@@ -75,7 +75,12 @@ class RutubeApi(
     }
 
     suspend fun playUrl(videoId: String): RutubePlayback = withContext(Dispatchers.IO) {
-        val url = "$baseUrl/api/play/options/$videoId/"
+        // The TV client's own query: `pver=v2` asks for the larger play-options payload and
+        // `referer=https://tv-androidtv.rutube.ru` turns the server-side ad schedule off
+        // (`advert: []`). `no_404` keeps a missing stream from spamming 404s. The referer is a
+        // QUERY parameter, not the HTTP header — the header does not have this effect.
+        val url = "$baseUrl/api/play/options/$videoId/?no_404=true&pver=v2" +
+            "&referer=https%3A%2F%2Ftv-androidtv.rutube.ru"
         try {
             val body = getText(url)
             RutubeParser.parsePlayOptions(200, body)
@@ -85,7 +90,9 @@ class RutubeApi(
             // cannot distinguish, so treat any play-options 404 as login_required (the
             // dominant cause) and let the UI show the paid message. Iframe/no-stream
             // channels answer 200 with no stream, handled above.
-            if (e.code == 404) {
+            // 404 = login_required; 244 = RuTube's "payment required" answer for subscription
+            // channels when the TV query parameters are used (Premier/SPORT packages).
+            if (e.code == 404 || e.code == 244) {
                 RutubePlayback.Unavailable(UnavailableReason.LOGIN_REQUIRED, e.message)
             } else {
                 RutubePlayback.Unavailable(UnavailableReason.NETWORK, e.message)

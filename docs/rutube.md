@@ -146,7 +146,21 @@ GET https://rutube.ru/api/v1/livestream/video/schedule/{videoId}/
 
 ```
 GET https://rutube.ru/api/play/options/{videoId}/
+      ?no_404=true&pver=v2&referer=https%3A%2F%2Ftv-androidtv.rutube.ru
 ```
+
+Это ровно те параметры, с которыми ходит TV-клиент RuTube:
+
+| Параметр | Зачем |
+|---|---|
+| `pver=v2` | более полный ответ play options |
+| `referer=https://tv-androidtv.rutube.ru` | **query-параметр**, не заголовок; отключает серверное рекламное расписание (`advert: []`) |
+| `no_404=true` | не спамить 404 при отсутствии потока (может вернуть 200 с пустым `live_streams`) |
+
+Проверено живыми запросами: без параметров ответ содержит `advert` с двумя preroll-объявлениями,
+с параметрами — `advert: []`; `live_streams.hls[0].url` при этом не меняется.
+Для подписочного канала с TV-параметрами приходит **HTTP 244** (а не 404) с тем же
+`detail.type = common_subscription` — в коде 244 трактуется как `LOGIN_REQUIRED`.
 
 - Live-поток: `live_streams.hls[0].url` (HLS master/m3u8).
 - VOD (не используется в этом проекте): `video_balancer.m3u8_m4s`, затем `video_balancer.m3u8`.
@@ -251,7 +265,8 @@ GET https://rutube.ru/api/play/options/{videoId}/
 ## 5. Известные ограничения
 
 1. **Подписочные каналы** (30 из 246) не играют: `is_paid` у них `false`, но есть
-   `common_subscription_product_codes`, и `play/options` отвечает 404 `common_subscription`.
+   `common_subscription_product_codes`, и `play/options` отвечает 404 (или 244 с TV-параметрами)
+   `common_subscription`.
    С v55 флаг хранится в `channels.isPaid`, в списке каналов показывается бейдж «Подписка».
    `sources.isPaid` (v54) оставлен для совместимости, но для одного RuTube-источника
    с бесплатными и платными каналами он бесполезен.
@@ -266,7 +281,13 @@ GET https://rutube.ru/api/play/options/{videoId}/
    считает JSON-null отсутствием. **Не заменять обратно на `optString(..., null)`.**
 6. **Кеш play-URL**: не хранить дольше минуты; при reconnect резолвить заново.
 7. **`is_on_air`** в live-каталоге всегда `false` — фильтровать по нему нельзя.
-8. **Мастер-манифест может отдать 200 с пустыми вариантами** (Content-Length: 0) — так
+8. **Заведомо битые каналы** скрываются при синке (`RuTubeSyncer.KNOWN_BROKEN_IDS`):
+   `hls404` — РБК-Уфа, CTV; `empty_hls` — ИЛЛИ ТВ; `no_hls` — Домашний, Пятый, РЕН ТВ, СТС,
+   ТВ Центр; `player_stub` — КИНОПРЕМЬЕРА, КИНОСВИДАНИЕ, КИНОСЕМЬЯ, Кинохит, Мужское кино.
+   Список взят из SmartRuTube `RuTubeChannelFilter` (проверен 2026-10-29) и устаревает:
+   из 13 id в текущем каталоге остались 3 бесплатных (РБК-Уфа, CTV, ИЛЛИ ТВ), остальные
+   отсутствуют или уже подписочные. Убирать id по мере починки каналов.
+9. **Мастер-манифест может отдать 200 с пустыми вариантами** (Content-Length: 0) — так
    выглядит нерабочий VOD у RuTube, ExoPlayer падает с `UnrecognizedInputFormatException`.
    На live-каталоге не встречалось (20/20 мастеров с рабочими вариантами), но проверка
    «мастер + хотя бы один вариант содержит `#EXTINF`» полезна для диагностики.
@@ -396,3 +417,6 @@ adb logcat | grep -E 'OwnTVPerf|SyncManager|Rutube|OwnTV-LivePreviewEngine'
 - v55: `channels.isPaid`; подписка определяется по `common_subscription_product_codes`
   (на live-каталоге `is_paid` всегда false); бейдж «Подписка» в списке каналов.
 - Разбор `detail.type` в `play/options`: `login_required` и `common_subscription`.
+- TV-параметры `play/options` (`pver=v2`, `referer=tv-androidtv`, `no_404`): отключено
+  рекламное расписание; 244 трактуется как подписка.
+- `KNOWN_BROKEN_IDS` — 13 заведомо неиграбельных каналов не попадают в каталог.

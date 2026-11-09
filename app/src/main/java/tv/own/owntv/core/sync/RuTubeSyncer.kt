@@ -51,7 +51,12 @@ internal class RuTubeSyncer(
         Log.i(TAG, "$label phase start sourceId=${s.id} fresh=$freshSource ruTube")
         progress.update(SyncPhase.LIVE, 0)
 
-        val channels = rutube.channels()
+        val allChannels = rutube.channels()
+        // Verified non-playable live channels (hls404 / empty master / player stub), mirroring the
+        // SmartRuTube filter. Filtered before naming so duplicate-name disambiguation sees the
+        // channels that actually remain. Reviewed 2026-11-09 with the mobile UA; drop an id here
+        // once the channel plays again.
+        val channels = allChannels.filterNot { it.videoId in KNOWN_BROKEN_IDS }
         val rawCategories = rutube.categories()
         if (channels.isEmpty()) {
             throw IllegalStateException("RuTube returned no live channels — refusing to wipe the catalogue")
@@ -143,6 +148,31 @@ internal class RuTubeSyncer(
 
         /** RuTube category ids in primary-bucket order (Federal and News first). */
         val CATEGORY_PRIORITY = listOf(4, 3, 9, 5, 6, 7, 15, 8, 10, 2, 11, 14, 12, 1)
+
+        /**
+         * Channels whose stream is confirmed broken upstream, so they are not inserted at all.
+         * Source: SmartRuTube `RuTubeChannelFilter.BAD_CHANNEL_IDS` (verified 2026-10-29 with the
+         * mobile UA). Temporary — remove an id when the channel plays again.
+         */
+        val KNOWN_BROKEN_IDS: Set<String> = setOf(
+            // hls404
+            "75957f55ed1e9b4e0ec00f8dd9594fcc", // Прямой эфир РБК-Уфа
+            "f785d738a845cc80658e887843a18ed9", // Прямой эфир телеканала CTV
+            // empty_hls (master exists, child playlist is empty)
+            "eda2da42eea89951e4135141a30915f7", // Прямой эфир ИЛЛИ ТВ
+            // no_hls
+            "49848b06c0fe2dae124419ffce1a1bab", // Домашний
+            "b2b32a7d6f2323f3a113ff44b0404bf2", // Пятый канал
+            "54395b96ad1a7b49966f46a6eee370a4", // РЕН ТВ
+            "ffc110c6785e57f4c329179b555547b4", // СТС
+            "92198c96552e3ee4a62cc1735a98ee54", // ТВ Центр
+            // player_stub
+            "21452175b89b01e0fb3ef72878d7259d", // КИНОПРЕМЬЕРА
+            "d1318878c58e59ecb5b3d167f2c33f6d", // КИНОСВИДАНИЕ
+            "aa94512eff79ba985e79d473c2a1e90b", // КИНОСЕМЬЯ
+            "f1c3b0bbf26ad010d999e19147e3924f", // Кинохит
+            "d5a20f38240b01ab8e4019a78f7d6a81", // Мужское кино
+        )
 
         private val PREFIXES = listOf(
             "Прямой эфир",

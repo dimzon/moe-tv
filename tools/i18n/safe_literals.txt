@@ -6477,14 +6477,27 @@
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	$label phase end sourceId=${s.id} unique=${total[0]} ruTube
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	$label phase start sourceId=${s.id} fresh=$freshSource ruTube
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	%s · %s
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	21452175b89b01e0fb3ef72878d7259d
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	49848b06c0fe2dae124419ffce1a1bab
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	54395b96ad1a7b49966f46a6eee370a4
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	75957f55ed1e9b4e0ec00f8dd9594fcc
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	92198c96552e3ee4a62cc1735a98ee54
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube EPG prune failed: ${it.message}
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube brief seed failed: ${e.message}
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube guide $videoId failed: ${it.message}
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube guide fallback failed $videoId: ${fallback.message}
 1	assertion	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube returned no live channels — refusing to wipe the catalogue
 1	locale	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	UTC
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	aa94512eff79ba985e79d473c2a1e90b
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	b2b32a7d6f2323f3a113ff44b0404bf2
 2	room-schema	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	channels
 1	room-schema	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	channels_fts
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	d1318878c58e59ecb5b3d167f2c33f6d
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	d5a20f38240b01ab8e4019a78f7d6a81
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	eda2da42eea89951e4135141a30915f7
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	f1c3b0bbf26ad010d999e19147e3924f
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	f785d738a845cc80658e887843a18ed9
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	ffc110c6785e57f4c329179b555547b4
 1	protocol	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	rutube://
 1	protocol	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	rutube://${s.id}/${ch.videoId}
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	Прямая трансляция
@@ -6492,11 +6505,12 @@
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	Прямой эфир
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/livestream/categories/
-1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/play/options/$videoId/
+1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/play/options/$videoId/?no_404=true&pver=v2
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v1/livestream/video/schedule/$videoId/
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=false
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=true
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/pangolin/api/tv/tvprogram/$videoId?client=tv&programDate=$day
+1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	&referer=https%3A%2F%2Ftv-androidtv.rutube.ru
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	Accept
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	Referer
 1	mime	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	application/json
