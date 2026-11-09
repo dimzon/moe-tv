@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.epg
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.stageTone
 import tv.own.myowntv.ui.theme.stageShadow
@@ -59,10 +111,10 @@ import androidx.compose.ui.unit.em
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import tv.own.myowntv.R
-import tv.own.myowntv.core.database.entity.ChannelEntity
-import tv.own.myowntv.core.database.entity.EpgProgrammeEntity
-import tv.own.myowntv.core.epg.displayLogoUrl
-import tv.own.myowntv.core.settings.SettingsRepository
+import tv.own.owntv.core.database.entity.ChannelEntity
+import tv.own.owntv.core.database.entity.EpgProgrammeEntity
+import tv.own.owntv.core.epg.displayLogoUrl
+import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.myowntv.features.home.durationText
 import tv.own.myowntv.features.live.LivePlate
 import tv.own.myowntv.ui.components.ChannelLogoTile
@@ -109,13 +161,13 @@ internal fun GuideVideo(
     channel: ChannelEntity?,
     channelLine: String?,
     nowTitle: String?,
-    previewEngine: tv.own.myowntv.player.LivePreviewEngine,
+    previewEngine: tv.own.owntv.player.LivePreviewEngine,
     showVideo: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val previewState by previewEngine.state.collectAsStateWithLifecycle()
-    val playing = showVideo && previewState != tv.own.myowntv.player.LivePreviewEngine.State.ERROR &&
-        previewState != tv.own.myowntv.player.LivePreviewEngine.State.IDLE
+    val playing = showVideo && previewState != tv.own.owntv.player.LivePreviewEngine.State.ERROR &&
+        previewState != tv.own.owntv.player.LivePreviewEngine.State.IDLE
     val r = 28.mpx
     val videoShadow = tv.own.myowntv.ui.theme.stageShadow(0.55f)
     Box(
@@ -132,7 +184,7 @@ internal fun GuideVideo(
             }
         }
         if (playing) tv.own.myowntv.player.ExoPreviewSurface(engine = previewEngine, modifier = Modifier.fillMaxSize())
-        if (showVideo && previewState == tv.own.myowntv.player.LivePreviewEngine.State.LOADING) OwnTVSpinner(sizeDp = 24)
+        if (showVideo && previewState == tv.own.owntv.player.LivePreviewEngine.State.LOADING) OwnTVSpinner(sizeDp = 24)
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.58f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.72f))))
         Box(Modifier.fillMaxSize().drawBehind { drawInnerRing(Color.White.copy(alpha = 0.08f), 1.mpx.toPx(), r.toPx()) })
         if (channel != null) {
@@ -358,7 +410,7 @@ internal fun guideProgrammeActions(
     val favoriteIds by vm.favoriteChannelIds.collectAsStateWithLifecycle()
     val catchupPlayer by vm.catchupPlayer.collectAsStateWithLifecycle()
     val recording = remember(recordingRows, ch.id, p.startMs) { vm.recordingFor(ch, p) }
-    val seriesRule by androidx.compose.runtime.produceState<tv.own.myowntv.core.database.entity.RecordingRuleEntity?>(null, ch.id, p.title, recordingRows) {
+    val seriesRule by androidx.compose.runtime.produceState<tv.own.owntv.core.database.entity.RecordingRuleEntity?>(null, ch.id, p.title, recordingRows) {
         value = vm.seriesRuleFor(ch, p)
     }
     val canCatchup = vm.canCatchup(ch, p, now)
@@ -374,14 +426,14 @@ internal fun guideProgrammeActions(
         onCatchupPlayer = vm::setCatchupPlayer,
         recordLabel = stringResource(
             when (status) {
-                tv.own.myowntv.core.model.RecordingStatus.RECORDING -> R.string.recording_stop
-                tv.own.myowntv.core.model.RecordingStatus.SCHEDULED -> R.string.common_cancel
+                tv.own.owntv.core.model.RecordingStatus.RECORDING -> R.string.recording_stop
+                tv.own.owntv.core.model.RecordingStatus.SCHEDULED -> R.string.common_cancel
                 else -> R.string.recording_record
             },
         ),
         onRecord = when (status) {
-            tv.own.myowntv.core.model.RecordingStatus.RECORDING -> ({ vm.stopRecording(recording) })
-            tv.own.myowntv.core.model.RecordingStatus.SCHEDULED -> ({ vm.cancelRecording(recording) })
+            tv.own.owntv.core.model.RecordingStatus.RECORDING -> ({ vm.stopRecording(recording) })
+            tv.own.owntv.core.model.RecordingStatus.SCHEDULED -> ({ vm.cancelRecording(recording) })
             else -> if (upcoming) ({ vm.record(ch, p) }) else null
         },
         seriesActive = seriesRule != null,
@@ -574,7 +626,7 @@ internal fun GuideChannelMenu(
     val locale = androidx.compose.ui.text.intl.Locale.current.platformLocale
     GuideMenuHost(x = 1150f, top = 64.mpx, width = 560.mpx, onDismiss = onDismiss) {
         StageMenuHeader(
-            title = listOfNotNull(channel.number?.toString(), tv.own.myowntv.core.live.ProviderTags.parse(channel.name).name).joinToString(" · "),
+            title = listOfNotNull(channel.number?.toString(), tv.own.owntv.core.live.ProviderTags.parse(channel.name).name).joinToString(" · "),
             subtitle = stringResource(R.string.content_epg_no_programme),
         )
         StageGroupLabel(stringResource(R.string.content_menu_group_watch).uppercase(locale))
@@ -823,7 +875,7 @@ private fun GuideReviewRow(
 
 /** A reminder's line: "Starts in 5 min · 20:05 – 21:40 · Sky Cinema Family" (the prompt, and Notify only's message). */
 @Composable
-internal fun reminderEyebrow(reminder: tv.own.myowntv.core.database.entity.ReminderEntity): String = programmeEyebrow(
+internal fun reminderEyebrow(reminder: tv.own.owntv.core.database.entity.ReminderEntity): String = programmeEyebrow(
     EpgProgrammeEntity(sourceId = 0, epgChannelId = "", startMs = reminder.startMs, stopMs = reminder.stopMs, title = reminder.title),
     reminder.channelName,
     System.currentTimeMillis(),
@@ -835,7 +887,7 @@ internal fun reminderEyebrow(reminder: tv.own.myowntv.core.database.entity.Remin
  */
 @Composable
 internal fun ReminderPrompt(
-    reminder: tv.own.myowntv.core.database.entity.ReminderEntity,
+    reminder: tv.own.owntv.core.database.entity.ReminderEntity,
     onWatch: () -> Unit,
     onDismiss: () -> Unit,
 ) {

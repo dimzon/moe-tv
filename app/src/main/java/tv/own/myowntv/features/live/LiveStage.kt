@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.live
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.stageTone
 import tv.own.myowntv.ui.theme.stageShadow
@@ -58,13 +110,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import kotlinx.coroutines.launch
 import tv.own.myowntv.R
-import tv.own.myowntv.core.database.entity.ChannelEntity
-import tv.own.myowntv.core.epg.displayLogoUrl
-import tv.own.myowntv.core.live.EpgNowNext
-import tv.own.myowntv.core.live.ProviderName
-import tv.own.myowntv.core.live.ProviderTags
-import tv.own.myowntv.core.parser.EpgDetails
-import tv.own.myowntv.core.parser.XtEpgEntry
+import tv.own.owntv.core.database.entity.ChannelEntity
+import tv.own.owntv.core.epg.displayLogoUrl
+import tv.own.owntv.core.live.EpgNowNext
+import tv.own.owntv.core.live.ProviderName
+import tv.own.owntv.core.live.ProviderTags
+import tv.own.owntv.core.parser.EpgDetails
+import tv.own.owntv.core.parser.XtEpgEntry
 import tv.own.myowntv.features.home.timeLeftText
 import tv.own.myowntv.ui.components.ChannelLogoTile
 import tv.own.myowntv.ui.components.MyOwnTVIcon
@@ -241,16 +293,16 @@ internal fun LiveStagePane(
     channel: ChannelEntity?,
     channelName: String?,
     nowNext: EpgNowNext?,
-    previewEngine: tv.own.myowntv.player.LivePreviewEngine,
+    previewEngine: tv.own.owntv.player.LivePreviewEngine,
     showVideo: Boolean,
     singleSessionBlocked: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val previewState by previewEngine.state.collectAsStateWithLifecycle()
     val streamChips by previewEngine.streamChips.collectAsStateWithLifecycle()
-    val playing = showVideo && previewState != tv.own.myowntv.player.LivePreviewEngine.State.ERROR &&
-        previewState != tv.own.myowntv.player.LivePreviewEngine.State.IDLE
-    val loading = showVideo && previewState == tv.own.myowntv.player.LivePreviewEngine.State.LOADING
+    val playing = showVideo && previewState != tv.own.owntv.player.LivePreviewEngine.State.ERROR &&
+        previewState != tv.own.owntv.player.LivePreviewEngine.State.IDLE
+    val loading = showVideo && previewState == tv.own.owntv.player.LivePreviewEngine.State.LOADING
     val videoR = 28.mpx
     val videoShadow = tv.own.myowntv.ui.theme.stageShadow(0.55f)
     Column(modifier) {
@@ -397,20 +449,20 @@ internal data class LiveCategoryEntry(
  * Guide's category sheet is this same list.
  */
 @Composable
-internal fun liveCategoryEntries(railItems: List<LiveRailItem>, railCounts: Map<tv.own.myowntv.core.live.LiveKey, Int>): Pair<List<LiveCategoryEntry>, String> {
+internal fun liveCategoryEntries(railItems: List<LiveRailItem>, railCounts: Map<tv.own.owntv.core.live.LiveKey, Int>): Pair<List<LiveCategoryEntry>, String> {
     val recentLabel = stringResource(R.string.content_category_recently_watched)
     val entries = railItems.map { item ->
-        val label = if (item.key == tv.own.myowntv.core.live.LiveKey.History) recentLabel else item.displayLabel()
-        val parsed = if (item.key is tv.own.myowntv.core.live.LiveKey.Folder || item.key is tv.own.myowntv.core.live.LiveKey.Custom) ProviderTags.parse(label) else null
+        val label = if (item.key == tv.own.owntv.core.live.LiveKey.History) recentLabel else item.displayLabel()
+        val parsed = if (item.key is tv.own.owntv.core.live.LiveKey.Folder || item.key is tv.own.owntv.core.live.LiveKey.Custom) ProviderTags.parse(label) else null
         LiveCategoryEntry(
             item = item,
             label = parsed?.name ?: label,
             name = parsed,
             icon = when (item.key) {
-                tv.own.myowntv.core.live.LiveKey.Favorites -> MyOwnTVIcon.FAVORITE
-                tv.own.myowntv.core.live.LiveKey.History -> MyOwnTVIcon.HISTORY
-                tv.own.myowntv.core.live.LiveKey.Catchup -> MyOwnTVIcon.REWIND
-                tv.own.myowntv.core.live.LiveKey.All -> MyOwnTVIcon.LIVE_TV
+                tv.own.owntv.core.live.LiveKey.Favorites -> MyOwnTVIcon.FAVORITE
+                tv.own.owntv.core.live.LiveKey.History -> MyOwnTVIcon.HISTORY
+                tv.own.owntv.core.live.LiveKey.Catchup -> MyOwnTVIcon.REWIND
+                tv.own.owntv.core.live.LiveKey.All -> MyOwnTVIcon.LIVE_TV
                 else -> if (item.locked) MyOwnTVIcon.LOCK else null
             },
             count = if (item.sealed) null else railCounts[item.key],
@@ -503,7 +555,7 @@ internal fun LiveCategories(
         }
     }
     // Where the fixed entries end and the provider groups begin (the "GROUPS · DE" heading).
-    val firstGroup = entries.indexOfFirst { it.item.key is tv.own.myowntv.core.live.LiveKey.Folder || it.item.key is tv.own.myowntv.core.live.LiveKey.Custom }
+    val firstGroup = entries.indexOfFirst { it.item.key is tv.own.owntv.core.live.LiveKey.Folder || it.item.key is tv.own.owntv.core.live.LiveKey.Custom }
     val rightKey = Modifier.onPreviewKeyEvent { e ->
         if (e.type == KeyEventType.KeyDown && e.key == Key.DirectionRight) { onNavigateRight(); true } else false
     }

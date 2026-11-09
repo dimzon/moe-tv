@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.settings
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,14 +63,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import tv.own.myowntv.core.backup.BackupManager
-import tv.own.myowntv.core.companion.CompanionController
-import tv.own.myowntv.core.companion.CompanionServerState
-import tv.own.myowntv.core.sync.local.DiscoveredDevice
-import tv.own.myowntv.core.sync.local.LocalSyncManager
-import tv.own.myowntv.core.sync.local.PairedDevice
-import tv.own.myowntv.core.sync.local.SyncDirection
-import tv.own.myowntv.core.sync.local.SyncFailure
+import tv.own.owntv.core.backup.BackupManager
+import tv.own.owntv.core.companion.CompanionController
+import tv.own.owntv.core.companion.CompanionServerState
+import tv.own.owntv.core.sync.local.DiscoveredDevice
+import tv.own.owntv.core.sync.local.LocalSyncManager
+import tv.own.owntv.core.sync.local.PairedDevice
+import tv.own.owntv.core.sync.local.SyncDirection
+import tv.own.owntv.core.sync.local.SyncFailure
 
 /**
  * Local sync from the television's side — the same feature the phone has, driven with a D-pad.
@@ -32,8 +84,8 @@ import tv.own.myowntv.core.sync.local.SyncFailure
  */
 class LocalSyncViewModel(
     private val sync: LocalSyncManager,
-    profileDao: tv.own.myowntv.core.database.dao.ProfileDao,
-    settings: tv.own.myowntv.core.settings.SettingsRepository,
+    profileDao: tv.own.owntv.core.database.dao.ProfileDao,
+    settings: tv.own.owntv.core.settings.SettingsRepository,
 ) : ViewModel() {
 
     /** The profile in use: the only one a sync carries, merged with the one in use on the other device. */
@@ -243,7 +295,7 @@ class LocalSyncViewModel(
     }
 
     private fun reason(): SyncFailure =
-        (sync.progress.value as? tv.own.myowntv.core.sync.local.SyncProgress.Failed)?.reason ?: SyncFailure.Unknown
+        (sync.progress.value as? tv.own.owntv.core.sync.local.SyncProgress.Failed)?.reason ?: SyncFailure.Unknown
 
     private companion object {
         const val STOP_TIMEOUT_MS = 5_000L

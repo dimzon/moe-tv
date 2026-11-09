@@ -1,6 +1,58 @@
 @file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 
 package tv.own.myowntv.features.customize
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,23 +80,23 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import tv.own.myowntv.core.database.dao.ChannelDao
-import tv.own.myowntv.core.database.dao.ContentOrderDao
-import tv.own.myowntv.core.database.dao.CustomCategoryDao
-import tv.own.myowntv.core.database.dao.MovieDao
-import tv.own.myowntv.core.database.dao.SeriesDao
-import tv.own.myowntv.core.database.dao.SourceDao
-import tv.own.myowntv.core.database.entity.ContentOrderEntity
-import tv.own.myowntv.core.customize.BulkRenameSession
-import tv.own.myowntv.core.customize.MoveKind
-import tv.own.myowntv.core.customize.SpanSelector
-import tv.own.myowntv.core.customize.moveBlock
-import tv.own.myowntv.core.customize.CustomizationStore
-import tv.own.myowntv.core.customize.CustomizeKeys
-import tv.own.myowntv.core.model.MediaType
-import tv.own.myowntv.core.repository.ActiveProfileSources
-import tv.own.myowntv.core.repository.activeProfileSources
-import tv.own.myowntv.core.settings.SettingsRepository
+import tv.own.owntv.core.database.dao.ChannelDao
+import tv.own.owntv.core.database.dao.ContentOrderDao
+import tv.own.owntv.core.database.dao.CustomCategoryDao
+import tv.own.owntv.core.database.dao.MovieDao
+import tv.own.owntv.core.database.dao.SeriesDao
+import tv.own.owntv.core.database.dao.SourceDao
+import tv.own.owntv.core.database.entity.ContentOrderEntity
+import tv.own.owntv.core.customize.BulkRenameSession
+import tv.own.owntv.core.customize.MoveKind
+import tv.own.owntv.core.customize.SpanSelector
+import tv.own.owntv.core.customize.moveBlock
+import tv.own.owntv.core.customize.CustomizationStore
+import tv.own.owntv.core.customize.CustomizeKeys
+import tv.own.owntv.core.model.MediaType
+import tv.own.owntv.core.repository.ActiveProfileSources
+import tv.own.owntv.core.repository.activeProfileSources
+import tv.own.owntv.core.settings.SettingsRepository
 
 /** One item row in the Customize items screen. */
 data class CustomizeItemRow(
@@ -69,10 +121,10 @@ class CustomizeItemsViewModel(
     private val contentOrderDao: ContentOrderDao,
     private val customCategoryDao: CustomCategoryDao,
     private val customize: CustomizationStore,
-    private val userDataWriter: tv.own.myowntv.core.backup.UserDataWriter,
+    private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
 ) : ViewModel() {
 
-    private data class Ctx(val profileId: Long, val sources: List<tv.own.myowntv.core.database.entity.SourceEntity>) {
+    private data class Ctx(val profileId: Long, val sources: List<tv.own.owntv.core.database.entity.SourceEntity>) {
         fun sourceIdsFor(type: MediaType): List<Long> = ActiveProfileSources(profileId, sources).sourceIdsFor(type)
     }
 
@@ -120,13 +172,13 @@ class CustomizeItemsViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     /** Customizations for the current section (drives hidden state + display names of items). */
-    private val customizeForItems: StateFlow<tv.own.myowntv.core.customize.SectionCustomizations> =
+    private val customizeForItems: StateFlow<tv.own.owntv.core.customize.SectionCustomizations> =
         combine(ctx, _catInfo) { c, ci -> c to ci }
             .flatMapLatest { (c, ci) ->
-                if (c.profileId < 0 || ci == null) flowOf(tv.own.myowntv.core.customize.SectionCustomizations())
+                if (c.profileId < 0 || ci == null) flowOf(tv.own.owntv.core.customize.SectionCustomizations())
                 else customize.observe(c.profileId, ci.mediaType)
             }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.myowntv.core.customize.SectionCustomizations())
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.customize.SectionCustomizations())
 
     /** Category display name (from customizations, or the provider name stored on the category). */
     val categoryName: StateFlow<String> = combine(ctx, _catInfo, customizeForItems) { c, ci, cust ->
@@ -324,26 +376,26 @@ class CustomizeItemsViewModel(
     private fun mapToRow(
         entity: Any,
         mediaType: MediaType,
-        cust: tv.own.myowntv.core.customize.SectionCustomizations,
+        cust: tv.own.owntv.core.customize.SectionCustomizations,
     ): CustomizeItemRow {
         val name: String
         val itemId: Long
         val key: String
         when (mediaType) {
             MediaType.LIVE -> {
-                val ch = entity as tv.own.myowntv.core.database.entity.ChannelEntity
+                val ch = entity as tv.own.owntv.core.database.entity.ChannelEntity
                 name = ch.name
                 itemId = ch.id
                 key = CustomizeKeys.channel(ch)
             }
             MediaType.MOVIE -> {
-                val m = entity as tv.own.myowntv.core.database.entity.MovieEntity
+                val m = entity as tv.own.owntv.core.database.entity.MovieEntity
                 name = m.name
                 itemId = m.id
                 key = CustomizeKeys.movie(m)
             }
             MediaType.SERIES -> {
-                val s = entity as tv.own.myowntv.core.database.entity.SeriesEntity
+                val s = entity as tv.own.owntv.core.database.entity.SeriesEntity
                 name = s.name
                 itemId = s.id
                 key = CustomizeKeys.series(s)

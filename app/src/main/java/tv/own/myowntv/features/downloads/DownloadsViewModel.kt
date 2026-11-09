@@ -1,8 +1,60 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
 package tv.own.myowntv.features.downloads
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
-import tv.own.myowntv.core.storage.missingFiles
+import tv.own.owntv.core.storage.missingFiles
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,23 +70,23 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import tv.own.myowntv.core.content.AdultCategoryClassifier
-import tv.own.myowntv.core.customize.CustomizationStore
-import tv.own.myowntv.core.customize.CustomizeKeys
-import tv.own.myowntv.core.customize.ItemCategory
-import tv.own.myowntv.core.customize.SectionCustomizations
-import tv.own.myowntv.core.customize.sealsItem
-import tv.own.myowntv.core.customize.sealsItemIn
-import tv.own.myowntv.core.database.dao.DownloadDao
-import tv.own.myowntv.core.database.dao.MovieDao
-import tv.own.myowntv.core.database.dao.SeriesDao
-import tv.own.myowntv.core.database.entity.DownloadEntity
-import tv.own.myowntv.core.download.DownloadManager
-import tv.own.myowntv.core.model.MediaType
-import tv.own.myowntv.core.settings.SettingsRepository
-import tv.own.myowntv.core.categorylock.PlayingFileCategory
-import tv.own.myowntv.core.categorylock.anyLockSealed
-import tv.own.myowntv.player.OwnTVPlayer
+import tv.own.owntv.core.content.AdultCategoryClassifier
+import tv.own.owntv.core.customize.CustomizationStore
+import tv.own.owntv.core.customize.CustomizeKeys
+import tv.own.owntv.core.customize.ItemCategory
+import tv.own.owntv.core.customize.SectionCustomizations
+import tv.own.owntv.core.customize.sealsItem
+import tv.own.owntv.core.customize.sealsItemIn
+import tv.own.owntv.core.database.dao.DownloadDao
+import tv.own.owntv.core.database.dao.MovieDao
+import tv.own.owntv.core.database.dao.SeriesDao
+import tv.own.owntv.core.database.entity.DownloadEntity
+import tv.own.owntv.core.download.DownloadManager
+import tv.own.owntv.core.model.MediaType
+import tv.own.owntv.core.settings.SettingsRepository
+import tv.own.owntv.core.categorylock.PlayingFileCategory
+import tv.own.owntv.core.categorylock.anyLockSealed
+import tv.own.owntv.player.OwnTVPlayer
 
 /** Lists the active profile's downloads and plays completed ones from local storage. */
 class DownloadsViewModel(
@@ -43,16 +95,16 @@ class DownloadsViewModel(
     private val downloadDao: DownloadDao,
     private val movieDao: MovieDao,
     private val seriesDao: SeriesDao,
-    private val categoryDao: tv.own.myowntv.core.database.dao.CategoryDao,
-    private val profileDao: tv.own.myowntv.core.database.dao.ProfileDao,
+    private val categoryDao: tv.own.owntv.core.database.dao.CategoryDao,
+    private val profileDao: tv.own.owntv.core.database.dao.ProfileDao,
     private val customize: CustomizationStore,
     private val settings: SettingsRepository,
     private val downloadManager: DownloadManager,
     val player: OwnTVPlayer,
-    private val externalPlayerLauncher: tv.own.myowntv.core.player.ExternalPlayerLauncher,
-    private val subtitleController: tv.own.myowntv.core.subtitles.SubtitleController,
-    private val metadata: tv.own.myowntv.core.metadata.MetadataRepository,
-    tracker: tv.own.myowntv.core.download.DownloadActivityTracker,
+    private val externalPlayerLauncher: tv.own.owntv.core.player.ExternalPlayerLauncher,
+    private val subtitleController: tv.own.owntv.core.subtitles.SubtitleController,
+    private val metadata: tv.own.owntv.core.metadata.MetadataRepository,
+    tracker: tv.own.owntv.core.download.DownloadActivityTracker,
     private val playingFiles: PlayingFileCategory,
 ) : ViewModel() {
 
@@ -65,7 +117,7 @@ class DownloadsViewModel(
     }
 
     /** The one transfer running now, with its speed, for the focused row's "12.4 MB/s · 3 min left". */
-    val active: StateFlow<tv.own.myowntv.core.download.DownloadActivityTracker.ActiveDownload?> = tracker.active
+    val active: StateFlow<tv.own.owntv.core.download.DownloadActivityTracker.ActiveDownload?> = tracker.active
 
     /**
      * The profile's downloads, minus rows whose movie/series the user has hidden — a hidden title
@@ -123,7 +175,7 @@ class DownloadsViewModel(
     /** Paths of finished downloads whose file is gone (drive formatted, swapped or unplugged). */
     val missingFiles: StateFlow<Set<String>> = downloads
         .map { rows -> rows// A paused or failed one has a partial file that can go missing too (a formatted stick).
-        .filter { it.status == tv.own.myowntv.core.model.DownloadStatus.COMPLETED || (it.status in RESUMABLE && it.downloadedBytes > 0) }.map { it.filePath } }
+        .filter { it.status == tv.own.owntv.core.model.DownloadStatus.COMPLETED || (it.status in RESUMABLE && it.downloadedBytes > 0) }.map { it.filePath } }
         .missingFiles(appContext)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
@@ -163,7 +215,7 @@ class DownloadsViewModel(
      * all, so it never refreshed. Found on the television the first time the folder was pointed at a
      * USB stick.
      */
-    val storage: StateFlow<tv.own.myowntv.core.download.DownloadStorageInfo?> =
+    val storage: StateFlow<tv.own.owntv.core.download.DownloadStorageInfo?> =
         combine(downloads, settings.downloadRoot) { _, _ -> Unit }
             .mapLatest { downloadManager.storageInfo() }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -287,4 +339,4 @@ data class DownloadDetails(
 )
 
 /** Stopped downloads that keep a partial file on the drive. */
-private val RESUMABLE = setOf(tv.own.myowntv.core.model.DownloadStatus.PAUSED, tv.own.myowntv.core.model.DownloadStatus.FAILED)
+private val RESUMABLE = setOf(tv.own.owntv.core.model.DownloadStatus.PAUSED, tv.own.owntv.core.model.DownloadStatus.FAILED)

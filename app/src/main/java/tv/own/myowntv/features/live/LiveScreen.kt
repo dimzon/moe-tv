@@ -1,7 +1,59 @@
 package tv.own.myowntv.features.live
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.components.onDpadLeft
-import tv.own.myowntv.core.epg.displayLogoUrl
+import tv.own.owntv.core.epg.displayLogoUrl
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
@@ -63,14 +115,14 @@ import androidx.tv.material3.Text
 import tv.own.myowntv.R
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.Key
-import tv.own.myowntv.core.customize.CustomizeKeys
-import tv.own.myowntv.core.database.entity.ChannelEntity
-import tv.own.myowntv.core.database.entity.ContentOrderEntity
+import tv.own.owntv.core.customize.CustomizeKeys
+import tv.own.owntv.core.database.entity.ChannelEntity
+import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.myowntv.features.categorylock.focusListAfterSheet
 import tv.own.myowntv.features.categorylock.rememberListPinFocus
 import tv.own.myowntv.features.customize.MoveToCategoryDialog
 import tv.own.myowntv.features.settings.SettingsViewModel
-import tv.own.myowntv.core.settings.PanelSection
+import tv.own.owntv.core.settings.PanelSection
 import tv.own.myowntv.features.settings.data.computePanelWidths
 import tv.own.myowntv.features.settings.rememberPanelShares
 import tv.own.myowntv.features.shell.components.RailCategoryMenu
@@ -78,7 +130,7 @@ import tv.own.myowntv.ui.components.MoveOrderOverlay
 import tv.own.myowntv.ui.components.chNavPaging
 import tv.own.myowntv.ui.components.longPressMenuGuard
 import tv.own.myowntv.ui.components.trapAllFocusExit
-import tv.own.myowntv.core.model.ContentMenu
+import tv.own.owntv.core.model.ContentMenu
 import tv.own.myowntv.ui.components.MenuAction
 import tv.own.myowntv.ui.components.arranged
 import tv.own.myowntv.ui.components.MyOwnTVIcon
@@ -87,8 +139,8 @@ import tv.own.myowntv.ui.components.TextInputDialog
 import tv.own.myowntv.ui.components.gridFocusTarget
 import tv.own.myowntv.ui.format.rememberBestDateFormatter
 import tv.own.myowntv.ui.format.rememberSystemTimeFormatter
-import tv.own.myowntv.core.live.LiveKey
-import tv.own.myowntv.core.live.ProviderTags
+import tv.own.owntv.core.live.LiveKey
+import tv.own.owntv.core.live.ProviderTags
 
 /** Live TV: the channel list, the stage beside it and the categories as a sheet or a column. */
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
@@ -232,15 +284,15 @@ fun LiveScreen(
     // The Live picker used to start the archive straight from the pick, so the same programme opened
     // from the Guide (which asks) and from here behaved differently — this makes the two match.
     var catchupDetail by remember {
-        mutableStateOf<Pair<ChannelEntity, tv.own.myowntv.core.database.entity.EpgProgrammeEntity>?>(null)
+        mutableStateOf<Pair<ChannelEntity, tv.own.owntv.core.database.entity.EpgProgrammeEntity>?>(null)
     }
     var contextChannel by remember { mutableStateOf<ChannelEntity?>(null) } // long-press quick menu
     // Multiview: whether the menu offers it at all, how many tiles the grid has, and the confirmation
     // after a channel is kept (null = nothing to say).
-    val liveSettings = koinInject<tv.own.myowntv.core.settings.SettingsRepository>()
+    val liveSettings = koinInject<tv.own.owntv.core.settings.SettingsRepository>()
     val multiviewEnabled by liveSettings.multiviewEnabled.collectAsStateWithLifecycle(false)
     val multiviewTiles by liveSettings.multiviewTiles.collectAsStateWithLifecycle(
-        tv.own.myowntv.core.live.DEFAULT_MULTIVIEW_TILES,
+        tv.own.owntv.core.live.DEFAULT_MULTIVIEW_TILES,
     )
     // Also says where a scheduled recording landed ("Will record Sat 21:00").
     val multiviewToast = tv.own.myowntv.ui.components.rememberInAppToast()
@@ -486,7 +538,7 @@ fun LiveScreen(
     val nowProgrammes by vm.nowProgrammes.collectAsStateWithLifecycle()
     val playlistMarks by vm.playlistMarks.collectAsStateWithLifecycle()
     // Separate panels keeps the categories on screen; the Stage layout opens them as a sheet on Left.
-    val separate = liveLayout == tv.own.myowntv.core.settings.SettingsRepository.LiveLayout.SEPARATE && lockedKey == null
+    val separate = liveLayout == tv.own.owntv.core.settings.SettingsRepository.LiveLayout.SEPARATE && lockedKey == null
     var categoriesOpen by remember { mutableStateOf(false) }
     var sheetHadFocus by remember { mutableStateOf(false) }
     // The current channel's row. After a long-press that row carries contextFocus instead of selFocus
@@ -563,7 +615,7 @@ fun LiveScreen(
     val onCategorySelect: (Int) -> Unit = { idx ->
         val item = railItems.getOrNull(idx)
         item?.let { vm.select(it.key) }
-        if (item?.sealed == true) lockVm.open(tv.own.myowntv.core.model.MediaType.LIVE, item.key)
+        if (item?.sealed == true) lockVm.open(tv.own.owntv.core.model.MediaType.LIVE, item.key)
         else if (categoriesOpen) { categoriesOpen = false; focusChannelList() }
     }
     val onCategoryLongSelect: (Int) -> Unit = { idx ->
@@ -751,7 +803,7 @@ fun LiveScreen(
                     tv.own.myowntv.ui.stage.StageTool(
                         text = null,
                         icon = MyOwnTVIcon.SORT,
-                        value = if (sortMode == tv.own.myowntv.core.settings.SettingsRepository.SortMode.ALPHA) stringResource(R.string.settings_sort_alpha) else stringResource(R.string.content_epg_sort_provider),
+                        value = if (sortMode == tv.own.owntv.core.settings.SettingsRepository.SortMode.ALPHA) stringResource(R.string.settings_sort_alpha) else stringResource(R.string.content_epg_sort_provider),
                         onClick = vm::toggleSort,
                     )
                     tv.own.myowntv.ui.stage.StageTool(
@@ -766,7 +818,7 @@ fun LiveScreen(
                         tv.own.myowntv.features.categorylock.CategoryEmptyState(
                             if (selectedItem?.sealed == true) stringResource(R.string.content_category_locked_placeholder) else if (searchQuery.isNotBlank()) stringResource(R.string.content_no_channels_found, searchQuery.trim()) else stringResource(R.string.content_no_channels_here),
                             sealed = selectedItem?.sealed == true, pinFocus = firstItemFocus, horizontalAlignment = Alignment.CenterHorizontally,
-                            onEnterPin = { selectedItem?.let { listPin.askedFromList(); lockVm.open(tv.own.myowntv.core.model.MediaType.LIVE, it.key) } },
+                            onEnterPin = { selectedItem?.let { listPin.askedFromList(); lockVm.open(tv.own.owntv.core.model.MediaType.LIVE, it.key) } },
                             onNavigateLeft = { openCategories() }.takeIf { lockedKey == null },
                         )
                     }
@@ -1138,13 +1190,13 @@ fun LiveScreen(
         RailCategoryMenu(
             item, item.displayLabel(), vm::categoryRestorePlan,
             onHide = vm::hideCategory, onMove = vm::enterCategoryMoveMode, onRestore = vm::restoreCategory,
-            onToggleLock = { lockVm.toggleLock(tv.own.myowntv.core.model.MediaType.LIVE, it) },
-            onSealedAction = { key, action -> lockVm.open(tv.own.myowntv.core.model.MediaType.LIVE, key, action) },
+            onToggleLock = { lockVm.toggleLock(tv.own.owntv.core.model.MediaType.LIVE, it) },
+            onSealedAction = { key, action -> lockVm.open(tv.own.owntv.core.model.MediaType.LIVE, key, action) },
             onClose = { contextCategory = null },
         )
     }
     tv.own.myowntv.features.categorylock.CategoryLockPrompts(
-        tv.own.myowntv.core.model.MediaType.LIVE,
+        tv.own.owntv.core.model.MediaType.LIVE,
         onAction = { key, action -> action.run(key, vm::hideCategory, vm::enterCategoryMoveMode, vm::restoreCategory) },
     ) { key, opened ->
         if (listPin.takeClose(opened)) Unit
@@ -1292,8 +1344,8 @@ private fun formatCatchupTime(
 @Composable
 private fun CatchupDialog(
     channelName: String,
-    loadProgrammes: suspend () -> List<tv.own.myowntv.core.database.entity.EpgProgrammeEntity>,
-    onPick: (tv.own.myowntv.core.database.entity.EpgProgrammeEntity) -> Unit,
+    loadProgrammes: suspend () -> List<tv.own.owntv.core.database.entity.EpgProgrammeEntity>,
+    onPick: (tv.own.owntv.core.database.entity.EpgProgrammeEntity) -> Unit,
     // Fallback for a channel with an archive but no guide: there are no programmes to name, but the
     // archive is still there, so offer times instead of a dead-end "go match your EPG" message.
     jumpOffsetsSec: List<Int>,
@@ -1302,7 +1354,7 @@ private fun CatchupDialog(
     onDismiss: () -> Unit,
 ) {
     val formatTime = rememberSystemTimeFormatter()
-    val list by androidx.compose.runtime.produceState<List<tv.own.myowntv.core.database.entity.EpgProgrammeEntity>?>(initialValue = null) {
+    val list by androidx.compose.runtime.produceState<List<tv.own.owntv.core.database.entity.EpgProgrammeEntity>?>(initialValue = null) {
         value = runCatching { loadProgrammes() }.getOrDefault(emptyList())
     }
     // "Choose exact time…" opens on top of this dialog, same as the player's route into it.
@@ -1367,13 +1419,13 @@ private fun CatchupDialog(
 internal fun EpgMatchDialog(
     channelName: String,
     currentMatch: String?,
-    loadChannels: suspend (String) -> List<tv.own.myowntv.core.epg.GuideCandidate>,
+    loadChannels: suspend (String) -> List<tv.own.owntv.core.epg.GuideCandidate>,
     onPick: (String) -> Unit,
     onClear: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     var query by remember { mutableStateOf("") }
-    val results by androidx.compose.runtime.produceState<List<tv.own.myowntv.core.epg.GuideCandidate>?>(initialValue = null, query) {
+    val results by androidx.compose.runtime.produceState<List<tv.own.owntv.core.epg.GuideCandidate>?>(initialValue = null, query) {
         kotlinx.coroutines.delay(250)
         value = runCatching { loadChannels(query) }.getOrDefault(emptyList())
     }

@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.shell.components
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.stageTone
 import tv.own.myowntv.ui.theme.LocalStagePalette
@@ -68,7 +120,7 @@ data class MediaDetailsUi(
     val metaLine: String = "",          // "2026 · ★ 7.6 · 2h 10m"
     val genres: List<String> = emptyList(),
     val plot: String? = null,
-    val cast: List<tv.own.myowntv.core.metadata.CastMember> = emptyList(),
+    val cast: List<tv.own.owntv.core.metadata.CastMember> = emptyList(),
 )
 
 /**
@@ -169,11 +221,11 @@ private fun DetailsLabel(text: String) {
  * service, so showing them costs nothing against anyone's allowance.
  */
 @Composable
-private fun CastGrid(cast: List<tv.own.myowntv.core.metadata.CastMember>) {
+private fun CastGrid(cast: List<tv.own.owntv.core.metadata.CastMember>) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(28.mpx), verticalArrangement = Arrangement.spacedBy(24.mpx)) {
         cast.forEach { member ->
             Column(Modifier.width(132.mpx), horizontalAlignment = Alignment.CenterHorizontally) {
-                val photo = tv.own.myowntv.core.metadata.MetadataImages.profile(member.profilePath)
+                val photo = tv.own.owntv.core.metadata.MetadataImages.profile(member.profilePath)
                 Box(
                     Modifier.size(112.mpx).clip(RoundedCornerShape(56.mpx)).background(StageColors.Ink.copy(alpha = 0.06f)),
                     contentAlignment = Alignment.Center,

@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.settings
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.stageTone
 import tv.own.myowntv.ui.theme.LocalStagePalette
@@ -544,7 +596,7 @@ fun PanelSwitches(items: List<Triple<String, Boolean, () -> Unit>>, onDone: () -
 fun PopupSizeSample(sizePercent: Int) {
     val base = androidx.compose.ui.platform.LocalDensity.current
     val sized = androidx.compose.ui.unit.Density(
-        density = base.density * tv.own.myowntv.core.theme.PopupSizeScale.factor(sizePercent),
+        density = base.density * tv.own.owntv.core.theme.PopupSizeScale.factor(sizePercent),
         fontScale = base.fontScale / tv.own.myowntv.ui.theme.LocalUiFontScaleFactor.current * tv.own.myowntv.ui.theme.LocalPopupFontScaleFactor.current,
     )
     val a = stageAccent
@@ -820,7 +872,7 @@ fun StageSearchResultRow(icon: MyOwnTVIcon, path: String, title: String, value: 
 
 /** Playlists' panel: each playlist's mark, its name and when it last synced. */
 @Composable
-fun PlaylistSyncList(sources: List<tv.own.myowntv.core.database.entity.SourceEntity>) {
+fun PlaylistSyncList(sources: List<tv.own.owntv.core.database.entity.SourceEntity>) {
     Column(Modifier.padding(top = 18.mpx), verticalArrangement = Arrangement.spacedBy(10.mpx)) {
         sources.forEachIndexed { i, src ->
             Row(horizontalArrangement = Arrangement.spacedBy(14.mpx), verticalAlignment = Alignment.CenterVertically) {

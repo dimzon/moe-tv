@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.settings
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.layout.widthIn
 import tv.own.myowntv.ui.stage.stageGlass
@@ -37,13 +89,13 @@ import androidx.compose.ui.focus.focusProperties
 import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.theme.mpx
 import androidx.compose.ui.focus.onFocusChanged
-import tv.own.myowntv.core.database.entity.SourceEntity
-import tv.own.myowntv.core.model.SourceType
-import tv.own.myowntv.core.sync.SyncCounts
-import tv.own.myowntv.core.sync.SyncProgressCounts
-import tv.own.myowntv.core.sync.importProgressDisplay
-import tv.own.myowntv.core.sync.resyncProgressPercent
-import tv.own.myowntv.core.sync.work.CatalogSyncState
+import tv.own.owntv.core.database.entity.SourceEntity
+import tv.own.owntv.core.model.SourceType
+import tv.own.owntv.core.sync.SyncCounts
+import tv.own.owntv.core.sync.SyncProgressCounts
+import tv.own.owntv.core.sync.importProgressDisplay
+import tv.own.owntv.core.sync.resyncProgressPercent
+import tv.own.owntv.core.sync.work.CatalogSyncState
 import tv.own.myowntv.ui.components.breakdownText
 import tv.own.myowntv.ui.components.summaryText
 import tv.own.myowntv.ui.components.displayText
@@ -51,11 +103,11 @@ import tv.own.myowntv.ui.components.detailText
 import tv.own.myowntv.ui.components.primaryText
 import tv.own.myowntv.ui.components.remainderText
 import tv.own.myowntv.ui.components.warningText
-import tv.own.myowntv.core.repository.SourceTestResult
-import tv.own.myowntv.core.setup.detailLines
-import tv.own.myowntv.core.setup.headline
-import tv.own.myowntv.core.settings.PlaylistAutoRefresh
-import tv.own.myowntv.core.settings.PlaylistRefresh
+import tv.own.owntv.core.repository.SourceTestResult
+import tv.own.owntv.core.setup.detailLines
+import tv.own.owntv.core.setup.headline
+import tv.own.owntv.core.settings.PlaylistAutoRefresh
+import tv.own.owntv.core.settings.PlaylistRefresh
 import tv.own.myowntv.features.setup.playlistAutoRefreshLabel
 import tv.own.myowntv.features.setup.AddSourceChooserScreen
 import tv.own.myowntv.features.setup.AddSourceScreen
@@ -178,9 +230,9 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 onStartXtream = { n, server, u, p, ua, ref, epg, autoRefresh, live, movies, series, isDefault, preferHls ->
                     vm.updateSource(
                         src.id, n, server, u, p, ua, epg, autoRefresh, isDefault, httpReferer = ref,
-                        syncLive = live != tv.own.myowntv.core.sync.SyncScopeChoice.Off,
-                        syncMovies = movies != tv.own.myowntv.core.sync.SyncScopeChoice.Off,
-                        syncSeries = series != tv.own.myowntv.core.sync.SyncScopeChoice.Off,
+                        syncLive = live != tv.own.owntv.core.sync.SyncScopeChoice.Off,
+                        syncMovies = movies != tv.own.owntv.core.sync.SyncScopeChoice.Off,
+                        syncSeries = series != tv.own.owntv.core.sync.SyncScopeChoice.Off,
                         preferHls = preferHls,
                     )
                     editingSource = null
@@ -191,9 +243,9 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                         src.id, n, url, login, password, ua, "", autoRefresh, isDefault, mac = mac, httpReferer = ref,
                         stalkerSerialNumber = serialNumber, stalkerDeviceId = deviceId,
                         stalkerDeviceId2 = deviceId2, stalkerSignature = signature,
-                        syncLive = live != tv.own.myowntv.core.sync.SyncScopeChoice.Off,
-                        syncMovies = movies != tv.own.myowntv.core.sync.SyncScopeChoice.Off,
-                        syncSeries = series != tv.own.myowntv.core.sync.SyncScopeChoice.Off,
+                        syncLive = live != tv.own.owntv.core.sync.SyncScopeChoice.Off,
+                        syncMovies = movies != tv.own.owntv.core.sync.SyncScopeChoice.Off,
+                        syncSeries = series != tv.own.owntv.core.sync.SyncScopeChoice.Off,
                     )
                     editingSource = null
                 },
@@ -420,6 +472,7 @@ private fun SourceRow(
             SourceType.M3U -> R.string.settings_sources_type_m3u
             SourceType.STALKER -> R.string.settings_sources_type_stalker
             SourceType.LOCAL_BACKUP -> R.string.settings_sources_backup
+            SourceType.RUTUBE -> R.string.settings_sources_type_rutube
         },
         source.url,
     )
@@ -486,7 +539,7 @@ private fun SourceRow(
     )
 }
 
-private fun CatalogSyncState.Syncing.countsLabel(sourceType: SourceType, stored: SyncCounts?): tv.own.myowntv.core.sync.SyncProgressCounts? {
+private fun CatalogSyncState.Syncing.countsLabel(sourceType: SourceType, stored: SyncCounts?): tv.own.owntv.core.sync.SyncProgressCounts? {
     fun visibleCount(active: Boolean, processed: Int, storedCount: Int): Int =
         if (active) processed else storedCount
 
@@ -526,6 +579,14 @@ private fun CatalogSyncState.Syncing.countsLabel(sourceType: SourceType, stored:
             liveActive = liveActive || live > 0,
             moviesActive = moviesActive || movies > 0,
             seriesActive = seriesActive || series > 0,
+        )
+        SourceType.RUTUBE -> SyncProgressCounts(
+            live = live,
+            movies = 0,
+            series = 0,
+            liveActive = liveActive || live > 0,
+            moviesActive = false,
+            seriesActive = false,
         )
     }
     return counts.takeIf { it.hasItems }
@@ -646,7 +707,7 @@ internal fun SourceTestDialog(
 }
 
 @Composable
-private fun SourceTestReport(result: SourceTestResult, limit: tv.own.myowntv.core.live.ConnectionLimit?) {
+private fun SourceTestReport(result: SourceTestResult, limit: tv.own.owntv.core.live.ConnectionLimit?) {
     val res = LocalContext.current.resources
     Column(verticalArrangement = Arrangement.spacedBy(8.mpx)) {
         Text(

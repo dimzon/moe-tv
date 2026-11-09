@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.more
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.stageTone
 import androidx.activity.compose.BackHandler
@@ -61,9 +113,9 @@ import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import tv.own.myowntv.BuildConfig
 import tv.own.myowntv.R
-import tv.own.myowntv.core.i18n.SupportedLocales
-import tv.own.myowntv.core.model.MediaType
-import tv.own.myowntv.core.update.UpdateManager
+import tv.own.owntv.core.i18n.SupportedLocales
+import tv.own.owntv.core.model.MediaType
+import tv.own.owntv.core.update.UpdateManager
 import tv.own.myowntv.features.downloads.recordingWhen
 import tv.own.myowntv.features.home.ChannelPlate
 import tv.own.myowntv.features.home.OnNowCard
@@ -73,7 +125,7 @@ import tv.own.myowntv.features.shell.components.GITHUB_REPO
 import tv.own.myowntv.features.shell.components.TELEGRAM_LINK
 import tv.own.myowntv.features.shell.components.playbackDisplayName
 import tv.own.myowntv.features.update.UpdateDialog
-import tv.own.myowntv.player.PlaybackErrorLog
+import tv.own.owntv.player.PlaybackErrorLog
 import tv.own.myowntv.player.displayText
 import tv.own.myowntv.ui.components.BrandMark
 import tv.own.myowntv.ui.components.MoveOrderOverlay
@@ -313,7 +365,7 @@ internal fun FavouritesPage(
     // OK / ▶ from the sheet lands on the first card, as drawn; on the filter when there is none.
     val firstTarget = when {
         showLive && lists.live.isNotEmpty() -> focusOf(MediaType.LIVE, lists.live.first().id)
-        vodShown.isNotEmpty() -> vodShown.first().let { (t, item) -> focusOf(t, (item as? tv.own.myowntv.core.database.entity.MovieEntity)?.id ?: (item as tv.own.myowntv.core.database.entity.SeriesEntity).id) }
+        vodShown.isNotEmpty() -> vodShown.first().let { (t, item) -> focusOf(t, (item as? tv.own.owntv.core.database.entity.MovieEntity)?.id ?: (item as tv.own.owntv.core.database.entity.SeriesEntity).id) }
         else -> segFocus
     }
 
@@ -357,9 +409,9 @@ internal fun FavouritesPage(
             }
             RowHead(heading, null, top = if (showLive && lists.live.isNotEmpty()) 36.mpx else 34.mpx)
             LazyRow(horizontalArrangement = Arrangement.spacedBy(24.mpx), contentPadding = PaddingValues(end = 24.mpx, bottom = 24.mpx)) {
-                items(vodShown, key = { (t, item) -> t.name + ((item as? tv.own.myowntv.core.database.entity.MovieEntity)?.id ?: (item as tv.own.myowntv.core.database.entity.SeriesEntity).id) }) { (type, item) ->
-                    val movie = item as? tv.own.myowntv.core.database.entity.MovieEntity
-                    val series = item as? tv.own.myowntv.core.database.entity.SeriesEntity
+                items(vodShown, key = { (t, item) -> t.name + ((item as? tv.own.owntv.core.database.entity.MovieEntity)?.id ?: (item as tv.own.owntv.core.database.entity.SeriesEntity).id) }) { (type, item) ->
+                    val movie = item as? tv.own.owntv.core.database.entity.MovieEntity
+                    val series = item as? tv.own.owntv.core.database.entity.SeriesEntity
                     val id = movie?.id ?: series!!.id
                     val name = movie?.name ?: series!!.name
                     val f = focusOf(type, id)

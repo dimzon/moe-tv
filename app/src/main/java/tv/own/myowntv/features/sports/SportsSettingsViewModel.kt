@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.sports
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,20 +60,20 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import tv.own.myowntv.core.database.dao.SourceDao
-import tv.own.myowntv.core.nav.MainSection
-import tv.own.myowntv.core.repository.activeProfileSources
-import tv.own.myowntv.core.settings.SettingsRepository
-import tv.own.myowntv.core.sports.FollowedTeam
-import tv.own.myowntv.core.sports.RebuildState
-import tv.own.myowntv.core.sports.SportsActivityTracker
-import tv.own.myowntv.core.sports.SportsCatalog
-import tv.own.myowntv.core.sports.SportsConfig
-import tv.own.myowntv.core.sports.SportsMemory
-import tv.own.myowntv.core.sports.SportsRepository
-import tv.own.myowntv.core.sports.SportsSource
-import tv.own.myowntv.core.sports.SportsSuggestion
-import tv.own.myowntv.core.sports.model.Team
+import tv.own.owntv.core.database.dao.SourceDao
+import tv.own.owntv.core.nav.MainSection
+import tv.own.owntv.core.repository.activeProfileSources
+import tv.own.owntv.core.settings.SettingsRepository
+import tv.own.owntv.core.sports.FollowedTeam
+import tv.own.owntv.core.sports.RebuildState
+import tv.own.owntv.core.sports.SportsActivityTracker
+import tv.own.owntv.core.sports.SportsCatalog
+import tv.own.owntv.core.sports.SportsConfig
+import tv.own.owntv.core.sports.SportsMemory
+import tv.own.owntv.core.sports.SportsRepository
+import tv.own.owntv.core.sports.SportsSource
+import tv.own.owntv.core.sports.SportsSuggestion
+import tv.own.owntv.core.sports.model.Team
 import java.util.Locale
 
 /**
@@ -33,7 +85,7 @@ class SportsSettingsViewModel(
     private val settings: SettingsRepository,
     private val source: SportsSource,
     private val repository: SportsRepository,
-    private val calendar: tv.own.myowntv.core.sports.SportsCalendar,
+    private val calendar: tv.own.owntv.core.sports.SportsCalendar,
     activity: SportsActivityTracker,
     sourceDao: SourceDao,
 ) : ViewModel() {
@@ -78,7 +130,7 @@ class SportsSettingsViewModel(
     }
 
     /** The Move overlay saved a new sport order (Settings → Sports and leagues). */
-    fun setSportOrder(order: List<tv.own.myowntv.core.sports.model.Sport>) = update { it.copy(sportOrder = order) }
+    fun setSportOrder(order: List<tv.own.owntv.core.sports.model.Sport>) = update { it.copy(sportOrder = order) }
 
     /**
      * The Move overlay saved a new order for one sport's chosen leagues: they go first, the other

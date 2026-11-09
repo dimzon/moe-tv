@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.sports
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,12 +76,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.R
-import tv.own.myowntv.core.sports.AutoRebuild
-import tv.own.myowntv.core.sports.FollowedTeam
-import tv.own.myowntv.core.sports.MinQuality
-import tv.own.myowntv.core.sports.SportsCatalog
-import tv.own.myowntv.core.sports.SportsConfig
-import tv.own.myowntv.core.sports.SportsRefreshPolicy
+import tv.own.owntv.core.sports.AutoRebuild
+import tv.own.owntv.core.sports.FollowedTeam
+import tv.own.owntv.core.sports.MinQuality
+import tv.own.owntv.core.sports.SportsCatalog
+import tv.own.owntv.core.sports.SportsConfig
+import tv.own.owntv.core.sports.SportsRefreshPolicy
 import tv.own.myowntv.features.settings.SettingValue
 import tv.own.myowntv.features.settings.StageFieldRow
 import tv.own.myowntv.features.settings.StageFullPage
@@ -280,7 +332,7 @@ private fun LeaguePicker(vm: SportsSettingsViewModel, c: SportsConfig, rowsFocus
     val cricketName = stringResource(R.string.sports_sport_cricket)
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     fun startMove(list: MoveList) { moving = list }
-    fun leagueName(l: tv.own.myowntv.core.sports.model.League) = if (l.key == "cricket/all") cricketName else l.name
+    fun leagueName(l: tv.own.owntv.core.sports.model.League) = if (l.key == "cricket/all") cricketName else l.name
     androidx.compose.foundation.layout.Row(modifier, horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(18.mpx)) {
         androidx.compose.foundation.layout.Column(
             Modifier.width(380.mpx).fillMaxHeight().focusRequester(rowsFocus).focusGroup()
@@ -300,7 +352,7 @@ private fun LeaguePicker(vm: SportsSettingsViewModel, c: SportsConfig, rowsFocus
                         onClick = { runCatching { leaguesFocus.requestFocus() } },
                         onLongClick = {
                             startMove(MoveList(label, sports.map { it.name }, sportNames, i) { keys ->
-                                vm.setSportOrder(keys.mapNotNull { k -> tv.own.myowntv.core.sports.model.Sport.entries.firstOrNull { it.name == k } })
+                                vm.setSportOrder(keys.mapNotNull { k -> tv.own.owntv.core.sports.model.Sport.entries.firstOrNull { it.name == k } })
                             })
                         },
                         help = help,

@@ -1,8 +1,60 @@
 @file:OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 
 package tv.own.myowntv.features.live
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
-import tv.own.myowntv.core.epg.displayLogoUrl
+import tv.own.owntv.core.epg.displayLogoUrl
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -44,64 +96,65 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.paging.filter
 import androidx.paging.map
-import tv.own.myowntv.core.customize.CustomizationStore
-import tv.own.myowntv.core.customize.CustomizeKeys
+import tv.own.owntv.core.customize.CustomizationStore
+import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.myowntv.features.customize.MoveTarget
-import tv.own.myowntv.core.customize.CategoryRestorePlan
-import tv.own.myowntv.core.customize.planCategoryRestore
-import tv.own.myowntv.core.customize.restoreCategoryToDefault
-import tv.own.myowntv.core.epg.CatchupUrl
-import tv.own.myowntv.core.live.StreamGrant
-import tv.own.myowntv.core.recording.RecordingSchedule
-import tv.own.myowntv.core.customize.SectionCustomizations
-import tv.own.myowntv.core.customize.sealsItemIn
-import tv.own.myowntv.core.categorylock.lockAwareCatchupCount
-import tv.own.myowntv.core.categorylock.lockAwareCountsByContexts
-import tv.own.myowntv.core.categorylock.visibleOnceRead
-import tv.own.myowntv.core.categorylock.whileSealed
-import tv.own.myowntv.core.customize.CategoryMove
-import tv.own.myowntv.core.customize.CategoryRailEditor
-import tv.own.myowntv.core.customize.railCategories
-import tv.own.myowntv.core.database.dao.CategoryDao
-import tv.own.myowntv.core.database.dao.ChannelDao
-import tv.own.myowntv.core.database.dao.ContentOrderDao
-import tv.own.myowntv.core.database.dao.CustomCategoryDao
-import tv.own.myowntv.core.database.dao.FavoriteDao
-import tv.own.myowntv.core.database.dao.HistoryDao
-import tv.own.myowntv.core.database.dao.ProfileDao
-import tv.own.myowntv.core.database.dao.SourceDao
-import tv.own.myowntv.core.database.dao.resolveExistingProfileId
-import tv.own.myowntv.core.database.entity.ChannelEntity
-import tv.own.myowntv.core.database.entity.ContentOrderEntity
-import tv.own.myowntv.core.database.entity.FavoriteEntity
-import tv.own.myowntv.core.database.entity.SourceEntity
-import tv.own.myowntv.core.database.entity.WatchHistoryEntity
-import tv.own.myowntv.core.launcher.LauncherIntegrationRepository
-import tv.own.myowntv.core.model.MediaType
-import tv.own.myowntv.core.util.throttleLatest
-import tv.own.myowntv.core.model.SourceType
-import tv.own.myowntv.core.parser.XtEpgEntry
-import tv.own.myowntv.core.parser.XtreamClient
-import tv.own.myowntv.core.repository.activeProfileSources
-import tv.own.myowntv.core.settings.SourceOverrides
-import tv.own.myowntv.core.settings.SettingsRepository
-import tv.own.myowntv.player.LiveExoWatchdog
-import tv.own.myowntv.player.LiveProgramme
-import tv.own.myowntv.player.OwnTVPlayer
+import tv.own.owntv.core.customize.CategoryRestorePlan
+import tv.own.owntv.core.customize.planCategoryRestore
+import tv.own.owntv.core.customize.restoreCategoryToDefault
+import tv.own.owntv.core.epg.CatchupUrl
+import tv.own.owntv.core.live.StreamGrant
+import tv.own.owntv.core.recording.RecordingSchedule
+import tv.own.owntv.core.customize.SectionCustomizations
+import tv.own.owntv.core.customize.sealsItemIn
+import tv.own.owntv.core.categorylock.lockAwareCatchupCount
+import tv.own.owntv.core.categorylock.lockAwareCountsByContexts
+import tv.own.owntv.core.categorylock.visibleOnceRead
+import tv.own.owntv.core.categorylock.whileSealed
+import tv.own.owntv.core.customize.CategoryMove
+import tv.own.owntv.core.customize.CategoryRailEditor
+import tv.own.owntv.core.customize.railCategories
+import tv.own.owntv.core.database.dao.CategoryDao
+import tv.own.owntv.core.database.dao.ChannelDao
+import tv.own.owntv.core.database.dao.ContentOrderDao
+import tv.own.owntv.core.database.dao.CustomCategoryDao
+import tv.own.owntv.core.database.dao.FavoriteDao
+import tv.own.owntv.core.database.dao.HistoryDao
+import tv.own.owntv.core.database.dao.ProfileDao
+import tv.own.owntv.core.database.dao.SourceDao
+import tv.own.owntv.core.database.dao.resolveExistingProfileId
+import tv.own.owntv.core.database.entity.ChannelEntity
+import tv.own.owntv.core.database.entity.ContentOrderEntity
+import tv.own.owntv.core.database.entity.FavoriteEntity
+import tv.own.owntv.core.database.entity.SourceEntity
+import tv.own.owntv.core.database.entity.WatchHistoryEntity
+import tv.own.owntv.core.launcher.LauncherIntegrationRepository
+import tv.own.owntv.core.model.MediaType
+import tv.own.owntv.core.util.throttleLatest
+import tv.own.owntv.core.model.SourceType
+import tv.own.owntv.core.parser.XtEpgEntry
+import tv.own.owntv.core.parser.XtreamClient
+import tv.own.owntv.core.repository.activeProfileSources
+import tv.own.owntv.core.settings.SourceOverrides
+import tv.own.owntv.core.settings.SettingsRepository
+import tv.own.owntv.player.LiveExoWatchdog
+import tv.own.owntv.player.MediaMeta
+import tv.own.owntv.player.LiveProgramme
+import tv.own.owntv.player.OwnTVPlayer
 import tv.own.myowntv.ui.components.MyOwnTVIcon
-import tv.own.myowntv.core.live.LiveTimeshift
-import tv.own.myowntv.core.live.LiveKey
-import tv.own.myowntv.core.live.LiveBuiltIns
-import tv.own.myowntv.core.live.liveLandingKey
+import tv.own.owntv.core.live.LiveTimeshift
+import tv.own.owntv.core.live.LiveKey
+import tv.own.owntv.core.live.LiveBuiltIns
+import tv.own.owntv.core.live.liveLandingKey
 import tv.own.myowntv.features.search.positionOf
-import tv.own.myowntv.core.live.isChannelVisible
-import tv.own.myowntv.core.live.liveCountFlow
-import tv.own.myowntv.core.live.livePagingSource
-import tv.own.myowntv.core.live.serialize
-import tv.own.myowntv.core.live.EpgNowNext
-import tv.own.myowntv.core.live.LiveEpgReader
-import tv.own.myowntv.core.live.LiveArchiveUrls
-import tv.own.myowntv.core.live.CatchupContinue
+import tv.own.owntv.core.live.isChannelVisible
+import tv.own.owntv.core.live.liveCountFlow
+import tv.own.owntv.core.live.livePagingSource
+import tv.own.owntv.core.live.serialize
+import tv.own.owntv.core.live.EpgNowNext
+import tv.own.owntv.core.live.LiveEpgReader
+import tv.own.owntv.core.live.LiveArchiveUrls
+import tv.own.owntv.core.live.CatchupContinue
 
 class LiveViewModel(
     private val appContext: Context,
@@ -109,27 +162,27 @@ class LiveViewModel(
     private val categoryDao: CategoryDao,
     private val favoriteDao: FavoriteDao,
     private val historyDao: HistoryDao,
-    private val userDataWriter: tv.own.myowntv.core.backup.UserDataWriter,
+    private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
     private val profileDao: ProfileDao,
     private val sourceDao: SourceDao,
     private val settings: SettingsRepository,
     private val xtreamClient: XtreamClient,
     private val customize: CustomizationStore,
     private val launcherIntegrationRepository: LauncherIntegrationRepository,
-    private val epgDao: tv.own.myowntv.core.database.dao.EpgDao,
+    private val epgDao: tv.own.owntv.core.database.dao.EpgDao,
     /** Shared with the Guide: one now/next cache, so an invalidation reaches both screens. */
     private val epgReader: LiveEpgReader,
     val player: OwnTVPlayer,
-    val previewEngine: tv.own.myowntv.player.LivePreviewEngine,
-    private val forceMpvStore: tv.own.myowntv.core.player.ForceMpvStore,
+    val previewEngine: tv.own.owntv.player.LivePreviewEngine,
+    private val forceMpvStore: tv.own.owntv.core.player.ForceMpvStore,
     private val contentOrderDao: ContentOrderDao,
     private val customCategoryDao: CustomCategoryDao,
-    private val streamUrlResolver: tv.own.myowntv.core.stalker.StreamUrlResolver,
-    private val epgRepository: tv.own.myowntv.core.repository.EpgRepository,
-    private val externalPlayerLauncher: tv.own.myowntv.core.player.ExternalPlayerLauncher,
-    private val recordings: tv.own.myowntv.core.recording.RecordingManager,
+    private val streamUrlResolver: tv.own.owntv.core.stalker.StreamUrlResolver,
+    private val epgRepository: tv.own.owntv.core.repository.EpgRepository,
+    private val externalPlayerLauncher: tv.own.owntv.core.player.ExternalPlayerLauncher,
+    private val recordings: tv.own.owntv.core.recording.RecordingManager,
     /** Keeps the preview pane off a one-stream playlist while a download is using it. */
-    private val downloadWatchGuard: tv.own.myowntv.core.download.DownloadWatchGuard,
+    private val downloadWatchGuard: tv.own.owntv.core.download.DownloadWatchGuard,
 ) : ViewModel() {
 
     // --- "Record what I'm watching" --------------------------------------------------------------
@@ -141,9 +194,9 @@ class LiveViewModel(
      * stream: it ends when the stream does, and nothing in the database says which stream that was.
      */
     private val _playerRecording =
-        MutableStateFlow<tv.own.myowntv.core.database.entity.RecordingEntity?>(null)
+        MutableStateFlow<tv.own.owntv.core.database.entity.RecordingEntity?>(null)
 
-    val playerRecording: StateFlow<tv.own.myowntv.core.database.entity.RecordingEntity?> = _playerRecording
+    val playerRecording: StateFlow<tv.own.owntv.core.database.entity.RecordingEntity?> = _playerRecording
 
     /**
      * Start or stop recording the channel on screen, from its start time of *now*.
@@ -207,7 +260,7 @@ class LiveViewModel(
     }
 
     /** What already claims this channel's playlist over the window — the clash the dialog warns about. */
-    suspend fun recordingClashes(channel: ChannelEntity, startMs: Long, stopMs: Long): List<tv.own.myowntv.core.database.entity.RecordingEntity> {
+    suspend fun recordingClashes(channel: ChannelEntity, startMs: Long, stopMs: Long): List<tv.own.owntv.core.database.entity.RecordingEntity> {
         val window = RecordingSchedule.manualWindow(startMs, stopMs, System.currentTimeMillis()) ?: return emptyList()
         return recordings.clashesWith(channel.sourceId, window.first, window.last)
     }
@@ -223,8 +276,8 @@ class LiveViewModel(
     private suspend fun startRecordingNow(
         channel: ChannelEntity,
         profileId: Long,
-        programme: tv.own.myowntv.core.parser.XtEpgEntry?,
-    ): tv.own.myowntv.core.database.entity.RecordingEntity? {
+        programme: tv.own.owntv.core.parser.XtEpgEntry?,
+    ): tv.own.owntv.core.database.entity.RecordingEntity? {
         if (recordings.canRecordOn(channel.sourceId) !is StreamGrant.Allowed) return null
         val startMs = System.currentTimeMillis()
         // Start now: the programme is already under way and a live edge cannot be rewound, so the
@@ -234,7 +287,7 @@ class LiveViewModel(
             ?.takeIf { it > startMs }
             ?: (startMs + RecordingSchedule.NO_GUIDE_RUNTIME_MINUTES * 60_000L)
         return recordings.schedule(
-            tv.own.myowntv.core.database.entity.RecordingEntity(
+            tv.own.owntv.core.database.entity.RecordingEntity(
                 profileId = profileId,
                 sourceId = channel.sourceId,
                 channelId = channel.id,
@@ -309,7 +362,7 @@ class LiveViewModel(
     // immediately (it used to be read once at startup, so a new playlist showed nothing until restart).
     // Full sources by id — lets the synchronous play() paths tell a Stalker source (needs play-time
     // create_link resolution) from M3U/Xtream (final URL already stored) without a DB round-trip.
-    private var sourceById: Map<Long, tv.own.myowntv.core.database.entity.SourceEntity> = emptyMap()
+    private var sourceById: Map<Long, tv.own.owntv.core.database.entity.SourceEntity> = emptyMap()
 
     private val ctx: StateFlow<Ctx> = activeProfileSources(settings, sourceDao)
         .map { aps ->
@@ -428,7 +481,7 @@ class LiveViewModel(
      *  single place that knows a customization changed. */
 
     /** The same candidate set the Guide's picker uses — filtered by no source. */
-    private val guideCandidates = tv.own.myowntv.core.epg.GuideCandidates(epgDao)
+    private val guideCandidates = tv.own.owntv.core.epg.GuideCandidates(epgDao)
 
     /** Catch-up and live-rewind archive URL construction — see [LiveArchiveUrls]. */
     private val archiveUrls = LiveArchiveUrls(sourceDao, xtreamClient, streamUrlResolver, settings)
@@ -617,7 +670,7 @@ class LiveViewModel(
                 flowOf(emptySet())
             } else {
                 combine(categoryDao.observe(c.sourceIds, MediaType.LIVE), custom, profileDao.observeById(c.profileId)) { cats, cust, profile ->
-                    tv.own.myowntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
+                    tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
                         cats,
                         cust.hiddenCategories,
                         profile?.isKids == true,
@@ -838,7 +891,7 @@ class LiveViewModel(
 
     /** The channel's own guide shift in minutes, or null when it follows the global offset. */
     fun currentEpgShift(channel: ChannelEntity): Int? =
-        tv.own.myowntv.core.epg.EpgShift.overrideFor(custom.value, channel)
+        tv.own.owntv.core.epg.EpgShift.overrideFor(custom.value, channel)
 
     /** The global guide shift, shown as the per-channel dialog's "follow global" default. */
     fun globalEpgShift(): Int = epgOffset.value
@@ -848,7 +901,7 @@ class LiveViewModel(
 
     /** Distinct EPG channels for the "Match EPG" picker (across the profile's playlists + EPG feeds),
      *  ranked so guide channels resembling [channelName] come first instead of a plain A-Z list. */
-    suspend fun availableEpgChannels(channelName: String, query: String): List<tv.own.myowntv.core.epg.GuideCandidate> {
+    suspend fun availableEpgChannels(channelName: String, query: String): List<tv.own.owntv.core.epg.GuideCandidate> {
         if (currentProfileId() == null) return emptyList()
         return guideCandidates.forPicker(channelName, query)
     }
@@ -1095,10 +1148,10 @@ class LiveViewModel(
      * the preview pane's engine — core's, the same code the phone runs. What stays here is the
      * television's own: which channel is on screen, the zap list, history, catch-up and the HUD state.
      */
-    private val live = tv.own.myowntv.player.LiveTuneController(
+    private val live = tv.own.owntv.player.LiveTuneController(
         scope = viewModelScope,
-        engines = tv.own.myowntv.player.EnginePair(previewEngine, player),
-        host = tv.own.myowntv.player.LiveTuneController.CoreHost(
+        engines = tv.own.owntv.player.EnginePair(previewEngine, player),
+        host = tv.own.owntv.player.LiveTuneController.CoreHost(
             context = appContext,
             settings = settings,
             sourceDao = sourceDao,
@@ -1163,7 +1216,7 @@ class LiveViewModel(
      * has to be resolved to a link per play. All of that already lives here, and a second copy in the
      * grid would drift the first time one of them changed.
      */
-    fun tuneTile(engine: tv.own.myowntv.player.LivePreviewEngine, channel: ChannelEntity, muted: Boolean) {
+    fun tuneTile(engine: tv.own.owntv.player.LivePreviewEngine, channel: ChannelEntity, muted: Boolean) {
         viewModelScope.launch { live.playTile(engine, channel, muted) }
     }
 
@@ -1330,7 +1383,7 @@ class LiveViewModel(
 
     /** The profile's recently-watched channels and when each was watched, for the right-hand in-player
      *  history overlay. */
-    suspend fun historyChannels(limit: Int = HISTORY_LIST_LIMIT): List<tv.own.myowntv.core.database.dao.ChannelWithWatchedAt> {
+    suspend fun historyChannels(limit: Int = HISTORY_LIST_LIMIT): List<tv.own.owntv.core.database.dao.ChannelWithWatchedAt> {
         val pid = currentProfileId() ?: return emptyList()
         val cust = custom.value
         val hiddenCats = hiddenCategoryIds.value
@@ -1361,7 +1414,7 @@ class LiveViewModel(
         // On a 2 GB TV the preview pane decodes at most 720p — a second full-size
         // decoder re-tuning on every focus step is the heaviest background cost there. Lifted the moment
         // the channel goes full-screen, so the promoted stream switches up to its full variant.
-        if (tv.own.myowntv.core.player.PlayerBudget.of(appContext).lowSpec) {
+        if (tv.own.owntv.core.player.PlayerBudget.of(appContext).lowSpec) {
             viewModelScope.launch {
                 liveOnExo.collect { fullScreen -> previewEngine.setMaxVideoHeight(if (fullScreen) null else PREVIEW_MAX_HEIGHT) }
             }
@@ -1409,7 +1462,7 @@ class LiveViewModel(
     suspend fun isVisibleToActiveProfile(channel: ChannelEntity): Boolean {
         val current = ctx.first { it.profileId >= 0L }
         if (channel.sourceId !in current.sourceIds) return false
-        if (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(current.profileId, channel.categoryId, profileDao, categoryDao) || customize.sealsCategory(current.profileId, channel.categoryId)) return false
+        if (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(current.profileId, channel.categoryId, profileDao, categoryDao) || customize.sealsCategory(current.profileId, channel.categoryId)) return false
         val customizations = customize.observeVisible(current.profileId, MediaType.LIVE).first()
         if (CustomizeKeys.channel(channel) in customizations.hiddenItems) return false
         val category = channel.categoryId?.let { categoryDao.getById(it) }
@@ -1492,13 +1545,13 @@ class LiveViewModel(
         val delayMs = zapTuneDelayMs(lastZapPressMs, now)
         // Logged only: single-connection panels follow the same rule (see ZAP_ISOLATED_PRESS_MS).
         val singleConnection = sourceById[channel.sourceId]?.maxConnections == 1 ||
-            tv.own.myowntv.player.LiveStreamQuirks.isSingleSession(channel.streamUrl)
-        tv.own.myowntv.player.LiveDiagnosticsLog.event(
+            tv.own.owntv.player.LiveStreamQuirks.isSingleSession(channel.streamUrl)
+        tv.own.owntv.player.LiveDiagnosticsLog.event(
             "zap: tune wait ${delayMs}ms — ${zapWaitReason(lastZapPressMs, now, singleConnection)}",
         )
         lastZapPressMs = now
         // Diagnostics only: the tune this press causes claims it and times its first frame from here.
-        tv.own.myowntv.player.ZapTiming.shared.markPress(now)
+        tv.own.owntv.player.ZapTiming.shared.markPress(now)
         pendingZapTuneJob?.cancel()
         if (delayMs <= 0L) {
             pendingZapTuneJob = null
@@ -1668,7 +1721,7 @@ class LiveViewModel(
     fun playExternal(channel: ChannelEntity) {
         viewModelScope.launch {
             val pid = currentProfileId() ?: return@launch
-            if (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(pid, channel.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, channel.categoryId)) return@launch
+            if (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, channel.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, channel.categoryId)) return@launch
             val source = withContext(Dispatchers.IO) { sourceDao.getById(channel.sourceId) }
             val url = if (streamUrlResolver.needsResolve(source)) {
                 withContext(Dispatchers.IO) {
@@ -1698,7 +1751,7 @@ class LiveViewModel(
      *  stick on a black screen for HLS). */
     fun ensurePlaying(channel: ChannelEntity) {
         // A deliberate pick, not a CH+/- step: an unclaimed zap press must not be timed against it.
-        tv.own.myowntv.player.ZapTiming.shared.clear()
+        tv.own.owntv.player.ZapTiming.shared.clear()
         startTune(channel)
     }
 
@@ -1717,7 +1770,7 @@ class LiveViewModel(
         live.launch { playChannel(channel) }
     }
 
-    private suspend fun getSource(sourceId: Long): tv.own.myowntv.core.database.entity.SourceEntity? =
+    private suspend fun getSource(sourceId: Long): tv.own.owntv.core.database.entity.SourceEntity? =
         sourceById[sourceId] ?: sourceDao.getById(sourceId)
 
     /** Internal playback: the canonical ExoPlayer / mpv / Stalker / history side-effects for a
@@ -1725,7 +1778,7 @@ class LiveViewModel(
      *  so the in-flight rebuild it owns isn't killed by its own play. */
     private suspend fun playChannel(channel: ChannelEntity) {
         val pid = currentProfileId() ?: return
-        if (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(pid, channel.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, channel.categoryId)) return
+        if (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, channel.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, channel.categoryId)) return
         // Live TV set to play externally: hand the channel over instead of tuning an in-app engine.
         // History is still recorded, so the channel shows up in History/Recently watched either way.
         // A protected channel stays in-app whatever this setting says: no standard intent extra
@@ -1817,7 +1870,7 @@ class LiveViewModel(
 
     /** Recent (already-aired) programmes for a catch-up channel, newest first — drives the Live TV
      *  catch-up picker. Bounded to the EPG we retain (≈ 2 days) and the channel's archive window. */
-    suspend fun catchupProgrammes(ch: ChannelEntity): List<tv.own.myowntv.core.database.entity.EpgProgrammeEntity> =
+    suspend fun catchupProgrammes(ch: ChannelEntity): List<tv.own.owntv.core.database.entity.EpgProgrammeEntity> =
         epgReader.catchupProgrammes(ch, custom.value, epgOffset.value, ctx.value.sourceIds)
 
     /** Full description for a programme picked in the catch-up dialog. The list query drops it to stay
@@ -1850,10 +1903,10 @@ class LiveViewModel(
 
     /** Hand an archive programme to an external app (VLC, MX Player). No HUD, resume or engine toggle
      *  once it leaves, but external players cope with mid-GOP archive segments some providers serve. */
-    fun playCatchupExternal(ch: ChannelEntity, programme: tv.own.myowntv.core.database.entity.EpgProgrammeEntity) {
+    fun playCatchupExternal(ch: ChannelEntity, programme: tv.own.owntv.core.database.entity.EpgProgrammeEntity) {
         viewModelScope.launch {
             val pid = currentProfileId() ?: return@launch
-            if (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(pid, ch.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, ch.categoryId)) return@launch
+            if (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, ch.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, ch.categoryId)) return@launch
             val url = archiveUrls.forProgramme(ch, programme) ?: run {
                 _catchupUnavailable.tryEmit(Unit)
                 return@launch
@@ -1872,15 +1925,15 @@ class LiveViewModel(
 
     /** The archive programme on screen, for [continueAfterCatchup] to find the one after it. Null
      *  whenever the picture is not a fixed catch-up programme. */
-    private var playingCatchupProgramme: tv.own.myowntv.core.database.entity.EpgProgrammeEntity? = null
+    private var playingCatchupProgramme: tv.own.owntv.core.database.entity.EpgProgrammeEntity? = null
 
     /** Replay a past programme from the channel's archive (seekable, like the Guide's "Watch from start"). */
-    fun playCatchupProgramme(ch: ChannelEntity, programme: tv.own.myowntv.core.database.entity.EpgProgrammeEntity) {
+    fun playCatchupProgramme(ch: ChannelEntity, programme: tv.own.owntv.core.database.entity.EpgProgrammeEntity) {
         // The controller's one tune job: a live tune still resolving is cancelled rather than starting
         // over the programme a moment later.
         live.launch {
             val pid = currentProfileId() ?: return@launch
-            if (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(pid, ch.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, ch.categoryId)) return@launch
+            if (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, ch.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, ch.categoryId)) return@launch
             val url = archiveUrls.forProgramme(ch, programme) ?: run {
                 _catchupUnavailable.tryEmit(Unit)
                 return@launch
@@ -1889,7 +1942,7 @@ class LiveViewModel(
             // The archive URL shape decides whether ExoPlayer can take it at all (progressive .ts vs
             // .m3u8 vs an extension-less panel endpoint), so log it redacted — it's the first thing
             // needed when the HUD's engine toggle can't get a catch-up programme playing.
-            Log.i(ENGINE_TAG, "catch-up '${ch.name}' prog='${programme.title}' -> ${tv.own.myowntv.core.network.HttpClient.redactUrl(url)}")
+            Log.i(ENGINE_TAG, "catch-up '${ch.name}' prog='${programme.title}' -> ${tv.own.owntv.core.network.HttpClient.redactUrl(url)}")
             tuned(ch)
             clearTimeshift()                 // a fixed programme replaces any live rewind in progress
             _catchupActive.value = true      // HUD: VOD engine toggle, not the live compatibility toggle
@@ -1900,7 +1953,7 @@ class LiveViewModel(
             // fresh create_link on Retry.
             player.play(
                 url, title = ch.name, subtitle = programme.title, logoUrl = ch.displayLogoUrl, isLive = false, isArchive = true,
-                userAgent = sourceUa, httpHeaders = headersFor(ch), contentKey = tv.own.myowntv.core.player.catchupPinKey(ch),
+                userAgent = sourceUa, httpHeaders = headersFor(ch), contentKey = tv.own.owntv.core.player.catchupPinKey(ch),
                 reconnectProvider = archiveUrls.reconnectFor(ch, programme),
             )
             // The picture is this programme's own airtime, not the present — drive the "watching" clock
@@ -1998,7 +2051,7 @@ class LiveViewModel(
     private val rewindStepSec: StateFlow<Int> = settings.liveRewindStepSec
         .stateIn(
             viewModelScope, SharingStarted.Eagerly,
-            tv.own.myowntv.core.settings.SeekSteps.DEFAULT_LIVE_REWIND_STEP_SEC,
+            tv.own.owntv.core.settings.SeekSteps.DEFAULT_LIVE_REWIND_STEP_SEC,
         )
 
     /** One press of the archive rewind/forward buttons. */
@@ -2025,9 +2078,9 @@ class LiveViewModel(
      *  the first row of the player's "Go back to…" list. Looked up as the list opens rather than taken
      *  from [nowNext], which is debounced and can still hold the previous channel's programme for a
      *  moment after a zap; core bounds the wait, so the list never hangs on a network guide. */
-    suspend fun currentProgrammeStart(): tv.own.myowntv.core.live.CatchupProgrammeStart? {
+    suspend fun currentProgrammeStart(): tv.own.owntv.core.live.CatchupProgrammeStart? {
         val ch = _previewChannel.value ?: return null
-        return tv.own.myowntv.core.live.CatchupProgrammeStart.lookUp(epgReader, ch, custom.value, epgOffset.value, catchupWindowOf(ch))
+        return tv.own.owntv.core.live.CatchupProgrammeStart.lookUp(epgReader, ch, custom.value, epgOffset.value, catchupWindowOf(ch))
     }
 
     /** Jump the channel already on screen to [offsetSec] behind live. */
@@ -2099,7 +2152,7 @@ class LiveViewModel(
             userAgent = sourceUa,
             httpHeaders = headersFor(ch),
             rewindStartMs = archive.startMs,
-            contentKey = tv.own.myowntv.core.player.catchupPinKey(ch),
+            contentKey = tv.own.owntv.core.player.catchupPinKey(ch),
             reconnectProvider = archive.reconnect,
         )
         return archive.startMs
@@ -2130,7 +2183,7 @@ class LiveViewModel(
      * guide simply has no entry here, and the row shows no second line. Returns only channels that
      * actually have something airing right now.
      */
-    suspend fun nowPlayingFor(channels: List<ChannelEntity>): Map<Long, tv.own.myowntv.core.parser.XtEpgEntry> =
+    suspend fun nowPlayingFor(channels: List<ChannelEntity>): Map<Long, tv.own.owntv.core.parser.XtEpgEntry> =
         epgReader.nowProgrammesFor(channels, custom.value, epgOffset.value)
 
     /**
@@ -2140,11 +2193,11 @@ class LiveViewModel(
      * behalf. An earlier version had each caller drop everything outside its own list, which made the
      * Live list and the channel-list overlay evict each other's work every time one opened.
      */
-    private val nowPlayingCache = object : LinkedHashMap<Long, tv.own.myowntv.core.parser.XtEpgEntry?>(256, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Long, tv.own.myowntv.core.parser.XtEpgEntry?>?) = size > MAX_NOW_PLAYING
+    private val nowPlayingCache = object : LinkedHashMap<Long, tv.own.owntv.core.parser.XtEpgEntry?>(256, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Long, tv.own.owntv.core.parser.XtEpgEntry?>?) = size > MAX_NOW_PLAYING
     }
 
-    private val _nowPlaying = MutableStateFlow<Map<Long, tv.own.myowntv.core.parser.XtEpgEntry?>>(emptyMap())
+    private val _nowPlaying = MutableStateFlow<Map<Long, tv.own.owntv.core.parser.XtEpgEntry?>>(emptyMap())
 
     /**
      * Channel id → the programme airing now.
@@ -2158,20 +2211,20 @@ class LiveViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     /** [nowPlaying] with the programme's start and stop, for the Stage rows' time left and progress. */
-    val nowProgrammes: StateFlow<Map<Long, tv.own.myowntv.core.parser.XtEpgEntry>> = _nowPlaying
+    val nowProgrammes: StateFlow<Map<Long, tv.own.owntv.core.parser.XtEpgEntry>> = _nowPlaying
         .map { found -> buildMap { found.forEach { (id, p) -> if (p != null) put(id, p) } } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     private var nowPlayingJob: kotlinx.coroutines.Job? = null
 
-    private fun publishNowPlaying(resolved: Map<Long, tv.own.myowntv.core.parser.XtEpgEntry?>) {
+    private fun publishNowPlaying(resolved: Map<Long, tv.own.owntv.core.parser.XtEpgEntry?>) {
         synchronized(nowPlayingCache) {
             nowPlayingCache.putAll(resolved)
             _nowPlaying.value = HashMap(nowPlayingCache)
         }
     }
 
-    private fun cachedNowPlaying(): Map<Long, tv.own.myowntv.core.parser.XtEpgEntry?> = synchronized(nowPlayingCache) { HashMap(nowPlayingCache) }
+    private fun cachedNowPlaying(): Map<Long, tv.own.owntv.core.parser.XtEpgEntry?> = synchronized(nowPlayingCache) { HashMap(nowPlayingCache) }
 
     /** Forget every resolved title — the guide data or the offset moved underneath them. */
     private fun clearNowPlaying() {

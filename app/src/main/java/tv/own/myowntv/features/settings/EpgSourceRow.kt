@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.settings
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
@@ -16,12 +68,12 @@ import androidx.tv.material3.Text
 import tv.own.myowntv.R
 import tv.own.myowntv.ui.theme.mpx
 import androidx.compose.ui.focus.onFocusChanged
-import tv.own.myowntv.core.epg.EpgSource
-import tv.own.myowntv.core.settings.EpgAutoRefresh
-import tv.own.myowntv.core.settings.EpgRefresh
+import tv.own.owntv.core.epg.EpgSource
+import tv.own.owntv.core.settings.EpgAutoRefresh
+import tv.own.owntv.core.settings.EpgRefresh
 import tv.own.myowntv.ui.components.MyOwnTVIcon
-import tv.own.myowntv.core.sync.work.EpgSyncState
-import tv.own.myowntv.core.util.classifySyncFailure
+import tv.own.owntv.core.sync.work.EpgSyncState
+import tv.own.owntv.core.util.classifySyncFailure
 import tv.own.myowntv.ui.components.displayText
 
 /** One guide on the EPG Sources list: its status line, its badge and the panel with its actions. */
@@ -54,11 +106,11 @@ internal fun EpgRow(
             null
         }
     }
-    val subtitle = if (tv.own.myowntv.core.repository.EpgRepository.stalkerSourceIdOf(source.url) != null) {
+    val subtitle = if (tv.own.owntv.core.repository.EpgRepository.stalkerSourceIdOf(source.url) != null) {
         stringResource(R.string.settings_epg_sources_portal_guide)
     } else {
         // Never the account's user name and password: an XMLTV address often carries both.
-        tv.own.myowntv.core.network.HttpClient.redactUrl(source.url)
+        tv.own.owntv.core.network.HttpClient.redactUrl(source.url)
     }
     val status = epgSourceStatus(source, count, activeSync)
     val failed = source.lastError != null && activeSync == null

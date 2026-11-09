@@ -1,10 +1,62 @@
 package tv.own.myowntv.ui.theme
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import tv.own.myowntv.core.theme.AccentColor
+import tv.own.owntv.core.theme.AccentColor
 
 /**
  * OwnTV's resolved Material 3 color roles for the current theme + accent. Read as `OwnTVTheme.colors`.
@@ -73,7 +125,7 @@ data class MyOwnTVColors(
  * The parsing itself is core's, so the mobile app reads a user's custom accent identically.
  */
 fun parseAccentHex(hex: String): Color? =
-    tv.own.myowntv.core.theme.parseAccentHex(hex)?.let { Color(it) }
+    tv.own.owntv.core.theme.parseAccentHex(hex)?.let { Color(it) }
 
 /** The four M3 primary roles, resolved either from a preset or generated from a custom seed. */
 private data class AccentRoles(
@@ -85,11 +137,11 @@ private data class AccentRoles(
 
 /**
  * Generate tonal primary roles from an arbitrary seed color (the custom hex accent).
- * The derivation is core's [tv.own.myowntv.core.theme.accentRolesFromSeed]; this only wraps its
+ * The derivation is core's [tv.own.owntv.core.theme.accentRolesFromSeed]; this only wraps its
  * values in [Color].
  */
 private fun rolesFrom(seed: Color, isDark: Boolean): AccentRoles {
-    val roles = tv.own.myowntv.core.theme.accentRolesFromSeed(
+    val roles = tv.own.owntv.core.theme.accentRolesFromSeed(
         seed = seed.toArgb().toLong() and 0xFFFFFFFFL,
         isDark = isDark,
     )

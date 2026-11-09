@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.settings
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -35,7 +87,7 @@ import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.R
-import tv.own.myowntv.core.home.TrendingHomeItem
+import tv.own.owntv.core.home.TrendingHomeItem
 import tv.own.myowntv.features.home.HomeViewModel
 import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.stage.StageProgress
@@ -160,7 +212,7 @@ private fun titleOf(item: TrendingHomeItem?): String? =
     item?.snapshot?.let { it.localizedTitle.ifBlank { it.canonicalTitle } }
 
 internal fun backdropOf(item: TrendingHomeItem): String? =
-    tv.own.myowntv.core.metadata.MetadataImages.backdrop(item.snapshot.backdropPath, size = "w780")
+    tv.own.owntv.core.metadata.MetadataImages.backdrop(item.snapshot.backdropPath, size = "w780")
         ?: when (item) {
             is TrendingHomeItem.Movie -> item.movie.backdropUrl ?: item.movie.posterUrl
             is TrendingHomeItem.Series -> item.series.backdropUrl ?: item.series.posterUrl

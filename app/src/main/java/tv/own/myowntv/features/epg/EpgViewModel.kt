@@ -1,8 +1,60 @@
 @file:OptIn(FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class) // debounce, flatMapLatest
 
 package tv.own.myowntv.features.epg
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
-import tv.own.myowntv.core.epg.displayLogoUrl
+import tv.own.owntv.core.epg.displayLogoUrl
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.FlowPreview
@@ -30,30 +82,30 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import tv.own.myowntv.core.customize.SectionCustomizations
-import tv.own.myowntv.core.database.dao.ChannelDao
-import tv.own.myowntv.core.database.dao.EpgDao
-import tv.own.myowntv.core.database.dao.ProfileDao
-import tv.own.myowntv.core.database.dao.SourceDao
-import tv.own.myowntv.core.database.dao.resolveExistingProfileId
-import tv.own.myowntv.core.epg.CatchupUrl
-import tv.own.myowntv.core.epg.EpgAutoMatcher
-import tv.own.myowntv.core.epg.GuideCandidate
-import tv.own.myowntv.core.epg.GuideCandidates
-import tv.own.myowntv.core.model.SourceType
-import tv.own.myowntv.core.parser.XtreamClient
-import tv.own.myowntv.core.customize.CustomizationStore
-import tv.own.myowntv.core.customize.CustomizeKeys
-import tv.own.myowntv.core.customize.railCategories
-import tv.own.myowntv.core.database.entity.ChannelEntity
-import tv.own.myowntv.core.database.entity.EpgProgrammeEntity
-import tv.own.myowntv.core.model.MediaType
-import tv.own.myowntv.core.network.ConnectivityObserver
-import tv.own.myowntv.core.repository.EpgRepository
-import tv.own.myowntv.core.repository.SourceRepository
-import tv.own.myowntv.core.repository.activeSourceIds
-import tv.own.myowntv.core.settings.SettingsRepository
-import tv.own.myowntv.core.settings.GuideWidthShares
+import tv.own.owntv.core.customize.SectionCustomizations
+import tv.own.owntv.core.database.dao.ChannelDao
+import tv.own.owntv.core.database.dao.EpgDao
+import tv.own.owntv.core.database.dao.ProfileDao
+import tv.own.owntv.core.database.dao.SourceDao
+import tv.own.owntv.core.database.dao.resolveExistingProfileId
+import tv.own.owntv.core.epg.CatchupUrl
+import tv.own.owntv.core.epg.EpgAutoMatcher
+import tv.own.owntv.core.epg.GuideCandidate
+import tv.own.owntv.core.epg.GuideCandidates
+import tv.own.owntv.core.model.SourceType
+import tv.own.owntv.core.parser.XtreamClient
+import tv.own.owntv.core.customize.CustomizationStore
+import tv.own.owntv.core.customize.CustomizeKeys
+import tv.own.owntv.core.customize.railCategories
+import tv.own.owntv.core.database.entity.ChannelEntity
+import tv.own.owntv.core.database.entity.EpgProgrammeEntity
+import tv.own.owntv.core.model.MediaType
+import tv.own.owntv.core.network.ConnectivityObserver
+import tv.own.owntv.core.repository.EpgRepository
+import tv.own.owntv.core.repository.SourceRepository
+import tv.own.owntv.core.repository.activeSourceIds
+import tv.own.owntv.core.settings.SettingsRepository
+import tv.own.owntv.core.settings.GuideWidthShares
 
 sealed interface EpgMessage {
     data object CreateProfile : EpgMessage
@@ -97,27 +149,27 @@ class EpgViewModel(
     private val epgDao: EpgDao,
     private val profileDao: ProfileDao,
     private val epgRepository: EpgRepository,
-    private val epgSourceStore: tv.own.myowntv.core.epg.EpgSourceStore,
+    private val epgSourceStore: tv.own.owntv.core.epg.EpgSourceStore,
     private val connectivity: ConnectivityObserver,
     private val customize: CustomizationStore,
     private val sourceDao: SourceDao,
     private val xtream: XtreamClient,
-    private val favoriteDao: tv.own.myowntv.core.database.dao.FavoriteDao,
-    private val userDataWriter: tv.own.myowntv.core.backup.UserDataWriter,
-    private val categoryDao: tv.own.myowntv.core.database.dao.CategoryDao,
-    private val streamUrlResolver: tv.own.myowntv.core.stalker.StreamUrlResolver,
-    private val externalPlayerLauncher: tv.own.myowntv.core.player.ExternalPlayerLauncher,
-    private val customCategoryDao: tv.own.myowntv.core.database.dao.CustomCategoryDao,
-    private val recordings: tv.own.myowntv.core.recording.RecordingManager,
+    private val favoriteDao: tv.own.owntv.core.database.dao.FavoriteDao,
+    private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
+    private val categoryDao: tv.own.owntv.core.database.dao.CategoryDao,
+    private val streamUrlResolver: tv.own.owntv.core.stalker.StreamUrlResolver,
+    private val externalPlayerLauncher: tv.own.owntv.core.player.ExternalPlayerLauncher,
+    private val customCategoryDao: tv.own.owntv.core.database.dao.CustomCategoryDao,
+    private val recordings: tv.own.owntv.core.recording.RecordingManager,
     /** The provider-guide half of a row, for channels whose stored guide stops short — the app-wide
      *  reader Live TV uses too, so both screens share one cache. */
-    private val liveEpgReader: tv.own.myowntv.core.live.LiveEpgReader,
+    private val liveEpgReader: tv.own.owntv.core.live.LiveEpgReader,
     /** Which guide feeds are syncing right now: the grid waits for them instead of reloading per batch. */
-    private val epgActivity: tv.own.myowntv.core.sync.EpgActivityTracker,
+    private val epgActivity: tv.own.owntv.core.sync.EpgActivityTracker,
     /** "Recently watched" in the category list reads the same history Live TV does. */
-    private val historyDao: tv.own.myowntv.core.database.dao.HistoryDao,
-    private val reminderManager: tv.own.myowntv.core.reminder.ReminderManager,
-    private val archiveGuide: tv.own.myowntv.core.epg.ArchiveGuideFiller,
+    private val historyDao: tv.own.owntv.core.database.dao.HistoryDao,
+    private val reminderManager: tv.own.owntv.core.reminder.ReminderManager,
+    private val archiveGuide: tv.own.owntv.core.epg.ArchiveGuideFiller,
 ) : ViewModel() {
 
     /** The categories' search text, held here so it survives the player (see LiveViewModel). */
@@ -139,7 +191,7 @@ class EpgViewModel(
      * The whole list rather than a per-programme lookup: the guide draws hundreds of cells and a
      * query each would be hundreds of queries. There are never many recordings.
      */
-    val recordingRows: StateFlow<List<tv.own.myowntv.core.database.entity.RecordingEntity>> =
+    val recordingRows: StateFlow<List<tv.own.owntv.core.database.entity.RecordingEntity>> =
         settings.activeProfileId
             .flatMapLatest { pid -> if (pid < 0) flowOf(emptyList()) else recordings.observe(pid) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -148,9 +200,9 @@ class EpgViewModel(
     fun recordingFor(
         channel: ChannelEntity,
         programme: EpgProgrammeEntity,
-    ): tv.own.myowntv.core.database.entity.RecordingEntity? = recordingRows.value.firstOrNull {
+    ): tv.own.owntv.core.database.entity.RecordingEntity? = recordingRows.value.firstOrNull {
         it.channelId == channel.id && it.programmeStartMs == programme.startMs &&
-            it.status != tv.own.myowntv.core.model.RecordingStatus.CANCELLED
+            it.status != tv.own.owntv.core.model.RecordingStatus.CANCELLED
     }
 
     /**
@@ -178,7 +230,7 @@ class EpgViewModel(
             }
             val window = recordings.windowFor(programme.startMs, programme.stopMs)
             recordings.schedule(
-                tv.own.myowntv.core.database.entity.RecordingEntity(
+                tv.own.owntv.core.database.entity.RecordingEntity(
                     profileId = pid,
                     sourceId = channel.sourceId,
                     channelId = channel.id,
@@ -205,17 +257,17 @@ class EpgViewModel(
     fun canRecord(channel: ChannelEntity, programme: EpgProgrammeEntity, now: Long): Boolean =
         programme.stopMs > now || canCatchup(channel, programme, now)
 
-    fun stopRecording(recording: tv.own.myowntv.core.database.entity.RecordingEntity) =
+    fun stopRecording(recording: tv.own.owntv.core.database.entity.RecordingEntity) =
         recordings.stop(recording)
 
-    fun cancelRecording(recording: tv.own.myowntv.core.database.entity.RecordingEntity) =
+    fun cancelRecording(recording: tv.own.owntv.core.database.entity.RecordingEntity) =
         recordings.cancel(recording)
 
     /** The standing "record every showing" rule covering this programme, or null. */
     suspend fun seriesRuleFor(
         channel: ChannelEntity,
         programme: EpgProgrammeEntity,
-    ): tv.own.myowntv.core.database.entity.RecordingRuleEntity? {
+    ): tv.own.owntv.core.database.entity.RecordingRuleEntity? {
         val pid = currentProfileId() ?: return null
         return recordings.ruleFor(pid, channel.id, programme.title)
     }
@@ -229,14 +281,14 @@ class EpgViewModel(
     }
 
     /** Stop the standing rule, and drop the showings it had queued but not yet recorded. */
-    fun stopSeries(rule: tv.own.myowntv.core.database.entity.RecordingRuleEntity) {
+    fun stopSeries(rule: tv.own.owntv.core.database.entity.RecordingRuleEntity) {
         viewModelScope.launch { recordings.removeSeriesRule(rule) }
     }
 
     /** Every windowed guide read this screen makes. The caches around it stay here — what to keep
      *  depends on how the grid scrolls, which is the screen's business, not core's. */
     private val guideReader =
-        tv.own.myowntv.core.live.GuideReader(epgDao, epgSourceStore, sourceDao, liveEpgReader)
+        tv.own.owntv.core.live.GuideReader(epgDao, epgSourceStore, sourceDao, liveEpgReader)
 
     // This profile's customizations — shared by the Guide picker, guide rows, and manual EPG match.
     // It must be initialized before guideCategories (Kotlin property initializers run top-to-bottom).
@@ -249,8 +301,8 @@ class EpgViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0)
 
     /** Guide category filter, from the same list as Live TV: null = All channels. */
-    private val _categoryFilter = MutableStateFlow<tv.own.myowntv.core.live.LiveKey?>(null)
-    val categoryFilter: StateFlow<tv.own.myowntv.core.live.LiveKey?> = _categoryFilter.asStateFlow()
+    private val _categoryFilter = MutableStateFlow<tv.own.owntv.core.live.LiveKey?>(null)
+    val categoryFilter: StateFlow<tv.own.owntv.core.live.LiveKey?> = _categoryFilter.asStateFlow()
 
     val guideWidthShares: StateFlow<GuideWidthShares?> = combine(
         settings.guideWidthEnabled,
@@ -258,8 +310,8 @@ class EpgViewModel(
     ) { enabled, shares -> shares.takeIf { enabled } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    fun setCategoryFilter(key: tv.own.myowntv.core.live.LiveKey?) {
-        _categoryFilter.value = key.takeUnless { it == tv.own.myowntv.core.live.LiveKey.All }
+    fun setCategoryFilter(key: tv.own.owntv.core.live.LiveKey?) {
+        _categoryFilter.value = key.takeUnless { it == tv.own.owntv.core.live.LiveKey.All }
     }
 
     private val _state = MutableStateFlow(EpgUiState())
@@ -304,7 +356,7 @@ class EpgViewModel(
      * Ask for the past days a catch-up [channel]'s guide feed lacks, from its provider's archive. Called
      * for a row that stays on screen, so the past is there by the time the user scrolls back to it; the
      * queue, its pacing and the "once every few hours per channel" rule are core's
-     * ([tv.own.myowntv.core.epg.ArchiveGuideFiller]).
+     * ([tv.own.owntv.core.epg.ArchiveGuideFiller]).
      */
     fun requestArchiveGuide(channel: ChannelEntity) = archiveGuide.request(channel, custom.value)
 
@@ -337,7 +389,7 @@ class EpgViewModel(
 
     /** Minutes this channel's guide is shifted by (per-channel override, else the global offset). */
     private fun shiftFor(channel: ChannelEntity): Int =
-        tv.own.myowntv.core.epg.EpgShift.minutesFor(custom.value, channel, epgOffset.value)
+        tv.own.owntv.core.epg.EpgShift.minutesFor(custom.value, channel, epgOffset.value)
 
     /** Synchronous cache peek — lets a re-composed row render instantly without a loading flash. */
     fun cachedProgrammes(channel: ChannelEntity): List<EpgProgrammeEntity>? =
@@ -545,7 +597,7 @@ class EpgViewModel(
     fun playCatchupExternal(channel: ChannelEntity, programme: EpgProgrammeEntity) {
         viewModelScope.launch {
             val profileId = settings.activeProfileId.first()
-            if (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(profileId, channel.categoryId, profileDao, categoryDao) || customize.sealsCategory(profileId, channel.categoryId)) return@launch
+            if (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(profileId, channel.categoryId, profileDao, categoryDao) || customize.sealsCategory(profileId, channel.categoryId)) return@launch
             val url = withContext(kotlinx.coroutines.Dispatchers.IO) { catchupUrlFor(channel, programme) }
             if (url == null) {
                 _matchSummary.value = EpgMatchSummary.CatchupUnavailable
@@ -557,7 +609,7 @@ class EpgViewModel(
                 title = channel.name,
                 subtitle = programme.title,
                 userAgent = source?.userAgent,
-                httpHeaders = tv.own.myowntv.core.settings.SourceOverrides.headersWithReferer(channel.httpHeaders, source),
+                httpHeaders = tv.own.owntv.core.settings.SourceOverrides.headersWithReferer(channel.httpHeaders, source),
             )
         }
     }
@@ -598,7 +650,7 @@ class EpgViewModel(
             if (favoriteChannelIds.value.contains(channel.id)) {
                 userDataWriter.removeFavorite(pid, MediaType.LIVE, channel.id)
             } else {
-                favoriteDao.add(tv.own.myowntv.core.database.entity.FavoriteEntity(profileId = pid, mediaType = MediaType.LIVE, itemId = channel.id))
+                favoriteDao.add(tv.own.owntv.core.database.entity.FavoriteEntity(profileId = pid, mediaType = MediaType.LIVE, itemId = channel.id))
             }
             // The "Favorites" guide sort shows only favourited channels — refresh it to match.
             if (settings.sortGuide.first() == SettingsRepository.GuideSort.FAVORITES) load()
@@ -608,16 +660,16 @@ class EpgViewModel(
     // --- Programme reminders ----------------------------------------------------------
 
     /** This profile's reminders: the bell in a cell, and "Reminder set" on the programme's button. */
-    val reminderRows: StateFlow<List<tv.own.myowntv.core.database.entity.ReminderEntity>> =
+    val reminderRows: StateFlow<List<tv.own.owntv.core.database.entity.ReminderEntity>> =
         settings.activeProfileId
             .flatMapLatest { pid -> if (pid < 0) flowOf(emptyList()) else reminderManager.observe(pid) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** How early a reminder comes (Settings › Sources & guide › Reminder time) — the menu's "5 min before". */
     val reminderLeadMinutes: StateFlow<Int> = settings.reminderLeadMinutes
-        .stateIn(viewModelScope, SharingStarted.Eagerly, tv.own.myowntv.core.reminder.ReminderSchedule.DEFAULT_LEAD_MINUTES)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, tv.own.owntv.core.reminder.ReminderSchedule.DEFAULT_LEAD_MINUTES)
 
-    fun reminderFor(channel: ChannelEntity, programme: EpgProgrammeEntity): tv.own.myowntv.core.database.entity.ReminderEntity? =
+    fun reminderFor(channel: ChannelEntity, programme: EpgProgrammeEntity): tv.own.owntv.core.database.entity.ReminderEntity? =
         reminderRows.value.firstOrNull { it.channelId == channel.id && it.startMs == programme.startMs }
 
     /** Remind me — or, when this programme already has a reminder, take it away again. */
@@ -642,7 +694,7 @@ class EpgViewModel(
 
     /** The channel's own guide shift in minutes, or null when it follows the global offset. */
     fun currentEpgShift(channel: ChannelEntity): Int? =
-        tv.own.myowntv.core.epg.EpgShift.overrideFor(custom.value, channel)
+        tv.own.owntv.core.epg.EpgShift.overrideFor(custom.value, channel)
 
     /** The global guide shift — the per-channel dialog's "follow global" default. */
     fun globalEpgShift(): Int = epgOffset.value
@@ -750,7 +802,7 @@ class EpgViewModel(
     private var runApplied: List<String> = emptyList()
 
     private suspend fun includeLogosIfTicked(epgIds: List<String>) {
-        if (_includeGuideLogos.value) tv.own.myowntv.core.epg.EpgLogoStore.includeLogosFor(settings, epgDao, runApplied + epgIds)
+        if (_includeGuideLogos.value) tv.own.owntv.core.epg.EpgLogoStore.includeLogosFor(settings, epgDao, runApplied + epgIds)
     }
 
     private suspend fun openReview(suggestions: List<EpgMatchSuggestion>) {
@@ -964,7 +1016,7 @@ class EpgViewModel(
     val hiddenCatIds = if (cust.hiddenCategories.isEmpty() && !isKidsProfile) {
         emptySet()
     } else {
-        tv.own.myowntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
+        tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
             categoryDao.observe(ids, MediaType.LIVE).first(),
             cust.hiddenCategories,
             isKidsProfile,
@@ -972,12 +1024,12 @@ class EpgViewModel(
     }
         val filter = _categoryFilter.value
         // A provider folder keeps out the channels the user moved from it into a custom category.
-        val folderKey = (filter as? tv.own.myowntv.core.live.LiveKey.Folder)
+        val folderKey = (filter as? tv.own.owntv.core.live.LiveKey.Folder)
             ?.let { categoryDao.getById(it.id) }?.let(CustomizeKeys::category)
         val memberIds: Set<Long>? = when (filter) {
-            is tv.own.myowntv.core.live.LiveKey.Custom -> if (filter.id in cust.sealedCategories) emptySet() else customCategoryDao.itemIds(pid, MediaType.LIVE, filter.id).toSet()
-            tv.own.myowntv.core.live.LiveKey.Favorites -> favoriteIds
-            tv.own.myowntv.core.live.LiveKey.History ->
+            is tv.own.owntv.core.live.LiveKey.Custom -> if (filter.id in cust.sealedCategories) emptySet() else customCategoryDao.itemIds(pid, MediaType.LIVE, filter.id).toSet()
+            tv.own.owntv.core.live.LiveKey.Favorites -> favoriteIds
+            tv.own.owntv.core.live.LiveKey.History ->
                 historyDao.getForProfileType(pid, MediaType.LIVE).mapTo(HashSet()) { it.itemId }
             else -> null
         }
@@ -987,10 +1039,10 @@ class EpgViewModel(
         val alphaSort = sortGuideMode == SettingsRepository.GuideSort.ALPHA
         val liveTvSort = alphaSort || sortGuideMode == SettingsRepository.GuideSort.PROVIDER || sortGuideMode == SettingsRepository.GuideSort.LIVE_TV
         val liveOrder: Map<Long, Int>? = if (!liveTvSort) null else when (filter) {
-            is tv.own.myowntv.core.live.LiveKey.Folder -> folderKey?.let { channelDao.snapshotByCategoryManual(filter.id, pid, it, alphaSort, MAX_CHANNELS) }
-            is tv.own.myowntv.core.live.LiveKey.Custom -> customCategoryDao.snapshotChannels(pid, filter.id, playlistIds, alphaSort, MAX_CHANNELS)
-            tv.own.myowntv.core.live.LiveKey.Favorites ->
-                channelDao.snapshotFavoritesManual(pid, tv.own.myowntv.core.database.entity.ContentOrderEntity.FAV_CONTEXT, playlistIds, MAX_CHANNELS)
+            is tv.own.owntv.core.live.LiveKey.Folder -> folderKey?.let { channelDao.snapshotByCategoryManual(filter.id, pid, it, alphaSort, MAX_CHANNELS) }
+            is tv.own.owntv.core.live.LiveKey.Custom -> customCategoryDao.snapshotChannels(pid, filter.id, playlistIds, alphaSort, MAX_CHANNELS)
+            tv.own.owntv.core.live.LiveKey.Favorites ->
+                channelDao.snapshotFavoritesManual(pid, tv.own.owntv.core.database.entity.ContentOrderEntity.FAV_CONTEXT, playlistIds, MAX_CHANNELS)
             else -> null
         }?.withIndex()?.associate { (i, ch) -> ch.id to i }
         // Heavy work — filter hidden, apply renames + manual EPG matches, sort, category-filter — runs off
@@ -1017,9 +1069,9 @@ class EpgViewModel(
                 SettingsRepository.GuideSort.LIVE_TV -> matched.sortedWith(byLiveTv ?: byProvider)
             }.let { sorted ->
                 when (filter) {
-                    null, tv.own.myowntv.core.live.LiveKey.All -> sorted
-                    tv.own.myowntv.core.live.LiveKey.Catchup -> sorted.filter { it.catchup }
-                    is tv.own.myowntv.core.live.LiveKey.Folder -> sorted.filter { ch ->
+                    null, tv.own.owntv.core.live.LiveKey.All -> sorted
+                    tv.own.owntv.core.live.LiveKey.Catchup -> sorted.filter { it.catchup }
+                    is tv.own.owntv.core.live.LiveKey.Folder -> sorted.filter { ch ->
                         ch.categoryId == filter.id && (folderKey == null || cust.movedFromOrigin[CustomizeKeys.channel(ch)] != folderKey)
                     }
                     else -> sorted.filter { it.id in memberIds.orEmpty() }
@@ -1075,7 +1127,7 @@ class EpgViewModel(
             loading = false, message = message, hasEpgSources = hasEpg,
         )
 
-        tv.own.myowntv.core.CorePerf.log {
+        tv.own.owntv.core.CorePerf.log {
             "guide_load channels=${channels.size} rawChannels=${rawChannels.size} " +
                 "stored=$stored sources=${ids.size} " +
                 "rebuilt=$windowChanged reason=$rebuildReason cachedRows=${cachedRowCount()} " +
@@ -1091,7 +1143,7 @@ class EpgViewModel(
     /** Apply per-channel manual EPG overrides to the auto-matched guide list. */
     private suspend fun applyEpgMatches(
         auto: List<ChannelEntity>,
-        cust: tv.own.myowntv.core.customize.SectionCustomizations,
+        cust: tv.own.owntv.core.customize.SectionCustomizations,
         playlistIds: List<Long>,
         query: String,
     ): List<ChannelEntity> {

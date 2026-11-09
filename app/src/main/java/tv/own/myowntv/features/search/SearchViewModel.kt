@@ -1,6 +1,58 @@
 @file:OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 
 package tv.own.myowntv.features.search
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,22 +74,22 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.transformLatest
-import tv.own.myowntv.core.database.dao.CategoryDao
-import tv.own.myowntv.core.database.dao.ProfileDao
-import tv.own.myowntv.core.database.entity.MetadataCacheEntity
-import tv.own.myowntv.core.database.entity.MovieEntity
-import tv.own.myowntv.core.database.entity.SeriesEntity
-import tv.own.myowntv.core.metadata.MetadataRepository
+import tv.own.owntv.core.database.dao.CategoryDao
+import tv.own.owntv.core.database.dao.ProfileDao
+import tv.own.owntv.core.database.entity.MetadataCacheEntity
+import tv.own.owntv.core.database.entity.MovieEntity
+import tv.own.owntv.core.database.entity.SeriesEntity
+import tv.own.owntv.core.metadata.MetadataRepository
 import tv.own.myowntv.ui.stage.PlaylistMark
-import tv.own.myowntv.core.database.dao.SourceDao
-import tv.own.myowntv.core.database.dao.resolveExistingProfileId
-import tv.own.myowntv.core.content.SearchIntent
-import tv.own.myowntv.core.content.SearchKind
-import tv.own.myowntv.core.content.SearchReader
-import tv.own.myowntv.core.content.SearchResults
-import tv.own.myowntv.core.repository.ActiveProfileSources
-import tv.own.myowntv.core.repository.activeProfileSources
-import tv.own.myowntv.core.settings.SettingsRepository
+import tv.own.owntv.core.database.dao.SourceDao
+import tv.own.owntv.core.database.dao.resolveExistingProfileId
+import tv.own.owntv.core.content.SearchIntent
+import tv.own.owntv.core.content.SearchKind
+import tv.own.owntv.core.content.SearchReader
+import tv.own.owntv.core.content.SearchResults
+import tv.own.owntv.core.repository.ActiveProfileSources
+import tv.own.owntv.core.repository.activeProfileSources
+import tv.own.owntv.core.settings.SettingsRepository
 
 /**
  * Cross-section search over a profile's channels, movies and series.
@@ -143,8 +195,8 @@ class SearchViewModel(
         .mapLatest { ids -> ids.mapNotNull { id -> categoryDao.getById(id)?.let { id to it.name } }.toMap() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    val metadataMode: StateFlow<tv.own.myowntv.core.metadata.MetadataMode> = settings.metadataMode
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.myowntv.core.metadata.MetadataMode.PROVIDER_PLUS_TMDB)
+    val metadataMode: StateFlow<tv.own.owntv.core.metadata.MetadataMode> = settings.metadataMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.metadata.MetadataMode.PROVIDER_PLUS_TMDB)
 
     /** The focused movie or series, for the poster panel's TMDB details (backdrop, genres, cast). */
     private val _focusedVod = MutableStateFlow<Any?>(null)

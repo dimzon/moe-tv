@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.setup
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import android.icu.text.ListFormatter
 import androidx.compose.foundation.background
@@ -34,12 +86,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.R
-import tv.own.myowntv.core.brand.AppIcon
-import tv.own.myowntv.core.database.entity.SourceEntity
-import tv.own.myowntv.core.setup.SourceImporter
-import tv.own.myowntv.core.sync.importProgressDisplay
-import tv.own.myowntv.core.theme.UiFontScale
-import tv.own.myowntv.core.theme.UiZoom
+import tv.own.owntv.core.brand.AppIcon
+import tv.own.owntv.core.database.entity.SourceEntity
+import tv.own.owntv.core.setup.SourceImporter
+import tv.own.owntv.core.sync.importProgressDisplay
+import tv.own.owntv.core.theme.UiFontScale
+import tv.own.owntv.core.theme.UiZoom
 import tv.own.myowntv.features.settings.EpgSyncDialog
 import tv.own.myowntv.features.settings.FirstRunLanguageSelector
 import tv.own.myowntv.features.settings.RemoteBackupRestoreScreen
@@ -98,7 +150,7 @@ fun Onboarding(firstRun: Boolean, onDone: (Long?) -> Unit, onCancel: () -> Unit,
     // The chosen backup file and what the user wants out of it. A file with no choice yet is what
     // raises the section dialog below; picking a file no longer starts the restore by itself.
     var restoreFile by remember { mutableStateOf<java.io.File?>(null) }
-    var restoreSections by remember { mutableStateOf<Set<tv.own.myowntv.core.backup.BackupManager.Section>?>(null) }
+    var restoreSections by remember { mutableStateOf<Set<tv.own.owntv.core.backup.BackupManager.Section>?>(null) }
     // "Hardware settings from the other device" — asked with the sections, carried like them.
     val restoreDeviceSettings = remember { mutableStateOf(false) }
 
@@ -150,7 +202,7 @@ fun Onboarding(firstRun: Boolean, onDone: (Long?) -> Unit, onCancel: () -> Unit,
                 onBack = { step = Step.SETUP_CHOICE },
             )
             Step.CREATE_PROFILE -> ProfileStep(
-                onCreate = { name, avatar, kids, pin, picture -> vm.createProfile(name.ifBlank { defaultProfileName }, avatar, kids, pin, picture) { step = Step.ADD_CONTENT } },
+                onCreate = { name, avatar, kids, pin, picture -> vm.createProfile(name.ifBlank { defaultProfileName }, avatar, kids, pin, picture) { importName = "RuTube"; vm.startRutube(); importOrigin = Step.CREATE_PROFILE; step = Step.IMPORTING } },
                 onBack = { if (firstRun) step = Step.SETUP_CHOICE else onCancel() },
             )
             Step.ADD_CONTENT -> AddContentStep(
@@ -267,7 +319,7 @@ fun Onboarding(firstRun: Boolean, onDone: (Long?) -> Unit, onCancel: () -> Unit,
                 // Every section, not only the ones the file holds: a sealed file says nothing until its
                 // password arrives, and asking for that before the user has said what they want would
                 // be the wrong order. Ticking a section the file lacks restores nothing for it.
-                sections = tv.own.myowntv.core.backup.BackupManager.Section.entries,
+                sections = tv.own.owntv.core.backup.BackupManager.Section.entries,
                 initial = allRestoreSections,
                 confirmLabel = stringResource(R.string.settings_backup_restore_action),
                 onConfirm = { chosen ->
@@ -643,7 +695,7 @@ private fun ImportBackupStep(
             title = stringResource(R.string.setup_pick_backup_file),
             mode = BrowseMode.FILE,
             // `.own` containers plus pre-4.2 `.json` backups.
-            fileExtensions = tv.own.myowntv.core.backup.BackupManager.RESTORE_EXTENSIONS,
+            fileExtensions = tv.own.owntv.core.backup.BackupManager.RESTORE_EXTENSIONS,
             onPick = onPick,
             onDismiss = onBack,
         )
@@ -651,8 +703,8 @@ private fun ImportBackupStep(
 }
 
 /** Every section, the wizard's starting point for a restore. */
-private val allRestoreSections: Set<tv.own.myowntv.core.backup.BackupManager.Section>
-    get() = tv.own.myowntv.core.backup.BackupManager.Section.entries.toSet()
+private val allRestoreSections: Set<tv.own.owntv.core.backup.BackupManager.Section>
+    get() = tv.own.owntv.core.backup.BackupManager.Section.entries.toSet()
 
 /**
  * "Importing <name>" with the bar and where the import is, Cancel and Run in background; then
@@ -661,7 +713,7 @@ private val allRestoreSections: Set<tv.own.myowntv.core.backup.BackupManager.Sec
 @Composable
 private fun ImportProgressStep(
     state: SourceImporter.ImportState,
-    progress: tv.own.myowntv.core.sync.ImportStage?,
+    progress: tv.own.owntv.core.sync.ImportStage?,
     name: String?,
     onContinue: () -> Unit,
     onAddGuide: () -> Unit,

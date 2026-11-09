@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.settings
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
@@ -54,12 +106,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.R
-import tv.own.myowntv.core.backup.BackupManager
-import tv.own.myowntv.core.companion.CompanionServerState
-import tv.own.myowntv.core.sync.local.PairedDevice
-import tv.own.myowntv.core.sync.local.SyncDirection
-import tv.own.myowntv.core.sync.local.SyncFailure
-import tv.own.myowntv.core.sync.local.shortCodes
+import tv.own.owntv.core.backup.BackupManager
+import tv.own.owntv.core.companion.CompanionServerState
+import tv.own.owntv.core.sync.local.PairedDevice
+import tv.own.owntv.core.sync.local.SyncDirection
+import tv.own.owntv.core.sync.local.SyncFailure
+import tv.own.owntv.core.sync.local.shortCodes
 import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.components.rememberDialogFocusRestore
 import tv.own.myowntv.ui.components.restoreAfterDialogClose
@@ -497,12 +549,12 @@ private fun BusySpinner(modifier: Modifier, color: Color) {
 @Composable
 private fun autoSyncLine(
     device: PairedDevice,
-    agreement: tv.own.myowntv.core.sync.local.AutoSyncAgreement?,
+    agreement: tv.own.owntv.core.sync.local.AutoSyncAgreement?,
     turnedOffAt: Long?,
-    event: tv.own.myowntv.core.sync.local.AutoSyncEvent?,
+    event: tv.own.owntv.core.sync.local.AutoSyncEvent?,
 ): String? = when {
     agreement == null -> turnedOffAt?.let { stringResource(R.string.local_auto_sync_turned_off, device.name) }
-    agreement.failures > 0 || event?.outcome == tv.own.myowntv.core.sync.local.AutoSyncOutcome.UNREACHABLE ->
+    agreement.failures > 0 || event?.outcome == tv.own.owntv.core.sync.local.AutoSyncOutcome.UNREACHABLE ->
         stringResource(R.string.local_auto_sync_unreachable, device.name)
     agreement.lastSuccessAt > 0 -> stringResource(
         R.string.local_auto_sync_last_run,
@@ -842,7 +894,7 @@ internal fun BackupManager.Section.labelRes(): Int = when (this) {
 /** `192.168.1.5:8089` or a whole URL both carry a port; a bare address means the usual one. */
 private fun portOf(address: String): Int =
     address.removePrefix("http://").substringAfter(':', "").substringBefore('/')
-        .toIntOrNull() ?: tv.own.myowntv.core.companion.CompanionLink.DEFAULT_PORT
+        .toIntOrNull() ?: tv.own.owntv.core.companion.CompanionLink.DEFAULT_PORT
 
 /** The destructive tone: the Unpair mark, and the error text's colour. */
 private val DestructiveRed = Color(0xFFEF4444)

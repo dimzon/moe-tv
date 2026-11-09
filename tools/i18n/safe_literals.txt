@@ -174,7 +174,7 @@
 1	technical	app/src/main/java/tv/own/myowntv/features/live/LiveViewModel.kt	#$it
 1	log	app/src/main/java/tv/own/myowntv/features/live/LiveViewModel.kt	LiveEngine
 1	log	app/src/main/java/tv/own/myowntv/features/live/LiveViewModel.kt	OwnTVHome
-1	log	app/src/main/java/tv/own/myowntv/features/live/LiveViewModel.kt	catch-up '${ch.name}' prog='${programme.title}' -> ${tv.own.myowntv.core.network.HttpClient.redactUrl(url)}
+1	log	app/src/main/java/tv/own/myowntv/features/live/LiveViewModel.kt	catch-up '${ch.name}' prog='${programme.title}' -> ${tv.own.owntv.core.network.HttpClient.redactUrl(url)}
 1	log	app/src/main/java/tv/own/myowntv/features/live/LiveViewModel.kt	catch-up external '${ch.name}' prog='${programme.title}'
 1	log	app/src/main/java/tv/own/myowntv/features/live/LiveViewModel.kt	ensurePlaying history profile=$pid channelId=${channel.id}
 1	log	app/src/main/java/tv/own/myowntv/features/live/LiveViewModel.kt	ensurePlaying history record failed channelId=${channel.id} profile=$pid
@@ -649,16 +649,7 @@
 14	empty	app/src/main/java/tv/own/myowntv/features/setup/SetupViewModel.kt	\0
 5	empty	app/src/main/java/tv/own/myowntv/features/setup/SetupWizard.kt	\0
 2	technical	app/src/main/java/tv/own/myowntv/features/setup/SetupWizard.kt	+
-3	technical	app/src/main/java/tv/own/myowntv/features/shell/OwnTVShell.kt	\0
-1	protocol	app/src/main/java/tv/own/myowntv/features/shell/OwnTVShell.kt	ass
-1	performance	app/src/main/java/tv/own/myowntv/features/shell/OwnTVShell.kt	epg-preload
-1	performance	app/src/main/java/tv/own/myowntv/features/shell/OwnTVShell.kt	shell-composed
-1	protocol	app/src/main/java/tv/own/myowntv/features/shell/OwnTVShell.kt	srt
-1	protocol	app/src/main/java/tv/own/myowntv/features/shell/OwnTVShell.kt	ssa
-1	log	app/src/main/java/tv/own/myowntv/features/shell/OwnTVShell.kt	startup-settled
-1	protocol	app/src/main/java/tv/own/myowntv/features/shell/OwnTVShell.kt	vtt
-1	protocol	app/src/main/java/tv/own/myowntv/features/shell/OwnTVShell.kt	webvtt
-1	technical	app/src/main/java/tv/own/myowntv/features/shell/OwnTVShell.kt	·
+1	technical	app/src/main/java/tv/own/myowntv/features/setup/SetupWizard.kt	RuTube
 8	technical	app/src/main/java/tv/own/myowntv/features/shell/ShellViewModel.kt	\0
 1	log	app/src/main/java/tv/own/myowntv/features/shell/ShellViewModel.kt	OwnTVHome
 1	log	app/src/main/java/tv/own/myowntv/features/shell/ShellViewModel.kt	activeProfileChanged profile=$pid androidTvHomeEnabled=${settings.androidTvHomeEnabled.first()}
@@ -1435,7 +1426,6 @@
 1	protocol	app/src/main/java/tv/own/myowntv/ui/components/GenreColor.kt	کارتون
 1	protocol	app/src/main/java/tv/own/myowntv/ui/components/GenreColor.kt	کودک
 1	empty	app/src/main/java/tv/own/myowntv/ui/components/NumberInputDialog.kt	\0
-1	technical	app/src/main/java/tv/own/myowntv/ui/components/OwnTVAvatar.kt	\0
 1	empty	app/src/main/java/tv/own/myowntv/ui/components/SetTmdbNameDialog.kt	\0
 1	technical	app/src/main/java/tv/own/myowntv/ui/components/SetTmdbNameDialog.kt	TMDB
 1	empty	app/src/main/java/tv/own/myowntv/ui/components/StorageBrowser.kt	\0
@@ -1459,5 +1449,4 @@
 1	technical	app/src/main/java/tv/own/myowntv/ui/stage/StageComponents.kt	−
 1	technical	app/src/main/java/tv/own/myowntv/ui/stage/StagePopup.kt	$value ›
 1	technical	app/src/main/java/tv/own/myowntv/ui/theme/Glass.kt	glassPosition
-2	empty	app/src/main/java/tv/own/myowntv/ui/theme/OwnTVColors.kt	\0
 2	empty	app/src/main/java/tv/own/myowntv/ui/theme/Theme.kt	\0

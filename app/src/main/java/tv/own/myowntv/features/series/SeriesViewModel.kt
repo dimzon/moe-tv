@@ -1,6 +1,58 @@
 @file:OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 
 package tv.own.myowntv.features.series
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -37,67 +89,67 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
-import tv.own.myowntv.core.customize.CustomizationStore
-import tv.own.myowntv.core.customize.SectionCustomizations
-import tv.own.myowntv.core.content.seriesCountFlow
-import tv.own.myowntv.core.categorylock.clearWhenSealed
-import tv.own.myowntv.core.categorylock.lockAwareCountsByContexts
-import tv.own.myowntv.core.categorylock.visibleOnceRead
-import tv.own.myowntv.core.customize.seals
-import tv.own.myowntv.core.customize.sealsItemIn
-import tv.own.myowntv.core.customize.CategoryMove
-import tv.own.myowntv.core.customize.CategoryRailEditor
-import tv.own.myowntv.core.customize.railCategories
-import tv.own.myowntv.core.customize.CustomizeKeys
-import tv.own.myowntv.core.database.dao.CategoryDao
-import tv.own.myowntv.core.database.dao.ContentOrderDao
-import tv.own.myowntv.core.database.dao.CustomCategoryDao
-import tv.own.myowntv.core.database.dao.FavoriteDao
-import tv.own.myowntv.core.database.dao.HistoryDao
-import tv.own.myowntv.core.database.dao.ProgressDao
-import tv.own.myowntv.core.database.dao.ProfileDao
-import tv.own.myowntv.core.database.dao.SeriesDao
-import tv.own.myowntv.core.database.dao.SeriesSortOrderDao
-import tv.own.myowntv.core.database.dao.SourceDao
-import tv.own.myowntv.core.database.dao.resolveExistingProfileId
-import tv.own.myowntv.core.database.entity.DownloadEntity
-import tv.own.myowntv.core.database.entity.EpisodeEntity
-import tv.own.myowntv.core.database.entity.FavoriteEntity
-import tv.own.myowntv.core.database.entity.PlaybackProgressEntity
-import tv.own.myowntv.core.database.entity.ContentOrderEntity
-import tv.own.myowntv.core.database.entity.SeriesEntity
-import tv.own.myowntv.core.database.entity.WatchHistoryEntity
-import tv.own.myowntv.core.launcher.LauncherIntegrationRepository
-import tv.own.myowntv.core.model.MediaType
-import tv.own.myowntv.core.util.throttleLatest
-import tv.own.myowntv.core.download.DownloadManager
-import tv.own.myowntv.core.repository.EpisodeLoad
-import tv.own.myowntv.core.repository.SeriesRepository
-import tv.own.myowntv.core.storage.StorageAccess
-import tv.own.myowntv.core.storage.MediaFolders
+import tv.own.owntv.core.customize.CustomizationStore
+import tv.own.owntv.core.customize.SectionCustomizations
+import tv.own.owntv.core.content.seriesCountFlow
+import tv.own.owntv.core.categorylock.clearWhenSealed
+import tv.own.owntv.core.categorylock.lockAwareCountsByContexts
+import tv.own.owntv.core.categorylock.visibleOnceRead
+import tv.own.owntv.core.customize.seals
+import tv.own.owntv.core.customize.sealsItemIn
+import tv.own.owntv.core.customize.CategoryMove
+import tv.own.owntv.core.customize.CategoryRailEditor
+import tv.own.owntv.core.customize.railCategories
+import tv.own.owntv.core.customize.CustomizeKeys
+import tv.own.owntv.core.database.dao.CategoryDao
+import tv.own.owntv.core.database.dao.ContentOrderDao
+import tv.own.owntv.core.database.dao.CustomCategoryDao
+import tv.own.owntv.core.database.dao.FavoriteDao
+import tv.own.owntv.core.database.dao.HistoryDao
+import tv.own.owntv.core.database.dao.ProgressDao
+import tv.own.owntv.core.database.dao.ProfileDao
+import tv.own.owntv.core.database.dao.SeriesDao
+import tv.own.owntv.core.database.dao.SeriesSortOrderDao
+import tv.own.owntv.core.database.dao.SourceDao
+import tv.own.owntv.core.database.dao.resolveExistingProfileId
+import tv.own.owntv.core.database.entity.DownloadEntity
+import tv.own.owntv.core.database.entity.EpisodeEntity
+import tv.own.owntv.core.database.entity.FavoriteEntity
+import tv.own.owntv.core.database.entity.PlaybackProgressEntity
+import tv.own.owntv.core.database.entity.ContentOrderEntity
+import tv.own.owntv.core.database.entity.SeriesEntity
+import tv.own.owntv.core.database.entity.WatchHistoryEntity
+import tv.own.owntv.core.launcher.LauncherIntegrationRepository
+import tv.own.owntv.core.model.MediaType
+import tv.own.owntv.core.util.throttleLatest
+import tv.own.owntv.core.download.DownloadManager
+import tv.own.owntv.core.repository.EpisodeLoad
+import tv.own.owntv.core.repository.SeriesRepository
+import tv.own.owntv.core.storage.StorageAccess
+import tv.own.owntv.core.storage.MediaFolders
 import tv.own.myowntv.features.customize.MoveTarget
-import tv.own.myowntv.core.customize.CategoryRestorePlan
-import tv.own.myowntv.core.customize.planCategoryRestore
-import tv.own.myowntv.core.customize.restoreCategoryToDefault
+import tv.own.owntv.core.customize.CategoryRestorePlan
+import tv.own.owntv.core.customize.planCategoryRestore
+import tv.own.owntv.core.customize.restoreCategoryToDefault
 import tv.own.myowntv.features.live.LiveRailItem
-import tv.own.myowntv.core.repository.activeProfileSources
-import tv.own.myowntv.core.settings.SettingsRepository
-import tv.own.myowntv.player.MediaMeta
-import tv.own.myowntv.player.OwnTVPlayer
-import tv.own.myowntv.player.PlaylistItem
+import tv.own.owntv.core.repository.activeProfileSources
+import tv.own.owntv.core.settings.SettingsRepository
+import tv.own.owntv.player.MediaMeta
+import tv.own.owntv.player.OwnTVPlayer
+import tv.own.owntv.player.PlaylistItem
 import tv.own.myowntv.ui.components.MyOwnTVIcon
-import tv.own.myowntv.core.live.LiveKey
-import tv.own.myowntv.core.live.parseLiveKey
-import tv.own.myowntv.core.live.serialize
+import tv.own.owntv.core.live.LiveKey
+import tv.own.owntv.core.live.parseLiveKey
+import tv.own.owntv.core.live.serialize
 
 class SeriesViewModel(
     private val seriesDao: SeriesDao,
     /** Lets the browse screen tell core's drain which category to fill first. */
-    private val catalogPriority: tv.own.myowntv.core.sync.CatalogPriority,
+    private val catalogPriority: tv.own.owntv.core.sync.CatalogPriority,
     private val categoryDao: CategoryDao,
     private val favoriteDao: FavoriteDao,
     private val historyDao: HistoryDao,
-    private val userDataWriter: tv.own.myowntv.core.backup.UserDataWriter,
+    private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
     private val progressDao: ProgressDao,
     private val profileDao: ProfileDao,
     private val sourceDao: SourceDao,
@@ -110,10 +162,10 @@ class SeriesViewModel(
     private val contentOrderDao: ContentOrderDao,
     private val customCategoryDao: CustomCategoryDao,
     private val seriesSortOrderDao: SeriesSortOrderDao,
-    private val metadata: tv.own.myowntv.core.metadata.MetadataRepository,
-    private val externalPlayerLauncher: tv.own.myowntv.core.player.ExternalPlayerLauncher,
-    private val streamUrlResolver: tv.own.myowntv.core.stalker.StreamUrlResolver,
-    private val subtitleController: tv.own.myowntv.core.subtitles.SubtitleController,
+    private val metadata: tv.own.owntv.core.metadata.MetadataRepository,
+    private val externalPlayerLauncher: tv.own.owntv.core.player.ExternalPlayerLauncher,
+    private val streamUrlResolver: tv.own.owntv.core.stalker.StreamUrlResolver,
+    private val subtitleController: tv.own.owntv.core.subtitles.SubtitleController,
 ) : ViewModel() {
 
     /** The categories' search text, held here so it survives the player (see LiveViewModel). */
@@ -236,7 +288,7 @@ class SeriesViewModel(
                 flowOf(emptySet())
             } else {
                 combine(categoryDao.observe(c.sourceIds, MediaType.SERIES), custom, profileDao.observeById(c.profileId)) { cats, cust, profile ->
-                    tv.own.myowntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
+                    tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
                         cats,
                         cust.hiddenCategories,
                         profile?.isKids == true,
@@ -308,7 +360,7 @@ class SeriesViewModel(
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     /** TMDB details already resolved this session, by title id: shown without the focus debounce. */
-    private val resolvedMeta = java.util.concurrent.ConcurrentHashMap<Long, tv.own.myowntv.core.database.entity.MetadataCacheEntity>()
+    private val resolvedMeta = java.util.concurrent.ConcurrentHashMap<Long, tv.own.owntv.core.database.entity.MetadataCacheEntity>()
 
     val selectedSeriesMeta: StateFlow<SeriesMeta?> = combine(_selectedSeries, _seriesMetaTick) { s, tick -> s to tick }
         .distinctUntilChanged { a, b -> a.first?.id == b.first?.id && a.second == b.second }
@@ -318,7 +370,7 @@ class SeriesViewModel(
         .transformLatest { (s, _) ->
             if (s == null) { emit(null); return@transformLatest }
             resolvedMeta[s.id]?.let { emit(SeriesMeta(s.id, it)); return@transformLatest }
-            delay(tv.own.myowntv.core.metadata.MetadataRepository.FOCUS_DEBOUNCE_MS)
+            delay(tv.own.owntv.core.metadata.MetadataRepository.FOCUS_DEBOUNCE_MS)
             val cache = runCatching { metadata.resolveSeries(s) }.getOrNull()
             if (cache != null) {
                 if (resolvedMeta.size > 500) resolvedMeta.clear()
@@ -328,7 +380,7 @@ class SeriesViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    data class SeriesMeta(val seriesId: Long, val cache: tv.own.myowntv.core.database.entity.MetadataCacheEntity?)
+    data class SeriesMeta(val seriesId: Long, val cache: tv.own.owntv.core.database.entity.MetadataCacheEntity?)
 
     /**
      * Poster fallback for tiles the provider gave no artwork for — see MovieViewModel.cachedPosters
@@ -341,8 +393,8 @@ class SeriesViewModel(
     fun onPosterlessVisible(series: List<SeriesEntity>) { _posterProbe.value = series }
 
     /** Source mode — the pane/details use it to flip provider/TMDB precedence. */
-    val metadataMode: StateFlow<tv.own.myowntv.core.metadata.MetadataMode> = settings.metadataMode
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.myowntv.core.metadata.MetadataMode.PROVIDER_PLUS_TMDB)
+    val metadataMode: StateFlow<tv.own.owntv.core.metadata.MetadataMode> = settings.metadataMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.metadata.MetadataMode.PROVIDER_PLUS_TMDB)
 
     private val _openedSeries = MutableStateFlow<SeriesEntity?>(null)
     val openedSeries: StateFlow<SeriesEntity?> = _openedSeries.asStateFlow()
@@ -431,7 +483,7 @@ class SeriesViewModel(
                 // outgoing one here: the player already loaded the new item, so its position has been
                 // reset and saving now would overwrite a finished episode with ~0.
                 playingEpisodeRef = PlayingEpisodeRef(
-                    ep, q.profileId, tv.own.myowntv.core.player.enginePinKey(q.show.sourceId, "EPISODE", ep.remoteId),
+                    ep, q.profileId, tv.own.owntv.core.player.enginePinKey(q.show.sourceId, "EPISODE", ep.remoteId),
                 )
                 subtitleController.setEpisode(q.profileId, q.show, ep, q.parentTmdbId)
             }
@@ -457,7 +509,7 @@ class SeriesViewModel(
         val url = player.currentMediaUrl ?: return
         val all = episodes.value
         val finished = all.firstOrNull { it.streamUrl == url } ?: return // not one of this series' episodes
-        val nextSeason = tv.own.myowntv.core.content.EpisodeOrder.seasonAfter(all.map { it.seasonNumber }, finished.seasonNumber)
+        val nextSeason = tv.own.owntv.core.content.EpisodeOrder.seasonAfter(all.map { it.seasonNumber }, finished.seasonNumber)
             ?: return // no next season — series finished
         val nextEpisode = all
             .filter { it.seasonNumber == nextSeason }
@@ -644,7 +696,7 @@ class SeriesViewModel(
     val nextUpEpisodeId: StateFlow<Long?> = combine(episodes, episodeProgress) { eps, prog ->
         if (eps.isEmpty()) null
         else {
-            val ordered = eps.sortedWith(tv.own.myowntv.core.content.EpisodeOrder.episodes)
+            val ordered = eps.sortedWith(tv.own.owntv.core.content.EpisodeOrder.episodes)
             val lastWatched = prog.values.maxByOrNull { it.updatedAt }
             when {
                 lastWatched == null -> ordered.first().id
@@ -756,7 +808,7 @@ class SeriesViewModel(
 
     suspend fun seriesTmdbNamePrefill(series: SeriesEntity): TmdbNamePrefill {
         metadata.seriesOverride(series)?.let { return TmdbNamePrefill(it.title, it.year, hasOverride = true) }
-        val norm = tv.own.myowntv.core.metadata.TitleNormalizer.normalize(series.name)
+        val norm = tv.own.owntv.core.metadata.TitleNormalizer.normalize(series.name)
         return TmdbNamePrefill(norm.query, series.year ?: norm.year, hasOverride = false)
     }
 
@@ -835,7 +887,7 @@ class SeriesViewModel(
     val selectedEpisodeMeta: StateFlow<EpisodeMeta?> = combine(_selectedEpisode, _episodeMetaTick) { ep, tick -> ep to tick }
         .distinctUntilChanged { a, b -> a.first?.id == b.first?.id && a.second == b.second }
         // See MetadataRepository.FOCUS_DEBOUNCE_MS — episode lists are the fastest thing to scroll.
-        .debounce(tv.own.myowntv.core.metadata.MetadataRepository.FOCUS_DEBOUNCE_MS)
+        .debounce(tv.own.owntv.core.metadata.MetadataRepository.FOCUS_DEBOUNCE_MS)
         .mapLatest { (ep, _) ->
             val show = _openedSeries.value
             if (ep == null || show == null) null
@@ -843,7 +895,7 @@ class SeriesViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    data class EpisodeMeta(val episodeId: Long, val cache: tv.own.myowntv.core.database.entity.MetadataCacheEntity?)
+    data class EpisodeMeta(val episodeId: Long, val cache: tv.own.owntv.core.database.entity.MetadataCacheEntity?)
 
     /** Whether the episode area draws as text rows or a wall of stills. Global, see SettingsRepository. */
     val episodeViewMode: StateFlow<SettingsRepository.VodViewMode> = settings.episodeViewMode
@@ -863,7 +915,7 @@ class SeriesViewModel(
      * `MetadataRepository.resolveSeasonEpisodes`).
      */
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    val seasonEpisodeMeta: StateFlow<Map<Long, tv.own.myowntv.core.database.entity.MetadataCacheEntity>> =
+    val seasonEpisodeMeta: StateFlow<Map<Long, tv.own.owntv.core.database.entity.MetadataCacheEntity>> =
         // Both layouts show each episode's still, date and plot, so both need the season's details.
         combine(_openedSeries, _selectedSeason, episodes, _episodeMetaTick) { show, season, eps, _ ->
             if (show == null) {
@@ -873,7 +925,7 @@ class SeriesViewModel(
                 // first season, and fetching the requested-but-absent season would leave the grid blank.
                 val available = eps.map { it.seasonNumber }.distinct()
                 val active = if (available.contains(season)) season
-                else tv.own.myowntv.core.content.EpisodeOrder.openingSeason(available) ?: season
+                else tv.own.owntv.core.content.EpisodeOrder.openingSeason(available) ?: season
                 show to eps.filter { it.seasonNumber == active }
             }
         }
@@ -940,9 +992,9 @@ class SeriesViewModel(
         val show = seriesDao.getSeriesById(showId) ?: return false
         if (episode.seriesId != show.id) return false
         val pid = currentProfileId() ?: return false
-        if (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(pid, show.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, show.categoryId)) return false
+        if (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, show.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, show.categoryId)) return false
         seriesRepository.loadEpisodes(show)
-        val queue = seriesDao.episodesBySeries(show.id).first().sortedWith(tv.own.myowntv.core.content.EpisodeOrder.episodes)
+        val queue = seriesDao.episodesBySeries(show.id).first().sortedWith(tv.own.owntv.core.content.EpisodeOrder.episodes)
         if (queue.isEmpty()) return false
         playEpisodeQueue(show, queue, episode, startPositionMs)
         return true
@@ -985,7 +1037,7 @@ class SeriesViewModel(
         viewModelScope.launch {
             val pid = currentProfileId()
             val show = seriesDao.getSeriesById(episode.seriesId) ?: return@launch
-            if (pid != null && (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(pid, show.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, show.categoryId))) return@launch
+            if (pid != null && (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, show.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, show.categoryId))) return@launch
             Log.d(TAG, "playEpisodeExternal episodeId=${episode.id}")
             val url = resolvedEpisodeUrlOrNull(episode) ?: return@launch
             val source = sourceDao.getById(show.sourceId)
@@ -994,7 +1046,7 @@ class SeriesViewModel(
                 title = episode.name.takeIf { it.isNotBlank() },
                 subtitle = show.name,
                 userAgent = source?.userAgent,
-                httpHeaders = tv.own.myowntv.core.settings.SourceOverrides.headersWithReferer(episode.httpHeaders, source),
+                httpHeaders = tv.own.owntv.core.settings.SourceOverrides.headersWithReferer(episode.httpHeaders, source),
                 startPositionMs = savedPositionMs(episode),
             )
             if (pid != null) {
@@ -1022,7 +1074,7 @@ class SeriesViewModel(
         _lastPlayedEpisodeId.value = episode.id
         viewModelScope.launch {
             val pid = currentProfileId()
-            if (pid != null && (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(pid, show.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, show.categoryId))) return@launch
+            if (pid != null && (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, show.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, show.categoryId))) return@launch
             // External player (global toggle): launch only the selected episode (external players are
             // single-item — no prev/next queue). History is still recorded; resume position and the
             // in-app HUD/progress tick are not, since OwnTV can't observe the external app.
@@ -1038,7 +1090,7 @@ class SeriesViewModel(
                     title = episode.name.takeIf { it.isNotBlank() },
                     subtitle = show.name,
                     userAgent = source?.userAgent,
-                    httpHeaders = tv.own.myowntv.core.settings.SourceOverrides.headersWithReferer(episode.httpHeaders, source),
+                    httpHeaders = tv.own.owntv.core.settings.SourceOverrides.headersWithReferer(episode.httpHeaders, source),
                     startPositionMs = startPositionMs, // the screen's Resume / Start over answer
                 )
                 if (pid != null) {
@@ -1061,7 +1113,7 @@ class SeriesViewModel(
             val needsResolve = streamUrlResolver.needsResolve(source)
             playingEpisodeRef = pid?.let {
                 PlayingEpisodeRef(
-                    episode, it, tv.own.myowntv.core.player.enginePinKey(show.sourceId, "EPISODE", episode.remoteId),
+                    episode, it, tv.own.owntv.core.player.enginePinKey(show.sourceId, "EPISODE", episode.remoteId),
                 )
             }
             player.playEpisodes(
@@ -1075,14 +1127,14 @@ class SeriesViewModel(
                             episodeNumber = ep.episodeNumber,
                             // Engine pins key on this, not on the URL: for Stalker the queue's
                             // stored URL is the shared season cmd and the played URL is minted per item.
-                            contentKey = tv.own.myowntv.core.player.enginePinKey(show.sourceId, "EPISODE", ep.remoteId),
+                            contentKey = tv.own.owntv.core.player.enginePinKey(show.sourceId, "EPISODE", ep.remoteId),
                             // v44 — audio/subtitle choices are remembered per series.
-                            trackKey = tv.own.myowntv.core.player.enginePinKey(show.sourceId, "SERIES", show.remoteId),
+                            trackKey = tv.own.owntv.core.player.enginePinKey(show.sourceId, "SERIES", show.remoteId),
                         ),
                         resolveUrl = if (needsResolve && source != null) {
                             { streamUrlResolver.resolve(source, ep.streamUrl, vod = true, episode = ep.episodeNumber) }
                         } else null,
-                        httpHeaders = tv.own.myowntv.core.settings.SourceOverrides.headersWithReferer(ep.httpHeaders, source),
+                        httpHeaders = tv.own.owntv.core.settings.SourceOverrides.headersWithReferer(ep.httpHeaders, source),
                         drmConfig = ep.drmConfig,
                         manifestType = ep.manifestType,
                     )
@@ -1090,7 +1142,7 @@ class SeriesViewModel(
                 startIndex = startIndex,
                 startPositionMs = startPositionMs,
                 userAgent = sourceUa,
-                vodEngineOverride = tv.own.myowntv.core.settings.SourceOverrides.vodEngineOf(source),
+                vodEngineOverride = tv.own.owntv.core.settings.SourceOverrides.vodEngineOf(source),
             )
             // Enable the player's OpenSubtitles search for this episode. The parent
             // series' TMDB id gives the strongest episode match when metadata is available.
@@ -1117,7 +1169,7 @@ class SeriesViewModel(
 
     /** Downloaded OpenSubtitles subtitles for an episode (long-press "Delete subtitles" popup).
      *  Uses the currently open series as the parent show for the content key. */
-    suspend fun downloadedSubtitles(episode: EpisodeEntity): List<tv.own.myowntv.core.database.dao.LinkedSubtitle> {
+    suspend fun downloadedSubtitles(episode: EpisodeEntity): List<tv.own.owntv.core.database.dao.LinkedSubtitle> {
         val show = _openedSeries.value ?: return emptyList()
         return subtitleController.downloadsForEpisode(show, episode)
     }
@@ -1144,7 +1196,7 @@ class SeriesViewModel(
         viewModelScope.launch {
             val pid = currentProfileId() ?: return@launch
             val actualShow = show ?: seriesDao.getSeriesById(episode.seriesId)
-            if (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(pid, actualShow?.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, actualShow?.categoryId)) return@launch
+            if (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, actualShow?.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, actualShow?.categoryId)) return@launch
             downloadManager.enqueue(
                 profileId = pid,
                 mediaType = MediaType.EPISODE,
@@ -1189,7 +1241,7 @@ class SeriesViewModel(
         val showDir = StorageAccess.sanitize(series.name)
         viewModelScope.launch {
             val pid = currentProfileId() ?: return@launch
-            if (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(pid, series.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, series.categoryId)) return@launch
+            if (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, series.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, series.categoryId)) return@launch
             seriesDao.episodesBySeries(series.id).first().filter { season == null || it.seasonNumber == season }.forEach { ep ->
                 val ext = ep.containerExt ?: StorageAccess.extOf(ep.streamUrl)
                 downloadManager.enqueue(

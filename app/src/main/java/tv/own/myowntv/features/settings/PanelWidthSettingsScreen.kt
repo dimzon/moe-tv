@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.settings
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -44,11 +96,11 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.res.pluralStringResource
 import tv.own.myowntv.ui.theme.mpx
-import tv.own.myowntv.core.settings.PanelSection
-import tv.own.myowntv.core.settings.PanelShares
-import tv.own.myowntv.core.settings.PanelWidthLimits
-import tv.own.myowntv.core.settings.CINEMATIC_DETAILS_DEFAULT
-import tv.own.myowntv.core.settings.CINEMATIC_DETAILS_MAX
+import tv.own.owntv.core.settings.PanelSection
+import tv.own.owntv.core.settings.PanelShares
+import tv.own.owntv.core.settings.PanelWidthLimits
+import tv.own.owntv.core.settings.CINEMATIC_DETAILS_DEFAULT
+import tv.own.owntv.core.settings.CINEMATIC_DETAILS_MAX
 import tv.own.myowntv.features.settings.data.BrowseColumnGap
 import tv.own.myowntv.features.settings.data.BrowseColumnDividerSpace
 import tv.own.myowntv.features.settings.data.BrowseContainerPadding
@@ -91,9 +143,9 @@ fun PanelWidthSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val rowWidth = maxWidth - BrowseContainerPadding * 2
         val vodLayout by vm.vodLayout.collectAsStateWithLifecycle()
-        val cinematic = vodLayout == tv.own.myowntv.core.settings.SettingsRepository.VodLayout.CINEMATIC
+        val cinematic = vodLayout == tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC
         val liveLayout by vm.liveLayout.collectAsStateWithLifecycle()
-        val liveStage = liveLayout == tv.own.myowntv.core.settings.SettingsRepository.LiveLayout.STAGE
+        val liveStage = liveLayout == tv.own.owntv.core.settings.SettingsRepository.LiveLayout.STAGE
         val liveStageSaved by vm.liveStageWidths.collectAsStateWithLifecycle()
         val detailsHeights = PanelSection.entries.associateWith {
             vm.cinematicDetailsHeight(it).collectAsStateWithLifecycle().value
@@ -115,7 +167,7 @@ fun PanelWidthSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) 
                 val enabled by vm.panelWidthEnabled.getValue(section).collectAsStateWithLifecycle()
                 val shares by vm.panelShares.getValue(section).collectAsStateWithLifecycle()
                 val current = shares ?: defaultPanelShares(section, rowWidth)
-                val stageWidths = (liveStageSaved ?: tv.own.myowntv.core.settings.LiveStageWidths.DEFAULT)
+                val stageWidths = (liveStageSaved ?: tv.own.owntv.core.settings.LiveStageWidths.DEFAULT)
                     .takeIf { section == PanelSection.LIVE && liveStage }
                 val vodCinematic = cinematic && section != PanelSection.LIVE
                 val layoutName = stringResource(
@@ -216,7 +268,7 @@ private fun PanelWidthDialog(
     val savedShares by vm.panelShares.getValue(section).collectAsStateWithLifecycle()
     val livePreviewEnabled by vm.livePreviewEnabled.collectAsStateWithLifecycle()
     val vodLayout by vm.vodLayout.collectAsStateWithLifecycle()
-    val cinematic = vodLayout == tv.own.myowntv.core.settings.SettingsRepository.VodLayout.CINEMATIC
+    val cinematic = vodLayout == tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC
     val stock = remember(section, rowWidth) { defaultPanelShares(section, rowWidth) }
     // Cinematic's detail block is a HEIGHT, so it is its own stored value and takes no part in the
     // 100% row budget below. Live TV is never Cinematic and never shows this row.
@@ -228,9 +280,9 @@ private fun PanelWidthDialog(
     // Live TV in the Stage layout sizes a different thing: the sheet over the list, on its own scale,
     // and a row of list + preview that totals 100. Seeded once, like `draft`.
     val liveLayout by vm.liveLayout.collectAsStateWithLifecycle()
-    val stage = section == PanelSection.LIVE && liveLayout == tv.own.myowntv.core.settings.SettingsRepository.LiveLayout.STAGE
+    val stage = section == PanelSection.LIVE && liveLayout == tv.own.owntv.core.settings.SettingsRepository.LiveLayout.STAGE
     val savedStage by vm.liveStageWidths.collectAsStateWithLifecycle()
-    var stageDraft by remember { mutableStateOf(savedStage ?: tv.own.myowntv.core.settings.LiveStageWidths.DEFAULT) }
+    var stageDraft by remember { mutableStateOf(savedStage ?: tv.own.owntv.core.settings.LiveStageWidths.DEFAULT) }
     // Seeded ONCE, exactly like `draft` above — never resynced from the flow while the dialog is up.
     // The saved value is a `stateIn(WhileSubscribed)` StateFlow, so it starts at the default and the
     // stored number lands a frame later; a resync would let that late emission overwrite whatever the
@@ -282,9 +334,9 @@ private fun PanelWidthDialog(
         buttons = {
             tv.own.myowntv.ui.stage.StageButton(stringResource(R.string.common_reset), onClick = {
                 draft = stock
-                stageDraft = tv.own.myowntv.core.settings.LiveStageWidths.DEFAULT
+                stageDraft = tv.own.owntv.core.settings.LiveStageWidths.DEFAULT
                 detailsHeight = CINEMATIC_DETAILS_DEFAULT
-                sheetWidth = tv.own.myowntv.core.settings.LiveStageWidths.DEFAULT.sheet
+                sheetWidth = tv.own.owntv.core.settings.LiveStageWidths.DEFAULT.sheet
                 showError = false
             }, height = 56.mpx, textSize = 19)
             tv.own.myowntv.ui.stage.StageButton(stringResource(R.string.common_ok), onClick = save, height = 56.mpx, textSize = 19, tinted = true)
@@ -310,8 +362,8 @@ private fun PanelWidthDialog(
                 // the one width is the sheet's, on its own scale (the Separate widths are not touched).
                 StepRow(
                     stringResource(R.string.settings_panel_width_live_sheet), sheetWidth,
-                    minimum = tv.own.myowntv.core.settings.LiveStageWidths.LIVE_SHEET_MIN,
-                    maximum = tv.own.myowntv.core.settings.LiveStageWidths.LIVE_SHEET_MAX,
+                    minimum = tv.own.owntv.core.settings.LiveStageWidths.LIVE_SHEET_MIN,
+                    maximum = tv.own.owntv.core.settings.LiveStageWidths.LIVE_SHEET_MAX,
                 ) { sheetWidth = it }
                 Text(stringResource(R.string.settings_panel_width_cinematic_sheet_hint), style = hint, color = muted, modifier = Modifier.padding(horizontal = 22.mpx, vertical = 6.mpx))
             } else {
@@ -345,8 +397,8 @@ private fun PanelWidthDialog(
                 tv.own.myowntv.ui.stage.StagePopupDivider()
                 StepRow(
                     stringResource(R.string.settings_panel_width_live_sheet), stageDraft.sheet,
-                    minimum = tv.own.myowntv.core.settings.LiveStageWidths.LIVE_SHEET_MIN,
-                    maximum = tv.own.myowntv.core.settings.LiveStageWidths.LIVE_SHEET_MAX,
+                    minimum = tv.own.owntv.core.settings.LiveStageWidths.LIVE_SHEET_MIN,
+                    maximum = tv.own.owntv.core.settings.LiveStageWidths.LIVE_SHEET_MAX,
                 ) { stageDraft = stageDraft.copy(sheet = it) }
                 Text(stringResource(R.string.settings_panel_width_live_sheet_hint, *NO_ARGS), style = hint, color = muted, modifier = Modifier.padding(horizontal = 22.mpx, vertical = 6.mpx))
             }
@@ -385,7 +437,7 @@ private fun PanelWidthDialog(
 
 /** Live TV, Stage layout: the list and the preview across the row, the categories sheet drawn over its left edge. */
 @Composable
-private fun StageWidthDiagram(w: tv.own.myowntv.core.settings.LiveStageWidths) {
+private fun StageWidthDiagram(w: tv.own.owntv.core.settings.LiveStageWidths) {
     Box(
         Modifier
             .fillMaxWidth()

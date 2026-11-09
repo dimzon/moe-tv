@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.sports
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
@@ -47,16 +99,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import tv.own.myowntv.R
-import tv.own.myowntv.core.database.entity.ChannelEntity
-import tv.own.myowntv.core.live.ProviderTags
-import tv.own.myowntv.core.sports.WatchFilter
-import tv.own.myowntv.core.sports.WatchOption
-import tv.own.myowntv.core.sports.WatchTier
-import tv.own.myowntv.core.sports.model.Match
-import tv.own.myowntv.core.sports.model.MatchEvent
-import tv.own.myowntv.core.sports.model.MatchState
-import tv.own.myowntv.core.sports.model.MatchSummary
-import tv.own.myowntv.core.sports.model.StandingsTable
+import tv.own.owntv.core.database.entity.ChannelEntity
+import tv.own.owntv.core.live.ProviderTags
+import tv.own.owntv.core.sports.WatchFilter
+import tv.own.owntv.core.sports.WatchOption
+import tv.own.owntv.core.sports.WatchTier
+import tv.own.owntv.core.sports.model.Match
+import tv.own.owntv.core.sports.model.MatchEvent
+import tv.own.owntv.core.sports.model.MatchState
+import tv.own.owntv.core.sports.model.MatchSummary
+import tv.own.owntv.core.sports.model.StandingsTable
 import tv.own.myowntv.features.epg.GuideVideo
 import tv.own.myowntv.features.live.LiveViewModel
 import tv.own.myowntv.ui.components.ChannelLogoTile
@@ -166,7 +218,7 @@ fun SportsMatchScreen(
                         )
                         Text(sep, style = stageText(21, 400), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         // The league name opens that league in the Leagues tab.
-                        val inCatalog = tv.own.myowntv.core.sports.SportsCatalog.league(tv.own.myowntv.core.sports.model.League.keyOf(m.sport, m.leagueSlug)) != null
+                        val inCatalog = tv.own.owntv.core.sports.SportsCatalog.league(tv.own.owntv.core.sports.model.League.keyOf(m.sport, m.leagueSlug)) != null
                         StageSurface(onClick = { onOpenLeague(m) }, radius = 10.mpx, enabled = inCatalog, modifier = Modifier.focusRequester(crumbFocus)) { f ->
                             Text(
                                 leagueName(m),
@@ -430,7 +482,7 @@ private fun ScoreHeader(
                         m.state == MatchState.PRE -> timeText(m.startMs)
                         hidden -> "– : –"
                         // Tennis reads set by set ("6–1 4–6 5–3"); one score a side reads "2 – 1".
-                        m.sport == tv.own.myowntv.core.sports.model.Sport.TENNIS && !home?.score?.periods.isNullOrEmpty() ->
+                        m.sport == tv.own.owntv.core.sports.model.Sport.TENNIS && !home?.score?.periods.isNullOrEmpty() ->
                             home!!.score!!.periods.zip(away?.score?.periods.orEmpty()).joinToString("  ") { (h, a) -> "${h.value}–${a.value}" }
                         else -> "${scoreText(m.sport, home?.score)} – ${scoreText(m.sport, away?.score)}"
                     }
@@ -470,7 +522,7 @@ private fun ScoreHeader(
 @Composable
 private fun Side(
     m: Match,
-    team: tv.own.myowntv.core.sports.model.Team?,
+    team: tv.own.owntv.core.sports.model.Team?,
     enabled: Boolean,
     onOpenTeam: (TeamRef) -> Unit,
     onFocus: (Boolean) -> Unit,
@@ -590,19 +642,19 @@ private fun FilterChips(filter: WatchFilter, onOpen: () -> Unit) {
     Row(Modifier.padding(top = 12.mpx).focusGroup(), horizontalArrangement = Arrangement.spacedBy(9.mpx)) {
         SportsChip(if (langs.isEmpty()) stringResource(R.string.sports_any) else langs.joinToString(", "), on = langs.isNotEmpty(), icon = MyOwnTVIcon.LANGUAGE, onClick = onOpen)
         SportsChip(if (filter.countries.isEmpty()) stringResource(R.string.sports_any_country) else filter.countries.joinToString(", "), on = filter.countries.isNotEmpty(), icon = MyOwnTVIcon.NETWORK, onClick = onOpen)
-        if (filter.minQuality != tv.own.myowntv.core.sports.MinQuality.ANY) SportsChip(qualityLabel(filter.minQuality), on = true, icon = MyOwnTVIcon.VIDEO, onClick = onOpen)
+        if (filter.minQuality != tv.own.owntv.core.sports.MinQuality.ANY) SportsChip(qualityLabel(filter.minQuality), on = true, icon = MyOwnTVIcon.VIDEO, onClick = onOpen)
         // The panel itself (its filter icon is the SORT glyph).
         SportsChip(stringResource(R.string.sports_filter_title), on = false, icon = MyOwnTVIcon.SORT, onClick = onOpen)
     }
 }
 
 @Composable
-internal fun qualityLabel(q: tv.own.myowntv.core.sports.MinQuality): String = stringResource(
+internal fun qualityLabel(q: tv.own.owntv.core.sports.MinQuality): String = stringResource(
     when (q) {
-        tv.own.myowntv.core.sports.MinQuality.ANY -> R.string.sports_any
-        tv.own.myowntv.core.sports.MinQuality.HD -> R.string.sports_quality_hd
-        tv.own.myowntv.core.sports.MinQuality.FHD -> R.string.sports_quality_fhd
-        tv.own.myowntv.core.sports.MinQuality.UHD -> R.string.sports_quality_uhd
+        tv.own.owntv.core.sports.MinQuality.ANY -> R.string.sports_any
+        tv.own.owntv.core.sports.MinQuality.HD -> R.string.sports_quality_hd
+        tv.own.owntv.core.sports.MinQuality.FHD -> R.string.sports_quality_fhd
+        tv.own.owntv.core.sports.MinQuality.UHD -> R.string.sports_quality_uhd
     },
 )
 
@@ -670,10 +722,10 @@ private fun FindChannels(busy: Boolean, searching: Boolean, onFind: () -> Unit) 
 
 /** Find channels outside its window: when it opens, or that the match is over. */
 @Composable
-private fun ClosedNote(window: tv.own.myowntv.core.sports.WatchWindow) {
+private fun ClosedNote(window: tv.own.owntv.core.sports.WatchWindow) {
     val locale = LocalConfiguration.current.locales[0]
     val text = when (window) {
-        is tv.own.myowntv.core.sports.WatchWindow.TooEarly ->
+        is tv.own.owntv.core.sports.WatchWindow.TooEarly ->
             stringResource(R.string.sports_find_channels_from, (dayOf(window.opensAt, locale) ?: stringResource(R.string.content_epg_today)) + " " + timeText(window.opensAt))
         else -> stringResource(R.string.sports_find_channels_ended)
     }

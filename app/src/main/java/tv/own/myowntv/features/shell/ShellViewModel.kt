@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.shell
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
@@ -20,39 +72,39 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import tv.own.myowntv.core.customize.CategoryUnlockSession
-import tv.own.myowntv.core.customize.CustomizationStore
-import tv.own.myowntv.core.nav.MainSection
-import tv.own.myowntv.core.nav.NavVisibility
-import tv.own.myowntv.core.network.ConnectivityObserver
-import tv.own.myowntv.core.weather.WeatherInfo
-import tv.own.myowntv.core.weather.WeatherRepository
-import tv.own.myowntv.core.database.dao.resolveExistingProfileId
-import tv.own.myowntv.core.repository.SourceRepository
-import tv.own.myowntv.core.launcher.LauncherIntegrationRepository
-import tv.own.myowntv.core.settings.SettingsRepository
-import tv.own.myowntv.core.theme.AccentColor
-import tv.own.myowntv.core.theme.FontCustomization
-import tv.own.myowntv.core.theme.ThemeMode
-import tv.own.myowntv.core.theme.UiFontScale
-import tv.own.myowntv.core.theme.UiZoom
-import tv.own.myowntv.core.categorylock.CategoryRelock
-import tv.own.myowntv.core.categorylock.SealedPlaybackGuard
+import tv.own.owntv.core.customize.CategoryUnlockSession
+import tv.own.owntv.core.customize.CustomizationStore
+import tv.own.owntv.core.nav.MainSection
+import tv.own.owntv.core.nav.NavVisibility
+import tv.own.owntv.core.network.ConnectivityObserver
+import tv.own.owntv.core.weather.WeatherInfo
+import tv.own.owntv.core.weather.WeatherRepository
+import tv.own.owntv.core.database.dao.resolveExistingProfileId
+import tv.own.owntv.core.repository.SourceRepository
+import tv.own.owntv.core.launcher.LauncherIntegrationRepository
+import tv.own.owntv.core.settings.SettingsRepository
+import tv.own.owntv.core.theme.AccentColor
+import tv.own.owntv.core.theme.FontCustomization
+import tv.own.owntv.core.theme.ThemeMode
+import tv.own.owntv.core.theme.UiFontScale
+import tv.own.owntv.core.theme.UiZoom
+import tv.own.owntv.core.categorylock.CategoryRelock
+import tv.own.owntv.core.categorylock.SealedPlaybackGuard
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ShellViewModel(
     private val settings: SettingsRepository,
     private val sourceRepository: SourceRepository,
-    private val profileDao: tv.own.myowntv.core.database.dao.ProfileDao,
+    private val profileDao: tv.own.owntv.core.database.dao.ProfileDao,
     connectivity: ConnectivityObserver,
     private val launcherIntegrationRepository: LauncherIntegrationRepository,
-    private val epgMigration: tv.own.myowntv.core.epg.EpgMigration,
-    private val autoRefresh: tv.own.myowntv.core.sync.AutoRefresh,
+    private val epgMigration: tv.own.owntv.core.epg.EpgMigration,
+    private val autoRefresh: tv.own.owntv.core.sync.AutoRefresh,
     private val weatherRepository: WeatherRepository,
     private val navVisibility: NavVisibility,
-    private val profiles: tv.own.myowntv.core.profile.ProfileManager,
-    private val catalogSyncScheduler: tv.own.myowntv.core.sync.work.CatalogSyncScheduler,
-    private val importFinalizer: tv.own.myowntv.core.sync.ImportFinalizer,
+    private val profiles: tv.own.owntv.core.profile.ProfileManager,
+    private val catalogSyncScheduler: tv.own.owntv.core.sync.work.CatalogSyncScheduler,
+    private val importFinalizer: tv.own.owntv.core.sync.ImportFinalizer,
     private val categoryUnlocks: CategoryUnlockSession,
     private val customize: CustomizationStore,
 ) : ViewModel() {
@@ -116,7 +168,7 @@ class ShellViewModel(
     val isOnline: StateFlow<Boolean> = connectivity.isOnline
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), connectivity.isOnlineNow())
 
-    /** The Auto refresh settings — core's [tv.own.myowntv.core.sync.AutoRefresh], shared with the phone. */
+    /** The Auto refresh settings — core's [tv.own.owntv.core.sync.AutoRefresh], shared with the phone. */
     fun checkAutoRefresh(includeStartup: Boolean) {
         viewModelScope.launch { autoRefresh.check(includeStartup) }
     }
@@ -125,7 +177,7 @@ class ShellViewModel(
      * The playlist menu's "Resync now": the same sync as Settings › Sources › Resync now, for
      * [sources]. KEEP, so a playlist already syncing carries on instead of starting over.
      */
-    fun resync(sources: List<tv.own.myowntv.core.database.entity.SourceEntity>) {
+    fun resync(sources: List<tv.own.owntv.core.database.entity.SourceEntity>) {
         viewModelScope.launch {
             sources.forEach { source ->
                 Log.d(TAG, "resync enqueue sourceId=${source.id} from=playlist_menu")
@@ -133,7 +185,7 @@ class ShellViewModel(
                 catalogSyncScheduler.enqueueSync(
                     source.id,
                     reason = "manual_resync",
-                    contentTypes = tv.own.myowntv.core.sync.SyncContentTypes.enabledOf(source),
+                    contentTypes = tv.own.owntv.core.sync.SyncContentTypes.enabledOf(source),
                     baseItemCount = counts.channels + counts.movies + counts.series,
                     policy = androidx.work.ExistingWorkPolicy.KEEP,
                 )
@@ -150,8 +202,8 @@ class ShellViewModel(
     val fontCustomization: StateFlow<FontCustomization> = settings.fontCustomization
         .stateIn(viewModelScope, SharingStarted.Eagerly, FontCustomization())
 
-    val animationLevel: StateFlow<tv.own.myowntv.core.theme.AnimationLevel> = settings.animationLevel
-        .stateIn(viewModelScope, SharingStarted.Eagerly, tv.own.myowntv.core.theme.AnimationLevel.FULL)
+    val animationLevel: StateFlow<tv.own.owntv.core.theme.AnimationLevel> = settings.animationLevel
+        .stateIn(viewModelScope, SharingStarted.Eagerly, tv.own.owntv.core.theme.AnimationLevel.FULL)
 
     val accent: StateFlow<AccentColor> = settings.accent
         .stateIn(viewModelScope, SharingStarted.Eagerly, AccentColor.TEAL)
@@ -173,12 +225,12 @@ class ShellViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     /** Resolved glass config (which surfaces + alpha). Empty scope = feature off. */
-    val glassConfig: StateFlow<tv.own.myowntv.core.theme.GlassConfig> = settings.glassConfig
-        .stateIn(viewModelScope, SharingStarted.Eagerly, tv.own.myowntv.core.theme.GlassConfig())
+    val glassConfig: StateFlow<tv.own.owntv.core.theme.GlassConfig> = settings.glassConfig
+        .stateIn(viewModelScope, SharingStarted.Eagerly, tv.own.owntv.core.theme.GlassConfig())
 
     /** Glass & background: what sits behind every screen. */
-    val backgroundConfig: StateFlow<tv.own.myowntv.core.theme.BackgroundConfig> = settings.backgroundConfig
-        .stateIn(viewModelScope, SharingStarted.Eagerly, tv.own.myowntv.core.theme.BackgroundConfig())
+    val backgroundConfig: StateFlow<tv.own.owntv.core.theme.BackgroundConfig> = settings.backgroundConfig
+        .stateIn(viewModelScope, SharingStarted.Eagerly, tv.own.owntv.core.theme.BackgroundConfig())
 
     /** The active profile's avatar (so the sidebar reflects profile edits, not a separate setting). */
     val avatarId: StateFlow<Int> = settings.activeProfileId
@@ -202,7 +254,7 @@ class ShellViewModel(
 
     /** The active (default) source's name for the sidebar; null means the profile has none. */
     val sourceSummary: StateFlow<String?> = settings.activeProfileId
-        .flatMapLatest { pid -> if (pid < 0) flowOf(emptyList<tv.own.myowntv.core.database.entity.SourceEntity>()) else sourceRepository.observeSources(pid) }
+        .flatMapLatest { pid -> if (pid < 0) flowOf(emptyList<tv.own.owntv.core.database.entity.SourceEntity>()) else sourceRepository.observeSources(pid) }
         .combine(settings.defaultSourceId) { sources, defaultId ->
             when {
                 sources.isEmpty() -> null
@@ -212,7 +264,7 @@ class ShellViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** The active profile's playlists, for the top-bar quick switcher (empty when the profile has none). */
-    val playlists: StateFlow<List<tv.own.myowntv.core.database.entity.SourceEntity>> = settings.activeProfileId
+    val playlists: StateFlow<List<tv.own.owntv.core.database.entity.SourceEntity>> = settings.activeProfileId
         .flatMapLatest { pid -> if (pid < 0) flowOf(emptyList()) else sourceRepository.observeSources(pid) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -304,8 +356,8 @@ class ShellViewModel(
             settings.setFontCustomization(
                 value.copy(
                     sizePercent = UiFontScale.clamp(value.sizePercent),
-                    popupFontSizePercent = tv.own.myowntv.core.theme.PopupFontScale.clamp(value.popupFontSizePercent),
-                    popupSizePercent = tv.own.myowntv.core.theme.PopupSizeScale.clamp(value.popupSizePercent),
+                    popupFontSizePercent = tv.own.owntv.core.theme.PopupFontScale.clamp(value.popupFontSizePercent),
+                    popupSizePercent = tv.own.owntv.core.theme.PopupSizeScale.clamp(value.popupSizePercent),
                 ),
             )
         }

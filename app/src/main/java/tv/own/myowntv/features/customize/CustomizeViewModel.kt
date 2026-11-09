@@ -1,6 +1,58 @@
 @file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 
 package tv.own.myowntv.features.customize
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,22 +70,22 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import tv.own.myowntv.core.customize.BulkRenameSession
-import tv.own.myowntv.core.customize.MoveKind
-import tv.own.myowntv.core.customize.SpanSelector
-import tv.own.myowntv.core.customize.moveBlock
-import tv.own.myowntv.core.customize.CustomizationStore
-import tv.own.myowntv.core.customize.CustomizeKeys
-import tv.own.myowntv.core.customize.placePinned
-import tv.own.myowntv.core.database.dao.CategoryDao
-import tv.own.myowntv.core.database.dao.ContentOrderDao
-import tv.own.myowntv.core.database.entity.ContentOrderEntity
-import tv.own.myowntv.core.database.dao.CustomCategoryDao
-import tv.own.myowntv.core.database.dao.SourceDao
-import tv.own.myowntv.core.model.MediaType
-import tv.own.myowntv.core.repository.ActiveProfileSources
-import tv.own.myowntv.core.repository.activeProfileSources
-import tv.own.myowntv.core.settings.SettingsRepository
+import tv.own.owntv.core.customize.BulkRenameSession
+import tv.own.owntv.core.customize.MoveKind
+import tv.own.owntv.core.customize.SpanSelector
+import tv.own.owntv.core.customize.moveBlock
+import tv.own.owntv.core.customize.CustomizationStore
+import tv.own.owntv.core.customize.CustomizeKeys
+import tv.own.owntv.core.customize.placePinned
+import tv.own.owntv.core.database.dao.CategoryDao
+import tv.own.owntv.core.database.dao.ContentOrderDao
+import tv.own.owntv.core.database.entity.ContentOrderEntity
+import tv.own.owntv.core.database.dao.CustomCategoryDao
+import tv.own.owntv.core.database.dao.SourceDao
+import tv.own.owntv.core.model.MediaType
+import tv.own.owntv.core.repository.ActiveProfileSources
+import tv.own.owntv.core.repository.activeProfileSources
+import tv.own.owntv.core.settings.SettingsRepository
 
 /** One category row in the Customize screen (hidden rows stay visible here, marked, for unhiding).
  *  [categoryId] is null for a user's custom combined category — there is no provider
@@ -69,7 +121,7 @@ class CustomizeViewModel(
     private val settings: SettingsRepository,
     private val sourceDao: SourceDao,
     private val categoryDao: CategoryDao,
-    private val profileDao: tv.own.myowntv.core.database.dao.ProfileDao,
+    private val profileDao: tv.own.owntv.core.database.dao.ProfileDao,
     private val customCategoryDao: CustomCategoryDao,
     private val contentOrderDao: ContentOrderDao,
     private val customize: CustomizationStore,
@@ -79,7 +131,7 @@ class CustomizeViewModel(
      *  pre-move order. */
     private val moveMutex = Mutex()
 
-    private data class Ctx(val profileId: Long, val sources: List<tv.own.myowntv.core.database.entity.SourceEntity>) {
+    private data class Ctx(val profileId: Long, val sources: List<tv.own.owntv.core.database.entity.SourceEntity>) {
         fun sourceIdsFor(type: MediaType): List<Long> = ActiveProfileSources(profileId, sources).sourceIdsFor(type)
     }
 
@@ -149,10 +201,10 @@ class CustomizeViewModel(
                     // hide/rename/reorder apply uniformly (their keys share the CustomizeKeys
                     // namespace). Custom rows carry categoryId = null and no provider name.
                     val visibleCustomCategories = if (profile?.isKids == true) {
-                        cust.customCategories.filterNot { tv.own.myowntv.core.content.AdultCategoryClassifier.isAdult(it.name) }
+                        cust.customCategories.filterNot { tv.own.owntv.core.content.AdultCategoryClassifier.isAdult(it.name) }
                     } else cust.customCategories
                     val visibleProviderCategories = if (profile?.isKids == true) {
-                        cats.filterNot { tv.own.myowntv.core.content.AdultCategoryClassifier.isAdult(it.name) }
+                        cats.filterNot { tv.own.owntv.core.content.AdultCategoryClassifier.isAdult(it.name) }
                     } else cats
                     val entries = visibleCustomCategories.map { cc ->
                         CustomizeCatRow(

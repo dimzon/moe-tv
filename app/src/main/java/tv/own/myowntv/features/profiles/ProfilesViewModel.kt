@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.profiles
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,11 +59,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import tv.own.myowntv.core.database.dao.ProfileDao
-import tv.own.myowntv.core.database.entity.ProfileEntity
-import tv.own.myowntv.core.profile.ProfileManager
-import tv.own.myowntv.core.util.Pin
-import tv.own.myowntv.core.settings.SettingsRepository
+import tv.own.owntv.core.database.dao.ProfileDao
+import tv.own.owntv.core.database.entity.ProfileEntity
+import tv.own.owntv.core.profile.ProfileManager
+import tv.own.owntv.core.util.Pin
+import tv.own.owntv.core.settings.SettingsRepository
 
 /**
  * Profile creation/switching and the launch gate's data. Shared by the "Who's watching?"
@@ -21,7 +73,7 @@ class ProfilesViewModel(
     private val profileDao: ProfileDao,
     private val settings: SettingsRepository,
     private val manager: ProfileManager,
-    private val protection: tv.own.myowntv.core.profile.ProfileProtection,
+    private val protection: tv.own.owntv.core.profile.ProfileProtection,
 ) : ViewModel() {
 
     /**
@@ -142,7 +194,7 @@ internal fun shellMayCompose(
     activeProfileId: Long?,
     authenticatedProfileId: Long?,
     gateRequired: Boolean,
-): Boolean = tv.own.myowntv.core.profile.shellMayCompose(
+): Boolean = tv.own.owntv.core.profile.shellMayCompose(
     profiles = (profileState as? ProfileLoadState.Loaded)?.profiles,
     activeProfileId = activeProfileId,
     authenticatedProfileId = authenticatedProfileId,
@@ -152,4 +204,4 @@ internal fun shellMayCompose(
 /** One unlocked profile enters the shell immediately; all chooser/PIN cases stay gated. Core's rule
  *  — the phone applies the same one. */
 internal fun profileGateRequired(profiles: List<ProfileEntity>): Boolean =
-    tv.own.myowntv.core.profile.profileGateRequired(profiles)
+    tv.own.owntv.core.profile.profileGateRequired(profiles)

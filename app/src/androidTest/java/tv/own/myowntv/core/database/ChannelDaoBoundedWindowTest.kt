@@ -1,4 +1,56 @@
-package tv.own.myowntv.core.database
+package tv.own.owntv.core.database
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import android.content.Context
 import androidx.room.Room
@@ -12,10 +64,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import tv.own.myowntv.core.database.dao.ChannelDao
-import tv.own.myowntv.core.database.entity.ChannelEntity
-import tv.own.myowntv.core.model.MediaType
-import tv.own.myowntv.core.model.SourceType
+import tv.own.owntv.core.database.dao.ChannelDao
+import tv.own.owntv.core.database.entity.ChannelEntity
+import tv.own.owntv.core.model.MediaType
+import tv.own.owntv.core.model.SourceType
 
 /**
  * Behavioral tests for the bounded window queries added for direct-tune's zap-list rebuild.
@@ -365,24 +417,24 @@ class ChannelDaoBoundedWindowTest {
 }
 
 // Tiny helpers so the test stays readable (avoid pulling in every DAO surface).
-private suspend fun tv.own.myowntv.core.database.dao.SourceDao.seedSources(seed: List<SourceSeed>) {
+private suspend fun tv.own.owntv.core.database.dao.SourceDao.seedSources(seed: List<SourceSeed>) {
     for (s in seed) insert(s.toEntity())
 }
 
 private data class SourceSeed(val id: Long, val name: String) {
-    fun toEntity() = tv.own.myowntv.core.database.entity.SourceEntity(
+    fun toEntity() = tv.own.owntv.core.database.entity.SourceEntity(
         id = id, name = name, type = SourceType.XTREAM, url = "https://example.test/$id",
     )
 }
 
-private suspend fun tv.own.myowntv.core.database.dao.CategoryDao.seedCategories(seed: List<CategorySeed>) {
+private suspend fun tv.own.owntv.core.database.dao.CategoryDao.seedCategories(seed: List<CategorySeed>) {
     upsertAll(seed.map { it.toEntity() })
 }
 
 private data class CategorySeed(
     val id: Long, val sourceId: Long, val mediaType: MediaType, val name: String, val sortOrder: Int,
 ) {
-    fun toEntity() = tv.own.myowntv.core.database.entity.CategoryEntity(
+    fun toEntity() = tv.own.owntv.core.database.entity.CategoryEntity(
         id = id, sourceId = sourceId, mediaType = mediaType, name = name, sortOrder = sortOrder,
     )
 }

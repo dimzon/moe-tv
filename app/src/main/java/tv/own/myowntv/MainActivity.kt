@@ -1,4 +1,56 @@
 package tv.own.myowntv
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import android.content.Intent
 import android.os.Bundle
@@ -31,8 +83,8 @@ import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import tv.own.myowntv.core.util.Perf
-import tv.own.myowntv.core.launcher.LauncherDeepLink
+import tv.own.owntv.core.util.Perf
+import tv.own.owntv.core.launcher.LauncherDeepLink
 import tv.own.myowntv.features.profiles.ProfileGate
 import tv.own.myowntv.features.profiles.ProfileGateSessionViewModel
 import tv.own.myowntv.features.profiles.ProfilesViewModel
@@ -45,8 +97,8 @@ import tv.own.myowntv.ui.theme.LocalBlurredBackdrop
 import tv.own.myowntv.ui.theme.LocalGlass
 import tv.own.myowntv.ui.theme.LocalUiFontScaleFactor
 import tv.own.myowntv.ui.theme.OwnTVTheme
-import tv.own.myowntv.core.theme.UiFontScale
-import tv.own.myowntv.core.theme.UiZoom
+import tv.own.owntv.core.theme.UiFontScale
+import tv.own.owntv.core.theme.UiZoom
 
 open class MainActivity : ComponentActivity() {
     companion object {
@@ -92,14 +144,14 @@ open class MainActivity : ComponentActivity() {
     @Volatile
     private var startupSettled = false
 
-    private val player: tv.own.myowntv.player.OwnTVPlayer by inject()
-    private val engines: tv.own.myowntv.player.PlaybackEngines by inject()
-    private val visibility: tv.own.myowntv.core.player.PlaybackVisibilityWatch by inject()
+    private val player: tv.own.owntv.player.OwnTVPlayer by inject()
+    private val engines: tv.own.owntv.player.PlaybackEngines by inject()
+    private val visibility: tv.own.owntv.core.player.PlaybackVisibilityWatch by inject()
     private val handOff: tv.own.myowntv.features.pip.AppHandOff by inject()
     // Activity-scoped: the same instance Compose retrieves via koinViewModel() inside setContent.
     private val shellViewModel: ShellViewModel by viewModel()
     // The sole locale authority (SharedPreferences-backed; see docs/internationalization.md 0b).
-    private val localeStore: tv.own.myowntv.core.i18n.LocaleStore by inject()
+    private val localeStore: tv.own.owntv.core.i18n.LocaleStore by inject()
     private var pendingDeepLink by mutableStateOf<LauncherDeepLink?>(null)
 
     /**
@@ -109,8 +161,8 @@ open class MainActivity : ComponentActivity() {
      * (see docs/internationalization.md 0b, "Both Application and Activity must wrap").
      */
     override fun attachBaseContext(newBase: android.content.Context) {
-        val tag = tv.own.myowntv.core.i18n.LocaleStore.from(newBase).readBlocking()
-        super.attachBaseContext(tv.own.myowntv.core.i18n.AppLocale.wrap(newBase, tag))
+        val tag = tv.own.owntv.core.i18n.LocaleStore.from(newBase).readBlocking()
+        super.attachBaseContext(tv.own.owntv.core.i18n.AppLocale.wrap(newBase, tag))
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -186,7 +238,7 @@ open class MainActivity : ComponentActivity() {
             // forcing Room to run the migration chain now rather than inside the first query.
             runCatching {
                 kotlinx.coroutines.runBlocking {
-                    get<tv.own.myowntv.core.database.OwnTVDatabase>().useWriterConnection { }
+                    get<tv.own.owntv.core.database.OwnTVDatabase>().useWriterConnection { }
                 }
             }.onFailure { error = it.message ?: it.javaClass.simpleName }
         }
@@ -228,7 +280,7 @@ open class MainActivity : ComponentActivity() {
                     onResetData = {
                         // Explicit, twice-confirmed user choice — the only thing that clears a
                         // database SQLite refuses to open. Never automatic: automatic deletion was a real bug once.
-                        runCatching { deleteDatabase(tv.own.myowntv.core.database.OwnTVDatabase.NAME) }
+                        runCatching { deleteDatabase(tv.own.owntv.core.database.OwnTVDatabase.NAME) }
                         finishAffinity()
                     },
                 )
@@ -271,9 +323,9 @@ open class MainActivity : ComponentActivity() {
             // choice can only be handed over for the next launch, and only from Android 13 on.
             LaunchedEffect(animationLevel) {
                 if (android.os.Build.VERSION.SDK_INT >= 33) {
-                    val still = animationLevel == tv.own.myowntv.core.theme.AnimationLevel.OFF
+                    val still = animationLevel == tv.own.owntv.core.theme.AnimationLevel.OFF
                     splashScreen.setSplashScreenTheme(
-                        if (still) stillLaunchTheme(tv.own.myowntv.core.brand.AppIconSwitcher.applied(this@MainActivity)) else 0,
+                        if (still) stillLaunchTheme(tv.own.owntv.core.brand.AppIconSwitcher.applied(this@MainActivity)) else 0,
                     )
                 }
             }
@@ -411,7 +463,7 @@ open class MainActivity : ComponentActivity() {
                     // LocalConfiguration/LocalLayoutDirection) for the currently selected locale, and
                     // trigger the single documented Activity.recreate() across a script-family switch.
                     // Same-script switches apply instantly here. See docs/internationalization.md 0b.
-                    tv.own.myowntv.core.i18n.LocalizedContent(localeStore) {
+                    tv.own.owntv.core.i18n.LocalizedContent(localeStore) {
                     Box(
                         modifier = Modifier.fillMaxSize()
                             // Solid base color first (fallback if no image / image fails to load).
@@ -512,6 +564,6 @@ open class MainActivity : ComponentActivity() {
 
 /** The user's picture behind the entire shell (Glass & background). Callers check [BackgroundConfig.showsPicture]. */
 @androidx.compose.runtime.Composable
-private fun BackgroundLayer(background: tv.own.myowntv.core.theme.BackgroundConfig, blurred: BlurredBackdrop?) {
+private fun BackgroundLayer(background: tv.own.owntv.core.theme.BackgroundConfig, blurred: BlurredBackdrop?) {
     tv.own.myowntv.ui.components.BackgroundPicture(background, blurred, Modifier.fillMaxSize())
 }

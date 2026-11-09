@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.home
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.runtime.Immutable
 
@@ -23,35 +75,35 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import tv.own.myowntv.core.content.AdultCategoryClassifier
-import tv.own.myowntv.core.customize.CustomizationStore
-import tv.own.myowntv.core.customize.SectionCustomizations
-import tv.own.myowntv.core.database.dao.CategoryDao
-import tv.own.myowntv.core.database.dao.ChannelDao
-import tv.own.myowntv.core.database.dao.MovieDao
-import tv.own.myowntv.core.database.dao.ProfileDao
-import tv.own.myowntv.core.database.dao.SeriesDao
-import tv.own.myowntv.core.database.dao.SourceDao
-import tv.own.myowntv.core.database.dao.TrendingDao
-import tv.own.myowntv.core.database.dao.resolveExistingProfileId
-import tv.own.myowntv.core.database.entity.ChannelEntity
-import tv.own.myowntv.core.database.entity.MovieEntity
-import tv.own.myowntv.core.database.entity.SeriesEntity
-import tv.own.myowntv.core.database.entity.MetadataCacheEntity
-import tv.own.myowntv.core.home.GuideSliceState
-import tv.own.myowntv.core.home.HeroItem
-import tv.own.myowntv.core.home.HomeFeedReader
-import tv.own.myowntv.core.home.TrendingHomeItem
-import tv.own.myowntv.core.home.homeKey
-import tv.own.myowntv.core.launcher.LauncherContinuationItem
-import tv.own.myowntv.core.model.HomeConfig
-import tv.own.myowntv.core.model.MediaType
-import tv.own.myowntv.core.metadata.MetadataImages
-import tv.own.myowntv.core.metadata.MetadataRepository
-import tv.own.myowntv.core.settings.SettingsRepository
-import tv.own.myowntv.core.categorylock.sealedCategoryKeys
-import tv.own.myowntv.core.sync.LibraryLoading
-import tv.own.myowntv.player.HeroPreviewEngine
+import tv.own.owntv.core.content.AdultCategoryClassifier
+import tv.own.owntv.core.customize.CustomizationStore
+import tv.own.owntv.core.customize.SectionCustomizations
+import tv.own.owntv.core.database.dao.CategoryDao
+import tv.own.owntv.core.database.dao.ChannelDao
+import tv.own.owntv.core.database.dao.MovieDao
+import tv.own.owntv.core.database.dao.ProfileDao
+import tv.own.owntv.core.database.dao.SeriesDao
+import tv.own.owntv.core.database.dao.SourceDao
+import tv.own.owntv.core.database.dao.TrendingDao
+import tv.own.owntv.core.database.dao.resolveExistingProfileId
+import tv.own.owntv.core.database.entity.ChannelEntity
+import tv.own.owntv.core.database.entity.MovieEntity
+import tv.own.owntv.core.database.entity.SeriesEntity
+import tv.own.owntv.core.database.entity.MetadataCacheEntity
+import tv.own.owntv.core.home.GuideSliceState
+import tv.own.owntv.core.home.HeroItem
+import tv.own.owntv.core.home.HomeFeedReader
+import tv.own.owntv.core.home.TrendingHomeItem
+import tv.own.owntv.core.home.homeKey
+import tv.own.owntv.core.launcher.LauncherContinuationItem
+import tv.own.owntv.core.model.HomeConfig
+import tv.own.owntv.core.model.MediaType
+import tv.own.owntv.core.metadata.MetadataImages
+import tv.own.owntv.core.metadata.MetadataRepository
+import tv.own.owntv.core.settings.SettingsRepository
+import tv.own.owntv.core.categorylock.sealedCategoryKeys
+import tv.own.owntv.core.sync.LibraryLoading
+import tv.own.owntv.player.HeroPreviewEngine
 
 @Immutable
 data class HomeHeroMetadata(
@@ -138,12 +190,12 @@ class HomeViewModel(
     private val settings: SettingsRepository,
     private val profileDao: ProfileDao,
     private val heroPreviewEngine: HeroPreviewEngine,
-    private val historyDao: tv.own.myowntv.core.database.dao.HistoryDao,
-    private val progressDao: tv.own.myowntv.core.database.dao.ProgressDao,
+    private val historyDao: tv.own.owntv.core.database.dao.HistoryDao,
+    private val progressDao: tv.own.owntv.core.database.dao.ProgressDao,
     private val metadata: MetadataRepository,
     private val trendingDao: TrendingDao,
-    private val favoriteDao: tv.own.myowntv.core.database.dao.FavoriteDao,
-    private val userDataWriter: tv.own.myowntv.core.backup.UserDataWriter,
+    private val favoriteDao: tv.own.owntv.core.database.dao.FavoriteDao,
+    private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
     private val customize: CustomizationStore,
     private val libraryLoading: LibraryLoading,
 ) : ViewModel() {
@@ -211,7 +263,7 @@ class HomeViewModel(
 
     private suspend fun resolveContinue(
         pid: Long,
-        h: tv.own.myowntv.core.database.entity.WatchHistoryEntity,
+        h: tv.own.owntv.core.database.entity.WatchHistoryEntity,
         cust: SectionCustomizations,
     ): ContinueTarget? = when (h.mediaType) {
         MediaType.MOVIE -> movieDao.getById(h.itemId)?.let { m ->
@@ -290,7 +342,7 @@ class HomeViewModel(
             if (id in favs) {
                 userDataWriter.removeFavorite(pid, type, id)
             } else {
-                favoriteDao.add(tv.own.myowntv.core.database.entity.FavoriteEntity(profileId = pid, mediaType = type, itemId = id))
+                favoriteDao.add(tv.own.owntv.core.database.entity.FavoriteEntity(profileId = pid, mediaType = type, itemId = id))
             }
         }
     }
@@ -333,7 +385,7 @@ class HomeViewModel(
             is TrendingHomeItem.Series -> Triple(MediaType.SERIES, item.series.titleSignature, item.series.parsedYear)
         }
         if (signature.isBlank()) return 1
-        val sources = tv.own.myowntv.core.repository.activeSourceIds(settings, sourceDao, pid, type)
+        val sources = tv.own.owntv.core.repository.activeSourceIds(settings, sourceDao, pid, type)
         val rows = sources.flatMap { sid ->
             when (type) {
                 MediaType.MOVIE -> movieDao.trendingExact(sid, listOf(signature))
@@ -387,7 +439,7 @@ class HomeViewModel(
         }
         heroPreviewEngine.play(
             hero.streamUrl, hero.seekToMs, source?.userAgent,
-            tv.own.myowntv.core.settings.SourceOverrides.headersWithReferer(hero.httpHeaders, source),
+            tv.own.owntv.core.settings.SourceOverrides.headersWithReferer(hero.httpHeaders, source),
         )
     }
 
@@ -431,7 +483,7 @@ class HomeViewModel(
             favoriteGuide = data.favoriteGuide,
             isLoading = false,
         )
-        tv.own.myowntv.core.util.Perf.stamp("home-data")
+        tv.own.owntv.core.util.Perf.stamp("home-data")
         _uiState.value.trendingItems.getOrNull(_uiState.value.activeTrendingIndex)?.let(::resolveTrendingExtras)
         // Keep watching shows every card as a still, so each needs its artwork up front, not on focus.
         _uiState.value.heroItems.indices.forEach { resolveHeroMetadata(it) }

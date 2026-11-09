@@ -1,6 +1,58 @@
 @file:OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 
 package tv.own.myowntv.features.movies
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
@@ -16,7 +68,7 @@ import androidx.compose.ui.layout.layout
 import tv.own.myowntv.ui.components.onDpadLeft
 import tv.own.myowntv.features.categorylock.focusListAfterSheet
 import tv.own.myowntv.features.live.LiveCategories
-import tv.own.myowntv.core.live.ProviderTags
+import tv.own.owntv.core.live.ProviderTags
 import tv.own.myowntv.features.live.edgeScrollSpec
 import tv.own.myowntv.features.shell.components.VodCinematicBackdrop
 import tv.own.myowntv.features.shell.components.VodDetailsCard
@@ -96,22 +148,22 @@ import tv.own.myowntv.features.live.LiveRailItem
 import tv.own.myowntv.features.live.displayLabel
 import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.R
-import tv.own.myowntv.core.customize.CustomizeKeys
-import tv.own.myowntv.core.database.entity.ContentOrderEntity
-import tv.own.myowntv.core.database.entity.MovieEntity
+import tv.own.owntv.core.customize.CustomizeKeys
+import tv.own.owntv.core.database.entity.ContentOrderEntity
+import tv.own.owntv.core.database.entity.MovieEntity
 import tv.own.myowntv.features.customize.MoveToCategoryDialog
 import tv.own.myowntv.ui.components.TextInputDialog
 import tv.own.myowntv.features.live.displayLabel
-import tv.own.myowntv.core.settings.PanelSection
+import tv.own.owntv.core.settings.PanelSection
 import tv.own.myowntv.features.settings.data.computePanelWidths
-import tv.own.myowntv.core.settings.SettingsRepository
+import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.myowntv.features.settings.rememberPanelShares
 import tv.own.myowntv.features.shell.components.RailCategoryMenu
 import tv.own.myowntv.features.shell.components.MediaDetailsScreen
 import tv.own.myowntv.ui.components.MoveOrderOverlay
 import tv.own.myowntv.ui.components.InAppToast
 import tv.own.myowntv.ui.components.rememberInAppToast
-import tv.own.myowntv.core.model.ContentMenu
+import tv.own.owntv.core.model.ContentMenu
 import tv.own.myowntv.ui.components.MenuAction
 import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.components.ResumeDialog
@@ -121,7 +173,7 @@ import tv.own.myowntv.ui.components.chNavPaging
 import tv.own.myowntv.ui.components.gridFocusTarget
 import androidx.compose.foundation.layout.width
 import tv.own.myowntv.ui.format.localizedInteger
-import tv.own.myowntv.core.live.LiveKey
+import tv.own.owntv.core.live.LiveKey
 
 @Composable
 fun MoviesScreen(
@@ -188,7 +240,7 @@ fun MoviesScreen(
     var trailerTitle by remember { mutableStateOf<String?>(null) }
     // Downloaded subtitles for the movie whose context menu is open; drives the
     // "Delete subtitles" action + its popup. Reloaded on menu open and after each delete.
-    var contextMovieSubs by remember { mutableStateOf<List<tv.own.myowntv.core.database.dao.LinkedSubtitle>>(emptyList()) }
+    var contextMovieSubs by remember { mutableStateOf<List<tv.own.owntv.core.database.dao.LinkedSubtitle>>(emptyList()) }
     var showDeleteSubs by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val toast = rememberInAppToast()
@@ -463,7 +515,7 @@ fun MoviesScreen(
     val onCategorySelect: (Int) -> Unit = { idx ->
         val item = railItems.getOrNull(idx)
         item?.let { vm.select(it.key) }
-        if (item?.sealed == true) lockVm.open(tv.own.myowntv.core.model.MediaType.MOVIE, item.key)
+        if (item?.sealed == true) lockVm.open(tv.own.owntv.core.model.MediaType.MOVIE, item.key)
         else if (categoriesOpen) { categoriesOpen = false; focusTitles() }
     }
     val onCategoryLongSelect: (Int) -> Unit = { idx ->
@@ -551,7 +603,7 @@ fun MoviesScreen(
     val searchLeft = Modifier.onDpadLeft({ !searchEditing && lockedKey == null }) { openCategories() }
     val listPin = tv.own.myowntv.features.categorylock.rememberListPinFocus(movies.itemCount, firstItemFocus, { scrollToIndex(0) }) { focusTitles() }
     val sealed = selectedItem?.sealed == true
-    val onEnterPin: () -> Unit = { selectedItem?.let { listPin.askedFromList(); lockVm.open(tv.own.myowntv.core.model.MediaType.MOVIE, it.key) } }
+    val onEnterPin: () -> Unit = { selectedItem?.let { listPin.askedFromList(); lockVm.open(tv.own.owntv.core.model.MediaType.MOVIE, it.key) } }
     val emptyText = if (sealed) stringResource(R.string.content_category_locked_placeholder) else if (searchQuery.isNotBlank()) stringResource(R.string.content_no_movies_found, searchQuery.trim()) else stringResource(R.string.content_no_movies_here)
 
     BoxWithConstraints(
@@ -1102,13 +1154,13 @@ fun MoviesScreen(
         RailCategoryMenu(
             item, item.displayLabel(R.string.content_category_all_movies), vm::categoryRestorePlan,
             onHide = vm::hideCategory, onMove = vm::enterCategoryMoveMode, onRestore = vm::restoreCategory,
-            onToggleLock = { lockVm.toggleLock(tv.own.myowntv.core.model.MediaType.MOVIE, it) },
-            onSealedAction = { key, action -> lockVm.open(tv.own.myowntv.core.model.MediaType.MOVIE, key, action) },
+            onToggleLock = { lockVm.toggleLock(tv.own.owntv.core.model.MediaType.MOVIE, it) },
+            onSealedAction = { key, action -> lockVm.open(tv.own.owntv.core.model.MediaType.MOVIE, key, action) },
             onClose = { contextCategory = null },
         )
     }
     tv.own.myowntv.features.categorylock.CategoryLockPrompts(
-        tv.own.myowntv.core.model.MediaType.MOVIE,
+        tv.own.owntv.core.model.MediaType.MOVIE,
         onAction = { key, action -> action.run(key, vm::hideCategory, vm::enterCategoryMoveMode, vm::restoreCategory) },
     ) { key, opened ->
         if (listPin.takeClose(opened)) Unit
@@ -1147,7 +1199,7 @@ fun MoviesScreen(
 }
 
 @Composable
-private fun metaLine(movie: MovieEntity, meta: tv.own.myowntv.core.database.entity.MetadataCacheEntity? = null, tmdbWins: Boolean = false): String {
+private fun metaLine(movie: MovieEntity, meta: tv.own.owntv.core.database.entity.MetadataCacheEntity? = null, tmdbWins: Boolean = false): String {
     val parts = mutableListOf<String>()
     // Precedence flips with the source mode.
     val year = if (tmdbWins) meta?.year ?: movie.year else movie.year ?: meta?.year
@@ -1167,25 +1219,25 @@ private fun metaLine(movie: MovieEntity, meta: tv.own.myowntv.core.database.enti
 @Composable
 private fun buildMovieDetails(
     movie: MovieEntity,
-    meta: tv.own.myowntv.core.database.entity.MetadataCacheEntity?,
+    meta: tv.own.owntv.core.database.entity.MetadataCacheEntity?,
     tmdbWins: Boolean,
 ): tv.own.myowntv.features.shell.components.MediaDetailsUi {
     val providerPoster = movie.posterUrl?.takeIf { it.isNotBlank() }
-    val tmdbPoster = tv.own.myowntv.core.metadata.MetadataImages.poster(meta?.posterPath)
+    val tmdbPoster = tv.own.owntv.core.metadata.MetadataImages.poster(meta?.posterPath)
     val poster = if (tmdbWins) tmdbPoster ?: providerPoster else providerPoster ?: tmdbPoster
     // Backdrop is TMDB-only (providers don't carry one); fall back to the provider's if it exists.
-    val backdrop = tv.own.myowntv.core.metadata.MetadataImages.backdrop(meta?.backdropPath)
+    val backdrop = tv.own.owntv.core.metadata.MetadataImages.backdrop(meta?.backdropPath)
         ?: movie.backdropUrl?.takeIf { it.isNotBlank() }
     val plot = if (tmdbWins) meta?.overview ?: movie.plot else movie.plot?.takeIf { it.isNotBlank() } ?: meta?.overview
     return tv.own.myowntv.features.shell.components.MediaDetailsUi(
         title = movie.name,
         backdropUrl = backdrop,
-        logoUrl = tv.own.myowntv.core.metadata.MetadataImages.logo(meta?.logoPath),
+        logoUrl = tv.own.owntv.core.metadata.MetadataImages.logo(meta?.logoPath),
         posterUrl = poster,
         metaLine = metaLine(movie, meta, tmdbWins),
         genres = jsonList(meta?.genresJson),
         plot = plot,
-        cast = tv.own.myowntv.core.metadata.MetadataCast.parse(meta?.castJson),
+        cast = tv.own.owntv.core.metadata.MetadataCast.parse(meta?.castJson),
     )
 }
 
@@ -1204,16 +1256,16 @@ private fun jsonList(json: String?): List<String> {
  */
 internal fun movieTitleInfo(
     movie: MovieEntity,
-    meta: tv.own.myowntv.core.database.entity.MetadataCacheEntity?,
+    meta: tv.own.owntv.core.database.entity.MetadataCacheEntity?,
     tmdbWins: Boolean,
 ): VodTitleInfo {
     val providerPlot = movie.plot?.takeIf { it.isNotBlank() }
     val providerPoster = movie.posterUrl?.takeIf { it.isNotBlank() }
-    val tmdbPoster = tv.own.myowntv.core.metadata.MetadataImages.poster(meta?.posterPath)
+    val tmdbPoster = tv.own.owntv.core.metadata.MetadataImages.poster(meta?.posterPath)
     return VodTitleInfo(
         title = movie.name,
-        logoUrl = tv.own.myowntv.core.metadata.MetadataImages.logo(meta?.logoPath),
-        backdropUrl = tv.own.myowntv.core.metadata.MetadataImages.backdrop(meta?.backdropPath, size = "w1280")
+        logoUrl = tv.own.owntv.core.metadata.MetadataImages.logo(meta?.logoPath),
+        backdropUrl = tv.own.owntv.core.metadata.MetadataImages.backdrop(meta?.backdropPath, size = "w1280")
             ?: movie.backdropUrl?.takeIf { it.isNotBlank() },
         posterUrl = if (tmdbWins) tmdbPoster ?: providerPoster else providerPoster ?: tmdbPoster,
         year = if (tmdbWins) meta?.year ?: movie.year else movie.year ?: meta?.year,
@@ -1223,6 +1275,6 @@ internal fun movieTitleInfo(
             else movie.rating?.takeIf { it > 0 } ?: meta?.rating?.takeIf { it > 0 },
         tags = cinematicQualityBadges(movie.qualityRank, movie.advertisedCapabilities),
         plot = if (tmdbWins) meta?.overview ?: providerPlot else providerPlot ?: meta?.overview,
-        cast = tv.own.myowntv.core.metadata.MetadataCast.parse(meta?.castJson),
+        cast = tv.own.owntv.core.metadata.MetadataCast.parse(meta?.castJson),
     )
 }

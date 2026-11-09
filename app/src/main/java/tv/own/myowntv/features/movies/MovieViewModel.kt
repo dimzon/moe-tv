@@ -1,6 +1,58 @@
 @file:OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 
 package tv.own.myowntv.features.movies
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -37,63 +89,63 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import tv.own.myowntv.core.customize.CustomizationStore
-import tv.own.myowntv.core.customize.CustomizeKeys
-import tv.own.myowntv.core.customize.SectionCustomizations
-import tv.own.myowntv.core.content.movieCountFlow
-import tv.own.myowntv.core.categorylock.clearWhenSealed
-import tv.own.myowntv.core.categorylock.lockAwareCountsByContexts
-import tv.own.myowntv.core.categorylock.visibleOnceRead
-import tv.own.myowntv.core.customize.seals
-import tv.own.myowntv.core.customize.sealsItemIn
-import tv.own.myowntv.core.customize.CategoryMove
-import tv.own.myowntv.core.customize.CategoryRailEditor
-import tv.own.myowntv.core.customize.railCategories
-import tv.own.myowntv.core.database.dao.CategoryDao
-import tv.own.myowntv.core.database.dao.ContentOrderDao
-import tv.own.myowntv.core.database.dao.CustomCategoryDao
-import tv.own.myowntv.core.database.dao.FavoriteDao
-import tv.own.myowntv.core.database.dao.HistoryDao
-import tv.own.myowntv.core.database.dao.MovieDao
-import tv.own.myowntv.core.database.dao.ProgressDao
-import tv.own.myowntv.core.database.dao.ProfileDao
-import tv.own.myowntv.core.database.dao.SourceDao
-import tv.own.myowntv.core.database.dao.resolveExistingProfileId
-import tv.own.myowntv.core.database.entity.ContentOrderEntity
-import tv.own.myowntv.core.database.entity.DownloadEntity
-import tv.own.myowntv.core.database.entity.FavoriteEntity
-import tv.own.myowntv.core.database.entity.MovieEntity
-import tv.own.myowntv.core.database.entity.PlaybackProgressEntity
-import tv.own.myowntv.core.database.entity.WatchHistoryEntity
-import tv.own.myowntv.core.launcher.LauncherIntegrationRepository
-import tv.own.myowntv.core.model.MediaType
-import tv.own.myowntv.core.util.throttleLatest
+import tv.own.owntv.core.customize.CustomizationStore
+import tv.own.owntv.core.customize.CustomizeKeys
+import tv.own.owntv.core.customize.SectionCustomizations
+import tv.own.owntv.core.content.movieCountFlow
+import tv.own.owntv.core.categorylock.clearWhenSealed
+import tv.own.owntv.core.categorylock.lockAwareCountsByContexts
+import tv.own.owntv.core.categorylock.visibleOnceRead
+import tv.own.owntv.core.customize.seals
+import tv.own.owntv.core.customize.sealsItemIn
+import tv.own.owntv.core.customize.CategoryMove
+import tv.own.owntv.core.customize.CategoryRailEditor
+import tv.own.owntv.core.customize.railCategories
+import tv.own.owntv.core.database.dao.CategoryDao
+import tv.own.owntv.core.database.dao.ContentOrderDao
+import tv.own.owntv.core.database.dao.CustomCategoryDao
+import tv.own.owntv.core.database.dao.FavoriteDao
+import tv.own.owntv.core.database.dao.HistoryDao
+import tv.own.owntv.core.database.dao.MovieDao
+import tv.own.owntv.core.database.dao.ProgressDao
+import tv.own.owntv.core.database.dao.ProfileDao
+import tv.own.owntv.core.database.dao.SourceDao
+import tv.own.owntv.core.database.dao.resolveExistingProfileId
+import tv.own.owntv.core.database.entity.ContentOrderEntity
+import tv.own.owntv.core.database.entity.DownloadEntity
+import tv.own.owntv.core.database.entity.FavoriteEntity
+import tv.own.owntv.core.database.entity.MovieEntity
+import tv.own.owntv.core.database.entity.PlaybackProgressEntity
+import tv.own.owntv.core.database.entity.WatchHistoryEntity
+import tv.own.owntv.core.launcher.LauncherIntegrationRepository
+import tv.own.owntv.core.model.MediaType
+import tv.own.owntv.core.util.throttleLatest
 import tv.own.myowntv.features.customize.MoveTarget
-import tv.own.myowntv.core.customize.CategoryRestorePlan
-import tv.own.myowntv.core.customize.planCategoryRestore
-import tv.own.myowntv.core.customize.restoreCategoryToDefault
+import tv.own.owntv.core.customize.CategoryRestorePlan
+import tv.own.owntv.core.customize.planCategoryRestore
+import tv.own.owntv.core.customize.restoreCategoryToDefault
 import tv.own.myowntv.features.live.LiveRailItem
-import tv.own.myowntv.core.download.DownloadManager
-import tv.own.myowntv.core.storage.StorageAccess
-import tv.own.myowntv.core.storage.MediaFolders
-import tv.own.myowntv.core.repository.activeProfileSources
-import tv.own.myowntv.core.settings.SettingsRepository
-import tv.own.myowntv.player.OwnTVPlayer
+import tv.own.owntv.core.download.DownloadManager
+import tv.own.owntv.core.storage.StorageAccess
+import tv.own.owntv.core.storage.MediaFolders
+import tv.own.owntv.core.repository.activeProfileSources
+import tv.own.owntv.core.settings.SettingsRepository
+import tv.own.owntv.player.OwnTVPlayer
 import tv.own.myowntv.ui.components.MyOwnTVIcon
-import tv.own.myowntv.core.live.LiveKey
+import tv.own.owntv.core.live.LiveKey
 import tv.own.myowntv.features.search.positionOf
-import tv.own.myowntv.core.live.parseLiveKey
-import tv.own.myowntv.core.live.serialize
-import tv.own.myowntv.core.settings.SourceOverrides
+import tv.own.owntv.core.live.parseLiveKey
+import tv.own.owntv.core.live.serialize
+import tv.own.owntv.core.settings.SourceOverrides
 
 class MovieViewModel(
     private val movieDao: MovieDao,
     /** Lets the browse screen tell core's drain which category to fill first. */
-    private val catalogPriority: tv.own.myowntv.core.sync.CatalogPriority,
+    private val catalogPriority: tv.own.owntv.core.sync.CatalogPriority,
     private val categoryDao: CategoryDao,
     private val favoriteDao: FavoriteDao,
     private val historyDao: HistoryDao,
-    private val userDataWriter: tv.own.myowntv.core.backup.UserDataWriter,
+    private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
     private val progressDao: ProgressDao,
     private val profileDao: ProfileDao,
     private val sourceDao: SourceDao,
@@ -104,10 +156,10 @@ class MovieViewModel(
     private val launcherIntegrationRepository: LauncherIntegrationRepository,
     private val contentOrderDao: ContentOrderDao,
     private val customCategoryDao: CustomCategoryDao,
-    private val metadata: tv.own.myowntv.core.metadata.MetadataRepository,
-    private val externalPlayerLauncher: tv.own.myowntv.core.player.ExternalPlayerLauncher,
-    private val streamUrlResolver: tv.own.myowntv.core.stalker.StreamUrlResolver,
-    private val subtitleController: tv.own.myowntv.core.subtitles.SubtitleController,
+    private val metadata: tv.own.owntv.core.metadata.MetadataRepository,
+    private val externalPlayerLauncher: tv.own.owntv.core.player.ExternalPlayerLauncher,
+    private val streamUrlResolver: tv.own.owntv.core.stalker.StreamUrlResolver,
+    private val subtitleController: tv.own.owntv.core.subtitles.SubtitleController,
 ) : ViewModel() {
 
     /** The categories' search text, held here so it survives the player (see LiveViewModel). */
@@ -230,7 +282,7 @@ class MovieViewModel(
                 flowOf(emptySet())
             } else {
                 combine(categoryDao.observe(c.sourceIds, MediaType.MOVIE), custom, profileDao.observeById(c.profileId)) { cats, cust, profile ->
-                    tv.own.myowntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
+                    tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
                         cats,
                         cust.hiddenCategories,
                         profile?.isKids == true,
@@ -306,7 +358,7 @@ class MovieViewModel(
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     /** TMDB details already resolved this session, by title id: shown without the focus debounce. */
-    private val resolvedMeta = java.util.concurrent.ConcurrentHashMap<Long, tv.own.myowntv.core.database.entity.MetadataCacheEntity>()
+    private val resolvedMeta = java.util.concurrent.ConcurrentHashMap<Long, tv.own.owntv.core.database.entity.MetadataCacheEntity>()
 
     val selectedMovieMeta: StateFlow<MovieMeta?> = combine(_selectedMovie, _metaRefreshTick) { m, tick -> m to tick }
         .distinctUntilChanged { a, b -> a.first?.id == b.first?.id && a.second == b.second }
@@ -318,7 +370,7 @@ class MovieViewModel(
         .transformLatest { (m, _) ->
             if (m == null) { emit(null); return@transformLatest }
             resolvedMeta[m.id]?.let { emit(MovieMeta(m.id, it)); return@transformLatest }
-            delay(tv.own.myowntv.core.metadata.MetadataRepository.FOCUS_DEBOUNCE_MS)
+            delay(tv.own.owntv.core.metadata.MetadataRepository.FOCUS_DEBOUNCE_MS)
             val cache = runCatching { metadata.resolveMovie(m) }.getOrNull()
             if (cache != null) {
                 if (resolvedMeta.size > 500) resolvedMeta.clear()
@@ -330,7 +382,7 @@ class MovieViewModel(
 
     /** TMDB metadata tagged with the movie id it was resolved for, so the UI never shows stale meta on a
      *  different card during the debounce window. [cache] is null while resolving or on no match. */
-    data class MovieMeta(val movieId: Long, val cache: tv.own.myowntv.core.database.entity.MetadataCacheEntity?)
+    data class MovieMeta(val movieId: Long, val cache: tv.own.owntv.core.database.entity.MetadataCacheEntity?)
 
     /**
      * Poster fallback for grid/list tiles the provider gave no artwork for. Those show a placeholder
@@ -347,8 +399,8 @@ class MovieViewModel(
     fun onPosterlessVisible(movies: List<MovieEntity>) { _posterProbe.value = movies }
 
     /** Source mode — the detail pane uses it to flip provider/TMDB field precedence. */
-    val metadataMode: StateFlow<tv.own.myowntv.core.metadata.MetadataMode> = settings.metadataMode
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.myowntv.core.metadata.MetadataMode.PROVIDER_PLUS_TMDB)
+    val metadataMode: StateFlow<tv.own.owntv.core.metadata.MetadataMode> = settings.metadataMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.metadata.MetadataMode.PROVIDER_PLUS_TMDB)
 
     // Observable so the player HUD's favorite toggle can reflect/act on the movie being played.
     private val _playingMovie = MutableStateFlow<MovieEntity?>(null)
@@ -612,7 +664,7 @@ class MovieViewModel(
 
     suspend fun movieTmdbNamePrefill(movie: MovieEntity): TmdbNamePrefill {
         metadata.movieOverride(movie)?.let { return TmdbNamePrefill(it.title, it.year, hasOverride = true) }
-        val norm = tv.own.myowntv.core.metadata.TitleNormalizer.normalize(movie.name)
+        val norm = tv.own.owntv.core.metadata.TitleNormalizer.normalize(movie.name)
         return TmdbNamePrefill(norm.query, movie.year ?: norm.year, hasOverride = false)
     }
 
@@ -664,7 +716,7 @@ class MovieViewModel(
     fun playExternal(movie: MovieEntity) {
         viewModelScope.launch {
             val pid = currentProfileId()
-            if (pid != null && (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(pid, movie.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, movie.categoryId))) return@launch
+            if (pid != null && (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, movie.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, movie.categoryId))) return@launch
             Log.d(TAG, "playExternal movieId=${movie.id}")
             val url = resolvedUrlOrNull(movie) ?: return@launch
             val source = sourceDao.getById(movie.sourceId)
@@ -686,7 +738,7 @@ class MovieViewModel(
     fun play(movie: MovieEntity, startPositionMs: Long = 0) {
         viewModelScope.launch {
             val pid = currentProfileId()
-            if (pid != null && (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(pid, movie.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, movie.categoryId))) return@launch
+            if (pid != null && (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, movie.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, movie.categoryId))) return@launch
             // External player (global toggle): hand the stream URL to an external app and skip the
             // in-app engine entirely. History is still recorded (recently-watched); resume position
             // and the playing-movie HUD/progress tick are intentionally not — the external app owns
@@ -727,7 +779,7 @@ class MovieViewModel(
                 movie.streamUrl
             }
             Log.d(TAG, "play movieId=${movie.id} profile=$pid startPositionMs=$startPositionMs")
-            val pinKey = tv.own.myowntv.core.player.enginePinKey(movie.sourceId, "MOVIE", movie.remoteId)
+            val pinKey = tv.own.owntv.core.player.enginePinKey(movie.sourceId, "MOVIE", movie.remoteId)
             player.play(
                 playUrl,
                 title = movie.name,
@@ -745,7 +797,7 @@ class MovieViewModel(
                 // mint a fresh one instead of retrying the expired link. Null for M3U/Xtream, which also
                 // clears any provider the previous item left on the player.
                 reconnectProvider = if (streamUrlResolver.needsResolve(source)) {
-                    tv.own.myowntv.core.stalker.ReconnectUrlProvider {
+                    tv.own.owntv.core.stalker.ReconnectUrlProvider {
                         runCatching { streamUrlResolver.resolve(source!!, movie.streamUrl, vod = true) }
                             .onFailure { Log.w(TAG, "stalker VOD reconnect resolve failed movieId=${movie.id}", it) }
                             .getOrNull()
@@ -785,7 +837,7 @@ class MovieViewModel(
     fun download(movie: MovieEntity) {
         viewModelScope.launch {
             val pid = currentProfileId() ?: return@launch
-            if (!tv.own.myowntv.core.content.AdultCategoryClassifier.allows(pid, movie.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, movie.categoryId)) return@launch
+            if (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, movie.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, movie.categoryId)) return@launch
             downloadManager.enqueue(
                 profileId = pid,
                 mediaType = MediaType.MOVIE,
@@ -800,7 +852,7 @@ class MovieViewModel(
     }
 
     /** Downloaded OpenSubtitles subtitles for this movie (long-press "Delete subtitles" popup). */
-    suspend fun downloadedSubtitles(movie: MovieEntity): List<tv.own.myowntv.core.database.dao.LinkedSubtitle> =
+    suspend fun downloadedSubtitles(movie: MovieEntity): List<tv.own.owntv.core.database.dao.LinkedSubtitle> =
         subtitleController.downloadsForMovie(movie)
 
     fun deleteSubtitle(cacheId: Long) {

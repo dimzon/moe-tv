@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.shell.components
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.StageColors
 import tv.own.myowntv.features.settings.SettingValue
@@ -72,19 +124,19 @@ import org.koin.androidx.compose.koinViewModel
 import androidx.tv.material3.Text
 import tv.own.myowntv.R
 import tv.own.myowntv.features.customize.CustomizeScreen
-import tv.own.myowntv.core.i18n.SupportedLocales
-import tv.own.myowntv.core.player.SurroundMode
+import tv.own.owntv.core.i18n.SupportedLocales
+import tv.own.owntv.core.player.SurroundMode
 import tv.own.myowntv.features.settings.LocalSyncScreen
 import tv.own.myowntv.features.settings.HomeSettingsScreen
 import tv.own.myowntv.features.settings.NO_ARGS
 import tv.own.myowntv.features.settings.LanguageSettingsScreen
 import tv.own.myowntv.features.settings.LanguageSettingsViewModel
-import tv.own.myowntv.core.settings.SettingsRepository
+import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.myowntv.features.update.UpdateDialog
 import tv.own.myowntv.features.settings.BackupScreen
 import tv.own.myowntv.features.settings.ManageSourcesScreen
 import tv.own.myowntv.features.settings.SettingsViewModel
-import tv.own.myowntv.core.nav.MainSection
+import tv.own.owntv.core.nav.MainSection
 import tv.own.myowntv.ui.components.BrowseMode
 import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.components.StorageBrowser
@@ -92,12 +144,12 @@ import tv.own.myowntv.ui.components.BackgroundImageChooserDialog
 import tv.own.myowntv.ui.components.ingestBackgroundImage
 import tv.own.myowntv.ui.components.trapAllFocusExit
 import tv.own.myowntv.ui.components.longPressMenuGuard
-import tv.own.myowntv.core.theme.GlassConfig
-import tv.own.myowntv.core.theme.AppFontFamily
-import tv.own.myowntv.core.theme.FontCustomization
-import tv.own.myowntv.core.theme.PopupSizeScale
-import tv.own.myowntv.core.theme.ThemeMode
-import tv.own.myowntv.core.theme.UiZoom
+import tv.own.owntv.core.theme.GlassConfig
+import tv.own.owntv.core.theme.AppFontFamily
+import tv.own.owntv.core.theme.FontCustomization
+import tv.own.owntv.core.theme.PopupSizeScale
+import tv.own.owntv.core.theme.ThemeMode
+import tv.own.owntv.core.theme.UiZoom
 import kotlin.math.roundToInt
 import java.io.File
 import java.util.Locale
@@ -155,7 +207,7 @@ fun SettingsScreen(
     start: SettingsStart? = null,
     onStartConsumed: () -> Unit = {},
     /** Settings → Sports → My teams: OK on a followed team opens its page in the Sports section. */
-    onOpenSportsTeam: (tv.own.myowntv.core.sports.FollowedTeam) -> Unit = {},
+    onOpenSportsTeam: (tv.own.owntv.core.sports.FollowedTeam) -> Unit = {},
 ) {
     // A cross-script language change recreates the Activity so Android can apply the new script's
     // shaping and font fallback. Keep the open settings sub-screen across that configuration change
@@ -174,7 +226,7 @@ fun SettingsScreen(
     // Per-playlist catch-up time zone: the playlist list, then the value picker for [catchupSource].
     var showCatchupSources by remember { mutableStateOf(false) }
     var showCatchupSourceValue by remember { mutableStateOf(false) }
-    var catchupSource by remember { mutableStateOf<tv.own.myowntv.core.database.entity.SourceEntity?>(null) }
+    var catchupSource by remember { mutableStateOf<tv.own.owntv.core.database.entity.SourceEntity?>(null) }
     var showEpgOffset by remember { mutableStateOf(false) }
     var showGuideDays by remember { mutableStateOf(false) }
     var showAnimations by remember { mutableStateOf(false) }
@@ -326,9 +378,9 @@ fun SettingsScreen(
     val rememberLastMovies by settingsVm.rememberLastMovies.collectAsStateWithLifecycle()
     val rememberLastSeries by settingsVm.rememberLastSeries.collectAsStateWithLifecycle()
     // "Custom" on the Panel Width row as soon as any one of the three sections is switched on.
-    val panelWidthLive by settingsVm.panelWidthEnabled.getValue(tv.own.myowntv.core.settings.PanelSection.LIVE).collectAsStateWithLifecycle()
-    val panelWidthMovies by settingsVm.panelWidthEnabled.getValue(tv.own.myowntv.core.settings.PanelSection.MOVIES).collectAsStateWithLifecycle()
-    val panelWidthSeries by settingsVm.panelWidthEnabled.getValue(tv.own.myowntv.core.settings.PanelSection.SERIES).collectAsStateWithLifecycle()
+    val panelWidthLive by settingsVm.panelWidthEnabled.getValue(tv.own.owntv.core.settings.PanelSection.LIVE).collectAsStateWithLifecycle()
+    val panelWidthMovies by settingsVm.panelWidthEnabled.getValue(tv.own.owntv.core.settings.PanelSection.MOVIES).collectAsStateWithLifecycle()
+    val panelWidthSeries by settingsVm.panelWidthEnabled.getValue(tv.own.owntv.core.settings.PanelSection.SERIES).collectAsStateWithLifecycle()
     val panelWidthCustom = panelWidthLive || panelWidthMovies || panelWidthSeries
     val guideWidthCustom by settingsVm.guideWidthEnabled.collectAsStateWithLifecycle()
 
@@ -648,7 +700,7 @@ fun SettingsScreen(
             title = stringResource(R.string.settings_vod_layout),
             desc = stringResource(R.string.settings_vod_layout_description),
             chip = stringResource(vodLayoutLabelRes(vodLayout)),
-            chipTone = if (vodLayout == tv.own.myowntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) TileTone.PRIMARY else TileTone.SECONDARY,
+            chipTone = if (vodLayout == tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) TileTone.PRIMARY else TileTone.SECONDARY,
             focus = vodLayoutRowFocus,
             onClick = { saveScroll(); dialogReturn = vodLayoutRowFocus; showVodLayout = true },
         ),
@@ -760,7 +812,7 @@ fun SettingsScreen(
         RootRow(
             "app_startup", TileTone.SECONDARY, MyOwnTVIcon.POWER,
             title = stringResource(R.string.settings_app_startup), desc = stringResource(R.string.settings_app_startup_description),
-            chip = if (startupMode == tv.own.myowntv.core.settings.StartupMode.SPECIFIC_CHANNEL) {
+            chip = if (startupMode == tv.own.owntv.core.settings.StartupMode.SPECIFIC_CHANNEL) {
                 startupChannel?.name ?: startupLabel(startupMode)
             } else startupLabel(startupMode),
             chipTone = TileTone.PRIMARY,
@@ -969,7 +1021,7 @@ fun SettingsScreen(
             SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_ch_paging), stringResource(R.string.settings_search_keywords_ch), MyOwnTVIcon.CH_NAV, TileTone.PRIMARY,
                 chip = if (chNavEnabled) stringResource(R.string.common_on) else stringResource(R.string.common_off), chipTone = if (chNavEnabled) TileTone.PRIMARY else TileTone.SECONDARY) { open(SettingsTab.CH_NAV) },
             SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_vod_layout), stringResource(R.string.settings_search_keywords_vod_layout), MyOwnTVIcon.LIST_GRID, TileTone.PRIMARY,
-                chip = stringResource(vodLayoutLabelRes(vodLayout)), chipTone = if (vodLayout == tv.own.myowntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) TileTone.PRIMARY else TileTone.SECONDARY) { saveScroll(); dialogReturn = searchFieldFocus; showVodLayout = true },
+                chip = stringResource(vodLayoutLabelRes(vodLayout)), chipTone = if (vodLayout == tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) TileTone.PRIMARY else TileTone.SECONDARY) { saveScroll(); dialogReturn = searchFieldFocus; showVodLayout = true },
             SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_panel_width), stringResource(R.string.settings_search_keywords_panel_width), MyOwnTVIcon.PANEL_WIDTH, TileTone.PRIMARY,
                 chip = if (panelWidthCustom) stringResource(R.string.settings_live_latency_custom) else stringResource(R.string.settings_subtitle_default), chipTone = if (panelWidthCustom) TileTone.PRIMARY else TileTone.SECONDARY) { open(SettingsTab.PANEL_WIDTH) },
         SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_guide_width), stringResource(R.string.settings_search_keywords_guide_width), MyOwnTVIcon.EPG, TileTone.PRIMARY,
@@ -1408,17 +1460,17 @@ private fun themeLabel(mode: ThemeMode): String = stringResource(
 @Composable
 private fun VodLayoutDialog(
     settingsVm: SettingsViewModel,
-    vodLayout: tv.own.myowntv.core.settings.SettingsRepository.VodLayout,
+    vodLayout: tv.own.owntv.core.settings.SettingsRepository.VodLayout,
     onClose: () -> Unit,
 ) {
-    val layouts = tv.own.myowntv.core.settings.SettingsRepository.VodLayout.entries
+    val layouts = tv.own.owntv.core.settings.SettingsRepository.VodLayout.entries
     tv.own.myowntv.features.settings.PickerDialog(
         title = stringResource(R.string.settings_vod_layout),
         subtitle = stringResource(R.string.settings_vod_layout_screen_description),
         options = layouts.map { it.name to stringResource(vodLayoutLabelRes(it)) },
         descriptions = layouts.associate {
             it.name to stringResource(
-                if (it == tv.own.myowntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) {
+                if (it == tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) {
                     R.string.settings_vod_layout_cinematic_description
                 } else {
                     R.string.settings_vod_layout_separate_description
@@ -1426,11 +1478,11 @@ private fun VodLayoutDialog(
             )
         },
         optionPreview = { value ->
-            VodLayoutPreviewBars(tv.own.myowntv.core.settings.SettingsRepository.VodLayout.valueOf(value))
+            VodLayoutPreviewBars(tv.own.owntv.core.settings.SettingsRepository.VodLayout.valueOf(value))
         },
         selected = vodLayout.name,
         onSelect = {
-            settingsVm.setVodLayout(tv.own.myowntv.core.settings.SettingsRepository.VodLayout.valueOf(it))
+            settingsVm.setVodLayout(tv.own.owntv.core.settings.SettingsRepository.VodLayout.valueOf(it))
             onClose()
         },
         onDismiss = onClose,
@@ -1504,27 +1556,27 @@ private fun liveLayoutSearchEntry(settingsVm: SettingsViewModel, onClick: () -> 
     )
 }
 
-private fun liveLayoutLabelRes(layout: tv.own.myowntv.core.settings.SettingsRepository.LiveLayout): Int =
-    if (layout == tv.own.myowntv.core.settings.SettingsRepository.LiveLayout.SEPARATE) R.string.settings_vod_layout_separate
+private fun liveLayoutLabelRes(layout: tv.own.owntv.core.settings.SettingsRepository.LiveLayout): Int =
+    if (layout == tv.own.owntv.core.settings.SettingsRepository.LiveLayout.SEPARATE) R.string.settings_vod_layout_separate
     else R.string.settings_live_layout_stage
 
 @Composable
 private fun LiveLayoutDialog(settingsVm: SettingsViewModel, onClose: () -> Unit) {
     val current by settingsVm.liveLayout.collectAsStateWithLifecycle()
-    val layouts = tv.own.myowntv.core.settings.SettingsRepository.LiveLayout.entries
+    val layouts = tv.own.owntv.core.settings.SettingsRepository.LiveLayout.entries
     tv.own.myowntv.features.settings.PickerDialog(
         title = stringResource(R.string.settings_live_layout),
         subtitle = stringResource(R.string.settings_live_layout_description),
         options = layouts.map { it.name to stringResource(liveLayoutLabelRes(it)) },
         descriptions = layouts.associate {
             it.name to stringResource(
-                if (it == tv.own.myowntv.core.settings.SettingsRepository.LiveLayout.SEPARATE) R.string.settings_live_layout_separate_description
+                if (it == tv.own.owntv.core.settings.SettingsRepository.LiveLayout.SEPARATE) R.string.settings_live_layout_separate_description
                 else R.string.settings_live_layout_stage_description,
             )
         },
         selected = current.name,
         onSelect = {
-            settingsVm.setLiveLayout(tv.own.myowntv.core.settings.SettingsRepository.LiveLayout.valueOf(it))
+            settingsVm.setLiveLayout(tv.own.owntv.core.settings.SettingsRepository.LiveLayout.valueOf(it))
             onClose()
         },
         onDismiss = onClose,
@@ -1544,12 +1596,12 @@ private fun ThemeDialogHost(settingsVm: SettingsViewModel, themeMode: ThemeMode,
 }
 
 @Composable
-private fun AnimationsDialogHost(settingsVm: SettingsViewModel, animationLevel: tv.own.myowntv.core.theme.AnimationLevel, onClose: () -> Unit) {
+private fun AnimationsDialogHost(settingsVm: SettingsViewModel, animationLevel: tv.own.owntv.core.theme.AnimationLevel, onClose: () -> Unit) {
     tv.own.myowntv.features.settings.PickerDialog(
         title = stringResource(R.string.settings_animations_dialog),
-        options = tv.own.myowntv.core.theme.AnimationLevel.entries.map { it.name to stringResource(it.labelRes) },
+        options = tv.own.owntv.core.theme.AnimationLevel.entries.map { it.name to stringResource(it.labelRes) },
         selected = animationLevel.name,
-        onSelect = { settingsVm.setAnimationLevel(tv.own.myowntv.core.theme.AnimationLevel.valueOf(it)); onClose() },
+        onSelect = { settingsVm.setAnimationLevel(tv.own.owntv.core.theme.AnimationLevel.valueOf(it)); onClose() },
         onDismiss = { onClose() },
     )
 }
@@ -1582,12 +1634,12 @@ private fun GuideDaysDialog(settingsVm: SettingsViewModel, guideDays: Int, onClo
         title = stringResource(R.string.settings_epg_guide_days),
         hint = stringResource(
             R.string.settings_epg_guide_days_hint,
-            tv.own.myowntv.core.settings.GuideRetention.MIN_DAYS,
-            tv.own.myowntv.core.settings.GuideRetention.MAX_DAYS,
+            tv.own.owntv.core.settings.GuideRetention.MIN_DAYS,
+            tv.own.owntv.core.settings.GuideRetention.MAX_DAYS,
         ),
         initialDays = guideDays,
-        minDays = tv.own.myowntv.core.settings.GuideRetention.MIN_DAYS,
-        maxDays = tv.own.myowntv.core.settings.GuideRetention.MAX_DAYS,
+        minDays = tv.own.owntv.core.settings.GuideRetention.MIN_DAYS,
+        maxDays = tv.own.owntv.core.settings.GuideRetention.MAX_DAYS,
         label = { days -> pluralStringResource(R.plurals.settings_epg_guide_days_value, days, days) },
         onConfirm = { settingsVm.setGuideDaysToKeep(it); onClose() },
         onDismiss = onClose,
@@ -1647,8 +1699,8 @@ private fun liveOpensInRootRow(settingsVm: SettingsViewModel, focus: FocusReques
     )
 }
 
-private fun liveViewLabelRes(view: tv.own.myowntv.core.settings.SettingsRepository.LiveView): Int =
-    if (view == tv.own.myowntv.core.settings.SettingsRepository.LiveView.GUIDE) R.string.content_live_guide_view else R.string.content_live_list_view
+private fun liveViewLabelRes(view: tv.own.owntv.core.settings.SettingsRepository.LiveView): Int =
+    if (view == tv.own.owntv.core.settings.SettingsRepository.LiveView.GUIDE) R.string.content_live_guide_view else R.string.content_live_list_view
 
 @Composable
 private fun LiveOpensInDialog(settingsVm: SettingsViewModel, onClose: () -> Unit) {
@@ -1656,9 +1708,9 @@ private fun LiveOpensInDialog(settingsVm: SettingsViewModel, onClose: () -> Unit
     tv.own.myowntv.features.settings.PickerDialog(
         title = stringResource(R.string.settings_live_opens_in),
         subtitle = stringResource(R.string.settings_live_opens_in_description),
-        options = tv.own.myowntv.core.settings.SettingsRepository.LiveView.entries.map { it.name to stringResource(liveViewLabelRes(it)) },
+        options = tv.own.owntv.core.settings.SettingsRepository.LiveView.entries.map { it.name to stringResource(liveViewLabelRes(it)) },
         selected = current.name,
-        onSelect = { settingsVm.setLiveView(tv.own.myowntv.core.settings.SettingsRepository.LiveView.valueOf(it)); onClose() },
+        onSelect = { settingsVm.setLiveView(tv.own.owntv.core.settings.SettingsRepository.LiveView.valueOf(it)); onClose() },
         onDismiss = onClose,
     )
 }
@@ -1678,10 +1730,10 @@ private fun remindersRootRow(settingsVm: SettingsViewModel, focus: FocusRequeste
     )
 }
 
-private fun reminderModeLabelRes(mode: tv.own.myowntv.core.settings.SettingsRepository.ReminderMode): Int = when (mode) {
-    tv.own.myowntv.core.settings.SettingsRepository.ReminderMode.ASK -> R.string.settings_reminder_ask
-    tv.own.myowntv.core.settings.SettingsRepository.ReminderMode.SWITCH -> R.string.settings_reminder_switch
-    tv.own.myowntv.core.settings.SettingsRepository.ReminderMode.NOTIFY -> R.string.settings_reminder_notify
+private fun reminderModeLabelRes(mode: tv.own.owntv.core.settings.SettingsRepository.ReminderMode): Int = when (mode) {
+    tv.own.owntv.core.settings.SettingsRepository.ReminderMode.ASK -> R.string.settings_reminder_ask
+    tv.own.owntv.core.settings.SettingsRepository.ReminderMode.SWITCH -> R.string.settings_reminder_switch
+    tv.own.owntv.core.settings.SettingsRepository.ReminderMode.NOTIFY -> R.string.settings_reminder_notify
 }
 
 @Composable
@@ -1690,9 +1742,9 @@ private fun RemindersDialog(settingsVm: SettingsViewModel, onClose: () -> Unit) 
     tv.own.myowntv.features.settings.PickerDialog(
         title = stringResource(R.string.settings_reminders),
         subtitle = stringResource(R.string.settings_reminders_description),
-        options = tv.own.myowntv.core.settings.SettingsRepository.ReminderMode.entries.map { it.name to stringResource(reminderModeLabelRes(it)) },
+        options = tv.own.owntv.core.settings.SettingsRepository.ReminderMode.entries.map { it.name to stringResource(reminderModeLabelRes(it)) },
         selected = current.name,
-        onSelect = { settingsVm.setReminderMode(tv.own.myowntv.core.settings.SettingsRepository.ReminderMode.valueOf(it)); onClose() },
+        onSelect = { settingsVm.setReminderMode(tv.own.owntv.core.settings.SettingsRepository.ReminderMode.valueOf(it)); onClose() },
         onDismiss = onClose,
     )
 }
@@ -1718,7 +1770,7 @@ private fun ReminderLeadDialog(settingsVm: SettingsViewModel, onClose: () -> Uni
     tv.own.myowntv.features.settings.PickerDialog(
         title = stringResource(R.string.settings_reminder_lead),
         subtitle = stringResource(R.string.settings_reminder_lead_description),
-        options = tv.own.myowntv.core.reminder.ReminderSchedule.LEAD_CHOICES.map { it.toString() to tv.own.myowntv.features.live.reminderLeadText(it) },
+        options = tv.own.owntv.core.reminder.ReminderSchedule.LEAD_CHOICES.map { it.toString() to tv.own.myowntv.features.live.reminderLeadText(it) },
         selected = current.toString(),
         onSelect = { settingsVm.setReminderLeadMinutes(it.toInt()); onClose() },
         onDismiss = onClose,
@@ -1727,16 +1779,16 @@ private fun ReminderLeadDialog(settingsVm: SettingsViewModel, onClose: () -> Uni
 
 /** Chip label for the Navigation row: the chosen rail style. */
 @Composable
-private fun navStyleLabel(style: tv.own.myowntv.core.settings.SettingsRepository.NavStyle): String = stringResource(
+private fun navStyleLabel(style: tv.own.owntv.core.settings.SettingsRepository.NavStyle): String = stringResource(
     when (style) {
-        tv.own.myowntv.core.settings.SettingsRepository.NavStyle.FLOATING -> R.string.settings_nav_floating
-        tv.own.myowntv.core.settings.SettingsRepository.NavStyle.DOCKED -> R.string.settings_nav_docked
+        tv.own.owntv.core.settings.SettingsRepository.NavStyle.FLOATING -> R.string.settings_nav_floating
+        tv.own.owntv.core.settings.SettingsRepository.NavStyle.DOCKED -> R.string.settings_nav_docked
     },
 )
 
 /** Chip and option label for the Movies & Series layout choice. */
-private fun vodLayoutLabelRes(layout: tv.own.myowntv.core.settings.SettingsRepository.VodLayout): Int =
-    if (layout == tv.own.myowntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) {
+private fun vodLayoutLabelRes(layout: tv.own.owntv.core.settings.SettingsRepository.VodLayout): Int =
+    if (layout == tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) {
         R.string.settings_vod_layout_cinematic
     } else {
         R.string.settings_vod_layout_separate
@@ -1751,14 +1803,14 @@ private fun vodLayoutLabelRes(layout: tv.own.myowntv.core.settings.SettingsRepos
  * colour, because in that layout the picture IS the background.
  */
 @Composable
-private fun VodLayoutPreviewBars(layout: tv.own.myowntv.core.settings.SettingsRepository.VodLayout) {
+private fun VodLayoutPreviewBars(layout: tv.own.owntv.core.settings.SettingsRepository.VodLayout) {
     val bar = tv.own.myowntv.ui.theme.StageColors.Text.copy(alpha = 0.13f)
     val shape = RoundedCornerShape(4.dp)
     Row(
         modifier = Modifier.fillMaxWidth().height(30.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        if (layout == tv.own.myowntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) {
+        if (layout == tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) {
             Box(Modifier.width(48.dp).fillMaxHeight().clip(shape).background(bar.copy(alpha = 0.07f)))
             Box(
                 Modifier
@@ -1788,8 +1840,8 @@ private fun languageChipText(tag: String): String {
 }
 
 /** The six quick presets shown at the top of the accent picker. */
-private val AccentPresetChoices: List<tv.own.myowntv.core.theme.AccentColor> =
-    tv.own.myowntv.core.theme.AccentColor.entries.take(6)
+private val AccentPresetChoices: List<tv.own.owntv.core.theme.AccentColor> =
+    tv.own.owntv.core.theme.AccentColor.entries.take(6)
 
 /**
  * Focus highlight presets: the six accent presets plus gold and white, which are the two
@@ -1906,9 +1958,9 @@ private fun CatchupTimeHost(
 /** The playlist list behind "Catch-up time zone per playlist", moved out of [SettingsScreen] unchanged. */
 @Composable
 private fun CatchupSourcesHost(
-    sources: List<tv.own.myowntv.core.database.entity.SourceEntity>,
-    current: tv.own.myowntv.core.database.entity.SourceEntity?,
-    onPick: (tv.own.myowntv.core.database.entity.SourceEntity?) -> Unit,
+    sources: List<tv.own.owntv.core.database.entity.SourceEntity>,
+    current: tv.own.owntv.core.database.entity.SourceEntity?,
+    onPick: (tv.own.owntv.core.database.entity.SourceEntity?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     tv.own.myowntv.features.settings.PickerDialog(
@@ -1925,7 +1977,7 @@ data class SettingsStart(val group: Int?, val search: Boolean)
 
 /** One playlist's catch-up time zone, moved out of [SettingsScreen] unchanged (its body is at the JVM method limit). */
 @Composable
-private fun CatchupSourceValueHost(settingsVm: SettingsViewModel, src: tv.own.myowntv.core.database.entity.SourceEntity?, onDone: () -> Unit) {
+private fun CatchupSourceValueHost(settingsVm: SettingsViewModel, src: tv.own.owntv.core.database.entity.SourceEntity?, onDone: () -> Unit) {
     tv.own.myowntv.features.settings.PickerDialog(
         title = src?.name ?: stringResource(R.string.settings_catchup_timezone_per_playlist),
         options = listOf(
@@ -1998,10 +2050,10 @@ internal fun LivePreviewPanelHiddenDialog(onDismiss: () -> Unit) {
 }
 
 /** Stable, non-display choices for the history picker. */
-private enum class HistoryScope(val type: tv.own.myowntv.core.model.MediaType?, val labelRes: Int) {
-    LIVE(tv.own.myowntv.core.model.MediaType.LIVE, R.string.settings_history_live),
-    MOVIES(tv.own.myowntv.core.model.MediaType.MOVIE, R.string.settings_history_movies),
-    SERIES(tv.own.myowntv.core.model.MediaType.SERIES, R.string.settings_history_series),
+private enum class HistoryScope(val type: tv.own.owntv.core.model.MediaType?, val labelRes: Int) {
+    LIVE(tv.own.owntv.core.model.MediaType.LIVE, R.string.settings_history_live),
+    MOVIES(tv.own.owntv.core.model.MediaType.MOVIE, R.string.settings_history_movies),
+    SERIES(tv.own.owntv.core.model.MediaType.SERIES, R.string.settings_history_series),
     ALL(null, R.string.settings_history_all),
 }
 
@@ -2011,7 +2063,7 @@ private enum class HistoryScope(val type: tv.own.myowntv.core.model.MediaType?, 
  */
 @Composable
 internal fun ClearHistoryDialog(
-    onClear: (tv.own.myowntv.core.model.MediaType?) -> Unit,
+    onClear: (tv.own.owntv.core.model.MediaType?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var pending by remember { mutableStateOf<HistoryScope?>(null) }
@@ -2163,7 +2215,7 @@ private fun GlassEffectSettingsScreen(onBack: () -> Unit, modifier: Modifier = M
         onSetStyle = { style ->
             // Picture with no picture yet goes straight to the picker.
             settingsVm.setBackgroundStyle(style)
-            if (style == tv.own.myowntv.core.theme.BackgroundStyle.PICTURE && bgImagePath.isBlank()) showBackgroundChooser = true
+            if (style == tv.own.owntv.core.theme.BackgroundStyle.PICTURE && bgImagePath.isBlank()) showBackgroundChooser = true
         },
         onOpenPicture = { showBackgroundChooser = true },
         onSetLook = settingsVm::setPictureLook,
@@ -2239,7 +2291,7 @@ private const val CATCHUP_MANUAL_PREFIX = "MANUAL:"
 
 /** A playlist's own catch-up time zone as the playlist list shows it. */
 @Composable
-private fun catchupOverrideLabel(source: tv.own.myowntv.core.database.entity.SourceEntity): String =
+private fun catchupOverrideLabel(source: tv.own.owntv.core.database.entity.SourceEntity): String =
     when (source.catchupTimezone) {
         null -> stringResource(R.string.settings_live_preroll_follow)
         SettingsRepository.CatchupTimezone.MANUAL.name -> utcOffsetLabel(source.catchupOffsetMin ?: 0)
@@ -2571,7 +2623,7 @@ private fun stageRowExtras(
     onOpenZoom: () -> Unit,
     font: FontCustomization,
     onSetFont: (FontCustomization) -> Unit,
-    playlists: List<tv.own.myowntv.core.database.entity.SourceEntity>,
+    playlists: List<tv.own.owntv.core.database.entity.SourceEntity>,
 ): Map<String, RowExtra> {
     val playlistsKnown by vm.loadedSources.collectAsStateWithLifecycle()
     val accent by vm.accent.collectAsStateWithLifecycle()
@@ -2596,11 +2648,11 @@ private fun stageRowExtras(
 
     val themes = ThemeMode.entries
     val themeNames = themes.map { themeLabel(it) }
-    val liveLayouts = tv.own.myowntv.core.settings.SettingsRepository.LiveLayout.entries
-    val liveViews = tv.own.myowntv.core.settings.SettingsRepository.LiveView.entries
+    val liveLayouts = tv.own.owntv.core.settings.SettingsRepository.LiveLayout.entries
+    val liveViews = tv.own.owntv.core.settings.SettingsRepository.LiveView.entries
     // Cinematic first.
-    val vodLayouts = listOf(tv.own.myowntv.core.settings.SettingsRepository.VodLayout.CINEMATIC, tv.own.myowntv.core.settings.SettingsRepository.VodLayout.SEPARATE)
-    val presets = tv.own.myowntv.core.theme.AccentColor.entries
+    val vodLayouts = listOf(tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC, tv.own.owntv.core.settings.SettingsRepository.VodLayout.SEPARATE)
+    val presets = tv.own.owntv.core.theme.AccentColor.entries
     val presetColors = presets.map { it.primary(true) }
     val current = tv.own.myowntv.ui.theme.stageAccent.accent
     val hex = if (customAccent.isNotBlank()) customAccent.uppercase() else String.format(java.util.Locale.ROOT, "#%06X", 0xFFFFFF and current.toArgb())
@@ -2610,14 +2662,14 @@ private fun stageRowExtras(
         vm.setAccent(if (customAccent.isNotBlank()) (if (step > 0) presets.first() else presets.last()) else cycle(presets, accent, step))
     }
     val zoomStep: (Int) -> Unit = { step ->
-        val next = tv.own.myowntv.core.theme.UiZoom.clamp(uiZoomPercent + step * tv.own.myowntv.core.theme.UiZoom.STEP)
+        val next = tv.own.owntv.core.theme.UiZoom.clamp(uiZoomPercent + step * tv.own.owntv.core.theme.UiZoom.STEP)
         // Below the low-memory line the zoom popup asks first; the row never steps past it alone.
-        if (next < tv.own.myowntv.core.theme.UiZoom.LOW_RAM_WARN && uiZoomPercent >= tv.own.myowntv.core.theme.UiZoom.LOW_RAM_WARN) onOpenZoom() else onSetZoom(next)
+        if (next < tv.own.owntv.core.theme.UiZoom.LOW_RAM_WARN && uiZoomPercent >= tv.own.owntv.core.theme.UiZoom.LOW_RAM_WARN) onOpenZoom() else onSetZoom(next)
     }
     val popupStep: (Int) -> Unit = { step ->
-        onSetFont(font.copy(popupSizePercent = tv.own.myowntv.core.theme.PopupSizeScale.clamp(font.popupSizePercent + step * tv.own.myowntv.core.theme.PopupSizeScale.STEP)))
+        onSetFont(font.copy(popupSizePercent = tv.own.owntv.core.theme.PopupSizeScale.clamp(font.popupSizePercent + step * tv.own.owntv.core.theme.PopupSizeScale.STEP)))
     }
-    val languages = tv.own.myowntv.core.i18n.SupportedLocales.all.count { it.packaged }
+    val languages = tv.own.owntv.core.i18n.SupportedLocales.all.count { it.packaged }
     val valueStyle = tv.own.myowntv.ui.theme.stageText(18, 700)
     return mapOf(
         "tab_SOURCES" to RowExtra(
@@ -2656,11 +2708,11 @@ private fun stageRowExtras(
         ),
         "ui_zoom" to RowExtra(SettingValue.Stepper(stringResource(R.string.common_percent, uiZoomPercent)), onStep = zoomStep),
         "animations" to RowExtra(
-            SettingValue.Switch(animation == tv.own.myowntv.core.theme.AnimationLevel.FULL),
+            SettingValue.Switch(animation == tv.own.owntv.core.theme.AnimationLevel.FULL),
             onClick = {
                 vm.setAnimationLevel(
-                    if (animation == tv.own.myowntv.core.theme.AnimationLevel.FULL) tv.own.myowntv.core.theme.AnimationLevel.OFF
-                    else tv.own.myowntv.core.theme.AnimationLevel.FULL,
+                    if (animation == tv.own.owntv.core.theme.AnimationLevel.FULL) tv.own.owntv.core.theme.AnimationLevel.OFF
+                    else tv.own.owntv.core.theme.AnimationLevel.FULL,
                 )
             },
         ),
@@ -2675,17 +2727,17 @@ private fun stageRowExtras(
             recommended = 1,
         ),
         "live_layout" to RowExtra(
-            SettingValue.Segmented(liveLayouts.map { stringResource(if (it == tv.own.myowntv.core.settings.SettingsRepository.LiveLayout.STAGE) R.string.settings_live_layout_stage else R.string.settings_seg_separate) }, liveLayouts.indexOf(liveLayout)),
+            SettingValue.Segmented(liveLayouts.map { stringResource(if (it == tv.own.owntv.core.settings.SettingsRepository.LiveLayout.STAGE) R.string.settings_live_layout_stage else R.string.settings_seg_separate) }, liveLayouts.indexOf(liveLayout)),
             onStep = { vm.setLiveLayout(cycle(liveLayouts, liveLayout, it)) },
             onClick = { vm.setLiveLayout(cycle(liveLayouts, liveLayout, 1)) },
         ),
         "live_opens_in" to RowExtra(
-            SettingValue.Segmented(liveViews.map { stringResource(if (it == tv.own.myowntv.core.settings.SettingsRepository.LiveView.LIST) R.string.settings_view_list else R.string.settings_seg_guide) }, liveViews.indexOf(liveView)),
+            SettingValue.Segmented(liveViews.map { stringResource(if (it == tv.own.owntv.core.settings.SettingsRepository.LiveView.LIST) R.string.settings_view_list else R.string.settings_seg_guide) }, liveViews.indexOf(liveView)),
             onStep = { vm.setLiveView(cycle(liveViews, liveView, it)) },
             onClick = { vm.setLiveView(cycle(liveViews, liveView, 1)) },
         ),
         "vod_layout" to RowExtra(
-            SettingValue.Segmented(vodLayouts.map { stringResource(if (it == tv.own.myowntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) R.string.settings_vod_layout_cinematic else R.string.settings_seg_separate) }, vodLayouts.indexOf(vodLayout)),
+            SettingValue.Segmented(vodLayouts.map { stringResource(if (it == tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) R.string.settings_vod_layout_cinematic else R.string.settings_seg_separate) }, vodLayouts.indexOf(vodLayout)),
             onStep = { vm.setVodLayout(cycle(vodLayouts, vodLayout, it)) },
             onClick = { vm.setVodLayout(cycle(vodLayouts, vodLayout, 1)) },
         ),
@@ -2704,7 +2756,7 @@ private fun serviceRowExtras(vm: SettingsViewModel): Map<String, RowExtra> {
     val mode by vm.metadataMode.collectAsStateWithLifecycle()
     val tier by vm.metadataTier.collectAsStateWithLifecycle()
     val budget by vm.metadataBudgetStatus.collectAsStateWithLifecycle()
-    LaunchedEffect(tier) { if (tier == tv.own.myowntv.core.metadata.MetadataConfig.Tier.DEFAULT_WORKER) vm.refreshMetadataBudget() }
+    LaunchedEffect(tier) { if (tier == tv.own.owntv.core.metadata.MetadataConfig.Tier.DEFAULT_WORKER) vm.refreshMetadataBudget() }
     val osVm: tv.own.myowntv.features.settings.OpenSubtitlesViewModel = org.koin.androidx.compose.koinViewModel()
     val os by osVm.state.collectAsStateWithLifecycle()
     val proxy by vm.proxyConfig.collectAsStateWithLifecycle()
@@ -2741,20 +2793,20 @@ private fun serviceRowExtras(vm: SettingsViewModel): Map<String, RowExtra> {
         ),
         "tab_METADATA" to RowExtra(
             SettingValue.Opens(if (!mode.enrich) off else when (tier) {
-                tv.own.myowntv.core.metadata.MetadataConfig.Tier.DEFAULT_WORKER -> stringResource(R.string.settings_shared)
-                tv.own.myowntv.core.metadata.MetadataConfig.Tier.OWN_KEY -> stringResource(R.string.settings_tier_key)
-                tv.own.myowntv.core.metadata.MetadataConfig.Tier.SELF_HOST -> stringResource(R.string.settings_tier_self_host)
+                tv.own.owntv.core.metadata.MetadataConfig.Tier.DEFAULT_WORKER -> stringResource(R.string.settings_shared)
+                tv.own.owntv.core.metadata.MetadataConfig.Tier.OWN_KEY -> stringResource(R.string.settings_tier_key)
+                tv.own.owntv.core.metadata.MetadataConfig.Tier.SELF_HOST -> stringResource(R.string.settings_tier_self_host)
             }),
             extra = {
                 val b = budget
                 if (mode.enrich) Column(Modifier.padding(top = 8.mpx)) {
                     line(stringResource(R.string.settings_metadata_connection), stringResource(when (tier) {
-                        tv.own.myowntv.core.metadata.MetadataConfig.Tier.DEFAULT_WORKER -> R.string.settings_tier_default
-                        tv.own.myowntv.core.metadata.MetadataConfig.Tier.OWN_KEY -> R.string.settings_tier_key
-                        tv.own.myowntv.core.metadata.MetadataConfig.Tier.SELF_HOST -> R.string.settings_tier_self_host
+                        tv.own.owntv.core.metadata.MetadataConfig.Tier.DEFAULT_WORKER -> R.string.settings_tier_default
+                        tv.own.owntv.core.metadata.MetadataConfig.Tier.OWN_KEY -> R.string.settings_tier_key
+                        tv.own.owntv.core.metadata.MetadataConfig.Tier.SELF_HOST -> R.string.settings_tier_self_host
                     }))
                     // The shared service has a daily allowance; an own key or self-host has none to show.
-                    if (tier == tv.own.myowntv.core.metadata.MetadataConfig.Tier.DEFAULT_WORKER && b != null) {
+                    if (tier == tv.own.owntv.core.metadata.MetadataConfig.Tier.DEFAULT_WORKER && b != null) {
                         line(stringResource(R.string.settings_allowance_day), pluralStringResource(R.plurals.settings_allowance_value, b.remainingDay, b.remainingDay, b.limitDay))
                     }
                 }

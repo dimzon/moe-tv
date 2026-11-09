@@ -1,4 +1,56 @@
 package tv.own.myowntv.ui.components
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -78,7 +130,7 @@ fun BackgroundImageChooserDialog(
  */
 @Composable
 fun RemoteBackgroundDialog(
-    state: tv.own.myowntv.core.companion.CompanionServerState,
+    state: tv.own.owntv.core.companion.CompanionServerState,
     images: kotlinx.coroutines.flow.Flow<File>,
     onStart: (port: Int) -> Unit,
     onStop: () -> Unit,
@@ -88,10 +140,10 @@ fun RemoteBackgroundDialog(
     val firstFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) { kotlinx.coroutines.delay(60); runCatching { firstFocus.requestFocus() } }
     // Open a fresh image-upload session on entry; stop it when the dialog leaves.
-    LaunchedEffect(Unit) { onStart(tv.own.myowntv.core.companion.CompanionLink.DEFAULT_PORT) }
+    LaunchedEffect(Unit) { onStart(tv.own.owntv.core.companion.CompanionLink.DEFAULT_PORT) }
     LaunchedEffect(images) { images.collect(onImageReceived) }
     androidx.compose.runtime.DisposableEffect(Unit) { onDispose { onStop() } }
-    val restart = { onStart(tv.own.myowntv.core.companion.CompanionLink.DEFAULT_PORT) }
+    val restart = { onStart(tv.own.owntv.core.companion.CompanionLink.DEFAULT_PORT) }
     tv.own.myowntv.ui.stage.StagePopup(
         onDismiss = onDismiss,
         title = stringResource(R.string.setup_send_from_phone),
@@ -99,10 +151,10 @@ fun RemoteBackgroundDialog(
         width = 820.mpx,
         buttons = {
             when (state) {
-                is tv.own.myowntv.core.companion.CompanionServerState.Failed ->
+                is tv.own.owntv.core.companion.CompanionServerState.Failed ->
                     tv.own.myowntv.ui.stage.StageButton(stringResource(R.string.setup_try_again), onClick = restart, height = 56.mpx, textSize = 19)
                 // Restarting mints a fresh PIN, so this is the recovery path — not a retry of a failure.
-                tv.own.myowntv.core.companion.CompanionServerState.Locked ->
+                tv.own.owntv.core.companion.CompanionServerState.Locked ->
                     tv.own.myowntv.ui.stage.StageButton(stringResource(R.string.setup_start_again_new_pin), onClick = restart, height = 56.mpx, textSize = 19)
                 else -> Unit
             }
@@ -119,16 +171,16 @@ fun RemoteBackgroundDialog(
  * every "send it from another device" popup, so they all read the same.
  */
 @Composable
-internal fun StageCompanionStatus(state: tv.own.myowntv.core.companion.CompanionServerState) {
+internal fun StageCompanionStatus(state: tv.own.owntv.core.companion.CompanionServerState) {
     val text = tv.own.myowntv.ui.theme.StageColors.Text
     val muted = tv.own.myowntv.ui.theme.StageColors.Muted
     val danger = tv.own.myowntv.ui.theme.StageColors.Danger
     val body = tv.own.myowntv.ui.theme.stageText(18, 500)
     when (state) {
-        tv.own.myowntv.core.companion.CompanionServerState.Idle,
-        tv.own.myowntv.core.companion.CompanionServerState.Starting,
+        tv.own.owntv.core.companion.CompanionServerState.Idle,
+        tv.own.owntv.core.companion.CompanionServerState.Starting,
         -> Text(stringResource(R.string.setup_opening_server), style = body, color = muted)
-        is tv.own.myowntv.core.companion.CompanionServerState.Listening -> Row(horizontalArrangement = Arrangement.spacedBy(28.mpx), verticalAlignment = Alignment.CenterVertically) {
+        is tv.own.owntv.core.companion.CompanionServerState.Listening -> Row(horizontalArrangement = Arrangement.spacedBy(28.mpx), verticalAlignment = Alignment.CenterVertically) {
             state.qr?.let { qr ->
                 androidx.compose.foundation.Image(
                     bitmap = qr.asImageBitmap(),
@@ -148,8 +200,8 @@ internal fun StageCompanionStatus(state: tv.own.myowntv.core.companion.Companion
                 state.urls.forEach { url -> Text(url, style = tv.own.myowntv.ui.theme.stageText(20, 700), color = text) }
             }
         }
-        is tv.own.myowntv.core.companion.CompanionServerState.Failed -> Text(state.failure.displayText(), style = body, color = danger)
-        tv.own.myowntv.core.companion.CompanionServerState.Locked -> Text(companionLockedText(), style = body, color = danger)
+        is tv.own.owntv.core.companion.CompanionServerState.Failed -> Text(state.failure.displayText(), style = body, color = danger)
+        tv.own.owntv.core.companion.CompanionServerState.Locked -> Text(companionLockedText(), style = body, color = danger)
     }
 }
 

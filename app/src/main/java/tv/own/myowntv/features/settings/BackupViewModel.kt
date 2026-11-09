@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.settings
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,7 +59,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import tv.own.myowntv.core.backup.BackupManager
+import tv.own.owntv.core.backup.BackupManager
 import java.io.File
 
 /** Drives Backup & Restore (selective export/import to a JSON file). */
@@ -16,10 +68,10 @@ enum class BackupError { EXPORT, READ, IMPORT }
 
 class BackupViewModel(
     private val backup: BackupManager,
-    private val profileDao: tv.own.myowntv.core.database.dao.ProfileDao,
-    private val settings: tv.own.myowntv.core.settings.SettingsRepository,
-    private val companion: tv.own.myowntv.core.companion.CompanionController,
-    private val protection: tv.own.myowntv.core.profile.ProfileProtection,
+    private val profileDao: tv.own.owntv.core.database.dao.ProfileDao,
+    private val settings: tv.own.owntv.core.settings.SettingsRepository,
+    private val companion: tv.own.owntv.core.companion.CompanionController,
+    private val protection: tv.own.owntv.core.profile.ProfileProtection,
 ) : ViewModel() {
 
     // ---- Remote restore: another device uploads a backup JSON to the TV over the LAN companion server. ----
@@ -29,7 +81,7 @@ class BackupViewModel(
     /** Uploaded backup files — the screen collects this and feeds each into [inspect]. */
     val remoteBackups get() = companion.backups
 
-    fun startRemoteRestore(port: Int = tv.own.myowntv.core.companion.CompanionLink.DEFAULT_PORT) =
+    fun startRemoteRestore(port: Int = tv.own.owntv.core.companion.CompanionLink.DEFAULT_PORT) =
         companion.startForBackupRestore(port)
 
     fun stopRemoteRestore() = companion.stop()
@@ -41,7 +93,7 @@ class BackupViewModel(
             _state.value = State.Working
             backup.export(companion.backupExportDir, sections, backupPassword, profileIds).fold(
                 onSuccess = { path ->
-                    companion.startForBackupDownload(tv.own.myowntv.core.companion.CompanionLink.DEFAULT_PORT, File(path))
+                    companion.startForBackupDownload(tv.own.owntv.core.companion.CompanionLink.DEFAULT_PORT, File(path))
                     _state.value = State.Idle
                 },
                 onFailure = { _state.value = State.Error(BackupError.EXPORT) },
@@ -54,7 +106,7 @@ class BackupViewModel(
     /** All profiles + the active one, for the export flow's profile-picker step. */
     /** [protectedIds]: profiles with a profile lock or a Settings lock — another profile needs one of their PINs. */
     data class ProfileChoices(
-        val profiles: List<tv.own.myowntv.core.database.entity.ProfileEntity>,
+        val profiles: List<tv.own.owntv.core.database.entity.ProfileEntity>,
         val activeId: Long,
         val protectedIds: Set<Long> = emptySet(),
     )
@@ -73,7 +125,7 @@ class BackupViewModel(
     }
 
     /** A protected profile's profile PIN or Settings PIN, for including or changing it. */
-    suspend fun verifyPin(profile: tv.own.myowntv.core.database.entity.ProfileEntity, pin: String): tv.own.myowntv.core.categorylock.PinAttempt =
+    suspend fun verifyPin(profile: tv.own.owntv.core.database.entity.ProfileEntity, pin: String): tv.own.owntv.core.categorylock.PinAttempt =
         protection.verify(profile, pin)
 
     sealed interface State {
@@ -114,7 +166,7 @@ class BackupViewModel(
             val clashes: List<BackupManager.ProfileClash>,
             val protectedIds: Set<Long>,
             val activeId: Long,
-            val profiles: List<tv.own.myowntv.core.database.entity.ProfileEntity>,
+            val profiles: List<tv.own.owntv.core.database.entity.ProfileEntity>,
         ) : State
 
         /**
@@ -142,8 +194,8 @@ class BackupViewModel(
     val state: StateFlow<State> = _state.asStateFlow()
 
     /** The icon colour a finished restore left chosen; the screen offers a restart if the launcher differs. */
-    private val _restoredIcon = MutableStateFlow<tv.own.myowntv.core.brand.AppIcon?>(null)
-    val restoredIcon: StateFlow<tv.own.myowntv.core.brand.AppIcon?> = _restoredIcon.asStateFlow()
+    private val _restoredIcon = MutableStateFlow<tv.own.owntv.core.brand.AppIcon?>(null)
+    val restoredIcon: StateFlow<tv.own.owntv.core.brand.AppIcon?> = _restoredIcon.asStateFlow()
     fun clearRestoredIcon() { _restoredIcon.value = null }
 
     /** Export with an optional backup passphrase (blank/null = omit secret password fields).

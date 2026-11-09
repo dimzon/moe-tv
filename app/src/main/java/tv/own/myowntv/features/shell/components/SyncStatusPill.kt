@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.shell.components
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,11 +67,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import androidx.tv.material3.Text
-import tv.own.myowntv.core.download.DownloadActivityTracker
-import tv.own.myowntv.core.recording.RecordingActivityTracker
-import tv.own.myowntv.core.sync.EpgActivityTracker
-import tv.own.myowntv.core.sync.SyncActivityTracker
-import tv.own.myowntv.core.sync.TrendingActivityTracker
+import tv.own.owntv.core.download.DownloadActivityTracker
+import tv.own.owntv.core.recording.RecordingActivityTracker
+import tv.own.owntv.core.sync.EpgActivityTracker
+import tv.own.owntv.core.sync.SyncActivityTracker
+import tv.own.owntv.core.sync.TrendingActivityTracker
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,10 +83,10 @@ import tv.own.myowntv.ui.stage.stageGlass
 import tv.own.myowntv.ui.theme.StageColors
 import tv.own.myowntv.ui.theme.stageText
 import tv.own.myowntv.ui.theme.mpx
-import tv.own.myowntv.core.network.ConnectivityObserver
-import tv.own.myowntv.core.sync.SyncProgressCounts
-import tv.own.myowntv.core.sync.SyncResult
-import tv.own.myowntv.core.util.classifySyncFailure
+import tv.own.owntv.core.network.ConnectivityObserver
+import tv.own.owntv.core.sync.SyncProgressCounts
+import tv.own.owntv.core.sync.SyncResult
+import tv.own.owntv.core.util.classifySyncFailure
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import tv.own.myowntv.ui.components.OwnTVSpinner
@@ -69,7 +121,7 @@ fun SyncStatusPill(modifier: Modifier = Modifier) {
     val activeRecordings by recordingTracker.active.collectAsStateWithLifecycle()
     val lastCompleted by catalogTracker.lastCompleted.collectAsStateWithLifecycle()
     val lastTrendingCompleted by trendingTracker.lastCompleted.collectAsStateWithLifecycle()
-    val sportsTracker: tv.own.myowntv.core.sports.SportsActivityTracker = koinInject()
+    val sportsTracker: tv.own.owntv.core.sports.SportsActivityTracker = koinInject()
     val sportsRebuild by sportsTracker.rebuild.collectAsStateWithLifecycle()
     // A failed rebuild is said once, for 5 s, when it happens — not again each time the pill returns.
     var sportsSeen by remember { mutableStateOf(sportsRebuild) }
@@ -77,7 +129,7 @@ fun SyncStatusPill(modifier: Modifier = Modifier) {
     LaunchedEffect(sportsRebuild) {
         val was = sportsSeen
         sportsSeen = sportsRebuild
-        if (sportsRebuild == tv.own.myowntv.core.sports.RebuildState.Failed && was is tv.own.myowntv.core.sports.RebuildState.Running) {
+        if (sportsRebuild == tv.own.owntv.core.sports.RebuildState.Failed && was is tv.own.owntv.core.sports.RebuildState.Running) {
             sportsFailed = true
             delay(5000)
             sportsFailed = false
@@ -91,7 +143,7 @@ fun SyncStatusPill(modifier: Modifier = Modifier) {
     var currentTrendingCompleted by remember { mutableStateOf<TrendingActivityTracker.CompletedBuild?>(null) }
 
     val anyActive = activeCatalog.isNotEmpty() || activeEpg.isNotEmpty() || activeTrending.isNotEmpty() ||
-        activeDownload != null || activeRecordings.isNotEmpty() || sportsRebuild is tv.own.myowntv.core.sports.RebuildState.Running
+        activeDownload != null || activeRecordings.isNotEmpty() || sportsRebuild is tv.own.owntv.core.sports.RebuildState.Running
 
     LaunchedEffect(lastCompleted) {
         val completed = lastCompleted ?: return@LaunchedEffect
@@ -147,7 +199,7 @@ fun SyncStatusPill(modifier: Modifier = Modifier) {
             add(SyncLine.TrendingDetail(it))
         }
         activeEpg.values.sortedBy { it.sourceId }.forEach { add(SyncLine.Epg(it)) }
-        if (sportsRebuild is tv.own.myowntv.core.sports.RebuildState.Running) add(SyncLine.Sports)
+        if (sportsRebuild is tv.own.owntv.core.sports.RebuildState.Running) add(SyncLine.Sports)
     }
     val shown = rows.take(MAX_ROWS)
     val hidden = rows.size - shown.size
@@ -235,7 +287,7 @@ private sealed interface SyncLine {
     data class Catalog(val sync: SyncActivityTracker.ActiveSync) : SyncLine
     /** [named]: the title may show; false while its category is locked and sealed. */
     data class Download(val download: DownloadActivityTracker.ActiveDownload, val named: Boolean) : SyncLine
-    data class Recording(val recording: tv.own.myowntv.core.recording.RecordingProgress, val named: Boolean) : SyncLine
+    data class Recording(val recording: tv.own.owntv.core.recording.RecordingProgress, val named: Boolean) : SyncLine
     data class Trending(val build: TrendingActivityTracker.ActiveBuild) : SyncLine
     data class TrendingDetail(val build: TrendingActivityTracker.ActiveBuild) : SyncLine
     data class Epg(val sync: EpgActivityTracker.ActiveEpgSync) : SyncLine

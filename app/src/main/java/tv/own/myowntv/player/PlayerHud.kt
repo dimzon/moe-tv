@@ -1,5 +1,58 @@
 package tv.own.myowntv.player
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
+import tv.own.owntv.player.LiveProgramme
 import tv.own.myowntv.ui.theme.hudShade
 import tv.own.myowntv.ui.theme.hudInk
 import androidx.activity.compose.BackHandler
@@ -50,11 +103,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import tv.own.myowntv.R
-import tv.own.myowntv.core.i18n.HorizontalDirection
-import tv.own.myowntv.core.i18n.horizontalDirection
-import tv.own.myowntv.core.settings.PlayerRemoteOptions
-import tv.own.myowntv.core.settings.RemoteShortcutAction
-import tv.own.myowntv.core.settings.RemoteShortcutPress
+import tv.own.owntv.core.i18n.HorizontalDirection
+import tv.own.owntv.core.i18n.horizontalDirection
+import tv.own.owntv.core.settings.PlayerRemoteOptions
+import tv.own.owntv.core.settings.RemoteShortcutAction
+import tv.own.owntv.core.settings.RemoteShortcutPress
 import tv.own.myowntv.ui.components.LocalRemoteShortcuts
 import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.components.OwnTVSpinner
@@ -96,18 +149,18 @@ private const val RECONNECT_NOTICE_AFTER_MS = 10_000L
 internal enum class HudDialog { NONE, AUDIO, SUBS, SPEED, ZOOM, QUALITY, VOLUME, JUMP_BACK, SLEEP_TIMER, SOURCES }
 
 /**
- * "Sources": the other versions of the live channel playing ([tv.own.myowntv.core.live.ChannelVersions]).
+ * "Sources": the other versions of the live channel playing ([tv.own.owntv.core.live.ChannelVersions]).
  * [load] is read as the list opens, never on a zap; [playingId] marks the one on screen; [onPick]
  * tunes the pick through Live TV's normal tune.
  */
 class HudSources(
-    val load: suspend () -> List<tv.own.myowntv.core.live.ChannelVersion>,
+    val load: suspend () -> List<tv.own.owntv.core.live.ChannelVersion>,
     val playingId: Long,
-    val onPick: (tv.own.myowntv.core.database.entity.ChannelEntity) -> Unit,
+    val onPick: (tv.own.owntv.core.database.entity.ChannelEntity) -> Unit,
 )
 
 /** The guide's answer for "Go back to…"'s first row; held in a box so "answered: no row" differs from "not answered yet". */
-private class Lookup(val start: tv.own.myowntv.core.live.CatchupProgrammeStart?)
+private class Lookup(val start: tv.own.owntv.core.live.CatchupProgrammeStart?)
 
 /** What the top-left channel OSD shows for direct tune: the digits being typed, the channel a number
  *  resolved to, or a failure message. All three render as the same card as the channel OSD. */
@@ -166,7 +219,7 @@ fun PlayerHud(
     jumpBackWindowSec: (() -> Int)? = null,
     // The start of the programme on air, from the guide, offered first in "Go back to…". Looked up as
     // the list opens; null (or a null answer) = no such row.
-    jumpBackProgrammeStart: (suspend () -> tv.own.myowntv.core.live.CatchupProgrammeStart?)? = null,
+    jumpBackProgrammeStart: (suspend () -> tv.own.owntv.core.live.CatchupProgrammeStart?)? = null,
     // Read as a lambda, not a value: the offset ticks once a second, and taking it as a plain Int?
     // made the shell (the caller) recompose on every tick just to hand it over. Invoked below, so the
     // per-second read lands in the HUD's own scope, which already recomposes with the position clock.

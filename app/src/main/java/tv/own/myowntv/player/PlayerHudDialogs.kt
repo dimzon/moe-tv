@@ -1,4 +1,56 @@
 package tv.own.myowntv.player
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -35,6 +87,11 @@ import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 import tv.own.myowntv.ui.components.longPressMenuGuard
 import tv.own.myowntv.R
+import tv.own.owntv.player.PlaybackEngine
+import tv.own.owntv.player.ScreenOff
+import tv.own.owntv.player.SleepTimer
+import tv.own.owntv.player.TrackOption
+import tv.own.owntv.player.ZoomMode
 import tv.own.myowntv.ui.theme.mpx
 import tv.own.myowntv.ui.theme.stageText
 import tv.own.myowntv.ui.theme.stageAccent
@@ -340,7 +397,7 @@ internal fun ZoomDialog(current: ZoomMode, onSelect: (ZoomMode) -> Unit, onDismi
  */
 @Composable
 internal fun SourcesDialog(sources: HudSources, onDismiss: () -> Unit) {
-    val versions by produceState<List<tv.own.myowntv.core.live.ChannelVersion>?>(null) { value = sources.load() }
+    val versions by produceState<List<tv.own.owntv.core.live.ChannelVersion>?>(null) { value = sources.load() }
     val list = versions ?: return
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { requestFocusRetrying(focus) }

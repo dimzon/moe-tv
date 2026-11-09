@@ -1,14 +1,66 @@
 package tv.own.myowntv.ui.components
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
-import tv.own.myowntv.core.menu.MenuLayout
-import tv.own.myowntv.core.menu.arrange
-import tv.own.myowntv.core.model.ContentMenu
-import tv.own.myowntv.core.settings.SettingsRepository
+import tv.own.owntv.core.menu.MenuLayout
+import tv.own.owntv.core.menu.arrange
+import tv.own.owntv.core.model.ContentMenu
+import tv.own.owntv.core.settings.SettingsRepository
 
 /**
  * One action in a long-press content menu — Live channel, movie, series or episode.
@@ -50,7 +102,7 @@ fun arranged(menu: ContentMenu, actions: List<MenuAction>): ArrangedMenu {
     val gate: tv.own.myowntv.features.settings.lock.MenuChangeGate = koinInject()
     // The organising actions ask for the Settings PIN first when its long-press switch is on.
     val guarded = actions.map { action ->
-        if (action.key in tv.own.myowntv.core.categorylock.GUARDED_MENU_ACTIONS) action.copy(onClick = { gate.run(action.onClick) }) else action
+        if (action.key in tv.own.owntv.core.categorylock.GUARDED_MENU_ACTIONS) action.copy(onClick = { gate.run(action.onClick) }) else action
     }
     return ArrangedMenu(arrange(menu, guarded, layout) { it.key }, layout.isShippedOrder(menu))
 }

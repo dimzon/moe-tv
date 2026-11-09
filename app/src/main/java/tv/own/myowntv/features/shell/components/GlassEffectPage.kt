@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.shell.components
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.stageTone
 import tv.own.myowntv.ui.theme.LocalStagePalette
@@ -42,9 +94,9 @@ import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.R
-import tv.own.myowntv.core.theme.BackgroundConfig
-import tv.own.myowntv.core.theme.BackgroundStyle
-import tv.own.myowntv.core.theme.PictureLook
+import tv.own.owntv.core.theme.BackgroundConfig
+import tv.own.owntv.core.theme.BackgroundStyle
+import tv.own.owntv.core.theme.PictureLook
 import tv.own.myowntv.features.home.HomeViewModel
 import tv.own.myowntv.features.live.LivePlate
 import tv.own.myowntv.features.settings.SettingHelp
@@ -197,7 +249,7 @@ internal fun GlassBackgroundPage(
         )
 
         val resetTitle = stringResource(tv.own.myowntv.R.string.common_reset)
-        val resetLine = stringResource(R.string.settings_line_glass_reset, stringResource(R.string.common_percent, tv.own.myowntv.core.settings.SettingsRepository.GLASS_ALPHA_DEFAULT_PCT))
+        val resetLine = stringResource(R.string.settings_line_glass_reset, stringResource(R.string.common_percent, tv.own.owntv.core.settings.SettingsRepository.GLASS_ALPHA_DEFAULT_PCT))
         StageSettingRow(
             icon = MyOwnTVIcon.REFRESH,
             title = resetTitle,
@@ -214,7 +266,7 @@ internal fun GlassBackgroundPage(
  * opacity, e.g. "Soft · 56%"; "· Off" with glass off.
  */
 @Composable
-internal fun glassBackgroundSummary(background: BackgroundConfig, glass: tv.own.myowntv.core.theme.GlassConfig): String {
+internal fun glassBackgroundSummary(background: BackgroundConfig, glass: tv.own.owntv.core.theme.GlassConfig): String {
     val bg = when {
         background.showsPicture -> stringResource(
             when (background.look) {

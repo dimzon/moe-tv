@@ -1,4 +1,56 @@
 package tv.own.myowntv
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import android.app.Application
 import android.content.Context
@@ -21,10 +73,10 @@ import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
-import tv.own.myowntv.core.util.Perf
-import tv.own.myowntv.core.di.coreModule
-import tv.own.myowntv.core.di.databaseModule
-import tv.own.myowntv.core.di.dataModule
+import tv.own.owntv.core.util.Perf
+import tv.own.owntv.core.di.coreModule
+import tv.own.owntv.core.di.databaseModule
+import tv.own.owntv.core.di.dataModule
 import tv.own.myowntv.di.appModule
 import tv.own.myowntv.di.playerModule
 import tv.own.myowntv.ui.theme.subtitleFontResource
@@ -49,7 +101,7 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
 
     override val workManagerConfiguration: androidx.work.Configuration
         get() = androidx.work.Configuration.Builder()
-            .setWorkerFactory(tv.own.myowntv.core.sync.work.KoinWorkerFactory())
+            .setWorkerFactory(tv.own.owntv.core.sync.work.KoinWorkerFactory())
             .build()
 
     /**
@@ -64,9 +116,9 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
      * every Locale.getDefault() reader still depend on it.
      */
     override fun attachBaseContext(base: Context) {
-        val tag = tv.own.myowntv.core.i18n.LocaleStore.from(base).readBlocking()
-        tv.own.myowntv.core.i18n.AppLocale.applyGlobally(tag)
-        super.attachBaseContext(tv.own.myowntv.core.i18n.AppLocale.wrap(base, tag))
+        val tag = tv.own.owntv.core.i18n.LocaleStore.from(base).readBlocking()
+        tv.own.owntv.core.i18n.AppLocale.applyGlobally(tag)
+        super.attachBaseContext(tv.own.owntv.core.i18n.AppLocale.wrap(base, tag))
     }
 
     /**
@@ -85,8 +137,8 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        val tag = tv.own.myowntv.core.i18n.LocaleStore.from(this).readBlocking()
-        tv.own.myowntv.core.i18n.AppLocale.applyGlobally(tag)
+        val tag = tv.own.owntv.core.i18n.LocaleStore.from(this).readBlocking()
+        tv.own.owntv.core.i18n.AppLocale.applyGlobally(tag)
     }
 
     override fun onCreate() {
@@ -94,38 +146,38 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
         super.onCreate()
         // The six icon colours are MainActivity + a suffix (see MainActivityColours.kt); core switches them.
         // Before the early returns: auto start opens the app from its bare process through this name.
-        tv.own.myowntv.core.brand.AppIconSwitcher.mainActivityClass = MainActivity::class.java.name
+        tv.own.owntv.core.brand.AppIconSwitcher.mainActivityClass = MainActivity::class.java.name
         // "Restart now" after an icon change runs a few milliseconds in a process of its own; nothing
         // below may start there (core's AppRestartActivity).
-        if (tv.own.myowntv.core.brand.AppIconSwitcher.isRestartProcess(this)) return
+        if (tv.own.owntv.core.brand.AppIconSwitcher.isRestartProcess(this)) return
         // The auto-start wake listener's process stays this bare (see AutoStart.isAutoStartProcess).
         if (tv.own.myowntv.features.autostart.AutoStart.isAutoStartProcess(this)) return
         // Core has its own BuildConfig, which carries none of this: a library gets no version at all,
         // and the edge key and the maintainer switch are the app's build inputs. Hand them over before
         // the first reader — CrashRecorder, two lines down (see CoreBuildInfo).
-        tv.own.myowntv.core.CoreBuildInfo.versionName = BuildConfig.VERSION_NAME
-        tv.own.myowntv.core.CoreBuildInfo.versionCode = BuildConfig.VERSION_CODE
-        tv.own.myowntv.core.CoreBuildInfo.edgeKey = BuildConfig.TMDB_EDGE_KEY
-        tv.own.myowntv.core.CoreBuildInfo.devTools = BuildConfig.DEV_TOOLS
-        tv.own.myowntv.core.CoreBuildInfo.debug = BuildConfig.DEBUG
-        tv.own.myowntv.core.CoreBuildInfo.diagnosticBuild = BuildConfig.DIAGNOSTIC_BUILD
+        tv.own.owntv.core.CoreBuildInfo.versionName = BuildConfig.VERSION_NAME
+        tv.own.owntv.core.CoreBuildInfo.versionCode = BuildConfig.VERSION_CODE
+        tv.own.owntv.core.CoreBuildInfo.edgeKey = BuildConfig.TMDB_EDGE_KEY
+        tv.own.owntv.core.CoreBuildInfo.devTools = BuildConfig.DEV_TOOLS
+        tv.own.owntv.core.CoreBuildInfo.debug = BuildConfig.DEBUG
+        tv.own.owntv.core.CoreBuildInfo.diagnosticBuild = BuildConfig.DIAGNOSTIC_BUILD
         // This app's own releases, which the in-app updater asks about. Core defaults to exactly
         // this value, so the line changes nothing today — it is here so the television names its own
         // repository instead of relying on core to guess it, the same as the phone app does. A
         // default that happens to be right for one app is a trap for every other one.
-        tv.own.myowntv.core.CoreBuildInfo.releaseRepo = "ahXN00/OwnTV"
+        tv.own.owntv.core.CoreBuildInfo.releaseRepo = "ahXN00/OwnTV"
         // Fixed for this process before any player exists: the setting applies only after a restart.
-        tv.own.myowntv.core.player.FfmpegAudioSetting.load(this)
+        tv.own.owntv.core.player.FfmpegAudioSetting.load(this)
         // First thing after the context exists: a crash from here on leaves a trace on disk that the
         // user can export from Settings, instead of being lost with the process.
-        tv.own.myowntv.core.util.CrashRecorder.diagnostics = { tv.own.myowntv.player.LiveDiagnosticsLog.snapshot() }
-        tv.own.myowntv.core.util.CrashRecorder.install(this)
+        tv.own.owntv.core.util.CrashRecorder.diagnostics = { tv.own.owntv.player.LiveDiagnosticsLog.snapshot() }
+        tv.own.owntv.core.util.CrashRecorder.install(this)
         // Core learns a panel's session limit while syncing; the engine is what acts on it. Registered
         // before Koin so the very first source flow already reaches the player (see LiveSessionLimit).
-        tv.own.myowntv.core.player.LiveSessionLimit.report = tv.own.myowntv.player.LiveStreamQuirks::rememberSessionLimit
+        tv.own.owntv.core.player.LiveSessionLimit.report = tv.own.owntv.player.LiveStreamQuirks::rememberSessionLimit
         // Four of the five subtitle faces are this app's own res/font files, so the engine asks us for
         // the id rather than owning the assets (see SubtitleFontAssets).
-        tv.own.myowntv.player.SubtitleFontAssets.resourceOf = { it.subtitleFontResource }
+        tv.own.owntv.player.SubtitleFontAssets.resourceOf = { it.subtitleFontResource }
         startKoin {
             androidLogger(if (BuildConfig.DEBUG) Level.ERROR else Level.NONE)
             androidContext(this@MyOwnTVApp)
@@ -134,13 +186,13 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
         Perf.stamp("koin-started")
         // A chosen icon colour ("Later", the first-run pick, a restore) reaches the launcher when the app
         // is next in the background, never while it is on screen.
-        tv.own.myowntv.core.brand.AppIconSwitcher.start(this, GlobalContext.get().get())
+        tv.own.owntv.core.brand.AppIconSwitcher.start(this, GlobalContext.get().get())
         // Auto start on wake-up: a force stop ends the wake listener, so the next app start brings it back.
         tv.own.myowntv.features.autostart.AutoStart.onAppStarted(this)
         tv.own.myowntv.features.autostart.AutoStartProfileGate(this).register()
         // Diagnostics switch and the one-shot settings migrations — core's, shared with the phone, which
         // used to run none of them.
-        tv.own.myowntv.player.PlaybackStartup.start(
+        tv.own.owntv.player.PlaybackStartup.start(
             context = this,
             scope = appScope,
             settings = GlobalContext.get().get(),
@@ -149,18 +201,18 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
         // on at 50%, the Stage background; Movies & Series keep an update's layout.
         appScope.launch {
             runCatching {
-                GlobalContext.get().get<tv.own.myowntv.core.settings.SettingsRepository>().applyStageDefaults()
+                GlobalContext.get().get<tv.own.owntv.core.settings.SettingsRepository>().applyStageDefaults()
             }
         }
         // Sports: core decides from Auto rebuild whether the stored board is due ("on every app start",
         // or older than the chosen hours). It reads one small file and touches no database.
         appScope.launch {
             kotlinx.coroutines.delay(SPORTS_START_DELAY_MS)
-            runCatching { GlobalContext.get().get<tv.own.myowntv.core.sports.SportsRepository>().appStarted() }
+            runCatching { GlobalContext.get().get<tv.own.owntv.core.sports.SportsRepository>().appStarted() }
         }
         // Local auto-sync: the paired-only listener and the moments a pass is tried (OwnTV to the
         // front or the back, the network back). Core owns what that means; no hourly check on a TV.
-        runCatching { GlobalContext.get().get<tv.own.myowntv.core.sync.work.LocalAutoSyncStarter>().start(periodic = false) }
+        runCatching { GlobalContext.get().get<tv.own.owntv.core.sync.work.LocalAutoSyncStarter>().start(periodic = false) }
         // NOTE: cold start does ZERO heavy DB work. Index + ANALYZE maintenance is piggy-backed onto the
         // operation that actually changes the data — ImportFinalizer.finalize() for normal re-syncs, the
         // deferred content-index worker after a fresh import, the EpgRepository refresh after every EPG
@@ -247,7 +299,7 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
         }
         // The engines judge the level themselves: UI_HIDDEN (every Home press) is not pressure for them,
         // and used to leave mpv on a trimmed cache for the rest of the session.
-        runCatching { GlobalContext.getOrNull()?.getOrNull<tv.own.myowntv.player.PlaybackEngines>()?.onTrimMemory(level) }
+        runCatching { GlobalContext.getOrNull()?.getOrNull<tv.own.owntv.player.PlaybackEngines>()?.onTrimMemory(level) }
     }
 }
 

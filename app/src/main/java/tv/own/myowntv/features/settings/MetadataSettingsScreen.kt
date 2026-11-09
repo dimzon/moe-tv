@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.settings
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +77,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import androidx.tv.material3.Text
 import tv.own.myowntv.R
-import tv.own.myowntv.core.metadata.MetadataConfig
+import tv.own.owntv.core.metadata.MetadataConfig
 import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.theme.StageColors
 import tv.own.myowntv.ui.theme.mpx
@@ -100,16 +152,16 @@ private fun tmdbLangName(code: String): String = stringResource(
  *
  * Precedence: self-host URL > own key > the default caching Worker (zero setup).
  */
-private fun metadataModeLabelRes(mode: tv.own.myowntv.core.metadata.MetadataMode): Int = when (mode) {
-    tv.own.myowntv.core.metadata.MetadataMode.PROVIDER -> R.string.settings_metadata_provider_only
-    tv.own.myowntv.core.metadata.MetadataMode.PROVIDER_PLUS_TMDB -> R.string.settings_metadata_provider_plus_tmdb
-    tv.own.myowntv.core.metadata.MetadataMode.TMDB_ONLY -> R.string.settings_metadata_tmdb_only
+private fun metadataModeLabelRes(mode: tv.own.owntv.core.metadata.MetadataMode): Int = when (mode) {
+    tv.own.owntv.core.metadata.MetadataMode.PROVIDER -> R.string.settings_metadata_provider_only
+    tv.own.owntv.core.metadata.MetadataMode.PROVIDER_PLUS_TMDB -> R.string.settings_metadata_provider_plus_tmdb
+    tv.own.owntv.core.metadata.MetadataMode.TMDB_ONLY -> R.string.settings_metadata_tmdb_only
 }
 
-private fun metadataTierLabelRes(tier: tv.own.myowntv.core.metadata.MetadataConfig.Tier): Int = when (tier) {
-    tv.own.myowntv.core.metadata.MetadataConfig.Tier.DEFAULT_WORKER -> R.string.settings_tier_default
-    tv.own.myowntv.core.metadata.MetadataConfig.Tier.OWN_KEY -> R.string.settings_tier_key
-    tv.own.myowntv.core.metadata.MetadataConfig.Tier.SELF_HOST -> R.string.settings_tier_self_host
+private fun metadataTierLabelRes(tier: tv.own.owntv.core.metadata.MetadataConfig.Tier): Int = when (tier) {
+    tv.own.owntv.core.metadata.MetadataConfig.Tier.DEFAULT_WORKER -> R.string.settings_tier_default
+    tv.own.owntv.core.metadata.MetadataConfig.Tier.OWN_KEY -> R.string.settings_tier_key
+    tv.own.owntv.core.metadata.MetadataConfig.Tier.SELF_HOST -> R.string.settings_tier_self_host
 }
 
 @Composable
@@ -173,7 +225,7 @@ fun MetadataSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     // LIBRARY DETAILS and CONNECTION as rows; the active source on top of the panel.
     val back = stringResource(R.string.common_back)
     val content = stringResource(R.string.settings_group_content_metadata)
-    val modeLabels = tv.own.myowntv.core.metadata.MetadataMode.entries.map { stringResource(metadataModeLabelRes(it)) }
+    val modeLabels = tv.own.owntv.core.metadata.MetadataMode.entries.map { stringResource(metadataModeLabelRes(it)) }
     val rows = if (mode.enrich) 4 else 1
     StageFullPage(
         parents = listOf(content),
@@ -342,12 +394,12 @@ fun MetadataSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     if (showModePicker) {
         PickerDialog(
             title = stringResource(R.string.settings_metadata_source),
-            options = tv.own.myowntv.core.metadata.MetadataMode.entries.map {
+            options = tv.own.owntv.core.metadata.MetadataMode.entries.map {
                 it.name to stringResource(metadataModeLabelRes(it))
             },
             selected = mode.name,
             onSelect = { picked ->
-                tv.own.myowntv.core.metadata.MetadataMode.entries.firstOrNull { it.name == picked }?.let {
+                tv.own.owntv.core.metadata.MetadataMode.entries.firstOrNull { it.name == picked }?.let {
                     if (it != mode) {
                         vm.setMetadataMode(it)
                         vm.resetMetadataTest()
@@ -482,14 +534,14 @@ private fun AdvancedMetadataPopup(
 @Composable
 internal fun CompanionKeyDialog(
     titleRes: Int,
-    state: tv.own.myowntv.core.companion.CompanionServerState,
+    state: tv.own.owntv.core.companion.CompanionServerState,
     onStart: (Int) -> Unit,
     onStop: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     val closeFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
-        onStart(tv.own.myowntv.core.companion.CompanionLink.DEFAULT_PORT)
+        onStart(tv.own.owntv.core.companion.CompanionLink.DEFAULT_PORT)
         kotlinx.coroutines.delay(60)
         runCatching { closeFocus.requestFocus() }
     }

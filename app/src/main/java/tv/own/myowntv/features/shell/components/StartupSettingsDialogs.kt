@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.shell.components
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -29,10 +81,10 @@ import tv.own.myowntv.ui.theme.mpx
 @Composable
 private fun StartupChannelPickerDialog(
     query: String,
-    channels: List<tv.own.myowntv.core.database.entity.ChannelEntity>,
-    selected: tv.own.myowntv.core.settings.StartupChannelRef?,
+    channels: List<tv.own.owntv.core.database.entity.ChannelEntity>,
+    selected: tv.own.owntv.core.settings.StartupChannelRef?,
     onQueryChange: (String) -> Unit,
-    onSelect: (tv.own.myowntv.core.database.entity.ChannelEntity) -> Unit,
+    onSelect: (tv.own.owntv.core.database.entity.ChannelEntity) -> Unit,
     onDismiss: () -> Unit,
 ) {
     // A long list picked from: in the page's panel on a settings page, a Stage popup elsewhere.
@@ -47,10 +99,10 @@ private fun StartupChannelPickerDialog(
 @Composable
 private fun androidx.compose.foundation.layout.ColumnScope.StartupChannelList(
     query: String,
-    channels: List<tv.own.myowntv.core.database.entity.ChannelEntity>,
-    selected: tv.own.myowntv.core.settings.StartupChannelRef?,
+    channels: List<tv.own.owntv.core.database.entity.ChannelEntity>,
+    selected: tv.own.owntv.core.settings.StartupChannelRef?,
     onQueryChange: (String) -> Unit,
-    onSelect: (tv.own.myowntv.core.database.entity.ChannelEntity) -> Unit,
+    onSelect: (tv.own.owntv.core.database.entity.ChannelEntity) -> Unit,
 ) {
     val searchFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) { kotlinx.coroutines.delay(80); runCatching { searchFocus.requestFocus() } }
@@ -98,27 +150,27 @@ private fun androidx.compose.foundation.layout.ColumnScope.StartupChannelList(
 }
 
 @Composable
-internal fun startupLabel(mode: tv.own.myowntv.core.settings.StartupMode): String = stringResource(
+internal fun startupLabel(mode: tv.own.owntv.core.settings.StartupMode): String = stringResource(
     when (mode) {
-        tv.own.myowntv.core.settings.StartupMode.HOME -> R.string.settings_startup_home
-        tv.own.myowntv.core.settings.StartupMode.LAST_CHANNEL -> R.string.settings_startup_last_channel
-        tv.own.myowntv.core.settings.StartupMode.LAST_CHANNEL_GUIDE -> R.string.settings_startup_last_channel_guide
-        tv.own.myowntv.core.settings.StartupMode.LAST_CHANNEL_LIVE -> R.string.settings_startup_last_channel_live
-        tv.own.myowntv.core.settings.StartupMode.FAVORITES -> R.string.settings_startup_favorites
-        tv.own.myowntv.core.settings.StartupMode.SPECIFIC_CHANNEL -> R.string.settings_startup_specific_channel
+        tv.own.owntv.core.settings.StartupMode.HOME -> R.string.settings_startup_home
+        tv.own.owntv.core.settings.StartupMode.LAST_CHANNEL -> R.string.settings_startup_last_channel
+        tv.own.owntv.core.settings.StartupMode.LAST_CHANNEL_GUIDE -> R.string.settings_startup_last_channel_guide
+        tv.own.owntv.core.settings.StartupMode.LAST_CHANNEL_LIVE -> R.string.settings_startup_last_channel_live
+        tv.own.owntv.core.settings.StartupMode.FAVORITES -> R.string.settings_startup_favorites
+        tv.own.owntv.core.settings.StartupMode.SPECIFIC_CHANNEL -> R.string.settings_startup_specific_channel
     },
 )
 
 @Composable
-internal fun StartupDialogHost(settingsVm: SettingsViewModel, startupMode: tv.own.myowntv.core.settings.StartupMode, onClose: () -> Unit, onPickChannel: () -> Unit) {
+internal fun StartupDialogHost(settingsVm: SettingsViewModel, startupMode: tv.own.owntv.core.settings.StartupMode, onClose: () -> Unit, onPickChannel: () -> Unit) {
     tv.own.myowntv.features.settings.PickerDialog(
         title = stringResource(R.string.settings_app_startup_dialog),
-        options = tv.own.myowntv.core.settings.StartupMode.entries.map { it.name to startupLabel(it) },
+        options = tv.own.owntv.core.settings.StartupMode.entries.map { it.name to startupLabel(it) },
         selected = startupMode.name,
         onSelect = {
-            val mode = tv.own.myowntv.core.settings.StartupMode.valueOf(it)
+            val mode = tv.own.owntv.core.settings.StartupMode.valueOf(it)
             onClose()
-            if (mode == tv.own.myowntv.core.settings.StartupMode.SPECIFIC_CHANNEL) {
+            if (mode == tv.own.owntv.core.settings.StartupMode.SPECIFIC_CHANNEL) {
                 settingsVm.setStartupChannelQuery("")
                 settingsVm.refreshStartupChannelPicker()
                 onPickChannel()
@@ -131,7 +183,7 @@ internal fun StartupDialogHost(settingsVm: SettingsViewModel, startupMode: tv.ow
 }
 
 @Composable
-internal fun StartupChannelPickerHost(settingsVm: SettingsViewModel, startupChannel: tv.own.myowntv.core.settings.StartupChannelRef?, onClose: () -> Unit) {
+internal fun StartupChannelPickerHost(settingsVm: SettingsViewModel, startupChannel: tv.own.owntv.core.settings.StartupChannelRef?, onClose: () -> Unit) {
     val startupChannelQuery by settingsVm.startupChannelQuery.collectAsStateWithLifecycle()
     val startupChannelResults by settingsVm.startupChannelResults.collectAsStateWithLifecycle()
     StartupChannelPickerDialog(

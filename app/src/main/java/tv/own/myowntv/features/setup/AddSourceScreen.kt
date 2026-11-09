@@ -1,4 +1,56 @@
 package tv.own.myowntv.features.setup
+import tv.own.owntv.*
+import tv.own.owntv.core.*
+import tv.own.owntv.core.backup.*
+import tv.own.owntv.core.brand.*
+import tv.own.owntv.core.catalog.*
+import tv.own.owntv.core.categorylock.*
+import tv.own.owntv.core.companion.*
+import tv.own.owntv.core.content.*
+import tv.own.owntv.core.customize.*
+import tv.own.owntv.core.database.*
+import tv.own.owntv.core.database.dao.*
+import tv.own.owntv.core.database.entity.*
+import tv.own.owntv.core.di.*
+import tv.own.owntv.core.download.*
+import tv.own.owntv.core.drm.*
+import tv.own.owntv.core.epg.*
+import tv.own.owntv.core.home.*
+import tv.own.owntv.core.i18n.*
+import tv.own.owntv.core.launcher.*
+import tv.own.owntv.core.live.*
+import tv.own.owntv.core.menu.*
+import tv.own.owntv.core.metadata.*
+import tv.own.owntv.core.model.*
+import tv.own.owntv.core.nav.*
+import tv.own.owntv.core.network.*
+import tv.own.owntv.core.parser.*
+import tv.own.owntv.core.player.*
+import tv.own.owntv.core.profile.*
+import tv.own.owntv.core.recording.*
+import tv.own.owntv.core.reminder.*
+import tv.own.owntv.core.repository.*
+import tv.own.owntv.core.settings.*
+import tv.own.owntv.core.setup.*
+import tv.own.owntv.core.sports.*
+import tv.own.owntv.core.sports.model.*
+import tv.own.owntv.core.stalker.*
+import tv.own.owntv.core.storage.*
+import tv.own.owntv.core.subtitles.*
+import tv.own.owntv.core.sync.*
+import tv.own.owntv.core.sync.local.*
+import tv.own.owntv.core.sync.work.*
+import tv.own.owntv.core.theme.*
+import tv.own.owntv.core.timeshift.*
+import tv.own.owntv.core.trending.*
+import tv.own.owntv.core.tv.*
+import tv.own.owntv.core.ui.*
+import tv.own.owntv.core.ui.stage.*
+import tv.own.owntv.core.update.*
+import tv.own.owntv.core.util.*
+import tv.own.owntv.core.weather.*
+import tv.own.owntv.player.*
+import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,18 +75,18 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import tv.own.myowntv.R
-import tv.own.myowntv.core.companion.CompanionPayload
-import tv.own.myowntv.core.database.dao.ChannelDao
-import tv.own.myowntv.core.database.dao.ProfileDao
-import tv.own.myowntv.core.database.dao.SourceDao
-import tv.own.myowntv.core.database.dao.resolveExistingProfileId
-import tv.own.myowntv.core.database.entity.SourceEntity
-import tv.own.myowntv.core.model.HlsSupport
-import tv.own.myowntv.core.model.SourceType
-import tv.own.myowntv.core.parser.HlsProbe
-import tv.own.myowntv.core.parser.HlsTest
-import tv.own.myowntv.core.parser.XtreamClient
-import tv.own.myowntv.core.sync.SyncScopeChoice
+import tv.own.owntv.core.companion.CompanionPayload
+import tv.own.owntv.core.database.dao.ChannelDao
+import tv.own.owntv.core.database.dao.ProfileDao
+import tv.own.owntv.core.database.dao.SourceDao
+import tv.own.owntv.core.database.dao.resolveExistingProfileId
+import tv.own.owntv.core.database.entity.SourceEntity
+import tv.own.owntv.core.model.HlsSupport
+import tv.own.owntv.core.model.SourceType
+import tv.own.owntv.core.parser.HlsProbe
+import tv.own.owntv.core.parser.HlsTest
+import tv.own.owntv.core.parser.XtreamClient
+import tv.own.owntv.core.sync.SyncScopeChoice
 import tv.own.myowntv.features.settings.PickerDialog
 import tv.own.myowntv.features.settings.SettingHelp
 import tv.own.myowntv.ui.components.MyOwnTVIcon
@@ -48,12 +100,12 @@ import tv.own.myowntv.features.settings.StageSettingsHeading
 import androidx.compose.ui.focus.focusProperties
 import tv.own.myowntv.features.settings.SourceTestDialog
 import tv.own.myowntv.features.settings.SourceTestUi
-import tv.own.myowntv.core.repository.SourceTester
-import tv.own.myowntv.core.setup.MAG_USER_AGENTS
-import tv.own.myowntv.core.setup.displayText
-import tv.own.myowntv.core.settings.PlaylistAutoRefresh
-import tv.own.myowntv.core.settings.PlaylistRefresh
-import tv.own.myowntv.core.settings.SettingsRepository
+import tv.own.owntv.core.repository.SourceTester
+import tv.own.owntv.core.setup.MAG_USER_AGENTS
+import tv.own.owntv.core.setup.displayText
+import tv.own.owntv.core.settings.PlaylistAutoRefresh
+import tv.own.owntv.core.settings.PlaylistRefresh
+import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.myowntv.ui.components.BrowseMode
 import tv.own.myowntv.ui.components.DayStepperDialog
 import tv.own.myowntv.ui.components.StorageBrowser
@@ -214,10 +266,10 @@ fun AddSourceScreen(
     // Cancelling this closes the probe's streams — it releases them in a `finally` — so Skip hands
     // the provider's connections straight back instead of leaving them held.
     var measureJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
-    val connectionLimits: tv.own.myowntv.core.live.ConnectionLimits = koinInject()
-    val player: tv.own.myowntv.player.OwnTVPlayer = koinInject()
-    val livePreview: tv.own.myowntv.player.LivePreviewEngine = koinInject()
-    val enginePool: tv.own.myowntv.player.LiveEnginePool = koinInject()
+    val connectionLimits: tv.own.owntv.core.live.ConnectionLimits = koinInject()
+    val player: tv.own.owntv.player.OwnTVPlayer = koinInject()
+    val livePreview: tv.own.owntv.player.LivePreviewEngine = koinInject()
+    val enginePool: tv.own.owntv.player.LiveEnginePool = koinInject()
 
     fun formSource(): SourceEntity {
         fun opt(value: String) = value.trim().takeIf { it.isNotBlank() }
@@ -279,7 +331,7 @@ fun AddSourceScreen(
             runCatching { player.stop() }
             runCatching { livePreview.stop() }
             runCatching { enginePool.releaseAll() }
-            sourceTest = SourceTestUi.Measuring(label, tv.own.myowntv.core.live.ProbeProgress(1, 1, tv.own.myowntv.core.live.MAX_PROBE_STREAMS))
+            sourceTest = SourceTestUi.Measuring(label, tv.own.owntv.core.live.ProbeProgress(1, 1, tv.own.owntv.core.live.MAX_PROBE_STREAMS))
             val limit = connectionLimits.measureAndStore(source, force = true) { progress ->
                 if (sourceTest is SourceTestUi.Measuring) sourceTest = SourceTestUi.Measuring(label, progress)
             }
@@ -420,17 +472,17 @@ fun AddSourceScreen(
 
     val showContentToggles = kind == SourceKind.XTREAM || kind == SourceKind.STALKER
     val hasAnySectionOn = syncLive != SyncScopeChoice.Off || syncMovies != SyncScopeChoice.Off || syncSeries != SyncScopeChoice.Off
-    val macValid = tv.own.myowntv.core.stalker.StalkerClient.canonicalizeMac(mac) != null
+    val macValid = tv.own.owntv.core.stalker.StalkerClient.canonicalizeMac(mac) != null
     val canStart = when (kind) {
         SourceKind.XTREAM -> server.isNotBlank() && username.isNotBlank() && password.isNotBlank() && hasAnySectionOn
         SourceKind.M3U -> m3uUrl.isNotBlank()
-        SourceKind.STALKER -> tv.own.myowntv.core.stalker.StalkerClient.isValidPortalUrl(portalUrl) && macValid && hasAnySectionOn
+        SourceKind.STALKER -> tv.own.owntv.core.stalker.StalkerClient.isValidPortalUrl(portalUrl) && macValid && hasAnySectionOn
     }
 
     val canTest = when (kind) {
         SourceKind.XTREAM -> server.isNotBlank() && username.isNotBlank() && password.isNotBlank()
         SourceKind.M3U -> m3uUrl.isNotBlank() && !m3uUrl.startsWith("/")
-        SourceKind.STALKER -> tv.own.myowntv.core.stalker.StalkerClient.isValidPortalUrl(portalUrl) && macValid
+        SourceKind.STALKER -> tv.own.owntv.core.stalker.StalkerClient.isValidPortalUrl(portalUrl) && macValid
     }
 
     // Every field is a row (label + value or placeholder, OK = keyboard); Start import sits in the
