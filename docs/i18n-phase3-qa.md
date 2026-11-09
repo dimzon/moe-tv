@@ -91,7 +91,7 @@ Launch the fixture on API 26 and a recent emulator:
 
 ```sh
 adb shell am start \
-  -n tv.own.owntv/tv.own.owntv.core.i18n.FontFallbackQaActivity
+  -n tv.own.myowntv/tv.own.myowntv.core.i18n.FontFallbackQaActivity
 ```
 
 Also exercise representative real provider titles, channel/programme names, playlists, and subtitle filenames in the actual EPG, overlays, and subtitle UI. Classify each issue as missing glyphs, incorrect shaping, incorrect paragraph direction, or only inconsistent serif/sans appearance.

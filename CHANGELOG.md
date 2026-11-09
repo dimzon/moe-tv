@@ -1,4 +1,6 @@
-# OwnTV — Changelog
+# MyOwnTV — Changelog
+
+> MyOwnTV 0.1.0 — independent fork of [OwnTV](https://github.com/ahXN00/OwnTV) (upstream history squashed), reworked so the channel list and programme guide come from **RuTube's public API** instead of Xtream/M3U/Stalker providers. The history below describes the upstream import point.
 
 > Release notes: two parts per version — New features (by name) and Fixes. This file feeds the GitHub release body and the in-app update dialog.
 >

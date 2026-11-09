@@ -1,0 +1,98 @@
+package tv.own.myowntv.features.settings
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.androidx.compose.koinViewModel
+import tv.own.myowntv.R
+import tv.own.myowntv.ui.components.MyOwnTVIcon
+
+/**
+ * Settings › Layout › Browsing lists as a Stage page (nine switches are not a popup): what
+ * each section remembers — its last category, then its last item — one switch per section, and
+ * whether the TV Guide shares Live TV's remembered category.
+ * The last section shows or hides the built-in Live TV categories.
+ */
+@Composable
+fun BrowsingListsSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
+    val vm: SettingsViewModel = koinViewModel()
+    val catLive by vm.rememberCategoryLive.collectAsStateWithLifecycle()
+    val guideFollows by vm.guideFollowsLiveCategory.collectAsStateWithLifecycle()
+    val catMovies by vm.rememberCategoryMovies.collectAsStateWithLifecycle()
+    val catSeries by vm.rememberCategorySeries.collectAsStateWithLifecycle()
+    val itemLive by vm.rememberLastLive.collectAsStateWithLifecycle()
+    val itemMovies by vm.rememberLastMovies.collectAsStateWithLifecycle()
+    val itemSeries by vm.rememberLastSeries.collectAsStateWithLifecycle()
+    val builtIns by vm.liveBuiltIns.collectAsStateWithLifecycle()
+    val showAll = builtIns.showAll
+    val showCatchup = builtIns.showCatchup
+    val first = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { first.requestFocus() } }
+    StageFullPage(
+        parents = listOf(stringResource(R.string.settings_group_layout)),
+        title = stringResource(R.string.settings_browsing_lists),
+        count = pluralStringResource(R.plurals.settings_setting_count, 9, 9),
+        onBack = onBack,
+        modifier = modifier,
+    ) {
+        val live = stringResource(R.string.settings_history_live)
+        val movies = stringResource(R.string.settings_history_movies)
+        val series = stringResource(R.string.settings_history_series)
+        val cat = stringResource(R.string.settings_browsing_last_category)
+        val catHelp = stringResource(R.string.settings_browsing_last_category_description)
+        StageSettingsHeading(cat, 4, first = true)
+        BrowsingSwitch(MyOwnTVIcon.LIVE_TV, live, cat, catHelp, catLive, Modifier.focusRequester(first)) { vm.setRememberCategoryLive(!catLive) }
+        BrowsingSwitch(
+            MyOwnTVIcon.EPG,
+            stringResource(R.string.settings_guide_follows_live),
+            cat,
+            stringResource(R.string.settings_help_guide_follows_live),
+            guideFollows,
+            desc = stringResource(R.string.settings_guide_follows_live_description),
+        ) { vm.setGuideFollowsLiveCategory(!guideFollows) }
+        BrowsingSwitch(MyOwnTVIcon.MOVIES, movies, cat, catHelp, catMovies) { vm.setRememberCategoryMovies(!catMovies) }
+        BrowsingSwitch(MyOwnTVIcon.SERIES, series, cat, catHelp, catSeries) { vm.setRememberCategorySeries(!catSeries) }
+        val item = stringResource(R.string.settings_browsing_last_item)
+        val itemHelp = stringResource(R.string.settings_browsing_last_item_description)
+        StageSettingsHeading(item, 3)
+        BrowsingSwitch(MyOwnTVIcon.LIVE_TV, live, item, itemHelp, itemLive) { vm.setRememberLastLive(!itemLive) }
+        BrowsingSwitch(MyOwnTVIcon.MOVIES, movies, item, itemHelp, itemMovies) { vm.setRememberLastMovies(!itemMovies) }
+        BrowsingSwitch(MyOwnTVIcon.SERIES, series, item, itemHelp, itemSeries) { vm.setRememberLastSeries(!itemSeries) }
+        val liveCats = stringResource(R.string.settings_browsing_live_categories)
+        val liveCatsHelp = stringResource(R.string.settings_browsing_live_categories_description)
+        StageSettingsHeading(liveCats, 2)
+        BrowsingSwitch(MyOwnTVIcon.CATCHUP, stringResource(R.string.content_catchup), liveCats, liveCatsHelp, showCatchup) { vm.setLiveShowCatchupRail(!showCatchup) }
+        BrowsingSwitch(MyOwnTVIcon.LIVE_TV, stringResource(R.string.content_category_all_channels), liveCats, liveCatsHelp, showAll) { vm.setLiveShowAllRail(!showAll) }
+    }
+}
+
+@Composable
+private fun BrowsingSwitch(
+    icon: MyOwnTVIcon,
+    title: String,
+    part: String,
+    help: String,
+    on: Boolean,
+    modifier: Modifier = Modifier,
+    desc: String? = null,
+    onClick: () -> Unit,
+) {
+    val value = SettingValue.Switch(on)
+    StageSettingRow(
+        icon = icon,
+        title = title,
+        desc = desc,
+        value = value,
+        onClick = onClick,
+        // The panel names the part too: "Remember last category · Live TV".
+        help = settingHelp(null, stringResource(R.string.settings_breadcrumb_eyebrow, part, title), help, value, pinnable = false),
+        modifier = modifier,
+    )
+}

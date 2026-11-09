@@ -1665,7 +1665,7 @@ Size and memory for the explicitly packaged build (catalogue-only entries are ex
 ```bash
 unzip -v app/build/outputs/apk/standard/release/*.apk | grep resources.arsc   # expect Stored, 0%
 ls -l app/build/outputs/apk/standard/release/*.apk                           # track against the filtered Phase 0 baseline
-adb shell dumpsys meminfo tv.own.owntv                                       # on a 1GB box, post-switch
+adb shell dumpsys meminfo tv.own.myowntv                                       # on a 1GB box, post-switch
 ```
 
 The arsc is mmap'd so it is not resident, but the native `ResStringPool` still decodes strings on access and maintains native tables. The old ~190k-string estimate applied to the abandoned 111-locale scope and is not relevant to the current explicit-packaging policy. Measure the actual APK and runtime memory on real 1 GB hardware before each materially expanded localized release.

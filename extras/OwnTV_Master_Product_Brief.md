@@ -548,13 +548,13 @@ manual check, and installation on the TV itself.
 | Language | Kotlin 2.4.20 (no `kotlin-android` plugin; the Compose compiler plugin pulls the Kotlin Gradle plugin to this version) |
 | Build | AGP 9.4.0 / Gradle 9.8.2, KSP2 2.3.11, JDK 25 |
 | UI | Jetpack Compose for TV (`androidx.tv:tv-material` 1.1.0), Compose BOM 2026.08.00 |
-| Media | libmpv (FFmpeg) — `tv.own.owntv:libmpv`, OwnTV's own build (newest mpv + FFmpeg 9, monthly) · ExoPlayer/Media3 1.11.1 |
+| Media | libmpv (FFmpeg) — `tv.own.myowntv:libmpv`, OwnTV's own build (newest mpv + FFmpeg 9, monthly) · ExoPlayer/Media3 1.11.1 |
 | Database | Room 2.8.5 + Paging 3.5.1 + FTS4 (WAL) |
 | DI | Koin 4.2.2 |
 | Networking | OkHttp 5 — the panel-facing client is pinned to HTTP/1.1 for flaky IPTV panels, while the image client keeps h2 so poster grids multiplex on one connection |
 | Images | Coil 3.6.0 |
 | Preferences | DataStore |
-| SDK | `minSdk 26`, `targetSdk 36`, `compileSdk 37`, `applicationId tv.own.owntv` |
+| SDK | `minSdk 26`, `targetSdk 36`, `compileSdk 37`, `applicationId tv.own.myowntv` |
 
 ---
 
@@ -571,7 +571,7 @@ the playlist reports; the provider's refusal still stops a stream with its sente
 | **[OwnTV](https://github.com/ahXN00/OwnTV)** | This app — Compose-for-TV interface, navigation, player HUD |
 | **[OwnTV_Mobile](https://github.com/ahXN00/OwnTV_Mobile)** | The phone and tablet interface |
 
-Core is published as `tv.own.owntv:core` and `tv.own.owntv:player-core`; both apps always consume the
+Core is published as `tv.own.myowntv:core` and `tv.own.myowntv:player-core`; both apps always consume the
 same version.
 
 ### 12.2 Parsing & sync

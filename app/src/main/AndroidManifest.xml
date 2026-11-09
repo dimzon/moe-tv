@@ -52,7 +52,7 @@
     </queries>
 
     <application
-        android:name=".OwnTVApp"
+        android:name=".MyOwnTVApp"
         android:allowBackup="false"
         android:banner="@drawable/owntv_banner_eggshell"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -62,7 +62,7 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/owntv_icon_eggshell"
         android:supportsRtl="true"
-        android:theme="@style/Theme.OwnTV"
+        android:theme="@style/Theme.MyOwnTV"
         android:usesCleartextTraffic="true"
         tools:targetApi="26">
 
@@ -77,7 +77,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Disable WorkManager default auto-init; OwnTVApp provides Configuration. -->
+        <!-- Disable WorkManager default auto-init; MyOwnTVApp provides Configuration. -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
@@ -110,7 +110,7 @@
             android:launchMode="singleTop"
             android:supportsPictureInPicture="true"
             android:roundIcon="@mipmap/owntv_icon_petrol"
-            android:theme="@style/Theme.OwnTV.Starting.Petrol"
+            android:theme="@style/Theme.MyOwnTV.Starting.Petrol"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -140,7 +140,7 @@
             android:launchMode="singleTop"
             android:supportsPictureInPicture="true"
             android:roundIcon="@mipmap/owntv_icon_sunflower"
-            android:theme="@style/Theme.OwnTV.Starting.Sunflower"
+            android:theme="@style/Theme.MyOwnTV.Starting.Sunflower"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -170,7 +170,7 @@
             android:launchMode="singleTop"
             android:supportsPictureInPicture="true"
             android:roundIcon="@mipmap/owntv_icon_cobalt"
-            android:theme="@style/Theme.OwnTV.Starting.Cobalt"
+            android:theme="@style/Theme.MyOwnTV.Starting.Cobalt"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -200,7 +200,7 @@
             android:launchMode="singleTop"
             android:supportsPictureInPicture="true"
             android:roundIcon="@mipmap/owntv_icon_tomato"
-            android:theme="@style/Theme.OwnTV.Starting.Tomato"
+            android:theme="@style/Theme.MyOwnTV.Starting.Tomato"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -230,7 +230,7 @@
             android:launchMode="singleTop"
             android:supportsPictureInPicture="true"
             android:roundIcon="@mipmap/owntv_icon_board"
-            android:theme="@style/Theme.OwnTV.Starting.Board"
+            android:theme="@style/Theme.MyOwnTV.Starting.Board"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -260,7 +260,7 @@
             android:launchMode="singleTop"
             android:supportsPictureInPicture="true"
             android:roundIcon="@mipmap/owntv_icon_eggshell"
-            android:theme="@style/Theme.OwnTV.Starting.Eggshell"
+            android:theme="@style/Theme.MyOwnTV.Starting.Eggshell"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -290,7 +290,7 @@
             android:launchMode="singleTop"
             android:supportsPictureInPicture="true"
             android:roundIcon="@mipmap/owntv_icon_olive"
-            android:theme="@style/Theme.OwnTV.Starting.Olive"
+            android:theme="@style/Theme.MyOwnTV.Starting.Olive"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -320,7 +320,7 @@
             android:launchMode="singleTop"
             android:supportsPictureInPicture="true"
             android:roundIcon="@mipmap/owntv_icon_olive_cream"
-            android:theme="@style/Theme.OwnTV.Starting.OliveCream"
+            android:theme="@style/Theme.MyOwnTV.Starting.OliveCream"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -351,7 +351,7 @@
             android:launchMode="singleTop"
             android:supportsPictureInPicture="true"
             android:roundIcon="@mipmap/owntv_icon_pixel"
-            android:theme="@style/Theme.OwnTV.Starting.Pixel"
+            android:theme="@style/Theme.MyOwnTV.Starting.Pixel"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -371,7 +371,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Auto start (AutoStart.kt). Both run in the bare :autostart process, where OwnTVApp starts
+        <!-- Auto start (AutoStart.kt). Both run in the bare :autostart process, where MyOwnTVApp starts
              nothing, so the wake listener does not keep the whole app in memory. The receiver is
              exported because these are system broadcasts; the service is not. -->
         <receiver

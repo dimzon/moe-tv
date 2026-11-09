@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "tv.own.owntv.baselineprofile"
+    namespace = "tv.own.myowntv.baselineprofile"
     compileSdk {
         version = release(37)
     }
