@@ -52,11 +52,16 @@ internal class RuTubeSyncer(
         progress.update(SyncPhase.LIVE, 0)
 
         val allChannels = rutube.channels()
-        // Verified non-playable live channels (hls404 / empty master / player stub), mirroring the
-        // SmartRuTube filter. Filtered before naming so duplicate-name disambiguation sees the
-        // channels that actually remain. Reviewed 2026-11-09 with the mobile UA; drop an id here
-        // once the channel plays again.
-        val channels = allChannels.filterNot { it.videoId in KNOWN_BROKEN_IDS }
+        // Two kinds of row never enter the catalogue:
+        //  - subscription channels (Premier/SPORT/…): `is_paid` is false everywhere, the real signal
+        //    is `common_subscription_product_codes`; play/options answers 244/404 and nothing plays
+        //    without the package. The app has no purchase flow, so they are simply not offered.
+        //  - verified broken channels (hls404 / empty master / player stub), mirroring SmartRuTube's
+        //    filter. Both filters run before naming, so duplicate-name disambiguation only sees the
+        //    channels that remain.
+        val channels = allChannels
+            .filterNot { it.isPaid }
+            .filterNot { it.videoId in KNOWN_BROKEN_IDS }
         val rawCategories = rutube.categories()
         if (channels.isEmpty()) {
             throw IllegalStateException("RuTube returned no live channels — refusing to wipe the catalogue")

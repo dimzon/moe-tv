@@ -237,9 +237,6 @@ internal fun LiveStageRow(
         if (trailing != null) trailing()
         else Row(horizontalArrangement = Arrangement.spacedBy(8.mpx), verticalAlignment = Alignment.CenterVertically) {
             name.tags.forEach { StageTag(it) }
-            // RuTube subscription channels cannot play without the package (play/options 404
-            // `common_subscription`), so say so on the row instead of failing at tune time.
-            if (channel.isPaid) StageTag(stringResource(R.string.live_paid_badge))
             if (channel.catchup) MyOwnTVIcon(MyOwnTVIcon.REWIND, StageColors.Dim, Modifier.size(22.mpx))
             if (isFavorite) MyOwnTVIcon(MyOwnTVIcon.FAVORITE, stageAccent.accent, Modifier.size(22.mpx), filled = true)
             mark?.let { StagePlaylistMark(it) }
