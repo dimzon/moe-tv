@@ -210,7 +210,7 @@ class SetupViewModel(
             block()
             val done = importer.state.value as? SourceImporter.ImportState.Success ?: return@launch
             val source = done.source ?: return@launch
-            if (!importer.backgroundHandoff && epgRepository.guideUrl(source) != null) {
+            if (!importer.backgroundHandoff && epgRepository.hasGuide(source)) {
                 pendingEpgSource = source
                 _epgSync.value = tv.own.myowntv.features.settings.EpgSyncUi.Ask(source.name)
             }

@@ -70,6 +70,21 @@ suspend fun runSemiAutoEpgSync(
     store: EpgSourceStore,
     setState: (EpgSyncUi) -> Unit,
 ) {
+    // The built-in RuTube guide is not an XMLTV feed: it comes from the API and is written straight
+    // into the guide tables. No EPG source row, no download.
+    if (source.type == tv.own.owntv.core.model.SourceType.RUTUBE) {
+        setState(EpgSyncUi.Syncing(0))
+        try {
+            val written = epgRepository.refresh(source) { _, count -> setState(EpgSyncUi.Syncing(count)) }
+            setState(EpgSyncUi.Done)
+            return
+        } catch (c: CancellationException) {
+            throw c
+        } catch (e: Exception) {
+            setState(EpgSyncUi.Failed(tv.own.owntv.core.util.classifySyncFailure(e.message, online = true)))
+            return
+        }
+    }
     // A playlist header may advertise several feeds in one comma-separated url-tvg; each is its own
     // EPG source, since only one address can be downloaded at a time.
     val urls = epgRepository.guideUrls(source)

@@ -202,6 +202,7 @@ fun Onboarding(firstRun: Boolean, onDone: (Long?) -> Unit, onCancel: () -> Unit,
                 onBack = { step = Step.SETUP_CHOICE },
             )
             Step.CREATE_PROFILE -> ProfileStep(
+                defaultName = defaultProfileName,
                 onCreate = { name, avatar, kids, pin, picture -> vm.createProfile(name.ifBlank { defaultProfileName }, avatar, kids, pin, picture) { importName = "RuTube"; vm.startRutube(); importOrigin = Step.CREATE_PROFILE; step = Step.IMPORTING } },
                 onBack = { if (firstRun) step = Step.SETUP_CHOICE else onCancel() },
             )
@@ -506,8 +507,8 @@ private fun AppIconSwatches(icons: List<AppIcon>, chosen: AppIcon) {
  * the profile has no id to store it under before it exists.
  */
 @Composable
-private fun ProfileStep(onCreate: (name: String, avatarId: Int, isKids: Boolean, pin: String?, picture: java.io.File?) -> Unit, onBack: () -> Unit) {
-    var name by remember { mutableStateOf("") }
+private fun ProfileStep(defaultName: String, onCreate: (name: String, avatarId: Int, isKids: Boolean, pin: String?, picture: java.io.File?) -> Unit, onBack: () -> Unit) {
+    var name by remember { mutableStateOf(defaultName) }
     var avatarId by remember { mutableIntStateOf(-1) } // new profiles start on the letter
     var isKids by remember { mutableStateOf(false) }
     var pin by remember { mutableStateOf("") }
