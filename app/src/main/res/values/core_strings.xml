@@ -299,4 +299,7 @@
     <string name="common_weather_degrees_city"><xliff:g id="temperature">%1$d</xliff:g>° <xliff:g id="city">%2$s</xliff:g></string>
     <!-- Translators: Button that closes a prompt without acting on it, e.g. a programme reminder. -->
     <string name="common_dismiss">Dismiss</string>
+
+    <!-- Translators: Badge on a live channel that requires a paid RuTube subscription (Premier, SPORT, ...). The app cannot play it without that subscription. -->
+    <string name="live_paid_badge">Subscription</string>
 </resources>

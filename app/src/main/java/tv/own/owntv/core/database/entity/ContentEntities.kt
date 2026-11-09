@@ -115,6 +115,13 @@ data class ChannelEntity(
     /** The provider's own name when the playlist's "Clean channel names" changed [name] (v51), so
      *  guide matching keeps seeing what the provider wrote. Null when [name] is that name. */
     val providerName: String? = null,
+    /**
+     * Subscription-only channel (RuTube `is_paid` **or** a non-empty
+     * `common_subscription_product_codes`, v55). The live catalogue reports `is_paid = false` on
+     * every row, so the subscription packages are the only real signal. The UI badges these and
+     * `play/options` answers 404 `common_subscription` for them.
+     */
+    @ColumnInfo(defaultValue = "0") val isPaid: Boolean = false,
 )
 
 /** The name guide matching compares: the provider's own, not the cleaned display name. */
@@ -335,9 +342,9 @@ data class ContentHashProjection(
 
 /**
  * The v26 fields ([ChannelEntity.catchupType] / [ChannelEntity.httpHeaders]), the v33
- * [ChannelEntity.drmConfig], the v43 [ChannelEntity.manifestType] / [ChannelEntity.directSource] and
- * the v49 [ChannelEntity.catchupCorrectionMin] and the v51 [ChannelEntity.providerName] are folded in ONLY when the channel actually carries
- * one. Adding them unconditionally would change every stored hash at once and turn the next resync of
+ * [ChannelEntity.drmConfig], the v43 [ChannelEntity.manifestType] / [ChannelEntity.directSource], the
+ * v49 [ChannelEntity.catchupCorrectionMin], the v51 [ChannelEntity.providerName] and the v55
+ * [ChannelEntity.isPaid] are folded in ONLY when the channel actually carries one. Adding them unconditionally would change every stored hash at once and turn the next resync of
  * a 100k-channel playlist into a full rewrite for everybody; this way only the (rare) channels that use
  * them pay a single re-upsert, while a later change to a header, a catch-up type, a licence URL, a
  * declared container or a correction still propagates.
@@ -358,7 +365,8 @@ fun ChannelEntity.computeContentHash(): Int {
         else Objects.hash(withDrm, manifestType, directSource)
     }
     val withV49 = if (catchupCorrectionMin == 0) withV43 else Objects.hash(withV43, catchupCorrectionMin)
-    return if (providerName == null) withV49 else Objects.hash(withV49, providerName)
+    val withV51 = if (providerName == null) withV49 else Objects.hash(withV49, providerName)
+    return if (!isPaid) withV51 else Objects.hash(withV51, true)
 }
 
 /** [httpHeaders], [MovieEntity.drmConfig] and [MovieEntity.manifestType] are folded in only when the

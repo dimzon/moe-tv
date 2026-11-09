@@ -79,7 +79,11 @@ object RutubeParser {
 
     fun parsePlayOptions(httpCode: Int, body: String?): RutubePlayback {
         val root = body?.let { runCatching { JSONObject(it) }.getOrNull() }
-        val detail = root?.optJSONObject("detail")?.str("name")
+        val detailObject = root?.optJSONObject("detail")
+        val detail = detailObject?.str("name")
+        // Two shapes mean "not playable without an account": `login_required` (single video) and
+        // `common_subscription` (Premier/SPORT packages). The name carries the package title.
+        val detailType = detailObject?.str("type")
         val iframeUrl = root?.str("iframe_url")
         val originType = root?.str("origin_type")
 
@@ -96,6 +100,7 @@ object RutubeParser {
         if (vod != null) return RutubePlayback.Ready(vod)
 
         val reason = when {
+            detailType == "login_required" || detailType == "common_subscription" -> UnavailableReason.LOGIN_REQUIRED
             detail == "login_required" -> UnavailableReason.LOGIN_REQUIRED
             originType == "ifrm" || !iframeUrl.isNullOrBlank() -> UnavailableReason.IFRAME
             httpCode !in 200..299 -> UnavailableReason.NETWORK
@@ -130,6 +135,11 @@ object RutubeParser {
                 if (id != Int.MIN_VALUE) categoryIds += id
             }
         }
+        // `is_paid` is false on every live row the API returns, but subscription channels carry
+        // `common_subscription_product_codes` (PREMIER, SPORT, …) and their play/options answer
+        // 404 `common_subscription`. Treat either signal as paid so the UI can badge them.
+        val subscriptionCodes = obj.optJSONArray("common_subscription_product_codes")
+        val hasSubscription = subscriptionCodes != null && subscriptionCodes.length() > 0
         return RutubeChannel(
             videoId = videoId,
             name = name,
@@ -138,7 +148,7 @@ object RutubeParser {
                 ?: obj.str("thumbnail_url"),
             categoryIds = categoryIds,
             orderNumber = obj.optInt("order_number", Int.MIN_VALUE).takeIf { it != Int.MIN_VALUE },
-            isPaid = obj.optBoolean("is_paid", false),
+            isPaid = obj.optBoolean("is_paid", false) || hasSubscription,
         )
     }
 

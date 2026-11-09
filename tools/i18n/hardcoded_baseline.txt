@@ -4,11 +4,11 @@
 # Entries go as literals are translated or classified; the file may only ever shrink.
 # Format: <count>\t<relative path>\t<content with \t/\n escaped>
 
+1	app/src/main/java/tv/own/myowntv/features/customize/BulkRenameDialogs.kt	\0
 1	app/src/main/java/tv/own/myowntv/features/customize/BulkRenameDialogs.kt	ADD
 1	app/src/main/java/tv/own/myowntv/features/customize/BulkRenameDialogs.kt	PREFIX
 1	app/src/main/java/tv/own/myowntv/features/customize/BulkRenameDialogs.kt	REMOVE
 1	app/src/main/java/tv/own/myowntv/features/customize/BulkRenameDialogs.kt	SUFFIX
-1	app/src/main/java/tv/own/myowntv/features/customize/BulkRenameDialogs.kt	\0
 2	app/src/main/java/tv/own/myowntv/features/customize/BulkRenameDialogs.kt	▾
 1	app/src/main/java/tv/own/myowntv/features/customize/BulkRenameDialogs.kt	✕
 3	app/src/main/java/tv/own/myowntv/features/customize/CustomizeItemsViewModel.kt	\0
@@ -17,9 +17,9 @@
 1	app/src/main/java/tv/own/myowntv/features/customize/CustomizeScreen.kt	hid:${entry.key}
 1	app/src/main/java/tv/own/myowntv/features/customize/CustomizeViewModel.kt	Custom
 1	app/src/main/java/tv/own/myowntv/features/customize/MoveToCategoryDialog.kt	new
+8	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	\0
 1	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	${cfg.host}$p
 1	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	:${cfg.port}
-8	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	\0
 2	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	https://
 6	app/src/main/java/tv/own/myowntv/features/settings/OpenSubtitlesAccountScreen.kt	\0
 1	app/src/main/java/tv/own/myowntv/features/settings/OpenSubtitlesViewModel.kt	OpenSubtitles
@@ -95,6 +95,7 @@
 2	app/src/main/java/tv/own/owntv/core/companion/CompanionPayload.kt	\0
 1	app/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	${CustomizeKeys.CUSTOM_PREFIX}${UUID.randomUUID()}
 1	app/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	custom:
+6	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	\0
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	${EDGE_SEPARATORS}\\z
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	(?:[\\x{2190}-\\x{21FF}\\x{2300}-\\x{23FF}\\x{25A0}-\\x{25FF}\\x{2600}-\\x{27BF}
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	(?:\\[$escaped\\]|\\($escaped\\)|$escaped)
@@ -102,7 +103,6 @@
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	(?<![\\p{L}\\p{N}])$wrapped$
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	;
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	[\\s|\\-–—·:._,]+
-6	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	\0
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	\\x{2B00}-\\x{2BFF}\\x{FE0F}\\x{1F000}-\\x{1FAFF}\\x{1F1E6}-\\x{1F1FF}])+
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	^$EDGE_SEPARATORS
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	^$wrapped(?![\\p{L}\\p{N}])
@@ -197,12 +197,12 @@
 1	app/src/main/java/tv/own/owntv/core/metadata/MetadataCast.kt	p
 1	app/src/main/java/tv/own/owntv/core/metadata/MetadataImages.kt	${TmdbProvider.IMAGE_BASE}/$size${it.ensureLeadingSlash()}
 1	app/src/main/java/tv/own/owntv/core/metadata/MetadataImages.kt	w185
+6	app/src/main/java/tv/own/owntv/core/metadata/MetadataRepository.kt	\0
 1	app/src/main/java/tv/own/owntv/core/metadata/MetadataRepository.kt	$TYPE_MOVIE:$lang:$tmdbId
 1	app/src/main/java/tv/own/owntv/core/metadata/MetadataRepository.kt	$TYPE_TV:$lang:$tmdbId
 1	app/src/main/java/tv/own/owntv/core/metadata/MetadataRepository.kt	$TYPE_TV:$lang:$tvId:s${season}e$episode
-6	app/src/main/java/tv/own/owntv/core/metadata/MetadataRepository.kt	\0
-1	app/src/main/java/tv/own/owntv/core/metadata/OwnTVClientId.kt	%02x
 1	app/src/main/java/tv/own/owntv/core/metadata/OwnTVClientId.kt	\0
+1	app/src/main/java/tv/own/owntv/core/metadata/OwnTVClientId.kt	%02x
 1	app/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	&api_key=
 1	app/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	,
 1	app/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	TMDB $label failed: ${it.message}
@@ -212,6 +212,7 @@
 1	app/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	profile_path
 1	app/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	search type=$type
 1	app/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	tv details id=$tmdbId
+3	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	\0
 1	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	${dohUrl.trimEnd('/')}?name=$hostname&type=$type
 1	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	A
 1	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	AAAA
@@ -223,7 +224,6 @@
 1	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	Google
 1	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	Quad9
 1	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	UDP DNS lookup $hostname → ${result.map { it.hostAddress }} (server=$server:$port)
-3	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	\0
 1	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	application/dns-json
 1	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	data
 1	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	https://cloudflare-dns.com/dns-query
@@ -247,9 +247,9 @@
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_color
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_position
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_style_enabled
+1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	\0
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	#
 2	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	#%08X
-1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	\0
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	bottom_center
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	bottom_left
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	bottom_right
@@ -267,9 +267,9 @@
 1	app/src/main/java/tv/own/owntv/core/stalker/StalkerClient.kt	stop_timestamp
 1	app/src/main/java/tv/own/owntv/core/stalker/StalkerClient.kt	time
 1	app/src/main/java/tv/own/owntv/core/stalker/StalkerClient.kt	time_to
+1	app/src/main/java/tv/own/owntv/core/stalker/StreamUrlResolver.kt	\0
 1	app/src/main/java/tv/own/owntv/core/stalker/StreamUrlResolver.kt	($it)
 1	app/src/main/java/tv/own/owntv/core/stalker/StreamUrlResolver.kt	StreamUrlResolver
-1	app/src/main/java/tv/own/owntv/core/stalker/StreamUrlResolver.kt	\0
 1	app/src/main/java/tv/own/owntv/core/stalker/StreamUrlResolver.kt	archive guide lookup failed ch=$channelRemoteId
 1	app/src/main/java/tv/own/owntv/core/stalker/StreamUrlResolver.kt	auto /media/$programmeId.mpg
 1	app/src/main/java/tv/own/owntv/core/stalker/StreamUrlResolver.kt	auto /media/${channelRemoteId}_${startMs / 1000}_$durationS.mpg
@@ -295,7 +295,6 @@
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	is_paid
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	items
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	live_streams
-1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	login_required
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	m3u8
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	m3u8_m4s
 4	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	name
@@ -343,6 +342,6 @@
 2	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	sub-color
 2	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	sub-pos
 1	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	track-list/$i/selected
+1	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	\0
 1	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	429
 1	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	458
-1	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	\0

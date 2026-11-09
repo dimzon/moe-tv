@@ -95,6 +95,7 @@ internal class RuTubeSyncer(
                 number = ch.orderNumber?.takeIf { it != 999 },
                 remoteId = ch.videoId,
                 sortOrder = order++,
+                isPaid = ch.isPaid,
             )
         }
 
