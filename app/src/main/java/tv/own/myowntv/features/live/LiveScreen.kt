@@ -903,8 +903,9 @@ fun LiveScreen(
                                         when (okAction(previewOnOk, effectivePreview && previewShown, paneChannel?.id, channel.id)) {
                                             OkAction.PREVIEW -> vm.playPreview(channel)
                                             OkAction.WATCH -> {
-                                                vm.watchFullscreen(channel, channels.itemSnapshotList.items.filterNotNull())
-                                                if (!externalPlayerOn) onFullscreen()
+                                                if (vm.watchFullscreen(channel, channels.itemSnapshotList.items.filterNotNull()) && !externalPlayerOn) {
+                                                    onFullscreen()
+                                                }
                                             }
                                         }
                                     },
@@ -984,7 +985,7 @@ fun LiveScreen(
             vm = epgVm,
             channel = ch,
             focusStartMs = null,
-            onWatch = { vm.watchFullscreen(ch, emptyList()); if (!externalPlayerOn) onFullscreen() },
+            onWatch = { if (vm.watchFullscreen(ch, emptyList()) && !externalPlayerOn) onFullscreen() },
             onPlayFromStart = { p -> vm.playCatchupProgramme(ch, p); if (!externalPlayerOn) onFullscreen() },
             onDismiss = { programmeDetails = null; scope.launch { restoreToContextRow() } },
         )
@@ -1015,7 +1016,7 @@ fun LiveScreen(
             canCatchup = true, // only reachable from the catch-up picker, which already gated on this
             isFavorite = favoriteIds.contains(ch.id),
             onToggleFavorite = { vm.toggleFavorite(ch) },
-            onWatch = { catchupDetail = null; vm.watchFullscreen(ch, emptyList()); if (!externalPlayerOn) onFullscreen() },
+            onWatch = { catchupDetail = null; if (vm.watchFullscreen(ch, emptyList()) && !externalPlayerOn) onFullscreen() },
             onPlayCatchup = { catchupDetail = null; vm.playCatchupProgramme(ch, prog); onFullscreen() },
             // External: the archive went to another app, so don't mount the fullscreen player over it.
             onPlayCatchupExternal = { catchupDetail = null; vm.playCatchupExternal(ch, prog) },

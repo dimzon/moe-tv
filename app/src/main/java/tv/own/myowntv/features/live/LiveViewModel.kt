@@ -1176,6 +1176,7 @@ class LiveViewModel(
         // Recorded even when it cannot play (a hidden folder, a one-stream panel): a second OK on it
         // must still open full screen.
         _paneChannel.value = channel
+        if (channel.isPaid) return // no stream without the package; don't spend a request per focus step
         if (channel.categoryId != null && channel.categoryId in hiddenCategoryIds.value) return
         // Core keeps the preview off a promoted full-screen stream, re-mutes on a re-focus instead of
         // reloading, mints a Stalker link, and holds back on a one-session panel while mpv plays.
@@ -1475,14 +1476,15 @@ class LiveViewModel(
     /** Open a channel fullscreen, preserving the browse context it was launched from. The channel's
      *  provider category is metadata (used by [previewCategoryName]); it must not replace Favorites,
      *  History, All, a custom category, or the provider folder the user is actually browsing. */
-    fun watchFullscreen(channel: ChannelEntity, list: List<ChannelEntity>) {
+    fun watchFullscreen(channel: ChannelEntity, list: List<ChannelEntity>): Boolean {
+        if (rejectSubscription(channel)) return false
         // Opened with no browse list behind it — the catch-up programme dialog does exactly this. Without
         // a zap list, CH+/CH− and the channel-list button are dead for the rest of the session, so rebuild
         // the channel's own category the way the Guide/Search path does.
         if (list.none { it.id == channel.id }) {
             zapList.armFor(channel)
             ensurePlaying(channel)
-            return
+            return true
         }
         val key = _selected.value
         zapList.armFromBrowse(
@@ -1494,6 +1496,7 @@ class LiveViewModel(
             categoryId = (key as? LiveKey.Folder)?.id,
         )
         ensurePlaying(channel)
+        return true
     }
 
     /** Tune a channel picked outside the Live TV list — the Guide. Same as
@@ -1719,6 +1722,7 @@ class LiveViewModel(
      *  [playChannel] when Live TV's external-player default is on. Stalker channels store a portal
      *  cmd rather than a URL, so it's resolved first — an external app can't mint one. */
     fun playExternal(channel: ChannelEntity) {
+        if (rejectSubscription(channel)) return
         viewModelScope.launch {
             val pid = currentProfileId() ?: return@launch
             if (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, channel.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, channel.categoryId)) return@launch
@@ -1750,9 +1754,25 @@ class LiveViewModel(
      *  because it's still loading (clicking OK before the preview is ready used to drop to mpv and
      *  stick on a black screen for HLS). */
     fun ensurePlaying(channel: ChannelEntity) {
+        if (rejectSubscription(channel)) return
         // A deliberate pick, not a CH+/- step: an unclaimed zap press must not be timed against it.
         tv.own.owntv.player.ZapTiming.shared.clear()
         startTune(channel)
+    }
+
+    /**
+     * A RuTube subscription channel cannot play without the package: `play/options` answers 244
+     * `common_subscription`, and the tune would otherwise sit on a black screen until the 30 s
+     * "no picture" watchdog fires. Say so at once and do not touch the engine.
+     */
+    private fun rejectSubscription(channel: ChannelEntity): Boolean {
+        if (!channel.isPaid) return false
+        android.widget.Toast.makeText(
+            appContext,
+            appContext.getString(tv.own.myowntv.R.string.live_subscription_required, channel.name),
+            android.widget.Toast.LENGTH_LONG,
+        ).show()
+        return true
     }
 
     /** [ensurePlaying] without forgetting the zap press: the tune a CH+/- step opens, timed from that press. */
@@ -1777,6 +1797,7 @@ class LiveViewModel(
      *  channel. Direct-tune's background rebuild path calls this without cancelling the rebuild
      *  so the in-flight rebuild it owns isn't killed by its own play. */
     private suspend fun playChannel(channel: ChannelEntity) {
+        if (rejectSubscription(channel)) return
         val pid = currentProfileId() ?: return
         if (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(pid, channel.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, channel.categoryId)) return
         // Live TV set to play externally: hand the channel over instead of tuning an in-app engine.
@@ -1830,6 +1851,7 @@ class LiveViewModel(
      *  a locked category, or one that is gone, does not open: false. */
     suspend fun ensurePlayingByIdAsync(channelId: Long, zapChannels: List<ChannelEntity> = emptyList()): Boolean {
         val channel = channelDao.getById(channelId)?.takeUnless { customize.sealsCategory(settings.activeProfileId.first(), it.categoryId) } ?: return false
+        if (rejectSubscription(channel)) return false
         if (zapChannels.isEmpty()) {
             // A single Home "continue watching" tile has no browse rail of its own.
             zapList.armFor(channel)

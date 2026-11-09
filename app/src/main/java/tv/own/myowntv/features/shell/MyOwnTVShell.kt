@@ -551,8 +551,7 @@ fun MyOwnTVShell(
                     zapSource = MainSection.LIVE_TV
                     // There is no caller-owned browse rail here. Let LiveViewModel build the channel's
                     // provider context instead of permanently arming a one-item list that disables CH+/CH-.
-                    liveVm.watchFullscreen(ch, emptyList())
-                    playerMode = PlayerMode.FULLSCREEN
+                    if (liveVm.watchFullscreen(ch, emptyList())) playerMode = PlayerMode.FULLSCREEN
                 }
             }
             // The TV Guide or Live TV on the last channel's category, the channel focused and in the preview,
@@ -609,8 +608,7 @@ fun MyOwnTVShell(
                 val channel = (launch as? LauncherLaunch.Live)?.channel
                 if (channel != null && liveVm.isVisibleToActiveProfile(channel) && playerMode == PlayerMode.NONE) {
                     zapSource = MainSection.LIVE_TV
-                    liveVm.watchFullscreen(channel, emptyList())
-                    playerMode = PlayerMode.FULLSCREEN
+                    if (liveVm.watchFullscreen(channel, emptyList())) playerMode = PlayerMode.FULLSCREEN
                 } else {
                     onSelectSection(MainSection.HOME)
                     localSubToast.show(startupChannelUnavailable)
@@ -961,8 +959,7 @@ fun MyOwnTVShell(
                     onSelectSection(MainSection.LIVE_TV)
                     // A launcher tile has no browse rail, so arm the channel's provider context before
                     // opening the player. A bare ensurePlaying() leaves CH+/CH- with no list to step through.
-                    liveVm.watchFullscreen(launch.channel, emptyList())
-                    openFullscreen(MainSection.LIVE_TV)
+                    if (liveVm.watchFullscreen(launch.channel, emptyList())) openFullscreen(MainSection.LIVE_TV)
                     onDeepLinkConsumed()
                 }
                 is LauncherLaunch.Series -> {

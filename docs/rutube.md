@@ -268,6 +268,8 @@ GET https://rutube.ru/api/play/options/{videoId}/
    `common_subscription_product_codes`, и `play/options` отвечает 404 (или 244 с TV-параметрами)
    `common_subscription`.
    С v55 флаг хранится в `channels.isPaid`, в списке каналов показывается бейдж «Подписка».
+   Попытка включить такой канал сразу показывает toast «требуется подписка RuTube» и не
+   запускает движок: иначе плеер ждал бы 30 с и падал с «no picture within 30s».
    `sources.isPaid` (v54) оставлен для совместимости, но для одного RuTube-источника
    с бесплатными и платными каналами он бесполезен.
 2. **Iframe-каналы** (`origin_type = "ifrm"`) не имеют HLS-потока — только внешний плеер.

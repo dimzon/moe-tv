@@ -212,4 +212,7 @@
 
     <!-- Translators: Badge on a live channel that requires a paid RuTube subscription (Premier, SPORT, ...). -->
     <string name="live_paid_badge">Подписка</string>
+
+    <!-- Translators: Toast when the user picks a live channel that needs a paid RuTube subscription. "name" is the channel name. -->
+    <string name="live_subscription_required">%1$s: требуется подписка RuTube</string>
 </resources>
