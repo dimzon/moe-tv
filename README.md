@@ -84,6 +84,9 @@ The database, sync, parsers, EPG storage and the playback engines live in this m
 `tv/own/owntv/**` — one source tree, no separate library to fetch. Only the libmpv engine
 (`tv.own.owntv:libmpv`) comes from a public Maven repository.
 
+The RuTube API contract, channel/EPG rules, database details and the native-library inventory are
+documented in [docs/rutube.md](docs/rutube.md).
+
 ## 📥 Installing (Fire TV / Android TV)
 
 1. Download the APK from this repository's **Releases**.
