@@ -33,6 +33,22 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
+    <!-- Networking and sync/download/recording (formerly declared by :core; its sources now live
+         in this module). -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- A recording timer must fire at the programme's start; revocable, so the code falls back to
+         an inexact alarm. Alarms do not survive a reboot, hence RECEIVE_BOOT_COMPLETED. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- VolumeBoost attaches a LoudnessEnhancer to the audio session (was :player-core's). -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
     <!-- TV-first app, but allow non-TV installs too: touchscreen optional, and leanback is NOT required
          (required=true blocked plain phones / non-TV armv7a boxes that don't report the leanback feature). -->
     <uses-feature
@@ -48,6 +64,40 @@
     <queries>
         <intent>
             <action android:name="android.speech.action.RECOGNIZE_SPEECH" />
+        </intent>
+        <!-- ExternalPlayerLauncher asks which installed apps can play a stream; from Android 11
+             that answer only includes apps matching a declared query. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="video/*" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="application/x-mpegURL" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="rtsp" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="rtmp" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="udp" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="mms" />
         </intent>
     </queries>
 
@@ -392,6 +442,105 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Listens for the screen turning on so the app can open when the TV wakes from sleep, a setting the user turns on." />
         </service>
+
+        <!-- "Restart now" after an icon change (AppIconSwitcher). Its own process, so it outlives
+             the app process it ends, and its own task. -->
+        <activity
+            android:name="tv.own.owntv.core.brand.AppRestartActivity"
+            android:process=":restart"
+            android:taskAffinity=":restart"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay" />
+
+        <!-- Read-only URI for generated logo files used by Google TV Home rows. Disabled until
+             the first file is written. -->
+        <provider
+            android:name="tv.own.owntv.core.tv.LiveLogoArtProvider"
+            android:authorities="${applicationId}.owntv-live-logo-art"
+            android:enabled="false"
+            android:exported="true" />
+
+        <!-- WorkManager's foreground-service host: data sync (downloads) and media playback
+             (recordings) both run in it. -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync|mediaPlayback"
+            tools:node="merge" />
+
+        <!-- Recording timers and their boot re-arm. -->
+        <receiver
+            android:name="tv.own.owntv.core.recording.RecordingAlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="tv.own.owntv.core.action.RECORDING_DUE" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="tv.own.owntv.core.recording.RecordingBootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Programme reminders: the same pair as recordings. -->
+        <receiver
+            android:name="tv.own.owntv.core.reminder.ReminderAlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="tv.own.owntv.core.action.REMINDER_DUE" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="tv.own.owntv.core.reminder.ReminderBootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Sports goal alerts. -->
+        <receiver
+            android:name="tv.own.owntv.core.sports.MatchAlertReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="tv.own.owntv.core.action.MATCH_DUE" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="tv.own.owntv.core.sports.MatchAlertBootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name="tv.own.owntv.core.sports.LiveMatchCardService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!-- The sleep timer's "turn the screen off" grant (ScreenOff.Admin). -->
+        <receiver
+            android:name="tv.own.owntv.player.ScreenOff$Admin"
+            android:description="@string/player_sleep_timer_screen_off_explanation"
+            android:exported="true"
+            android:label="@string/player_sleep_timer"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/screen_off_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

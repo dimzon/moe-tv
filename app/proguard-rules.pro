@@ -22,3 +22,14 @@
 #     EpgAutoRefresh, PlaylistAutoRefresh, ...) round-trip through Enum.name/valueOf.
 #     Renaming a constant would silently reset settings and break old backups. ---
 -keep enum tv.own.myowntv.** { *; }
+
+# --- ExoPlayer FFmpeg audio decoder (tv.own.owntv.player.ffmpeg, moved here with player-core):
+#     libowntvffmpeg.so binds its natives with RegisterNatives by class and method name and calls
+#     growOutputBuffer back from C++, so R8 must keep those names. ---
+-keep class tv.own.owntv.player.ffmpeg.FfmpegLibrary {
+    native <methods>;
+}
+-keep class tv.own.owntv.player.ffmpeg.FfmpegAudioDecoder {
+    native <methods>;
+    private java.nio.ByteBuffer growOutputBuffer(androidx.media3.decoder.SimpleDecoderOutputBuffer, int);
+}

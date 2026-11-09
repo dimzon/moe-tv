@@ -242,6 +242,17 @@ androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
         variant.androidResources.localeFilters.addAll("en-rXA", "ar-rXB")
     }
+    // The exported Room schemas ride with the instrumentation APK: the migration test replays every
+    // shipped version from assets, which is the guard against wiping a user's data on upgrade.
+    onVariants { variant ->
+        variant.androidTest?.sources?.assets?.addStaticSourceDirectory("$projectDir/schemas")
+    }
+}
+
+// Room exports its schema JSON here (the @Database lives in this module now that core's sources
+// moved in). The migration test reads the same directory through androidTest assets above.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 // The profile is a list of code paths, not machine code, so one recording serves every ABI flavor.
@@ -342,14 +353,10 @@ val verifyI18nLiterals = tasks.register<VerifyI18nLiterals>("verifyI18nLiterals"
 tasks.named("preBuild") { dependsOn(verifyI18nLiterals) }
 
 dependencies {
-    // The shared data/settings/sync module. It lives in its own repository now — see
-    // https://github.com/ahXN00/OwnTV_Core. Set owntv.corePath in ~/.gradle/gradle.properties to
-    // build against its source instead of this pinned version.
-    implementation(libs.owntv.core)
-
-    // The shared playback engine. The TV HUD in app/player/** drives it; it renders nothing itself,
-    // so the mobile shell drives the same engine. Always on the same version as core.
-    implementation(libs.owntv.player.core)
+    // The engine (database, sync, parsers, EPG, playback) used to be a separate :core/:player-core
+    // module. Its sources now live in this module under tv/own/owntv/**; only the mpv engine stays
+    // an external artifact.
+    implementation(libs.libmpv)
 
     // Core
     implementation(libs.androidx.core.ktx)
@@ -397,8 +404,15 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
     ksp(libs.androidx.room.compiler)
+    // The SQLiteDriver API + the engine shipped inside the APK (migrations are written against it).
+    implementation(libs.androidx.sqlite)
+    implementation(libs.androidx.sqlite.bundled)
+    implementation(libs.androidx.sqlite.framework)
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
+    // SAF wrapper for user-chosen download folders; process-lifecycle for the auto-sync listener.
+    implementation(libs.androidx.documentfile)
+    implementation(libs.androidx.lifecycle.process)
 
     // Networking
     implementation(libs.okhttp)
@@ -439,10 +453,13 @@ dependencies {
 
     // Test
     testImplementation(libs.junit)
+    testImplementation(libs.gson)
+    testImplementation(libs.kotlinx.coroutines.test)
     // Test-only, never packaged: android.jar's org.json is a stub, and isReturnDefaultValues turns
     // every JSONObject call into a silent null/0. Backup/restore is all JSON, so the unit tests need
     // the real implementation to mean anything.
     testImplementation(libs.org.json)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.test.runner)
 }

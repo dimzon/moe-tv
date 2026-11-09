@@ -80,9 +80,9 @@ tv.own.myowntv/
 └── di/          Koin modules
 ```
 
-The database, sync, parsers, EPG storage and the playback engines live in the shared core
-library (`tv.own.owntv:core` / `:player-core`), which is downloaded from a public Maven
-repository by Gradle itself — **no account or token needed** to build.
+The database, sync, parsers, EPG storage and the playback engines live in this module under
+`tv/own/owntv/**` — one source tree, no separate library to fetch. Only the libmpv engine
+(`tv.own.owntv:libmpv`) comes from a public Maven repository.
 
 ## 📥 Installing (Fire TV / Android TV)
 
@@ -96,8 +96,7 @@ repository by Gradle itself — **no account or token needed** to build.
 ## 🛠️ Building & running
 
 1. **Get the code** — `git clone <this repository>` (or download the ZIP).
-2. **Open it** in [Android Studio](https://developer.android.com/studio) and let Gradle sync —
-   the core library is fetched automatically.
+2. **Open it** in [Android Studio](https://developer.android.com/studio) and let Gradle sync.
 3. **Pick the build variant** — `standard` for real devices and arm emulators, `x86_64` for
    x86_64 emulators. The native player only loads on a matching ABI.
 4. **Run** ▶. Minimum **Android 8.0 / API 26**.
