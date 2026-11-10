@@ -84,7 +84,6 @@ class CompanionHttpServer(
     @Volatile private var onPayload: (CompanionPayload) -> Unit = {}
     @Volatile private var onBackup: (String) -> Unit = {}
     @Volatile private var onImage: (bytes: ByteArray, extension: String) -> Unit = { _, _ -> }
-    @Volatile private var onServiceConfig: (CompanionServiceConfig) -> Unit = {}
 
     /** The backup file served at `/backup.json` in [CompanionMode.BACKUP_DOWNLOAD] mode. */
     @Volatile private var downloadFile: File? = null
@@ -120,7 +119,6 @@ class CompanionHttpServer(
         onPayload: (CompanionPayload) -> Unit = {},
         onBackup: (String) -> Unit = {},
         onImage: (bytes: ByteArray, extension: String) -> Unit = { _, _ -> },
-        onServiceConfig: (CompanionServiceConfig) -> Unit = {},
         downloadFile: File? = null,
         syncInfo: () -> String = { "{}" },
         onPair: (name: String, address: String, deviceId: String) -> String? = { _, _, _ -> null },
@@ -138,7 +136,6 @@ class CompanionHttpServer(
         this.onPayload = onPayload
         this.onBackup = onBackup
         this.onImage = onImage
-        this.onServiceConfig = onServiceConfig
         this.downloadFile = downloadFile
         this.syncInfo = syncInfo
         this.onPair = onPair
@@ -365,39 +362,6 @@ class CompanionHttpServer(
                 return sendHtml(socket, 200, CompanionHtml.imageSentPage(pageContext, pin))
             }
 
-            if (method == "POST" && path == "/serviceconfig") {
-                val headerPin = headers["x-companion-pin"].orEmpty()
-                if (!requirePin(queryPin.ifBlank { headerPin })) return sendText(socket, 401, localized(R.string.companion_error_unauthorized))
-                val body = CompanionHttpProtocol.readBody(input, headers, CompanionHttpProtocol.maxBodyBytes(path))
-                    ?: return sendText(socket, 413, localized(R.string.companion_error_body_too_large))
-                val fields = CompanionHttpProtocol.parseQuery(body)
-                val key = fields["apiKey"].orEmpty().trim()
-                val url = fields["serverUrl"].orEmpty().trim()
-                // Credentials belong to the OpenSubtitles page only; dropped outright in TMDB mode so
-                // a hand-crafted POST can't push an account into a flow that has no use for one.
-                val credentials = mode == CompanionMode.OPEN_SUBTITLES_CONFIG
-                val username = if (credentials) fields["username"].orEmpty().trim() else ""
-                // NOT trimmed: leading/trailing spaces can be part of a password, and silently eating
-                // them would produce an "invalid credentials" the user cannot explain.
-                val password = if (credentials) fields["password"].orEmpty() else ""
-                if (key.isBlank() && url.isBlank() && username.isBlank() && password.isEmpty()) {
-                    return sendText(socket, 400, localized(
-                        if (credentials) R.string.companion_service_config_empty_account
-                        else R.string.companion_service_config_empty
-                    ))
-                }
-                if (key.isNotBlank() && !Regex("^[A-Za-z0-9._-]{8,256}$").matches(key)) return sendText(socket, 400, localized(R.string.companion_service_config_invalid_key))
-                if (url.isNotBlank() && runCatching { java.net.URI(url).let { it.scheme == "https" && !it.host.isNullOrBlank() } }.getOrDefault(false).not()) return sendText(socket, 400, localized(R.string.companion_service_config_invalid_url))
-                // Length-bounded only. A password may legitimately contain anything, and OpenSubtitles
-                // does not publish a username charset — rejecting on a guessed pattern would lock real
-                // accounts out with no way for the user to tell why.
-                if (username.length > 256 || password.length > 256) {
-                    return sendText(socket, 400, localized(R.string.companion_service_config_invalid_credentials))
-                }
-                onServiceConfig(CompanionServiceConfig(key, url, username, password))
-                return sendHtml(socket, 200, CompanionHtml.serviceConfigSentPage(pageContext, pin))
-            }
-
             // Source submissions — PIN required (query or header), else 401.
             if (method == "POST" && (path == "/xtream" || path == "/m3u" || path == "/stalker")) {
                 val headerPin = headers["x-companion-pin"].orEmpty()
@@ -491,8 +455,6 @@ class CompanionHttpServer(
         CompanionMode.BACKUP_RESTORE -> CompanionHtml.backupUploadPage(context, pin)
         CompanionMode.BACKUP_DOWNLOAD -> CompanionHtml.backupDownloadPage(context, pin)
         CompanionMode.IMAGE_UPLOAD -> CompanionHtml.imageUploadPage(context, pin)
-        CompanionMode.TMDB_CONFIG -> CompanionHtml.serviceConfigPage(context, pin, openSubtitles = false)
-        CompanionMode.OPEN_SUBTITLES_CONFIG -> CompanionHtml.serviceConfigPage(context, pin, openSubtitles = true)
         // Local sync has no browser side. Someone who opens the address in a browser and types the
         // PIN gets told so rather than a blank page.
         CompanionMode.LOCAL_SYNC -> CompanionHtml.localSyncPage(context)

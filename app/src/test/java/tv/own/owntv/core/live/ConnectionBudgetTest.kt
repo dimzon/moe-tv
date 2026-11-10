@@ -7,9 +7,9 @@ import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.SourceType
 
 /**
- * The connection rules as arithmetic. Every case here is one a user can hit with a real
- * account: a one-connection panel, a panel that never said, and a recording holding a stream while
- * tiles ask for more.
+ * The connection rules as arithmetic. Every case here is one a user can hit with a real account: a
+ * one-connection panel, a panel that never said, and a playlist whose stated limit is lower than what
+ * it really allows.
  */
 class ConnectionBudgetTest {
 
@@ -24,10 +24,8 @@ class ConnectionBudgetTest {
     private fun grant(
         max: Int,
         watching: Int = 0,
-        recording: Int = 0,
-        purpose: StreamPurpose = StreamPurpose.WATCHING,
         reserve: Boolean = true,
-    ) = connectionBudget(source(max), OpenStreams(watching, recording), purpose, reserve)
+    ) = connectionBudget(source(max), OpenStreams(watching), StreamPurpose.WATCHING, reserve)
 
     private fun refusal(grant: StreamGrant) = (grant as StreamGrant.Refused).reason
 
@@ -37,7 +35,6 @@ class ConnectionBudgetTest {
     fun `a playlist set to ignore its limit allows every stream to try`() {
         val ignoring = source(1).copy(ignoreConnectionLimit = true)
         assertEquals(StreamGrant.Allowed, connectionBudget(ignoring, OpenStreams(watching = 3), StreamPurpose.WATCHING))
-        assertEquals(StreamGrant.Allowed, connectionBudget(ignoring, OpenStreams(recording = 2), StreamPurpose.RECORDING))
     }
 
     // --- maxConnections = 0, the playlist never said ---------------------------------------------
@@ -45,7 +42,6 @@ class ConnectionBudgetTest {
     @Test
     fun `an unknown limit allows everything`() {
         assertEquals(StreamGrant.Allowed, grant(0, watching = 4))
-        assertEquals(StreamGrant.Allowed, grant(0, recording = 4, purpose = StreamPurpose.RECORDING))
     }
 
     @Test
@@ -65,24 +61,11 @@ class ConnectionBudgetTest {
     }
 
     @Test
-    fun `one connection held by a recording names the recording`() {
-        val refused = grant(1, recording = 1) as StreamGrant.Refused
-        assertEquals(StreamRefusal.SINGLE_CONNECTION, refused.reason)
-        assertEquals(1, refused.open.recording)
-    }
-
-    @Test
-    fun `a recording may take the only connection even while something is watching`() {
-        // The recording wins and the picture stops, because a live programme does not come back.
-        assertEquals(StreamGrant.Allowed, grant(1, watching = 1, purpose = StreamPurpose.RECORDING))
-    }
-
-    @Test
-    fun `but only one recording at a time on a one-connection account`() {
-        assertEquals(
-            StreamRefusal.SINGLE_CONNECTION,
-            refusal(grant(1, recording = 1, purpose = StreamPurpose.RECORDING)),
-        )
+    fun `the refusal carries the limit and what is open so the sentence can say so`() {
+        val refused = grant(1, watching = 1) as StreamGrant.Refused
+        assertEquals(1, refused.maxConnections)
+        assertEquals(1, refused.open.watching)
+        assertEquals(1, refused.open.total)
     }
 
     // --- maxConnections = 2, 3, 4 -----------------------------------------------------------------
@@ -110,50 +93,15 @@ class ConnectionBudgetTest {
         assertEquals(StreamGrant.Allowed, grant(8, watching = 4))
     }
 
-    // --- tiles and recordings share the budget ------------------------------------------------
-
-    @Test
-    fun `a recording counts against the tiles`() {
-        assertEquals(StreamGrant.Allowed, grant(2, recording = 1))
-        assertEquals(StreamRefusal.ALL_IN_USE, refusal(grant(2, watching = 1, recording = 1)))
-    }
-
-    @Test
-    fun `the refusal carries what is recording so the sentence can say so`() {
-        val refused = grant(3, watching = 1, recording = 2) as StreamGrant.Refused
-        assertEquals(3, refused.maxConnections)
-        assertEquals(2, refused.open.recording)
-        assertEquals(3, refused.open.total)
-    }
-
     // --- the reserve rule ---------------------------------------------------------------------
 
     @Test
-    fun `recordings leave one connection for watching by default`() {
-        // Three connections, two already recording: the third is kept back.
-        assertEquals(StreamGrant.Allowed, grant(3, recording = 1, purpose = StreamPurpose.RECORDING))
-        assertEquals(
-            StreamRefusal.RESERVED_FOR_WATCHING,
-            refusal(grant(3, recording = 2, purpose = StreamPurpose.RECORDING)),
-        )
-    }
-
-    @Test
-    fun `giving up the reserve lets every connection record`() {
-        assertEquals(
-            StreamGrant.Allowed,
-            grant(3, recording = 2, purpose = StreamPurpose.RECORDING, reserve = false),
-        )
-        assertEquals(
-            StreamRefusal.ALL_IN_USE,
-            refusal(grant(3, recording = 3, purpose = StreamPurpose.RECORDING, reserve = false)),
-        )
-    }
-
-    @Test
-    fun `the reserve does not stop a tile from using the last connection`() {
-        // The reserve exists for watching; watching is exactly what this is.
-        assertEquals(StreamGrant.Allowed, grant(3, recording = 2, purpose = StreamPurpose.WATCHING))
+    fun `the reserve flag no longer changes the answer, because nothing else takes a stream`() {
+        // It was kept for call-shape compatibility when recordings were removed: watching is the only
+        // purpose left, and the reserve existed for watching.
+        assertEquals(StreamGrant.Allowed, grant(3, watching = 2, reserve = false))
+        assertEquals(StreamRefusal.ALL_IN_USE, refusal(grant(3, watching = 3, reserve = false)))
+        assertEquals(refusal(grant(3, watching = 3)), refusal(grant(3, watching = 3, reserve = false)))
     }
 
     // --- the registry both sides count against ------------------------------------------------------
@@ -162,15 +110,15 @@ class ConnectionBudgetTest {
     fun `the registry counts per playlist and forgets a released claim`() {
         val registry = OpenStreamRegistry()
         val tile = registry.claim(sourceId = 1, purpose = StreamPurpose.WATCHING)
-        registry.claim(sourceId = 1, purpose = StreamPurpose.RECORDING)
+        registry.claim(sourceId = 1, purpose = StreamPurpose.WATCHING)
         registry.claim(sourceId = 2, purpose = StreamPurpose.WATCHING)
 
-        assertEquals(OpenStreams(watching = 1, recording = 1), registry.openOn(1))
-        assertEquals(OpenStreams(watching = 1, recording = 0), registry.openOn(2))
+        assertEquals(OpenStreams(watching = 2), registry.openOn(1))
+        assertEquals(OpenStreams(watching = 1), registry.openOn(2))
         assertEquals(OpenStreams(), registry.openOn(3))
 
         registry.release(tile)
-        assertEquals(OpenStreams(watching = 0, recording = 1), registry.openOn(1))
+        assertEquals(OpenStreams(watching = 1), registry.openOn(1))
         assertTrue(registry.claims.value.size == 2)
     }
 

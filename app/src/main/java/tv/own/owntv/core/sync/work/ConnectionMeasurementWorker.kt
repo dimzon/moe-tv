@@ -8,7 +8,6 @@ import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.live.ConnectionLimits
 import tv.own.owntv.core.live.OpenStreamRegistry
 import tv.own.owntv.core.live.WatchSession
-import tv.own.owntv.core.timeshift.TimeshiftManager
 
 /**
  * Measures how many streams a provider allows, off the setup path.
@@ -30,11 +29,11 @@ import tv.own.owntv.core.timeshift.TimeshiftManager
  * watching?".
  *
  * [WatchSession] now answers exactly that, so the measurement can wait for a quiet
- * moment instead of taking one hostage. If anything is playing or recording on this source, the
- * worker steps aside and comes back later — the same shape as the catalogue drain.
+ * moment instead of taking one hostage. If anything is playing on this source, the
+ * worker steps aside and comes back later.
  *
- * The answer is only needed by Multiview and recordings, both of which ask the budget before they
- * tune. Until it arrives `ConnectionLimits.known()` reports "nobody knows", which those callers
+ * The answer is only needed by Multiview, which asks the budget before it
+ * tunes. Until it arrives `ConnectionLimits.known()` reports "nobody knows", which those callers
  * already handle — so nothing is broken by it being late, and a minute of setup is given back.
  */
 class ConnectionMeasurementWorker(
@@ -44,7 +43,6 @@ class ConnectionMeasurementWorker(
     private val connectionLimits: ConnectionLimits,
     private val watchSession: WatchSession,
     private val openStreams: OpenStreamRegistry,
-    private val timeshift: TimeshiftManager,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
@@ -59,7 +57,7 @@ class ConnectionMeasurementWorker(
             return Result.success()
         }
 
-        if (watchSession.isWatching(sourceId) || openStreams.openOn(sourceId).total > 0 || timeshift.isSaving(sourceId)) {
+        if (watchSession.isWatching(sourceId) || openStreams.openOn(sourceId).total > 0) {
             // Opening a probe stream now is what would cut the picture off. Come back later.
             Log.i(TAG, "measurement deferred sourceId=$sourceId — this playlist is in use")
             return Result.retry()

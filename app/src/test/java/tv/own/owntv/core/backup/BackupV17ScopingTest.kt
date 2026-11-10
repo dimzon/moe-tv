@@ -3,7 +3,6 @@ package tv.own.owntv.core.backup
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import tv.own.owntv.core.database.entity.SourceEntity
 
@@ -12,10 +11,10 @@ import tv.own.owntv.core.database.entity.SourceEntity
  * export/restore path. Every case here failed before that change.
  *
  *  1. **Per-item content keys were never remapped.** [tv.own.owntv.core.player.contentKey] is
- *     "<sourceId>:<TYPE>:<remoteId>" and typed overrides lead with the media type, but their rows
- *     were imported verbatim — so after a merge restore they named a source id that either did not
- *     exist here or, worse, belonged to somebody else's playlist. (The per-item engine pins the same
- *     audit found are gone with the second engine; old files lose those silently, by design.)
+ *     "<sourceId>:<TYPE>:<remoteId>", but the rows were imported verbatim — so after a merge restore
+ *     they named a source id that either did not exist here or, worse, belonged to somebody else's
+ *     playlist. (The per-item engine pins the same audit found are gone with the second engine, and
+ *     the typed subtitle/TMDB keys with the VOD catalogue; old files lose those silently, by design.)
  *  2. **Source-keyed blocks were exported unscoped.** An id whose source is not in the file cannot
  *     be remapped on restore, and an unmapped numeric id happily matches whatever unrelated source
  *     holds that number on the target device.
@@ -53,15 +52,6 @@ class BackupV17ScopingTest {
         assertEquals(url, remapContentKey(url, idMap))
     }
 
-    @Test
-    fun `typed content keys remap the id in the middle`() {
-        // Subtitle rows and TMDB overrides lead with the media type, so the id is the SECOND segment.
-        assertEquals("movie:91:12345", remapTypedContentKey("movie:7:12345", idMap))
-        assertEquals("episode:91:show1:S1E2", remapTypedContentKey("episode:7:show1:S1E2", idMap))
-        assertEquals("movie:5:12345", remapTypedContentKey("movie:5:12345", idMap))
-        assertEquals("nonsense", remapTypedContentKey("nonsense", idMap))
-    }
-
     // --- 2. export scoping ---
 
     @Test
@@ -84,23 +74,6 @@ class BackupV17ScopingTest {
         val filtered = filterBySourceId(map, setOf(7L))
         assertEquals("HOURS_6", filtered.optString("7"))
         assertFalse(filtered.has("99"))
-    }
-
-    @Test
-    fun `tmdb overrides are scoped by the source id in the middle of the key`() {
-        val raw = JSONObject()
-            .put("movie:7:1|Old Name", "New Name")
-            .put("movie:99:2|Other", "Nope")
-            .toString()
-        val out = JSONObject(filterTmdbOverridesBySourceId(raw, setOf(7L)))
-        assertTrue(out.has("movie:7:1|Old Name"))
-        assertFalse(out.has("movie:99:2|Other"))
-    }
-
-    @Test
-    fun `scoping a map with nothing in scope yields an empty payload, not the original`() {
-        val raw = JSONObject().put("movie:99:2|Other", "Nope").toString()
-        assertEquals("", filterTmdbOverridesBySourceId(raw, setOf(7L)))
     }
 
     // --- PIN hashes: sealed with a passphrase, never written in the clear ---

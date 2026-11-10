@@ -5,9 +5,7 @@ import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ProfileEntity
 import tv.own.owntv.core.database.entity.ProfileSourceCrossRef
-import tv.own.owntv.core.launcher.LauncherIntegrationRepository
 import tv.own.owntv.core.settings.SettingsRepository
-import tv.own.owntv.core.subtitles.OpenSubtitlesAccountManager
 import tv.own.owntv.core.util.Pin
 
 /**
@@ -15,7 +13,7 @@ import tv.own.owntv.core.util.Pin
  * layout.
  *
  * Both apps run this. What a profile *is* spans more tables than the `profiles` row itself: its
- * sources, its OpenSubtitles login, its "start on this channel" target, and the app-wide active id
+ * sources, its "start on this channel" target, and the app-wide active id
  * that every screen resolves its content against. Two independent implementations of that would
  * drift, and the two apps share one database.
  */
@@ -23,8 +21,6 @@ class ProfileManager(
     private val profileDao: ProfileDao,
     private val sourceDao: SourceDao,
     private val settings: SettingsRepository,
-    private val launcherIntegration: LauncherIntegrationRepository,
-    private val openSubtitlesAccounts: OpenSubtitlesAccountManager,
     private val avatars: ProfileAvatarStore,
     private val protection: ProfileProtection,
 ) {
@@ -70,9 +66,6 @@ class ProfileManager(
                 pinHash = pinHash,
             ),
         )
-        if (profile.isKids != isKids) {
-            launcherIntegration.refreshProfile(profile.id, allowBrowsableRequest = false)
-        }
     }
 
     /**
@@ -115,9 +108,6 @@ class ProfileManager(
         if (profileDao.count() <= 1) return
         val activeProfileId = settings.activeProfileId.first()
         val remainingProfileId = profileDao.getAllOnce().firstOrNull { it.id != profile.id }?.id
-        runCatching { launcherIntegration.clearProfile(profile.id) }
-        // Deleting a profile permanently erases its stored OpenSubtitles login.
-        openSubtitlesAccounts.eraseFor(profile.id)
         // …and its picture, which nothing else would ever clean up.
         avatars.clear(profile.id)
         settings.setStartupChannel(profile.id, null)

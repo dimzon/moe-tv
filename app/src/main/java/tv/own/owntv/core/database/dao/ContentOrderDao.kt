@@ -81,14 +81,10 @@ interface ContentOrderDao {
     @Query(
         "SELECT o.profileId AS profileId, o.mediaType AS mediaType, o.itemId AS itemId, " +
             "o.contextKey AS contextKey, o.position AS position, " +
-            "COALESCE(c.sourceId, m.sourceId, s.sourceId) AS sourceId, " +
-            "COALESCE(c.remoteId, m.remoteId, s.remoteId) AS remoteId, " +
-            "COALESCE(c.name, m.name, s.name) AS name " +
+            "c.sourceId AS sourceId, c.remoteId AS remoteId, c.name AS name " +
             "FROM content_order o " +
-            "LEFT JOIN channels c ON o.mediaType = 'LIVE' AND o.itemId = c.id " +
-            "LEFT JOIN movies m ON o.mediaType = 'MOVIE' AND o.itemId = m.id " +
-            "LEFT JOIN series s ON o.mediaType = 'SERIES' AND o.itemId = s.id " +
-            "WHERE c.sourceId = :sourceId OR m.sourceId = :sourceId OR s.sourceId = :sourceId",
+            "JOIN channels c ON o.mediaType = 'LIVE' AND o.itemId = c.id " +
+            "WHERE c.sourceId = :sourceId",
     )
     suspend fun exportRowsForSource(sourceId: Long): List<ContentOrderExportRow>
 
@@ -99,24 +95,19 @@ interface ContentOrderDao {
      * it holds the writer.
      */
     @Query(
-        "DELETE FROM content_order WHERE profileId = :profileId AND mediaType = :type AND itemId IN (:itemIds) AND (" +
-            "(:type = 'LIVE'   AND itemId NOT IN (SELECT id FROM channels)) OR " +
-            "(:type = 'MOVIE'  AND itemId NOT IN (SELECT id FROM movies))   OR " +
-            "(:type = 'SERIES' AND itemId NOT IN (SELECT id FROM series))" +
-            ")",
+        "DELETE FROM content_order WHERE profileId = :profileId AND mediaType = :type AND itemId IN (:itemIds) " +
+            "AND itemId NOT IN (SELECT id FROM channels)",
     )
     suspend fun purgeSnapshotOrphans(profileId: Long, type: MediaType, itemIds: List<Long>)
 
     /**
      * Drops order rows whose content row no longer exists — content is clear-then-insert on every sync,
      * so an item's itemId goes stale. Called after a re-sync's relink (UserDataResolver), mirroring
-     * FavoriteDao.purgeOrphans. Episodes never appear here (items only — LIVE/MOVIE/SERIES).
+     * FavoriteDao.purgeOrphans. Live-only now.
      */
     @Query(
         "DELETE FROM content_order WHERE " +
-            "(mediaType = 'LIVE'   AND itemId NOT IN (SELECT id FROM channels)) OR " +
-            "(mediaType = 'MOVIE'  AND itemId NOT IN (SELECT id FROM movies))   OR " +
-            "(mediaType = 'SERIES' AND itemId NOT IN (SELECT id FROM series))",
+            "mediaType = 'LIVE' AND itemId NOT IN (SELECT id FROM channels)",
     )
     suspend fun purgeOrphans()
 }

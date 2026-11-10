@@ -9,7 +9,7 @@ import androidx.core.net.toUri
 import tv.own.owntv.core.database.dao.ReminderDao
 
 /**
- * One alarm per reminder, re-armed after a reboot — the same clock as `RecordingScheduler`, for the
+ * One alarm per reminder, re-armed after a reboot, for the
  * same reasons: WorkManager is inexact, `SCHEDULE_EXACT_ALARM` is user-revocable so it is consulted on
  * every arm, and an inexact alarm is the fallback.
  */

@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -223,9 +216,9 @@ fun Onboarding(firstRun: Boolean, onDone: (Long?) -> Unit, onCancel: () -> Unit,
                 onBack = { vm.stopRemoteListener(); step = Step.ADD_CONTENT },
             )
             Step.ADD_SOURCE -> AddSourceScreen(
-                onStartXtream = { name, server, user, pass, ua, ref, epg, refresh, live, movies, series, _, preferHls ->
+                onStartXtream = { name, server, user, pass, ua, ref, epg, refresh, live, _, preferHls ->
                     importName = name.ifBlank { defaultIptvName }
-                    vm.startXtream(importName!!, server, user, pass, ua, epg, refresh, live, movies, series, preferHls, httpReferer = ref)
+                    vm.startXtream(importName!!, server, user, pass, ua, epg, refresh, live, preferHls, httpReferer = ref)
                     importOrigin = Step.ADD_SOURCE
                     step = Step.IMPORTING
                 },
@@ -235,11 +228,11 @@ fun Onboarding(firstRun: Boolean, onDone: (Long?) -> Unit, onCancel: () -> Unit,
                     importOrigin = Step.ADD_SOURCE
                     step = Step.IMPORTING
                 },
-                onStartStalker = { name, portalUrl, mac, serialNumber, deviceId, deviceId2, signature, ua, ref, refresh, _, live, movies, series, login, password ->
+                onStartStalker = { name, portalUrl, mac, serialNumber, deviceId, deviceId2, signature, ua, ref, refresh, _, live, login, password ->
                     importName = name.ifBlank { defaultPortalName }
                     vm.startStalker(
                         importName!!, portalUrl, mac, serialNumber, deviceId,
-                        deviceId2, signature, ua, refresh, live, movies, series, httpReferer = ref,
+                        deviceId2, signature, ua, refresh, live, httpReferer = ref,
                         login = login, password = password,
                     )
                     importOrigin = Step.ADD_SOURCE
@@ -437,7 +430,7 @@ private fun DisplaySizeStep(onNext: () -> Unit, onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(stringResource(R.string.settings_panel_width_preview).uppercase(), style = stageText(13, 800, androidx.compose.ui.unit.TextUnit(0.13f, androidx.compose.ui.unit.TextUnitType.Em)), color = StageColors.Dim)
-            Text(stringResource(R.string.home_row_now_trending), style = stageText(21, 700), color = StageColors.Text, modifier = Modifier.weight(1f))
+            Text(stringResource(R.string.home_row_recent_channels), style = stageText(21, 700), color = StageColors.Text, modifier = Modifier.weight(1f))
             Text(stringResource(R.string.common_on), style = stageText(18, 700), color = stageAccent.accent)
         }
     }
@@ -730,8 +723,8 @@ private fun ImportProgressStep(
                 title = name?.let { stringResource(R.string.setup_importing_title, it) } ?: stringResource(R.string.setup_importing_catalog),
                 sub = stringResource(R.string.setup_watching_during_import),
                 back = WizardAction(stringResource(R.string.common_cancel), onCancel),
-                // Enter the app right away; the import keeps running (VM is activity-scoped) and content
-                // appears as it lands — no need to sit through a big movies/series sync.
+                // Enter the app right away; the import keeps running (VM is activity-scoped) and channels
+                // appear as they land — no need to sit through a big playlist sync.
                 next = WizardAction(stringResource(R.string.setup_run_in_background), onBackground, rememberFirstFocus()),
             ) {
                 StageSettingRow(

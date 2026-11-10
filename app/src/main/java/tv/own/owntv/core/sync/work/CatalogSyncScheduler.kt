@@ -9,10 +9,8 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import tv.own.owntv.core.sync.SyncContentTypes
@@ -38,8 +36,6 @@ class CatalogSyncScheduler(private val context: Context) {
                 CatalogSyncWorker.KEY_REASON to reason,
                 CatalogSyncWorker.KEY_BASE_ITEM_COUNT to baseItemCount,
                 CatalogSyncWorker.KEY_LIVE to contentTypes.live,
-                CatalogSyncWorker.KEY_MOVIES to contentTypes.movies,
-                CatalogSyncWorker.KEY_SERIES to contentTypes.series,
                 CatalogSyncWorker.KEY_COMPLETES_INITIAL_SYNC to completesInitialSync,
                 CatalogSyncWorker.KEY_FORCE_PRUNE to forcePrune,
             ))
@@ -70,29 +66,6 @@ class CatalogSyncScheduler(private val context: Context) {
             .enqueueUniqueWork(ContentIndexWorker.workName(), ExistingWorkPolicy.KEEP, request)
     }
 
-    fun enqueueTrendingRefresh(sourceId: Long, force: Boolean = false) {
-        val request = OneTimeWorkRequestBuilder<TrendingRefreshWorker>()
-            .setInputData(
-                workDataOf(
-                    TrendingRefreshWorker.KEY_SOURCE_ID to sourceId,
-                    TrendingRefreshWorker.KEY_FORCE to force,
-                ),
-            )
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build(),
-            )
-            .addTag(TrendingRefreshWorker.WORK_TAG)
-            .addTag("trending-source-$sourceId")
-            .build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            TrendingRefreshWorker.workName(sourceId),
-            ExistingWorkPolicy.REPLACE,
-            request,
-        )
-    }
-
     /**
      * Measure this provider's stream limit in the background.
      *
@@ -118,68 +91,6 @@ class CatalogSyncScheduler(private val context: Context) {
         android.util.Log.i("ConnectionMeasurement", "measurement enqueued sourceId=$sourceId")
     }
 
-    /**
-     * Finish a Stalker catalogue in the background — start its drain now.
-     *
-     * A pass already running is left alone: it has a live position in a category and re-reads the
-     * category priority between categories, so replacing it would only throw that position away. A
-     * pass waiting out its retry delay is replaced by one that starts now — leaving it (KEEP) would
-     * make the user's opened category, or a sync that just finished, wait up to that delay.
-     *
-     * [initialDelayMinutes] and [onlyIfWaiting] are for the resume after playback: start soon, and only
-     * when a pass is actually waiting, so a playlist with nothing left to fill never gets a worker.
-     *
-     * Deliberately no battery/idle constraint beyond a network: a TV is mains-powered, and the point
-     * is for the catalogue to be whole by the time the user scrolls that far, not overnight.
-     */
-    suspend fun enqueueCatalogBackfill(
-        sourceId: Long,
-        initialDelayMinutes: Long = 0,
-        onlyIfWaiting: Boolean = false,
-    ) {
-        val infos = WorkManager.getInstance(context)
-            .getWorkInfosForUniqueWorkFlow(CatalogBackfillWorker.workName(sourceId))
-            .first()
-        if (infos.any { it.state == WorkInfo.State.RUNNING }) return
-        if (onlyIfWaiting && infos.none { !it.state.isFinished }) return
-        submitBackfill(sourceId, initialDelayMinutes, ExistingWorkPolicy.REPLACE)
-    }
-
-    /**
-     * The worker's own "come back later". Not [enqueueCatalogBackfill]: the calling pass is still
-     * running under the same unique name, so anything but an append would either be dropped (KEEP)
-     * or cancel the caller (REPLACE). APPEND_OR_REPLACE queues the next pass behind the one ending.
-     */
-    internal fun enqueueNextBackfillPass(sourceId: Long, delayMinutes: Long) =
-        submitBackfill(sourceId, delayMinutes, ExistingWorkPolicy.APPEND_OR_REPLACE)
-
-    private fun submitBackfill(sourceId: Long, initialDelayMinutes: Long, policy: ExistingWorkPolicy) {
-        val request = OneTimeWorkRequestBuilder<CatalogBackfillWorker>()
-            .setInputData(workDataOf(CatalogBackfillWorker.KEY_SOURCE_ID to sourceId))
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build(),
-            )
-            .apply {
-                if (initialDelayMinutes > 0) {
-                    setInitialDelay(initialDelayMinutes, java.util.concurrent.TimeUnit.MINUTES)
-                }
-            }
-            .addTag(CatalogBackfillWorker.WORK_TAG)
-            .addTag("backfill-source-$sourceId")
-            .build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            CatalogBackfillWorker.workName(sourceId),
-            policy,
-            request,
-        )
-        android.util.Log.i(
-            "CatalogBackfillWorker",
-            "backfill enqueued sourceId=$sourceId delayMinutes=$initialDelayMinutes policy=$policy",
-        )
-    }
-
     fun observeSync(sourceId: Long): Flow<CatalogSyncState> =
         WorkManager.getInstance(context)
             .getWorkInfosForUniqueWorkFlow(workName(sourceId))
@@ -191,11 +102,7 @@ class CatalogSyncScheduler(private val context: Context) {
                     CatalogSyncState.Syncing(
                         baseItemCount = active.progress.getInt(CatalogSyncWorker.KEY_BASE_ITEM_COUNT, 0),
                         liveProcessed = active.progress.getInt(CatalogSyncWorker.KEY_PROGRESS_LIVE_PROCESSED, 0),
-                        moviesProcessed = active.progress.getInt(CatalogSyncWorker.KEY_PROGRESS_MOVIES_PROCESSED, 0),
-                        seriesProcessed = active.progress.getInt(CatalogSyncWorker.KEY_PROGRESS_SERIES_PROCESSED, 0),
                         liveActive = active.progress.getBoolean(CatalogSyncWorker.KEY_PROGRESS_LIVE_ACTIVE, false),
-                        moviesActive = active.progress.getBoolean(CatalogSyncWorker.KEY_PROGRESS_MOVIES_ACTIVE, false),
-                        seriesActive = active.progress.getBoolean(CatalogSyncWorker.KEY_PROGRESS_SERIES_ACTIVE, false),
                     )
                 }
             }
@@ -203,24 +110,16 @@ class CatalogSyncScheduler(private val context: Context) {
 
     /**
      * Emits at once, and again each time the playlist's catalogue work goes quiet — the moments its
-     * stored counts may have changed. The background backfill counts as catalogue work: it keeps
-     * adding titles for many minutes after the sync itself has finished, and a Playlists row that
-     * re-counted only after the sync went on showing the few per cent stored by setup.
+     * stored counts may have changed.
      *
-     * Only a *running* pass is busy. Between passes the next one is already queued behind its retry
-     * delay, and counting that as busy would hold the re-count until the whole catalogue is done.
+     * Only a *running* pass is busy.
      */
-    fun catalogueSettled(sourceId: Long): Flow<Unit> {
-        val syncing = observeSync(sourceId).map { it.isActive }.onStart { emit(false) }
-        val backfilling = WorkManager.getInstance(context)
-            .getWorkInfosForUniqueWorkFlow(CatalogBackfillWorker.workName(sourceId))
-            .map { infos -> infos.any { it.state == WorkInfo.State.RUNNING } }
+    fun catalogueSettled(sourceId: Long): Flow<Unit> =
+        observeSync(sourceId).map { it.isActive }
             .onStart { emit(false) }
-        return combine(syncing, backfilling) { a, b -> a || b }
             .distinctUntilChanged()
             .filter { busy -> !busy }
             .map { }
-    }
 
     companion object {
         const val TAG_CATALOG_SYNC = "catalog-sync"
@@ -233,14 +132,10 @@ sealed interface CatalogSyncState {
     data class Syncing(
         val baseItemCount: Int,
         val liveProcessed: Int,
-        val moviesProcessed: Int,
-        val seriesProcessed: Int,
         val liveActive: Boolean,
-        val moviesActive: Boolean,
-        val seriesActive: Boolean,
     ) : CatalogSyncState {
         val totalProcessed: Int
-            get() = liveProcessed + moviesProcessed + seriesProcessed
+            get() = liveProcessed
     }
 
     val isActive: Boolean

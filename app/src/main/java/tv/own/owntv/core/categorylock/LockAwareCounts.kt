@@ -29,7 +29,3 @@ fun CustomCategoryDao.lockAwareCountsByContexts(
 ): Flow<List<CustomCategoryCount>> =
     if (sealed.isEmpty()) observeCountsByContexts(profileId, type, contextKeys, sourceIds)
     else observeCountsByContextsExcluding(profileId, type, contextKeys, sourceIds, sealed.toList())
-
-/** The channels with an archive, without those in a [sealed] category: Catch-up shows only when one is left. */
-fun ChannelDao.lockAwareCatchupCount(sourceIds: List<Long>, sealed: Flow<Set<Long>>): Flow<Int> =
-    lockAwareCount(sealed, { observeCatchupCount(sourceIds) }) { observeCatchupCountExcluding(sourceIds, it) }

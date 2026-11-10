@@ -8,7 +8,6 @@ import tv.own.owntv.core.CoreBuildInfo
 import tv.own.owntv.core.database.dao.ContentOrderDao
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.settings.SettingsRepository
-import tv.own.owntv.core.timeshift.TimeshiftStorage
 
 /**
  * The start-of-process work the engines depend on, for every host. It used to live in the TV app's
@@ -49,7 +48,5 @@ object PlaybackStartup {
                 }
             }
         }
-        // Timeshift buffers never outlive the run that wrote them.
-        scope.launch { TimeshiftStorage.clearAll(context) }
     }
 }

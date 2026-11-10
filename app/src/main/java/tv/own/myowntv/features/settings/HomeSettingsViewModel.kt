@@ -5,7 +5,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -14,7 +13,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -22,14 +20,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -38,13 +34,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -62,7 +55,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import tv.own.owntv.core.model.HeroKind
 import tv.own.owntv.core.model.HomeConfig
 import tv.own.owntv.core.model.HomeLiveRowMode
 import tv.own.owntv.core.model.HomeRow
@@ -127,14 +119,8 @@ class HomeSettingsViewModel(
         }
     }
 
-    fun setHeroInclude(kind: HeroKind, included: Boolean) {
-        updateConfig { config ->
-            when (kind) {
-                HeroKind.LIVE -> config.copy(heroIncludeLive = included)
-                HeroKind.MOVIES -> config.copy(heroIncludeMovies = included)
-                HeroKind.SERIES -> config.copy(heroIncludeSeries = included)
-            }
-        }
+    fun setHeroInclude(included: Boolean) {
+        updateConfig { config -> config.copy(heroIncludeLive = included) }
     }
 
     fun setLiveRowMode(row: HomeRow, mode: HomeLiveRowMode) {

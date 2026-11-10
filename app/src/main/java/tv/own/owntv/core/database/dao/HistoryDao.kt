@@ -43,18 +43,10 @@ interface HistoryDao {
     @Query("DELETE FROM watch_history WHERE profileId = :profileId AND mediaType = :type AND itemId = :itemId AND watchedAt <= :at")
     suspend fun removeIfOlderThan(profileId: Long, type: MediaType, itemId: Long, at: Long): Int
 
-    /** The episode rows belonging to one series — removed alongside the show's own row, so the
-     *  top-bar Continue chip stops offering a show the user just removed from history. */
-    @Query(
-        "DELETE FROM watch_history WHERE profileId = :profileId AND mediaType = 'EPISODE' " +
-            "AND itemId IN (SELECT id FROM episodes WHERE seriesId = :seriesId)",
-    )
-    suspend fun removeSeriesEpisodes(profileId: Long, seriesId: Long)
-
     @Query("DELETE FROM watch_history WHERE profileId = :profileId")
     suspend fun clear(profileId: Long)
 
-    /** Clear just one media type (Live / Movie / Series) for a profile. */
+    /** Clear just one media type (Live) for a profile. */
     @Query("DELETE FROM watch_history WHERE profileId = :profileId AND mediaType = :type")
     suspend fun clearType(profileId: Long, type: MediaType)
 
@@ -84,57 +76,31 @@ interface HistoryDao {
     @Query("SELECT * FROM watch_history WHERE profileId = :profileId AND mediaType = :type")
     suspend fun getForProfileType(profileId: Long, type: MediaType): List<WatchHistoryEntity>
 
-    /** The episodes of one series that are in history — the ids whose removal has to be recorded. */
-    @Query(
-        "SELECT itemId FROM watch_history WHERE profileId = :profileId AND mediaType = 'EPISODE' " +
-            "AND itemId IN (SELECT id FROM episodes WHERE seriesId = :seriesId)",
-    )
-    suspend fun episodeIdsInHistory(profileId: Long, seriesId: Long): List<Long>
-
     /** Everything, for Backup & Restore. */
     @Query("SELECT * FROM watch_history")
     suspend fun getAllOnce(): List<WatchHistoryEntity>
 
-    /** User-data rows tied to one source, already joined to stable content keys for fast re-sync snapshots. */
+    /** User-data rows tied to one source, already joined to stable content keys for fast re-sync snapshots.
+     *  Live-only: the only media type whose content rows still exist. */
     @Query(
         "SELECT h.profileId AS profileId, h.mediaType AS mediaType, h.itemId AS itemId, " +
-            "COALESCE(c.sourceId, m.sourceId, s.sourceId, episodeSeries.sourceId) AS sourceId, " +
-            "COALESCE(c.remoteId, m.remoteId, s.remoteId, e.remoteId) AS remoteId, " +
-            "COALESCE(c.name, m.name, s.name) AS name, " +
-            "episodeSeries.remoteId AS seriesRemoteId, episodeSeries.name AS seriesName, " +
-            "e.seasonNumber AS seasonNumber, e.episodeNumber AS episodeNumber, " +
-            "h.watchedAt AS at, 0 AS positionMs, 0 AS durationMs " +
+            "c.sourceId AS sourceId, c.remoteId AS remoteId, c.name AS name, " +
+            "h.watchedAt AS at " +
             "FROM watch_history h " +
-            "LEFT JOIN channels c ON h.mediaType = 'LIVE' AND h.itemId = c.id " +
-            "LEFT JOIN movies m ON h.mediaType = 'MOVIE' AND h.itemId = m.id " +
-            "LEFT JOIN series s ON h.mediaType = 'SERIES' AND h.itemId = s.id " +
-            "LEFT JOIN episodes e ON h.mediaType = 'EPISODE' AND h.itemId = e.id " +
-            "LEFT JOIN series episodeSeries ON e.seriesId = episodeSeries.id " +
-            "WHERE c.sourceId = :sourceId OR m.sourceId = :sourceId OR s.sourceId = :sourceId OR episodeSeries.sourceId = :sourceId",
+            "JOIN channels c ON h.mediaType = 'LIVE' AND h.itemId = c.id " +
+            "WHERE c.sourceId = :sourceId",
     )
     suspend fun exportRowsForSource(sourceId: Long): List<UserDataExportRow>
 
+    /** The row is an orphan when its type no longer has content rows at all (the app is live-only)
+     *  or its LIVE row is gone. */
     @Query(
         "DELETE FROM watch_history WHERE profileId = :profileId AND mediaType = :type AND itemId = :itemId AND (" +
-            "(:type = 'LIVE'   AND itemId NOT IN (SELECT id FROM channels)) OR " +
-            "(:type = 'MOVIE'  AND itemId NOT IN (SELECT id FROM movies))   OR " +
-            "(:type = 'SERIES' AND itemId NOT IN (SELECT id FROM series))  OR " +
-            // Resume positions and history are mostly EPISODE rows, and without this branch the
-            // OR-chain was false for every one of them: the orphan was never dropped, while the
-            // relink inserted a fresh row for the new id. Every series re-sync therefore left one
-            // more dead row behind, for ever. Safe to purge: an episode that has not loaded yet is
-            // held in the pending set by the same call and re-inserts when it arrives.
-            "(:type = 'EPISODE' AND itemId NOT IN (SELECT id FROM episodes))" +
-            ")",
+            "mediaType != 'LIVE' OR itemId NOT IN (SELECT id FROM channels))",
     )
     suspend fun purgeSnapshotOrphan(profileId: Long, type: MediaType, itemId: Long)
 
-    /** Drops history rows orphaned by a re-sync (see FavoriteDao.purgeOrphans); episodes excluded. */
-    @Query(
-        "DELETE FROM watch_history WHERE " +
-            "(mediaType = 'LIVE'   AND itemId NOT IN (SELECT id FROM channels)) OR " +
-            "(mediaType = 'MOVIE'  AND itemId NOT IN (SELECT id FROM movies))   OR " +
-            "(mediaType = 'SERIES' AND itemId NOT IN (SELECT id FROM series))",
-    )
+    /** Drops history rows orphaned by a re-sync (see FavoriteDao.purgeOrphans). */
+    @Query("DELETE FROM watch_history WHERE mediaType != 'LIVE' OR itemId NOT IN (SELECT id FROM channels)")
     suspend fun purgeOrphans()
 }

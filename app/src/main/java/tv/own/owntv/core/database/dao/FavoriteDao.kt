@@ -51,45 +51,31 @@ interface FavoriteDao {
     @Query("SELECT * FROM favorites")
     suspend fun getAllOnce(): List<FavoriteEntity>
 
-    /** User-data rows tied to one source, already joined to stable content keys for fast re-sync snapshots. */
+    /** User-data rows tied to one source, already joined to stable content keys for fast re-sync snapshots.
+     *  Live-only: the only media type whose content rows still exist. */
     @Query(
         "SELECT f.profileId AS profileId, f.mediaType AS mediaType, f.itemId AS itemId, " +
-            "COALESCE(c.sourceId, m.sourceId, s.sourceId, episodeSeries.sourceId) AS sourceId, " +
-            "COALESCE(c.remoteId, m.remoteId, s.remoteId, e.remoteId) AS remoteId, " +
-            "COALESCE(c.name, m.name, s.name) AS name, " +
-            "episodeSeries.remoteId AS seriesRemoteId, episodeSeries.name AS seriesName, " +
-            "e.seasonNumber AS seasonNumber, e.episodeNumber AS episodeNumber, " +
-            "f.addedAt AS at, 0 AS positionMs, 0 AS durationMs " +
+            "c.sourceId AS sourceId, c.remoteId AS remoteId, c.name AS name, " +
+            "f.addedAt AS at " +
             "FROM favorites f " +
-            "LEFT JOIN channels c ON f.mediaType = 'LIVE' AND f.itemId = c.id " +
-            "LEFT JOIN movies m ON f.mediaType = 'MOVIE' AND f.itemId = m.id " +
-            "LEFT JOIN series s ON f.mediaType = 'SERIES' AND f.itemId = s.id " +
-            "LEFT JOIN episodes e ON f.mediaType = 'EPISODE' AND f.itemId = e.id " +
-            "LEFT JOIN series episodeSeries ON e.seriesId = episodeSeries.id " +
-            "WHERE c.sourceId = :sourceId OR m.sourceId = :sourceId OR s.sourceId = :sourceId OR episodeSeries.sourceId = :sourceId",
+            "JOIN channels c ON f.mediaType = 'LIVE' AND f.itemId = c.id " +
+            "WHERE c.sourceId = :sourceId",
     )
     suspend fun exportRowsForSource(sourceId: Long): List<UserDataExportRow>
 
+    /** The row is an orphan when its type no longer has content rows at all (the app is live-only)
+     *  or its LIVE row is gone. */
     @Query(
         "DELETE FROM favorites WHERE profileId = :profileId AND mediaType = :type AND itemId = :itemId AND (" +
-            "(:type = 'LIVE'   AND itemId NOT IN (SELECT id FROM channels)) OR " +
-            "(:type = 'MOVIE'  AND itemId NOT IN (SELECT id FROM movies))   OR " +
-            "(:type = 'SERIES' AND itemId NOT IN (SELECT id FROM series))" +
-            ")",
+            "mediaType != 'LIVE' OR itemId NOT IN (SELECT id FROM channels))",
     )
     suspend fun purgeSnapshotOrphan(profileId: Long, type: MediaType, itemId: Long)
 
     /**
      * Drops favorites whose content row no longer exists — content is clear-then-insert on every sync,
-     * so a favorite's itemId goes stale and the join (pagingFavorites) returns nothing while the raw
-     * count still showed it. Called after a re-sync's relink (UserDataResolver). Episodes are excluded
-     * (they load lazily, so their rows are legitimately absent until a show is opened).
+     * so a favorite's itemId goes stale and the join returns nothing while the raw count still showed
+     * it. Called after a re-sync's relink (UserDataResolver).
      */
-    @Query(
-        "DELETE FROM favorites WHERE " +
-            "(mediaType = 'LIVE'   AND itemId NOT IN (SELECT id FROM channels)) OR " +
-            "(mediaType = 'MOVIE'  AND itemId NOT IN (SELECT id FROM movies))   OR " +
-            "(mediaType = 'SERIES' AND itemId NOT IN (SELECT id FROM series))",
-    )
+    @Query("DELETE FROM favorites WHERE mediaType != 'LIVE' OR itemId NOT IN (SELECT id FROM channels)")
     suspend fun purgeOrphans()
 }

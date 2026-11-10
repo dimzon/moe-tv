@@ -2,17 +2,13 @@ package tv.own.owntv.core.sync
 
 data class SyncProgressCounts(
     val live: Int,
-    val movies: Int,
-    val series: Int,
     val liveActive: Boolean,
-    val moviesActive: Boolean,
-    val seriesActive: Boolean,
     /** The connection measurement's position, when it is the thing currently running. */
     val measuringStream: Int = 0,
     val measuringOf: Int = 0,
 ) {
     val hasItems: Boolean
-        get() = live > 0 || movies > 0 || series > 0
+        get() = live > 0
 
     val measuringConnections: Boolean get() = measuringOf > 0
 }
@@ -26,11 +22,7 @@ data class SyncProgressDisplay(
 
 fun ImportStage.progressCounts(): SyncProgressCounts = SyncProgressCounts(
     live = liveProcessed,
-    movies = moviesProcessed,
-    series = seriesProcessed,
     liveActive = liveActive,
-    moviesActive = moviesActive,
-    seriesActive = seriesActive,
     measuringStream = measuringStream,
     measuringOf = measuringOf,
 )

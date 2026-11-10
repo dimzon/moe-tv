@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -118,43 +111,41 @@ internal fun remoteButtonIcon(keyCode: Int, fallbackAction: RemoteShortcutAction
 }
 
 @Composable
-internal fun remoteActionLabel(action: RemoteShortcutAction): String = stringResource(
-    when (action) {
-        RemoteShortcutAction.OPEN_HOME -> R.string.common_nav_home
-        RemoteShortcutAction.OPEN_LIVE_TV -> R.string.common_nav_live_tv
-        RemoteShortcutAction.OPEN_MOVIES -> R.string.common_nav_movies
-        RemoteShortcutAction.OPEN_SERIES -> R.string.common_nav_series
-        RemoteShortcutAction.OPEN_DOWNLOADS -> R.string.common_nav_downloads
-        RemoteShortcutAction.OPEN_GUIDE -> R.string.common_nav_guide
-        RemoteShortcutAction.OPEN_SEARCH -> R.string.common_nav_search
-        RemoteShortcutAction.OPEN_SETTINGS -> R.string.common_nav_settings
-        RemoteShortcutAction.OPEN_PROFILE_SWITCHER -> R.string.profiles_title
-        RemoteShortcutAction.OPEN_PLAYLIST_SWITCHER -> R.string.settings_playlists
-        RemoteShortcutAction.CONTINUE_LAST_WATCHED -> R.string.settings_remote_action_continue
-        RemoteShortcutAction.FOCUS_NOW_PLAYING -> R.string.settings_remote_action_focus_now_playing
-        RemoteShortcutAction.EXPAND_NOW_PLAYING -> R.string.settings_remote_action_expand_now_playing
-        RemoteShortcutAction.ENTER_MINI_PLAYER -> R.string.settings_remote_action_mini_player
-        RemoteShortcutAction.ENTER_AUDIO_MODE -> R.string.player_tool_audio_only
-        RemoteShortcutAction.PLAY_PAUSE -> R.string.settings_remote_action_play_pause
-        RemoteShortcutAction.PAGE_TOWARD_FIRST -> R.string.settings_remote_action_page_first
-        RemoteShortcutAction.PAGE_TOWARD_LAST -> R.string.settings_remote_action_page_last
-        RemoteShortcutAction.JUMP_TO_FIRST -> R.string.settings_remote_action_jump_first
-        RemoteShortcutAction.JUMP_TO_LAST -> R.string.settings_remote_action_jump_last
-        RemoteShortcutAction.RETURN_TO_LIVE -> R.string.player_go_live
-        RemoteShortcutAction.PREVIOUS_CHANNEL -> R.string.player_previous_channel
-        RemoteShortcutAction.OPEN_SUBTITLE_CONTROLS -> R.string.player_tool_subtitles
-        RemoteShortcutAction.OPEN_AUDIO_CONTROLS -> R.string.player_tool_audio
-        RemoteShortcutAction.OPEN_ASPECT_CONTROLS -> R.string.player_tool_aspect
-        RemoteShortcutAction.TOGGLE_PLAYBACK_INFO -> R.string.player_tool_info
-    },
-)
+internal fun remoteActionLabel(action: RemoteShortcutAction): String = when (action) {
+    RemoteShortcutAction.OPEN_HOME -> stringResource(R.string.common_nav_home)
+    RemoteShortcutAction.OPEN_LIVE_TV -> stringResource(R.string.common_nav_live_tv)
+    RemoteShortcutAction.OPEN_GUIDE -> stringResource(R.string.common_nav_guide)
+    RemoteShortcutAction.OPEN_SEARCH -> stringResource(R.string.common_nav_search)
+    RemoteShortcutAction.OPEN_SETTINGS -> stringResource(R.string.common_nav_settings)
+    RemoteShortcutAction.OPEN_PROFILE_SWITCHER -> stringResource(R.string.profiles_title)
+    RemoteShortcutAction.OPEN_PLAYLIST_SWITCHER -> stringResource(R.string.settings_playlists)
+    RemoteShortcutAction.CONTINUE_LAST_WATCHED -> stringResource(R.string.settings_remote_action_continue)
+    RemoteShortcutAction.FOCUS_NOW_PLAYING -> stringResource(R.string.settings_remote_action_focus_now_playing)
+    RemoteShortcutAction.EXPAND_NOW_PLAYING -> stringResource(R.string.settings_remote_action_expand_now_playing)
+    RemoteShortcutAction.ENTER_MINI_PLAYER -> stringResource(R.string.settings_remote_action_mini_player)
+    RemoteShortcutAction.ENTER_AUDIO_MODE -> stringResource(R.string.player_tool_audio_only)
+    RemoteShortcutAction.PLAY_PAUSE -> stringResource(R.string.settings_remote_action_play_pause)
+    RemoteShortcutAction.PAGE_TOWARD_FIRST -> stringResource(R.string.settings_remote_action_page_first)
+    RemoteShortcutAction.PAGE_TOWARD_LAST -> stringResource(R.string.settings_remote_action_page_last)
+    RemoteShortcutAction.JUMP_TO_FIRST -> stringResource(R.string.settings_remote_action_jump_first)
+    RemoteShortcutAction.JUMP_TO_LAST -> stringResource(R.string.settings_remote_action_jump_last)
+    RemoteShortcutAction.RETURN_TO_LIVE -> stringResource(R.string.player_go_live)
+    RemoteShortcutAction.PREVIOUS_CHANNEL -> stringResource(R.string.player_previous_channel)
+    RemoteShortcutAction.OPEN_SUBTITLE_CONTROLS -> stringResource(R.string.player_tool_subtitles)
+    RemoteShortcutAction.OPEN_AUDIO_CONTROLS -> stringResource(R.string.player_tool_audio)
+    RemoteShortcutAction.OPEN_ASPECT_CONTROLS -> stringResource(R.string.player_tool_aspect)
+    RemoteShortcutAction.TOGGLE_PLAYBACK_INFO -> stringResource(R.string.player_tool_info)
+    // Legacy VOD destinations: never offered by the picker; shown by their stable
+    // identifier so a binding saved before wave 2 is still identifiable.
+    RemoteShortcutAction.OPEN_MOVIES,
+    RemoteShortcutAction.OPEN_SERIES,
+    RemoteShortcutAction.OPEN_DOWNLOADS,
+    -> action.name
+}
 
 internal fun remoteActionIcon(action: RemoteShortcutAction): MyOwnTVIcon = when (action) {
     RemoteShortcutAction.OPEN_HOME -> MyOwnTVIcon.HOME
     RemoteShortcutAction.OPEN_LIVE_TV, RemoteShortcutAction.RETURN_TO_LIVE -> MyOwnTVIcon.LIVE_TV
-    RemoteShortcutAction.OPEN_MOVIES -> MyOwnTVIcon.MOVIES
-    RemoteShortcutAction.OPEN_SERIES -> MyOwnTVIcon.SERIES
-    RemoteShortcutAction.OPEN_DOWNLOADS -> MyOwnTVIcon.DOWNLOADS
     RemoteShortcutAction.OPEN_GUIDE -> MyOwnTVIcon.EPG
     RemoteShortcutAction.OPEN_SEARCH -> MyOwnTVIcon.SEARCH
     RemoteShortcutAction.OPEN_SETTINGS -> MyOwnTVIcon.SETTINGS
@@ -171,4 +162,7 @@ internal fun remoteActionIcon(action: RemoteShortcutAction): MyOwnTVIcon = when 
     RemoteShortcutAction.OPEN_ASPECT_CONTROLS -> MyOwnTVIcon.ASPECT
     RemoteShortcutAction.TOGGLE_PLAYBACK_INFO -> MyOwnTVIcon.INFO
     RemoteShortcutAction.PREVIOUS_CHANNEL -> MyOwnTVIcon.HISTORY
+    RemoteShortcutAction.OPEN_MOVIES -> MyOwnTVIcon.MOVIES
+    RemoteShortcutAction.OPEN_SERIES -> MyOwnTVIcon.SERIES
+    RemoteShortcutAction.OPEN_DOWNLOADS -> MyOwnTVIcon.DOWNLOADS
 }

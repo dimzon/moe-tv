@@ -21,10 +21,6 @@ import org.junit.runner.RunWith
 import tv.own.owntv.core.epg.EpgMatcher
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.model.SourceType
-import tv.own.owntv.core.database.entity.TrendingAttemptStatus
-import tv.own.owntv.core.database.entity.TrendingItemEntity
-import tv.own.owntv.core.database.entity.TrendingSnapshotEntity
-import tv.own.owntv.core.database.entity.TrendingSnapshotStatus
 
 @RunWith(AndroidJUnit4::class)
 class OwnTVDatabaseMigrationTest {
@@ -56,12 +52,10 @@ class OwnTVDatabaseMigrationTest {
             assertCount(sqlite, "profile_source", 1)
             assertCount(sqlite, "categories", 3)
             assertCount(sqlite, "channels", 1)
-            assertCount(sqlite, "movies", 1)
-            assertCount(sqlite, "series", 1)
-            assertCount(sqlite, "seasons", 1)
-            assertCount(sqlite, "episodes", 1)
-            assertCount(sqlite, "watch_history", 3)
-            assertCount(sqlite, "playback_progress", 2)
+            // v57 dropped the whole VOD schema; the seeded movie/series/season/episode rows are gone
+            // with their tables, and the VOD rows of watch_history were purged.
+            droppedVodTables.forEach { assertTableMissing(sqlite, it) }
+            assertCount(sqlite, "watch_history", 1)
             assertCount(sqlite, "tv_provider_programs", 0)
         } finally {
             db.close()
@@ -79,8 +73,8 @@ class OwnTVDatabaseMigrationTest {
         try {
             val sqlite = openForAssertions(db)
             assertColumnExists(sqlite, "channels", "contentHash")
-            assertColumnExists(sqlite, "movies", "contentHash")
-            assertColumnExists(sqlite, "series", "contentHash")
+            assertTableMissing(sqlite, "movies")
+            assertTableMissing(sqlite, "series")
             assertColumnExists(sqlite, "epg_programmes", "contentHash")
             assertIndexExists(sqlite, "index_epg_programmes_natural_key")
             assertTableExists(sqlite, "content_order")
@@ -112,12 +106,8 @@ class OwnTVDatabaseMigrationTest {
             assertTableExists(sqlite, "custom_category_members")
             assertIndexExists(sqlite, "index_custom_category_members_profileId_mediaType_contextKey_itemId")
             assertColumnExists(sqlite, "channels", "contentHash")
-            assertColumnExists(sqlite, "movies", "contentHash")
-            assertColumnExists(sqlite, "series", "contentHash")
             assertColumnExists(sqlite, "epg_programmes", "contentHash")
             assertIndexExists(sqlite, "index_channels_sourceId_sortOrder_name")
-            assertIndexExists(sqlite, "index_movies_sourceId_remoteId")
-            assertIndexExists(sqlite, "index_series_sourceId_remoteId")
             assertIndexExists(sqlite, "index_epg_programmes_natural_key")
             // v50 dropped it again: the natural key serves its reads.
             assertIndexMissing(sqlite, "index_epg_programmes_sourceId_epgChannelId")
@@ -127,9 +117,8 @@ class OwnTVDatabaseMigrationTest {
                 assertIndexMissing(sqlite, "index_${table}_categoryId")
             }
             assertIndexMissing(sqlite, "index_channels_name")
-            assertIndexExists(sqlite, "index_movies_name")
-            assertTableExists(sqlite, "metadata_cache")
-            assertColumnExists(sqlite, "metadata_cache", "logoPath")
+            // v57: metadata_cache went with the VOD catalogue.
+            assertTableMissing(sqlite, "metadata_cache")
             assertColumnExists(sqlite, "sources", "mac")
             // v25: per-playlist "Pre-buffer" override.
             assertColumnExists(sqlite, "sources", "livePrerollSecs")
@@ -142,8 +131,9 @@ class OwnTVDatabaseMigrationTest {
             assertColumnExists(sqlite, "sources", "stalkerDeviceId")
             assertColumnExists(sqlite, "sources", "stalkerDeviceId2")
             assertColumnExists(sqlite, "sources", "stalkerSignature")
-            assertTableExists(sqlite, "trending_snapshots")
-            assertTableExists(sqlite, "trending_items")
+            // v57: the Trending showcase's tables went with the VOD rails.
+            assertTableMissing(sqlite, "trending_snapshots")
+            assertTableMissing(sqlite, "trending_items")
             // v34: the per-playlist Live TV engine / latency overrides. All three must arrive meaning
             // "follow the global setting" — nulls for the two modes, the -1 sentinel for the custom
             // buffer — or an upgrade would silently pin every existing playlist to one engine.
@@ -159,12 +149,10 @@ class OwnTVDatabaseMigrationTest {
             assertTableExists(sqlite, "user_data_tombstones")
             assertIndexExists(sqlite, "index_user_data_tombstones_profileId_kind_identity")
             assertCount(sqlite, "user_data_tombstones", 0)
-            // v37: when an episode first aired — the provider's date on the episode, TMDB's in the
-            // cache. Both must arrive NULL on an upgrade: an invented date would be worse than none,
-            // and the real ones fill in on the next refresh.
-            assertColumnExists(sqlite, "episodes", "airDateMs")
-            assertColumnExists(sqlite, "metadata_cache", "airDate")
-            assertColumnValue(sqlite, "episodes", "airDateMs", 70, null)
+            // v37 added the air date to episodes/metadata_cache; both tables left at v57, so the
+            // columns are gone with them rather than arriving empty.
+            assertTableMissing(sqlite, "episodes")
+            assertTableMissing(sqlite, "metadata_cache")
             // …and the profile picture column, which must arrive empty: an existing profile keeps the
             // drawn avatar it already had until somebody chooses a picture.
             assertColumnExists(sqlite, "profiles", "avatarPath")
@@ -173,24 +161,15 @@ class OwnTVDatabaseMigrationTest {
             // arrives with it ON — an upgrade must not silently switch a guide off.
             assertColumnExists(sqlite, "sources", "importPortalEpg")
             assertColumnValue(sqlite, "sources", "importPortalEpg", 10, 1L)
-            // v39: live recording. Two new tables, both empty — an upgrade must not invent a
-            // recording, and it must not have touched anything that was already there. The unique
-            // index is the one with teeth: it is what stops pressing Record twice on the same
-            // programme from scheduling it twice.
-            assertTableExists(sqlite, "recordings")
-            assertIndexExists(sqlite, "index_recordings_profileId_channelId_programmeStartMs")
-            assertIndexExists(sqlite, "index_recordings_startMs_stopMs")
-            assertCount(sqlite, "recordings", 0)
-            assertTableExists(sqlite, "recording_rules")
-            assertIndexExists(sqlite, "index_recording_rules_profileId_channelId_titleKey")
-            assertCount(sqlite, "recording_rules", 0)
+            // v39 added live recording; v57 removed the feature and its two tables.
+            assertTableMissing(sqlite, "recordings")
+            assertTableMissing(sqlite, "recording_rules")
             // v40: when the app measured how many streams the provider allows. Every upgraded
             // playlist must arrive at 0 — "never measured" — so the measurement runs once for them
             // rather than being assumed to have already happened. Crucially it must NOT disturb
             // maxConnections: a playlist whose Xtream panel already published its limit keeps it.
             assertColumnExists(sqlite, "sources", "maxConnectionsProbedAt")
             assertColumnValue(sqlite, "sources", "maxConnectionsProbedAt", 10, 0L)
-            assertIndexExists(sqlite, "index_movies_sourceId_rating_name")
             // v20: direct-tune index on (sourceId, number).
             assertIndexExists(sqlite, "index_channels_sourceId_number")
             // Channel number column preserved through the full migration chain.
@@ -201,66 +180,114 @@ class OwnTVDatabaseMigrationTest {
             assertCount(sqlite, "profile_source", 1)
             assertCount(sqlite, "categories", 3)
             assertCount(sqlite, "channels", 1)
-            assertCount(sqlite, "movies", 1)
-            assertCount(sqlite, "series", 1)
-            assertCount(sqlite, "favorites", 3)
-            assertCount(sqlite, "playback_progress", 2)
+            // The seeded favorites were LIVE + MOVIE + SERIES; the VOD two were purged at v57.
+            assertCount(sqlite, "favorites", 1)
+            // The seeded watch_history row was a MOVIE, so nothing is left of it.
+            assertCount(sqlite, "watch_history", 0)
+            assertTableMissing(sqlite, "playback_progress")
         } finally {
             db.close()
         }
     }
 
+    /**
+     * v56 → v57: the app is live-only, so every VOD table is dropped and the VOD rows of the shared
+     * user-data tables are purged. What must survive is exactly what the live app still reads: the
+     * playlists, profiles, channels, the guide, and every LIVE row of favorites / history / order /
+     * custom categories. Read [MIGRATION_56_57] for the SQL this pins.
+     */
     @Test
-    fun migrateVersion29ToCurrent_addsIndependentTrendingSnapshots_andCascadesSourceDelete() {
+    fun migrateVersion56To57_dropsEveryVodTable_andPurgesOnlyVodUserData() {
         context.deleteDatabase(DB_NAME)
-        bootstrapVersion29Database()
+        val db56 = context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null)
+        try {
+            executeSchemaQueries(db56, "tv.own.owntv.core.database.OwnTVDatabase/56.json")
+            db56.execSQL("INSERT INTO profiles (id, name, avatarColor, avatarId, isKids, pinHash, createdAt) VALUES (1, 'Primary', 1122867, 7, 0, NULL, 1)")
+            db56.execSQL(
+                "INSERT INTO sources (id, name, type, url, syncLive, syncMovies, syncSeries, importPortalEpg, hlsSupported, " +
+                    "preferHls, livePrerollSecs, liveLatencyCustomSecs, maxConnections, maxConnectionsProbedAt, createdAt) " +
+                    "VALUES (10, 'Playlist', '${SourceType.XTREAM.name}', 'https://example.test', 1, 1, 1, 0, 0, 0, -1, -1, 1, 0, 2)",
+            )
+            db56.execSQL("INSERT INTO categories (id, sourceId, mediaType, name, remoteId, sortOrder) VALUES (20, 10, '${MediaType.LIVE.name}', 'Live', 'cat-live', 0)")
+            db56.execSQL(
+                "INSERT INTO channels (id, sourceId, categoryId, name, streamUrl, remoteId, sortOrder) " +
+                    "VALUES (30, 10, 20, 'News', 'https://example.test/live.ts', 'ch-30', 0)",
+            )
+            // A VOD row in every table that is about to disappear — so the DROP is proved to take rows.
+            db56.execSQL(
+                "INSERT INTO movies (id, sourceId, name, streamUrl, sortOrder) VALUES (40, 10, 'Movie One', 'https://example.test/m.mp4', 0)",
+            )
+            db56.execSQL("INSERT INTO series (id, sourceId, name, sortOrder) VALUES (50, 10, 'Show One', 0)")
+            db56.execSQL("INSERT INTO seasons (id, seriesId, seasonNumber, name) VALUES (60, 50, 1, 'Season 1')")
+            db56.execSQL(
+                "INSERT INTO episodes (id, seriesId, seasonId, seasonNumber, episodeNumber, name, streamUrl) " +
+                    "VALUES (70, 50, 60, 1, 1, 'Episode 1', 'https://example.test/e1.mp4')",
+            )
+            db56.execSQL(
+                "INSERT INTO metadata_cache (`key`, tmdbId, type, title, updatedAt) VALUES ('movie:40', 40, 'movie', 'Movie One', 1)",
+            )
+            db56.execSQL(
+                "INSERT INTO trending_snapshots (sourceId, status, metadataLanguage, refreshedAt, candidateFetchedAt, generationId, itemCount) " +
+                    "VALUES (10, 'ELIGIBLE', 'en-US', 1, 1, 'gen-1', 0)",
+            )
+            db56.execSQL(
+                "INSERT INTO downloads (id, profileId, mediaType, itemId, title, streamUrl, status, downloadedBytes, totalBytes, createdAt, updatedAt) " +
+                    "VALUES (80, 1, '${MediaType.MOVIE.name}', 40, 'Movie One', 'https://example.test/m.mp4', 'DONE', 10, 10, 1, 1)",
+            )
+            db56.execSQL(
+                "INSERT INTO playback_progress (id, profileId, mediaType, itemId, positionMs, durationMs, updatedAt) " +
+                    "VALUES (90, 1, '${MediaType.MOVIE.name}', 40, 1, 2, 1)",
+            )
+            // Shared user data: one LIVE row and one VOD row per table.
+            db56.execSQL("INSERT INTO favorites (id, profileId, mediaType, itemId, addedAt) VALUES (100, 1, '${MediaType.LIVE.name}', 30, 1)")
+            db56.execSQL("INSERT INTO favorites (id, profileId, mediaType, itemId, addedAt) VALUES (101, 1, '${MediaType.MOVIE.name}', 40, 2)")
+            db56.execSQL("INSERT INTO watch_history (id, profileId, mediaType, itemId, watchedAt) VALUES (110, 1, '${MediaType.LIVE.name}', 30, 1)")
+            db56.execSQL("INSERT INTO watch_history (id, profileId, mediaType, itemId, watchedAt) VALUES (111, 1, '${MediaType.SERIES.name}', 50, 2)")
+            db56.execSQL(
+                "INSERT INTO content_order (id, profileId, mediaType, contextKey, itemId, position) " +
+                    "VALUES (120, 1, '${MediaType.LIVE.name}', '20:cat-live', 30, 0)",
+            )
+            db56.execSQL(
+                "INSERT INTO content_order (id, profileId, mediaType, contextKey, itemId, position) " +
+                    "VALUES (121, 1, '${MediaType.MOVIE.name}', '21:cat-movies', 40, 0)",
+            )
+            db56.execSQL(
+                "INSERT INTO custom_category_members (id, profileId, mediaType, contextKey, itemId, position) " +
+                    "VALUES (130, 1, '${MediaType.LIVE.name}', 'custom:one', 30, 0)",
+            )
+            db56.execSQL(
+                "INSERT INTO custom_category_members (id, profileId, mediaType, contextKey, itemId, position) " +
+                    "VALUES (131, 1, '${MediaType.SERIES.name}', 'custom:one', 50, 1)",
+            )
+            db56.version = 56
+        } finally {
+            db56.close()
+        }
 
         val db = openWithAllMigrations()
         try {
             val sqlite = openForAssertions(db)
-            assertTableExists(sqlite, "trending_snapshots")
-            assertTableExists(sqlite, "trending_items")
-            assertIndexExists(sqlite, "index_trending_items_sourceId_mediaType_providerItemId")
-            assertIndexExists(sqlite, "index_trending_items_mediaType_tmdbId")
-            assertCount(sqlite, "sources", 2)
+            assertEquals("v56 did not reach the current version", CURRENT_VERSION, userVersionOf(sqlite))
 
-            runBlocking {
-                val dao = db.trendingDao()
-                dao.replaceSnapshot(
-                    trendingState(sourceId = 10, generationId = "source-a-1"),
-                    trendingItems(sourceId = 10, generationId = "source-a-1", titlePrefix = "A"),
-                )
-                dao.replaceSnapshot(
-                    trendingState(sourceId = 11, generationId = "source-b-1"),
-                    trendingItems(sourceId = 11, generationId = "source-b-1", titlePrefix = "B"),
-                )
+            // Every VOD table is gone, FTS mirrors included.
+            droppedVodTables.forEach { assertTableMissing(sqlite, it) }
 
-                val sourceB = dao.getSnapshot(11) ?: error("Source B snapshot missing")
-                assertEquals(5, sourceB.items.size)
-                assertEquals("B 1", sourceB.items.first().localizedTitle)
+            // The live schema is untouched.
+            assertCount(sqlite, "profiles", 1)
+            assertCount(sqlite, "sources", 1)
+            assertCount(sqlite, "categories", 1)
+            assertCount(sqlite, "channels", 1)
+            assertColumnExists(sqlite, "channels", "catchup")
 
-                dao.writeBelowThreshold(
-                    TrendingSnapshotEntity(
-                        sourceId = 10,
-                        status = TrendingSnapshotStatus.BELOW_THRESHOLD,
-                        metadataLanguage = "de-DE",
-                        refreshedAt = 2_000,
-                        candidateFetchedAt = 1_900,
-                        generationId = "source-a-2",
-                        itemCount = 0,
-                        matchedItemCount = 2,
-                        lastAttemptAt = 2_000,
-                        lastAttemptStatus = TrendingAttemptStatus.BELOW_THRESHOLD,
-                    ),
-                )
-
-                assertEquals(0, dao.getSnapshot(10)?.items?.size)
-                assertEquals("source-b-1", dao.getSnapshot(11)?.state?.generationId)
-            }
-
-            sqlite.execSQL("DELETE FROM sources WHERE id = 11")
-            assertCount(sqlite, "trending_snapshots", 1)
-            assertCount(sqlite, "trending_items", 0)
+            // The shared tables keep their LIVE rows and lose the VOD ones.
+            assertCount(sqlite, "favorites", 1)
+            assertEquals(30L, countRows(sqlite, "SELECT itemId FROM favorites"))
+            assertCount(sqlite, "watch_history", 1)
+            assertEquals(30L, countRows(sqlite, "SELECT itemId FROM watch_history"))
+            assertCount(sqlite, "content_order", 1)
+            assertEquals(30L, countRows(sqlite, "SELECT itemId FROM content_order"))
+            assertCount(sqlite, "custom_category_members", 1)
+            assertEquals(30L, countRows(sqlite, "SELECT itemId FROM custom_category_members"))
         } finally {
             db.close()
         }
@@ -372,16 +399,16 @@ class OwnTVDatabaseMigrationTest {
         try {
             // Would throw IllegalStateException here without the heal (validation failure).
             val sqlite = openForAssertions(db)
-            assertIndexExists(sqlite, "index_movies_sourceId_rating_name")
-            assertIndexExists(sqlite, "index_series_categoryId_rating_name")
+            // The live indexes the heal guarantees are back; the movies/series ones the same drift
+            // dropped no longer exist at all, because v57 dropped their tables.
             assertIndexExists(sqlite, "index_channels_sourceId_sortOrder_name")
             assertIndexExists(sqlite, "index_epg_programmes_stopMs")
-            assertColumnExists(sqlite, "metadata_cache", "logoPath")
+            assertTableMissing(sqlite, "metadata_cache")
+            assertTableMissing(sqlite, "series")
             assertColumnExists(sqlite, "sources", "mac")
             assertColumnExists(sqlite, "sources", "syncLive")
             assertColumnExists(sqlite, "sources", "syncMovies")
             assertColumnExists(sqlite, "sources", "syncSeries")
-            assertColumnExists(sqlite, "series", "episodesSyncedAt")
             assertCount(sqlite, "profiles", 1)
         } finally {
             db.close()
@@ -603,7 +630,7 @@ class OwnTVDatabaseMigrationTest {
     }
 
     @Test
-    fun migrateVersion44To45_addsOriginalLanguage_keepingCachedRows() {
+    fun migrateVersion44To45_addsOriginalLanguage_andTheChainStillDropsTheCache() {
         context.deleteDatabase(DB_NAME)
         val db44 = context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null)
         try {
@@ -621,14 +648,10 @@ class OwnTVDatabaseMigrationTest {
         val db = openWithAllMigrations()
         try {
             val sqlite = openForAssertions(db)
-            assertColumnExists(sqlite, "metadata_cache", "originalLanguage")
-            // The cached row came through; its language is unknown until the title is played.
-            assertCount(sqlite, "metadata_cache", 1)
-            sqlite.prepare("SELECT title, originalLanguage FROM metadata_cache").use {
-                assertTrue(it.step())
-                assertEquals("Parasite", it.getText(0))
-                assertTrue(it.isNull(1))
-            }
+            // v45 added originalLanguage; v57 dropped the whole cache with the VOD catalogue, so the
+            // hop's column is gone with the table it was added to.
+            assertTableMissing(sqlite, "metadata_cache")
+            assertCount(sqlite, "profiles", 1)
         } finally {
             db.close()
         }
@@ -772,9 +795,9 @@ class OwnTVDatabaseMigrationTest {
         }
     }
 
-    /** v47 adds nothing a download depends on: every row, failed ones included, comes through with no reason. */
+    /** v48 added the failure reason to downloads; the chain now continues to v57, which drops the table. */
     @Test
-    fun migrateVersion47To48_addsDownloadReason_keepingDownloads() {
+    fun migrateVersion47To48_addsDownloadReason_andTheChainStillDropsDownloads() {
         context.deleteDatabase(DB_NAME)
         val db47 = context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null)
         try {
@@ -792,17 +815,9 @@ class OwnTVDatabaseMigrationTest {
         val db = openWithAllMigrations()
         try {
             val sqlite = openForAssertions(db)
-            assertColumnExists(sqlite, "downloads", "reason")
-            assertColumnExists(sqlite, "downloads", "httpCode")
-            sqlite.prepare("SELECT title, status, downloadedBytes, totalBytes, reason, httpCode FROM downloads").use {
-                assertTrue(it.step())
-                assertEquals("Heat", it.getText(0))
-                assertEquals("FAILED", it.getText(1))
-                assertEquals(250L, it.getLong(2))
-                assertEquals(1000L, it.getLong(3))
-                assertTrue(it.isNull(4))
-                assertTrue(it.isNull(5))
-            }
+            // v48 added the failure reason to downloads; v57 dropped downloads with the feature.
+            assertTableMissing(sqlite, "downloads")
+            assertCount(sqlite, "profiles", 1)
         } finally {
             db.close()
         }
@@ -973,71 +988,6 @@ class OwnTVDatabaseMigrationTest {
         }
     }
 
-    private fun bootstrapVersion29Database() {
-        val db = context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null)
-        try {
-            executeSchemaQueries(db, "tv.own.owntv.core.database.OwnTVDatabase/29.json")
-            db.execSQL(
-                "INSERT INTO sources (id, name, type, url, username, password, mac, " +
-                    "stalkerSerialNumber, stalkerDeviceId, stalkerDeviceId2, stalkerSignature, " +
-                    "userAgent, epgUrl, syncLive, syncMovies, syncSeries, hlsSupported, preferHls, " +
-                    "livePrerollSecs, maxConnections, createdAt, lastSyncAt) VALUES " +
-                    "(10, 'Source A', '${SourceType.XTREAM.name}', 'https://a.example', NULL, NULL, NULL, " +
-                    "NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, 1, 0, 0, -1, 0, 1, NULL), " +
-                    "(11, 'Source B', '${SourceType.XTREAM.name}', 'https://b.example', NULL, NULL, NULL, " +
-                    "NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, 1, 0, 0, -1, 0, 1, NULL)",
-            )
-            db.version = 29
-        } finally {
-            db.close()
-        }
-    }
-
-    /** A completed, eligible refresh. The attempt fields are explicit because [TrendingDao] rejects a
-     *  replacement that does not describe a successful attempt — they default to "never attempted". */
-    private fun trendingState(sourceId: Long, generationId: String) = TrendingSnapshotEntity(
-        sourceId = sourceId,
-        status = TrendingSnapshotStatus.ELIGIBLE,
-        metadataLanguage = "de-DE",
-        refreshedAt = 1_000,
-        candidateFetchedAt = 900,
-        generationId = generationId,
-        itemCount = 5,
-        matchedItemCount = 5,
-        lastAttemptAt = 1_000,
-        lastAttemptStatus = TrendingAttemptStatus.SUCCESS,
-    )
-
-    private fun trendingItems(sourceId: Long, generationId: String, titlePrefix: String) =
-        (0 until 5).map { position ->
-            val mediaType = if (position % 2 == 0) MediaType.MOVIE else MediaType.SERIES
-            TrendingItemEntity(
-                sourceId = sourceId,
-                position = position,
-                tmdbId = 1_000 + position,
-                mediaType = mediaType,
-                trendingRank = position + 1,
-                providerItemId = 2_000L + position,
-                providerRemoteId = "remote-$position",
-                providerStableKey = "remote-$position",
-                providerRawName = "$titlePrefix ${position + 1}",
-                canonicalTitle = "$titlePrefix ${position + 1}",
-                providerLanguage = "DE",
-                advertisedQuality = "FHD",
-                advertisedCapabilities = null,
-                localizedTitle = "$titlePrefix ${position + 1}",
-                originalTitle = null,
-                year = 2026,
-                overview = null,
-                posterPath = null,
-                backdropPath = null,
-                rating = 8.0,
-                trailerKey = null,
-                generationId = generationId,
-                refreshedAt = 1_000,
-            )
-        }
-
     private fun bootstrapVersion3Database() {
         val db = context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null)
         try {
@@ -1133,6 +1083,26 @@ class OwnTVDatabaseMigrationTest {
         db.execSQL("INSERT INTO epg_programmes (id, sourceId, epgChannelId, startMs, stopMs, title, description) VALUES (10, -1, 'news', 1000, 2000, 'News One', 'A')")
         db.execSQL("INSERT INTO epg_programmes (id, sourceId, epgChannelId, startMs, stopMs, title, description) VALUES (11, -1, 'news', 1000, 2000, 'News Duplicate', 'B')")
         db.execSQL("INSERT INTO epg_programmes (id, sourceId, epgChannelId, startMs, stopMs, title, description) VALUES (12, -1, 'sports', 3000, 4000, 'Sports One', 'C')")
+    }
+
+    /** Every table [MIGRATION_56_57] drops — the VOD schema, its FTS mirrors included. */
+    private val droppedVodTables = listOf(
+        "movies", "series", "seasons", "episodes",
+        "movies_fts", "series_fts", "episodes_fts",
+        "metadata_cache", "metadata_match",
+        "trending_snapshots", "trending_items",
+        "recordings", "recording_rules",
+        "catalog_backfill",
+        "subtitle_cache", "subtitle_selection", "subtitle_link", "subtitle_timing",
+        "playback_progress", "downloads", "series_sort_order",
+    )
+
+    private fun assertTableMissing(db: SQLiteConnection, table: String) {
+        assertEquals(
+            "table $table should have been dropped",
+            0L,
+            countRows(db, "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = ?", arrayOf<Any?>(table)),
+        )
     }
 
     private fun assertTableExists(db: SQLiteConnection, table: String) {

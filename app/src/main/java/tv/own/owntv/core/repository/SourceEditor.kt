@@ -33,25 +33,22 @@ class SourceEditor(
                 existing.id,
                 reason = "playlist_edit",
                 contentTypes = SyncContentTypes.enabledFor(edited),
-                baseItemCount = counts.channels + counts.movies + counts.series,
+                baseItemCount = counts.channels,
             )
         }
     }
 
     internal companion object {
-        fun scopeChanged(a: SourceEntity, b: SourceEntity): Boolean =
-            a.syncLive != b.syncLive || a.syncMovies != b.syncMovies || a.syncSeries != b.syncSeries
+        fun scopeChanged(a: SourceEntity, b: SourceEntity): Boolean = a.syncLive != b.syncLive
 
         /**
-         * Fetch again when a section was switched on, when the playlist has never completed a sync,
+         * Fetch again when Live was switched on, when the playlist has never completed a sync,
          * or when anything that decides *what the provider sends* changed. The last is what makes a
          * corrected password take effect: a pass that ran with the wrong one may already be stamped
          * synced, so neither of the first two rules would ever fire.
          */
         fun needsResync(existing: SourceEntity, edited: SourceEntity): Boolean {
-            val scopeTurnedOn = (!existing.syncLive && edited.syncLive) ||
-                (!existing.syncMovies && edited.syncMovies) ||
-                (!existing.syncSeries && edited.syncSeries)
+            val scopeTurnedOn = !existing.syncLive && edited.syncLive
             return scopeTurnedOn || edited.lastSyncAt == null || accountChanged(existing, edited)
         }
 

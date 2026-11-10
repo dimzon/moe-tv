@@ -12,8 +12,6 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import tv.own.owntv.core.database.BulkInsertHelper
 import tv.own.owntv.core.database.entity.ChannelEntity
-import tv.own.owntv.core.database.entity.MovieEntity
-import tv.own.owntv.core.database.entity.SeriesEntity
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.network.HttpClient
@@ -25,7 +23,7 @@ import kotlin.coroutines.CoroutineContext
  * The Xtream import flow (split out of SyncManager): re-syncs preserve
  * existing rows until a phase succeeds — rows are matched by provider remote id, unchanged rows are
  * skipped, changed rows keep their local id, and stale rows are pruned only after the full phase
- * completes. Series episodes are intentionally fetched lazily on open, not during sync.
+ * completes.
  */
 internal class XtreamSyncer(
     private val xtream: XtreamClient,
@@ -49,21 +47,19 @@ internal class XtreamSyncer(
             if (details.maxConnections == 1 && s.maxConnectionsProbedAt <= 0) {
                 tv.own.owntv.core.player.LiveSessionLimit.singleSession(s.url)
             }
-            // The zone its timeshift `start` is written in — catch-up's Automatic time zone.
+            // The panel's own reported time zone, used to date-stamp its answers.
             support.sourceDao.updateServerTimeZone(s.id, details.serverTimeZone)
         }
         val semaphore = Semaphore(PHASE_CONCURRENCY)
         Log.i(TAG, "Xtream sync scheduling sourceId=${s.id} contentTypes=$contentTypes concurrency=$PHASE_CONCURRENCY hlsSupported=${details?.hlsSupported} maxConnections=${details?.maxConnections} serverTimeZone=${details?.serverTimeZone}")
         coroutineScope {
             if (contentTypes.live) async { semaphore.withPermit { syncLive(s, progress, stats) } }
-            if (contentTypes.movies) async { semaphore.withPermit { syncMovies(s, progress, stats) } }
-            if (contentTypes.series) async { semaphore.withPermit { syncSeries(s, progress, stats) } }
         }
     }
 
-    // The three Xtream phases share one generic scaffolding (syncXtreamPhase) — they differ only
+    // The Xtream live phase follows one generic scaffolding (syncXtreamPhase) — differing only
     // in phase/table names, the entity mapper, and per-entity DAO lambdas (ContentAdapter). Live is
-    // NOT wrapped in guardStep (a live failure fails the whole sync, as before); movies/series are.
+        // NOT wrapped in guardStep: a live failure fails the whole sync, as before.
 
     private suspend fun syncLive(s: SourceEntity, progress: SyncCounters, stats: SyncStatsCollector) =
         syncXtreamPhase(
@@ -106,88 +102,6 @@ internal class XtreamSyncer(
             ),
         )
 
-    private suspend fun syncMovies(s: SourceEntity, progress: SyncCounters, stats: SyncStatsCollector) {
-        guardStep("movies", stats) {
-            syncXtreamPhase(
-                s, progress, stats,
-                XtreamPhase(
-                    phase = SyncPhase.MOVIES, type = MediaType.MOVIE,
-                    table = "movies", ftsTable = "movies_fts",
-                    countsKey = "movies",
-                    adapter = support.movieAdapter,
-                    fetchCategories = { report -> xtream.vodCategories(s, report) },
-                    makeStreams = { catMap, seenCategory ->
-                        var order = 0
-                        val toMovie = {
-                            streamId: String,
-                            name: String,
-                            icon: String?,
-                            rating: Double?,
-                            plot: String?,
-                            categoryId: String?,
-                            containerExt: String?,
-                            added: Long? ->
-                            seenCategory(categoryId)
-                            MovieEntity(
-                                sourceId = s.id, categoryId = catMap[categoryId], name = name,
-                                posterUrl = icon, rating = rating, plot = plot,
-                                streamUrl = xtream.movieUrl(s, streamId, containerExt),
-                                containerExt = containerExt, remoteId = streamId,
-                                addedAt = added?.takeIf { it > 0L }?.let { if (it < 10_000_000_000L) it * 1000L else it },
-                                sortOrder = order++,
-                            )
-                        }
-                        XtreamStreams(
-                            bulk = { add -> xtream.streamVod(s, transform = toMovie, onItem = add, onProgress = SyncSupport.IgnoreByteProgress) },
-                            byCategory = { cat, add -> xtream.streamVod(s, cat.id, transform = toMovie, onItem = add, onProgress = SyncSupport.IgnoreByteProgress) },
-                        )
-                    },
-                ),
-            )
-        }
-    }
-
-    private suspend fun syncSeries(s: SourceEntity, progress: SyncCounters, stats: SyncStatsCollector) {
-        guardStep("series", stats) {
-            syncXtreamPhase(
-                s, progress, stats,
-                XtreamPhase(
-                    phase = SyncPhase.SERIES, type = MediaType.SERIES,
-                    table = "series", ftsTable = "series_fts",
-                    countsKey = "series",
-                    adapter = support.seriesAdapter,
-                    fetchCategories = { report -> xtream.seriesCategories(s, report) },
-                    makeStreams = { catMap, seenCategory ->
-                        var order = 0
-                        val toSeries = {
-                            seriesId: String,
-                            name: String,
-                            cover: String?,
-                            plot: String?,
-                            rating: Double?,
-                            categoryId: String?,
-                            year: Int?, added: Long?, lastModified: Long? ->
-                            seenCategory(categoryId)
-                            SeriesEntity(
-                                sourceId = s.id, categoryId = catMap[categoryId], name = name,
-                                posterUrl = cover, plot = plot, rating = rating,
-                                year = year, remoteId = seriesId,
-                                addedAt = (lastModified ?: added)?.takeIf { it > 0L }?.let {
-                                    if (it < 10_000_000_000L) it * 1000L else it
-                                },
-                                sortOrder = order++,
-                            )
-                        }
-                        XtreamStreams(
-                            bulk = { add -> xtream.streamSeries(s, transform = toSeries, onItem = add, onProgress = SyncSupport.IgnoreByteProgress) },
-                            byCategory = { cat, add -> xtream.streamSeries(s, cat.id, transform = toSeries, onItem = add, onProgress = SyncSupport.IgnoreByteProgress) },
-                        )
-                    },
-                ),
-            )
-        }
-    }
-
     /** Per-phase wiring for [syncXtreamPhase]: names/keys plus the entity mapper and streams. */
     private class XtreamPhase<T>(
         val phase: SyncPhase,
@@ -195,7 +109,7 @@ internal class XtreamSyncer(
         val table: String,
         val ftsTable: String,
         val countsKey: String,
-        /** Only Live records its own timing key; movies/series get theirs from [guardStep]. */
+        /** Only Live records its own timing key; [guardStep] stamps the phase timing. */
         val timingKey: String? = null,
         val adapter: ContentAdapter<T>,
         val fetchCategories: suspend (report: (Long, Long?) -> Unit) -> List<XtCategory>,
@@ -212,7 +126,7 @@ internal class XtreamSyncer(
     )
 
     /**
-     * One Xtream content phase (extracted from three near-identical copies):
+     * One Xtream content phase (extracted from what used to be three near-identical copies):
      * category refresh → bulk stream (fresh insert or hash-diffed stable upsert) → per-category
      * fallback when the bulk list errors/truncates → prune (only after a COMPLETE bulk pass).
      */
@@ -390,7 +304,7 @@ internal class XtreamSyncer(
     /**
      * Run a bulk list fetch; if it ERRORS (not just truncates), return false so the caller drops to the
      * smaller per-category requests. Some panels (e.g. peoplestv) return a non-standard HTTP 512 on the giant
-     * full `get_series` / `get_vod_streams` response but serve the per-category (`&category_id=X`) requests
+     * full `get_live_streams` response but serve the per-category (`&category_id=X`) requests
      * fine — without this, the bulk error skipped straight past the per-category fallback.
      */
     private suspend inline fun bulkOrFallback(label: String, bulk: suspend () -> Boolean): Boolean =
@@ -493,17 +407,15 @@ internal class XtreamSyncer(
         private const val TAG = SyncSupport.TAG
 
         /**
-         * How many of live/movies/series may be in flight at once. Three lets all of them overlap
-         * instead of leaving one waiting on the other two — the panel answers each phase with one
-         * bulk request, so this is three requests, not three streams, and a panel's `max_connections`
-         * limit counts streams. Raise it no further: the per-category fallback fans out underneath
-         * this, and a panel that rate-limits answers 429.
+         * One live phase runs at a time now (the movies/series phases are gone), but the cap stays
+         * configurable: the per-category fallback fans out underneath it, and a panel that
+         * rate-limits answers 429.
          */
         private const val PHASE_CONCURRENCY = 3
 
         /**
          * The categories the bulk stream list never referenced. A panel can serve a complete-looking
-         * `get_live_streams` / `get_vod_streams` while filtering out everything the line is not
+         * `get_live_streams` while filtering out everything the line is not
          * entitled to — adult content is the usual case, gated per line in XUI-style panels — and
          * still list the category in `get_*_categories`, which is how a category ends up on screen
          * with nothing in it. `&category_id=` serves those items, so they are asked for directly.

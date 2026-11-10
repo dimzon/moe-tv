@@ -141,7 +141,7 @@ object StorageAccess {
      * always "granted": there is no grant involved.
      */
     fun hasTree(context: Context, stored: String?): Boolean {
-        if (!MediaTarget.isDocument(stored)) return true
+        if (!isDocumentUri(stored)) return true
         val value = stored ?: return false
         return runCatching {
             context.contentResolver.persistedUriPermissions.any {
@@ -155,7 +155,7 @@ object StorageAccess {
      * of grants the user can see in system settings and did not ask to keep.
      */
     fun releaseTree(context: Context, stored: String?) {
-        if (!MediaTarget.isDocument(stored)) return
+        if (!isDocumentUri(stored)) return
         runCatching {
             context.contentResolver.releasePersistableUriPermission(
                 Uri.parse(stored),
@@ -172,7 +172,7 @@ object StorageAccess {
      */
     fun folderLabel(stored: String?): String? {
         val value = stored?.takeIf { it.isNotBlank() } ?: return null
-        if (!MediaTarget.isDocument(value)) return value
+        if (!isDocumentUri(value)) return value
         val id = runCatching { java.net.URLDecoder.decode(value.substringAfterLast('/'), "UTF-8") }
             .getOrDefault(value.substringAfterLast('/'))
         return id.substringAfter(':').takeIf { it.isNotBlank() } ?: id
@@ -188,3 +188,7 @@ object StorageAccess {
         return ext.takeIf { it.isNotBlank() && it.length <= 4 } ?: "mp4"
     }
 }
+
+/** A stored path that is a SAF document URI (mirrors the old MediaTarget.isDocument rule). */
+private fun isDocumentUri(stored: String?): Boolean =
+    stored != null && stored.startsWith("content://", ignoreCase = true)

@@ -36,16 +36,6 @@ class ContentHashV43Test {
         drmConfig = drmConfig,
     )
 
-    private fun movie(manifestType: String? = null, drmConfig: String? = null, httpHeaders: String? = null) =
-        MovieEntity(
-            sourceId = 1L,
-            name = "A Film",
-            streamUrl = "https://tv.example/movie/1",
-            manifestType = manifestType,
-            drmConfig = drmConfig,
-            httpHeaders = httpHeaders,
-        )
-
     // --- the no-rewrite guarantee ---
 
     /** The upgrade case: every existing row is NULL in both new columns, so every stored hash must be
@@ -57,17 +47,6 @@ class ContentHashV43Test {
             plain.sourceId, plain.categoryId, plain.name, plain.logoUrl, plain.streamUrl,
             plain.epgChannelId, plain.number, plain.remoteId, plain.catchup, plain.catchupDays,
             plain.catchupSource,
-        )
-        assertEquals(expectedBase, plain.computeContentHash())
-    }
-
-    @Test
-    fun `a movie with no manifest type hashes exactly as the base`() {
-        val plain = movie()
-        val expectedBase = java.util.Objects.hash(
-            plain.sourceId, plain.categoryId, plain.name, plain.posterUrl, plain.backdropUrl,
-            plain.year, plain.rating, plain.durationSecs, plain.plot, plain.streamUrl,
-            plain.containerExt, plain.remoteId, plain.addedAt,
         )
         assertEquals(expectedBase, plain.computeContentHash())
     }
@@ -133,18 +112,4 @@ class ContentHashV43Test {
         )
     }
 
-    @Test
-    fun `declaring a manifest type changes a movie hash`() {
-        assertNotEquals(movie().computeContentHash(), movie(manifestType = "mpd").computeContentHash())
-    }
-
-    /** A declaration must not be swallowed by a licence that is also present. */
-    @Test
-    fun `a movie manifest type still propagates alongside drm`() {
-        val drm = """{"scheme":"widevine","license":"https://h/k"}"""
-        assertNotEquals(
-            movie(drmConfig = drm).computeContentHash(),
-            movie(drmConfig = drm, manifestType = "mpd").computeContentHash(),
-        )
-    }
 }

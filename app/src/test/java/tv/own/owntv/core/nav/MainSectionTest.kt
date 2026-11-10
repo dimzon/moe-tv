@@ -17,16 +17,24 @@ class MainSectionTest {
 
     @Test
     fun `dynamic mode always shows sports, with or without a playlist`() {
-        for (live in listOf(false, true)) for (movies in listOf(false, true)) for (series in listOf(false, true)) {
-            assertTrue(MainSection.SPORTS in MainSection.dynamicVisible(live, movies, series))
+        for (live in listOf(false, true)) {
+            assertTrue(MainSection.SPORTS in MainSection.dynamicVisible(live))
         }
-        assertEquals(setOf(MainSection.HOME, MainSection.SPORTS), MainSection.dynamicVisible(false, false, false))
+        assertEquals(setOf(MainSection.HOME, MainSection.SPORTS), MainSection.dynamicVisible(false))
+    }
+
+    @Test
+    fun `dynamic mode adds Live TV and the guide only with channels`() {
+        assertEquals(
+            setOf(MainSection.HOME, MainSection.SPORTS, MainSection.LIVE_TV, MainSection.EPG),
+            MainSection.dynamicVisible(true),
+        )
     }
 
     @Test
     fun `static mode hides sports only when the user hid it`() {
         // An existing user's hidden set never names SPORTS, so the update shows it.
-        assertTrue(MainSection.SPORTS in MainSection.staticVisible(setOf("MOVIES", "DOWNLOADS", "GONE")))
+        assertTrue(MainSection.SPORTS in MainSection.staticVisible(setOf("LIVE_TV", "GONE")))
         assertFalse(MainSection.SPORTS in MainSection.staticVisible(setOf("SPORTS")))
     }
 }

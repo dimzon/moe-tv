@@ -8,62 +8,31 @@ import androidx.room.TypeConverters
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.ContentOrderDao
-import tv.own.owntv.core.database.dao.DownloadDao
 import tv.own.owntv.core.database.dao.EpgDao
 import tv.own.owntv.core.database.dao.FavoriteDao
 import tv.own.owntv.core.database.dao.HistoryDao
-import tv.own.owntv.core.database.dao.MetadataDao
-import tv.own.owntv.core.database.dao.MovieDao
 import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.dao.PlaybackPrefsDao
-import tv.own.owntv.core.database.dao.ProgressDao
-import tv.own.owntv.core.database.dao.CatalogBackfillDao
-import tv.own.owntv.core.database.dao.RecordingDao
-import tv.own.owntv.core.database.dao.SeriesDao
-import tv.own.owntv.core.database.dao.SeriesSortOrderDao
 import tv.own.owntv.core.database.dao.TvProviderProgramDao
 import tv.own.owntv.core.database.dao.TombstoneDao
-import tv.own.owntv.core.database.dao.TrendingDao
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.CategoryEntity
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.ChannelFtsEntity
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.database.entity.CustomCategoryMemberEntity
-import tv.own.owntv.core.database.entity.DownloadEntity
 import tv.own.owntv.core.database.entity.EpgChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
-import tv.own.owntv.core.database.entity.EpisodeEntity
-import tv.own.owntv.core.database.entity.EpisodeFtsEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
-import tv.own.owntv.core.database.entity.MetadataCacheEntity
-import tv.own.owntv.core.database.entity.MetadataMatchEntity
-import tv.own.owntv.core.database.entity.MovieEntity
-import tv.own.owntv.core.database.entity.MovieFtsEntity
 import tv.own.owntv.core.database.entity.PlaybackPrefsEntity
 import tv.own.owntv.core.database.entity.PlaybackQuirkEntity
-import tv.own.owntv.core.database.entity.PlaybackProgressEntity
 import tv.own.owntv.core.database.entity.ProfileEntity
 import tv.own.owntv.core.database.entity.ProfileSourceCrossRef
-import tv.own.owntv.core.database.entity.CatalogBackfillEntity
-import tv.own.owntv.core.database.entity.RecordingEntity
-import tv.own.owntv.core.database.entity.RecordingRuleEntity
-import tv.own.owntv.core.database.entity.SeasonEntity
-import tv.own.owntv.core.database.entity.SeriesEntity
-import tv.own.owntv.core.database.entity.SeriesFtsEntity
-import tv.own.owntv.core.database.entity.SeriesSortOrderEntity
 import tv.own.owntv.core.database.entity.SourceEntity
-import tv.own.owntv.core.database.entity.SubtitleCacheEntity
-import tv.own.owntv.core.database.entity.SubtitleLinkEntity
-import tv.own.owntv.core.database.entity.SubtitleSelectionEntity
-import tv.own.owntv.core.database.entity.SubtitleTimingEntity
 import tv.own.owntv.core.database.entity.UserDataTombstoneEntity
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
 import tv.own.owntv.core.database.entity.TvProviderProgramEntity
-import tv.own.owntv.core.database.entity.TrendingItemEntity
-import tv.own.owntv.core.database.entity.TrendingSnapshotEntity
 import tv.own.owntv.core.database.dao.CustomCategoryDao
-import tv.own.owntv.core.database.dao.SubtitleDao
 
 @Database(
     entities = [
@@ -74,28 +43,18 @@ import tv.own.owntv.core.database.dao.SubtitleDao
         // Content
         CategoryEntity::class,
         ChannelEntity::class,
-        MovieEntity::class,
-        SeriesEntity::class,
-        SeasonEntity::class,
-        EpisodeEntity::class,
         // User data (profile-scoped)
         FavoriteEntity::class,
         WatchHistoryEntity::class,
-        PlaybackProgressEntity::class,
         ContentOrderEntity::class,
         CustomCategoryMemberEntity::class,
         PlaybackPrefsEntity::class,
         // What a stream needs, shared by every profile (v44)
         PlaybackQuirkEntity::class,
-        SeriesSortOrderEntity::class,
         UserDataTombstoneEntity::class,
-        DownloadEntity::class,
         // Live recordings and the standing rules that create them (v39). Never synced, never
         // backed up.
-        RecordingEntity::class,
         // Stalker outstanding pages
-        CatalogBackfillEntity::class,
-        RecordingRuleEntity::class,
         // Programme reminders (v47). Never synced, never backed up — they last hours or days.
         tv.own.owntv.core.database.entity.ReminderEntity::class,
         // Android TV home-screen bookkeeping
@@ -104,23 +63,11 @@ import tv.own.owntv.core.database.dao.SubtitleDao
         EpgChannelEntity::class,
         EpgProgrammeEntity::class,
         // TMDB metadata enrichment cache
-        MetadataCacheEntity::class,
-        MetadataMatchEntity::class,
-        // Source-scoped, locally matched TMDB Trending showcase cache (v30).
-        TrendingSnapshotEntity::class,
-        TrendingItemEntity::class,
         // External subtitles (OpenSubtitles / local files)
-        SubtitleCacheEntity::class,
-        SubtitleSelectionEntity::class,
-        SubtitleTimingEntity::class,
-        SubtitleLinkEntity::class,
         // FTS (search)
         ChannelFtsEntity::class,
-        MovieFtsEntity::class,
-        SeriesFtsEntity::class,
-        EpisodeFtsEntity::class,
     ],
-    version = 56, // v7: content_order (Move). v8: contentHash + browse/unique indexes. v9: EPG contentHash + natural key. v10: TMDB metadata cache. v11: movies/series rating-sort indexes. v12: metadata_cache trailerKey. v13: metadata_cache logoPath. v14: sources.mac (Stalker portal). v15: external-subtitle cache/selection/timing tables. v16: subtitle_link (downloaded-sub ↔ content). v17: sources.syncLive/Movies/Series (skip-sync enabledScope). v18: series.episodesSyncedAt (episode-cache freshness). v19: epg_channels.iconUrl (XMLTV channel logos). v20: channels (sourceId, number) index for direct tune. v21: series.addedAt + date-added sort indexes. v22: series_sort_order (per-series season/episode order). v23: sources.hlsSupported and sources.preferHls. v24: custom_category_members (user custom categories). v25: sources.livePrerollSecs (per-playlist "Pre-buffer"). v26: channels.catchupType + channels.httpHeaders (M3U catch-up styles + per-channel HTTP headers). v27: sources.maxConnections (Xtream session limit read at sync). v28: movies.httpHeaders + episodes.httpHeaders (per-item M3U HTTP headers). v29: optional Stalker serial/device IDs/signature. v30: source-scoped Now Trending snapshots. v31: indexed provider-title metadata and persistent Trending attempt state. v32: playback_prefs (per-item zoom + volume, keyed by the stable content key). v33: channels/movies/episodes drmConfig (M3U Widevine/ClearKey licence details). v34: sources.liveEnginePreference + sources.liveLatencyMode/liveLatencyCustomSecs (per-playlist Live TV engine and Live latency). v35: playback_prefs.audioDelayMs (per-item A/V-sync memory). v36: user_data_tombstones (deleted favorites/history/resume/memberships, so local sync propagates a deletion instead of undoing it). v37: episodes.airDateMs + metadata_cache.airDate (when an episode first aired — the provider's date, with TMDB's as the fallback) profiles.avatarPath (a picture of the user's own instead of a drawn tile). v38: sources.importPortalEpg (whether a Stalker portal's own guide may be imported). v39: recordings + recording_rules (live recording and its standing "record every showing" rules; never synced, never backed up). v40: sources.maxConnectionsProbedAt (when the app measured how many streams the provider really allows, for the providers that never say). v41: epg_channels.normName/normId (the matcher's normalized forms, stored at sync instead of recomputed per keystroke) and an epg_programmes (startMs, stopMs) index for time-bounded guide reads. v42: catalog_backfill (the Stalker VOD pages setup deliberately did not fetch, drained in the background). v43: channels/movies/episodes manifestType (the container an M3U entry declares via #KODIPROP:…manifest_type) and channels.directSource (the Xtream panel’s own URL, kept as a last-resort retry only). v44: playback_quirks (what a stream needs, shared by all profiles), playback_prefs.sourceId/audioLang/subtitleLang, and five per-playlist overrides on sources (catch-up zone/offset, VOD engine, tune timeout, Referer). v45: metadata_cache.originalLanguage (TMDB's original language, for the "Original language" audio choice). v46: playback_quirks.softwareDecode dropped (never written). v47: epg_programmes details (categories, year, rating, lengthMin, episode — the XMLTV details line) and programme_reminders. v48: downloads.reason/httpCode (why a download failed, waits or was paused). v49: sources.serverTimeZone (the Xtream panel's own zone, catch-up Automatic) and channels.catchupCorrectionMin (M3U catchup-correction). v50: epg_programmes (sourceId) and (sourceId, epgChannelId) indexes dropped (the natural key covers both; each slowed every guide write). v51: sources.cleanChannelNames/channelNameStrip (per-playlist "Clean channel names") and channels.providerName (the raw name, for guide matching). v52: the single-column channels/movies/series (sourceId) and (categoryId) indexes and channels (name) dropped (composites starting with the same column serve every query; each slowed every catalogue write). v53: sources.ignoreConnectionLimit (per-playlist "Ignore connection limit": Multiview and recordings stop counting the provider's stream limit). v54: SourceType.RUTUBE (built-in RuTube source, stored by name; no DDL change). v55: channels.isPaid (per-channel RuTube subscription flag; the live catalogue reports is_paid=false, subscription packages are the real signal). v56: playback_quirks.enginePin and sources.vodEnginePreference dropped (the second playback engine is gone — live plays on ExoPlayer only).
+    version = 57, // v7: content_order (Move). v8: contentHash + browse/unique indexes. v9: EPG contentHash + natural key. v10: TMDB metadata cache. v11: movies/series rating-sort indexes. v12: metadata_cache trailerKey. v13: metadata_cache logoPath. v14: sources.mac (Stalker portal). v15: external-subtitle cache/selection/timing tables. v16: subtitle_link (downloaded-sub ↔ content). v17: sources.syncLive/Movies/Series (skip-sync enabledScope). v18: series.episodesSyncedAt (episode-cache freshness). v19: epg_channels.iconUrl (XMLTV channel logos). v20: channels (sourceId, number) index for direct tune. v21: series.addedAt + date-added sort indexes. v22: series_sort_order (per-series season/episode order). v23: sources.hlsSupported and sources.preferHls. v24: custom_category_members (user custom categories). v25: sources.livePrerollSecs (per-playlist "Pre-buffer"). v26: channels.catchupType + channels.httpHeaders (M3U catch-up styles + per-channel HTTP headers). v27: sources.maxConnections (Xtream session limit read at sync). v28: movies.httpHeaders + episodes.httpHeaders (per-item M3U HTTP headers). v29: optional Stalker serial/device IDs/signature. v30: source-scoped Now Trending snapshots. v31: indexed provider-title metadata and persistent Trending attempt state. v32: playback_prefs (per-item zoom + volume, keyed by the stable content key). v33: channels/movies/episodes drmConfig (M3U Widevine/ClearKey licence details). v34: sources.liveEnginePreference + sources.liveLatencyMode/liveLatencyCustomSecs (per-playlist Live TV engine and Live latency). v35: playback_prefs.audioDelayMs (per-item A/V-sync memory). v36: user_data_tombstones (deleted favorites/history/resume/memberships, so local sync propagates a deletion instead of undoing it). v37: episodes.airDateMs + metadata_cache.airDate (when an episode first aired — the provider's date, with TMDB's as the fallback) profiles.avatarPath (a picture of the user's own instead of a drawn tile). v38: sources.importPortalEpg (whether a Stalker portal's own guide may be imported). v39: recordings + recording_rules (live recording and its standing "record every showing" rules; never synced, never backed up). v40: sources.maxConnectionsProbedAt (when the app measured how many streams the provider really allows, for the providers that never say). v41: epg_channels.normName/normId (the matcher's normalized forms, stored at sync instead of recomputed per keystroke) and an epg_programmes (startMs, stopMs) index for time-bounded guide reads. v42: catalog_backfill (the Stalker VOD pages setup deliberately did not fetch, drained in the background). v43: channels/movies/episodes manifestType (the container an M3U entry declares via #KODIPROP:…manifest_type) and channels.directSource (the Xtream panel’s own URL, kept as a last-resort retry only). v44: playback_quirks (what a stream needs, shared by all profiles), playback_prefs.sourceId/audioLang/subtitleLang, and five per-playlist overrides on sources (catch-up zone/offset, VOD engine, tune timeout, Referer). v45: metadata_cache.originalLanguage (TMDB's original language, for the "Original language" audio choice). v46: playback_quirks.softwareDecode dropped (never written). v47: epg_programmes details (categories, year, rating, lengthMin, episode — the XMLTV details line) and programme_reminders. v48: downloads.reason/httpCode (why a download failed, waits or was paused). v49: sources.serverTimeZone (the Xtream panel's own zone, catch-up Automatic) and channels.catchupCorrectionMin (M3U catchup-correction). v50: epg_programmes (sourceId) and (sourceId, epgChannelId) indexes dropped (the natural key covers both; each slowed every guide write). v51: sources.cleanChannelNames/channelNameStrip (per-playlist "Clean channel names") and channels.providerName (the raw name, for guide matching). v52: the single-column channels/movies/series (sourceId) and (categoryId) indexes and channels (name) dropped (composites starting with the same column serve every query; each slowed every catalogue write). v53: sources.ignoreConnectionLimit (per-playlist "Ignore connection limit": Multiview and recordings stop counting the provider's stream limit). v54: SourceType.RUTUBE (built-in RuTube source, stored by name; no DDL change). v55: channels.isPaid (per-channel RuTube subscription flag; the live catalogue reports is_paid=false, subscription packages are the real signal). v56: playback_quirks.enginePin and sources.vodEnginePreference dropped (the second playback engine is gone — live plays on ExoPlayer only). v57: VOD tables dropped with the features (movies/series/seasons/episodes + their FTS, metadata cache/matches, trending snapshots/items, recordings + rules, catalog_backfill, subtitle tables, playback_progress, downloads, series_sort_order) — the app is live-only.
 
     exportSchema = true,
 )
@@ -131,26 +78,16 @@ abstract class OwnTVDatabase : RoomDatabase() {
     abstract fun sourceDao(): SourceDao
     abstract fun categoryDao(): CategoryDao
     abstract fun channelDao(): ChannelDao
-    abstract fun movieDao(): MovieDao
-    abstract fun seriesDao(): SeriesDao
     abstract fun favoriteDao(): FavoriteDao
     abstract fun historyDao(): HistoryDao
-    abstract fun progressDao(): ProgressDao
     abstract fun contentOrderDao(): ContentOrderDao
     abstract fun playbackPrefsDao(): PlaybackPrefsDao
     abstract fun playbackQuirkDao(): tv.own.owntv.core.database.dao.PlaybackQuirkDao
     abstract fun customCategoryDao(): CustomCategoryDao
-    abstract fun seriesSortOrderDao(): SeriesSortOrderDao
     abstract fun tombstoneDao(): TombstoneDao
     abstract fun tvProviderProgramDao(): TvProviderProgramDao
-    abstract fun downloadDao(): DownloadDao
-    abstract fun recordingDao(): RecordingDao
     abstract fun reminderDao(): tv.own.owntv.core.database.dao.ReminderDao
-    abstract fun catalogBackfillDao(): CatalogBackfillDao
     abstract fun epgDao(): EpgDao
-    abstract fun metadataDao(): tv.own.owntv.core.database.dao.MetadataDao
-    abstract fun trendingDao(): TrendingDao
-    abstract fun subtitleDao(): SubtitleDao
 
     companion object {
         const val NAME = "owntv.db"
@@ -1499,6 +1436,7 @@ abstract class OwnTVDatabase : RoomDatabase() {
             MIGRATION_53_54,
             MIGRATION_54_55,
             MIGRATION_55_56,
+            MIGRATION_56_57,
         )
 
         /**
@@ -1517,30 +1455,6 @@ abstract class OwnTVDatabase : RoomDatabase() {
                 "CREATE INDEX IF NOT EXISTS `index_channels_sourceId_sortOrder_name` ON `channels` (`sourceId`, `sortOrder`, `name`)",
                 "CREATE INDEX IF NOT EXISTS `index_channels_categoryId_sortOrder_name` ON `channels` (`categoryId`, `sortOrder`, `name`)",
                 "CREATE INDEX IF NOT EXISTS `index_channels_sourceId_number` ON `channels` (`sourceId`, `number`)",
-            ),
-            "movies" to listOf(
-                "CREATE INDEX IF NOT EXISTS `index_movies_name` ON `movies` (`name`)",
-                "CREATE INDEX IF NOT EXISTS `index_movies_sourceId_name` ON `movies` (`sourceId`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_movies_categoryId_name` ON `movies` (`categoryId`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_movies_sourceId_sortOrder_name` ON `movies` (`sourceId`, `sortOrder`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_movies_categoryId_sortOrder_name` ON `movies` (`categoryId`, `sortOrder`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_movies_sourceId_rating_name` ON `movies` (`sourceId`, `rating`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_movies_categoryId_rating_name` ON `movies` (`categoryId`, `rating`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_movies_sourceId_addedAt_sortOrder` ON `movies` (`sourceId`, `addedAt`, `sortOrder`)",
-                "CREATE INDEX IF NOT EXISTS `index_movies_categoryId_addedAt_sortOrder` ON `movies` (`categoryId`, `addedAt`, `sortOrder`)",
-                "CREATE INDEX IF NOT EXISTS `index_movies_sourceId_titleSignature_parsedYear` ON `movies` (`sourceId`, `titleSignature`, `parsedYear`)",
-            ),
-            "series" to listOf(
-                "CREATE INDEX IF NOT EXISTS `index_series_name` ON `series` (`name`)",
-                "CREATE INDEX IF NOT EXISTS `index_series_sourceId_name` ON `series` (`sourceId`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_series_categoryId_name` ON `series` (`categoryId`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_series_sourceId_sortOrder_name` ON `series` (`sourceId`, `sortOrder`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_series_categoryId_sortOrder_name` ON `series` (`categoryId`, `sortOrder`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_series_sourceId_rating_name` ON `series` (`sourceId`, `rating`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_series_categoryId_rating_name` ON `series` (`categoryId`, `rating`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_series_sourceId_addedAt_sortOrder` ON `series` (`sourceId`, `addedAt`, `sortOrder`)",
-                "CREATE INDEX IF NOT EXISTS `index_series_categoryId_addedAt_sortOrder` ON `series` (`categoryId`, `addedAt`, `sortOrder`)",
-                "CREATE INDEX IF NOT EXISTS `index_series_sourceId_titleSignature_parsedYear` ON `series` (`sourceId`, `titleSignature`, `parsedYear`)",
             ),
             "epg_programmes" to listOf(
                 "CREATE INDEX IF NOT EXISTS `index_epg_programmes_epgChannelId_startMs` ON `epg_programmes` (`epgChannelId`, `startMs`)",
@@ -1561,9 +1475,6 @@ abstract class OwnTVDatabase : RoomDatabase() {
         // internal, not private: the migration test asserts healSchema restores every entry.
         internal val EXPECTED_FTS_TABLES: Map<String, String> = mapOf(
             "channels_fts" to "CREATE VIRTUAL TABLE IF NOT EXISTS `channels_fts` USING FTS4(`name` TEXT NOT NULL, content=`channels`)",
-            "movies_fts" to "CREATE VIRTUAL TABLE IF NOT EXISTS `movies_fts` USING FTS4(`name` TEXT NOT NULL, content=`movies`)",
-            "series_fts" to "CREATE VIRTUAL TABLE IF NOT EXISTS `series_fts` USING FTS4(`name` TEXT NOT NULL, content=`series`)",
-            "episodes_fts" to "CREATE VIRTUAL TABLE IF NOT EXISTS `episodes_fts` USING FTS4(`name` TEXT NOT NULL, content=`episodes`)",
         )
 
         /**

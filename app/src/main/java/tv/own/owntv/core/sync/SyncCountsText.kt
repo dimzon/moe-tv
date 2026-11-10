@@ -10,12 +10,10 @@ import tv.own.myowntv.R
  * once here and each app decides only where to put them.
  */
 
-/** "12K channels · 4.1K movies" — the parts a caller wants, joined. Empty when nothing arrived. */
+/** "12K channels" — the parts a caller wants, joined. Empty when nothing arrived. */
 fun SyncCounts.breakdownText(res: Resources, includeEpg: Boolean = false): String {
     val parts = buildList {
         if (channels > 0) add(res.getQuantityString(R.plurals.sync_count_channels, channels, compactCount(res, channels)))
-        if (movies > 0) add(res.getQuantityString(R.plurals.sync_count_movies, movies, compactCount(res, movies)))
-        if (series > 0) add(res.getQuantityString(R.plurals.sync_count_series, series, compactCount(res, series)))
         if (includeEpg && epg > 0) add(res.getQuantityString(R.plurals.sync_count_epg, epg, compactCount(res, epg)))
     }
     return parts.joinToString(res.getString(R.string.sync_counts_separator))
@@ -35,8 +33,6 @@ fun SyncCounts.summaryText(res: Resources, includeEpg: Boolean = false): String 
 fun SyncProgressCounts.displayText(res: Resources): String {
     val parts = buildList {
         if (liveActive && live > 0) add(res.getQuantityString(R.plurals.sync_count_channels, live, compactCount(res, live)))
-        if (moviesActive && movies > 0) add(res.getQuantityString(R.plurals.sync_count_movies, movies, compactCount(res, movies)))
-        if (seriesActive && series > 0) add(res.getQuantityString(R.plurals.sync_count_series, series, compactCount(res, series)))
     }
     return parts.joinToString(res.getString(R.string.sync_counts_separator))
 }
@@ -70,8 +66,6 @@ fun SyncProgressDisplay.detailText(res: Resources): String = when (phase) {
 
 fun SyncWarning.labelText(res: Resources): String = when (phase.trim().uppercase()) {
     SyncPhase.LIVE.name -> res.getString(R.string.sync_phase_live)
-    SyncPhase.MOVIES.name -> res.getString(R.string.sync_phase_movies)
-    SyncPhase.SERIES.name -> res.getString(R.string.sync_phase_series)
     else -> phase.replaceFirstChar { it.uppercase() }
 }
 

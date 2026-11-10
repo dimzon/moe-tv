@@ -103,7 +103,7 @@ class ProbeChannelSource(
      *
      * An M3U *is* the catalogue, and large ones run to hundreds of thousands of entries, so this
      * closes the connection the moment it has enough rather than downloading the file twice — once to
-     * measure and once to sync. VOD-looking entries are skipped where possible: a live channel is the
+     * measure and once to sync. The app is live-only, so the file's entries are live channels: the
      * closest thing to what the user will actually do with the connection.
      */
     private suspend fun m3uUrls(source: SourceEntity, count: Int): List<String> {
@@ -111,9 +111,7 @@ class ProbeChannelSource(
         runCatching {
             http.get(source.url, source.userAgent) { input ->
                 M3uParser().parse(input) { entry ->
-                    val looksVod = entry.type?.contains(VOD, ignoreCase = true) == true ||
-                        entry.tvgType?.contains(VOD, ignoreCase = true) == true
-                    if (!looksVod && entry.streamUrl.startsWith(HTTP, ignoreCase = true)) urls += entry.streamUrl
+                    if (entry.streamUrl.startsWith(HTTP, ignoreCase = true)) urls += entry.streamUrl
                     if (urls.size >= count) throw StopCollecting()
                 }
             }
@@ -133,7 +131,6 @@ class ProbeChannelSource(
          */
         const val MAX_CANDIDATES = MAX_PROBE_STREAMS * 2
 
-        const val VOD = "vod"
         const val HTTP = "http"
     }
 }

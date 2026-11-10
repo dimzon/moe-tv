@@ -454,40 +454,13 @@
             android:noHistory="true"
             android:theme="@android:style/Theme.NoDisplay" />
 
-        <!-- Read-only URI for generated logo files used by Google TV Home rows. Disabled until
-             the first file is written. -->
-        <provider
-            android:name="tv.own.owntv.core.tv.LiveLogoArtProvider"
-            android:authorities="${applicationId}.owntv-live-logo-art"
-            android:enabled="false"
-            android:exported="true" />
-
-        <!-- WorkManager's foreground-service host: data sync (downloads) and media playback
-             (recordings) both run in it. -->
+        <!-- WorkManager's foreground-service host: data sync (catalog/EPG sync). -->
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
-            android:foregroundServiceType="dataSync|mediaPlayback"
+            android:foregroundServiceType="dataSync"
             tools:node="merge" />
 
-        <!-- Recording timers and their boot re-arm. -->
-        <receiver
-            android:name="tv.own.owntv.core.recording.RecordingAlarmReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="tv.own.owntv.core.action.RECORDING_DUE" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name="tv.own.owntv.core.recording.RecordingBootReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
-            </intent-filter>
-        </receiver>
-
-        <!-- Programme reminders: the same pair as recordings. -->
+        <!-- Programme reminders and their boot re-arm. -->
         <receiver
             android:name="tv.own.owntv.core.reminder.ReminderAlarmReceiver"
             android:exported="false">

@@ -115,8 +115,6 @@ internal object CompanionHtml {
         val syncXtreamHint = s(R.string.companion_sync_xtream_hint)
         val syncStalkerHint = s(R.string.companion_sync_stalker_hint)
         val live = s(R.string.setup_live_tv)
-        val movies = s(R.string.setup_movies)
-        val series = s(R.string.setup_series)
         val now = s(R.string.setup_now)
         val later = s(R.string.setup_later)
         val off = s(R.string.setup_off)
@@ -236,8 +234,6 @@ internal object CompanionHtml {
                 <p class="hint">${c.syncXtreamHint.h()}</p>
                 <div class="grid">
                   ${scopeSelect(c, "syncLive", c.live)}
-                  ${scopeSelect(c, "syncMovies", c.movies)}
-                  ${scopeSelect(c, "syncSeries", c.series)}
                 </div>
                 <input type="hidden" name="isDefault" value="false">
                 <label class="check"><input type="checkbox" name="isDefault" value="true"> ${c.defaultPlaylistLabel.h()}</label>
@@ -283,8 +279,6 @@ internal object CompanionHtml {
                 <p class="hint">${c.syncStalkerHint.h()}</p>
                 <div class="grid">
                   ${scopeSelect(c, "syncLive", c.live, "now")}
-                  ${scopeSelect(c, "syncMovies", c.movies, "later")}
-                  ${scopeSelect(c, "syncSeries", c.series, "later")}
                 </div>
                 <input type="hidden" name="isDefault" value="false">
                 <label class="check"><input type="checkbox" name="isDefault" value="true"> ${c.defaultPlaylistLabel.h()}</label>
@@ -505,64 +499,6 @@ internal object CompanionHtml {
               });
             </script>
         """.trimIndent()
-    }
-
-    /**
-     * One-field page: paste a TMDB API key and send it to the TV.
-     *
-     * The whole point is that a 32-character key is miserable to type on a remote, which is why
-     * almost nobody switches to their own key. TMDB's own signup is not mobile-optimised either, so
-     * the page links straight to the API settings page rather than making the user find it.
-     */
-    fun serviceConfigPage(context: Context, pin: String, openSubtitles: Boolean): String {
-        val title = context.getString(if (openSubtitles) R.string.settings_open_subtitles_setup_title else R.string.settings_metadata_remote_advanced)
-        val description = context.getString(if (openSubtitles) R.string.companion_open_subtitles_description else R.string.settings_metadata_remote_advanced_description)
-        val keyLabel = context.getString(if (openSubtitles) R.string.settings_open_subtitles_api_key else R.string.settings_tmdb_api_key)
-        val urlLabel = context.getString(R.string.settings_worker_server_url)
-        // OpenSubtitles is an account, not just a key: the credentials are the whole point of doing
-        // this from a browser instead of a remote. TMDB has no account, so it keeps the two fields.
-        val credentialFields = if (!openSubtitles) "" else """
-                <label>${context.getString(R.string.player_subtitles_username).h()} <input id="user" type="text" autocomplete="username" autocapitalize="off" spellcheck="false"></label>
-                <label>${context.getString(R.string.player_subtitles_password).h()} <input id="pass" type="password" autocomplete="current-password"></label>
-        """.trimIndent()
-        // Read back into the POST body only when the fields exist; '' keeps the TMDB body unchanged.
-        val credentialBody = if (!openSubtitles) "" else
-            ",username:(document.getElementById('user').value||''),password:(document.getElementById('pass').value||'')"
-        val send = context.getString(R.string.companion_send_to_tv)
-        val sending = context.getString(R.string.companion_sending)
-        val failed = context.getString(R.string.companion_upload_failed).replace("%1\$d", "__STATUS__")
-        val unreachable = context.getString(R.string.companion_could_not_reach)
-        return page(context, title, """
-            <div class="card">
-              <h1>${title.h()}</h1><p>${description.h()}</p>
-              <form id="f" onsubmit="return false">
-                $credentialFields
-                <label>${keyLabel.h()} <input id="key" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
-                <label>${urlLabel.h()} <input id="url" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://"></label>
-                <button class="go" id="send" type="submit">${send.h()}</button>
-              </form><p id="status" class="hint"></p>
-            </div>
-            <script>
-              var k=document.getElementById('key'),u=document.getElementById('url'),b=document.getElementById('send'),s=document.getElementById('status');
-              document.getElementById('f').addEventListener('submit',function(){
-                var body=new URLSearchParams({apiKey:(k.value||'').trim(),serverUrl:(u.value||'').trim()$credentialBody}).toString();
-                b.disabled=true;s.textContent=${sending.js()};
-                fetch('/serviceconfig?pin=$pin',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
-                  .then(function(res){if(res.ok){return res.text().then(function(t){document.open();document.write(t);document.close();});}b.disabled=false;s.textContent=${failed.js()}.replace('__STATUS__',String(res.status));})
-                  .catch(function(){b.disabled=false;s.textContent=${unreachable.js()};});return false;
-              });
-            </script>
-        """.trimIndent())
-    }
-
-    fun serviceConfigSentPage(context: Context, pin: String): String {
-        val c = Copy(context)
-        return page(context, c.savedTitle, """
-            <div class="card"><h1>${c.savedHeading.h()}</h1>
-              <p>${context.getString(R.string.companion_service_config_sent).h()}</p>
-              <p><a href="/?pin=$pin">${context.getString(R.string.companion_service_config_again).h()}</a></p>
-            </div>
-        """.trimIndent())
     }
 
     fun imageSentPage(context: Context, pin: String): String {

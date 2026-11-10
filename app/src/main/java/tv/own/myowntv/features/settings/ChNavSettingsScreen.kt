@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -265,13 +258,12 @@ fun ChNavSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             onDismiss = { dialog = ChNavDialog.NONE },
         )
         ChNavDialog.ACTION -> pendingBinding?.let { binding ->
-            // Movies/Series/Downloads actions still exist in the core enum (wave 2 prunes it) but the
-            // screens and their dispatch are gone, so they are not offered here. A stored binding to
-            // one of them still labels its row below until the user rebinds or resets it.
-            val liveActions = RemoteShortcutAction.entries.filter {
-                it != RemoteShortcutAction.OPEN_MOVIES &&
-                    it != RemoteShortcutAction.OPEN_SERIES &&
-                    it != RemoteShortcutAction.OPEN_DOWNLOADS
+            // The VOD destinations are gone, so their actions are never offered — only a binding
+            // saved before wave 2 can still name one.
+            val liveActions = RemoteShortcutAction.entries.filterNot {
+                it == RemoteShortcutAction.OPEN_MOVIES ||
+                    it == RemoteShortcutAction.OPEN_SERIES ||
+                    it == RemoteShortcutAction.OPEN_DOWNLOADS
             }
             val actionOptions = liveActions.map { it.name to remoteActionLabel(it) }
             PickerDialog(

@@ -8,9 +8,6 @@ import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import tv.own.owntv.core.CorePerf
@@ -23,7 +20,6 @@ import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgChannelEntity
-import tv.own.owntv.core.epg.ArchiveGuidePlan
 import tv.own.owntv.core.epg.EpgMatcher
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.database.entity.SourceEntity
@@ -155,121 +151,28 @@ class EpgRepository(
     }
 
     /**
-     * The guide ids whose **past** is worth keeping: every catch-up channel's own id, plus whatever a
-     * hand-made match points it at.
-     *
-     * The match half is the part that is easy to get wrong and expensive to get wrong. A matched
-     * catch-up channel reads its guide under a *different* id from its own `epgChannelId`, so a prune
-     * that consulted only the column would delete exactly the history that channel needs, and the
-     * user would find their archive empty on the channels they had bothered to fix by hand. Every
-     * profile's matches are consulted, for the same reason [neededEpgIds] consults them all.
-     *
-     * Resolved through [tv.own.owntv.core.customize.EpgMatchResolver], not the raw map, so a match
-     * made before a playlist was deleted and re-added still protects its history.
-     */
-    private suspend fun catchupGuideIds(): Set<String>? {
-        val ids = HashSet<String>()
-        val catchupChannels = runCatching { channelDao.allCatchupChannels() }.getOrElse {
-            Log.w("EpgRepository", "Unable to read catch-up channels — keeping all history this run", it)
-            return null
-        }
-        if (catchupChannels.isEmpty()) return emptySet()
-        catchupChannels.forEach { ch ->
-            ch.epgChannelId?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }?.let(ids::add)
-        }
-        try {
-            for (profile in db.profileDao().getAllOnce()) {
-                val resolver = customize.observe(profile.id, MediaType.LIVE).first().epgMatchResolver
-                catchupChannels.forEach { ch ->
-                    resolver.epgIdFor(ch)?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }?.let(ids::add)
-                }
-            }
-        } catch (c: CancellationException) {
-            throw c
-        } catch (e: Exception) {
-            // A hand-matched catch-up channel reads its guide under an id that is NOT its own column,
-            // so without the matches this set is incomplete — and pruning against an incomplete set
-            // deletes exactly the archive the user bothered to fix by hand. Decline to prune instead.
-            Log.w("EpgRepository", "Unable to read EPG matches — keeping all history this run", e)
-            return null
-        }
-        return ids
-    }
-
-    /**
-     * Drop finished programmes, keeping a full archive **only for channels that can replay it**.
-     *
-     * Seven days of history used to be kept for every channel. On a 7,083-channel lineup where a few
-     * hundred have catch-up, that is overwhelmingly history nobody can watch — and it is not free: it
-     * inflates every scan, every DISTINCT, the ANALYZE, the backup, and the prune itself, which was
-     * measured at 38.9 s of a 112 s sync on the maintainer's television.
-     *
-     * Everything else keeps [RECENT_PAST_MS], which is what the player overlay's "Before" slot and a
-     * just-finished programme need, and nothing more.
-     *
-     * The keep-set goes into a temporary table rather than an `IN (...)` list: it can run to thousands
-     * of ids, and SQLite rejects a statement with more than 999 bound parameters on older Android.
+     * Drop finished programmes, keeping only [RECENT_PAST_MS] of recent past — what a just-finished
+     * programme needs and nothing more. No channel can replay its history any more (the app is
+     * live-only since v57), so a longer archive window would be rows nobody can open.
      */
     private suspend fun pruneFinishedProgrammes(now: Long) = withContext(Dispatchers.IO) {
-        val archiveCutoff = now - WINDOW_BACK_MS
         val recentCutoff = now - RECENT_PAST_MS
         // Anything beyond the horizon the user asked for is dropped as well, so lowering "Guide days
         // to keep" actually frees the space rather than leaving orphaned rows the sync stops touching.
         runCatching { epgDao.pruneFuture(now + guideAheadMs()) }
             .onFailure { Log.w("EpgRepository", "Unable to prune beyond the guide horizon", it) }
-        // Beyond the archive window nothing is replayable, whatever the channel is.
-        epgDao.prune(archiveCutoff)
-
-        val keep = catchupGuideIds()
-        if (keep == null) {
-            // Could not work out which channels can replay their past. Deleting on a guess would take
-            // archives that cannot be re-downloaded, so this run keeps everything inside the archive
-            // window and tries again on the next sync. Costs disk; cannot cost data.
-            CorePerf.log { "epg_retention skipped=unknown-catchup archiveH=${WINDOW_BACK_MS / 3_600_000}" }
-            return@withContext
-        }
-        if (keep.isEmpty()) {
-            // No catch-up anywhere: nothing can replay anything, so keep only the recent past.
-            epgDao.prune(recentCutoff)
-            CorePerf.log { "epg_retention catchupIds=0 recentPastH=${RECENT_PAST_MS / 3_600_000}" }
-            return@withContext
-        }
-        db.useWriterConnection { connection ->
-            connection.execSQL("CREATE TEMP TABLE IF NOT EXISTS `epg_keep_history` (`epgChannelId` TEXT PRIMARY KEY NOT NULL)")
-            connection.execSQL("DELETE FROM `epg_keep_history`")
-            // Room's own transaction helper rather than hand-written BEGIN/COMMIT: this runs on a
-            // pooled connection that Room may already have in a transaction, and immediateTransaction
-            // handles the nesting.
-            connection.immediateTransaction {
-                usePrepared("INSERT OR IGNORE INTO `epg_keep_history` VALUES (?)") { statement ->
-                    keep.forEach {
-                        statement.clearBindings()
-                        statement.bindText(1, it)
-                        statement.step()
-                        statement.reset()
-                    }
-                }
-            }
-            connection.usePrepared(
-                "DELETE FROM `epg_programmes` WHERE `stopMs` < ? " +
-                    "AND `epgChannelId` NOT IN (SELECT `epgChannelId` FROM `epg_keep_history`)",
-            ) { statement ->
-                statement.bindLong(1, recentCutoff)
-                statement.step()
-            }
-            connection.execSQL("DROP TABLE IF EXISTS `epg_keep_history`")
-        }
-        CorePerf.log { "epg_retention catchupIds=${keep.size} recentPastH=${RECENT_PAST_MS / 3_600_000} archiveH=${WINDOW_BACK_MS / 3_600_000}" }
+        epgDao.prune(recentCutoff)
+        CorePerf.log { "epg_retention recentPastH=${RECENT_PAST_MS / 3_600_000}" }
     }
 
     /**
      * Per guide id, the earliest stop time a sync accepts — [pruneFinishedProgrammes]' rule, applied
-     * before writing instead of after. Unknown catch-up set: the whole window, as retention does.
+     * before writing instead of after. [archiveFrom] is unused now that no guide id keeps a longer
+     * past; the parameter stays so call sites read the same way.
      */
-    private suspend fun pastCutoff(now: Long, archiveFrom: Long): (String) -> Long {
-        val keep = catchupGuideIds() ?: return { archiveFrom }
+    private fun pastCutoff(now: Long, archiveFrom: Long): (String) -> Long {
         val recent = now - RECENT_PAST_MS
-        return { key -> if (key in keep) archiveFrom else recent }
+        return { _ -> recent }
     }
 
     /** The guide URL for a source, or null if it has no EPG feed. A manual EPG URL always wins. */
@@ -887,86 +790,6 @@ class EpgRepository(
 
     /** Per-source fingerprint of the last gap fill that found nothing — see [fillGuideGapsForSource]. */
     private val futileGapFills = java.util.concurrent.ConcurrentHashMap<Long, String>()
-
-    /** When each channel's archive schedule was last asked for — see [fillArchiveGuide]. Memory only. */
-    private val archiveTries = java.util.concurrent.ConcurrentHashMap<Long, Long>()
-
-    // Room for a whole queue of fills (ArchiveGuideFiller), so a slow collector misses no channel.
-    private val _archiveGuideAdded = MutableSharedFlow<Long>(extraBufferCapacity = 32)
-
-    /** Ids of channels whose past programmes [fillArchiveGuide] just changed, so an open guide can re-read them. */
-    internal val archiveGuideAdded: SharedFlow<Long> = _archiveGuideAdded.asSharedFlow()
-
-    /**
-     * Add the past of a catch-up Xtream [channel] that its guide feed does not carry, from the
-     * provider's own schedule of that channel ([XtreamClient.getArchiveSchedule]).
-     *
-     * Many `xmltv.php` feeds stop about a day back while the archive keeps up to a week, so most of
-     * what catch-up could replay never shows in the guide. One API call for one channel, at most once
-     * every few hours per channel ([ArchiveGuidePlan]). The rows only ever end where the feeds' own
-     * rows begin, and are stored under a guide store of their own ([ArchiveGuidePlan.storeId]): not
-     * the playlist's id, whose guide sync would delete them as missing from its feed. Being no EPG
-     * source, that store ranks below all of them ([tv.own.owntv.core.epg.GuidePriority]). Each fill
-     * replaces the channel's rows there as a whole. Retention keeps them, as the past of every
-     * catch-up channel is kept.
-     *
-     * Returns how many programmes the channel now has from its archive when they changed, 0 when
-     * they did not (or the request failed), and null when the provider was not asked at all (not a
-     * catch-up Xtream channel, or asked too recently), so a caller pacing its requests can skip ahead.
-     */
-    internal suspend fun fillArchiveGuide(channel: ChannelEntity, cust: SectionCustomizations): Int? = withContext(Dispatchers.IO) {
-        if (!channel.catchup) return@withContext null
-        val streamId = channel.remoteId?.takeIf { it.isNotBlank() } ?: return@withContext null
-        // Trimmed and lower-cased, the way the guide stores and reads its ids.
-        val key = epgKeyOf(channel, cust) ?: return@withContext null
-        val now = System.currentTimeMillis()
-        synchronized(archiveTries) {
-            if (!ArchiveGuidePlan.due(archiveTries[channel.id], now)) return@withContext null
-            archiveTries[channel.id] = now
-        }
-        val stored = try {
-            val source = sourceDao.getById(channel.sourceId)?.takeIf { it.type == SourceType.XTREAM }
-                ?: return@withContext null
-            val listings = xtream.getArchiveSchedule(source, streamId)
-            val from = ArchiveGuidePlan.windowStart(now, channel.catchupDays, WINDOW_BACK_MS)
-            val store = ArchiveGuidePlan.storeId(channel.sourceId)
-            val (own, feeds) = epgDao.programmeSummariesForChannel(key, from, Long.MAX_VALUE)
-                .partition { it.sourceId == store }
-            val keep = ArchiveGuidePlan.toStore(
-                listings,
-                guideStartMs = feeds.minOfOrNull { it.startMs },
-                windowStartMs = from,
-                nowMs = now,
-            )
-            val changed = ArchiveGuidePlan.changed(keep, own.map { it.startMs })
-            if (changed) {
-                own.map { it.id }.chunked(QUERY_CHUNK).forEach { epgDao.deleteProgrammesByIds(it) }
-                writeProgrammes(
-                    keep.map {
-                        EpgProgrammeEntity(
-                            sourceId = store,
-                            epgChannelId = key,
-                            startMs = it.startMs,
-                            stopMs = it.stopMs,
-                            title = it.title,
-                            description = it.description,
-                        ).let { p -> p.copy(contentHash = p.computeContentHash()) }
-                    },
-                )
-            }
-            Log.i("EpgRepository", "archive guide channelId=${channel.id} listed=${listings.size} kept=${keep.size} changed=$changed")
-            if (changed) _archiveGuideAdded.tryEmit(channel.id)
-            if (changed) keep.size else 0
-        } catch (c: CancellationException) {
-            throw c
-        } catch (e: Exception) {
-            // A provider that hiccuped is asked again sooner than one that answered.
-            archiveTries[channel.id] = ArchiveGuidePlan.failedAt(now)
-            Log.w("EpgRepository", "archive guide failed channelId=${channel.id}: ${e.javaClass.simpleName}")
-            0
-        }
-        stored
-    }
 
     /** Identifies the current set of usable cache files, so a new/refreshed guide invalidates a skip. */
     private fun cacheFingerprint(): String {

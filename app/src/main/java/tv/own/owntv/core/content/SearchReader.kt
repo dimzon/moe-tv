@@ -10,13 +10,9 @@ import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.ChannelSearchResult
 import tv.own.owntv.core.database.dao.EpgDao
-import tv.own.owntv.core.database.dao.MovieDao
 import tv.own.owntv.core.database.dao.ProfileDao
-import tv.own.owntv.core.database.dao.SeriesDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
-import tv.own.owntv.core.database.entity.MovieEntity
-import tv.own.owntv.core.database.entity.SeriesEntity
 import tv.own.owntv.core.epg.EpgDedupe
 import tv.own.owntv.core.epg.EpgShift
 import tv.own.owntv.core.live.epgKeyOf
@@ -24,36 +20,30 @@ import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.repository.ActiveProfileSources
 import tv.own.owntv.core.settings.SettingsRepository
 
-/** Combined results of a global query (each list bounded). */
+/** Combined results of a global query (each list bounded). Live-only. */
 @Immutable
 data class SearchResults(
     val channels: List<ChannelSearchResult> = emptyList(),
-    val movies: List<MovieEntity> = emptyList(),
-    val series: List<SeriesEntity> = emptyList(),
     /** Programmes on now or later today whose title matches, on now first. Only from a typed query. */
     val programmes: List<ProgrammeSearchResult> = emptyList(),
 ) {
-    val isEmpty: Boolean get() = channels.isEmpty() && movies.isEmpty() && series.isEmpty() && programmes.isEmpty()
+    val isEmpty: Boolean get() = channels.isEmpty() && programmes.isEmpty()
 
     /** How many results are of [kind] — the count each filter button shows. */
     fun count(kind: SearchKind): Int = when (kind) {
         SearchKind.LIVE -> channels.size
         SearchKind.TV_SHOWS -> programmes.size
-        SearchKind.MOVIES -> movies.size
-        SearchKind.SERIES -> series.size
     }
 
     /** Only the kinds in [kinds]. None picked is no filter at all: everything. */
     fun only(kinds: Set<SearchKind>): SearchResults = if (kinds.isEmpty()) this else SearchResults(
         channels = if (SearchKind.LIVE in kinds) channels else emptyList(),
-        movies = if (SearchKind.MOVIES in kinds) movies else emptyList(),
-        series = if (SearchKind.SERIES in kinds) series else emptyList(),
         programmes = if (SearchKind.TV_SHOWS in kinds) programmes else emptyList(),
     )
 }
 
 /** The search filter's buttons, each switched on and off on its own. TV shows are guide programmes. */
-enum class SearchKind { LIVE, TV_SHOWS, MOVIES, SERIES }
+enum class SearchKind { LIVE, TV_SHOWS }
 
 /** A programme found by its title, with the channel showing it; times are on the user's clock. */
 @Immutable
@@ -65,23 +55,20 @@ data class ProgrammeSearchResult(
 /** The curated lists offered when nothing has been typed yet. */
 enum class SearchIntent {
     CONTINUE,
-    UNWATCHED,
     CHANNELS,
 }
 
 /**
- * Searching a profile's channels, films and shows at once.
+ * Searching a profile's channels and guide programmes at once.
  *
  * The queries themselves are the DAOs'; what lives here is everything that decides *which* of their
  * rows a user may see — the FTS expression, the hidden items, the hidden categories, a kids
  * profile's adult filter, and the renames a user made in Customize. Two apps searching the same
- * database have to agree on all five, so it is written once rather than in each app's search screen.
+ * database have to agree on all of them, so it is written once rather than in each app's search screen.
  */
 class SearchReader(
     private val channelDao: ChannelDao,
     private val categoryDao: CategoryDao,
-    private val movieDao: MovieDao,
-    private val seriesDao: SeriesDao,
     private val profileDao: ProfileDao,
     private val customize: CustomizationStore,
     private val epgDao: EpgDao,
@@ -91,8 +78,8 @@ class SearchReader(
     /**
      * Results for a typed query, already filtered and renamed for [profileId].
      *
-     * [sources] is the profile's active playlists, per section, so a section switched Off never
-     * surfaces. Returns nothing at all when the profile has no sources — there is nothing to search.
+     * [sources] is the profile's active playlists, so a section switched Off never surfaces.
+     * Returns nothing at all when the profile has no sources — there is nothing to search.
      */
     suspend fun search(
         profileId: Long,
@@ -103,12 +90,8 @@ class SearchReader(
         if (profileId < 0 || !sources.hasAny) return SearchResults()
         val fts = ftsQuery(query)
         val custLive = customize.observeVisible(profileId, MediaType.LIVE).first()
-        val custMovie = customize.observeVisible(profileId, MediaType.MOVIE).first()
-        val custSeries = customize.observeVisible(profileId, MediaType.SERIES).first()
         val isKids = profileDao.getById(profileId)?.isKids == true
         val hiddenLiveCats = hiddenCategoryIds(sources.liveSourceIds, MediaType.LIVE, custLive, isKids)
-        val hiddenMovieCats = hiddenCategoryIds(sources.movieSourceIds, MediaType.MOVIE, custMovie, isKids)
-        val hiddenSeriesCats = hiddenCategoryIds(sources.seriesSourceIds, MediaType.SERIES, custSeries, isKids)
         return SearchResults(
             channels = if (sources.liveSourceIds.isEmpty()) emptyList() else
                 (
@@ -123,26 +106,6 @@ class SearchReader(
                         custLive.itemNames[CustomizeKeys.channel(row.channel)]
                             ?.let { row.copy(channel = row.channel.copy(name = it)) } ?: row
                     },
-            movies = if (sources.movieSourceIds.isEmpty()) emptyList() else
-                (
-                    if (fts != null) movieDao.searchListFts(fts, sources.movieSourceIds, limit)
-                    else movieDao.searchList(query, sources.movieSourceIds, limit)
-                    )
-                    .filter {
-                        CustomizeKeys.movie(it) !in custMovie.hiddenItems &&
-                            (it.categoryId == null || it.categoryId !in hiddenMovieCats)
-                    }
-                    .map { m -> custMovie.itemNames[CustomizeKeys.movie(m)]?.let { m.copy(name = it) } ?: m },
-            series = if (sources.seriesSourceIds.isEmpty()) emptyList() else
-                (
-                    if (fts != null) seriesDao.searchListFts(fts, sources.seriesSourceIds, limit)
-                    else seriesDao.searchList(query, sources.seriesSourceIds, limit)
-                    )
-                    .filter {
-                        CustomizeKeys.series(it) !in custSeries.hiddenItems &&
-                            (it.categoryId == null || it.categoryId !in hiddenSeriesCats)
-                    }
-                    .map { s -> custSeries.itemNames[CustomizeKeys.series(s)]?.let { s.copy(name = it) } ?: s },
             programmes = if (sources.liveSourceIds.isEmpty()) emptyList() else
                 programmes(query.trim(), sources.liveSourceIds, custLive, hiddenLiveCats),
         )
@@ -210,27 +173,11 @@ class SearchReader(
         if (profileId < 0 || !sources.hasAny) return SearchResults()
         // Curated lists never dropped user-hidden categories; only a locked one's items are kept out.
         val live = customize.observeVisible(profileId, MediaType.LIVE).first()
-        val movie = customize.observeVisible(profileId, MediaType.MOVIE).first()
-        val series = customize.observeVisible(profileId, MediaType.SERIES).first()
         return when (intent) {
             SearchIntent.CONTINUE -> SearchResults(
                 channels = channelDao.recentlyWatched(profileId, limit).first()
                     .filter { it.sourceId in sources.liveSourceIds && !live.sealsItemIn(it.categoryId) }
                     .map { ChannelSearchResult(it, null) },
-                movies = if (sources.movieSourceIds.isEmpty()) emptyList()
-                else movieDao.recentlyWatchedSnapshot(profileId, sources.movieSourceIds, limit)
-                    .filterNot { movie.sealsItemIn(it.categoryId) },
-                series = if (sources.seriesSourceIds.isEmpty()) emptyList()
-                else seriesDao.recentlyWatchedSnapshot(profileId, sources.seriesSourceIds, limit)
-                    .filterNot { series.sealsItemIn(it.categoryId) },
-            )
-            SearchIntent.UNWATCHED -> SearchResults(
-                movies = if (sources.movieSourceIds.isEmpty()) emptyList()
-                else movieDao.unwatchedFavorites(profileId, sources.movieSourceIds, limit)
-                    .filterNot { movie.sealsItemIn(it.categoryId) },
-                series = if (sources.seriesSourceIds.isEmpty()) emptyList()
-                else seriesDao.unwatchedFavorites(profileId, sources.seriesSourceIds, limit)
-                    .filterNot { series.sealsItemIn(it.categoryId) },
             )
             SearchIntent.CHANNELS -> SearchResults(
                 channels = channelDao.favoritesListAlpha(profileId).first()
@@ -262,8 +209,7 @@ class SearchReader(
 
         /**
          * How many rows of each kind a typed search returns. High enough that a title search lists
-         * every match ("Spider" found more than 40 films, and the rest were never shown); the cap is
-         * only for a two-letter query that matches most of a 170k-row catalogue.
+         * every match; the cap is only for a short query that matches most of a huge catalogue.
          */
         const val MATCH_LIMIT = 500
 
@@ -287,7 +233,7 @@ class SearchReader(
          * hyphen instead gave "SpiderM*", which no indexed word starts with.
          * Null when nothing tokenizable remains (symbols-only input) — the caller then falls back to
          * the substring LIKE queries. Prefix terms match word starts rather than mid-word substrings,
-         * which is the accepted trade-off for an index-served search over ~220k rows per keystroke.
+         * which is the accepted trade-off for an index-served search over a huge catalogue per keystroke.
          */
         fun ftsQuery(query: String): String? {
             val tokens = query.split(Regex("[^\\p{L}\\p{Nd}]+")).filter { it.isNotEmpty() }
@@ -299,4 +245,4 @@ class SearchReader(
 
 /** True when the profile has at least one playlist a search could look in. */
 private val ActiveProfileSources.hasAny: Boolean
-    get() = liveSourceIds.isNotEmpty() || movieSourceIds.isNotEmpty() || seriesSourceIds.isNotEmpty()
+    get() = liveSourceIds.isNotEmpty()

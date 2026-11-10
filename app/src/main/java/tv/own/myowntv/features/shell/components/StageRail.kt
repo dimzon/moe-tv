@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -150,7 +143,6 @@ data class NowPlayingRail(val logoUrl: String?, val audioMode: Boolean, val play
 /** The rail order: Search first, Sports then the Guide right after Live TV, More last. */
 private val StageRailOrder = listOf(
     MainSection.SEARCH, MainSection.HOME, MainSection.LIVE_TV, MainSection.SPORTS, MainSection.EPG,
-    MainSection.MOVIES, MainSection.SERIES, MainSection.DOWNLOADS,
 )
 
 /** The rail's width with names: Normal 280 · Wide 340 · Extra wide 400; Compact is the 84 capsule. */
@@ -376,9 +368,6 @@ private val MainSection.stageIcon: MyOwnTVIcon
         MainSection.LIVE_TV -> MyOwnTVIcon.LIVE_TV
         MainSection.EPG -> MyOwnTVIcon.EPG
         MainSection.SPORTS -> MyOwnTVIcon.SPORTS
-        MainSection.MOVIES -> MyOwnTVIcon.MOVIES
-        MainSection.SERIES -> MyOwnTVIcon.SERIES
-        MainSection.DOWNLOADS -> MyOwnTVIcon.DOWNLOADS
         MainSection.MORE, MainSection.SETTINGS -> MyOwnTVIcon.TILES
     }
 

@@ -4,15 +4,27 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import tv.own.owntv.core.database.entity.MovieEntity
-import tv.own.owntv.core.database.entity.SeriesEntity
+import tv.own.owntv.core.database.dao.ChannelSearchResult
+import tv.own.owntv.core.database.entity.ChannelEntity
+import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 
 /** The search filter buttons: each kind switched on and off on its own, none on meaning everything. */
 class SearchKindTest {
 
+    private val bbcOne = ChannelEntity(sourceId = 1, name = "BBC One", streamUrl = "u1")
+    private val channel = ChannelSearchResult(channel = bbcOne, categoryName = null)
+    private val otherChannel = ChannelSearchResult(
+        channel = ChannelEntity(sourceId = 1, name = "BBC Two", streamUrl = "u2"),
+        categoryName = null,
+    )
+    private val programme = ProgrammeSearchResult(
+        programme = EpgProgrammeEntity(sourceId = 1, epgChannelId = "bbc1", startMs = 0, stopMs = 1, title = "News"),
+        channel = bbcOne,
+    )
+
     private val results = SearchResults(
-        movies = listOf(MovieEntity(id = 1, sourceId = 1, name = "Heat", streamUrl = "u1"), MovieEntity(id = 2, sourceId = 1, name = "Ran", streamUrl = "u2")),
-        series = listOf(SeriesEntity(id = 3, sourceId = 1, name = "Dark")),
+        channels = listOf(channel, otherChannel),
+        programmes = listOf(programme),
     )
 
     @Test
@@ -22,20 +34,20 @@ class SearchKindTest {
 
     @Test
     fun oneKind_keepsOnlyThatKind() {
-        val movies = results.only(setOf(SearchKind.MOVIES))
-        assertEquals(results.movies, movies.movies)
-        assertTrue(movies.series.isEmpty())
+        val channels = results.only(setOf(SearchKind.LIVE))
+        assertEquals(results.channels, channels.channels)
+        assertTrue(channels.programmes.isEmpty())
     }
 
     @Test
     fun severalKinds_keepEachOfThem() {
-        val both = results.only(setOf(SearchKind.MOVIES, SearchKind.SERIES))
-        assertEquals(2, both.count(SearchKind.MOVIES))
-        assertEquals(1, both.count(SearchKind.SERIES))
+        val both = results.only(setOf(SearchKind.LIVE, SearchKind.TV_SHOWS))
+        assertEquals(2, both.count(SearchKind.LIVE))
+        assertEquals(1, both.count(SearchKind.TV_SHOWS))
     }
 
     @Test
     fun aKindWithNothingFound_leavesNothing() {
-        assertTrue(results.only(setOf(SearchKind.TV_SHOWS)).isEmpty)
+        assertTrue(SearchResults().only(setOf(SearchKind.TV_SHOWS)).isEmpty)
     }
 }

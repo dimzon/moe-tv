@@ -14,9 +14,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import tv.own.owntv.core.database.OwnTVDatabase
+import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
-import tv.own.owntv.core.database.entity.MovieEntity
-import tv.own.owntv.core.database.entity.PlaybackProgressEntity
 import tv.own.owntv.core.database.entity.ProfileEntity
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
@@ -32,7 +31,8 @@ import tv.own.owntv.core.model.SourceType
  * The failure mode is not a crash: it is a favorite quietly coming back from the dead on every sync,
  * for ever, which is exactly the kind of thing nobody reports as a bug and everybody stops trusting.
  *
- * Instrumentation, not JVM: the rule is expressed in DAO queries and a real transaction.
+ * Instrumentation, not JVM: the rule is expressed in DAO queries and a real transaction. The app is
+ * live-only, so channels are the content rows these records point at.
  */
 @RunWith(AndroidJUnit4::class)
 class UserDataTombstoneTest {
@@ -53,15 +53,11 @@ class UserDataTombstoneTest {
         resolver = UserDataResolver(
             context = context,
             channelDao = db.channelDao(),
-            movieDao = db.movieDao(),
-            seriesDao = db.seriesDao(),
             profileDao = db.profileDao(),
             favoriteDao = db.favoriteDao(),
             historyDao = db.historyDao(),
-            progressDao = db.progressDao(),
             contentOrderDao = db.contentOrderDao(),
             customCategoryDao = db.customCategoryDao(),
-            seriesSortOrderDao = db.seriesSortOrderDao(),
             tombstoneDao = db.tombstoneDao(),
             db = db,
         )
@@ -69,7 +65,6 @@ class UserDataTombstoneTest {
             db = db,
             favoriteDao = db.favoriteDao(),
             historyDao = db.historyDao(),
-            progressDao = db.progressDao(),
             customCategoryDao = db.customCategoryDao(),
             userData = resolver,
         )
@@ -89,10 +84,10 @@ class UserDataTombstoneTest {
     /** Unfavoriting records the deletion, so the other device can be told about it. */
     @Test
     fun removingAFavoriteRecordsADeletionThatTravels() = runBlocking {
-        val movieId = insertMovie("m-1", "Blade Runner")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = movieId, addedAt = 100))
+        val channelId = insertChannel("m-1", "BBC One")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
 
-        writer.removeFavorite(profileId, MediaType.MOVIE, movieId)
+        writer.removeFavorite(profileId, MediaType.LIVE, channelId)
 
         assertEquals(0, db.favoriteDao().getAllOnce().size)
         val exported = resolver.exportTombstones(setOf("fav"))
@@ -106,12 +101,12 @@ class UserDataTombstoneTest {
      */
     @Test
     fun anIncomingFavoriteOlderThanTheDeletionIsNotReinstated() = runBlocking {
-        val movieId = insertMovie("m-1", "Blade Runner")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = movieId, addedAt = 100))
-        writer.removeFavorite(profileId, MediaType.MOVIE, movieId)
+        val channelId = insertChannel("m-1", "BBC One")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
+        writer.removeFavorite(profileId, MediaType.LIVE, channelId)
 
         // What the other device sends: the same favorite, as it was before the deletion.
-        resolver.importAll(incomingFavorites(movieId, at = 100))
+        resolver.importAll(incomingFavorites(channelId, at = 100))
 
         assertEquals("a deleted favorite came back", 0, db.favoriteDao().getAllOnce().size)
     }
@@ -126,12 +121,12 @@ class UserDataTombstoneTest {
      */
     @Test
     fun aRestoreReinstatesWhatADeletionWouldHaveRefused() = runBlocking {
-        val movieId = insertMovie("m-1", "Blade Runner")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = movieId, addedAt = 100))
-        writer.removeFavorite(profileId, MediaType.MOVIE, movieId)
+        val channelId = insertChannel("m-1", "BBC One")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
+        writer.removeFavorite(profileId, MediaType.LIVE, channelId)
 
         resolver.clearDeletionsFor(listOf(profileId))
-        val refused = resolver.importAll(incomingFavorites(movieId, at = 100))
+        val refused = resolver.importAll(incomingFavorites(channelId, at = 100))
 
         assertEquals("a restore refused a record", 0, refused)
         assertEquals("the restore did not bring the favorite back", 1, db.favoriteDao().getAllOnce().size)
@@ -143,26 +138,26 @@ class UserDataTombstoneTest {
      */
     @Test
     fun aRestoreLeavesNoMarkerForTheNextSyncToActOn() = runBlocking {
-        val movieId = insertMovie("m-1", "Blade Runner")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = movieId, addedAt = 100))
-        writer.removeFavorite(profileId, MediaType.MOVIE, movieId)
+        val channelId = insertChannel("m-1", "BBC One")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
+        writer.removeFavorite(profileId, MediaType.LIVE, channelId)
         resolver.clearDeletionsFor(listOf(profileId))
-        resolver.importAll(incomingFavorites(movieId, at = 100))
+        resolver.importAll(incomingFavorites(channelId, at = 100))
 
         assertEquals(0, resolver.exportTombstones(setOf("fav")).length())
         // The same record arriving again from the other device must now be a no-op, not a deletion.
-        resolver.importAll(incomingFavorites(movieId, at = 100))
+        resolver.importAll(incomingFavorites(channelId, at = 100))
         assertEquals(1, db.favoriteDao().getAllOnce().size)
     }
 
     /** A merge is untouched by the above: it still refuses, and now says so instead of staying mute. */
     @Test
     fun aMergeStillRefusesAndReportsTheCount() = runBlocking {
-        val movieId = insertMovie("m-1", "Blade Runner")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = movieId, addedAt = 100))
-        writer.removeFavorite(profileId, MediaType.MOVIE, movieId)
+        val channelId = insertChannel("m-1", "BBC One")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
+        writer.removeFavorite(profileId, MediaType.LIVE, channelId)
 
-        val refused = resolver.importAll(incomingFavorites(movieId, at = 100))
+        val refused = resolver.importAll(incomingFavorites(channelId, at = 100))
 
         assertEquals("the refusal was not reported", 1, refused)
         assertEquals(0, db.favoriteDao().getAllOnce().size)
@@ -172,9 +167,9 @@ class UserDataTombstoneTest {
     @Test
     fun aRestoreLeavesOtherProfilesDeletionsAlone() = runBlocking {
         val otherId = db.profileDao().insert(ProfileEntity(name = "Guest", avatarColor = 0x778899))
-        val movieId = insertMovie("m-1", "Blade Runner")
-        db.favoriteDao().add(FavoriteEntity(profileId = otherId, mediaType = MediaType.MOVIE, itemId = movieId, addedAt = 100))
-        writer.removeFavorite(otherId, MediaType.MOVIE, movieId)
+        val channelId = insertChannel("m-1", "BBC One")
+        db.favoriteDao().add(FavoriteEntity(profileId = otherId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
+        writer.removeFavorite(otherId, MediaType.LIVE, channelId)
 
         resolver.clearDeletionsFor(listOf(profileId)) // restoring the OTHER profile's file
 
@@ -184,11 +179,11 @@ class UserDataTombstoneTest {
     /** The opposite direction: favoriting it again afterwards is newer, and must survive a sync. */
     @Test
     fun anIncomingFavoriteNewerThanTheDeletionIsApplied() = runBlocking {
-        val movieId = insertMovie("m-1", "Blade Runner")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = movieId, addedAt = 100))
-        writer.removeFavorite(profileId, MediaType.MOVIE, movieId)
+        val channelId = insertChannel("m-1", "BBC One")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
+        writer.removeFavorite(profileId, MediaType.LIVE, channelId)
 
-        resolver.importAll(incomingFavorites(movieId, at = System.currentTimeMillis() + 60_000))
+        resolver.importAll(incomingFavorites(channelId, at = System.currentTimeMillis() + 60_000))
 
         assertEquals(1, db.favoriteDao().getAllOnce().size)
     }
@@ -196,10 +191,10 @@ class UserDataTombstoneTest {
     /** A deletion arriving from the other device removes the local row when the local row is older. */
     @Test
     fun anIncomingDeletionRemovesTheLocalRow() = runBlocking {
-        val movieId = insertMovie("m-1", "Blade Runner")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = movieId, addedAt = 100))
+        val channelId = insertChannel("m-1", "BBC One")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
 
-        val applied = resolver.applyTombstones(incomingDeletion(movieId, at = 200))
+        val applied = resolver.applyTombstones(incomingDeletion(channelId, at = 200))
 
         assertEquals(1, applied)
         assertEquals(0, db.favoriteDao().getAllOnce().size)
@@ -208,10 +203,10 @@ class UserDataTombstoneTest {
     /** ...and leaves it alone when the user re-added it here after the other device deleted it. */
     @Test
     fun anIncomingDeletionOlderThanTheLocalRowLeavesItAlone() = runBlocking {
-        val movieId = insertMovie("m-1", "Blade Runner")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = movieId, addedAt = 500))
+        val channelId = insertChannel("m-1", "BBC One")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 500))
 
-        resolver.applyTombstones(incomingDeletion(movieId, at = 200))
+        resolver.applyTombstones(incomingDeletion(channelId, at = 200))
 
         assertEquals("a favorite re-added after the deletion was lost", 1, db.favoriteDao().getAllOnce().size)
     }
@@ -223,12 +218,12 @@ class UserDataTombstoneTest {
      */
     @Test
     fun aDeletionStillMatchesAfterAResyncChangesTheRowId() = runBlocking {
-        val oldId = insertMovie("m-1", "Blade Runner")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = oldId, addedAt = 100))
-        writer.removeFavorite(profileId, MediaType.MOVIE, oldId)
+        val oldId = insertChannel("m-1", "BBC One")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = oldId, addedAt = 100))
+        writer.removeFavorite(profileId, MediaType.LIVE, oldId)
 
-        db.movieDao().clearSource(sourceId)
-        val newId = insertMovie("m-1", "Blade Runner")
+        db.channelDao().clearSource(sourceId)
+        val newId = insertChannel("m-1", "BBC One")
         assertTrue(newId != oldId)
 
         resolver.importAll(incomingFavorites(newId, at = 100))
@@ -239,102 +234,49 @@ class UserDataTombstoneTest {
     /** The dry run has to promise the same answer the apply will give. */
     @Test
     fun thePreviewAgreesWithWhatTheMergeWillDo() = runBlocking {
-        val movieId = insertMovie("m-1", "Blade Runner")
-        val incoming = incomingFavorites(movieId, at = 100).getJSONObject(0)
+        val channelId = insertChannel("m-1", "BBC One")
+        val incoming = incomingFavorites(channelId, at = 100).getJSONObject(0)
 
         assertTrue("a favorite this device does not have is new", resolver.wouldAdd(profileId, "fav", incoming))
 
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = movieId, addedAt = 100))
-        assertFalse("one it already has is not", resolver.wouldAdd(profileId, "fav", incomingFavorites(movieId, at = 100).getJSONObject(0)))
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
+        assertFalse("one it already has is not", resolver.wouldAdd(profileId, "fav", incomingFavorites(channelId, at = 100).getJSONObject(0)))
 
-        val deletion = incomingDeletion(movieId, at = 200).getJSONObject(0)
+        val deletion = incomingDeletion(channelId, at = 200).getJSONObject(0)
         assertTrue("a deletion of a row that is here counts", resolver.wouldRemove(profileId, deletion))
     }
 
     // --- newest wins, for records as well as deletions --------------------------------------------
-    //
-    // A deletion already obeyed the clock; an ordinary record did not, and went in with REPLACE. So
-    // the merge's answer depended on which device happened to apply last rather than on which fact
-    // was newer. These four cases are the everyday ones: watch on one device, sync, look at the other.
-
-    /** Finish an episode on the television; the phone's older position must not overwrite it. */
-    @Test
-    fun anIncomingResumePositionOlderThanTheLocalOneIsIgnored() = runBlocking {
-        val movieId = insertMovie("m-1", "Blade Runner")
-        db.progressDao().save(progress(movieId, positionMs = 3_600_000, at = 500))
-
-        resolver.importAll(incomingProgress(movieId, positionMs = 60_000, at = 100))
-
-        val kept = db.progressDao().get(profileId, MediaType.MOVIE, movieId)!!
-        assertEquals("an older resume position overwrote a newer one", 3_600_000L, kept.positionMs)
-        assertEquals(500L, kept.updatedAt)
-    }
-
-    /** ...and the other way round: a genuinely newer position from the other device is taken. */
-    @Test
-    fun anIncomingResumePositionNewerThanTheLocalOneWins() = runBlocking {
-        val movieId = insertMovie("m-1", "Blade Runner")
-        db.progressDao().save(progress(movieId, positionMs = 60_000, at = 100))
-
-        resolver.importAll(incomingProgress(movieId, positionMs = 3_600_000, at = 500))
-
-        val kept = db.progressDao().get(profileId, MediaType.MOVIE, movieId)!!
-        assertEquals(3_600_000L, kept.positionMs)
-        assertEquals(500L, kept.updatedAt)
-    }
-
-    /** A position for something this device has never played still arrives. */
-    @Test
-    fun anIncomingResumePositionForAnUnknownItemIsInserted() = runBlocking {
-        val movieId = insertMovie("m-1", "Blade Runner")
-
-        resolver.importAll(incomingProgress(movieId, positionMs = 60_000, at = 100))
-
-        assertEquals(60_000L, db.progressDao().get(profileId, MediaType.MOVIE, movieId)!!.positionMs)
-    }
 
     /** Watch history obeys the same clock: the time only ever moves forward. */
     @Test
     fun watchHistoryNeverMovesBackwards() = runBlocking {
-        val movieId = insertMovie("m-1", "Blade Runner")
-        db.historyDao().record(WatchHistoryEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = movieId, watchedAt = 500))
+        val channelId = insertChannel("m-1", "BBC One")
+        db.historyDao().record(WatchHistoryEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = channelId, watchedAt = 500))
 
-        resolver.importAll(incomingHistory(movieId, at = 100))
+        resolver.importAll(incomingHistory(channelId, at = 100))
         assertEquals("history was aged by a sync", 500L, db.historyDao().getAllOnce().single().watchedAt)
 
-        resolver.importAll(incomingHistory(movieId, at = 900))
+        resolver.importAll(incomingHistory(channelId, at = 900))
         assertEquals(900L, db.historyDao().getAllOnce().single().watchedAt)
     }
 
-    private fun progress(itemId: Long, positionMs: Long, at: Long) = PlaybackProgressEntity(
-        profileId = profileId, mediaType = MediaType.MOVIE, itemId = itemId,
-        positionMs = positionMs, durationMs = 7_200_000, updatedAt = at,
-    )
-
-    private suspend fun incomingProgress(itemId: Long, positionMs: Long, at: Long): JSONArray {
-        val record = resolver.identityOf(MediaType.MOVIE, itemId)!!
-        return JSONArray().put(
-            record.put("p", profileId).put("kind", "prog").put("at", at)
-                .put("pos", positionMs).put("dur", 7_200_000),
-        )
-    }
-
     private suspend fun incomingHistory(itemId: Long, at: Long): JSONArray {
-        val record = resolver.identityOf(MediaType.MOVIE, itemId)!!
+        val record = resolver.identityOf(MediaType.LIVE, itemId)!!
         return JSONArray().put(record.put("p", profileId).put("kind", "his").put("at", at))
     }
 
     private suspend fun incomingFavorites(itemId: Long, at: Long): JSONArray {
-        val record = resolver.identityOf(MediaType.MOVIE, itemId)!!
+        val record = resolver.identityOf(MediaType.LIVE, itemId)!!
         return JSONArray().put(record.put("p", profileId).put("kind", "fav").put("at", at))
     }
 
     private suspend fun incomingDeletion(itemId: Long, at: Long): JSONArray = incomingFavorites(itemId, at)
 
-    private suspend fun insertMovie(remoteId: String?, name: String): Long {
-        db.movieDao().insertAll(
-            listOf(MovieEntity(sourceId = sourceId, name = name, streamUrl = "https://portal.test/$name", remoteId = remoteId)),
+    private suspend fun insertChannel(remoteId: String?, name: String): Long {
+        db.channelDao().insertAll(
+            listOf(ChannelEntity(sourceId = sourceId, name = name, streamUrl = "https://portal.test/$name", remoteId = remoteId)),
         )
-        return db.movieDao().findByName(sourceId, name)!!.id
+        return db.channelDao().findByName(sourceId, name)!!.id
     }
 }

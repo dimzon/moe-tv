@@ -10,38 +10,17 @@ import tv.own.owntv.core.network.StreamHeaders
 class SourceOverridesTest {
 
     private fun source(
-        tz: String? = null, offset: Int? = null, timeout: Int? = null, referer: String? = null,
+        timeout: Int? = null, referer: String? = null,
     ) = SourceEntity(
         name = "p", type = SourceType.M3U, url = "http://x",
-        catchupTimezone = tz, catchupOffsetMin = offset,
         liveTuneTimeoutSecs = timeout, httpReferer = referer,
     )
 
     @Test fun nullColumnsFollowTheGlobalSetting() {
         val s = source()
-        assertNull(SourceOverrides.catchupTimeZoneOf(s))
         assertNull(SourceOverrides.liveTuneTimeoutSecsOf(s))
         assertEquals("Cookie: a", SourceOverrides.headersWithReferer("Cookie: a", s))
-        assertNull(SourceOverrides.catchupTimeZoneOf(null))
-    }
-
-    @Test fun manualCatchupZoneUsesTheOffset() {
-        val tz = SourceOverrides.catchupTimeZoneOf(source(tz = "MANUAL", offset = 90))!!
-        assertEquals(90 * 60_000, tz.rawOffset)
-    }
-
-    /** Automatic is the panel's reported zone when there is one, else the device's. */
-    @Test fun automaticCatchupZoneUsesThePanelZone() {
-        val panel = source(tz = "AUTOMATIC").copy(serverTimeZone = "Asia/Kolkata")
-        assertEquals("Asia/Kolkata", SourceOverrides.catchupTimeZoneOf(panel)!!.id)
-        assertEquals("Asia/Kolkata", SourceOverrides.panelTimeZoneOf(panel)!!.id)
-        assertEquals(java.util.TimeZone.getDefault().id, SourceOverrides.catchupTimeZoneOf(source(tz = "AUTOMATIC"))!!.id)
-        assertNull(SourceOverrides.panelTimeZoneOf(source()))
-        assertEquals(60 * 60_000, SourceOverrides.panelTimeZoneOf(source().copy(serverTimeZone = "GMT+01:00"))!!.rawOffset)
-    }
-
-    @Test fun unknownNamesReadAsNoOverride() {
-        assertNull(SourceOverrides.catchupTimeZoneOf(source(tz = "MARS")))
+        assertNull(SourceOverrides.liveTuneTimeoutSecsOf(null))
     }
 
     @Test fun tuneTimeoutParse() {

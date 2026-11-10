@@ -56,11 +56,6 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
     private val _images = MutableSharedFlow<File>(extraBufferCapacity = 4)
     val images: SharedFlow<File> = _images.asSharedFlow()
 
-    private val _tmdbConfigs = MutableSharedFlow<CompanionServiceConfig>(extraBufferCapacity = 4)
-    val tmdbConfigs: SharedFlow<CompanionServiceConfig> = _tmdbConfigs.asSharedFlow()
-    private val _openSubtitlesConfigs = MutableSharedFlow<CompanionServiceConfig>(extraBufferCapacity = 4)
-    val openSubtitlesConfigs: SharedFlow<CompanionServiceConfig> = _openSubtitlesConfigs.asSharedFlow()
-
     /** The playlist [startForSourceEdit] is editing; a submission's empty fields are filled from it. */
     @Volatile private var editing: SourceEntity? = null
 
@@ -198,9 +193,6 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
     /** Starts the companion server in image-upload mode: the remote device sends a background image, emitted on [images]. */
     fun startForImageUpload(port: Int) = startInternal(port, CompanionMode.IMAGE_UPLOAD)
 
-    fun startForTmdbConfig(port: Int) = startInternal(port, CompanionMode.TMDB_CONFIG)
-    fun startForOpenSubtitlesConfig(port: Int) = startInternal(port, CompanionMode.OPEN_SUBTITLES_CONFIG)
-
     private fun startInternal(
         port: Int,
         mode: CompanionMode,
@@ -237,13 +229,6 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
                 },
                 onBackup = ::onBackupUploaded,
                 onImage = ::onImageUploaded,
-                onServiceConfig = { config ->
-                    when (mode) {
-                        CompanionMode.TMDB_CONFIG -> _tmdbConfigs.tryEmit(config)
-                        CompanionMode.OPEN_SUBTITLES_CONFIG -> _openSubtitlesConfigs.tryEmit(config)
-                        else -> Unit
-                    }
-                },
                 downloadFile = downloadFile,
                 syncInfo = syncInfo,
                 onPair = onPair,

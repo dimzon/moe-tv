@@ -13,6 +13,9 @@ import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.ChannelNumberProjection
 import tv.own.owntv.core.database.entity.ContentHashProjection
 
+/** One category's current channel count for a source (re-sync delta check). */
+data class CategoryItemCount(val categoryId: Long, val itemCount: Int)
+
 /** A channel plus its category name, for richer global-search results ("category · #number"). */
 data class ChannelSearchResult(
     @Embedded val channel: ChannelEntity,
@@ -105,21 +108,6 @@ interface ChannelDao {
     )
     suspend fun epgChannelIdsWithoutProgrammes(sourceId: Long): List<String>
 
-    /** Every catch-up channel, across every source — the ones whose past programmes can still be
-     *  replayed, and therefore the only ones whose history is worth keeping. */
-    @Query("SELECT * FROM channels WHERE catchup = 1")
-    suspend fun allCatchupChannels(): List<ChannelEntity>
-
-    /** Largest archive window (days) across these sources' catch-up channels — 0 if none have catch-up.
-     *  Drives how far back the Guide extends so archived programmes are visible. */
-    @Query("SELECT COALESCE(MAX(catchupDays), 0) FROM channels WHERE sourceId IN (:sourceIds) AND catchup = 1")
-    suspend fun maxCatchupDays(sourceIds: List<Long>): Int
-
-    /** How many channels advertise catch-up/archive — surfaced in the Guide so the user knows their
-     *  provider supports it. */
-    @Query("SELECT COUNT(*) FROM channels WHERE sourceId IN (:sourceIds) AND catchup = 1")
-    suspend fun countCatchup(sourceIds: List<Long>): Int
-
     /**
      * Channels that actually HAVE programmes in the window — so the guide never wastes its row limit
      * on channels without data. The id match is case/whitespace-insensitive: XMLTV channel ids often
@@ -158,14 +146,6 @@ interface ChannelDao {
     suspend fun remoteIdsForSource(sourceId: Long): List<String>
 
     /**
-     * A few of the source's live URLs containing [pattern] (a `LIKE` pattern such as `%.mp4%`). A
-     * coarse filter so the startup check never loads the whole catalogue; the caller confirms each
-     * with `ProgressiveVideoUrl`.
-     */
-    @Query("SELECT streamUrl FROM channels WHERE sourceId = :sourceId AND streamUrl LIKE :pattern LIMIT :limit")
-    suspend fun streamUrlsLike(sourceId: Long, pattern: String, limit: Int): List<String>
-
-    /**
      * Each channel's provider id alongside the guide key it is actually stored under — what a Stalker
      * portal's own guide needs to line up.
      *
@@ -182,7 +162,7 @@ interface ChannelDao {
     @Query("SELECT remoteId FROM channels WHERE sourceId = :sourceId AND remoteId IS NOT NULL LIMIT 1")
     suspend fun anyRemoteId(sourceId: Long): String?
 
-    /** Prune scope for the per-category sync fallback — see [MovieDao.remoteIdsInCategories]. */
+    /** Prune scope for the per-category sync fallback. */
     @Query("SELECT remoteId FROM channels WHERE sourceId = :sourceId AND categoryId IN (:categoryIds) AND remoteId IS NOT NULL")
     suspend fun remoteIdsInCategories(sourceId: Long, categoryIds: List<Long>): List<String>
 
@@ -281,16 +261,6 @@ interface ChannelDao {
     @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) ORDER BY sourceId ASC, sortOrder ASC, name ASC")
     fun pagingAllOriginal(sourceIds: List<Long>): PagingSource<Int, ChannelEntity>
 
-    // --- Catch-up rail: every channel whose provider advertises an archive. A filter over the same
-    //     rows as ALL, so it needs no sync work and stays correct after every re-sync. Deliberately
-    //     independent of the guide: `catchup` comes from the playlist, so these lists are populated
-    //     even for a user with no EPG at all (who is exactly the person looking for them).
-    @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND catchup = 1 ORDER BY name ASC")
-    fun pagingCatchup(sourceIds: List<Long>): PagingSource<Int, ChannelEntity>
-
-    @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND catchup = 1 ORDER BY sourceId ASC, sortOrder ASC, name ASC")
-    fun pagingCatchupOriginal(sourceIds: List<Long>): PagingSource<Int, ChannelEntity>
-
     // --- Manual order (Move) — LEFT JOIN content_order; a row with a saved position keeps it, the rest
     //     follow A–Z or the provider/playlist order around it. ---
     /** Moved rows keep their saved position; the rest follow [alpha] (A–Z) or the playlist order
@@ -334,10 +304,6 @@ interface ChannelDao {
     @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) ORDER BY sourceId ASC, sortOrder ASC, name ASC LIMIT :limit")
     suspend fun snapshotAll(sourceIds: List<Long>, limit: Int): List<ChannelEntity>
 
-    /** Bounded snapshot of the Catch-up rail in provider order — the in-player category sheet's pick. */
-    @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND catchup = 1 ORDER BY sourceId ASC, sortOrder ASC, name ASC LIMIT :limit")
-    suspend fun snapshotCatchup(sourceIds: List<Long>, limit: Int): List<ChannelEntity>
-
     /** Bounded snapshot of Favorites in manual order, for the Move session's in-memory reorder. */
     @Query(
         "SELECT c.* FROM channels c " +
@@ -372,18 +338,6 @@ interface ChannelDao {
     @Query("SELECT COUNT(*) FROM channels WHERE sourceId = :sourceId")
     suspend fun countForSourceOnce(sourceId: Long): Int
 
-    /** Observed catch-up channel count — drives the Live TV list count AND whether the Catch-up rail
-     *  entry is offered at all (a provider with no archive must not get a permanently empty folder). */
-    @Query("SELECT COUNT(*) FROM channels WHERE sourceId IN (:sourceIds) AND catchup = 1")
-    fun observeCatchupCount(sourceIds: List<Long>): Flow<Int>
-
-    /** [observeCatchupCount] without the channels filed under [excluded] (locked categories). */
-    @Query(
-        "SELECT COUNT(*) FROM channels WHERE sourceId IN (:sourceIds) AND catchup = 1 " +
-            "AND (categoryId IS NULL OR categoryId NOT IN (:excluded))",
-    )
-    fun observeCatchupCountExcluding(sourceIds: List<Long>, excluded: List<Long>): Flow<Int>
-
     // --- Search (FTS4) ---
     @Query(
         "SELECT * FROM channels WHERE sourceId IN (:sourceIds) " +
@@ -397,9 +351,6 @@ interface ChannelDao {
 
     @Query("SELECT * FROM channels WHERE categoryId = :categoryId AND name LIKE '%' || :query || '%' ORDER BY sortOrder ASC, name ASC")
     fun searchInCategory(query: String, categoryId: Long): PagingSource<Int, ChannelEntity>
-
-    @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND catchup = 1 AND name LIKE '%' || :query || '%' ORDER BY name ASC")
-    fun searchCatchup(query: String, sourceIds: List<Long>): PagingSource<Int, ChannelEntity>
 
     /** Bounded list for global search (across all of a profile's sources). */
     @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND name LIKE '%' || :query || '%' ORDER BY name ASC LIMIT :limit")
@@ -415,7 +366,7 @@ interface ChannelDao {
     )
     suspend fun searchListDetailed(query: String, sourceIds: List<Long>, limit: Int): List<ChannelSearchResult>
 
-    /** FTS-backed variant of [searchListDetailed] for global as-you-type search (see MovieDao.searchListFts). */
+    /** FTS-backed variant of [searchListDetailed] for global as-you-type search. */
     @Query(
         "SELECT c.*, cat.name AS categoryName FROM channels c " +
             "LEFT JOIN categories cat ON c.categoryId = cat.id " +

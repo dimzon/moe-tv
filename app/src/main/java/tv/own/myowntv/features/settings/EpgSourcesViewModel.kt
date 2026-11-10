@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -81,7 +74,6 @@ class EpgSourcesViewModel(
     private val sourceRepository: SourceRepository,
     private val settings: SettingsRepository,
     private val epgDao: tv.own.owntv.core.database.dao.EpgDao,
-    private val channelDao: tv.own.owntv.core.database.dao.ChannelDao,
     private val epgSyncScheduler: EpgSyncScheduler,
     private val liveEpgReader: LiveEpgReader,
 ) : ViewModel() {
@@ -176,16 +168,9 @@ class EpgSourcesViewModel(
         epgSyncScheduler.cancelSync(source.id)
     }
 
-    /** A source's status line: guide channels, stored programmes, and how many of the profile's
-     *  channels advertise catch-up (the last is playlist-wide, shown so it's visible alongside the EPG). */
-    suspend fun counts(id: Long): Triple<Int, Int, Int> {
-        val channels = epgDao.countGuideChannels(listOf(id))
-        val programmes = epgDao.countForSources(listOf(id))
-        val pid = settings.activeProfileId.first()
-        val playlistIds = if (pid < 0) emptyList() else sourceRepository.observeSources(pid).first().map { it.id }
-        val catchup = if (playlistIds.isEmpty()) 0 else channelDao.countCatchup(playlistIds)
-        return Triple(channels, programmes, catchup)
-    }
+    /** A source's status line: guide channels and the programmes stored for them. */
+    suspend fun counts(id: Long): Pair<Int, Int> =
+        epgDao.countGuideChannels(listOf(id)) to epgDao.countForSources(listOf(id))
 
     /** Playlists whose own EPG can pre-fill the add form (Xtream xmltv.php / M3U url-tvg). */
     suspend fun playlistEpgOptions(): List<PlaylistEpg> {

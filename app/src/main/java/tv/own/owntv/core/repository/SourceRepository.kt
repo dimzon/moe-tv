@@ -23,8 +23,6 @@ class SourceRepository(
     private val syncManager: SyncManager,
     private val userData: tv.own.owntv.core.backup.UserDataResolver,
     private val channelDao: tv.own.owntv.core.database.dao.ChannelDao,
-    private val movieDao: tv.own.owntv.core.database.dao.MovieDao,
-    private val seriesDao: tv.own.owntv.core.database.dao.SeriesDao,
     private val categoryDao: tv.own.owntv.core.database.dao.CategoryDao,
     private val playbackQuirkDao: tv.own.owntv.core.database.dao.PlaybackQuirkDao,
     private val playbackPrefsDao: tv.own.owntv.core.database.dao.PlaybackPrefsDao,
@@ -36,7 +34,7 @@ class SourceRepository(
     suspend fun addXtreamSource(
         profileId: Long, name: String, serverUrl: String, username: String, password: String,
         userAgent: String? = null, epgUrl: String? = null,
-        syncLive: Boolean = true, syncMovies: Boolean = true, syncSeries: Boolean = true,
+        syncLive: Boolean = true,
         preferHls: Boolean = false,
         httpReferer: String? = null,
     ): SourceEntity = addAndLink(
@@ -44,7 +42,7 @@ class SourceRepository(
         SourceEntity(
             name = name, type = SourceType.XTREAM, url = serverUrl,
             username = username, password = password, userAgent = userAgent, epgUrl = epgUrl,
-            syncLive = syncLive, syncMovies = syncMovies, syncSeries = syncSeries,
+            syncLive = syncLive,
             preferHls = preferHls, httpReferer = httpReferer,
         ),
     )
@@ -61,7 +59,7 @@ class SourceRepository(
         profileId: Long, name: String, portalUrl: String, mac: String,
         serialNumber: String? = null, deviceId: String? = null, deviceId2: String? = null,
         signature: String? = null, userAgent: String? = null,
-        syncLive: Boolean = true, syncMovies: Boolean = true, syncSeries: Boolean = true,
+        syncLive: Boolean = true,
         httpReferer: String? = null,
         login: String? = null, password: String? = null,
     ): SourceEntity = addAndLink(
@@ -71,7 +69,7 @@ class SourceRepository(
             username = login, password = password,
             stalkerSerialNumber = serialNumber, stalkerDeviceId = deviceId,
             stalkerDeviceId2 = deviceId2, stalkerSignature = signature, userAgent = userAgent,
-            syncLive = syncLive, syncMovies = syncMovies, syncSeries = syncSeries,
+            syncLive = syncLive,
             httpReferer = httpReferer,
         ),
     )
@@ -102,7 +100,7 @@ class SourceRepository(
     }
 
     /**
-     * Wipe a source's imported content (channels/movies/series + their categories) but KEEP the
+     * Wipe a source's imported content (channels + their categories) but KEEP the
      * source row and its credentials. Used when a backgrounded first import fails: deleting the
      * source would make the user's playlist silently vanish, while keeping the partial content
      * would duplicate rows on the next sync (a never-synced source takes the insertFresh path,
@@ -110,10 +108,7 @@ class SourceRepository(
      */
     suspend fun clearSourceContent(sourceId: Long) {
         channelDao.clearSource(sourceId)
-        movieDao.clearSource(sourceId)
-        seriesDao.clearSource(sourceId) // seasons/episodes cascade
-        listOf(tv.own.owntv.core.model.MediaType.LIVE, tv.own.owntv.core.model.MediaType.MOVIE, tv.own.owntv.core.model.MediaType.SERIES)
-            .forEach { categoryDao.clear(sourceId, it) }
+        categoryDao.clear(sourceId, tv.own.owntv.core.model.MediaType.LIVE)
     }
 
     /**
@@ -132,7 +127,7 @@ class SourceRepository(
     ): SyncResult {
         val startedAt = SystemClock.elapsedRealtime()
         Log.i(TAG, "sync wrapper start sourceId=${source.id} type=${source.type} contentTypes=$contentTypes")
-        // Snapshot favorites/history/resume with stable keys BEFORE the sync clears content (their ids
+        // Snapshot favorites/history with stable keys BEFORE the sync clears content (their ids
         // change on every refresh, so they'd otherwise orphan — count badge set, list empty).
         val snapshotStartedAt = SystemClock.elapsedRealtime()
         val snapshot = runCatching { userData.exportForSource(source.id) }
@@ -144,10 +139,10 @@ class SourceRepository(
         Log.i(TAG, "core sync sourceId=${source.id} result=${result.name()} ms=${SystemClock.elapsedRealtime() - coreStartedAt}")
         // Always re-attach the snapshot to the new ids — a failed/cancelled sync can still have
         // rewritten some rows (M3U is clear-then-insert; Xtream REPLACE-upserts renumber ids), and
-        // without a relink those favorites/history/resume entries turn invisible until a later
+        // without a relink those favorites/history entries turn invisible until a later
         // successful sync. Purging genuinely-gone rows is only allowed after a complete enabled
-        // success: a partial content-type sync never touched the other types, and a failure proves
-        // nothing. Off sections retain cache + user data, so their favorites stay resolvable.
+        // success: a partial pass never touched the rest, and a failure proves nothing. Off
+        // sections retain cache + user data, so their favorites stay resolvable.
         val effective = contentTypes.effectiveFor(source)
         val purge = result is SyncResult.Success && effective.isCompleteFor(SyncContentTypes.enabledFor(source))
         val relinkStartedAt = SystemClock.elapsedRealtime()
@@ -157,14 +152,6 @@ class SourceRepository(
             runCatching { userData.relinkAfterSync(snapshot ?: org.json.JSONArray(), purge = purge) }
                 .onSuccess { Log.i(TAG, "userData relink sourceId=${source.id} rows=${snapshot?.length() ?: 0} purge=$purge ms=${SystemClock.elapsedRealtime() - relinkStartedAt}") }
                 .onFailure { Log.w(TAG, "userData relink failed sourceId=${source.id} ms=${SystemClock.elapsedRealtime() - relinkStartedAt}", it) }
-        }
-        // Episodes are fetched lazily on show-open, never by the syncer, so a resync would otherwise
-        // leave every already-opened show frozen on the episode list it cached the first time.
-        // Zeroing the stamps makes the user's "I'll just resync" actually refresh them, on demand
-        // and one show at a time — no episode fetch storm across a 46k-series catalog.
-        if (result is SyncResult.Success && effective.series) {
-            runCatching { seriesDao.invalidateEpisodeCaches(source.id) }
-                .onFailure { Log.w(TAG, "episode cache invalidate failed sourceId=${source.id}", it) }
         }
         Log.i(TAG, "sync wrapper end sourceId=${source.id} result=${result.name()} totalMs=${SystemClock.elapsedRealtime() - startedAt}")
         return result

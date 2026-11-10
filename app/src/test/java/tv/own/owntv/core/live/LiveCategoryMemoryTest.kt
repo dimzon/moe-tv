@@ -11,7 +11,7 @@ class LiveCategoryMemoryTest {
     private fun restore(stored: String, items: List<Item>) = liveRestoreKey(stored, items, { it.key }, { it.sealed })
 
     private val rail = listOf(
-        Item(LiveKey.Favorites), Item(LiveKey.History), Item(LiveKey.Catchup), Item(LiveKey.All),
+        Item(LiveKey.Favorites), Item(LiveKey.History), Item(LiveKey.All),
         Item(LiveKey.Folder(7)), Item(LiveKey.Custom("custom:abc")),
     )
 
@@ -36,11 +36,9 @@ class LiveCategoryMemoryTest {
     }
 
     @Test
-    fun `a hidden All or Catch-up is not brought back`() {
+    fun `a hidden All is not brought back`() {
         assertNull(restore("ALL", rail.filterNot { it.key == LiveKey.All }))
-        assertNull(restore("CATCHUP", rail.filterNot { it.key == LiveKey.Catchup }))
         assertEquals(LiveKey.All, restore("ALL", rail))
-        assertEquals(LiveKey.Catchup, restore("CATCHUP", rail))
     }
 
     @Test

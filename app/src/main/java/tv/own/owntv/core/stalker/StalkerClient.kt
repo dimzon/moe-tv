@@ -32,7 +32,7 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
      * The shared client sets `retryOnConnectionFailure(false)` so SyncManager owns stream retries. A
      * portal call is not a stream: it is one small request, often the first in minutes, and portals
      * drop idle keep-alive sockets. OkHttp then hands the dead one out and the request dies instantly
-     * with `unexpected end of stream` — which is exactly how a catch-up pick failed with no network
+     * with `unexpected end of stream` — which is exactly how a request failed with no network
      * round trip at all, three milliseconds after it was made.
      */
     private val client: OkHttpClient = okHttpClient.newBuilder().retryOnConnectionFailure(true).build()
@@ -75,73 +75,11 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
         val archiveDuration: Int,
     )
 
-    /**
-     * A VOD (movie) or series-show item from `get_ordered_list`. For a movie, [cmd] is the
-     * portal command resolved to a real URL at play time via [createLink] (`type=vod`). For a series
-     * SHOW, [cmd] carries the show command; per-episode URLs are minted with a `series=<ep>` param at
-     * play time (episodes themselves are listed lazily when the show is opened). [id] is the stable
-     * portal id → used as remoteId.
-     */
-    data class VodItem(
-        val id: String,
-        val name: String,
-        val cmd: String?,
-        val poster: String?,
-        val year: Int?,
-        val plot: String?,
-        val rating: Double?,
-        // The item's own category id (`category_id`). Used by the bulk `category=*` fast path to map each
-        // item to its category (the per-category path already knows the category from the request).
-        val categoryId: String?,
-        // Epoch ms for the "Date added" sort, from Ministra's `video.added` column. Null on trimmed
-        // reseller panels that omit it — the sort then falls through to playlist order.
-        val addedAt: Long?,
-        // `is_series` on a `type=vod` row: a show filed in the film catalogue. Portals with no series
-        // section of their own list every show this way.
-        val isSeries: Boolean = false,
-    )
-
     /** One page of `get_ordered_list`: the items plus the totals needed to page through the rest. */
     data class Page<T>(val totalItems: Int, val maxPageItems: Int, val items: List<T>)
 
-    /**
-     * A season row from `get_ordered_list&movie_id=<show>` (D-2). [episodes] is the row's `series`
-     * array — the episode numbers that exist. [cmd] is shared by the whole season; a playable URL is
-     * minted per episode via [createLink] with `type=vod&series=<episode>`. [seasonNumber] is parsed
-     * from the row id (`"280:2"` → 2) or the name ("Season 2"); callers fall back to the row index.
-     */
-    data class SeasonItem(
-        val id: String,
-        val name: String?,
-        val cmd: String?,
-        val seasonNumber: Int?,
-        val episodes: List<Int>,
-    )
-
-    /**
-     * A season of a show filed in the film catalogue, from Ministra's three-level VOD tree
-     * (`type=vod&movie_id=<show>&season_id=0`). Unlike [SeasonItem] it carries no episode list and no
-     * cmd: the episodes are one request further down ([getVodEpisodes]), and each episode's playable
-     * file one more ([getVodEpisodeFileCmd]).
-     */
-    data class VodSeason(val id: String, val number: Int?, val name: String?)
-
-    /** An episode row of a [VodSeason]: `series_number` is its number, `series_name` its own title. */
-    data class VodEpisode(val id: String, val number: Int?, val title: String?)
-
-    /** Where a [VodEpisode]'s file is listed: the parts of a [vodEpisodeRef]. */
-    data class VodEpisodeRef(val movieId: String, val seasonId: String, val episodeId: String)
-
     /** One programme from `get_short_epg` — times in epoch ms. */
     data class ShortEpgEntry(val title: String, val description: String?, val startMs: Long, val stopMs: Long)
-
-    /**
-     * One row of the portal's per-day guide table, which is the only place the **archive token** for a
-     * programme can be had. [id] is the portal's own `"<programme>_<channel>"` pair, and it is what
-     * `tv_archive&action=create_link` expects inside its `cmd` — see [getArchiveDay]. [archived] is
-     * the portal's `mark_archive`: its claim that this programme is inside the recorded window.
-     */
-    data class ArchiveEntry(val id: String, val startMs: Long, val stopMs: Long, val archived: Boolean)
 
     /**
      * Probe the API-endpoint candidates for [portalUrl] (`portal.php`, `stalker_portal/server/
@@ -242,18 +180,6 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
         return request(url, mac, token, userAgent) { readGenreArray(it) }
     }
 
-    /** `?type=vod&action=get_categories` → movie categories (same `[{id,title}]` shape as genres). */
-    suspend fun getVodCategories(apiBase: String, mac: String, token: String, userAgent: String? = null): List<Genre> {
-        val url = "$apiBase?type=vod&action=get_categories&JsHttpRequest=1-xml"
-        return request(url, mac, token, userAgent) { readGenreArray(it) }
-    }
-
-    /** `?type=series&action=get_categories` → series categories (same shape as genres). */
-    suspend fun getSeriesCategories(apiBase: String, mac: String, token: String, userAgent: String? = null): List<Genre> {
-        val url = "$apiBase?type=series&action=get_categories&JsHttpRequest=1-xml"
-        return request(url, mac, token, userAgent) { readGenreArray(it) }
-    }
-
     /**
      * `?type=itv&action=get_short_epg&ch_id=<id>&size=<n>` → the channel's now/next programmes
      * (the safe per-channel path; the OOM-prone bulk `get_epg_info` is never used).
@@ -265,63 +191,6 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
     ): List<ShortEpgEntry> {
         val url = "$apiBase?type=itv&action=get_short_epg&ch_id=${enc(channelId)}&size=$size&JsHttpRequest=1-xml"
         return request(url, mac, token, userAgent) { readShortEpg(it) }
-    }
-
-    /**
-     * `?type=epg&action=get_simple_data_table&ch_id=<id>&date=<yyyy-MM-dd>&p=<page>` → one page of that
-     * channel's guide for that day, each row carrying the archive token [ArchiveEntry.id].
-     *
-     * **This call is what makes catch-up work at all on a portal.** The archive `cmd` is
-     * `auto /media/<programme>_<channel>.mpg`, and that first half is a portal-side programme id we
-     * cannot compute: a Ministra facade parses the filename as `<programme_id>_<stream_id>` and looks
-     * the pair up in its own guide. Sending a synthesized `<channel>_<start>_<duration>` instead — as
-     * this client did until 1.0.43 — finds no row, so the portal answers **HTTP 200 with an empty
-     * body**, which surfaces as an unhelpful `EOFException` and left catch-up silently dead.
-     *
-     * Note `type=epg`, not `itv` and not `tv_archive`: the facades that serve this route everything
-     * else to an empty body, which is a fast way to be misled about what the portal supports.
-     *
-     * Times come back as true epoch seconds in `start_timestamp`/`stop_timestamp`, already matching
-     * the wall clock the portal shows for the timezone this client sends in its cookie.
-     */
-    open suspend fun getArchiveDay(
-        apiBase: String, mac: String, token: String, userAgent: String?, channelId: String, date: String, page: Int,
-    ): Page<ArchiveEntry> {
-        val url = "$apiBase?type=epg&action=get_simple_data_table&ch_id=${enc(channelId)}" +
-            "&date=${enc(date)}&p=$page&JsHttpRequest=1-xml"
-        return request(url, mac, token, userAgent) { readArchiveDay(it) }
-    }
-
-    private fun readArchiveDay(reader: JsonReader): Page<ArchiveEntry> {
-        var total = 0
-        var maxPer = 0
-        val rows = ArrayList<Map<String, String>>()
-        if (reader.peek() != JsonToken.BEGIN_OBJECT) { reader.skipValue(); return Page(0, 0, emptyList()) }
-        reader.beginObject()
-        while (reader.hasNext()) {
-            when (reader.nextName()) {
-                "total_items" -> total = nextIntLenient(reader) ?: 0
-                "max_page_items" -> maxPer = nextIntLenient(reader) ?: 0
-                "data" -> if (reader.peek() == JsonToken.BEGIN_ARRAY) {
-                    reader.beginArray()
-                    while (reader.hasNext()) {
-                        if (reader.peek() == JsonToken.BEGIN_OBJECT) rows.add(readScalarFields(reader)) else reader.skipValue()
-                    }
-                    reader.endArray()
-                } else {
-                    reader.skipValue()
-                }
-                else -> reader.skipValue()
-            }
-        }
-        reader.endObject()
-        val items = rows.mapNotNull { f ->
-            val id = f["id"]?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
-            val start = epgTimeMs(f["start_timestamp"], f["time"]) ?: return@mapNotNull null
-            val stop = epgTimeMs(f["stop_timestamp"], f["time_to"]) ?: return@mapNotNull null
-            ArchiveEntry(id, start, stop, (f["mark_archive"]?.trim()?.toIntOrNull() ?: 0) > 0)
-        }
-        return Page(total, maxPer, items)
     }
 
     private fun readShortEpg(reader: JsonReader): List<ShortEpgEntry> {
@@ -363,8 +232,8 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
      * Download the whole portal guide (`?type=itv&action=get_epg_info&period=<days>`) to [dest]
      * **without parsing a byte of it**, returning the size.
      *
-     * This is the call STBEmu and TiviMate make, and the reason their users see a full guide and a
-     * working catch-up list on portals that offer only now/next otherwise.
+     * This is the call STBEmu and TiviMate make, and the reason their users see a full guide where
+     * a portal offers only now/next otherwise.
      *
      * Written this way because of what a real portal did. The guide itself is quick — a measured
      * 9 MB in about a second for a 12 000-channel panel — but the first attempt parsed it as it
@@ -446,76 +315,6 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
         }.getOrNull()
     }
 
-    /** `?type=vod&action=get_ordered_list&category=<id>&p=<page>` → one page of movies + paging totals. */
-    suspend fun getVodPage(
-        apiBase: String, mac: String, token: String, userAgent: String?, categoryId: String, page: Int,
-    ): Page<VodItem> {
-        val url = "$apiBase?type=vod&action=get_ordered_list&category=${enc(categoryId)}&sortby=added&p=$page&JsHttpRequest=1-xml"
-        return request(url, mac, token, userAgent) { readVodPage(it, apiBase) }
-    }
-
-    /** `?type=series&action=get_ordered_list&category=<id>&p=<page>` → one page of series shows + totals. */
-    suspend fun getSeriesPage(
-        apiBase: String, mac: String, token: String, userAgent: String?, categoryId: String, page: Int,
-    ): Page<VodItem> {
-        val url = "$apiBase?type=series&action=get_ordered_list&category=${enc(categoryId)}&sortby=added&p=$page&JsHttpRequest=1-xml"
-        return request(url, mac, token, userAgent) { readVodPage(it, apiBase) }
-    }
-
-    /**
-     * `?type=series&action=get_ordered_list&movie_id=<show remoteId>&p=<page>` → one page of the
-     * show's SEASONS, each carrying its `series` episode-number array. Category is included
-     * because some portals require it alongside movie_id. [type] is `vod` for a show the portal
-     * files in its film catalogue (see [VodItem.isSeries]).
-     */
-    suspend fun getSeriesSeasons(
-        apiBase: String, mac: String, token: String, userAgent: String?, categoryId: String?, movieId: String, page: Int,
-        type: String = "series",
-    ): Page<SeasonItem> {
-        val cat = categoryId?.takeIf { it.isNotBlank() }?.let { "&category=${enc(it)}" } ?: ""
-        val url = "$apiBase?type=${enc(type)}&action=get_ordered_list$cat&movie_id=${enc(movieId)}&p=$page&JsHttpRequest=1-xml"
-        return request(url, mac, token, userAgent) { readSeasonPage(it) }
-    }
-
-    /** `?type=vod&action=get_ordered_list&movie_id=<show>&season_id=0&p=<page>` → the seasons of a [VodSeason] show. */
-    open suspend fun getVodSeasons(
-        apiBase: String, mac: String, token: String, userAgent: String?, movieId: String, page: Int,
-    ): Page<VodSeason> {
-        val url = "$apiBase?type=vod&action=get_ordered_list&movie_id=${enc(movieId)}&season_id=0&episode_id=0&p=$page&JsHttpRequest=1-xml"
-        return request(url, mac, token, userAgent) { reader ->
-            readScalarPage(reader) { f ->
-                val id = f["id"]?.takeIf { it.isNotBlank() } ?: return@readScalarPage null
-                VodSeason(id, f["season_number"]?.trim()?.toIntOrNull(), (f["season_name"] ?: f["name"])?.takeIf { it.isNotBlank() })
-            }
-        }
-    }
-
-    /** `…&movie_id=<show>&season_id=<season>&p=<page>` → one page of that season's episodes. */
-    open suspend fun getVodEpisodes(
-        apiBase: String, mac: String, token: String, userAgent: String?, movieId: String, seasonId: String, page: Int,
-    ): Page<VodEpisode> {
-        val url = "$apiBase?type=vod&action=get_ordered_list&movie_id=${enc(movieId)}&season_id=${enc(seasonId)}&episode_id=0&p=$page&JsHttpRequest=1-xml"
-        return request(url, mac, token, userAgent) { reader ->
-            readScalarPage(reader) { f ->
-                val id = f["id"]?.takeIf { it.isNotBlank() } ?: return@readScalarPage null
-                VodEpisode(id, f["series_number"]?.trim()?.toIntOrNull(), f["series_name"]?.takeIf { it.isNotBlank() })
-            }
-        }
-    }
-
-    /**
-     * `…&movie_id=<show>&season_id=<season>&episode_id=<episode>` → the episode's files. Returns the
-     * first file's cmd (`/media/file_<id>.mpg`), which [createLink] turns into a URL like a film's.
-     */
-    open suspend fun getVodEpisodeFileCmd(
-        apiBase: String, mac: String, token: String, userAgent: String?, movieId: String, seasonId: String, episodeId: String,
-    ): String? {
-        val url = "$apiBase?type=vod&action=get_ordered_list&movie_id=${enc(movieId)}&season_id=${enc(seasonId)}&episode_id=${enc(episodeId)}&p=1&JsHttpRequest=1-xml"
-        val files = request(url, mac, token, userAgent) { reader -> readScalarPage(reader) { f -> f["cmd"]?.takeIf { it.isNotBlank() } } }
-        return files.items.firstOrNull()
-    }
-
-    /** A `get_ordered_list` page whose rows only need their scalar fields; [row] drops a row by returning null. */
     private fun <T> readScalarPage(reader: JsonReader, row: (Map<String, String>) -> T?): Page<T> {
         var total = 0
         var maxPer = 0
@@ -542,63 +341,6 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
         return Page(total, maxPer, items)
     }
 
-    private fun readSeasonPage(reader: JsonReader): Page<SeasonItem> {
-        var total = 0
-        var maxPer = 0
-        val items = ArrayList<SeasonItem>()
-        if (reader.peek() != JsonToken.BEGIN_OBJECT) { reader.skipValue(); return Page(0, 0, items) }
-        reader.beginObject()
-        while (reader.hasNext()) {
-            when (reader.nextName()) {
-                "total_items" -> total = nextIntLenient(reader) ?: 0
-                "max_page_items" -> maxPer = nextIntLenient(reader) ?: 0
-                "data" -> if (reader.peek() == JsonToken.BEGIN_ARRAY) {
-                    reader.beginArray()
-                    while (reader.hasNext()) readSeasonItem(reader)?.let { items.add(it) }
-                    reader.endArray()
-                } else {
-                    reader.skipValue()
-                }
-                else -> reader.skipValue()
-            }
-        }
-        reader.endObject()
-        return Page(total, maxPer, items)
-    }
-
-    /** Like [readScalarFields] but also captures the row's `series` episode-number array. */
-    private fun readSeasonItem(reader: JsonReader): SeasonItem? {
-        if (reader.peek() != JsonToken.BEGIN_OBJECT) { reader.skipValue(); return null }
-        val fields = LinkedHashMap<String, String>()
-        val episodes = ArrayList<Int>()
-        reader.beginObject()
-        while (reader.hasNext()) {
-            val name = reader.nextName()
-            when {
-                name == "series" && reader.peek() == JsonToken.BEGIN_ARRAY -> {
-                    reader.beginArray()
-                    while (reader.hasNext()) nextIntLenient(reader)?.let { episodes.add(it) }
-                    reader.endArray()
-                }
-                else -> when (reader.peek()) {
-                    JsonToken.STRING, JsonToken.NUMBER -> fields[name] = reader.nextString()
-                    JsonToken.BOOLEAN -> fields[name] = reader.nextBoolean().toString()
-                    JsonToken.NULL -> reader.nextNull()
-                    else -> reader.skipValue()
-                }
-            }
-        }
-        reader.endObject()
-        val id = fields["id"]?.takeIf { it.isNotBlank() } ?: return null
-        return SeasonItem(
-            id = id,
-            name = fields["name"]?.takeIf { it.isNotBlank() },
-            cmd = fields["cmd"]?.takeIf { it.isNotBlank() },
-            seasonNumber = seasonNumberOf(id, fields["name"]),
-            episodes = episodes.distinct().sorted(),
-        )
-    }
-
     private fun readGenreArray(reader: JsonReader): List<Genre> {
         val out = ArrayList<Genre>()
         if (reader.peek() == JsonToken.BEGIN_ARRAY) {
@@ -614,78 +356,6 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
             reader.skipValue()
         }
         return out
-    }
-
-    private fun readVodPage(reader: JsonReader, apiBase: String): Page<VodItem> {
-        var total = 0
-        var maxPer = 0
-        val items = ArrayList<VodItem>()
-        if (reader.peek() != JsonToken.BEGIN_OBJECT) { reader.skipValue(); return Page(0, 0, items) }
-        reader.beginObject()
-        while (reader.hasNext()) {
-            when (reader.nextName()) {
-                "total_items" -> total = nextIntLenient(reader) ?: 0
-                "max_page_items" -> maxPer = nextIntLenient(reader) ?: 0
-                "data" -> if (reader.peek() == JsonToken.BEGIN_ARRAY) {
-                    reader.beginArray()
-                    while (reader.hasNext()) readVodItem(reader, apiBase)?.let { items.add(it) }
-                    reader.endArray()
-                } else {
-                    reader.skipValue()
-                }
-                else -> reader.skipValue()
-            }
-        }
-        reader.endObject()
-        return Page(total, maxPer, items)
-    }
-
-    private fun readVodItem(reader: JsonReader, apiBase: String): VodItem? {
-        if (reader.peek() != JsonToken.BEGIN_OBJECT) { reader.skipValue(); return null }
-        // Nested fields (the series episode list, actors arrays) are skipped by readScalarFields — the
-        // show/movie row only needs the scalar metadata; episodes are fetched lazily on open.
-        val f = readScalarFields(reader)
-        val id = f["id"]?.takeIf { it.isNotBlank() } ?: return null
-        return VodItem(
-            id = id,
-            name = f["name"] ?: f["o_name"] ?: id,
-            cmd = f["cmd"]?.takeIf { it.isNotBlank() },
-            poster = absoluteArt(f["screenshot_uri"] ?: f["poster"] ?: f["cover"], apiBase),
-            year = parseYear(f["year"]),
-            plot = f["description"]?.takeIf { it.isNotBlank() },
-            rating = (f["rating_imdb"] ?: f["rating"])?.trim()?.toDoubleOrNull()?.takeIf { it > 0 },
-            categoryId = (f["category_id"] ?: f["category"])?.takeIf { it.isNotBlank() && it != "*" },
-            addedAt = parseAddedAt(f["added"]),
-            isSeries = isFlagSet(f["is_series"]),
-        )
-    }
-
-    private fun parseYear(raw: String?): Int? {
-        val m = raw?.let { Regex("\\d{4}").find(it) } ?: return null
-        return m.value.toIntOrNull()?.takeIf { it in 1900..2100 }
-    }
-
-    /**
-     * Ministra's `video.added` → epoch ms. It is a portal-local datetime STRING
-     * (`YYYY-MM-DD HH:MM:SS`, sometimes date-only), not an epoch — but a few panels do return a
-     * numeric epoch, so both are accepted. Interpreted in the device timezone: the portal's own
-     * offset is not exposed, and the value is only ever used to order items relative to each other.
-     * Anything unparseable is null ("unknown"), which sorts last.
-     */
-    private fun parseAddedAt(raw: String?): Long? {
-        val v = raw?.trim()?.takeIf { it.isNotBlank() && it != "0" } ?: return null
-        // Numeric epoch (seconds or already-ms) — same guard the Xtream path uses.
-        v.toLongOrNull()?.let { n ->
-            return n.takeIf { it > 0 }?.let { if (it < 10_000_000_000L) it * 1000L else it }
-        }
-        val m = Regex("(\\d{4})-(\\d{2})-(\\d{2})(?:[ T](\\d{2}):(\\d{2})(?::(\\d{2}))?)?").find(v) ?: return null
-        val (y, mo, d, h, mi, sec) = m.destructured
-        return runCatching {
-            java.util.GregorianCalendar(
-                y.toInt(), mo.toInt() - 1, d.toInt(),
-                h.toIntOrNull() ?: 0, mi.toIntOrNull() ?: 0, sec.toIntOrNull() ?: 0,
-            ).apply { set(java.util.Calendar.MILLISECOND, 0) }.timeInMillis.takeIf { it > 0 }
-        }.getOrNull()
     }
 
     /**
@@ -744,12 +414,10 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
      */
     open suspend fun createLink(
         apiBase: String, mac: String, token: String, userAgent: String?, cmd: String,
-        // "itv" for live; "vod" for movies AND series episodes. [episode] is the series episode
-        // number minted into the URL via `series=<ep>` — null for live/movies.
-        type: String = "itv", episode: Int? = null,
+        // "itv" for a live channel; "tv_archive" is gone with catch-up playback.
+        type: String = "itv",
     ): String {
-        val seriesParam = episode?.let { "&series=$it" } ?: ""
-        val url = "$apiBase?type=${enc(type)}&action=create_link&cmd=${enc(cmd)}$seriesParam&forced_storage=0&disable_ad=0&JsHttpRequest=1-xml"
+        val url = "$apiBase?type=${enc(type)}&action=create_link&cmd=${enc(cmd)}&forced_storage=0&disable_ad=0&JsHttpRequest=1-xml"
         val js = request(url, mac, token, userAgent) { readScalarFields(it) }
         val raw = js["cmd"]?.takeIf { it.isNotBlank() }
             ?: throw StalkerAuthException("Portal create_link returned no cmd — token may have expired")
@@ -980,25 +648,6 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
         private const val TAG = "StalkerClient"
 
         /** A season row's number: the id suffix ("280:2"), 0 for Specials, else a trailing number in its name. */
-        internal fun seasonNumberOf(id: String, name: String?): Int? {
-            // "280:2" — the suffix after ':' is the season on classic portals.
-            id.substringAfterLast(':', "").toIntOrNull()?.let { return it }
-            // A "Specials" season is season 0. Without this it had no number, took its list position,
-            // and — listed first — merged into Season 1.
-            if (name != null && SPECIALS.containsMatchIn(name)) return 0
-            // Else a trailing number in the name ("Season 2", "S02").
-            return name?.let { Regex("(\\d+)\\s*$").find(it.trim())?.value?.toIntOrNull() }
-        }
-
-        /** "Specials", "Special", "Season 0 - Specials": the provider's season 0. */
-        private val SPECIALS = Regex("""\bspecials?\b""", RegexOption.IGNORE_CASE)
-
-        /**
-         * A poster or cover as a loadable URL. Many portals send a server path
-         * (`/stalker_portal/screenshots/…`), which is resolved against the API base's origin — not
-         * its path, which would double `/stalker_portal`. Absolute URLs are kept; blank and `"0"`
-         * mean none.
-         */
         internal fun absoluteArt(raw: String?, apiBase: String): String? {
             val value = raw?.trim()?.takeIf { it.isNotEmpty() && it != "0" } ?: return null
             if (value.toHttpUrlOrNull() != null) return value
@@ -1122,12 +771,12 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
          * [StalkerAuthException] — so nothing is lost by letting 403 back off and retry instead.
          */
         /**
-         * Whether this channel has a catch-up archive.
+         * Whether this channel has an archive.
          *
          * `tv_archive` is **Xtream's** field name and Ministra does not send it — a portal channel carries
          * `enable_tv_archive` and `archive` instead. Reading only the Xtream name meant every Stalker
-         * channel was recorded as having no archive, which is why catch-up never appeared on a portal even
-         * when the portal offered it: on the test portal, 427 of 11 545 channels have it.
+         * channel was recorded as having no archive, which is why the archive flag never appeared on a
+         * portal even when the portal offered it: on the test portal, 427 of 11 545 channels have it.
          *
          * All three are accepted, because panels differ and any one of them saying yes is a yes.
          */
@@ -1139,8 +788,8 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
          * How far back the archive goes, in **days**, from Ministra's `tv_archive_duration` — which is in
          * **hours**. The test portal reports 24, 48, 72 and 168: every value a multiple of 24, which is
          * one, two, three and seven days. Stored as days because that is what `ChannelEntity.catchupDays`
-         * and the catch-up picker mean by it; keeping the raw hours there would have offered a 72-day
-         * archive on a three-day one.
+         * means by it; keeping the raw hours there would have offered a 72-day archive on a three-day
+         * one.
          *
          * A value below 24 is taken at face value as days: a panel reporting "7" plainly means a week, and
          * seven hours of archive is not a thing anyone sells.
@@ -1232,24 +881,9 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
         fun withoutPlayToken(cmd: String): String = cmd.replace(PLAY_TOKEN, "")
 
         /**
-         * What an episode of a [VodSeason] show stores as its stream URL. Such an episode has no cmd of
-         * its own until its file is listed, and that listing is a request per episode — so the
-         * listing stores where the file is, and [StreamUrlResolver] fetches it at play time.
+         * Whether a `cmd` still carries its `play_token` — the per-response token that must be left
+         * OUT of a content hash, and out of the URL a reconnect replays.
          */
-        fun vodEpisodeRef(movieId: String, seasonId: String, episodeId: String): String =
-            "$VOD_EPISODE_SCHEME$movieId/$seasonId/$episodeId"
-
-        /** The parts of a [vodEpisodeRef], or null for any other stored URL. */
-        fun parseVodEpisodeRef(stored: String): VodEpisodeRef? {
-            if (!stored.startsWith(VOD_EPISODE_SCHEME)) return null
-            val parts = stored.removePrefix(VOD_EPISODE_SCHEME).split('/')
-            if (parts.size != 3 || parts.any { it.isBlank() }) return null
-            return VodEpisodeRef(parts[0], parts[1], parts[2])
-        }
-
-        private const val VOD_EPISODE_SCHEME = "stalker-vod-episode://"
-
-        /** True when [cmd] carries a `play_token`, so its stored copy is renewed on each re-sync. */
         fun hasPlayToken(cmd: String): Boolean = PLAY_TOKEN.containsMatchIn(cmd)
 
         private val PLAY_TOKEN = Regex("(?i)[?&]play_token=[^&\\s]*(?=&|\\s|$)")

@@ -8,8 +8,6 @@ import kotlinx.coroutines.withContext
 import tv.own.owntv.core.database.BulkInsertHelper
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
-import tv.own.owntv.core.database.dao.MovieDao
-import tv.own.owntv.core.database.dao.SeriesDao
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.SourceEntity
@@ -24,16 +22,12 @@ import tv.own.owntv.core.settings.SettingsRepository
  * [XtreamSyncer] preserves existing rows via
  * hash-diffed stable upserts; [M3uSyncer] uses clear-then-insert because playlists do not provide
  * stable item ids. Shared machinery (chunked inserts, upserts, pruning) lives in [SyncSupport].
- *
- * Series episodes are intentionally fetched lazily on open, not during sync.
  */
 class SyncManager(
     context: android.content.Context,
     private val sourceDao: SourceDao,
     categoryDao: CategoryDao,
     channelDao: ChannelDao,
-    movieDao: MovieDao,
-    seriesDao: SeriesDao,
     xtream: XtreamClient,
     m3u: M3uParser,
     http: HttpClient,
@@ -53,28 +47,25 @@ class SyncManager(
      * playing?" directly, so the work can wait for a quiet moment instead of taking one.
      */
     private val connectionLimits: tv.own.owntv.core.live.ConnectionLimits,
-    private val catalogBackfillDao: tv.own.owntv.core.database.dao.CatalogBackfillDao,
     /**
-     * Enqueues the background drain of a lazily-planned Stalker catalogue.
+     * Enqueues the connection-limit measurement and the content-index build in the background.
      *
      * Deliberately hooked here rather than at an import call site: a source is imported from the
      * setup wizard, from the Settings "Add source" screen — which has its own copy of the import
      * flow in the TV app — and from `CatalogSyncWorker`. All of them funnel through [sync], so this
-     * is the one place the drain cannot be forgotten by a caller that core does not own.
+     * is the one place those enqueues cannot be forgotten by a caller that core does not own.
      *
      * (The TV app's private copy of the import flow is gone, so `SourceImporter` would
      * now be reachable from every path too. This hook stays here regardless: [sync] is the narrower
      * and more durable guarantee, and it costs nothing.)
      */
     private val catalogSyncScheduler: tv.own.owntv.core.sync.work.CatalogSyncScheduler,
-    /** Which category the user is looking at, so the drain serves it first. */
-    private val catalogPriority: CatalogPriority,
     private val rutubeApi: tv.own.owntv.core.sync.RutubeApi? = null,
 ) {
-    private val support = SyncSupport(categoryDao, channelDao, movieDao, seriesDao, sourceDao, customize, settings)
+    private val support = SyncSupport(categoryDao, channelDao, sourceDao, customize, settings)
     private val xtreamSyncer = XtreamSyncer(xtream, bulkInsertHelper, support)
-    private val m3uSyncer = M3uSyncer(context, sourceDao, categoryDao, channelDao, movieDao, seriesDao, m3u, http, bulkInsertHelper, support)
-    private val stalkerSyncer = StalkerSyncer(stalkerClient, stalkerAuth, bulkInsertHelper, support, sourceDao, catalogBackfillDao, catalogPriority, PortalCeilingStore(context))
+    private val m3uSyncer = M3uSyncer(context, sourceDao, categoryDao, channelDao, m3u, http, bulkInsertHelper, support)
+    private val stalkerSyncer = StalkerSyncer(stalkerClient, stalkerAuth, bulkInsertHelper, support, sourceDao, PortalCeilingStore(context))
     private val rutubeSyncer = rutubeApi?.let { RuTubeSyncer(it, bulkInsertHelper, support) }
     /** Late-bound EPG syncer, created by DataModule after EpgRepository exists. */
     var rutubeEpgSyncer: RuTubeEpgSyncer? = null
@@ -125,7 +116,7 @@ class SyncManager(
             var result: SyncResult = SyncResult.Cancelled
             try {
                 if (!effective.hasAny) {
-                    // Empty effective (e.g. Movies-later remainder after Movies turned Off): clean
+                    // Empty effective (e.g. a live-only remainder after Live turned Off): clean
                     // no-op — do not stamp lastSyncAt (scope edit enqueues a reconcile resync).
                     Log.i(TAG, "sync no-op empty effective sourceId=${source.id}")
                     progress.completeAll()
@@ -153,15 +144,6 @@ class SyncManager(
                         sourceDao.markSynced(source.id, System.currentTimeMillis())
                         Log.d(TAG, "markSynced sourceId=${source.id} ms=${SystemClock.elapsedRealtime() - markStartedAt}")
                     }
-                    // A Stalker pass that stopped after the page-1 sweep left a page plan behind.
-                    // Finish it in the background now that every list is browsable. Gated on the plan
-                    // itself, so a pass that drained the catalogue eagerly (and cleared its plan)
-                    // enqueues nothing, and no other source type ever does.
-                    if (source.type == SourceType.STALKER) {
-                        val pending = catalogBackfillDao.pendingCount(source.id, tv.own.owntv.core.model.MediaType.MOVIE) +
-                            catalogBackfillDao.pendingCount(source.id, tv.own.owntv.core.model.MediaType.SERIES)
-                        if (pending > 0) catalogSyncScheduler.enqueueCatalogBackfill(source.id)
-                    }
                     progress.completeAll()
                     result = SyncResult.Success(
                         warnings = stats.warnings(),
@@ -183,24 +165,6 @@ class SyncManager(
             logStats(runStats)
             result to runStats
         }
-
-    /**
-     * Finish a Stalker catalogue whose setup deliberately stopped after the first page of every
-     * category. Runs from `CatalogBackfillWorker`, not from a sync: it is long, resumable and
-     * interruptible, and the catalogue is already browsable while it works.
-     *
-     * Reports no progress and touches no [SyncActivityTracker] state — the user did not ask for this
-     * and must not see a sync pill for it. Returns what the pass achieved so the worker can decide
-     * between "come back later" and "done".
-     */
-    internal suspend fun backfillCatalog(
-        sourceId: Long,
-        yieldToUser: suspend () -> Boolean,
-    ): StalkerSyncer.BackfillOutcome = withContext(Dispatchers.IO) {
-        val source = sourceDao.getById(sourceId) ?: return@withContext StalkerSyncer.BackfillOutcome()
-        if (source.type != SourceType.STALKER) return@withContext StalkerSyncer.BackfillOutcome()
-        stalkerSyncer.backfill(source, yieldToUser)
-    }
 
     private fun logStats(stats: SyncRunStats) {
         val tag = "SyncManager"

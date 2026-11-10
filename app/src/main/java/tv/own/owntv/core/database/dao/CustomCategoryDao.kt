@@ -9,8 +9,6 @@ import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.CustomCategoryMemberEntity
-import tv.own.owntv.core.database.entity.MovieEntity
-import tv.own.owntv.core.database.entity.SeriesEntity
 import tv.own.owntv.core.model.MediaType
 
 /**
@@ -88,11 +86,9 @@ interface CustomCategoryDao {
      */
     @Query(
         "SELECT contextKey, COUNT(*) AS count FROM custom_category_members " +
-            "WHERE profileId = :profileId AND mediaType = :type AND contextKey IN (:contextKeys) AND (" +
-            "(:type = 'LIVE' AND itemId IN (SELECT id FROM channels WHERE sourceId IN (:sourceIds))) OR " +
-            "(:type = 'MOVIE' AND itemId IN (SELECT id FROM movies WHERE sourceId IN (:sourceIds))) OR " +
-            "(:type = 'SERIES' AND itemId IN (SELECT id FROM series WHERE sourceId IN (:sourceIds)))" +
-            ") GROUP BY contextKey",
+            "WHERE profileId = :profileId AND mediaType = :type AND contextKey IN (:contextKeys) AND " +
+            "itemId IN (SELECT id FROM channels WHERE sourceId IN (:sourceIds)) " +
+            "GROUP BY contextKey",
     )
     fun observeCountsByContexts(
         profileId: Long,
@@ -104,14 +100,10 @@ interface CustomCategoryDao {
     /** [observeCountsByContexts] without the items filed under [excluded] (locked categories). */
     @Query(
         "SELECT contextKey, COUNT(*) AS count FROM custom_category_members " +
-            "WHERE profileId = :profileId AND mediaType = :type AND contextKey IN (:contextKeys) AND (" +
-            "(:type = 'LIVE' AND itemId IN (SELECT id FROM channels WHERE sourceId IN (:sourceIds) " +
-            "AND (categoryId IS NULL OR categoryId NOT IN (:excluded)))) OR " +
-            "(:type = 'MOVIE' AND itemId IN (SELECT id FROM movies WHERE sourceId IN (:sourceIds) " +
-            "AND (categoryId IS NULL OR categoryId NOT IN (:excluded)))) OR " +
-            "(:type = 'SERIES' AND itemId IN (SELECT id FROM series WHERE sourceId IN (:sourceIds) " +
-            "AND (categoryId IS NULL OR categoryId NOT IN (:excluded))))" +
-            ") GROUP BY contextKey",
+            "WHERE profileId = :profileId AND mediaType = :type AND contextKey IN (:contextKeys) AND " +
+            "itemId IN (SELECT id FROM channels WHERE sourceId IN (:sourceIds) " +
+            "AND (categoryId IS NULL OR categoryId NOT IN (:excluded))) " +
+            "GROUP BY contextKey",
     )
     fun observeCountsByContextsExcluding(
         profileId: Long,
@@ -130,15 +122,7 @@ interface CustomCategoryDao {
     @Query(
         "SELECT CAST(c.sourceId AS TEXT) || ':' || COALESCE(c.remoteId, c.name) " +
             "FROM custom_category_members m INNER JOIN channels c ON m.mediaType = 'LIVE' AND m.itemId = c.id " +
-            "WHERE m.profileId = :profileId AND m.mediaType = 'LIVE' AND m.contextKey = :contextKey " +
-            "UNION ALL " +
-            "SELECT CAST(mv.sourceId AS TEXT) || ':' || COALESCE(mv.remoteId, mv.name) " +
-            "FROM custom_category_members m INNER JOIN movies mv ON m.mediaType = 'MOVIE' AND m.itemId = mv.id " +
-            "WHERE m.profileId = :profileId AND m.mediaType = 'MOVIE' AND m.contextKey = :contextKey " +
-            "UNION ALL " +
-            "SELECT CAST(s.sourceId AS TEXT) || ':' || COALESCE(s.remoteId, s.name) " +
-            "FROM custom_category_members m INNER JOIN series s ON m.mediaType = 'SERIES' AND m.itemId = s.id " +
-            "WHERE m.profileId = :profileId AND m.mediaType = 'SERIES' AND m.contextKey = :contextKey",
+            "WHERE m.profileId = :profileId AND m.mediaType = 'LIVE' AND m.contextKey = :contextKey",
     )
     suspend fun stableItemKeys(profileId: Long, contextKey: String): List<String>
 
@@ -150,14 +134,10 @@ interface CustomCategoryDao {
     @Query(
         "SELECT m.profileId AS profileId, m.mediaType AS mediaType, m.itemId AS itemId, " +
             "m.contextKey AS contextKey, m.position AS position, " +
-            "COALESCE(c.sourceId, mv.sourceId, s.sourceId) AS sourceId, " +
-            "COALESCE(c.remoteId, mv.remoteId, s.remoteId) AS remoteId, " +
-            "COALESCE(c.name, mv.name, s.name) AS name " +
+            "c.sourceId AS sourceId, c.remoteId AS remoteId, c.name AS name " +
             "FROM custom_category_members m " +
-            "LEFT JOIN channels c ON m.mediaType = 'LIVE' AND m.itemId = c.id " +
-            "LEFT JOIN movies mv ON m.mediaType = 'MOVIE' AND m.itemId = mv.id " +
-            "LEFT JOIN series s ON m.mediaType = 'SERIES' AND m.itemId = s.id " +
-            "WHERE c.sourceId = :sourceId OR mv.sourceId = :sourceId OR s.sourceId = :sourceId",
+            "JOIN channels c ON m.mediaType = 'LIVE' AND m.itemId = c.id " +
+            "WHERE c.sourceId = :sourceId",
     )
     suspend fun exportRowsForSource(sourceId: Long): List<CustomCategoryMemberExportRow>
 
@@ -169,10 +149,7 @@ interface CustomCategoryDao {
      */
     @Query(
         "DELETE FROM custom_category_members WHERE profileId = :profileId AND mediaType = :type AND itemId IN (:itemIds) AND (" +
-            "(:type = 'LIVE'   AND itemId NOT IN (SELECT id FROM channels)) OR " +
-            "(:type = 'MOVIE'  AND itemId NOT IN (SELECT id FROM movies))   OR " +
-            "(:type = 'SERIES' AND itemId NOT IN (SELECT id FROM series))" +
-            ")",
+            "mediaType != 'LIVE' OR itemId NOT IN (SELECT id FROM channels))",
     )
     suspend fun purgeSnapshotOrphans(profileId: Long, type: MediaType, itemIds: List<Long>)
 
@@ -181,12 +158,7 @@ interface CustomCategoryDao {
      * every sync, so an item's itemId goes stale. Called after a re-sync's relink
      * (UserDataResolver), mirroring FavoriteDao.purgeOrphans.
      */
-    @Query(
-        "DELETE FROM custom_category_members WHERE " +
-            "(mediaType = 'LIVE'   AND itemId NOT IN (SELECT id FROM channels)) OR " +
-            "(mediaType = 'MOVIE'  AND itemId NOT IN (SELECT id FROM movies))   OR " +
-            "(mediaType = 'SERIES' AND itemId NOT IN (SELECT id FROM series))",
-    )
+    @Query("DELETE FROM custom_category_members WHERE mediaType != 'LIVE' OR itemId NOT IN (SELECT id FROM channels)")
     suspend fun purgeOrphans()
 
     // --- browse side: paging / count / search (mirrors the ChannelDao manual-order joins) ---
@@ -209,53 +181,24 @@ interface CustomCategoryDao {
     )
     fun pagingChannels(profileId: Long, contextKey: String, sourceIds: List<Long>, alpha: Boolean): PagingSource<Int, ChannelEntity>
 
-    /** Moved rows keep their saved position; the rest follow [alpha] (A–Z) or the playlist order
-     *  around them — the same rule as `placePinned` for categories. */
-    @Query(
-            "WITH base AS (SELECT mv.id AS id, mv.sortOrder AS so, mv.name AS nm, m.position AS mp, o.position AS pos " +
-            "FROM movies mv INNER JOIN custom_category_members m ON m.itemId = mv.id AND m.profileId = :profileId AND m.mediaType = 'MOVIE' AND m.contextKey = :contextKey " +
-            "LEFT JOIN content_order o ON o.itemId = mv.id AND o.profileId = :profileId AND o.mediaType = 'MOVIE' AND o.contextKey = :contextKey " +
-            "WHERE mv.sourceId IN (:sourceIds)), " +
-            "slots AS (SELECT id, pos - (ROW_NUMBER() OVER (ORDER BY pos, id) - 1) AS slot, 0 AS grp, pos AS tie FROM base WHERE pos IS NOT NULL " +
-            "UNION ALL SELECT id, ROW_NUMBER() OVER (ORDER BY CASE WHEN :alpha THEN nm END, mp, so, nm) - 1 AS slot, 1 AS grp, 0 AS tie FROM base WHERE pos IS NULL) " +
-            "SELECT mv.* FROM movies mv INNER JOIN slots sl ON sl.id = mv.id ORDER BY sl.slot, sl.grp, sl.tie",
-    )
-    fun pagingMovies(profileId: Long, contextKey: String, sourceIds: List<Long>, alpha: Boolean): PagingSource<Int, MovieEntity>
-
-    /** Moved rows keep their saved position; the rest follow [alpha] (A–Z) or the playlist order
-     *  around them — the same rule as `placePinned` for categories. */
-    @Query(
-            "WITH base AS (SELECT s.id AS id, s.sortOrder AS so, s.name AS nm, m.position AS mp, o.position AS pos " +
-            "FROM series s INNER JOIN custom_category_members m ON m.itemId = s.id AND m.profileId = :profileId AND m.mediaType = 'SERIES' AND m.contextKey = :contextKey " +
-            "LEFT JOIN content_order o ON o.itemId = s.id AND o.profileId = :profileId AND o.mediaType = 'SERIES' AND o.contextKey = :contextKey " +
-            "WHERE s.sourceId IN (:sourceIds)), " +
-            "slots AS (SELECT id, pos - (ROW_NUMBER() OVER (ORDER BY pos, id) - 1) AS slot, 0 AS grp, pos AS tie FROM base WHERE pos IS NOT NULL " +
-            "UNION ALL SELECT id, ROW_NUMBER() OVER (ORDER BY CASE WHEN :alpha THEN nm END, mp, so, nm) - 1 AS slot, 1 AS grp, 0 AS tie FROM base WHERE pos IS NULL) " +
-            "SELECT s.* FROM series s INNER JOIN slots sl ON sl.id = s.id ORDER BY sl.slot, sl.grp, sl.tie",
-    )
-    fun pagingSeries(profileId: Long, contextKey: String, sourceIds: List<Long>, alpha: Boolean): PagingSource<Int, SeriesEntity>
-
-    /** Live count of a custom category's in-scope items — the rail count badge. */
+    
+    
+    /** Live count of a custom category's in-scope items — the rail count badge. Live-only. */
     @Query(
         "SELECT COUNT(*) FROM custom_category_members m " +
-            "LEFT JOIN channels c ON m.mediaType = 'LIVE' AND m.itemId = c.id " +
-            "LEFT JOIN movies mv ON m.mediaType = 'MOVIE' AND m.itemId = mv.id " +
-            "LEFT JOIN series s ON m.mediaType = 'SERIES' AND m.itemId = s.id " +
+            "JOIN channels c ON m.mediaType = 'LIVE' AND m.itemId = c.id " +
             "WHERE m.profileId = :profileId AND m.mediaType = :type AND m.contextKey = :contextKey " +
-            "AND COALESCE(c.sourceId, mv.sourceId, s.sourceId) IN (:sourceIds)",
+            "AND c.sourceId IN (:sourceIds)",
     )
     fun countMembers(profileId: Long, type: MediaType, contextKey: String, sourceIds: List<Long>): Flow<Int>
 
-    /** [countMembers] without the items filed under [excluded] (locked categories). */
+    /** [countMembers] without the items filed under [excluded] (locked categories). Live-only. */
     @Query(
         "SELECT COUNT(*) FROM custom_category_members m " +
-            "LEFT JOIN channels c ON m.mediaType = 'LIVE' AND m.itemId = c.id " +
-            "LEFT JOIN movies mv ON m.mediaType = 'MOVIE' AND m.itemId = mv.id " +
-            "LEFT JOIN series s ON m.mediaType = 'SERIES' AND m.itemId = s.id " +
+            "JOIN channels c ON m.mediaType = 'LIVE' AND m.itemId = c.id " +
             "WHERE m.profileId = :profileId AND m.mediaType = :type AND m.contextKey = :contextKey " +
-            "AND COALESCE(c.sourceId, mv.sourceId, s.sourceId) IN (:sourceIds) " +
-            "AND (COALESCE(c.categoryId, mv.categoryId, s.categoryId) IS NULL " +
-            "OR COALESCE(c.categoryId, mv.categoryId, s.categoryId) NOT IN (:excluded))",
+            "AND c.sourceId IN (:sourceIds) " +
+            "AND (c.categoryId IS NULL OR c.categoryId NOT IN (:excluded))",
     )
     fun countMembersExcluding(profileId: Long, type: MediaType, contextKey: String, sourceIds: List<Long>, excluded: List<Long>): Flow<Int>
 
@@ -265,8 +208,7 @@ interface CustomCategoryDao {
     @Query("SELECT itemId FROM custom_category_members WHERE profileId = :profileId AND mediaType = :type AND contextKey = :contextKey")
     suspend fun itemIds(profileId: Long, type: MediaType, contextKey: String): List<Long>
 
-    /** Bounded snapshot of a custom category in rail order — the Move session's in-memory reorder. Moved rows keep their saved position; the rest follow
-     *  [alpha] (A–Z) or the playlist order around them. */
+    /** Bounded snapshot of a custom category in rail order — the Move session's in-memory reorder. */
     @Query(
             "WITH base AS (SELECT c.id AS id, c.sortOrder AS so, c.name AS nm, m.position AS mp, o.position AS pos " +
             "FROM channels c INNER JOIN custom_category_members m ON m.itemId = c.id AND m.profileId = :profileId AND m.mediaType = 'LIVE' AND m.contextKey = :contextKey " +
@@ -278,32 +220,6 @@ interface CustomCategoryDao {
     )
     suspend fun snapshotChannels(profileId: Long, contextKey: String, sourceIds: List<Long>, alpha: Boolean, limit: Int): List<ChannelEntity>
 
-    /** Moved rows keep their saved position; the rest follow [alpha] (A–Z) or the playlist order
-     *  around them — the same rule as `placePinned` for categories. */
-    @Query(
-            "WITH base AS (SELECT mv.id AS id, mv.sortOrder AS so, mv.name AS nm, m.position AS mp, o.position AS pos " +
-            "FROM movies mv INNER JOIN custom_category_members m ON m.itemId = mv.id AND m.profileId = :profileId AND m.mediaType = 'MOVIE' AND m.contextKey = :contextKey " +
-            "LEFT JOIN content_order o ON o.itemId = mv.id AND o.profileId = :profileId AND o.mediaType = 'MOVIE' AND o.contextKey = :contextKey " +
-            "WHERE mv.sourceId IN (:sourceIds)), " +
-            "slots AS (SELECT id, pos - (ROW_NUMBER() OVER (ORDER BY pos, id) - 1) AS slot, 0 AS grp, pos AS tie FROM base WHERE pos IS NOT NULL " +
-            "UNION ALL SELECT id, ROW_NUMBER() OVER (ORDER BY CASE WHEN :alpha THEN nm END, mp, so, nm) - 1 AS slot, 1 AS grp, 0 AS tie FROM base WHERE pos IS NULL) " +
-            "SELECT mv.* FROM movies mv INNER JOIN slots sl ON sl.id = mv.id ORDER BY sl.slot, sl.grp, sl.tie LIMIT :limit",
-    )
-    suspend fun snapshotMovies(profileId: Long, contextKey: String, sourceIds: List<Long>, alpha: Boolean, limit: Int): List<MovieEntity>
-
-    /** Moved rows keep their saved position; the rest follow [alpha] (A–Z) or the playlist order
-     *  around them — the same rule as `placePinned` for categories. */
-    @Query(
-            "WITH base AS (SELECT s.id AS id, s.sortOrder AS so, s.name AS nm, m.position AS mp, o.position AS pos " +
-            "FROM series s INNER JOIN custom_category_members m ON m.itemId = s.id AND m.profileId = :profileId AND m.mediaType = 'SERIES' AND m.contextKey = :contextKey " +
-            "LEFT JOIN content_order o ON o.itemId = s.id AND o.profileId = :profileId AND o.mediaType = 'SERIES' AND o.contextKey = :contextKey " +
-            "WHERE s.sourceId IN (:sourceIds)), " +
-            "slots AS (SELECT id, pos - (ROW_NUMBER() OVER (ORDER BY pos, id) - 1) AS slot, 0 AS grp, pos AS tie FROM base WHERE pos IS NOT NULL " +
-            "UNION ALL SELECT id, ROW_NUMBER() OVER (ORDER BY CASE WHEN :alpha THEN nm END, mp, so, nm) - 1 AS slot, 1 AS grp, 0 AS tie FROM base WHERE pos IS NULL) " +
-            "SELECT s.* FROM series s INNER JOIN slots sl ON sl.id = s.id ORDER BY sl.slot, sl.grp, sl.tie LIMIT :limit",
-    )
-    suspend fun snapshotSeries(profileId: Long, contextKey: String, sourceIds: List<Long>, alpha: Boolean, limit: Int): List<SeriesEntity>
-
     /** In-category search (mirrors ChannelDao.searchInCategory), for custom categories. */
     @Query(
         "SELECT c.* FROM channels c " +
@@ -312,22 +228,6 @@ interface CustomCategoryDao {
             "ORDER BY m.position, c.sortOrder, c.name",
     )
     fun searchChannels(query: String, profileId: Long, contextKey: String, sourceIds: List<Long>): PagingSource<Int, ChannelEntity>
-
-    @Query(
-        "SELECT mv.* FROM movies mv " +
-            "INNER JOIN custom_category_members m ON m.itemId = mv.id AND m.profileId = :profileId AND m.mediaType = 'MOVIE' AND m.contextKey = :contextKey " +
-            "WHERE mv.sourceId IN (:sourceIds) AND mv.name LIKE '%' || :query || '%' " +
-            "ORDER BY m.position, mv.sortOrder, mv.name",
-    )
-    fun searchMovies(query: String, profileId: Long, contextKey: String, sourceIds: List<Long>): PagingSource<Int, MovieEntity>
-
-    @Query(
-        "SELECT s.* FROM series s " +
-            "INNER JOIN custom_category_members m ON m.itemId = s.id AND m.profileId = :profileId AND m.mediaType = 'SERIES' AND m.contextKey = :contextKey " +
-            "WHERE s.sourceId IN (:sourceIds) AND s.name LIKE '%' || :query || '%' " +
-            "ORDER BY m.position, s.sortOrder, s.name",
-    )
-    fun searchSeries(query: String, profileId: Long, contextKey: String, sourceIds: List<Long>): PagingSource<Int, SeriesEntity>
 }
 
 /**

@@ -39,9 +39,9 @@ class LocalAutoSyncStoreTest {
     fun termsRoundTripAndKeepTheirRecord() = runBlocking {
         store.saveTerms(device.id, setOf(Section.HISTORY), 2L, LocalAutoSyncTiming.HOURS_24, setOf(Section.FAVORITES), "Phone")
         store.recordAttempt(device.id, at = 50, success = true)
-        store.saveTerms(device.id, setOf(Section.RESUME), 1L, LocalAutoSyncTiming.IMMEDIATELY)
+        store.saveTerms(device.id, setOf(Section.MANUAL_REORDER), 1L, LocalAutoSyncTiming.IMMEDIATELY)
         val a = store.get(device.id)!!
-        assertEquals(setOf(Section.RESUME), a.sections)
+        assertEquals(setOf(Section.MANUAL_REORDER), a.sections)
         assertEquals(setOf(Section.FAVORITES), a.theirSections)
         assertEquals(50L, a.lastSuccessAt)
     }

@@ -90,7 +90,7 @@ data class SourceEntity(
     val hlsSupported: HlsSupport = HlsSupport.UNKNOWN,
     /**
      * User preference (v23): prioritize .m3u8 streams over .ts for **Live TV only**. Catch-up is
-     * deliberately excluded — the timeshift server serves recordings off disk with no HLS repackager
+     * deliberately excluded
      * in front of it, so asking it for `.m3u8` breaks archives on accounts whose live TV is fine.
      */
     val preferHls: Boolean = false,

@@ -1,9 +1,9 @@
 package tv.own.myowntv.features.shell.components
+import kotlinx.coroutines.delay
 import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +12,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +19,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +33,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -56,7 +50,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -66,17 +65,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import androidx.tv.material3.Text
-import tv.own.owntv.core.download.DownloadActivityTracker
-import tv.own.owntv.core.recording.RecordingActivityTracker
 import tv.own.owntv.core.sync.EpgActivityTracker
 import tv.own.owntv.core.sync.SyncActivityTracker
-import tv.own.owntv.core.sync.TrendingActivityTracker
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.LaunchedEffect
-import kotlinx.coroutines.delay
 import tv.own.myowntv.R
 import tv.own.myowntv.ui.stage.stageGlass
 import tv.own.myowntv.ui.theme.StageColors
@@ -90,14 +80,13 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import tv.own.myowntv.ui.components.OwnTVSpinner
 import tv.own.myowntv.ui.components.compactCount
-import tv.own.myowntv.ui.components.displayText
 
 /**
- * Unobtrusive "sync running" pill (shell overlay, bottom middle). Reflects BOTH catalog syncs (a
- * backgrounded first import, the movies/series remainder worker, auto refresh — all funnel through
- * SyncManager → [SyncActivityTracker]) AND EPG/guide syncs (manual resync from Settings, auto startup
- * refresh — [EpgSyncWorker] → [EpgActivityTracker]). Semi-transparent, never focusable, renders nothing
- * when no sync is active. The shell hides it during fullscreen playback.
+ * Unobtrusive "sync running" pill (shell overlay, bottom middle). Reflects live catalog syncs
+ * (a backgrounded first import, auto refresh — all funnel through SyncManager →
+ * [SyncActivityTracker]) AND EPG/guide syncs (manual resync from Settings, auto startup
+ * refresh — [EpgSyncWorker] → [EpgActivityTracker]). Semi-transparent, never focusable, renders
+ * nothing when no sync is active. The shell hides it during fullscreen playback.
  *
  * **One line per running sync.** It used to show a single line for whichever sync happened to be
  * first, with the rest collapsed into "(+2 more) · EPG too" — so with a playlist and a guide running
@@ -109,17 +98,10 @@ import tv.own.myowntv.ui.components.displayText
 fun SyncStatusPill(modifier: Modifier = Modifier) {
     val catalogTracker: SyncActivityTracker = koinInject()
     val epgTracker: EpgActivityTracker = koinInject()
-    val trendingTracker: TrendingActivityTracker = koinInject()
-    val downloadTracker: DownloadActivityTracker = koinInject()
-    val recordingTracker: RecordingActivityTracker = koinInject()
     val connectivity: ConnectivityObserver = koinInject()
     val activeCatalog by catalogTracker.active.collectAsStateWithLifecycle()
     val activeEpg by epgTracker.active.collectAsStateWithLifecycle()
-    val activeTrending by trendingTracker.active.collectAsStateWithLifecycle()
-    val activeDownload by downloadTracker.active.collectAsStateWithLifecycle()
-    val activeRecordings by recordingTracker.active.collectAsStateWithLifecycle()
     val lastCompleted by catalogTracker.lastCompleted.collectAsStateWithLifecycle()
-    val lastTrendingCompleted by trendingTracker.lastCompleted.collectAsStateWithLifecycle()
     val sportsTracker: tv.own.owntv.core.sports.SportsActivityTracker = koinInject()
     val sportsRebuild by sportsTracker.rebuild.collectAsStateWithLifecycle()
     // A failed rebuild is said once, for 5 s, when it happens — not again each time the pill returns.
@@ -134,15 +116,12 @@ fun SyncStatusPill(modifier: Modifier = Modifier) {
             sportsFailed = false
         }
     }
-    val named = rememberPillNamedTitles(downloadTracker, recordingTracker)
-
 
     val completedQueue = remember { mutableStateListOf<SyncActivityTracker.CompletedSync>() }
     var currentCompleted by remember { mutableStateOf<SyncActivityTracker.CompletedSync?>(null) }
-    var currentTrendingCompleted by remember { mutableStateOf<TrendingActivityTracker.CompletedBuild?>(null) }
 
-    val anyActive = activeCatalog.isNotEmpty() || activeEpg.isNotEmpty() || activeTrending.isNotEmpty() ||
-        activeDownload != null || activeRecordings.isNotEmpty() || sportsRebuild is tv.own.owntv.core.sports.RebuildState.Running
+    val anyActive = activeCatalog.isNotEmpty() || activeEpg.isNotEmpty() ||
+        sportsRebuild is tv.own.owntv.core.sports.RebuildState.Running
 
     LaunchedEffect(lastCompleted) {
         val completed = lastCompleted ?: return@LaunchedEffect
@@ -151,18 +130,10 @@ fun SyncStatusPill(modifier: Modifier = Modifier) {
         }
     }
 
-    LaunchedEffect(lastTrendingCompleted) {
-        val completed = lastTrendingCompleted ?: return@LaunchedEffect
-        currentTrendingCompleted = completed
-        trendingTracker.consumeCompleted(completed.timestamp)
-    }
-
     LaunchedEffect(currentCompleted, completedQueue.size) {
         if (currentCompleted == null && completedQueue.isNotEmpty()) {
             val next = completedQueue.removeAt(0)
             currentCompleted = next
-            // Keep the just-finished catalog row visible while its follow-up Trending build runs;
-            // this makes the two backend phases readable together instead of replacing one another.
             catalogTracker.consumeCompleted(next.timestamp)
         }
     }
@@ -174,36 +145,19 @@ fun SyncStatusPill(modifier: Modifier = Modifier) {
         }
     }
 
-    LaunchedEffect(currentTrendingCompleted) {
-        if (currentTrendingCompleted != null) {
-            delay(5000)
-            currentTrendingCompleted = null
-        }
-    }
-
-    if (!anyActive && currentCompleted == null && currentTrendingCompleted == null && !sportsFailed) return
+    if (!anyActive && currentCompleted == null && !sportsFailed) return
 
     // Catalog syncs first (they're the slower, more interesting ones), then guides, in a stable
     // order so a row doesn't jump around as progress updates arrive.
     val rows = buildList<SyncLine> {
-        // Recordings first, always. They are time-critical and unrecoverable — a sync that is
-        // collapsed into "+N more" can be watched again in a minute, a programme that is being
-        // recorded cannot. Then downloads, which are deliberately started and time-limited. Then the
-        // background syncs, which are the ones that can afford to be hidden.
-        activeRecordings.values.sortedBy { it.id }.forEach { add(SyncLine.Recording(it, it.id in named.recordings)) }
-        activeDownload?.let { add(SyncLine.Download(it, it.id in named.downloads)) }
         activeCatalog.values.sortedBy { it.sourceId }.forEach { add(SyncLine.Catalog(it)) }
-        activeTrending.values.sortedBy { it.sourceId }.forEach {
-            add(SyncLine.Trending(it))
-            add(SyncLine.TrendingDetail(it))
-        }
         activeEpg.values.sortedBy { it.sourceId }.forEach { add(SyncLine.Epg(it)) }
         if (sportsRebuild is tv.own.owntv.core.sports.RebuildState.Running) add(SyncLine.Sports)
     }
     val shown = rows.take(MAX_ROWS)
     val hidden = rows.size - shown.size
     val lineCount = shown.size + (if (hidden > 0) 1 else 0) +
-        (if (currentCompleted != null) 1 else 0) + (if (currentTrendingCompleted != null) 2 else 0) + (if (sportsFailed) 1 else 0)
+        (if (currentCompleted != null) 1 else 0) + (if (sportsFailed) 1 else 0)
 
     // The Stage glass card (as the top-right pills): fully round for one line, a rounded card for a stack.
     val radius = if (lineCount > 1) 22.mpx else 30.mpx
@@ -257,38 +211,11 @@ fun SyncStatusPill(modifier: Modifier = Modifier) {
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        currentTrendingCompleted?.let { completed ->
-            Text(
-                trendingCompletedLine(completed),
-                style = stageText(16, 600),
-                color = StageColors.ItemText,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                trendingCompletedDetailLine(completed),
-                style = stageText(16, 600),
-                color = StageColors.ItemText,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
     }
 }
 
-/**
- * The `|| count > 0` on each active flag mirrors ManageSourcesScreen: the syncer clears a phase's
- * active flag when it moves on, and without this a finished phase's count would vanish from the line
- * mid-sync. Counts are cumulative, so a type that never runs (M3U movies/series) stays at 0 and is
- * left out.
- */
 private sealed interface SyncLine {
     data class Catalog(val sync: SyncActivityTracker.ActiveSync) : SyncLine
-    /** [named]: the title may show; false while its category is locked and sealed. */
-    data class Download(val download: DownloadActivityTracker.ActiveDownload, val named: Boolean) : SyncLine
-    data class Recording(val recording: tv.own.owntv.core.recording.RecordingProgress, val named: Boolean) : SyncLine
-    data class Trending(val build: TrendingActivityTracker.ActiveBuild) : SyncLine
-    data class TrendingDetail(val build: TrendingActivityTracker.ActiveBuild) : SyncLine
     data class Epg(val sync: EpgActivityTracker.ActiveEpgSync) : SyncLine
     data object Sports : SyncLine
 }
@@ -297,18 +224,14 @@ private sealed interface SyncLine {
 private fun SyncLine.text(): String = when (this) {
     SyncLine.Sports -> stringResource(R.string.sports_rebuilding)
     is SyncLine.Catalog -> {
-        val stage = sync.stage
-        val counts = stage?.let {
+        val res = LocalContext.current.resources
+        val counts = sync.stage?.let {
             SyncProgressCounts(
                 live = it.liveProcessed,
-                movies = it.moviesProcessed,
-                series = it.seriesProcessed,
                 liveActive = it.liveActive || it.liveProcessed > 0,
-                moviesActive = it.moviesActive || it.moviesProcessed > 0,
-                seriesActive = it.seriesActive || it.seriesProcessed > 0,
             )
         }
-        val countsText = counts?.displayText().orEmpty()
+        val countsText = counts?.displayText(res).orEmpty()
         if (countsText.isBlank()) stringResource(R.string.sync_status_catalog, sync.sourceName)
         else stringResource(R.string.sync_status_catalog_with_counts, sync.sourceName, countsText)
     }
@@ -321,85 +244,6 @@ private fun SyncLine.text(): String = when (this) {
         val countsText = countParts.joinToString(stringResource(R.string.sync_counts_separator))
         if (countsText.isBlank()) stringResource(R.string.sync_status_epg, sync.sourceName)
         else stringResource(R.string.sync_status_epg_with_counts, sync.sourceName, countsText)
-    }
-    // No percentage: a recording ends on the clock, not on a byte count, so there is nothing to be
-    // a percentage of.
-    // With the size as it grows: a recording has no total to count towards, so the bytes already
-    // written are the only sign it is moving rather than stuck.
-    is SyncLine.Recording -> listOfNotNull(
-        if (named) stringResource(R.string.recording_pill_line, recording.title) else stringResource(R.string.recording_pill_line_locked),
-        recording.bytes.takeIf { it > 0 }
-            ?.let { stringResource(R.string.common_size_mb, recordingSizeMb(it)) },
-    ).joinToString(stringResource(R.string.content_epg_bits_separator))
-    is SyncLine.Download -> {
-        val percent = download.progress?.let { (it * 100).toInt() }
-        when {
-            percent == null -> if (named) stringResource(R.string.sync_status_download, download.title)
-                else stringResource(R.string.sync_status_download_locked)
-            named -> stringResource(R.string.sync_status_download_with_progress, download.title, percent)
-            else -> stringResource(R.string.sync_status_download_locked_with_progress, percent)
-        }
-    }
-    is SyncLine.Trending -> when (build.stage) {
-        TrendingActivityTracker.Stage.STARTING -> stringResource(R.string.sync_status_trending_starting, build.sourceName)
-        TrendingActivityTracker.Stage.RECEIVED -> pluralStringResource(
-            R.plurals.sync_status_trending_received,
-            build.candidates,
-            build.candidates,
-        )
-        TrendingActivityTracker.Stage.PREPARING -> stringResource(R.string.sync_status_trending_preparing)
-        TrendingActivityTracker.Stage.MATCHING_MOVIES -> stringResource(R.string.sync_status_trending_matching_movies)
-        TrendingActivityTracker.Stage.MATCHING_SERIES -> stringResource(R.string.sync_status_trending_matching_series)
-        TrendingActivityTracker.Stage.LOADING_SEASONS -> stringResource(R.string.sync_status_trending_loading_seasons)
-        TrendingActivityTracker.Stage.ENRICHING -> pluralStringResource(
-            R.plurals.sync_status_trending_building,
-            build.matched,
-            build.matched,
-        )
-        TrendingActivityTracker.Stage.PUBLISHING -> pluralStringResource(
-            R.plurals.sync_status_trending_publishing,
-            build.matched,
-            build.matched,
-        )
-    }
-    is SyncLine.TrendingDetail -> when (build.stage) {
-        TrendingActivityTracker.Stage.STARTING -> stringResource(R.string.sync_status_trending_detail_waiting)
-        TrendingActivityTracker.Stage.RECEIVED -> stringResource(
-            R.string.sync_status_trending_detail_received,
-            build.movieCandidates,
-            build.seriesCandidates,
-        )
-        TrendingActivityTracker.Stage.PREPARING -> stringResource(
-            R.string.sync_status_trending_detail_preparing,
-            build.preparationProcessed,
-            build.preparationTotal,
-        )
-        TrendingActivityTracker.Stage.MATCHING_MOVIES -> stringResource(
-            R.string.sync_status_trending_detail_movies,
-            build.movieChecked,
-            build.movieCandidates,
-            build.movieMatches,
-            build.movieTarget,
-        )
-        TrendingActivityTracker.Stage.MATCHING_SERIES -> stringResource(
-            R.string.sync_status_trending_detail_series,
-            build.seriesChecked,
-            build.seriesCandidates,
-            build.seriesMatches,
-            build.seriesTarget,
-        )
-        TrendingActivityTracker.Stage.LOADING_SEASONS -> stringResource(
-            R.string.sync_status_trending_detail_loading_seasons,
-            build.seasonsProcessed,
-            build.seasonsTotal,
-        )
-        TrendingActivityTracker.Stage.ENRICHING,
-        TrendingActivityTracker.Stage.PUBLISHING -> stringResource(
-            R.string.sync_status_trending_detail_selected,
-            build.movieMatches,
-            build.seriesMatches,
-            build.finalItems,
-        )
     }
 }
 
@@ -420,42 +264,10 @@ private fun completedLine(completed: SyncActivityTracker.CompletedSync, online: 
     is SyncResult.Failed -> stringResource(
         R.string.sync_status_failed,
         completed.sourceName,
-        classifySyncFailure(result.message, online).displayText(),
+        classifySyncFailure(result.message, online).displayText(LocalContext.current.resources),
     )
     SyncResult.Cancelled -> stringResource(R.string.sync_status_cancelled, completed.sourceName)
 }
 
-@Composable
-private fun trendingCompletedLine(completed: TrendingActivityTracker.CompletedBuild): String = when {
-    completed.preservedFailure -> stringResource(R.string.sync_status_trending_preserved)
-    completed.eligible -> pluralStringResource(
-        R.plurals.sync_status_trending_ready,
-        completed.itemCount,
-        completed.itemCount,
-    )
-    else -> pluralStringResource(
-        R.plurals.sync_status_trending_below_minimum,
-        completed.itemCount,
-        completed.itemCount,
-    )
-}
-
-@Composable
-private fun trendingCompletedDetailLine(completed: TrendingActivityTracker.CompletedBuild): String = stringResource(
-    R.string.sync_status_trending_detail_completed,
-    completed.movieMatches,
-    completed.movieCandidates,
-    completed.seriesMatches,
-    completed.seriesCandidates,
-)
-
-
 /** Beyond this many concurrent syncs the pill summarises the rest, rather than covering the screen. */
 private const val MAX_ROWS = 4
-
-/** Megabytes to one decimal, formatted for the locale. */
-private fun recordingSizeMb(bytes: Long): String =
-    java.text.NumberFormat.getNumberInstance().apply {
-        minimumFractionDigits = 1
-        maximumFractionDigits = 1
-    }.format(bytes / 1_048_576.0)

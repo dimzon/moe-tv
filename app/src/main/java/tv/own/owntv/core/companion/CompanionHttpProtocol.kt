@@ -145,8 +145,6 @@ internal object CompanionHttpProtocol {
             epgUrl = pick(fields, "epgUrl", "epg_url").trim(),
             autoRefresh = pick(fields, "autoRefresh", "auto_refresh").ifBlank { "OFF" },
             syncLive = scopeChoice(fields, "syncLive", "sync_live", SyncScopeChoice.Now),
-            syncMovies = scopeChoice(fields, "syncMovies", "sync_movies", SyncScopeChoice.Now),
-            syncSeries = scopeChoice(fields, "syncSeries", "sync_series", SyncScopeChoice.Now),
             isDefault = bool(fields, "isDefault", "is_default", default = false),
         )
     }

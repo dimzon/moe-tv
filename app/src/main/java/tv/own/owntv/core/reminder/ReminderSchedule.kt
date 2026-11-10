@@ -4,7 +4,7 @@ import tv.own.owntv.core.database.entity.ReminderEntity
 
 /**
  * Arithmetic only — no `AlarmManager`, no database, no clock of its own — so every rule is unit-tested
- * (shaped after `RecordingSchedule`).
+ *
  */
 object ReminderSchedule {
 

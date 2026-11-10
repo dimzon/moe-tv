@@ -82,14 +82,6 @@ class PlayerControlsTest {
     }
 
     @Test
-    fun `speed is on both apps now`() {
-        // It was television-only for no reason anybody could name, which is exactly the kind of
-        // difference this definition exists to remove.
-        assertTrue(PlayerControl.SPEED.onTv)
-        assertTrue(PlayerControl.SPEED.onMobile)
-    }
-
-    @Test
     fun `brightness never reaches a television`() {
         // A television's brightness is the television's; nothing the app does to its own window
         // would change it.
@@ -97,9 +89,8 @@ class PlayerControlsTest {
     }
 
     @Test
-    fun `the Multiview and Record controls are in the shared order, not bolted on per app`() {
+    fun `the Multiview control is in the shared order, not bolted on per app`() {
         // The alignment has to have held through the features built before it.
-        assertTrue(PlayerControl.RECORD.onTv && PlayerControl.RECORD.onMobile)
         assertTrue(PlayerControl.MULTIVIEW.onTv && PlayerControl.MULTIVIEW.onMobile)
     }
 
@@ -121,22 +112,18 @@ class PlayerControlsTest {
             listOf(
                 PlayerControl.GO_LIVE,
                 PlayerControl.VOLUME,
-                PlayerControl.SPEED,
                 PlayerControl.SUBTITLES,
                 PlayerControl.AUDIO,
                 PlayerControl.FAVOURITE,
-                PlayerControl.CATCH_UP,
                 PlayerControl.PREVIOUS_CHANNEL,
                 PlayerControl.OTHER_CHANNELS,
                 PlayerControl.MATCH,
                 PlayerControl.SOURCES,
-                PlayerControl.ENGINE,
                 PlayerControl.ASPECT,
                 PlayerControl.QUALITY,
                 PlayerControl.MINI_PLAYER,
                 PlayerControl.AUDIO_ONLY,
                 PlayerControl.MULTIVIEW,
-                PlayerControl.RECORD,
                 PlayerControl.SLEEP_TIMER,
                 PlayerControl.INFO,
                 PlayerControl.REPORT,

@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -133,8 +126,6 @@ fun AddSourceScreen(
         epgUrl: String,
         autoRefresh: PlaylistRefresh,
         live: SyncScopeChoice,
-        movies: SyncScopeChoice,
-        series: SyncScopeChoice,
         isDefault: Boolean,
         preferHls: Boolean,
     ) -> Unit,
@@ -168,8 +159,6 @@ fun AddSourceScreen(
         autoRefresh: PlaylistRefresh,
         isDefault: Boolean,
         live: SyncScopeChoice,
-        movies: SyncScopeChoice,
-        series: SyncScopeChoice,
         login: String,
         password: String,
     ) -> Unit)? = null,
@@ -202,18 +191,10 @@ fun AddSourceScreen(
     var autoRefresh by remember(initialAutoRefresh) { mutableStateOf(initialAutoRefresh) }
     var isDefault by remember(initialIsDefault) { mutableStateOf(initialIsDefault) }
     var preferHls by remember(initial) { mutableStateOf(initial?.preferHls == true) }
-    // Edit: On(=Now)/Off from persisted flags. Add: default all Now for Xtream; Stalker defaults
-    // Live Now + Movies/Series Later when the kind switches (see LaunchedEffect below).
+    // Edit: On(=Now)/Off from the persisted live flag; Add defaults to Now.
     var syncLive by remember(initial) {
         mutableStateOf(if (initial?.syncLive == false) SyncScopeChoice.Off else SyncScopeChoice.Now)
     }
-    var syncMovies by remember(initial) {
-        mutableStateOf(if (initial?.syncMovies == false) SyncScopeChoice.Off else SyncScopeChoice.Now)
-    }
-    var syncSeries by remember(initial) {
-        mutableStateOf(if (initial?.syncSeries == false) SyncScopeChoice.Off else SyncScopeChoice.Now)
-    }
-    var hasRemoteStalkerScopes by remember { mutableStateOf(false) }
     var showFileBrowser by remember { mutableStateOf(false) }
     var showAutoRefreshPicker by remember { mutableStateOf(false) }
     var showManualDaysPicker by remember { mutableStateOf(false) }
@@ -422,7 +403,6 @@ fun AddSourceScreen(
             autoRefresh = PlaylistRefresh.parse(payload.autoRefresh)
             when (payload.type) {
                 SourceType.M3U -> {
-                    hasRemoteStalkerScopes = false
                     m3uUrl = payload.server
                     kind = SourceKind.M3U
                 }
@@ -436,9 +416,6 @@ fun AddSourceScreen(
                     username = payload.user
                     password = payload.pass
                     syncLive = payload.syncLive
-                    syncMovies = payload.syncMovies
-                    syncSeries = payload.syncSeries
-                    hasRemoteStalkerScopes = true
                     kind = SourceKind.STALKER
                 }
                 else -> {
@@ -446,9 +423,6 @@ fun AddSourceScreen(
                     username = payload.user
                     password = payload.pass
                     syncLive = payload.syncLive
-                    syncMovies = payload.syncMovies
-                    syncSeries = payload.syncSeries
-                    hasRemoteStalkerScopes = false
                     kind = SourceKind.XTREAM
                 }
             }
@@ -457,18 +431,8 @@ fun AddSourceScreen(
         }
     }
 
-    // Stalker add defaults: Live Now, Movies/Series Later (VOD has no bulk endpoint). Skip when
-    // editing, retrying a failed add, or applying explicit choices from a remote Stalker payload.
-    LaunchedEffect(kind, initial, hasRemoteStalkerScopes) {
-        if (initial != null || kind != SourceKind.STALKER || hasRemoteStalkerScopes) return@LaunchedEffect
-        if (syncLive == SyncScopeChoice.Now && syncMovies == SyncScopeChoice.Now && syncSeries == SyncScopeChoice.Now) {
-            syncMovies = SyncScopeChoice.Later
-            syncSeries = SyncScopeChoice.Later
-        }
-    }
-
     val showContentToggles = kind == SourceKind.XTREAM || kind == SourceKind.STALKER
-    val hasAnySectionOn = syncLive != SyncScopeChoice.Off || syncMovies != SyncScopeChoice.Off || syncSeries != SyncScopeChoice.Off
+    val hasAnySectionOn = syncLive != SyncScopeChoice.Off
     val macValid = tv.own.owntv.core.stalker.StalkerClient.canonicalizeMac(mac) != null
     val canStart = when (kind) {
         SourceKind.XTREAM -> server.isNotBlank() && username.isNotBlank() && password.isNotBlank() && hasAnySectionOn
@@ -486,11 +450,11 @@ fun AddSourceScreen(
     // panel, reached with ▶ from any row.
     val submit = {
         when (kind) {
-            SourceKind.XTREAM -> onStartXtream(name, server, username, password, userAgent, referer, epgUrl, autoRefresh, syncLive, syncMovies, syncSeries, isDefault, preferHls)
+            SourceKind.XTREAM -> onStartXtream(name, server, username, password, userAgent, referer, epgUrl, autoRefresh, syncLive, isDefault, preferHls)
             SourceKind.M3U -> onStartM3u(name, m3uUrl, userAgent, referer, epgUrl, autoRefresh, isDefault)
             SourceKind.STALKER -> onStartStalker?.invoke(
                 name, portalUrl, mac, stalkerSerialNumber, stalkerDeviceId, stalkerDeviceId2,
-                stalkerSignature, userAgent, referer, autoRefresh, isDefault, syncLive, syncMovies, syncSeries,
+                stalkerSignature, userAgent, referer, autoRefresh, isDefault, syncLive,
                 username, password,
             )
         }
@@ -716,8 +680,6 @@ fun AddSourceScreen(
             StageSettingsHeading(stringResource(R.string.setup_what_to_sync), 3)
             val scopeHelp = stringResource(if (editing) R.string.setup_sync_off_editing else R.string.setup_sync_choices)
             SyncScopeStageRow(MyOwnTVIcon.LIVE_TV, stringResource(R.string.setup_live_tv), stringResource(R.string.setup_channels_categories), syncLive, editing, help(stringResource(R.string.setup_live_tv), scopeHelp, changeKeys), toSubmit) { syncLive = it }
-            SyncScopeStageRow(MyOwnTVIcon.MOVIES, stringResource(R.string.setup_movies), stringResource(R.string.setup_vod_movie_catalog), syncMovies, editing, help(stringResource(R.string.setup_movies), scopeHelp, changeKeys), toSubmit) { syncMovies = it }
-            SyncScopeStageRow(MyOwnTVIcon.SERIES, stringResource(R.string.setup_series), stringResource(R.string.setup_tv_series_catalog), syncSeries, editing, help(stringResource(R.string.setup_series), scopeHelp, changeKeys), toSubmit) { syncSeries = it }
         }
         if (!editing && hideNewCatsProfile >= 0) {
             val hideTitle = stringResource(R.string.setup_hide_new_categories)

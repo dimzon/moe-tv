@@ -5,7 +5,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -14,7 +13,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -22,7 +20,6 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
@@ -37,12 +34,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -117,7 +112,6 @@ import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
-import tv.own.owntv.core.launcher.LauncherIntegrationRepository
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.util.throttleLatest
 import tv.own.owntv.core.model.SourceType
@@ -147,7 +141,6 @@ class LiveViewModel(
     private val sourceDao: SourceDao,
     private val settings: SettingsRepository,
     private val customize: CustomizationStore,
-    private val launcherIntegrationRepository: LauncherIntegrationRepository,
     private val epgDao: tv.own.owntv.core.database.dao.EpgDao,
     /** Shared with the Guide: one now/next cache, so an invalidation reaches both screens. */
     private val epgReader: LiveEpgReader,
@@ -157,8 +150,6 @@ class LiveViewModel(
     private val streamUrlResolver: tv.own.owntv.core.stalker.StreamUrlResolver,
     private val epgRepository: tv.own.owntv.core.repository.EpgRepository,
     private val externalPlayerLauncher: tv.own.owntv.core.player.ExternalPlayerLauncher,
-    /** Keeps the preview pane off a one-stream playlist while a download is using it. */
-    private val downloadWatchGuard: tv.own.owntv.core.download.DownloadWatchGuard,
 ) : ViewModel() {
 
     data class ChannelMoveState(val items: List<ChannelEntity>, val activeIndex: Int, val contextKey: String, val carried: Set<Long> = emptySet())
@@ -943,7 +934,6 @@ class LiveViewModel(
             label = ::channelNumberLabel,
             // The warm playlist map, so a preview on a focus step never waits on the database.
             sourceLookup = { id -> sourceById[id] },
-            downloadHolds = downloadWatchGuard::holdsOnlyStream,
         ),
     )
 
@@ -1062,7 +1052,7 @@ class LiveViewModel(
             when (key) {
                 is LiveKey.Folder -> channelsInCategory(key.id)
                 is LiveKey.Custom -> channelsInCustom(key)
-                LiveKey.Favorites, LiveKey.History, LiveKey.Catchup, LiveKey.All -> channelsInRail(key)
+                LiveKey.Favorites, LiveKey.History, LiveKey.All -> channelsInRail(key)
             }
         }
     }
@@ -1095,7 +1085,7 @@ class LiveViewModel(
                 val title = browserCategories.value.firstOrNull { it.first == key }?.second.orEmpty()
                 zapList.armForKey(key, title, { channelsInCustom(key) }, close)
             }
-            LiveKey.Favorites, LiveKey.History, LiveKey.Catchup, LiveKey.All ->
+            LiveKey.Favorites, LiveKey.History, LiveKey.All ->
                 zapList.armForKey(key, null, { channelsInRail(key) }, close)
         }
     }
@@ -1216,6 +1206,26 @@ class LiveViewModel(
             launch { customize.observeHasLocks(pid).first() }
             channelDao.recentlyWatched(pid, 1).first().firstOrNull()
         }?.takeIf { !customize.sealsCategory(pid, it.categoryId) }
+    }
+
+    /**
+     * Resolves a launcher deep link to a channel: provider id + remote id first, then the channel
+     * name, then the row id. The channel must still belong to one of the profile's live playlists —
+     * a launcher tile pointing at a deleted playlist resolves to nothing. Callers apply the
+     * Customize/age policy on top with [isVisibleToActiveProfile].
+     */
+    suspend fun resolveLauncherChannel(pid: Long, link: tv.own.owntv.core.launcher.LauncherDeepLink.Live): ChannelEntity? {
+        val liveIds = sourceDao.observeForProfile(pid).first()
+            .filter { it.syncLive }.map { it.id }.toSet()
+        if (liveIds.isEmpty()) return null
+        val channel = when {
+            link.sourceId != null && !link.remoteId.isNullOrBlank() -> channelDao.findByRemote(link.sourceId, link.remoteId)
+            link.sourceId != null && !link.name.isNullOrBlank() -> channelDao.findByName(link.sourceId, link.name)
+            link.itemId != null && link.itemId > 0L -> channelDao.getById(link.itemId)
+            else -> null
+        } ?: return null
+        if (link.sourceId != null && channel.sourceId != link.sourceId) return null
+        return channel.takeIf { it.sourceId in liveIds }
     }
 
     /** Final startup/deep-entry visibility check, including profile source and Customize policy. */
@@ -1628,7 +1638,6 @@ class LiveViewModel(
             }.onFailure { t ->
                 Log.w(TAG, "ensurePlaying history record failed channelId=${channel.id} profile=$pid", t)
             }
-            runCatching { launcherIntegrationRepository.refreshRecentLive(pid) }
         }
     }
 
@@ -1781,8 +1790,8 @@ class LiveViewModel(
                 is LiveKey.Folder -> channelDao.snapshotByCategoryManual(key.id, pid, contextKey, alpha, 5000)
                 is LiveKey.Custom -> customCategoryDao.snapshotChannels(pid, key.id, ctx.value.sourceIds.ifEmpty { listOf(-1L) }, alpha, 5000)
                 LiveKey.Favorites -> channelDao.snapshotFavoritesManual(pid, contextKey, ctx.value.sourceIds.ifEmpty { listOf(-1L) }, 5000)
-                // Catch-up joins History/All as a computed view: it has no stored order to move within.
-                LiveKey.History, LiveKey.All, LiveKey.Catchup -> return@launch
+                // History/All are computed views: no stored order to move within.
+                LiveKey.History, LiveKey.All -> return@launch
             }
             val idx = items.indexOfFirst { it.id == channel.id }
             if (idx < 0) return@launch

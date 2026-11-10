@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -130,7 +123,6 @@ import tv.own.myowntv.ui.format.rememberSystemTimeFormatter
 private fun SearchIntent.displayLabel(): String = stringResource(
     when (this) {
         SearchIntent.CONTINUE -> R.string.search_continue
-        SearchIntent.UNWATCHED -> R.string.search_unwatched // VOD-only curated list; the launcher never offers it.
         SearchIntent.CHANNELS -> R.string.search_channels
     },
 )
@@ -140,8 +132,6 @@ private fun SearchKind.label(): String = stringResource(
     when (this) {
         SearchKind.LIVE -> R.string.common_nav_live_tv
         SearchKind.TV_SHOWS -> R.string.search_on_tv
-        SearchKind.MOVIES -> R.string.common_nav_movies // VOD is gone; these kinds never get a chip.
-        SearchKind.SERIES -> R.string.common_nav_series
     },
 )
 
@@ -554,11 +544,9 @@ private fun Launcher(
     Column(modifier.focusGroup()) {
         GroupHeading(stringResource(R.string.search_jump_to).uppercase(locale), Modifier.padding(top = 8.mpx, bottom = 10.mpx))
         Row(horizontalArrangement = Arrangement.spacedBy(10.mpx)) {
-            // The "Unwatched" list curated favourite movies and series — VOD is gone, so it is not offered.
-            SearchIntent.entries.filterNot { it == SearchIntent.UNWATCHED }.forEach { i ->
+            SearchIntent.entries.forEach { i ->
                 val icon = when (i) {
                     SearchIntent.CONTINUE -> MyOwnTVIcon.PLAY
-                    SearchIntent.UNWATCHED -> MyOwnTVIcon.SPARKLE
                     SearchIntent.CHANNELS -> MyOwnTVIcon.LIVE_TV
                 }
                 StageTool(

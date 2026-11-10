@@ -20,19 +20,21 @@ class ContentMenusTest {
 
     @Test
     fun `a popup with only some actions keeps the catalogue order of those`() {
-        val shown = listOf("favourite", "record", "catchup")
-        assertEquals(listOf("catchup", "record", "favourite"), arrange(ContentMenu.LIVE, shown, MenuLayout()) { it })
+        val shown = listOf("favourite", "hide", "rename")
+        assertEquals(listOf("favourite", "rename", "hide"), arrange(ContentMenu.LIVE, shown, MenuLayout()) { it })
     }
 
     @Test
     fun `the live catalogue starts with what the popup puts first`() {
-        assertEquals(listOf("programme_details", "catchup", "record", "schedule_record"), keys(ContentMenu.LIVE).take(4))
+        assertEquals(
+            listOf("programme_details", "add_to_multiview", "play_external", "favourite"),
+            keys(ContentMenu.LIVE).take(4),
+        )
     }
 
     @Test
     fun `the phone's list leaves out the TV-only actions`() {
         assertEquals(keys(ContentMenu.LIVE).drop(1), phoneCatalogue(ContentMenu.LIVE).map { it.key })
-        assertEquals(catalogue(ContentMenu.MOVIE), phoneCatalogue(ContentMenu.MOVIE))
     }
 
     @Test
@@ -45,29 +47,23 @@ class ContentMenusTest {
     fun `a saved order wins, an unknown saved key is ignored and a new action is appended`() {
         val layout = MenuLayout(order = listOf("hide", "gone_action", "favourite"))
         assertEquals(
-            listOf("hide", "favourite", "catchup", "record"),
-            arrange(ContentMenu.LIVE, listOf("catchup", "favourite", "record", "hide"), layout) { it },
+            listOf("hide", "favourite", "rename", "move"),
+            arrange(ContentMenu.LIVE, listOf("favourite", "rename", "move", "hide"), layout) { it },
         )
     }
 
     @Test
     fun `hidden actions are left out`() {
-        val layout = MenuLayout(hidden = setOf("record", "rename"))
-        assertEquals(listOf("catchup", "favourite"), arrange(ContentMenu.LIVE, listOf("favourite", "rename", "record", "catchup"), layout) { it })
-    }
-
-    @Test
-    fun `a profile without downloads has no Download action`() {
-        val layout = MenuLayout(downloads = false)
-        listOf(ContentMenu.MOVIE, ContentMenu.SERIES, ContentMenu.EPISODE).forEach { menu ->
-            assertFalse(DOWNLOAD_ACTION in arrange(menu, keys(menu), layout) { it })
-            assertTrue(DOWNLOAD_ACTION in arrange(menu, keys(menu), MenuLayout()) { it })
-        }
+        val layout = MenuLayout(hidden = setOf("hide", "rename"))
+        assertEquals(
+            listOf("favourite", "move"),
+            arrange(ContentMenu.LIVE, listOf("favourite", "rename", "hide", "move"), layout) { it },
+        )
     }
 
     @Test
     fun `an order equal to the catalogue is still the shipped order`() {
-        val menu = ContentMenu.MOVIE
+        val menu = ContentMenu.LIVE
         assertTrue(MenuLayout().isShippedOrder(menu))
         assertTrue(MenuLayout(order = keys(menu)).isShippedOrder(menu))
         assertFalse(MenuLayout(order = keys(menu)).isCustom(menu))
@@ -77,8 +73,8 @@ class ContentMenusTest {
     @Test
     fun `hiding an action makes the menu custom but keeps its headings`() {
         val layout = MenuLayout(hidden = setOf("hide"))
-        assertTrue(layout.isCustom(ContentMenu.SERIES))
-        assertTrue(layout.isShippedOrder(ContentMenu.SERIES))
+        assertTrue(layout.isCustom(ContentMenu.LIVE))
+        assertTrue(layout.isShippedOrder(ContentMenu.LIVE))
     }
 
     @Test

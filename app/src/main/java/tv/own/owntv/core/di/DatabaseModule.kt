@@ -102,24 +102,14 @@ val databaseModule = module {
     single { get<OwnTVDatabase>().sourceDao() }
     single { get<OwnTVDatabase>().categoryDao() }
     single { get<OwnTVDatabase>().channelDao() }
-    single { get<OwnTVDatabase>().movieDao() }
-    single { get<OwnTVDatabase>().seriesDao() }
     single { get<OwnTVDatabase>().favoriteDao() }
     single { get<OwnTVDatabase>().historyDao() }
-    single { get<OwnTVDatabase>().progressDao() }
     single { get<OwnTVDatabase>().contentOrderDao() }
     single { get<OwnTVDatabase>().playbackPrefsDao() }
     single { get<OwnTVDatabase>().playbackQuirkDao() }
     single { get<OwnTVDatabase>().customCategoryDao() }
-    single { get<OwnTVDatabase>().seriesSortOrderDao() }
     single { get<OwnTVDatabase>().tombstoneDao() }
     single { get<OwnTVDatabase>().tvProviderProgramDao() }
-    single { get<OwnTVDatabase>().downloadDao() }
-    single { get<OwnTVDatabase>().recordingDao() }
     single { get<OwnTVDatabase>().reminderDao() }
-    single { get<OwnTVDatabase>().catalogBackfillDao() }
     single { get<OwnTVDatabase>().epgDao() }
-    single { get<OwnTVDatabase>().metadataDao() }
-    single { get<OwnTVDatabase>().trendingDao() }
-    single { get<OwnTVDatabase>().subtitleDao() }
 }

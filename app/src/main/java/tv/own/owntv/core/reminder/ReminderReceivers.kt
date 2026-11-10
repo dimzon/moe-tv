@@ -31,7 +31,7 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
 
 /**
  * After a reboot, after the app is replaced, and when the exact-alarm permission changes (revoking it
- * cancels every exact alarm): re-arm. Same reasons as `RecordingBootReceiver`.
+ * cancels every exact alarm): re-arm.
  */
 class ReminderBootReceiver : BroadcastReceiver() {
 

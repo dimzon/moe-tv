@@ -9,20 +9,12 @@ import tv.own.owntv.core.backup.BackupManager
 import tv.own.owntv.core.database.BulkInsertHelper
 import tv.own.owntv.core.backup.UserDataResolver
 import tv.own.owntv.core.customize.CustomizationStore
-import tv.own.owntv.core.download.DownloadEngine
-import tv.own.owntv.core.download.DownloadManager
 import tv.own.owntv.core.network.ConnectivityObserver
 import tv.own.owntv.core.network.HttpClient
 import tv.own.owntv.core.parser.M3uParser
 import tv.own.owntv.core.parser.XtreamClient
-import tv.own.owntv.core.launcher.LauncherIntegrationRepository
-import tv.own.owntv.core.launcher.LauncherLaunchResolver
-import tv.own.owntv.core.launcher.LauncherRecommendationPlanner
 import tv.own.owntv.core.repository.EpgRepository
-import tv.own.owntv.core.repository.SeriesRepository
 import tv.own.owntv.core.repository.SourceRepository
-import tv.own.owntv.core.tv.TvHomeRepository
-import tv.own.owntv.core.tv.LiveLogoPosterArt
 import tv.own.owntv.core.update.UpdateManager
 import tv.own.owntv.core.sync.SyncManager
 import tv.own.owntv.core.sync.work.CatalogSyncScheduler
@@ -80,15 +72,8 @@ val dataModule = module {
     }
     // The playback client: same proxy/DNS/UA/protocol configuration as the singleton above,
     // but its own connection pool, so a live stop can evict *stream* sockets without dropping keep-alive
-    // for EPG, panel API, metadata and image traffic.
+    // for EPG, panel API and image traffic.
     single { tv.own.owntv.core.network.StreamingHttpClient(get()) }
-    // Live timeshift buffers download on the streaming client, as the players would.
-    single {
-        tv.own.owntv.core.timeshift.TimeshiftManager(
-            androidContext(),
-            get<tv.own.owntv.core.network.StreamingHttpClient>().client,
-        )
-    }
     single { HttpClient(get()) }
     // RuTube's API must never go through a proxy (false blocking_rule 404s), so it gets its own
     // no-proxy OkHttpClient under a name, wrapped by a named HttpClient for the RuTube stack.
@@ -120,10 +105,9 @@ val dataModule = module {
     // another category or section does not start a fresh run of guesses, and guessing at one lock never
     // makes another wait. Monotonic clock: changing the time cannot end a wait.
     single { tv.own.owntv.core.categorylock.PinAttemptLimiters(android.os.SystemClock::elapsedRealtime) }
-    // Which locked category a downloaded or recorded file the player is on belongs to, for the relock.
+    // Which locked category a file the player is on belongs to, for the relock.
     single { tv.own.owntv.core.categorylock.PlayingFileCategory() }
     single { CustomizationStore(androidContext(), get()) }
-    single { tv.own.owntv.core.customize.LockedNotificationTitles(get(), get(), get(), get(), get(), get()) }
     single { tv.own.owntv.core.epg.EpgSourceStore(androidContext()) }
     // Per-channel "watched without a picture" memory, for the mobile audio-only mode.
     single { tv.own.owntv.core.player.AudioOnlyStore(androidContext(), get()) }
@@ -146,32 +130,6 @@ val dataModule = module {
     single { tv.own.owntv.core.live.ConnectionProbe(get()) }
     single { tv.own.owntv.core.live.ProbeChannelSource(get(), get(), get(), get(), get()) }
     single { tv.own.owntv.core.live.ConnectionLimits(get(), get(), get(), get()) }
-    // TMDB metadata enrichment: one provider, three tiers resolved from SettingsRepository.
-    // Opaque per-install id sent to the default Worker only, so one abusive install can be capped
-    // without blocking the IP address a whole household/carrier NAT shares.
-    single { tv.own.owntv.core.metadata.OwnTVClientId(androidContext()) }
-    // Per-install allowance for the shared default Worker (40/min, 150/hr, 400/day). Own key and
-    // self-hosted server are never metered.
-    single { tv.own.owntv.core.metadata.MetadataBudget(androidContext()) }
-    single<tv.own.owntv.core.metadata.MetadataProvider> {
-        tv.own.owntv.core.metadata.TmdbProvider(get(), get(), get(), get())
-    }
-    // provider, metadataDao, settings, overrideStore — the on-demand resolve + cache orchestrator.
-    single { tv.own.owntv.core.metadata.MetadataRepository(get(), get(), get(), get(), get()) }
-    single { tv.own.owntv.core.metadata.OriginalLanguageLookup(get(), get(), get()) }
-    // Gates the TMDB Trending download to once every 5–8 days per playlist and holds the shared
-    // candidate list; deliberately DataStore, not Room (derived state, no migration, no backup).
-    single { tv.own.owntv.core.trending.TrendingScheduleStore(androidContext()) }
-    single { tv.own.owntv.core.trending.TrendingRepository(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-    // Per-content TMDB name overrides: DataStore side-store, no Room schema change.
-    single { tv.own.owntv.core.metadata.MetadataOverrideStore(androidContext()) }
-    // OpenSubtitles: Worker-proxied REST client + Keystore-sealed
-    // per-profile sessions + the sign-in/out orchestrator with one-shot silent re-login.
-    single { tv.own.owntv.core.subtitles.OpenSubtitlesClient(get(), get(), get()) }
-    single { tv.own.owntv.core.subtitles.OpenSubtitlesAuthStore(androidContext()) }
-    single { tv.own.owntv.core.subtitles.OpenSubtitlesAccountManager(get(), get()) }
-    // context, client, accountManager, okHttpClient, subtitleDao — search/download/cache orchestration
-    single { tv.own.owntv.core.subtitles.SubtitleRepository(androidContext(), get(), get(), get(), get()) }
     single { WeatherRepository(get(), get()) }
     // Sports Hub: ESPN straight from the device on the shared client (no Worker, no key). Lazy like
     // everything here — none of it exists, let alone fetches, until a sports screen asks (startup zero-work).
@@ -183,13 +141,11 @@ val dataModule = module {
         tv.own.owntv.core.sports.SportsRepository(
             source = get(),
             policy = get(),
-            gate = get(),
             // The active profile's follow list (every catalogue league with "All sports").
             followed = settings.activeSportsConfig.map { it.followedLeagues() },
             liveRefreshSeconds = settings.activeSportsConfig.map { it.liveRefreshSeconds },
             autoRebuild = settings.activeSportsConfig.map { it.autoRebuild },
             dataDir = androidContext().filesDir,
-            activity = get(),
             scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default),
         ).also { repository ->
             // Goal alerts re-arm from every board built — and so start only with the repository, never at launch.
@@ -278,34 +234,29 @@ val dataModule = module {
     single {
         tv.own.owntv.core.sync.ImportFinalizer(
             channelDao = get(),
-            movieDao = get(),
-            seriesDao = get(),
             db = get(),
             bulkInsertHelper = get(),
-            metadataDao = get(),
             epgSourceStore = get(),
         )
     }
-    // context, channelDao, movieDao, seriesDao, profileDao, favoriteDao, historyDao, progressDao,
-    // contentOrderDao, customCategoryDao, seriesSortOrderDao, tombstoneDao, db
-    single { UserDataResolver(androidContext(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    // context, channelDao, profileDao, favoriteDao, historyDao, contentOrderDao, customCategoryDao,
+    // tombstoneDao, db
+    single { UserDataResolver(androidContext(), get(), get(), get(), get(), get(), get(), get(), get()) }
     // The one place a user deletion is written: it records the tombstone local sync needs and does
-    // the delete in the same transaction. db, favoriteDao, historyDao, progressDao, customCategoryDao, userData
-    single { tv.own.owntv.core.backup.UserDataWriter(get(), get(), get(), get(), get(), get()) }
-    // sourceDao, syncManager, userDataResolver, channelDao, movieDao, seriesDao, categoryDao
-    single { SourceRepository(get(), get(), get(), get(), get(), get(), get(), playbackQuirkDao = get(), playbackPrefsDao = get()) }
+    // the delete in the same transaction. db, favoriteDao, historyDao, customCategoryDao, userData
+    single { tv.own.owntv.core.backup.UserDataWriter(get(), get(), get(), get(), get()) }
+    // sourceDao, syncManager, userDataResolver, channelDao, categoryDao
+    single { SourceRepository(get(), get(), get(), get(), get(), playbackQuirkDao = get(), playbackPrefsDao = get()) }
     // sourceDao, stalkerAuthManager, catalogSyncScheduler, importFinalizer
     single { tv.own.owntv.core.repository.SourceEditor(get(), get(), get(), get()) }
-    // settings, sourceRepository, channelDao, movieDao, seriesDao
-    single { tv.own.owntv.core.nav.NavVisibility(get(), get(), get(), get(), get()) }
+    // settings, sourceRepository, channelDao
+    single { tv.own.owntv.core.nav.NavVisibility(get(), get(), get()) }
     single {
         SyncManager(
             context = androidContext(),
             sourceDao = get(),
             categoryDao = get(),
             channelDao = get(),
-            movieDao = get(),
-            seriesDao = get(),
             xtream = get(),
             m3u = get(),
             http = get(),
@@ -316,35 +267,16 @@ val dataModule = module {
             customize = get(),
             settings = get(),
             connectionLimits = get(),
-            catalogBackfillDao = get(),
             catalogSyncScheduler = get(),
-            catalogPriority = get(),
             rutubeApi = get(),
         )
     }
     single { tv.own.owntv.core.sync.RuTubeEpgSyncer(get(), get()) }
     // App-wide "sync running" signal for the shell status pill (every sync funnels through SyncManager).
-    // Which VOD category the user is looking at, so the lazy-catalogue drain serves it first.
-    single { tv.own.owntv.core.sync.CatalogPriority(get(), get()) }
-    // settings, sourceDao, catalogBackfillDao — Home's "library still loading" note, in both apps.
-    single { tv.own.owntv.core.sync.LibraryLoading(get(), get(), get()) }
-    // The drain comes back soon after playback stops instead of waiting out its retry delay.
-    // createdAtStart: it has to be listening before the first playback closes.
-    single(createdAtStart = true) {
-        val scheduler: CatalogSyncScheduler = get()
-        tv.own.owntv.core.sync.BackfillResume(get(), { sourceId ->
-            scheduler.enqueueCatalogBackfill(
-                sourceId,
-                initialDelayMinutes = tv.own.owntv.core.sync.BackfillResume.RESUME_DELAY_MINUTES,
-                onlyIfWaiting = true,
-            )
-        })
-    }
     single { tv.own.owntv.core.sync.SyncActivityTracker() }
     // Same idea for EPG: EpgSyncWorker reports started/progress/finished here so the pill also reflects
     // guide/EPG downloads (manual resync from Settings, auto startup refresh, …).
     single { tv.own.owntv.core.sync.EpgActivityTracker() }
-    single { tv.own.owntv.core.sync.TrendingActivityTracker() }
     // epgDao, httpClient, xtreamClient, channelDao, customize, settings, context, db, bulkInsertHelper
     single {
         EpgRepository(
@@ -362,99 +294,42 @@ val dataModule = module {
             rutube = get(),
         )
     }
-    single { tv.own.owntv.core.epg.ArchiveGuideFiller(get()) }
     // channelDao, categoryDao, sourceDao, profileDao, customize, settings
     single { tv.own.owntv.core.live.ChannelVersions(get(), get(), get(), get(), get(), get()) }
-    // seriesDao, sourceDao, xtreamClient, userDataResolver, stalkerClient, stalkerAuthManager
-    single { SeriesRepository(get(), get(), get(), get(), get(), get()) }
-    // sourceDao, movieDao, seriesDao, progressDao
-    single { LauncherRecommendationPlanner(get(), get(), get(), get(), get(), get(), get()) }
-    // sourceDao, channelDao, movieDao, seriesDao, progressDao
-    single { LauncherLaunchResolver(get(), get(), get(), get(), get(), get(), get(), get()) }
-    // context, sourceDao, channelDao, movieDao, seriesDao, progressDao, tvProviderProgramDao, customize, settings, localeStore
-    single { TvHomeRepository(androidContext(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), LiveLogoPosterArt(androidContext(), get())) }
-    // planner, resolver, tvHomeRepository
-    single { LauncherIntegrationRepository(get(), get(), get()) }
-    // Who currently holds a stream on which playlist. Multiview tiles and recordings spend the same
-    // provider connections, so both count against one register.
+    // Who currently holds a stream on which playlist. Multiview tiles and the main playback spend the
+    // same provider connections, so both count against one register.
     single { tv.own.owntv.core.live.OpenStreamRegistry() }
     // What the user is actually watching. Separate from the register above on purpose — see the
     // class doc: that one is the connection budget, this one is a playback signal.
     single { tv.own.owntv.core.live.WatchSession() }
-    // Same idea as the sync trackers: the download engine reports its running transfer here so the
-    // shell's status pill can show it in both apps.
-    single { tv.own.owntv.core.download.DownloadActivityTracker() }
-    // downloadDao, okHttpClient, sourceDao, movieDao, seriesDao, streamUrlResolver, activityTracker
-    // (the middle four are D-3: Stalker downloads resolve the stored cmd at download-start time),
-    // then watchSession, openStreamRegistry, settings — the streams a download must leave free
-    single { DownloadEngine(androidContext(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-    // context, downloadDao, settings, engine, watchSession
-    single { DownloadManager(androidContext(), get(), get(), get(), get()) }
-    // Watching vs downloading on a one-stream playlist. createdAtStart: it has to be listening before
-    // the first playback opens, and nothing else would ask for it until an app's dialog does.
-    single(createdAtStart = true) { tv.own.owntv.core.download.DownloadWatchGuard(get(), get(), get(), get(), get(), get()) }
-    // The recording half of the same idea: several can run at once, so the tracker keeps a
-    // line per running recording rather than a single active one.
-    single { tv.own.owntv.core.recording.RecordingActivityTracker() }
-    // recordingDao, okHttpClient, sourceDao, streamUrlResolver, openStreamRegistry, settings,
-    // connectivity (the metered check that turns "not over mobile data" into a MISSED row rather
-    // than a silent wait), tracker
-    single {
-        tv.own.owntv.core.recording.RecordingEngine(androidContext(), get(), get(), get(), get(), get(), get(), get(), get(), get())
-    }
-    // context, recordingDao — the AlarmManager half. Exact alarms where the user allows them,
-    // inexact plus a bigger head start where they do not.
-    single { tv.own.owntv.core.recording.RecordingScheduler(androidContext(), get()) }
-    // context, recordingDao, sourceDao, settings, openStreamRegistry, engine, scheduler,
-    // channelDao + epgDao (series rules: "every showing of this title on this channel" has to read
-    // the guide to find out what the showings are)
-    // `createdAtStart` is the fix for a defect found on a real television: some manufacturers'
-    // auto-start policies never deliver BOOT_COMPLETED to an app the user has not "allowed", so
-    // RecordingBootReceiver simply does not run and a recording scheduled across a reboot is never
-    // re-armed. Nothing in the app can make an OEM deliver that broadcast — but opening the app is
-    // something the user does anyway, and `RecordingManager.init` already re-arms everything and
-    // marks what was missed. Left lazy, that only happened once a screen that injects it was opened,
-    // which on such a television could be never. Eager, every launch repairs the timers.
-    //
-    // Safe for a cold start: the constructor sets a flag and launches one background coroutine; the
-    // only database read is `recordings` — a handful of rows — and it happens off the main thread.
-    single(createdAtStart = true) {
-        tv.own.owntv.core.recording.RecordingManager(
-            androidContext(), get(), get(), get(), get(), get(), get(), get(), get(),
-        )
-    }
-    // Programme reminders: context, reminderDao — then reminderDao, scheduler. Eager for the
-    // same reason as RecordingManager: every launch re-arms, whether or not BOOT_COMPLETED arrived.
+    // Programme reminders: context, reminderDao — then reminderDao, scheduler. Eager so every launch
+    // re-arms, whether or not BOOT_COMPLETED arrived.
     single { tv.own.owntv.core.reminder.ReminderScheduler(androidContext(), get()) }
     single(createdAtStart = true) { tv.own.owntv.core.reminder.ReminderManager(get(), get()) }
     // profileDao, sourceDao, settings, customizationStore, userDataResolver, epgSourceStore,
-    // db, metadataOverrideStore, metadataDao, openSubtitlesAuthStore,
-    // backgroundsDir (same folder ingestBackgroundImage writes to — the .own container carries the wallpaper),
-    // subtitlesDir (SubtitleRepository's shared cache — the container carries the subtitle files too)
+    // db, backgroundsDir (the folder ingestBackgroundImage writes to — the .own container carries the
+    // wallpaper), avatarStore
     single {
         BackupManager(
-            get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
+            get(), get(), get(), get(), get(), get(), get(),
             java.io.File(androidContext().filesDir, "backgrounds"),
-            java.io.File(androidContext().filesDir, "subtitles"),
             get(),
         )
     }
-    // profileDao, sourceDao, settings, launcherIntegration, openSubtitlesAccounts — creating,
+    // profileDao, sourceDao, settings, avatarStore, protection — creating,
     // editing, switching and deleting a profile, shared by both apps' profile gates.
     single { tv.own.owntv.core.profile.ProfileAvatarStore(androidContext()) }
     single { tv.own.owntv.core.profile.ProfileProtection(get(), get(), get(), get()) }
-    single { tv.own.owntv.core.profile.ProfileManager(get(), get(), get(), get(), get(), get(), get()) }
-    // context, okHttpClient — in-app updates from GitHub Releases
+    single { tv.own.owntv.core.profile.ProfileManager(get(), get(), get(), get(), get()) }
+    // context, okHttpClient, settings — in-app updates from GitHub Releases
     single { UpdateManager(androidContext(), get(), get()) }
     single { CatalogSyncScheduler(androidContext()) }
     single { EpgSyncScheduler(androidContext()) }
     // settings, sourceRepository, profileDao, catalogSyncScheduler, epgSyncScheduler, epgSourceStore,
-    // epgDao, importFinalizer, vodResort — the Auto refresh settings, run by both apps on start and resume.
-    single { tv.own.owntv.core.sync.AutoRefresh(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-    // settings, sourceDao, channelDao, catalogSyncScheduler, importFinalizer
-    single { tv.own.owntv.core.sync.M3uVodResort(get(), get(), get(), get(), get()) }
+    // epgDao, importFinalizer — the Auto refresh settings, run by both apps on start and resume.
+    single { tv.own.owntv.core.sync.AutoRefresh(get(), get(), get(), get(), get(), get(), get(), get()) }
     // profileDao, sourceDao, sourceRepository, backup, settings, connectivity, importFinalizer,
-    // launcherIntegration, catalogSyncScheduler, stalkerAuth, xtreamClient, context — onboarding: add a
+    // catalogSyncScheduler, stalkerAuth, xtreamClient, protection, context — onboarding: add a
     // source, sync it, undo it when it fails. Factory, not single: each wizard run owns its own state machine.
-    factory { tv.own.owntv.core.setup.SourceImporter(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), androidContext()) }
+    factory { tv.own.owntv.core.setup.SourceImporter(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), androidContext()) }
 }

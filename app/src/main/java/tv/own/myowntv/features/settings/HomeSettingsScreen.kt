@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -76,7 +69,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.R
-import tv.own.owntv.core.model.HeroKind
 import tv.own.owntv.core.model.HomeRow
 import tv.own.myowntv.features.home.displayLabel
 import tv.own.myowntv.features.home.displayTitle
@@ -102,7 +94,6 @@ fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val config by vm.config.collectAsStateWithLifecycle()
     val heroPreviewEnabled by vm.heroPreviewEnabled.collectAsStateWithLifecycle()
     val androidTvHomeEnabled by settingsVm.androidTvHomeEnabled.collectAsStateWithLifecycle()
-    val tvHomeRefresh by settingsVm.tvHomeRefresh.collectAsStateWithLifecycle()
     val homeRows = config.settingsRows.filter { it in LIVE_HOME_ROWS }
 
     val rowsFocus = remember { FocusRequester() }
@@ -202,32 +193,15 @@ fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
 
         StageSettingsHeading(stringResource(R.string.settings_keep_watching), 2)
         HomeSwitchRow(MyOwnTVIcon.LIVE_TV, R.string.settings_live_keep_watching, R.string.settings_live_keep_watching_description, config.heroIncludeLive) {
-            vm.setHeroInclude(HeroKind.LIVE, !config.heroIncludeLive)
+            vm.setHeroInclude(!config.heroIncludeLive)
         }
         HomeSwitchRow(MyOwnTVIcon.PLAY, R.string.settings_hero_preview, R.string.settings_hero_preview_description, heroPreviewEnabled) {
             vm.setHeroPreviewEnabled(!heroPreviewEnabled)
         }
 
-        StageSettingsHeading(stringResource(R.string.settings_android_tv_home), if (androidTvHomeEnabled) 2 else 1)
+        StageSettingsHeading(stringResource(R.string.settings_android_tv_home), 1)
         HomeSwitchRow(MyOwnTVIcon.HISTORY, R.string.settings_android_tv_home, R.string.settings_android_tv_home_description, androidTvHomeEnabled) {
             settingsVm.setAndroidTvHomeEnabled(!androidTvHomeEnabled)
-        }
-        if (androidTvHomeEnabled) {
-            val refreshTitle = stringResource(R.string.settings_refresh_now)
-            val refreshValue = when (tvHomeRefresh) {
-                SettingsViewModel.TvHomeRefresh.REFRESHING -> SettingValue.Action(stringResource(R.string.settings_rebuilding))
-                SettingsViewModel.TvHomeRefresh.DONE -> SettingValue.Action(stringResource(R.string.settings_done_check))
-                else -> null
-            }
-            val refreshDesc = stringResource(R.string.settings_refresh_description)
-            StageSettingRow(
-                icon = MyOwnTVIcon.REFRESH,
-                title = refreshTitle,
-                desc = refreshDesc,
-                value = refreshValue,
-                onClick = { if (tvHomeRefresh == SettingsViewModel.TvHomeRefresh.IDLE) settingsVm.refreshAndroidTvHome() },
-                help = SettingHelp(refreshTitle, refreshDesc, hints = settingHints(null, pinnable = false)),
-            )
         }
     }
     BackHandler(enabled = moving != null) { moving = null }
@@ -249,13 +223,8 @@ private fun HomeSwitchRow(icon: MyOwnTVIcon, titleRes: Int, descRes: Int, on: Bo
 }
 
 private val HomeRow.icon: MyOwnTVIcon get() = when (this) {
-    HomeRow.TRENDING -> MyOwnTVIcon.STAR
     HomeRow.HERO -> MyOwnTVIcon.PLAY_CIRCLE
     HomeRow.LIVE_SPORTS -> MyOwnTVIcon.SPORTS
     HomeRow.RECENT_CHANNELS -> MyOwnTVIcon.LIVE_TV
     HomeRow.FAVORITE_CHANNELS -> MyOwnTVIcon.FAVORITE
-    HomeRow.FAVORITE_MOVIES -> MyOwnTVIcon.MOVIES
-    HomeRow.FAVORITE_SERIES -> MyOwnTVIcon.SERIES
-    HomeRow.CONTINUE_MOVIES -> MyOwnTVIcon.MOVIES
-    HomeRow.CONTINUE_SERIES -> MyOwnTVIcon.SERIES
 }

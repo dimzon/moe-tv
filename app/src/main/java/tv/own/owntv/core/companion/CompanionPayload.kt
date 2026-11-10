@@ -36,7 +36,5 @@ data class CompanionPayload(
     /** A serialized [tv.own.owntv.core.settings.PlaylistRefresh] (e.g. `HOURS_6`, `MANUAL:14`); defaults to OFF. */
     val autoRefresh: String = "OFF",
     val syncLive: SyncScopeChoice = SyncScopeChoice.Now,
-    val syncMovies: SyncScopeChoice = SyncScopeChoice.Now,
-    val syncSeries: SyncScopeChoice = SyncScopeChoice.Now,
     val isDefault: Boolean = false,
 )

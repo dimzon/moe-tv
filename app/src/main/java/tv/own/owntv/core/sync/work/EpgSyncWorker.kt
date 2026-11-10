@@ -22,7 +22,6 @@ class EpgSyncWorker(
     private val store: EpgSourceStore,
     private val connectivity: ConnectivityObserver,
     private val activityTracker: EpgActivityTracker,
-    private val recordings: tv.own.owntv.core.recording.RecordingManager,
     private val localeStore: LocaleStore,
     private val watchSession: tv.own.owntv.core.live.WatchSession,
 ) : CoroutineWorker(context, params) {
@@ -51,7 +50,7 @@ class EpgSyncWorker(
             return Result.success()
         }
 
-        // An automatic refresh never runs under a film or channel: it waits until playback stops
+        // An automatic refresh never runs under playback: it waits until playback stops
         // (WorkManager restarts it later if the wait outlives the job's time limit).
         if (reason == tv.own.owntv.core.sync.AutoRefresh.REASON && watchSession.watching.value.isNotEmpty()) {
             Log.i(TAG, "auto refresh waiting for playback to stop sourceId=$sourceId")
@@ -76,12 +75,6 @@ class EpgSyncWorker(
             }
             progress.flush()
             store.setSynced(source.id, System.currentTimeMillis(), null)
-            // A series rule is a standing instruction about programmes that do not exist in the
-            // database until the guide mentioning them is fetched — so this is the moment "record
-            // every showing" becomes actual timers. Best-effort: a rule that could not be
-            // applied is re-applied on the next refresh, and it must never fail the EPG sync.
-            runCatching { recordings.applyRules() }
-                .onFailure { Log.w(TAG, "series rules not applied after EPG sync: ${it.message}") }
             Log.i(
                 TAG,
                 "EPG sync finished sourceId=${source.id} reason=$reason programmes=$programmes ms=${SystemClock.elapsedRealtime() - startedAt}",
@@ -192,7 +185,7 @@ class EpgSyncWorker(
         const val TAG = "EpgSyncWorker"
         private const val PROGRESS_MIN_INTERVAL_MS = 750L
 
-        /** The same cadence [tv.own.owntv.core.download.DownloadWorker] refreshes its own at. */
+        /** The cadence the shell status pill reads at — slow enough to never matter, fast enough to move. */
         private const val NOTIFICATION_INTERVAL_MS = 2_000L
         const val KEY_SOURCE_ID = "sourceId"
         const val KEY_REASON = "reason"
@@ -207,8 +200,7 @@ internal const val MAX_EPG_RETRY_ATTEMPTS = 3
 /**
  * Whether a failed EPG sync is worth another attempt.
  *
- * Extracted so the classification can be tested without WorkManager — the same reason
- * [shouldScheduleTrendingRefresh] is a function of its own.
+ * Extracted so the classification can be tested without WorkManager.
  *
  * The retry test is "is this an IOException", which reads any of these as network trouble because
  * that is what they are built on. They are not: in each one the server did everything asked of it

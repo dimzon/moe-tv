@@ -5,7 +5,7 @@ import tv.own.myowntv.R
 import tv.own.owntv.core.model.ContentMenu
 
 /**
- * One arrangeable action in a long-press content menu.
+ * One arrangeable action in the long-press channel menu.
  *
  * [key] is a stable identifier and is deliberately NOT derived from the label: labels are translated,
  * and several of them flip between two texts. [labelRes] is the *neutral* wording of an action that
@@ -23,39 +23,27 @@ data class MenuActionRef(
 fun phoneCatalogue(menu: ContentMenu): List<MenuActionRef> = catalogue(menu).filterNot { it.tvOnly }
 
 /**
- * What *can* appear in each menu, in its shipped order.
+ * What *can* appear in the channel menu, in its shipped order.
  *
  * Here rather than in an app because the saved order is user data keyed by these strings: a second
  * copy of the key list in the second app is a rename away from silently dropping a user's
  * arrangement. Both apps build their menus from this and both arrange them with [arrange].
  *
- * The order is the one the popups are grouped in (WATCH, CHANNEL, GUIDE DATA, ORGANISE for a
- * channel; WATCH, LIBRARY, ORGANISE, DETAILS for a title), so the list Settings shows as "Default"
- * is exactly what the popup shows. The labels are the popup's own where it has a neutral one.
+ * The order is the one the popup is grouped in (WATCH, CHANNEL, GUIDE DATA, ORGANISE), so the list
+ * Settings shows as "Default" is exactly what the popup shows. The labels are the popup's own where
+ * it has a neutral one.
  */
 fun catalogue(menu: ContentMenu): List<MenuActionRef> = when (menu) {
     ContentMenu.LIVE -> LIVE_ACTIONS
-    ContentMenu.MOVIE -> MOVIE_ACTIONS
-    ContentMenu.SERIES -> SERIES_ACTIONS
-    ContentMenu.EPISODE -> EPISODE_ACTIONS
 }
 
 private val LIVE_ACTIONS = listOf(
     // The channel's Program details page (its day, each programme with what it can do). TV only:
     // the phone shows a channel's schedule on its own channel page.
     MenuActionRef("programme_details", R.string.content_programme_details, tvOnly = true),
-    MenuActionRef("catchup", R.string.content_catchup),
-    // Record this channel from now. It belongs in the list rather than being added by an app,
-    // because this list is what both apps arrange by and what Customize lets the user reorder and
-    // hide — a key that is not here is dropped by the arrangement, which is exactly what happened
-    // to the phone's Record row while the television's happened to survive.
-    MenuActionRef("record", R.string.recording_record),
-    // Record this channel between two times the user picks (#2) — the way to record ahead on a
-    // channel with no guide. Here for the same reason as `record`.
-    MenuActionRef("schedule_record", R.string.recording_schedule),
-    // Keep this channel for the Multiview grid. Same reason as `record` above, and the same symptom:
-    // absent from this list, the phone's row was silently dropped by the arrangement while the
-    // television's survived — and it is the only way to *start* a grid from the channel list.
+    // Keep this channel for the Multiview grid. It belongs in the list rather than being added by an
+    // app, because this list is what both apps arrange by and what Customize lets the user reorder
+    // and hide — a key that is not here is dropped by the arrangement.
     MenuActionRef("add_to_multiview", R.string.multiview_add_to),
     MenuActionRef("play_external", R.string.content_play_external_short),
     MenuActionRef("favourite", R.string.content_add_favourite),
@@ -70,57 +58,13 @@ private val LIVE_ACTIONS = listOf(
     MenuActionRef("remove_from_category", R.string.content_remove_from_category),
 )
 
-private val MOVIE_ACTIONS = listOf(
-    MenuActionRef("play_trailer", R.string.content_play_trailer),
-    MenuActionRef("play_external", R.string.content_play_external_short),
-    MenuActionRef("favourite", R.string.content_add_favourite),
-    MenuActionRef("mark_watched", R.string.content_mark_watched),
-    MenuActionRef(DOWNLOAD_ACTION, R.string.content_download),
-    MenuActionRef("remove_history", R.string.content_remove_history),
-    MenuActionRef("move", R.string.content_move),
-    MenuActionRef("move_to_category", R.string.content_move_to_category),
-    MenuActionRef("hide", R.string.common_hide),
-    MenuActionRef("tmdb_details", R.string.content_movie_details),
-    MenuActionRef("refetch_tmdb", R.string.content_refetch_tmdb),
-    MenuActionRef("set_tmdb_name", R.string.content_set_tmdb_name),
-    MenuActionRef("delete_subtitles", R.string.content_delete_subtitles),
-)
-
-private val SERIES_ACTIONS = listOf(
-    MenuActionRef("play_trailer", R.string.content_play_trailer),
-    MenuActionRef("favourite", R.string.content_add_favourite),
-    MenuActionRef(DOWNLOAD_ACTION, R.string.content_download_all_episodes),
-    MenuActionRef("remove_history", R.string.content_remove_history),
-    MenuActionRef("move", R.string.content_move),
-    MenuActionRef("move_to_category", R.string.content_move_to_category),
-    MenuActionRef("hide", R.string.common_hide),
-    MenuActionRef("tmdb_details", R.string.content_series_details),
-    MenuActionRef("refetch_tmdb", R.string.content_refetch_tmdb),
-    MenuActionRef("set_tmdb_name", R.string.content_set_tmdb_name),
-)
-
-private val EPISODE_ACTIONS = listOf(
-    MenuActionRef("play_start", R.string.content_play_from_start),
-    MenuActionRef("play_external", R.string.content_play_external_short),
-    MenuActionRef(DOWNLOAD_ACTION, R.string.content_download),
-    MenuActionRef("mark_watched", R.string.content_mark_watched),
-    MenuActionRef("tmdb_details", R.string.content_episode_details),
-    MenuActionRef("refetch_tmdb", R.string.content_refetch_tmdb),
-    MenuActionRef("delete_subtitles", R.string.content_delete_subtitles),
-)
-
-/** The key of the Download action in the film, series and episode menus. */
-const val DOWNLOAD_ACTION = "download"
-
 /**
- * How the user set up one menu: the saved [order] (empty = as shipped), the actions they [hidden],
- * and whether the profile in use may download at all — a profile with downloads off has no
- * Download action in any menu, whatever the arrangement says.
+ * How the user set up one menu: the saved [order] (empty = as shipped) and the actions they [hidden],
+ * the same way.
  */
 data class MenuLayout(
     val order: List<String> = emptyList(),
     val hidden: Set<String> = emptySet(),
-    val downloads: Boolean = true,
 ) {
     /** Whether the user changed anything Settings shows: the order or what is hidden. */
     fun isCustom(menu: ContentMenu): Boolean = hidden.isNotEmpty() || !isShippedOrder(menu)
@@ -144,7 +88,7 @@ data class MenuLayout(
  */
 fun <T> arrange(menu: ContentMenu, items: List<T>, layout: MenuLayout, key: (T) -> String): List<T> {
     val order = layout.order.ifEmpty { catalogue(menu).map { it.key } }
-    return applyMenuOrder(items, order, key).filter { key(it) !in layout.hidden && (layout.downloads || key(it) != DOWNLOAD_ACTION) }
+    return applyMenuOrder(items, order, key).filter { key(it) !in layout.hidden }
 }
 
 /**

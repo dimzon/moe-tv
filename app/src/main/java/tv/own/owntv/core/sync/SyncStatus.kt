@@ -26,11 +26,7 @@ enum class SyncScopeChoice {
 /** Live source-sync progress reported as per-content counters. */
 data class ImportStage(
     val liveProcessed: Int = 0,
-    val moviesProcessed: Int = 0,
-    val seriesProcessed: Int = 0,
     val liveActive: Boolean = false,
-    val moviesActive: Boolean = false,
-    val seriesActive: Boolean = false,
     /**
      * Which stream the connection measurement is opening, and how many it may open, or 0/0 when it
      * is not running.
@@ -45,14 +41,12 @@ data class ImportStage(
     val measuringConnections: Boolean get() = measuringOf > 0
 
     val totalProcessed: Int
-        get() = liveProcessed + moviesProcessed + seriesProcessed
+        get() = liveProcessed
 }
 
-/** Xtream / M3U progress is reported in these three phases. */
+/** Xtream / M3U progress is reported in the live phase. */
 enum class SyncPhase {
     LIVE,
-    MOVIES,
-    SERIES,
 }
 
 /** Terminal result of a sync run. */
@@ -74,14 +68,13 @@ sealed interface SyncWarningKind {
     data class CATALOG_SHRINK(val stored: Int, val percentFewer: Int) : SyncWarningKind
 
     /**
-     * The provider's bulk list stopped part-way and the per-category fallback finished the job
-     *.
+     * The provider's bulk list stopped part-way and the per-category fallback finished the job.
      *
-     * Measured on a real playlist: `get_vod_streams` ran for 242 seconds and the peer sent a
-     * connection reset at 139,924 of 178,720 films. The catalogue still ended up complete, because
-     * the fallback recovered it — but it took ten minutes instead of thirty-six seconds, and
-     * *nothing said so*. The run reported `Success`, and the only trace was a warning under a log
-     * tag nobody was filtering on. That silence is the defect this kind exists to end.
+     * Measured on a real playlist: the bulk call ran for 242 seconds and the peer sent a connection
+     * reset part-way through. The catalogue still ended up complete, because the fallback recovered
+     * it — but it took ten minutes instead of thirty-six seconds, and *nothing said so*. The run
+     * reported `Success`, and the only trace was a warning under a log tag nobody was filtering on.
+     * That silence is the defect this kind exists to end.
      *
      * [recovered] says whether the fallback got everything back, which is what decides whether the
      * user is looking at a slow sync or a short catalogue.
@@ -97,57 +90,40 @@ data class SyncWarning(
     val count: Int = 0,
 )
 
+/**
+ * Which sections of a source's catalogue a sync pass covers. The app is live-only now, so there is
+ * exactly one section: live channels. The `movies`/`series` sections and their persisted
+ * `sources.syncMovies`/`syncSeries` columns are retired (v57) — the columns stay in the schema for
+ * backup round-tripping and are simply never read.
+ */
 data class SyncContentTypes(
     val live: Boolean = true,
-    val movies: Boolean = true,
-    val series: Boolean = true,
 ) {
-    val hasAny: Boolean get() = live || movies || series
-
-    fun intersect(other: SyncContentTypes) = SyncContentTypes(
-        live = live && other.live,
-        movies = movies && other.movies,
-        series = series && other.series,
-    )
+    val hasAny: Boolean get() = live
 
     /** enabled - priority: the background remainder AFTER the foreground pass (enabled-relative). */
     fun remainderAfter(priority: SyncContentTypes) = SyncContentTypes(
         live = !priority.live && live,
-        movies = !priority.movies && movies,
-        series = !priority.series && series,
     )
 
-    /** M3U/backup/RuTube are single-stream (live-only) regardless of the persisted flags. */
-    fun constrainedTo(type: SourceType) = when (type) {
-        SourceType.M3U, SourceType.LOCAL_BACKUP, SourceType.RUTUBE -> copy(movies = false, series = false)
-        else -> this
-    }
-
     /** True iff this pass covered every section in [target]. Compare against [enabledFor], NOT [enabledOf]. */
-    fun isCompleteFor(target: SyncContentTypes): Boolean = intersect(target) == target
+    fun isCompleteFor(target: SyncContentTypes): Boolean = !target.live || live
 
-    /** The single derivation used at every sync boundary: request ∩ enabled, then type-constrained. */
-    fun effectiveFor(source: SourceEntity): SyncContentTypes =
-        intersect(enabledOf(source)).constrainedTo(source.type)
+    /** The single derivation used at every sync boundary: request ∩ enabled. */
+    fun effectiveFor(source: SourceEntity): SyncContentTypes = intersect(enabledOf(source))
+
+    private fun intersect(other: SyncContentTypes) = SyncContentTypes(live = live && other.live)
 
     companion object {
         /** Raw persisted enabledScope (Off = false). */
-        fun enabledOf(s: SourceEntity) = SyncContentTypes(s.syncLive, s.syncMovies, s.syncSeries)
+        fun enabledOf(s: SourceEntity) = SyncContentTypes(s.syncLive)
 
-        /** enabledScope constrained by source type — the completion TARGET (M3U → live-only). */
-        fun enabledFor(s: SourceEntity) = enabledOf(s).constrainedTo(s.type)
+        /** enabledScope — the completion TARGET. */
+        fun enabledFor(s: SourceEntity) = SyncContentTypes(s.syncLive)
 
-        fun fromChoices(live: SyncScopeChoice, movies: SyncScopeChoice, series: SyncScopeChoice) = SyncContentTypes(
-            live = live != SyncScopeChoice.Off,
-            movies = movies != SyncScopeChoice.Off,
-            series = series != SyncScopeChoice.Off,
-        )
+        fun fromChoices(live: SyncScopeChoice) = SyncContentTypes(live = live != SyncScopeChoice.Off)
 
-        fun priorityFromChoices(live: SyncScopeChoice, movies: SyncScopeChoice, series: SyncScopeChoice) = SyncContentTypes(
-            live = live == SyncScopeChoice.Now,
-            movies = movies == SyncScopeChoice.Now,
-            series = series == SyncScopeChoice.Now,
-        )
+        fun priorityFromChoices(live: SyncScopeChoice) = SyncContentTypes(live = live == SyncScopeChoice.Now)
     }
 }
 

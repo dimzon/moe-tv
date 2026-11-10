@@ -19,20 +19,15 @@ import tv.own.owntv.core.settings.SettingsRepository
  * full merged view. This is purely a *display* filter: every playlist still imports and stores all of its
  * content and EPG; this only decides which source ids the grids/guide read from.
  *
- * Per-section accessors ([liveSourceIds] / [movieSourceIds] / [seriesSourceIds]) further hide sources
- * whose enabledScope marks that section Off — cache stays on disk, rows just don't surface.
+ * The app is live-only (v57): [liveSourceIds] hides sources whose `syncLive` scope is Off — cache stays
+ * on disk, rows just don't surface. The [MediaType] parameter of [sourceIdsFor] is kept for call-site
+ * compatibility and maps every type to [liveSourceIds], since live channels are the only content there is.
  */
 data class ActiveProfileSources(val profileId: Long, val sources: List<SourceEntity>) {
     val sourceIds: List<Long> get() = sources.map { it.id }
     val liveSourceIds: List<Long> get() = sources.filter { it.syncLive }.map { it.id }
-    val movieSourceIds: List<Long> get() = sources.filter { it.syncMovies }.map { it.id }
-    val seriesSourceIds: List<Long> get() = sources.filter { it.syncSeries }.map { it.id }
 
-    fun sourceIdsFor(type: MediaType): List<Long> = when (type) {
-        MediaType.LIVE -> liveSourceIds
-        MediaType.MOVIE -> movieSourceIds
-        MediaType.SERIES, MediaType.EPISODE -> seriesSourceIds
-    }
+    fun sourceIdsFor(type: MediaType): List<Long> = liveSourceIds
 }
 
 /**
@@ -99,11 +94,6 @@ suspend fun activeSourceIds(
     } else {
         all
     }
-    val scoped = when (section) {
-        MediaType.LIVE -> filtered.filter { it.syncLive }
-        MediaType.MOVIE -> filtered.filter { it.syncMovies }
-        MediaType.SERIES, MediaType.EPISODE -> filtered.filter { it.syncSeries }
-        null -> filtered
-    }
+    val scoped = if (section == null) filtered else filtered.filter { it.syncLive }
     return scoped.map { it.id }
 }

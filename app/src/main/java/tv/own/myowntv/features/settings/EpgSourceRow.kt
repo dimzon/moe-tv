@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -80,7 +73,7 @@ import tv.own.myowntv.ui.components.displayText
 internal fun EpgRow(
     source: EpgSource,
     autoRefresh: EpgRefresh,
-    counts: suspend () -> Triple<Int, Int, Int>,
+    counts: suspend () -> Pair<Int, Int>,
     syncState: EpgSyncState,
     deleting: Boolean,
     rowFocus: FocusRequester?,
@@ -94,7 +87,7 @@ internal fun EpgRow(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val count by produceState<Triple<Int, Int, Int>?>(initialValue = null, source.id, source.lastSyncAt, source.lastError) {
+    val count by produceState<Pair<Int, Int>?>(initialValue = null, source.id, source.lastSyncAt, source.lastError) {
         value = runCatching { counts() }.getOrNull()
     }
     val activeSync = syncState as? EpgSyncState.Syncing
@@ -161,12 +154,9 @@ internal fun EpgRow(
 @Composable
 private fun epgSourceStatus(
     source: EpgSource,
-    count: Triple<Int, Int, Int>?,
+    count: Pair<Int, Int>?,
     activeSync: EpgSyncState.Syncing?,
 ): String {
-    val catchupNote = count?.third?.takeIf { it > 0 }?.let {
-        pluralStringResource(R.plurals.settings_epg_sources_catchup, it, it)
-    }
     return when {
         activeSync != null -> when {
             activeSync.programmes > 0 -> stringResource(
@@ -185,18 +175,12 @@ private fun epgSourceStatus(
             R.string.settings_epg_sources_error,
             classifySyncFailure(source.lastError, online = true).displayText(),
         )
-        count != null && count.second > 0 -> {
-            val counts = stringResource(
-                R.string.settings_epg_sources_status_count,
-                pluralStringResource(R.plurals.settings_epg_sources_status_count_channels, count.first, count.first),
-                pluralStringResource(R.plurals.settings_epg_sources_status_count_programmes, count.second, count.second),
-            )
-            if (catchupNote != null) stringResource(R.string.settings_epg_sources_status_count_with_catchup, counts, catchupNote)
-            else counts
-        }
-        source.lastSyncAt != null -> catchupNote?.let {
-            stringResource(R.string.settings_epg_sources_status_synced_with_catchup, it)
-        } ?: stringResource(R.string.settings_epg_sources_status_synced)
+        count != null && count.second > 0 -> stringResource(
+            R.string.settings_epg_sources_status_count,
+            pluralStringResource(R.plurals.settings_epg_sources_status_count_channels, count.first, count.first),
+            pluralStringResource(R.plurals.settings_epg_sources_status_count_programmes, count.second, count.second),
+        )
+        source.lastSyncAt != null -> stringResource(R.string.settings_epg_sources_status_synced)
         else -> stringResource(R.string.settings_epg_sources_not_synced)
     }
 }

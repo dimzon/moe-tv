@@ -6,9 +6,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import tv.own.owntv.core.database.dao.ChannelDao
-import tv.own.owntv.core.database.dao.MovieDao
-import tv.own.owntv.core.database.dao.SeriesDao
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.repository.SourceRepository
 import tv.own.owntv.core.settings.SettingsRepository
@@ -30,8 +29,6 @@ class NavVisibility(
     private val settings: SettingsRepository,
     private val sourceRepository: SourceRepository,
     private val channelDao: ChannelDao,
-    private val movieDao: MovieDao,
-    private val seriesDao: SeriesDao,
 ) {
 
     /** What the nav shows right now, honouring the user's mode and hidden set. */
@@ -58,22 +55,12 @@ class NavVisibility(
 
     private fun capsFlow(sources: List<SourceEntity>, defaultId: Long): Flow<Set<MainSection>> {
         val scoped = if (defaultId > 0) sources.filter { it.id == defaultId } else sources
-        if (scoped.isEmpty()) return flowOf(MainSection.dynamicVisible(hasLive = false, hasMovies = false, hasSeries = false))
+        if (scoped.isEmpty()) return flowOf(MainSection.dynamicVisible(hasLive = false))
         val liveIds = scoped.filter { it.syncLive }.map { it.id }
-        val movieIds = scoped.filter { it.syncMovies }.map { it.id }
-        val seriesIds = scoped.filter { it.syncSeries }.map { it.id }
         // Empty id lists would make countAll misbehave — use a sentinel that matches nothing.
         val empty = listOf(-1L)
-        return combine(
-            channelDao.countAll(liveIds.ifEmpty { empty }),
-            movieDao.countAll(movieIds.ifEmpty { empty }),
-            seriesDao.countAll(seriesIds.ifEmpty { empty }),
-        ) { channels, movies, series ->
-            MainSection.dynamicVisible(
-                hasLive = liveIds.isNotEmpty() && channels > 0,
-                hasMovies = movieIds.isNotEmpty() && movies > 0,
-                hasSeries = seriesIds.isNotEmpty() && series > 0,
-            )
+        return channelDao.countAll(liveIds.ifEmpty { empty }).map { channels ->
+            MainSection.dynamicVisible(hasLive = liveIds.isNotEmpty() && channels > 0)
         }
     }
 }

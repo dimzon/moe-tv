@@ -12,15 +12,3 @@ import androidx.room.Fts4
 @Entity(tableName = "channels_fts")
 @Fts4(contentEntity = ChannelEntity::class)
 data class ChannelFtsEntity(val name: String)
-
-@Entity(tableName = "movies_fts")
-@Fts4(contentEntity = MovieEntity::class)
-data class MovieFtsEntity(val name: String)
-
-@Entity(tableName = "series_fts")
-@Fts4(contentEntity = SeriesEntity::class)
-data class SeriesFtsEntity(val name: String)
-
-@Entity(tableName = "episodes_fts")
-@Fts4(contentEntity = EpisodeEntity::class)
-data class EpisodeFtsEntity(val name: String)

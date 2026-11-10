@@ -68,12 +68,7 @@ class ExcludingCountDaoTest {
         val channels = db.channelDao()
         val sources = listOf(source)
         assertEquals(2, channels.countAllExcluding(sources, listOf(locked)).first())
-        assertEquals(2, channels.observeCatchupCountExcluding(sources, listOf(locked)).first())
         assertEquals(channels.countAll(sources).first(), channels.countAllExcluding(sources, emptyList()).first())
-        assertEquals(
-            channels.observeCatchupCount(sources).first(),
-            channels.observeCatchupCountExcluding(sources, emptyList()).first(),
-        )
     }
 
     @Test

@@ -9,12 +9,10 @@ import androidx.room.execSQL
 import androidx.room.useWriterConnection
 import tv.own.owntv.core.database.OwnTVDatabase
 import tv.own.owntv.core.database.dao.ChannelDao
-import tv.own.owntv.core.database.dao.MovieDao
-import tv.own.owntv.core.database.dao.SeriesDao
 import tv.own.owntv.core.database.entity.SourceEntity
 
 /** Per-type counts after a playlist import, for the success breakdown. */
-data class SyncCounts(val channels: Int, val movies: Int, val series: Int, val epg: Int = 0)
+data class SyncCounts(val channels: Int, val epg: Int = 0)
 
 /**
  * Runs after a playlist syncs: returns the per-type content counts for the success message. EPG is NOT
@@ -24,33 +22,20 @@ data class SyncCounts(val channels: Int, val movies: Int, val series: Int, val e
  */
 class ImportFinalizer(
     private val channelDao: ChannelDao,
-    private val movieDao: MovieDao,
-    private val seriesDao: SeriesDao,
     private val db: OwnTVDatabase,
     private val bulkInsertHelper: BulkInsertHelper,
-    private val metadataDao: tv.own.owntv.core.database.dao.MetadataDao,
     private val epgSourceStore: tv.own.owntv.core.epg.EpgSourceStore,
 ) {
     suspend fun finalize(source: SourceEntity, deferIndexes: Boolean = false): SyncCounts {
         val counts = contentCounts(source.id)
         registerPortalGuide(source)
-        // Bounded TTL eviction of the TMDB caches — they grow without limit as the user
-        // browses. Piggy-backed here (the operation that changes data), never on cold start.
-        // Indexed DELETE on updatedAt; evicted rows simply re-fetch on next focus.
-        runCatching {
-            val cutoff = System.currentTimeMillis() - METADATA_TTL_MS
-            val cache = metadataDao.evictCacheOlderThan(cutoff)
-            val matches = metadataDao.evictMatchesOlderThan(cutoff)
-            if (cache > 0 || matches > 0) Log.i(TAG, "Metadata eviction: cache=$cache matches=$matches")
-        }
         if (!deferIndexes) {
             // A sync does REPLACE on 100k+ rows, which invalidates SQLite's planner statistics
             // (sqlite_stat1). With stale stats the query planner IGNORES the single-column and
-            // composite indices on channels/movies/series and falls back to a full table scan +
-            // temp B-tree sort — the Movies/Series grids' 2–3s cold-open. ANALYZE refreshes the
-            // stats so the existing indices get used again, dropping the open back to <300ms. Same
-            // trick EPG uses after its bulk sync (EpgRepository.refreshUrl). Safe, idempotent,
-            // <1s even on 100k rows.
+            // composite indices on channels and falls back to a full table scan + temp B-tree
+            // sort — the grid's 2–3s cold-open. ANALYZE refreshes the stats so the existing
+            // indices get used again, dropping the open back to <300ms. Same trick EPG uses after
+            // its bulk sync (EpgRepository.refreshUrl). Safe, idempotent, <1s even on 100k rows.
             ensureContentIndexes()
         }
         return counts
@@ -85,12 +70,10 @@ class ImportFinalizer(
     /** Current content counts for a source (no EPG) — for the success message and the Playlists list rows. */
     suspend fun contentCounts(sourceId: Long): SyncCounts = SyncCounts(
         channels = channelDao.countForSourceOnce(sourceId),
-        movies = movieDao.countForSourceOnce(sourceId),
-        series = seriesDao.countForSourceOnce(sourceId),
     )
 
     /**
-     * Ensure the Movies/Series/Channels grid read-indices exist and the planner statistics are fresh.
+     * Ensure the channel grid read-indices exist and the planner statistics are fresh.
      * Fresh imports may drop the non-unique content indices to speed up bulk inserts, so this rebuilds the
      * single-column and composite read paths, then refreshes `sqlite_stat1` with ANALYZE so SQLite keeps
      * choosing them instead of reverting to a full-table sort. Mirrors `EpgRepository.ensureEpgIndexes`.
@@ -106,7 +89,7 @@ class ImportFinalizer(
             // this pass can never miss an index those paths expect (the old hand-copied list omitted
             // the rating-sort indexes — drift that crashed the next migration's schema validation).
             db.useWriterConnection { connection ->
-                listOf("channels", "movies", "series").forEach { table ->
+                listOf("channels").forEach { table ->
                     OwnTVDatabase.EXPECTED_NON_UNIQUE_INDEXES.getValue(table).forEach { connection.execSQL(it) }
                 }
             }
@@ -115,7 +98,7 @@ class ImportFinalizer(
             // Refresh planner stats so the indices above are chosen for the grids' "WHERE … ORDER BY …" —
             // without this, stale stats from a bulk REPLACE make SQLite ignore them and full-sort.
             val analyzeStartedAt = SystemClock.elapsedRealtime()
-            bulkInsertHelper.analyzeTables("movies", "series", "channels", "categories")
+            bulkInsertHelper.analyzeTables("channels", "categories")
             Log.d(TAG, "ensureContentIndexes analyze ms=${SystemClock.elapsedRealtime() - analyzeStartedAt}")
         }.onSuccess {
             Log.i(TAG, "ensureContentIndexes end ms=${SystemClock.elapsedRealtime() - startedAt}")
@@ -127,8 +110,5 @@ class ImportFinalizer(
     companion object {
         private const val TAG = "ImportFinalizer"
 
-        /** TMDB cache TTL: entries untouched for this long are evicted after a sync.
-         *  90 days ≫ the repository's own refresh window, so this only drops long-abandoned rows. */
-        private const val METADATA_TTL_MS = 90L * 24 * 60 * 60 * 1000
     }
 }

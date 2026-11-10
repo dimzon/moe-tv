@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -106,8 +99,7 @@ private const val SECTION_CONTROLS = 6
 private const val SECTION_MULTIVIEW = 7
 internal const val SECTION_SOUND = 8
 private const val SECTION_LANGUAGES = 9
-private const val SECTION_RESUME = 10
-private const val SECTION_DIAGNOSTICS = 11
+private const val SECTION_DIAGNOSTICS = 10
 
 /**
  * The Settings groups that hold Video player rows: each part is a sub-heading and the sections
@@ -118,7 +110,7 @@ internal enum class VideoGroup(val titleRes: Int, val parts: List<Pair<Int, List
     PICTURE(R.string.settings_vp_cat_picture, listOf(R.string.settings_vp_cat_picture to listOf(SECTION_PICTURE), R.string.settings_vp_cat_frame_rate to listOf(SECTION_FRAME_RATE))),
     SOUND(R.string.settings_group_sound_subtitles, listOf(R.string.settings_vp_section_sound to listOf(SECTION_SOUND), R.string.settings_vp_cat_languages to listOf(SECTION_LANGUAGES))),
     LIVE(R.string.settings_live_tv, listOf(R.string.settings_live_tv to listOf(SECTION_LIVE), R.string.settings_vp_cat_live_tuning to listOf(SECTION_LIVE_TUNING))),
-    WATCHING(R.string.settings_group_watching_recording, listOf(R.string.settings_vp_cat_controls_resume to listOf(SECTION_CONTROLS, SECTION_RESUME), R.string.settings_vp_cat_multiview to listOf(SECTION_MULTIVIEW))),
+    WATCHING(R.string.settings_group_watching_recording, listOf(R.string.settings_vp_cat_controls_resume to listOf(SECTION_CONTROLS), R.string.settings_vp_cat_multiview to listOf(SECTION_MULTIVIEW))),
     DIAGNOSTICS(R.string.settings_group_app, listOf(R.string.settings_diagnostics to listOf(SECTION_DIAGNOSTICS))),
 }
 
@@ -141,7 +133,6 @@ internal fun videoRowPath(key: String): String {
 internal fun videoSectionCounts(vm: SettingsViewModel): List<Int> {
     val sources by vm.sources.collectAsStateWithLifecycle()
     val livePreview by vm.livePreviewEnabled.collectAsStateWithLifecycle()
-    val timeshift by vm.timeshiftEnabled.collectAsStateWithLifecycle()
     val multiview by vm.multiviewEnabled.collectAsStateWithLifecycle()
     val perPlaylist = sources.isNotEmpty()
     // One entry per section number; 3 (film streaming) is a gap kept so the list stays indexed
@@ -151,7 +142,7 @@ internal fun videoSectionCounts(vm: SettingsViewModel): List<Int> {
         6 + (if (vm.tunnelingSupported) 1 else 0),
         4,
         0,
-        3 + (if (livePreview) 2 else 0) + (if (timeshift) 2 else 0),
+        3 + (if (livePreview) 2 else 0),
         3 + (if (perPlaylist) 3 else 0),
         1,
         2 + (if (multiview) 1 else 0) + (if (tv.own.myowntv.features.pip.PictureInPicture.supported()) 1 else 0),
@@ -211,9 +202,6 @@ internal val VIDEO_QUICK_ROWS: List<VideoQuickRef> = listOf(
     VideoQuickRef("vp_live_preview", SECTION_LIVE, MyOwnTVIcon.LIVE_TV, R.string.settings_quick_live_preview, R.string.settings_live_preview_description),
     VideoQuickRef("vp_preview_audio", SECTION_LIVE, MyOwnTVIcon.AUDIO, R.string.settings_preview_audio, R.string.settings_preview_audio_description),
     VideoQuickRef("vp_preview_on_ok", SECTION_LIVE, MyOwnTVIcon.LIVE_TV, R.string.settings_preview_on_ok, R.string.settings_preview_on_ok_description),
-    VideoQuickRef("vp_timeshift", SECTION_LIVE, MyOwnTVIcon.REWIND, R.string.settings_timeshift, R.string.settings_timeshift_description),
-    VideoQuickRef("vp_timeshift_window", SECTION_LIVE, MyOwnTVIcon.REWIND, R.string.settings_timeshift_window, R.string.settings_timeshift_window_description),
-    VideoQuickRef("vp_timeshift_resume", SECTION_LIVE, MyOwnTVIcon.PLAY, R.string.settings_timeshift_resume, R.string.settings_timeshift_resume_description),
     VideoQuickRef("vp_live_latency", SECTION_LIVE_TUNING, MyOwnTVIcon.LIVE_TV, R.string.settings_live_latency, R.string.settings_live_latency_description),
     VideoQuickRef("vp_latency_sources", SECTION_LIVE_TUNING, MyOwnTVIcon.LIVE_TV, R.string.settings_live_latency_per_playlist, R.string.settings_live_latency_per_playlist_description),
     VideoQuickRef("vp_preroll", SECTION_LIVE_TUNING, MyOwnTVIcon.LIVE_TV, R.string.settings_live_preroll, R.string.settings_live_preroll_description),
@@ -237,8 +225,6 @@ internal val VIDEO_QUICK_ROWS: List<VideoQuickRef> = listOf(
     VideoQuickRef("vp_audio_lang", SECTION_LANGUAGES, MyOwnTVIcon.AUDIO, R.string.settings_preferred_audio_language, R.string.settings_preferred_audio_language_description),
     VideoQuickRef("vp_sub_lang", SECTION_LANGUAGES, MyOwnTVIcon.SUBTITLE, R.string.settings_preferred_subtitle_language, R.string.settings_preferred_language_description),
     VideoQuickRef("vp_sub_style", SECTION_LANGUAGES, MyOwnTVIcon.SUBTITLE, R.string.settings_subtitle_appearance, R.string.settings_subtitle_appearance_description),
-    VideoQuickRef("vp_resume", SECTION_RESUME, MyOwnTVIcon.PLAY, R.string.settings_resume_playback, R.string.settings_resume_playback_description),
-    VideoQuickRef("vp_autoplay", SECTION_RESUME, MyOwnTVIcon.AUTOPLAY_NEXT, R.string.settings_autoplay_next, R.string.settings_autoplay_next_description),
     VideoQuickRef("vp_measured_stats", SECTION_DIAGNOSTICS, MyOwnTVIcon.VIDEO, R.string.settings_measured_stats, R.string.settings_measured_stats_description),
     VideoQuickRef("vp_logging", SECTION_DIAGNOSTICS, MyOwnTVIcon.INFO, R.string.settings_detailed_playback_logging, R.string.settings_detailed_playback_logging_description),
     // No row, so nothing to find or pin, on a TV whose decoders cannot tunnel or has no picture-in-picture.
@@ -326,7 +312,7 @@ internal fun videoQuickBinding(key: String, vm: SettingsViewModel): VideoQuickBi
         }
         "vp_external" -> {
             val live by vm.externalPlayerLive.collectAsStateWithLifecycle()
-            toggle(onOff(live), live) { vm.setExternalPlayer(tv.own.owntv.core.settings.SettingsRepository.ExternalPlayerSection.LIVE_TV, !live) }
+            toggle(onOff(live), live) { vm.setExternalPlayerLive(!live) }
         }
         "vp_zoom" -> {
             val zoom by vm.defaultZoom.collectAsStateWithLifecycle()
@@ -398,18 +384,6 @@ internal fun videoQuickBinding(key: String, vm: SettingsViewModel): VideoQuickBi
             val on by vm.directTune.collectAsStateWithLifecycle()
             toggle(onOff(on), on) { vm.setDirectTune(!on) }
         }
-        "vp_timeshift" -> {
-            val on by vm.timeshiftEnabled.collectAsStateWithLifecycle()
-            toggle(onOff(on), on) { vm.setTimeshiftEnabled(!on) }
-        }
-        "vp_timeshift_window" -> {
-            val minutes by vm.timeshiftWindowMinutes.collectAsStateWithLifecycle()
-            link(stringResource(R.string.player_duration_minutes, minutes))
-        }
-        "vp_timeshift_resume" -> {
-            val mode by vm.timeshiftResumeMode.collectAsStateWithLifecycle()
-            link(stringResource(resumeModeLabelRes(mode)))
-        }
         "vp_volume" -> {
             val volume by vm.defaultVolume.collectAsStateWithLifecycle()
             link(stringResource(R.string.player_percent, volume))
@@ -458,14 +432,6 @@ internal fun videoQuickBinding(key: String, vm: SettingsViewModel): VideoQuickBi
         "vp_sub_lang" -> {
             val code by vm.preferredSubLang.collectAsStateWithLifecycle()
             link(langName(code))
-        }
-        "vp_resume" -> {
-            val mode by vm.resumeMode.collectAsStateWithLifecycle()
-            link(stringResource(resumeModeLabelRes(mode)))
-        }
-        "vp_autoplay" -> {
-            val on by vm.autoPlayNext.collectAsStateWithLifecycle()
-            toggle(onOff(on), on) { vm.setAutoPlayNext(!on) }
         }
         "vp_measured_stats" -> {
             val on by vm.measuredStreamStats.collectAsStateWithLifecycle()
@@ -523,12 +489,6 @@ private fun subSizeName(scale: Float): String = stringResource(
     SUB_SIZES.minByOrNull { kotlin.math.abs(it.first - scale) }?.second ?: R.string.settings_subtitle_normal,
 )
 
-private fun resumeModeLabelRes(mode: tv.own.owntv.core.settings.SettingsRepository.ResumeMode): Int = when (mode) {
-    tv.own.owntv.core.settings.SettingsRepository.ResumeMode.AUTO -> R.string.settings_resume_always
-    tv.own.owntv.core.settings.SettingsRepository.ResumeMode.ASK -> R.string.settings_resume_ask
-    tv.own.owntv.core.settings.SettingsRepository.ResumeMode.NEVER -> R.string.settings_resume_never
-}
-
 private fun liveLatencyLabelRes(mode: tv.own.owntv.core.settings.LiveLatency): Int = when (mode) {
     tv.own.owntv.core.settings.LiveLatency.LOW -> R.string.settings_live_latency_low
     tv.own.owntv.core.settings.LiveLatency.BALANCED -> R.string.settings_live_latency_balanced
@@ -564,9 +524,6 @@ internal fun VideoPlayerGroupRows(
     val measuredStats by vm.measuredStreamStats.collectAsStateWithLifecycle()
     val detailedDiagnostics by vm.detailedDiagnostics.collectAsStateWithLifecycle()
     val directTune by vm.directTune.collectAsStateWithLifecycle()
-    val timeshiftEnabled by vm.timeshiftEnabled.collectAsStateWithLifecycle()
-    val timeshiftWindowMinutes by vm.timeshiftWindowMinutes.collectAsStateWithLifecycle()
-    val timeshiftResumeMode by vm.timeshiftResumeMode.collectAsStateWithLifecycle()
     val afrPauseSecs by vm.afrPauseSecs.collectAsStateWithLifecycle()
     val afrMatchResolution by vm.afrMatchResolution.collectAsStateWithLifecycle()
     val externalLive by vm.externalPlayerLive.collectAsStateWithLifecycle()
@@ -578,7 +535,6 @@ internal fun VideoPlayerGroupRows(
     val outputAudioDelay = vm.outputAudioDelays.collectAsStateWithLifecycle().value.offsetFor(audioOutput)
     val audioLang by vm.preferredAudioLang.collectAsStateWithLifecycle()
     val subLang by vm.preferredSubLang.collectAsStateWithLifecycle()
-    val resumeMode by vm.resumeMode.collectAsStateWithLifecycle()
     val liveLatency by vm.liveLatencyMode.collectAsStateWithLifecycle()
     val liveCustomSecs by vm.liveLatencyCustomSecs.collectAsStateWithLifecycle()
     val livePreroll by vm.livePrerollSecs.collectAsStateWithLifecycle()
@@ -598,7 +554,6 @@ internal fun VideoPlayerGroupRows(
     val maxVideoHeight by vm.maxVideoHeight.collectAsStateWithLifecycle()
     val tunneledPlayback by vm.tunneledPlayback.collectAsStateWithLifecycle()
     val tunnelingFailed by vm.tunnelingFailed.collectAsStateWithLifecycle()
-    val autoPlayNext by vm.autoPlayNext.collectAsStateWithLifecycle()
     val livePreview by vm.livePreviewEnabled.collectAsStateWithLifecycle()
     val previewAudio by vm.livePreviewAudio.collectAsStateWithLifecycle()
     val guidePreviewOnOk by vm.guidePreviewOnOk.collectAsStateWithLifecycle()
@@ -733,14 +688,14 @@ internal fun VideoPlayerGroupRows(
                 when (section) {
                     SECTION_PLAYER -> {
         // The one playback path that leaves the app: hand the live channel's URL to an external
-        // player (VLC, MX Player…). The Movies/Series switches went with those sections.
+        // player (VLC, MX Player…).
         KeyedSettingRow(
             quickKey = "vp_external",
             icon = MyOwnTVIcon.PLAY,
             title = stringResource(R.string.settings_external_player),
             desc = stringResource(R.string.settings_external_player_row_description),
             value = SettingValue.Switch(externalLive),
-            onClick = { vm.setExternalPlayer(tv.own.owntv.core.settings.SettingsRepository.ExternalPlayerSection.LIVE_TV, !externalLive) },
+            onClick = { vm.setExternalPlayerLive(!externalLive) },
         )
                     }
                     SECTION_PICTURE -> {
@@ -892,38 +847,6 @@ internal fun VideoPlayerGroupRows(
                 onClick = { savedScroll = scrollState.value; dialog = Dialog.PREVIEW_ON_OK },
             )
         }
-        KeyedSettingRow(
-            quickKey = "vp_timeshift",
-            icon = MyOwnTVIcon.REWIND,
-            title = stringResource(R.string.settings_timeshift),
-            desc = stringResource(R.string.settings_timeshift_description),
-            value = SettingValue.Switch(timeshiftEnabled),
-            onClick = { vm.setTimeshiftEnabled(!timeshiftEnabled) },
-        )
-        // The length means nothing while saving is off, so it appears with the switch.
-        if (timeshiftEnabled) KeyedSettingRow(
-            quickKey = "vp_timeshift_window",
-            choices = tv.own.owntv.core.timeshift.TimeshiftRules.WINDOW_CHOICES_MINUTES.map { stringResource(R.string.player_duration_minutes, it) },
-            chosen = tv.own.owntv.core.timeshift.TimeshiftRules.WINDOW_CHOICES_MINUTES.indexOf(timeshiftWindowMinutes),
-            recommended = tv.own.owntv.core.timeshift.TimeshiftRules.WINDOW_CHOICES_MINUTES.indexOf(tv.own.owntv.core.timeshift.TimeshiftRules.DEFAULT_WINDOW_MINUTES),
-            icon = MyOwnTVIcon.REWIND,
-            title = stringResource(R.string.settings_timeshift_window),
-            desc = stringResource(R.string.settings_timeshift_window_description),
-            value = SettingValue.Choice(stringResource(R.string.player_duration_minutes, timeshiftWindowMinutes)),
-            modifier = Modifier.focusRequester(dialogRowFocus.getValue(Dialog.TIMESHIFT_WINDOW)),
-            onClick = { savedScroll = scrollState.value; dialog = Dialog.TIMESHIFT_WINDOW },
-        )
-        if (timeshiftEnabled) KeyedSettingRow(
-            quickKey = "vp_timeshift_resume",
-            choices = tv.own.owntv.core.settings.SettingsRepository.ResumeMode.entries.map { stringResource(resumeModeLabelRes(it)) },
-            chosen = timeshiftResumeMode.ordinal,
-            icon = MyOwnTVIcon.PLAY,
-            title = stringResource(R.string.settings_timeshift_resume),
-            desc = stringResource(R.string.settings_timeshift_resume_description),
-            value = SettingValue.Choice(stringResource(resumeModeLabelRes(timeshiftResumeMode))),
-            modifier = Modifier.focusRequester(dialogRowFocus.getValue(Dialog.TIMESHIFT_RESUME)),
-            onClick = { savedScroll = scrollState.value; dialog = Dialog.TIMESHIFT_RESUME },
-        )
                     }
                     SECTION_LIVE_TUNING -> {
         KeyedSettingRow(
@@ -1198,27 +1121,6 @@ internal fun VideoPlayerGroupRows(
             onClick = { savedScroll = scrollState.value; dialog = Dialog.SUB_STYLE },
         )
                     }
-                    SECTION_RESUME -> {
-        KeyedSettingRow(
-            quickKey = "vp_resume",
-            choices = tv.own.owntv.core.settings.SettingsRepository.ResumeMode.entries.map { stringResource(resumeModeLabelRes(it)) },
-            chosen = resumeMode.ordinal,
-            icon = MyOwnTVIcon.PLAY,
-            title = stringResource(R.string.settings_resume_playback),
-            desc = stringResource(R.string.settings_resume_playback_description),
-            value = SettingValue.Choice(stringResource(resumeModeLabelRes(resumeMode))),
-            modifier = Modifier.focusRequester(dialogRowFocus.getValue(Dialog.RESUME)),
-            onClick = { savedScroll = scrollState.value; dialog = Dialog.RESUME },
-        )
-        KeyedSettingRow(
-            quickKey = "vp_autoplay",
-            icon = MyOwnTVIcon.AUTOPLAY_NEXT,
-            title = stringResource(R.string.settings_autoplay_next),
-            desc = stringResource(R.string.settings_autoplay_next_description),
-            value = SettingValue.Switch(autoPlayNext),
-            onClick = { vm.setAutoPlayNext(!autoPlayNext) },
-        )
-                    }
                     else -> {
         KeyedSettingRow(
             quickKey = "vp_measured_stats",
@@ -1267,13 +1169,6 @@ internal fun VideoPlayerGroupRows(
             options = ZoomMode.entries.map { it.name to stringResource(it.labelRes) },
             selected = zoomMode.name,
             onSelect = { vm.setDefaultZoom(it); dialog = Dialog.NONE },
-            onDismiss = { dialog = Dialog.NONE },
-        )
-        Dialog.RESUME -> PickerDialog(
-            title = stringResource(R.string.settings_resume_playback),
-            options = tv.own.owntv.core.settings.SettingsRepository.ResumeMode.entries.map { it.name to stringResource(resumeModeLabelRes(it)) },
-            selected = resumeMode.name,
-            onSelect = { vm.setResumeMode(it); dialog = Dialog.NONE },
             onDismiss = { dialog = Dialog.NONE },
         )
         // A page of its own: opened through the Settings screen, which owns the pages.
@@ -1559,22 +1454,6 @@ internal fun VideoPlayerGroupRows(
             onSelect = { vm.setMaxVideoHeight(it.toIntOrNull() ?: 0); dialog = Dialog.NONE },
             onDismiss = { dialog = Dialog.NONE },
         )
-        Dialog.TIMESHIFT_WINDOW -> PickerDialog(
-            title = stringResource(R.string.settings_timeshift_window),
-            options = tv.own.owntv.core.timeshift.TimeshiftRules.WINDOW_CHOICES_MINUTES.map {
-                it.toString() to stringResource(R.string.player_duration_minutes, it)
-            },
-            selected = timeshiftWindowMinutes.toString(),
-            onSelect = { choice -> choice.toIntOrNull()?.let { vm.setTimeshiftWindowMinutes(it) }; dialog = Dialog.NONE },
-            onDismiss = { dialog = Dialog.NONE },
-        )
-        Dialog.TIMESHIFT_RESUME -> PickerDialog(
-            title = stringResource(R.string.settings_timeshift_resume),
-            options = tv.own.owntv.core.settings.SettingsRepository.ResumeMode.entries.map { it.name to stringResource(resumeModeLabelRes(it)) },
-            selected = timeshiftResumeMode.name,
-            onSelect = { vm.setTimeshiftResumeMode(it); dialog = Dialog.NONE },
-            onDismiss = { dialog = Dialog.NONE },
-        )
         Dialog.AFR_PAUSE -> PickerDialog(
             title = stringResource(R.string.settings_afr_pause),
             options = (0..vm.afrPauseMaxSecs).map { it.toString() to afrPauseLabel(it) },
@@ -1695,12 +1574,11 @@ private fun dialogForQuickKey(key: String): Dialog? = when (key) {
     "vp_reset_audio_delay" -> Dialog.RESET_SAVED_AUDIO_DELAY
     "vp_sub_style" -> Dialog.SUB_STYLE
     "vp_sub_lang" -> Dialog.SUB_LANG
-    "vp_resume" -> Dialog.RESUME
     "vp_mini" -> Dialog.MINI_PLAYER
     else -> null
 }
 
-private enum class Dialog { NONE, LIVE_LATENCY_SOURCES, LIVE_LATENCY_SOURCE, LIVE_LATENCY_CUSTOM_SOURCE, ZOOM, VOLUME, RESET_SAVED_ZOOM, RESET_SAVED_VOLUME, RESET_SAVED_AUDIO_DELAY, SEEK_STEP, SUB_STYLE, SUB_LANG, AUDIO_LANG, SURROUND, AUDIO_SYNC, OUTPUT_AUDIO_DELAY, RESUME, LIVE_LATENCY, LIVE_CUSTOM, LIVE_PREROLL, LIVE_TUNE_TIMEOUT, LIVE_TUNE_TIMEOUT_SOURCES, LIVE_TUNE_TIMEOUT_SOURCE, LIVE_PREROLL_SOURCES, LIVE_PREROLL_SOURCE, PREVIEW_ON_OK, AFR_WARNING, AFR_LIVE_WARNING, AFR_PAUSE, TIMESHIFT_WINDOW, TIMESHIFT_RESUME, MAX_QUALITY, LIVE_PREVIEW_PANEL, MINI_PLAYER, MULTIVIEW_TILES, MULTIVIEW_WARNING }
+private enum class Dialog { NONE, LIVE_LATENCY_SOURCES, LIVE_LATENCY_SOURCE, LIVE_LATENCY_CUSTOM_SOURCE, ZOOM, VOLUME, RESET_SAVED_ZOOM, RESET_SAVED_VOLUME, RESET_SAVED_AUDIO_DELAY, SEEK_STEP, SUB_STYLE, SUB_LANG, AUDIO_LANG, SURROUND, AUDIO_SYNC, OUTPUT_AUDIO_DELAY, LIVE_LATENCY, LIVE_CUSTOM, LIVE_PREROLL, LIVE_TUNE_TIMEOUT, LIVE_TUNE_TIMEOUT_SOURCES, LIVE_TUNE_TIMEOUT_SOURCE, LIVE_PREROLL_SOURCES, LIVE_PREROLL_SOURCE, PREVIEW_ON_OK, AFR_WARNING, AFR_LIVE_WARNING, AFR_PAUSE, MAX_QUALITY, LIVE_PREVIEW_PANEL, MINI_PLAYER, MULTIVIEW_TILES, MULTIVIEW_WARNING }
 
 /** "Auto" for 0, else the picture height ("1080p") — Maximum video quality. */
 @Composable

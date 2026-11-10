@@ -12,7 +12,7 @@ import tv.own.owntv.core.settings.SettingsRepository.Keys
 /**
  * Every stored setting has a backup decision. A new key that is in neither a backup list nor
  * [notInSettingsBackup] fails here, so a user's choice cannot silently go missing from backups again
- * (Multiview and the recording settings did).
+ * (Multiview did).
  */
 class SettingsBackupCoverageTest {
 
@@ -20,9 +20,8 @@ class SettingsBackupCoverageTest {
     private val notInSettingsBackup = setOf(
         // Internal state and one-shot migration flags.
         "active_profile_id", "default_source_id", "refresh_migration_done", "epg_refill_checked",
-        "m3u_vod_resort_checked",
         "restore_in_progress", "font_jakarta_migrated", "list_orders_reset", "live_latency_reset_416", "auto_frame_rate_reset_416",
-        "auto_frame_rate_reset_pre12", "metadata_match_heal_version", "stage_defaults_applied",
+        "auto_frame_rate_reset_pre12", "stage_defaults_applied",
         // A fact about this device's decoders (tunneled playback failed here), not a choice.
         "tunneling_failed",
         // The latency of this device's own outputs; another device's HDMI or Bluetooth path differs.
@@ -35,9 +34,9 @@ class SettingsBackupCoverageTest {
         // Backed up in their own BackupManager blocks, remapped to this device's playlists / EPG sources.
         "playlist_auto_refresh", "epg_auto_refresh", "epg_use_logos", "refresh_source_ids",
         // Exported only in their portable forms, per profile (the backup's "lastCategories" block).
-        "last_live_category", "last_movies_category", "last_series_category",
+        "last_live_category",
         // Secrets: sealed into the encrypted section, or never written in plain text.
-        "proxy_pass", "tmdb_api_key", "open_subtitles_api_key",
+        "proxy_pass",
     )
 
     private fun allKeys(): List<Preferences.Key<*>> =
@@ -68,8 +67,6 @@ class SettingsBackupCoverageTest {
     fun `the settings the audit found missing are backed up`() {
         listOf(
             "multiview_enabled", "multiview_tiles", "multiview_warning_accepted",
-            "recording_reserve_connection", "record_what_im_watching", "recording_pre_roll_minutes",
-            "recording_post_roll_minutes", "recording_over_mobile_data",
         ).forEach { assertTrue(it, it in backedUp) }
     }
 
@@ -98,12 +95,11 @@ class SettingsBackupCoverageTest {
     }
 
     @Test
-    fun `the Live TV category switches are backed up and restored`() {
+    fun `the Live TV category switch is backed up and restored`() {
         // Export and import both iterate BackupKeys.bools.
-        listOf(Keys.LIVE_SHOW_ALL_RAIL to "live_show_all_rail", Keys.LIVE_SHOW_CATCHUP_RAIL to "live_show_catchup_rail").forEach { (key, name) ->
-            assertTrue(key.name in BackupKeys.bools.map { it.name })
-            assertTrue(BackupKeys.exports(key, mutablePreferencesOf(key to false)))
-            assertEquals(name, key.name)
-        }
+        val key = Keys.LIVE_SHOW_ALL_RAIL
+        assertEquals("live_show_all_rail", key.name)
+        assertTrue(key.name in BackupKeys.bools.map { it.name })
+        assertTrue(BackupKeys.exports(key, mutablePreferencesOf(key to false)))
     }
 }

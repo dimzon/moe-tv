@@ -5,7 +5,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -14,7 +13,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -22,14 +20,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -38,13 +34,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -94,7 +87,6 @@ import tv.own.owntv.core.util.classifySyncFailure
 import tv.own.owntv.core.sync.work.CatalogSyncState
 import tv.own.owntv.core.sync.work.CatalogSyncScheduler
 import tv.own.owntv.core.database.dao.resolveExistingProfileId
-import tv.own.owntv.core.launcher.LauncherIntegrationRepository
 import tv.own.owntv.core.settings.ChNavLimits
 import tv.own.owntv.core.settings.EpgRefresh
 import tv.own.owntv.core.settings.PanelSection
@@ -121,12 +113,8 @@ class SettingsViewModel(
     private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
     private val epgRepository: tv.own.owntv.core.repository.EpgRepository,
     private val epgSourceStore: tv.own.owntv.core.epg.EpgSourceStore,
-    private val launcherIntegrationRepository: LauncherIntegrationRepository,
     private val catalogSyncScheduler: CatalogSyncScheduler,
     private val okHttpClient: okhttp3.OkHttpClient,
-    private val metadataProvider: tv.own.owntv.core.metadata.MetadataProvider,
-    private val metadataRepository: tv.own.owntv.core.metadata.MetadataRepository,
-    private val metadataBudget: tv.own.owntv.core.metadata.MetadataBudget,
     private val stalkerAuth: tv.own.owntv.core.stalker.StalkerAuthManager,
     private val stalkerClient: tv.own.owntv.core.stalker.StalkerClient,
     private val xtreamClient: tv.own.owntv.core.parser.XtreamClient,
@@ -169,11 +157,6 @@ class SettingsViewModel(
 
     fun startRemoteImageListener(port: Int) = companion.startForImageUpload(port)
 
-    /** TMDB settings handed over from another device, so a 32-character key never has to be typed with the remote. */
-    val remoteTmdbConfigs get() = companion.tmdbConfigs
-
-    fun startRemoteTmdbConfigListener(port: Int) = companion.startForTmdbConfig(port)
-
     // Semi-auto EPG: after a playlist import, if the playlist has a guide URL we offer to sync the EPG now
     // (rather than a slow automatic sync). "Sync now" shows a live programme count, just like the import.
     private var pendingEpgSource: SourceEntity? = null
@@ -198,8 +181,6 @@ class SettingsViewModel(
             // and the core tables for the other scopes are pruned in wave 2. userDataWriter records
             // each deletion so a local sync does not hand the cleared history straight back.
             userDataWriter.clearHistory(pid, type)
-            // Rebuild the Android TV home cards so the cleared items also leave the system Continue Watching row.
-            runCatching { launcherIntegrationRepository.refreshProfile(pid) }
         }
     }
 
@@ -217,7 +198,7 @@ class SettingsViewModel(
         data class Success(
             val counts: SyncCounts,
             val warnings: List<SyncWarning> = emptyList(),
-            val remainder: SyncContentTypes = SyncContentTypes(false, false, false),
+            val remainder: SyncContentTypes = SyncContentTypes(),
         ) : ImportState
         data class Failed(val failure: FriendlySyncFailure) : ImportState
     }
@@ -272,14 +253,6 @@ class SettingsViewModel(
             else -> null
         }
     }.getOrNull()
-
-    /** How many of the active profile's channels advertise catch-up — for the Catch-up settings note. */
-    val catchupChannelCount: StateFlow<Int> = sources
-        .flatMapLatest { srcs ->
-            val ids = srcs.map { it.id }
-            kotlinx.coroutines.flow.flow { emit(if (ids.isEmpty()) 0 else channelDao.countCatchup(ids)) }
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
     /** The source marked as default/active (shown in the sidebar). */
     val defaultSourceId: StateFlow<Long> = settings.defaultSourceId
@@ -404,34 +377,6 @@ class SettingsViewModel(
         viewModelScope.launch { settings.setTunneledPlayback(enabled) }
     }
 
-    val autoPlayNext: StateFlow<Boolean> = settings.autoPlayNext
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
-
-    fun setAutoPlayNext(enabled: Boolean) {
-        viewModelScope.launch { settings.setAutoPlayNext(enabled) }
-    }
-
-    // Seeded with the repository's own default (DEVICE). MANUAL here made the chip open reading "Manual"
-    // for a frame before the stored value arrived — on a setting the user had never touched.
-    val catchupTimezone: StateFlow<SettingsRepository.CatchupTimezone> = settings.catchupTimezone
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsRepository.CatchupTimezone.AUTOMATIC)
-
-    val catchupOffsetMinutes: StateFlow<Int> = settings.catchupOffsetMinutes
-        .stateIn(viewModelScope, SharingStarted.Eagerly, 0)
-
-    val catchupOffsetRangeMinutes: IntRange = settings.catchupOffsetRangeMinutes
-    val catchupOffsetStepMinutes: Int = settings.catchupOffsetStepMinutes
-    val catchupOffsetChoicesMinutes: List<Int> = settings.catchupOffsetChoicesMinutes
-
-    fun setCatchupTimezone(mode: SettingsRepository.CatchupTimezone) {
-        viewModelScope.launch { settings.setCatchupTimezone(mode) }
-    }
-
-    /** Nudge the manual UTC offset by [deltaMinutes] (the picker's − / + steps), clamped to range. */
-    fun adjustCatchupOffset(deltaMinutes: Int) {
-        viewModelScope.launch { settings.setCatchupOffsetMinutes(catchupOffsetMinutes.value + deltaMinutes) }
-    }
-
     /** Global guide shift in minutes (0 = off). Per-channel overrides live in the channel menu. */
     val epgOffsetMinutes: StateFlow<Int> = settings.epgOffsetMinutes
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0)
@@ -462,27 +407,6 @@ class SettingsViewModel(
         viewModelScope.launch {
             Log.d(TAG, "setAndroidTvHomeEnabled enabled=$enabled")
             settings.setAndroidTvHomeEnabled(enabled)
-            if (enabled) {
-                refreshActiveTvHome(allowBrowsableRequest = true)
-            } else {
-                profileDao.getAllOnce().forEach { profile -> launcherIntegrationRepository.clearProfile(profile.id) }
-            }
-        }
-    }
-
-    /** Status of the manual "Refresh now" so the UI can show Rebuilding… → Done. */
-    enum class TvHomeRefresh { IDLE, REFRESHING, DONE }
-    private val _tvHomeRefresh = MutableStateFlow(TvHomeRefresh.IDLE)
-    val tvHomeRefresh: StateFlow<TvHomeRefresh> = _tvHomeRefresh.asStateFlow()
-
-    fun refreshAndroidTvHome() {
-        if (_tvHomeRefresh.value == TvHomeRefresh.REFRESHING) return
-        viewModelScope.launch {
-            _tvHomeRefresh.value = TvHomeRefresh.REFRESHING
-            runCatching { refreshActiveTvHome(allowBrowsableRequest = true) }
-            _tvHomeRefresh.value = TvHomeRefresh.DONE
-            kotlinx.coroutines.delay(1_800)
-            if (_tvHomeRefresh.value == TvHomeRefresh.DONE) _tvHomeRefresh.value = TvHomeRefresh.IDLE
         }
     }
 
@@ -529,21 +453,6 @@ class SettingsViewModel(
     val directTune: StateFlow<Boolean> = settings.directTune.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
     fun setDirectTune(enabled: Boolean) { viewModelScope.launch { settings.setDirectTune(enabled) } }
 
-    // Pause and rewind channels without catch-up, from a copy saved while watching.
-    val timeshiftEnabled: StateFlow<Boolean> = settings.timeshiftEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-    fun setTimeshiftEnabled(enabled: Boolean) { viewModelScope.launch { settings.setTimeshiftEnabled(enabled) } }
-    val timeshiftWindowMinutes: StateFlow<Int> = settings.timeshiftWindowMinutes.stateIn(
-        viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.timeshift.TimeshiftRules.DEFAULT_WINDOW_MINUTES,
-    )
-    fun setTimeshiftWindowMinutes(minutes: Int) { viewModelScope.launch { settings.setTimeshiftWindowMinutes(minutes) } }
-    val timeshiftResumeMode: StateFlow<SettingsRepository.ResumeMode> =
-        settings.timeshiftResumeMode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsRepository.ResumeMode.ASK)
-    fun setTimeshiftResumeMode(name: String) {
-        viewModelScope.launch {
-            settings.setTimeshiftResumeMode(runCatching { SettingsRepository.ResumeMode.valueOf(name) }.getOrDefault(SettingsRepository.ResumeMode.ASK))
-        }
-    }
-
     // Auto frame rate's film extras.
     val afrPauseMaxSecs: Int get() = settings.afrPauseMaxSecs
     val afrPauseSecs: StateFlow<Int> = settings.afrPauseSecs.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
@@ -551,14 +460,9 @@ class SettingsViewModel(
     val afrMatchResolution: StateFlow<Boolean> = settings.afrMatchResolution.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
     fun setAfrMatchResolution(enabled: Boolean) { viewModelScope.launch { settings.setAfrMatchResolution(enabled) } }
 
-    // External player is a Live TV toggle — handing a live channel's URL to VLC/MX Player. The Movies
-    // and Series switches went with those sections; the repository's per-section keys stay readable so
-    // older backups still import (wave 2 will prune them).
+    // External player is a Live TV toggle — handing a live channel's URL to VLC/MX Player.
     val externalPlayerLive: StateFlow<Boolean> = settings.externalPlayerLive.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-
-    fun setExternalPlayer(section: SettingsRepository.ExternalPlayerSection, enabled: Boolean) {
-        viewModelScope.launch { settings.setExternalPlayer(section, enabled) }
-    }
+    fun setExternalPlayerLive(enabled: Boolean) { viewModelScope.launch { settings.setExternalPlayerLive(enabled) } }
 
     val updateCheckOnStart: StateFlow<Boolean> =
         settings.updateCheckOnStart.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
@@ -658,14 +562,6 @@ class SettingsViewModel(
             .toList()
     }
 
-    val resumeMode: StateFlow<SettingsRepository.ResumeMode> =
-        settings.resumeMode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsRepository.ResumeMode.ASK)
-    fun setResumeMode(name: String) {
-        viewModelScope.launch {
-            settings.setResumeMode(runCatching { SettingsRepository.ResumeMode.valueOf(name) }.getOrDefault(SettingsRepository.ResumeMode.ASK))
-        }
-    }
-
     val defaultZoom: StateFlow<String> = settings.defaultZoom.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "FIT")
     fun setDefaultZoom(name: String) { viewModelScope.launch { settings.setDefaultZoom(name) } }
 
@@ -729,26 +625,6 @@ class SettingsViewModel(
 
     fun setPanelWidths(s: PanelSection, enabled: Boolean, shares: PanelShares) {
         viewModelScope.launch { settings.setPanelWidths(s, enabled, shares) }
-    }
-
-    /** Cinematic's detail-block height per section — its own value, not one of the width shares. */
-    val cinematicDetailsHeights: Map<PanelSection, StateFlow<Int>> =
-        panelFlows(settings::cinematicDetailsHeight, tv.own.owntv.core.settings.CINEMATIC_DETAILS_DEFAULT)
-
-    fun cinematicDetailsHeight(s: PanelSection): StateFlow<Int> = cinematicDetailsHeights.getValue(s)
-
-    fun setCinematicDetailsHeight(s: PanelSection, percent: Int) {
-        viewModelScope.launch { settings.setCinematicDetailsHeight(s, percent) }
-    }
-
-    /** Cinematic's categories sheet width — its own value, so the Separate widths are never touched. */
-    private val cinematicSheetWidths: Map<PanelSection, StateFlow<Int>> =
-        panelFlows(settings::cinematicSheetWidth, tv.own.owntv.core.settings.LiveStageWidths.DEFAULT.sheet)
-
-    fun cinematicSheetWidth(s: PanelSection): StateFlow<Int> = cinematicSheetWidths.getValue(s)
-
-    fun setCinematicSheetWidth(s: PanelSection, percent: Int) {
-        viewModelScope.launch { settings.setCinematicSheetWidth(s, percent) }
     }
 
     val guideWidthEnabled: StateFlow<Boolean> = settings.guideWidthEnabled
@@ -916,11 +792,6 @@ class SettingsViewModel(
         viewModelScope.launch { sourceDao.updateLiveTuneTimeout(sourceId, secs) }
     }
 
-    /** Per-playlist catch-up time zone override; `null` mode = follow the global setting. */
-    fun setSourceCatchupTimezone(sourceId: Long, mode: String?, offsetMin: Int?) {
-        viewModelScope.launch { sourceDao.updateCatchupTimezone(sourceId, mode, offsetMin) }
-    }
-
     /** Per-playlist Live latency override; `null` mode = follow the global setting. */
     fun setSourceLiveLatency(sourceId: Long, mode: String?, customSecs: Int) {
         viewModelScope.launch { sourceDao.updateLiveLatency(sourceId, mode, customSecs) }
@@ -930,10 +801,6 @@ class SettingsViewModel(
         settings.animationLevel.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.theme.AnimationLevel.FULL)
     fun setAnimationLevel(level: tv.own.owntv.core.theme.AnimationLevel) { viewModelScope.launch { settings.setAnimationLevel(level) } }
 
-    /** Separate panels (the default) or the Cinematic frame, shared by Movies and Series. */
-    val vodLayout: StateFlow<tv.own.owntv.core.settings.SettingsRepository.VodLayout> =
-        settings.vodLayout.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.settings.SettingsRepository.VodLayout.SEPARATE)
-    fun setVodLayout(layout: tv.own.owntv.core.settings.SettingsRepository.VodLayout) { viewModelScope.launch { settings.setVodLayout(layout) } }
     val liveLayout: StateFlow<tv.own.owntv.core.settings.SettingsRepository.LiveLayout> =
         settings.liveLayout.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.settings.SettingsRepository.LiveLayout.STAGE)
     fun setLiveLayout(layout: tv.own.owntv.core.settings.SettingsRepository.LiveLayout) { viewModelScope.launch { settings.setLiveLayout(layout) } }
@@ -1002,12 +869,6 @@ class SettingsViewModel(
     val rememberLastLive: StateFlow<Boolean> =
         settings.rememberLastLive.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
     fun setRememberLastLive(enabled: Boolean) { viewModelScope.launch { settings.setRememberLastLive(enabled) } }
-    // The Movies/Series switches went with those screens, but the shell's root still reads these two
-    // flows (its own cleanup owns the call); the repository keeps the prefs.
-    val rememberLastMovies: StateFlow<Boolean> =
-        settings.rememberLastMovies.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-    val rememberLastSeries: StateFlow<Boolean> =
-        settings.rememberLastSeries.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     /** Per-source playlist auto-refresh selection (Off / Startup / staleness threshold). */
     val playlistAutoRefresh: StateFlow<Map<Long, PlaylistRefresh>> = settings.playlistAutoRefresh
@@ -1045,8 +906,6 @@ class SettingsViewModel(
         stalkerDeviceId2: String = "",
         stalkerSignature: String = "",
         syncLive: Boolean = true,
-        syncMovies: Boolean = true,
-        syncSeries: Boolean = true,
         preferHls: Boolean = false,
         httpReferer: String = "",
     ) {
@@ -1071,8 +930,6 @@ class SettingsViewModel(
                 httpReferer = httpReferer.trim().takeIf { it.isNotEmpty() },
                 epgUrl = epgUrl.trim().takeIf { it.isNotBlank() },
                 syncLive = syncLive,
-                syncMovies = syncMovies,
-                syncSeries = syncSeries,
                 preferHls = preferHls,
             )
             sourceEditor.save(existing, updated)
@@ -1083,8 +940,6 @@ class SettingsViewModel(
                 isDefault -> settings.setDefaultSource(id)
                 settings.defaultSourceId.first() == id -> settings.setDefaultSource(-1L)
             }
-            // Hidden sections must drop from the Android TV launcher immediately.
-            runCatching { refreshActiveTvHome(allowBrowsableRequest = true) }
         }
     }
 
@@ -1119,7 +974,7 @@ class SettingsViewModel(
         SourceImporter.ImportState.Idle -> ImportState.Idle
         SourceImporter.ImportState.Running -> ImportState.Running
         is SourceImporter.ImportState.Success ->
-            ImportState.Success(counts ?: SyncCounts(0, 0, 0, 0), warnings, remainder)
+            ImportState.Success(counts ?: SyncCounts(0, 0), warnings, remainder)
         is SourceImporter.ImportState.Failed -> ImportState.Failed(
             when (val f = failure) {
                 SourceImporter.SetupFailure.InvalidMac -> FriendlySyncFailure.InvalidMac
@@ -1143,8 +998,6 @@ class SettingsViewModel(
         epgUrl: String = "",
         autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF,
         live: SyncScopeChoice = SyncScopeChoice.Now,
-        movies: SyncScopeChoice = SyncScopeChoice.Now,
-        series: SyncScopeChoice = SyncScopeChoice.Now,
         isDefault: Boolean = false,
         preferHls: Boolean = false,
         httpReferer: String = "",
@@ -1152,7 +1005,7 @@ class SettingsViewModel(
         importer.xtream(
             name = name, server = server, username = user, password = pass,
             userAgent = userAgent, epgUrl = epgUrl, autoRefresh = autoRefresh,
-            live = live, movies = movies, series = series,
+            live = live,
             preferHls = preferHls, makeDefault = isDefault, httpReferer = httpReferer,
         )
     }
@@ -1189,7 +1042,7 @@ class SettingsViewModel(
      * A single-connection provider cuts the oldest stream when a new one starts, so a picture left
      * running would both be killed by the measurement and corrupt its result.
      */
-    /** Per-playlist "Ignore connection limit": Multiview and recordings stop counting the provider's limit. */
+    /** Per-playlist "Ignore connection limit": Multiview stops counting the provider's limit. */
     fun setIgnoreConnectionLimit(source: SourceEntity, ignore: Boolean) {
         viewModelScope.launch { sourceDao.updateIgnoreConnectionLimit(source.id, ignore) }
     }
@@ -1239,10 +1092,7 @@ class SettingsViewModel(
 
     /**
      * Save a Stalker source. Verifies the portal handshake first (same as Test connection) so a
-     * typo'd portal/MAC fails with a clear error instead of saving a dead source. Staged
-     * automatically: live syncs in the foreground (one bulk get_all_channels), movies/series are
-     * enqueued as the background remainder — Stalker VOD has no bulk endpoint (~14 items/page), so
-     * blocking the user on that crawl would take minutes on large catalogs.
+     * typo'd portal/MAC fails with a clear error instead of saving a dead source.
      */
     fun addStalker(
         name: String,
@@ -1256,8 +1106,6 @@ class SettingsViewModel(
         autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF,
         isDefault: Boolean = false,
         live: SyncScopeChoice = SyncScopeChoice.Now,
-        movies: SyncScopeChoice = SyncScopeChoice.Later,
-        series: SyncScopeChoice = SyncScopeChoice.Later,
         httpReferer: String = "",
         login: String = "",
         password: String = "",
@@ -1266,7 +1114,7 @@ class SettingsViewModel(
             name = name, portalUrl = portalUrl, mac = mac,
             serialNumber = serialNumber, deviceId = deviceId, deviceId2 = deviceId2,
             signature = signature, userAgent = userAgent, autoRefresh = autoRefresh,
-            live = live, movies = movies, series = series, makeDefault = isDefault,
+            live = live, makeDefault = isDefault,
             httpReferer = httpReferer, login = login, password = password,
         )
     }
@@ -1298,7 +1146,6 @@ class SettingsViewModel(
                     _epgSync.value = EpgSyncUi.Ask(synced.name)
                 }
             }
-            runCatching { refreshActiveTvHome(allowBrowsableRequest = true) }
         }
         importJob = job
         job.invokeOnCompletion { if (importJob == job) importJob = null }
@@ -1322,7 +1169,7 @@ class SettingsViewModel(
                 source.id,
                 reason = if (clean) "manual_clean_resync" else "manual_resync",
                 contentTypes = SyncContentTypes.enabledOf(source),
-                baseItemCount = counts.channels + counts.movies + counts.series,
+                baseItemCount = counts.channels,
                 forcePrune = clean,
             )
         }
@@ -1354,7 +1201,6 @@ class SettingsViewModel(
                 withContext(NonCancellable) {
                     sourceRepository.deleteSource(source)
                     if (defaultSourceId.value == source.id) settings.setDefaultSource(-1L)
-                    refreshActiveTvHome(allowBrowsableRequest = true)
                 }
             } finally {
                 _deletingSourceIds.value = _deletingSourceIds.value - source.id
@@ -1369,12 +1215,6 @@ class SettingsViewModel(
         importJob?.cancel()
         importJob = null
         importer.reset()
-    }
-
-    private suspend fun refreshActiveTvHome(allowBrowsableRequest: Boolean = true) {
-        val pid = profileDao.resolveExistingProfileId(settings.activeProfileId.first()) ?: return
-        Log.d(TAG, "refreshActiveTvHome profile=$pid allowBrowsable=$allowBrowsableRequest")
-        launcherIntegrationRepository.refreshProfile(pid, allowBrowsableRequest)
     }
 
     // --- Global proxy (Approach 1 — one app-wide HTTP proxy) ---
@@ -1550,114 +1390,6 @@ class SettingsViewModel(
     }
 
     private class DnsNoAddressesException(val host: String) : java.io.IOException()
-
-    // --- TMDB metadata enrichment: config + manual "look up title" test ---
-
-    val metadataMode: StateFlow<tv.own.owntv.core.metadata.MetadataMode> =
-        settings.metadataMode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.metadata.MetadataMode.PROVIDER_PLUS_TMDB)
-    fun setMetadataMode(mode: tv.own.owntv.core.metadata.MetadataMode) { viewModelScope.launch { settings.setMetadataMode(mode) } }
-
-    val tmdbApiKey: StateFlow<String> =
-        settings.tmdbApiKey.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
-    fun setTmdbApiKey(key: String) { viewModelScope.launch { settings.setTmdbApiKey(key) } }
-
-    val metadataServerUrl: StateFlow<String> =
-        settings.metadataServerUrl.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
-    fun setMetadataServerUrl(url: String) { viewModelScope.launch { settings.setMetadataServerUrl(url) } }
-
-    /** TMDB content language ("" = TMDB default en-US, "auto" = device locale, else an ISO 639-1 code). */
-    val metadataLanguage: StateFlow<String> =
-        settings.metadataLanguage.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
-
-    /**
-     * Persist the metadata language and wipe the cached TMDB detail rows, which hold text in the *old*
-     * language under a language-agnostic key — without the wipe the change wouldn't show until the 60-day
-     * TTL expired. Runs under NonCancellable so navigating away mid-write can't leave a half-cleared cache
-     * paired with the new language. Matches are kept (title→tmdbId doesn't depend on language).
-     */
-    fun setMetadataLanguage(code: String) {
-        viewModelScope.launch {
-            withContext(NonCancellable) {
-                settings.setMetadataLanguage(code)
-                runCatching { metadataRepository.clearCacheForLanguageChange() }
-                    .onFailure { Log.w("SettingsViewModel", "Metadata cache wipe after language change failed: ${it.message}") }
-            }
-        }
-    }
-
-    /** Which access tier the current config resolves to — shown as the Metadata screen's status chip. */
-    val metadataTier: StateFlow<tv.own.owntv.core.metadata.MetadataConfig.Tier> =
-        settings.metadataConfigFlow
-            .map { it.tier }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.metadata.MetadataConfig.Tier.DEFAULT_WORKER)
-
-    /**
-     * This install's remaining metadata allowance, for the status row on the Metadata screen. Only
-     * meaningful on the shared default-Worker tier; the screen hides the row on the other two, which
-     * are the user's own resource and are never metered.
-     *
-     * Refreshed when the screen asks ([refreshMetadataBudget]) rather than continuously — it is a
-     * DataStore read and the number only moves while the user is browsing, not while they sit in
-     * Settings.
-     */
-    private val _metadataBudgetStatus =
-        MutableStateFlow<tv.own.owntv.core.metadata.MetadataBudgetStatus?>(null)
-    val metadataBudgetStatus: StateFlow<tv.own.owntv.core.metadata.MetadataBudgetStatus?> =
-        _metadataBudgetStatus.asStateFlow()
-
-    fun refreshMetadataBudget() {
-        viewModelScope.launch {
-            _metadataBudgetStatus.value = runCatching { metadataBudget.status() }.getOrNull()
-        }
-    }
-
-    sealed interface MetadataTestState {
-        data object Idle : MetadataTestState
-        data object Testing : MetadataTestState
-        data class Ok(val title: String, val year: Int?, val tmdbId: Int) : MetadataTestState
-        data class Fail(val failure: MetadataFailure) : MetadataTestState
-    }
-
-    sealed interface MetadataFailure {
-        data object EmptyTitle : MetadataFailure
-        data object ServerUnavailable : MetadataFailure
-        data class NoMatch(val query: String) : MetadataFailure
-        data class Unknown(val rawMessage: String?) : MetadataFailure
-    }
-
-    private val _metadataTest = MutableStateFlow<MetadataTestState>(MetadataTestState.Idle)
-    val metadataTest: StateFlow<MetadataTestState> = _metadataTest.asStateFlow()
-
-    fun resetMetadataTest() { _metadataTest.value = MetadataTestState.Idle }
-
-    /** Manual "look up title" through the configured tier — proves the plumbing end-to-end. */
-    fun testMetadataLookup(title: String) {
-        if (_metadataTest.value == MetadataTestState.Testing) return
-        val q = title.trim()
-        if (q.isEmpty()) {
-            _metadataTest.value = MetadataTestState.Fail(MetadataFailure.EmptyTitle)
-            return
-        }
-        _metadataTest.value = MetadataTestState.Testing
-        viewModelScope.launch {
-            val profileId = settings.activeProfileId.first()
-            val includeAdult = tv.own.owntv.core.metadata.profileAllowsAdultMetadata(profileDao.getById(profileId)?.isKids)
-            val result = runCatching { metadataProvider.searchMovie(q, includeAdult = includeAdult) }
-            _metadataTest.value = result.fold(
-                onSuccess = { hits ->
-                    val top = hits?.firstOrNull()
-                    if (hits == null) {
-                        MetadataTestState.Fail(MetadataFailure.ServerUnavailable)
-                    } else if (top == null) {
-                        MetadataTestState.Fail(MetadataFailure.NoMatch(q))
-                    } else {
-                        MetadataTestState.Ok(top.title, top.year, top.tmdbId)
-                    }
-                },
-                onFailure = { MetadataTestState.Fail(MetadataFailure.Unknown(it.message?.takeIf { m -> m.isNotBlank() })) },
-            )
-        }
-    }
 
     private class ProxyHttpException(val code: Int) : java.io.IOException()
 

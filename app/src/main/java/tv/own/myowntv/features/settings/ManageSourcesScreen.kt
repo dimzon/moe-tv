@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -226,25 +219,21 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 initial = src,
                 initialAutoRefresh = playlistAutoRefresh[src.id] ?: PlaylistRefresh.OFF,
                 initialIsDefault = src.id == defaultId,
-                onStartXtream = { n, server, u, p, ua, ref, epg, autoRefresh, live, movies, series, isDefault, preferHls ->
+                onStartXtream = { n, server, u, p, ua, ref, epg, autoRefresh, live, isDefault, preferHls ->
                     vm.updateSource(
                         src.id, n, server, u, p, ua, epg, autoRefresh, isDefault, httpReferer = ref,
                         syncLive = live != tv.own.owntv.core.sync.SyncScopeChoice.Off,
-                        syncMovies = movies != tv.own.owntv.core.sync.SyncScopeChoice.Off,
-                        syncSeries = series != tv.own.owntv.core.sync.SyncScopeChoice.Off,
                         preferHls = preferHls,
                     )
                     editingSource = null
                 },
                 onStartM3u = { n, url, ua, ref, epg, autoRefresh, isDefault -> vm.updateSource(src.id, n, url, "", "", ua, epg, autoRefresh, isDefault, httpReferer = ref); editingSource = null },
-                onStartStalker = { n, url, mac, serialNumber, deviceId, deviceId2, signature, ua, ref, autoRefresh, isDefault, live, movies, series, login, password ->
+                onStartStalker = { n, url, mac, serialNumber, deviceId, deviceId2, signature, ua, ref, autoRefresh, isDefault, live, login, password ->
                     vm.updateSource(
                         src.id, n, url, login, password, ua, "", autoRefresh, isDefault, mac = mac, httpReferer = ref,
                         stalkerSerialNumber = serialNumber, stalkerDeviceId = deviceId,
                         stalkerDeviceId2 = deviceId2, stalkerSignature = signature,
                         syncLive = live != tv.own.owntv.core.sync.SyncScopeChoice.Off,
-                        syncMovies = movies != tv.own.owntv.core.sync.SyncScopeChoice.Off,
-                        syncSeries = series != tv.own.owntv.core.sync.SyncScopeChoice.Off,
                     )
                     editingSource = null
                 },
@@ -274,14 +263,14 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                         modifier = Modifier,
                     )
                     AddMode.MANUAL -> AddSourceScreen(
-                        onStartXtream = { n, server, u, p, ua, ref, epg, autoRefresh, live, movies, series, isDefault, preferHls ->
-                            vm.addXtream(n.ifBlank { defaultIptvName }, server, u, p, ua, epg, autoRefresh, live, movies, series, isDefault, preferHls, httpReferer = ref)
+                        onStartXtream = { n, server, u, p, ua, ref, epg, autoRefresh, live, isDefault, preferHls ->
+                            vm.addXtream(n.ifBlank { defaultIptvName }, server, u, p, ua, epg, autoRefresh, live, isDefault, preferHls, httpReferer = ref)
                         },
                         onStartM3u = { n, url, ua, ref, epg, autoRefresh, isDefault -> vm.addM3u(n.ifBlank { defaultPlaylistName }, url, ua, epg, autoRefresh, isDefault, httpReferer = ref) },
-                        onStartStalker = { n, url, mac, serialNumber, deviceId, deviceId2, signature, ua, ref, autoRefresh, isDefault, live, movies, series, login, password ->
+                        onStartStalker = { n, url, mac, serialNumber, deviceId, deviceId2, signature, ua, ref, autoRefresh, isDefault, live, login, password ->
                             vm.addStalker(
                                 n.ifBlank { defaultPortalName }, url, mac, serialNumber, deviceId,
-                                deviceId2, signature, ua, autoRefresh, isDefault, live, movies, series, httpReferer = ref,
+                                deviceId2, signature, ua, autoRefresh, isDefault, live, httpReferer = ref,
                                 login = login, password = password,
                             )
                         },
@@ -543,50 +532,9 @@ private fun CatalogSyncState.Syncing.countsLabel(sourceType: SourceType, stored:
         if (active) processed else storedCount
 
     val live = visibleCount(liveActive, liveProcessed, stored?.channels ?: 0)
-    val movies = visibleCount(moviesActive, moviesProcessed, stored?.movies ?: 0)
-    val series = visibleCount(seriesActive, seriesProcessed, stored?.series ?: 0)
     val counts = when (sourceType) {
-        SourceType.M3U -> SyncProgressCounts(
-            live = live,
-            movies = 0,
-            series = 0,
-            liveActive = true,
-            moviesActive = false,
-            seriesActive = false,
-        )
-        SourceType.XTREAM -> SyncProgressCounts(
-            live = live,
-            movies = movies,
-            series = series,
-            liveActive = liveActive || live > 0,
-            moviesActive = moviesActive || movies > 0,
-            seriesActive = seriesActive || series > 0,
-        )
-        SourceType.LOCAL_BACKUP -> SyncProgressCounts(
-            live = 0,
-            movies = 0,
-            series = 0,
-            liveActive = false,
-            moviesActive = false,
-            seriesActive = false,
-        )
-        // Stalker: LIVE + VOD/series all populate.
-        SourceType.STALKER -> SyncProgressCounts(
-            live = live,
-            movies = movies,
-            series = series,
-            liveActive = liveActive || live > 0,
-            moviesActive = moviesActive || movies > 0,
-            seriesActive = seriesActive || series > 0,
-        )
-        SourceType.RUTUBE -> SyncProgressCounts(
-            live = live,
-            movies = 0,
-            series = 0,
-            liveActive = liveActive || live > 0,
-            moviesActive = false,
-            seriesActive = false,
-        )
+        SourceType.LOCAL_BACKUP -> SyncProgressCounts(live = 0, liveActive = false)
+        else -> SyncProgressCounts(live = live, liveActive = liveActive || live > 0)
     }
     return counts.takeIf { it.hasItems }
 }

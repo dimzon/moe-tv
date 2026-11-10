@@ -13,26 +13,23 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import tv.own.owntv.core.database.OwnTVDatabase
-import tv.own.owntv.core.database.entity.EpisodeEntity
+import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
-import tv.own.owntv.core.database.entity.MovieEntity
-import tv.own.owntv.core.database.entity.PlaybackProgressEntity
 import tv.own.owntv.core.database.entity.ProfileEntity
-import tv.own.owntv.core.database.entity.SeriesEntity
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.model.SourceType
 
 /**
- * [UserDataResolver] is the reason favorites, history and resume positions survive a re-sync.
+ * [UserDataResolver] is the reason favorites and history survive a re-sync.
  * Content rows are clear-then-insert, so every id a user-data row points at is invalidated on every
  * refresh; the resolver exports each record against a stable identity beforehand and re-attaches it
  * afterwards. If it silently fails to re-attach, the user just finds their favorites gone — no
  * crash, no log, nothing to notice until it is too late to recover. None of it was covered.
  *
  * Instrumentation rather than a JVM test on purpose: the whole mechanism IS the DAO queries
- * (findByRemote / findSeriesByName / findEpisodeByNumber) and a real transaction, so faking the DAOs
- * would only test the fakes.
+ * (findByRemote / findByName) and a real transaction, so faking the DAOs would only test the fakes.
+ * The app is live-only, so channels are the content rows the resolver relinks.
  */
 @RunWith(AndroidJUnit4::class)
 class UserDataResolverRelinkTest {
@@ -50,15 +47,11 @@ class UserDataResolverRelinkTest {
         resolver = UserDataResolver(
             context = context,
             channelDao = db.channelDao(),
-            movieDao = db.movieDao(),
-            seriesDao = db.seriesDao(),
             profileDao = db.profileDao(),
             favoriteDao = db.favoriteDao(),
             historyDao = db.historyDao(),
-            progressDao = db.progressDao(),
             contentOrderDao = db.contentOrderDao(),
             customCategoryDao = db.customCategoryDao(),
-            seriesSortOrderDao = db.seriesSortOrderDao(),
             tombstoneDao = db.tombstoneDao(),
             db = db,
         )
@@ -73,7 +66,7 @@ class UserDataResolverRelinkTest {
     fun tearDown() = runBlocking {
         // Records left unresolved by one case must not survive into the next: the database is fresh
         // per test and hands out row ids from 1 again, so a leftover pending record matches content it
-        // was never about and quietly adds a favorite/progress row the assertions then count.
+        // was never about and quietly adds a favorite row the assertions then count.
         clearPending()
         db.close()
     }
@@ -84,20 +77,20 @@ class UserDataResolverRelinkTest {
     }
 
     /**
-     * The core promise: a movie is deleted and re-inserted by a sync (new row id), and the favorite
+     * The core promise: a channel is deleted and re-inserted by a sync (new row id), and the favorite
      * that pointed at the old id ends up pointing at the new one.
      */
     @Test
-    fun favoriteFollowsAMovieAcrossAResyncThatChangesItsRowId() = runBlocking {
-        val oldId = insertMovie(remoteId = "m-1", name = "Blade Runner")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = oldId, addedAt = 500))
+    fun favoriteFollowsAChannelAcrossAResyncThatChangesItsRowId() = runBlocking {
+        val oldId = insertChannel(remoteId = "m-1", name = "BBC One")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = oldId, addedAt = 500))
 
         val snapshot = resolver.exportForSource(sourceId, setOf("fav"))
         assertEquals(1, snapshot.length())
 
-        // The sync: clear-then-insert. Same movie, brand new id.
-        db.movieDao().clearSource(sourceId)
-        val newId = insertMovie(remoteId = "m-1", name = "Blade Runner")
+        // The sync: clear-then-insert. Same channel, brand new id.
+        db.channelDao().clearSource(sourceId)
+        val newId = insertChannel(remoteId = "m-1", name = "BBC One")
         assert(newId != oldId)
 
         resolver.relinkAfterSync(snapshot)
@@ -113,13 +106,13 @@ class UserDataResolverRelinkTest {
      * weaker key — worth pinning, because the fallback is what most M3U users actually rely on.
      */
     @Test
-    fun favoriteFollowsAMovieByNameWhenTheProviderHasNoRemoteId() = runBlocking {
-        val oldId = insertMovie(remoteId = null, name = "Nameless Provider Movie")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = oldId, addedAt = 1))
+    fun favoriteFollowsAChannelByNameWhenTheProviderHasNoRemoteId() = runBlocking {
+        val oldId = insertChannel(remoteId = null, name = "Nameless Provider Channel")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = oldId, addedAt = 1))
 
         val snapshot = resolver.exportForSource(sourceId, setOf("fav"))
-        db.movieDao().clearSource(sourceId)
-        val newId = insertMovie(remoteId = null, name = "Nameless Provider Movie")
+        db.channelDao().clearSource(sourceId)
+        val newId = insertChannel(remoteId = null, name = "Nameless Provider Channel")
 
         resolver.relinkAfterSync(snapshot)
 
@@ -127,58 +120,22 @@ class UserDataResolverRelinkTest {
     }
 
     /**
-     * The episode path is the fiddly one: an episode has no sourceId of its own, so it is identified
-     * by its SHOW (source + series remoteId, name as fallback) plus season/episode numbers. A resume
-     * position landing on the wrong episode is worse than losing it.
-     */
-    @Test
-    fun resumePositionFollowsAnEpisodeIdentifiedByItsShowAndSeasonEpisodeNumbers() = runBlocking {
-        val showId = insertSeries(remoteId = "s-1", name = "The Show")
-        val oldEpisodeId = insertEpisode(showId, season = 2, episode = 5, remoteId = "e-old", name = "Old Id")
-        insertEpisode(showId, season = 2, episode = 6, remoteId = "e-other", name = "Neighbour")
-        db.progressDao().save(
-            PlaybackProgressEntity(
-                profileId = profileId, mediaType = MediaType.EPISODE, itemId = oldEpisodeId,
-                positionMs = 123_000, durationMs = 2_400_000, updatedAt = 42,
-            ),
-        )
-
-        val snapshot = resolver.exportForSource(sourceId, setOf("prog"))
-        assertEquals(1, snapshot.length())
-
-        // Re-sync: the show keeps its remoteId, but the provider re-issued the episode ids — so the
-        // episode remoteId no longer matches and only the season/episode fallback can save this.
-        db.seriesDao().clearSource(sourceId)
-        val newShowId = insertSeries(remoteId = "s-1", name = "The Show")
-        val newEpisodeId = insertEpisode(newShowId, season = 2, episode = 5, remoteId = "e-new", name = "New Id")
-        insertEpisode(newShowId, season = 2, episode = 6, remoteId = "e-other-new", name = "Neighbour")
-
-        resolver.relinkAfterSync(snapshot)
-
-        val progress = db.progressDao().getAllOnce()
-        assertEquals(1, progress.size)
-        assertEquals("resume landed on the wrong episode", newEpisodeId, progress.single().itemId)
-        assertEquals(123_000L, progress.single().positionMs)
-    }
-
-    /**
-     * Content that hasn't come back yet (a show whose episodes load lazily, a source still syncing)
-     * must not be thrown away. It stays pending and heals the moment the content appears — this is
-     * what makes the "episodes load later" path work.
+     * Content that hasn't come back yet (a source still syncing) must not be thrown away. It stays
+     * pending and heals the moment the content appears.
      */
     @Test
     fun anUnresolvableRecordStaysPendingAndHealsWhenTheContentArrives() = runBlocking {
-        val oldId = insertMovie(remoteId = "m-late", name = "Arrives Late")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = oldId, addedAt = 1))
+        val oldId = insertChannel(remoteId = "m-late", name = "Arrives Late")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = oldId, addedAt = 1))
         val snapshot = resolver.exportForSource(sourceId, setOf("fav"))
 
-        // Sync wiped the catalog and the movie is not back yet.
-        db.movieDao().clearSource(sourceId)
+        // Sync wiped the catalogue and the channel is not back yet.
+        db.channelDao().clearSource(sourceId)
         resolver.relinkAfterSync(snapshot, purge = true)
         assertEquals("nothing to attach to yet", 0, db.favoriteDao().getAllOnce().size)
 
-        // Content arrives (later sync / lazy episode load), and the retry re-attaches it.
-        val newId = insertMovie(remoteId = "m-late", name = "Arrives Late")
+        // Content arrives (later sync), and the retry re-attaches it.
+        val newId = insertChannel(remoteId = "m-late", name = "Arrives Late")
         resolver.resolvePending()
 
         assertEquals(newId, db.favoriteDao().getAllOnce().single().itemId)
@@ -191,11 +148,11 @@ class UserDataResolverRelinkTest {
      */
     @Test
     fun purgeFalseKeepsAnOrphanedRowSoAFailedSyncCannotDeleteFavorites() = runBlocking {
-        val oldId = insertMovie(remoteId = "m-2", name = "Interrupted")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = oldId, addedAt = 1))
+        val oldId = insertChannel(remoteId = "m-2", name = "Interrupted")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = oldId, addedAt = 1))
         val snapshot = resolver.exportForSource(sourceId, setOf("fav"))
 
-        db.movieDao().clearSource(sourceId)
+        db.channelDao().clearSource(sourceId)
         resolver.relinkAfterSync(snapshot, purge = false)
 
         val stale = db.favoriteDao().getAllOnce().firstOrNull { it.itemId == oldId }
@@ -205,11 +162,11 @@ class UserDataResolverRelinkTest {
     /** …and purge=true is what makes the counts agree once the sync really did succeed. */
     @Test
     fun purgeTrueDropsTheOrphanedRowAfterASuccessfulSync() = runBlocking {
-        val oldId = insertMovie(remoteId = "m-3", name = "Gone For Good")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = oldId, addedAt = 1))
+        val oldId = insertChannel(remoteId = "m-3", name = "Gone For Good")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = oldId, addedAt = 1))
         val snapshot = resolver.exportForSource(sourceId, setOf("fav"))
 
-        db.movieDao().clearSource(sourceId)
+        db.channelDao().clearSource(sourceId)
         resolver.relinkAfterSync(snapshot, purge = true)
 
         assertNull(db.favoriteDao().getAllOnce().firstOrNull { it.itemId == oldId })
@@ -222,13 +179,13 @@ class UserDataResolverRelinkTest {
      */
     @Test
     fun aRecordForADeletedProfileIsNotAttachedToAnyoneElse() = runBlocking {
-        val movieId = insertMovie(remoteId = "m-4", name = "Orphan Profile")
+        val channelId = insertChannel(remoteId = "m-4", name = "Orphan Profile")
         // A real second profile, deleted between the export and the relink — which is the actual
         // sequence this guards against. Inventing an id that never existed cannot stand in for it:
         // favorites carry a foreign key to profiles, so such a row is rejected before the test starts.
         val secondProfile = ProfileEntity(name = "Second", avatarColor = 0x445566)
         val secondProfileId = db.profileDao().insert(secondProfile)
-        db.favoriteDao().add(FavoriteEntity(profileId = secondProfileId, mediaType = MediaType.MOVIE, itemId = movieId, addedAt = 1))
+        db.favoriteDao().add(FavoriteEntity(profileId = secondProfileId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 1))
         val snapshot = resolver.exportForSource(sourceId, setOf("fav"))
         assertEquals(1, snapshot.length())
         // Deleting the profile cascades its favorites away; the snapshot still names it.
@@ -239,7 +196,7 @@ class UserDataResolverRelinkTest {
 
         assertNull(
             "a record for a missing profile must not land on the surviving profile",
-            db.favoriteDao().getAllOnce().firstOrNull { it.itemId == movieId },
+            db.favoriteDao().getAllOnce().firstOrNull { it.itemId == channelId },
         )
     }
 
@@ -250,40 +207,23 @@ class UserDataResolverRelinkTest {
      */
     @Test
     fun purgeSnapshotOrphanDeletesOnlyOnceTheContentRowHasGone() = runBlocking {
-        val movieId = insertMovie(remoteId = "m-9", name = "Purge Me")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.MOVIE, itemId = movieId, addedAt = 1))
+        val channelId = insertChannel(remoteId = "m-9", name = "Purge Me")
+        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 1))
 
-        db.favoriteDao().purgeSnapshotOrphan(profileId, MediaType.MOVIE, movieId)
-        assertEquals("the movie is still there — nothing to purge", 1, db.favoriteDao().getAllOnce().size)
+        db.favoriteDao().purgeSnapshotOrphan(profileId, MediaType.LIVE, channelId)
+        assertEquals("the channel is still there — nothing to purge", 1, db.favoriteDao().getAllOnce().size)
 
-        db.movieDao().clearSource(sourceId)
-        db.favoriteDao().purgeSnapshotOrphan(profileId, MediaType.MOVIE, movieId)
-        assertEquals("the movie is gone — the favorite must go with it", 0, db.favoriteDao().getAllOnce().size)
+        db.channelDao().clearSource(sourceId)
+        db.favoriteDao().purgeSnapshotOrphan(profileId, MediaType.LIVE, channelId)
+        assertEquals("the channel is gone — the favorite must go with it", 0, db.favoriteDao().getAllOnce().size)
     }
 
     // --- helpers ---
 
-    private suspend fun insertMovie(remoteId: String?, name: String): Long {
-        db.movieDao().insertAll(
-            listOf(MovieEntity(sourceId = sourceId, name = name, streamUrl = "https://portal.test/$name", remoteId = remoteId)),
+    private suspend fun insertChannel(remoteId: String?, name: String): Long {
+        db.channelDao().insertAll(
+            listOf(ChannelEntity(sourceId = sourceId, name = name, streamUrl = "https://portal.test/$name", remoteId = remoteId)),
         )
-        return db.movieDao().findByName(sourceId, name)!!.id
-    }
-
-    private suspend fun insertSeries(remoteId: String?, name: String): Long {
-        db.seriesDao().insertSeries(listOf(SeriesEntity(sourceId = sourceId, name = name, remoteId = remoteId)))
-        return db.seriesDao().findSeriesByName(sourceId, name)!!.id
-    }
-
-    private suspend fun insertEpisode(seriesId: Long, season: Int, episode: Int, remoteId: String, name: String): Long {
-        db.seriesDao().upsertEpisodes(
-            listOf(
-                EpisodeEntity(
-                    seriesId = seriesId, seasonNumber = season, episodeNumber = episode,
-                    name = name, streamUrl = "https://portal.test/$remoteId", remoteId = remoteId,
-                ),
-            ),
-        )
-        return db.seriesDao().findEpisodeByRemote(seriesId, remoteId)!!.id
+        return db.channelDao().findByName(sourceId, name)!!.id
     }
 }

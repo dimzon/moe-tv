@@ -5,7 +5,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -14,7 +13,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -22,7 +20,6 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
@@ -37,12 +34,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -862,14 +857,12 @@ class EpgViewModel(
             when (sortGuideMode) {
                 SettingsRepository.GuideSort.ALPHA -> matched.sortedWith(byLiveTv ?: byAlpha)
                 SettingsRepository.GuideSort.PROVIDER -> matched.sortedWith(byLiveTv ?: byProvider)
-                SettingsRepository.GuideSort.CATCHUP -> matched.sortedWith(compareByDescending<ChannelEntity> { it.catchup }.then(byProvider))
                 SettingsRepository.GuideSort.FAVORITES -> matched.sortedWith(compareByDescending<ChannelEntity> { it.id in favoriteIds }.then(byProvider))
                 // LIVE_TV, the old default, is the provider's order too (Channel number was the same thing).
                 SettingsRepository.GuideSort.LIVE_TV -> matched.sortedWith(byLiveTv ?: byProvider)
             }.let { sorted ->
                 when (filter) {
                     null, tv.own.owntv.core.live.LiveKey.All -> sorted
-                    tv.own.owntv.core.live.LiveKey.Catchup -> sorted.filter { it.catchup }
                     is tv.own.owntv.core.live.LiveKey.Folder -> sorted.filter { ch ->
                         ch.categoryId == filter.id && (folderKey == null || cust.movedFromOrigin[CustomizeKeys.channel(ch)] != folderKey)
                     }

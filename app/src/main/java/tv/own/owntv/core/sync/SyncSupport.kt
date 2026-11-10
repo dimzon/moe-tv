@@ -15,14 +15,10 @@ import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.database.BulkInsertHelper
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
-import tv.own.owntv.core.database.dao.MovieDao
-import tv.own.owntv.core.database.dao.SeriesDao
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.CategoryEntity
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.ContentHashProjection
-import tv.own.owntv.core.database.entity.MovieEntity
-import tv.own.owntv.core.database.entity.SeriesEntity
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.database.entity.computeContentHash
 import tv.own.owntv.core.model.MediaType
@@ -39,8 +35,6 @@ import kotlin.coroutines.CoroutineContext
 internal class SyncSupport(
     private val categoryDao: CategoryDao,
     channelDao: ChannelDao,
-    movieDao: MovieDao,
-    seriesDao: SeriesDao,
     val sourceDao: SourceDao,
     private val customize: CustomizationStore,
     private val settings: SettingsRepository,
@@ -59,42 +53,6 @@ internal class SyncSupport(
         deleteByRemoteIds = { src, ids -> channelDao.deleteByRemoteIds(src, ids) },
         loadHashes = { channelDao.contentHashesForSource(it) },
         remoteIdsInCategories = { src, cats -> channelDao.remoteIdsInCategories(src, cats) },
-    )
-
-    val movieAdapter = ContentAdapter<MovieEntity>(
-        remoteIdOf = { it.remoteId },
-        hashOf = { it.computeContentHash() },
-        sortOrderOf = { it.sortOrder },
-        copyWith = { row, id, hash -> if (id != null) row.copy(id = id, contentHash = hash) else row.copy(contentHash = hash) },
-        sourceIdOf = { it.sourceId },
-        updateAll = { movieDao.updateAll(it) },
-        insertAll = { movieDao.insertAll(it) },
-        moveAll = { m -> movieDao.applyPositionMoves(m.map { it.id }, m.map { it.sortOrder }) },
-        moveRanges = { src, r -> movieDao.applyPositionRanges(src, r.map { it.fromSortOrder }, r.map { it.toSortOrder }, r.map { it.delta }) },
-        remoteIdsForSource = { movieDao.remoteIdsForSource(it) },
-        deleteByRemoteIds = { src, ids -> movieDao.deleteByRemoteIds(src, ids) },
-        loadHashes = { movieDao.contentHashesForSource(it) },
-        countsByCategory = { src -> movieDao.countsByCategoryOnce(src).associate { it.categoryId to it.itemCount } },
-        remoteIdsForCategory = { src, cat -> movieDao.remoteIdsForCategory(src, cat) },
-        remoteIdsInCategories = { src, cats -> movieDao.remoteIdsInCategories(src, cats) },
-    )
-
-    val seriesAdapter = ContentAdapter<SeriesEntity>(
-        remoteIdOf = { it.remoteId },
-        hashOf = { it.computeContentHash() },
-        sortOrderOf = { it.sortOrder },
-        copyWith = { row, id, hash -> if (id != null) row.copy(id = id, contentHash = hash) else row.copy(contentHash = hash) },
-        sourceIdOf = { it.sourceId },
-        updateAll = { seriesDao.updateSeries(it) },
-        insertAll = { seriesDao.insertSeries(it) },
-        moveAll = { m -> seriesDao.applyPositionMoves(m.map { it.id }, m.map { it.sortOrder }) },
-        moveRanges = { src, r -> seriesDao.applyPositionRanges(src, r.map { it.fromSortOrder }, r.map { it.toSortOrder }, r.map { it.delta }) },
-        remoteIdsForSource = { seriesDao.remoteIdsForSource(it) },
-        deleteByRemoteIds = { src, ids -> seriesDao.deleteByRemoteIds(src, ids) },
-        loadHashes = { seriesDao.contentHashesForSource(it) },
-        countsByCategory = { src -> seriesDao.countsByCategoryOnce(src).associate { it.categoryId to it.itemCount } },
-        remoteIdsForCategory = { src, cat -> seriesDao.remoteIdsForCategory(src, cat) },
-        remoteIdsInCategories = { src, cats -> seriesDao.remoteIdsInCategories(src, cats) },
     )
 
     /**
@@ -256,9 +214,6 @@ internal class SyncSupport(
         return if (id > 0) id else existingCategoriesByRemoteId(sourceId, type, listOf(remoteId))[remoteId]?.id
     }
 
-    /** A source's film categories that hold no film. Returns how many went. */
-    suspend fun deleteEmptyFilmCategories(sourceId: Long): Int = categoryDao.deleteEmptyMovieCategories(sourceId)
-
     private suspend fun existingCategoriesByRemoteId(sourceId: Long, type: MediaType, remoteIds: List<String>): Map<String, CategoryEntity> =
         remoteIds.distinct().chunked(QUERY_CHUNK).flatMap { categoryDao.findByRemoteIds(sourceId, type, it) }
             .mapNotNull { category -> category.remoteId?.let { it to category } }
@@ -306,7 +261,7 @@ internal class SyncSupport(
         )
     }
 
-    /** Applies each profile's own "hide new categories" preference (same across Live/Movies/Series) to
+    /** Applies each profile's own "hide new categories" preference (same across sections) to
      *  categories just discovered on a resync — a source can be shared by several profiles.
      *  Non-private: M3uSyncer discovers categories incrementally during the stream, so it applies
      *  this itself at end-of-parse instead of going through [refreshCategories]. */
@@ -635,7 +590,7 @@ internal class SyncSupport(
 
 /**
  * Per-entity DAO/mapping lambdas so ONE [SyncSupport.upsertStable]/[SyncSupport.insertFresh]/prune
- * implementation serves channels, movies and series — any fix to the hash-diff/prune logic now
+ * implementation serves the channel list — any fix to the hash-diff/prune logic now
  * lands once.
  */
 internal data class ContentAdapter<T>(
@@ -759,18 +714,12 @@ internal class SyncCounters(
 ) {
     private val lock = Any()
     private val liveActive = contentTypes.live
-    private val moviesActive = contentTypes.movies
-    private val seriesActive = contentTypes.series
     private var liveProcessed = 0
-    private var moviesProcessed = 0
-    private var seriesProcessed = 0
 
     fun update(phase: SyncPhase, count: Int): ImportStage {
         val snapshot = synchronized(lock) {
             when (phase) {
                 SyncPhase.LIVE -> liveProcessed = count
-                SyncPhase.MOVIES -> moviesProcessed = count
-                SyncPhase.SERIES -> seriesProcessed = count
             }
             snapshotLocked()
         }
@@ -786,11 +735,7 @@ internal class SyncCounters(
 
     private fun snapshotLocked() = ImportStage(
         liveProcessed = liveProcessed,
-        moviesProcessed = moviesProcessed,
-        seriesProcessed = seriesProcessed,
         liveActive = liveActive,
-        moviesActive = moviesActive,
-        seriesActive = seriesActive,
     )
 }
 

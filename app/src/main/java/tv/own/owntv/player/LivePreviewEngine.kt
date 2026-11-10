@@ -42,7 +42,6 @@ import tv.own.owntv.core.network.HttpClient
 import java.util.Locale
 import tv.own.owntv.core.drm.toMediaDrmConfiguration
 import tv.own.owntv.core.network.StreamHeaders
-import tv.own.owntv.core.timeshift.TimeshiftServer
 
 /**
  * ExoPlayer (Media3) that drives the muted **in-pane Live preview**. It starts HLS fast — no
@@ -1699,9 +1698,7 @@ class LivePreviewEngine(
         // A different channel starts at normal volume. Re-opening the SAME one does not: a retry, a
         // decoder rebuild or a screensaver restore is the same channel continuing, and dropping the
         // boost there made a quiet channel go quiet again every time the stream hiccuped.
-        // A saved timeshift copy re-opened is the same channel continuing too (see wave 2; harmless
-        // once the buffer store is gone).
-        val sameChannelReopen = url == lastTunedUrl || TimeshiftServer.sameBuffer(url, lastTunedUrl)
+        val sameChannelReopen = url == lastTunedUrl
         lastTunedUrl = url
         _volume.value = when {
             muted -> 0
@@ -2778,7 +2775,7 @@ class LivePreviewEngine(
         }
         val now = android.os.SystemClock.elapsedRealtime()
         if (LiveResume.backToLiveEdge(
-                live = true, fromSavedCopy = TimeshiftServer.isLocal(currentUrl), pausedAtMs = tune.pausedAtMs, nowMs = now,
+                live = true, fromSavedCopy = false, pausedAtMs = tune.pausedAtMs, nowMs = now,
             )
         ) {
             LiveDiagnosticsLog.event("play after ${(now - tune.pausedAtMs) / 1000}s paused — back to the live edge")

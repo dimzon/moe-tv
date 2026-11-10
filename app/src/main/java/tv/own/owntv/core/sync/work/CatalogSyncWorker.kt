@@ -7,9 +7,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import kotlinx.coroutines.flow.first
 import tv.own.owntv.core.database.dao.SourceDao
-import tv.own.owntv.core.launcher.LauncherIntegrationRepository
 import tv.own.owntv.core.network.ConnectivityObserver
 import tv.own.owntv.core.util.isTransientSyncError
 import tv.own.owntv.core.repository.SourceRepository
@@ -18,7 +16,6 @@ import tv.own.owntv.core.sync.ImportStage
 import tv.own.owntv.core.sync.SyncContentTypes
 import tv.own.owntv.core.sync.SyncResult
 import tv.own.owntv.core.settings.SettingsRepository
-import tv.own.owntv.core.model.HomeRow
 
 class CatalogSyncWorker(
     context: Context,
@@ -27,7 +24,6 @@ class CatalogSyncWorker(
     private val sourceDao: SourceDao,
     private val importFinalizer: ImportFinalizer,
     private val catalogSyncScheduler: CatalogSyncScheduler,
-    private val launcherIntegrationRepository: LauncherIntegrationRepository,
     private val connectivity: ConnectivityObserver,
     private val epgRepository: tv.own.owntv.core.repository.EpgRepository,
     private val settings: SettingsRepository,
@@ -42,8 +38,6 @@ class CatalogSyncWorker(
 
         val contentTypes = SyncContentTypes(
             live = inputData.getBoolean(KEY_LIVE, true),
-            movies = inputData.getBoolean(KEY_MOVIES, true),
-            series = inputData.getBoolean(KEY_SERIES, true),
         )
         // Set when this run is the background remainder of a staged (priority) initial sync: the
         // foreground pass plus this one cover all content types, so together they count as a full
@@ -74,7 +68,7 @@ class CatalogSyncWorker(
         val progressPublisher = ProgressPublisher(effective, baseItemCount)
         progressPublisher.publishStarting()
 
-        // Stale enqueue after a section was turned Off: clean pill, no syncer calls, no lastSyncAt stamp.
+        // Stale enqueue after Live was turned Off: clean pill, no syncer calls, no lastSyncAt stamp.
         if (!effective.hasAny) {
             progressPublisher.flush()
             Log.i(TAG, "Sync no-op empty effective sourceId=${source.id} reason=$reason")
@@ -113,35 +107,6 @@ class CatalogSyncWorker(
                 runCatching { epgRepository.fillGuideGapsForSource(source.id) }
                     .onSuccess { if (it > 0) Log.i(TAG, "Guide gap fill sourceId=${source.id} channels=$it ms=${SystemClock.elapsedRealtime() - gapFillStartedAt}") }
                     .onFailure { Log.w(TAG, "Guide gap fill failed sourceId=${source.id}", it) }
-                sourceDao.profileIdsForSource(source.id).forEach { profileId ->
-                    val launcherStartedAt = SystemClock.elapsedRealtime()
-                    runCatching { launcherIntegrationRepository.refreshProfile(profileId) }
-                        .onSuccess { Log.i(TAG, "Launcher refresh profileId=$profileId sourceId=${source.id} ms=${SystemClock.elapsedRealtime() - launcherStartedAt}") }
-                        .onFailure { Log.w(TAG, "Launcher refresh failed profileId=$profileId sourceId=${source.id} ms=${SystemClock.elapsedRealtime() - launcherStartedAt}", it) }
-                }
-                val metadataEnabled = runCatching { settings.metadataConfig().enabled }
-                    .onFailure { Log.w(TAG, "Trending settings read failed sourceId=${source.id}; skip enqueue", it) }
-                    .getOrDefault(false)
-                val trendingVisible = runCatching {
-                    sourceDao.profileIdsForSource(source.id).any { profileId ->
-                        HomeRow.TRENDING !in settings.homeConfig(profileId).first().hidden
-                    }
-                }
-                    .onFailure { Log.w(TAG, "Trending Home visibility read failed sourceId=${source.id}; skip enqueue", it) }
-                    .getOrDefault(false)
-                if (
-                    shouldScheduleTrendingRefresh(
-                        sourceWasNeverSynced = source.lastSyncAt == null,
-                        completesInitialSync = completesInitialSync,
-                        effective = effective,
-                        enabledScope = SyncContentTypes.enabledFor(source),
-                        metadataEnabled = metadataEnabled,
-                        trendingVisible = trendingVisible,
-                    )
-                ) {
-                    catalogSyncScheduler.enqueueTrendingRefresh(source.id)
-                    Log.i(TAG, "Trending refresh enqueued sourceId=${source.id}")
-                }
                 Result.success()
             }
             is SyncResult.Failed -> {
@@ -165,11 +130,7 @@ class CatalogSyncWorker(
     ) {
         private var lastEmitAtMs = 0L
         private var emittedLiveCount = false
-        private var emittedMoviesCount = false
-        private var emittedSeriesCount = false
         private var lastLiveProcessed = 0
-        private var lastMoviesProcessed = 0
-        private var lastSeriesProcessed = 0
         private var lastTotalProcessed = 0
         private var pending: ImportStage? = null
 
@@ -179,11 +140,7 @@ class CatalogSyncWorker(
                 workDataOf(
                     KEY_BASE_ITEM_COUNT to baseItemCount,
                     KEY_PROGRESS_LIVE_PROCESSED to 0,
-                    KEY_PROGRESS_MOVIES_PROCESSED to 0,
-                    KEY_PROGRESS_SERIES_PROCESSED to 0,
                     KEY_PROGRESS_LIVE_ACTIVE to contentTypes.live,
-                    KEY_PROGRESS_MOVIES_ACTIVE to contentTypes.movies,
-                    KEY_PROGRESS_SERIES_ACTIVE to contentTypes.series,
                 ),
             )
             lastEmitAtMs = now
@@ -207,34 +164,25 @@ class CatalogSyncWorker(
             Log.d(
                 TAG,
                 "Progress emit total=${stage.totalProcessed} live=${stage.liveProcessed} " +
-                    "movies=${stage.moviesProcessed} series=${stage.seriesProcessed} " +
                     "sinceLastMs=${now - lastEmitAtMs}",
             )
             setProgress(stage.toWorkData(baseItemCount))
             lastEmitAtMs = now
             lastLiveProcessed = stage.liveProcessed
-            lastMoviesProcessed = stage.moviesProcessed
-            lastSeriesProcessed = stage.seriesProcessed
             lastTotalProcessed = stage.totalProcessed
             if (stage.liveProcessed > 0) emittedLiveCount = true
-            if (stage.moviesProcessed > 0) emittedMoviesCount = true
-            if (stage.seriesProcessed > 0) emittedSeriesCount = true
             pending = null
         }
 
         private fun shouldEmit(stage: ImportStage, now: Long): Boolean =
             (stage.liveProcessed > 0 && !emittedLiveCount) ||
-                (stage.moviesProcessed > 0 && !emittedMoviesCount) ||
-                (stage.seriesProcessed > 0 && !emittedSeriesCount) ||
                 (now - lastEmitAtMs >= PROGRESS_MIN_INTERVAL_MS && stage.hasMeaningfulCountDelta())
 
         private fun ImportStage.hasMeaningfulCountDelta(): Boolean =
             totalProcessed - lastTotalProcessed >= PROGRESS_ITEM_STEP
 
         private fun ImportStage.matchesLastEmit(): Boolean =
-            liveProcessed == lastLiveProcessed &&
-                moviesProcessed == lastMoviesProcessed &&
-                seriesProcessed == lastSeriesProcessed
+            liveProcessed == lastLiveProcessed
 
         private fun setProgress(data: Data) {
             setProgressAsync(data)
@@ -250,37 +198,11 @@ class CatalogSyncWorker(
         const val KEY_REASON = "reason"
         const val KEY_BASE_ITEM_COUNT = "baseItemCount"
         const val KEY_LIVE = "live"
-        const val KEY_MOVIES = "movies"
-        const val KEY_SERIES = "series"
         const val KEY_COMPLETES_INITIAL_SYNC = "completesInitialSync"
         const val KEY_FORCE_PRUNE = "forcePrune"
         const val KEY_PROGRESS_LIVE_PROCESSED = "liveProcessed"
-        const val KEY_PROGRESS_MOVIES_PROCESSED = "moviesProcessed"
-        const val KEY_PROGRESS_SERIES_PROCESSED = "seriesProcessed"
         const val KEY_PROGRESS_LIVE_ACTIVE = "liveActive"
-        const val KEY_PROGRESS_MOVIES_ACTIVE = "moviesActive"
-        const val KEY_PROGRESS_SERIES_ACTIVE = "seriesActive"
     }
-}
-
-internal fun shouldScheduleTrendingRefresh(
-    sourceWasNeverSynced: Boolean,
-    completesInitialSync: Boolean,
-    effective: SyncContentTypes,
-    enabledScope: SyncContentTypes,
-    metadataEnabled: Boolean,
-    trendingVisible: Boolean,
-): Boolean {
-    // A lazily-added catalogue that is still draining schedules too. Its page-1 sweep already holds each
-    // category's newest titles, which is where trending titles sit, and only the first build calls TMDB:
-    // `CatalogBackfillWorker` re-matches the row from disk after every pass as the catalogue fills in,
-    // so an early row is never left behind the multi-day fetch timer.
-    if (!metadataEnabled || !trendingVisible) return false
-    val incompleteFirstPass =
-        sourceWasNeverSynced && !completesInitialSync && !effective.isCompleteFor(enabledScope)
-    if (incompleteFirstPass) return false
-    return effective.movies || effective.series ||
-        (completesInitialSync && (enabledScope.movies || enabledScope.series))
 }
 
 private fun SyncResult.name(): String = when (this) {
@@ -293,9 +215,5 @@ private fun ImportStage.toWorkData(baseItemCount: Int): Data =
     workDataOf(
         CatalogSyncWorker.KEY_BASE_ITEM_COUNT to baseItemCount,
         CatalogSyncWorker.KEY_PROGRESS_LIVE_PROCESSED to liveProcessed,
-        CatalogSyncWorker.KEY_PROGRESS_MOVIES_PROCESSED to moviesProcessed,
-        CatalogSyncWorker.KEY_PROGRESS_SERIES_PROCESSED to seriesProcessed,
         CatalogSyncWorker.KEY_PROGRESS_LIVE_ACTIVE to liveActive,
-        CatalogSyncWorker.KEY_PROGRESS_MOVIES_ACTIVE to moviesActive,
-        CatalogSyncWorker.KEY_PROGRESS_SERIES_ACTIVE to seriesActive,
     )

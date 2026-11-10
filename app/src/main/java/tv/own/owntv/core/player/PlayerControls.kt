@@ -65,14 +65,9 @@ enum class PlayerControl(
      */
     BRIGHTNESS(ControlCluster.MEDIA, ControlHost.MOBILE_ONLY, R.string.player_tool_brightness),
 
-    /** Playback speed. Was television-only for no reason anybody could name; the phone has it too. */
-    SPEED(ControlCluster.MEDIA, ControlHost.BOTH, R.string.player_tool_speed),
     SUBTITLES(ControlCluster.MEDIA, ControlHost.BOTH, R.string.player_tool_subtitles),
     AUDIO(ControlCluster.MEDIA, ControlHost.BOTH, R.string.player_tool_audio),
     FAVOURITE(ControlCluster.MEDIA, ControlHost.BOTH, R.string.player_tool_favorite),
-
-    /** Jump back into this channel's archive. Live catch-up channels only. */
-    CATCH_UP(ControlCluster.MEDIA, ControlHost.BOTH, R.string.player_tool_catchup),
 
     /**
      * Back to the channel watched before this one. Live only, and only once there is one. The
@@ -98,8 +93,6 @@ enum class PlayerControl(
 
     // --- The tools cluster: things about how it is being played and shown ---
 
-    /** Which engine owns playback. A text pill naming it on the television, and on the phone. */
-    ENGINE(ControlCluster.TOOLS, ControlHost.BOTH, R.string.player_tool_engine),
     ASPECT(ControlCluster.TOOLS, ControlHost.BOTH, R.string.player_tool_aspect),
 
     /**
@@ -121,9 +114,6 @@ enum class PlayerControl(
      * you are watching and put it somewhere else.
      */
     MULTIVIEW(ControlCluster.TOOLS, ControlHost.BOTH, R.string.multiview_button),
-
-    /** Record the channel already playing. Only exists once the setting is on. */
-    RECORD(ControlCluster.TOOLS, ControlHost.BOTH, R.string.recording_record),
 
     /**
      * Stop playing after a while. In the bar on both apps — the phone had it only on the

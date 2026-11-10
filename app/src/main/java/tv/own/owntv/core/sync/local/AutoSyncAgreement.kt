@@ -49,7 +49,6 @@ data class AutoSyncAgreement(
         val DEFAULT_SECTIONS: Set<BackupManager.Section> = setOf(
             BackupManager.Section.FAVORITES,
             BackupManager.Section.HISTORY,
-            BackupManager.Section.RESUME,
             BackupManager.Section.CUSTOMIZE,
             BackupManager.Section.MANUAL_REORDER,
         )

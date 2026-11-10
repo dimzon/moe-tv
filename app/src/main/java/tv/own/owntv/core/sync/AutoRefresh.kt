@@ -42,7 +42,6 @@ class AutoRefresh(
     private val epgSourceStore: EpgSourceStore,
     private val epgDao: EpgDao,
     private val importFinalizer: ImportFinalizer,
-    private val vodResort: M3uVodResort,
 ) {
     private var coldStartCheckDone = false
     private var lastResumeCheckAtElapsed = 0L
@@ -72,7 +71,7 @@ class AutoRefresh(
                         source.id,
                         reason = REASON,
                         contentTypes = SyncContentTypes.enabledOf(source),
-                        baseItemCount = counts.channels + counts.movies + counts.series,
+                        baseItemCount = counts.channels,
                         policy = ExistingWorkPolicy.KEEP,
                     )
                 }
@@ -97,7 +96,6 @@ class AutoRefresh(
         }
         if (includeStartup) {
             refillGuideEmptiedByMigration()
-            vodResort.runOnce()
         }
     }
 

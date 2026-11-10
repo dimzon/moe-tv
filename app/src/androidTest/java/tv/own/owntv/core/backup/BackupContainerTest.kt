@@ -54,7 +54,7 @@ class BackupContainerTest {
             "1_profile_1.jpg" to byteArrayOf(9, 8, 7, 0, -3),
             "2_profile_2.jpg" to byteArrayOf(4, 4, 4),
         )
-        val payload = BackupContainer.Payload(json, wallpaper, emptyMap(), avatars)
+        val payload = BackupContainer.Payload(json, wallpaper, avatars)
 
         val plain = BackupContainer.open(write(BackupContainer.pack(payload, passphrase = null)))
         assertEquals(avatars.keys, plain.avatars.keys)

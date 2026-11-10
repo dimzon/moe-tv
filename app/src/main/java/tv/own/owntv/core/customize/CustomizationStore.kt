@@ -14,9 +14,7 @@ import java.util.UUID
 import tv.own.owntv.core.database.entity.CategoryEntity
 import tv.own.owntv.core.epg.EpgMatcher
 import tv.own.owntv.core.database.entity.ChannelEntity
-import tv.own.owntv.core.database.entity.MovieEntity
 import tv.own.owntv.core.database.entity.matchName
-import tv.own.owntv.core.database.entity.SeriesEntity
 import tv.own.owntv.core.model.MediaType
 
 private val Context.customizeStore: DataStore<Preferences> by preferencesDataStore(name = "owntv_customizations")
@@ -34,8 +32,6 @@ object CustomizeKeys {
     fun isCustom(key: String): Boolean = key.startsWith(CUSTOM_PREFIX)
     fun category(c: CategoryEntity): String = "${c.sourceId}:${c.remoteId ?: c.name}"
     fun channel(ch: ChannelEntity): String = "${ch.sourceId}:${ch.remoteId ?: ch.name}"
-    fun movie(m: MovieEntity): String = "${m.sourceId}:${m.remoteId ?: m.name}"
-    fun series(s: SeriesEntity): String = "${s.sourceId}:${s.remoteId ?: s.name}"
 
     /** The part of an item key after the source id: the provider's own id, or the name as a fallback. */
     fun tailOf(key: String): String = key.substringAfter(':', "")
@@ -161,8 +157,6 @@ data class SectionCustomizations(
 
     /** The name the user gave this item in Customize, else the provider's. */
     fun displayName(ch: ChannelEntity): String = itemNames[CustomizeKeys.channel(ch)] ?: ch.name
-    fun displayName(m: MovieEntity): String = itemNames[CustomizeKeys.movie(m)] ?: m.name
-    fun displayName(s: SeriesEntity): String = itemNames[CustomizeKeys.series(s)] ?: s.name
 
     val isEmpty: Boolean
         get() = hiddenCategories.isEmpty() && hiddenItems.isEmpty() && categoryNames.isEmpty() &&
@@ -295,7 +289,7 @@ class CustomizationStore(private val context: Context, private val locks: Catego
         update(profileId, type) { it.copy(categoryNames = it.categoryNames - keys) }
 
     /** Removes every rename entry for the given item keys in one atomic edit — the "↺ Restore
-     *  original names" bulk path for channel/movie/series names. */
+     *  original names" bulk path for channel names. */
     suspend fun clearItemNames(profileId: Long, type: MediaType, keys: Set<String>) =
         update(profileId, type) { it.copy(itemNames = it.itemNames - keys) }
 

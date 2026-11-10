@@ -7,46 +7,53 @@ import org.junit.Test
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.SourceType
 
+/** The app is live-only: [SyncContentTypes] has exactly one section, and every derivation is about it. */
 class SyncContentTypesTest {
 
     @Test
-    fun `effectiveFor intersects enabled and constrains M3U to live`() {
-        val source = SourceEntity(
-            name = "m3u", type = SourceType.M3U, url = "http://x",
-            syncLive = true, syncMovies = true, syncSeries = true,
-        )
-        val effective = SyncContentTypes().effectiveFor(source)
-        assertEquals(SyncContentTypes(live = true, movies = false, series = false), effective)
-        assertTrue(effective.isCompleteFor(SyncContentTypes.enabledFor(source)))
-        assertFalse(effective.isCompleteFor(SyncContentTypes.enabledOf(source)))
+    fun `effectiveFor intersects the request with what the playlist has enabled`() {
+        val on = SourceEntity(name = "m3u", type = SourceType.M3U, url = "http://x", syncLive = true)
+        val effective = SyncContentTypes().effectiveFor(on)
+        assertEquals(SyncContentTypes(live = true), effective)
+        assertTrue(effective.isCompleteFor(SyncContentTypes.enabledFor(on)))
+        assertTrue(effective.isCompleteFor(SyncContentTypes.enabledOf(on)))
+
+        val off = on.copy(syncLive = false)
+        val nothing = SyncContentTypes().effectiveFor(off)
+        assertEquals(SyncContentTypes(live = false), nothing)
+        assertFalse(nothing.hasAny)
+        // A pass that covered nothing is still complete for a target that asks for nothing.
+        assertTrue(nothing.isCompleteFor(SyncContentTypes.enabledFor(off)))
     }
 
     @Test
-    fun `effectiveFor drops Off sections`() {
-        val source = SourceEntity(
-            name = "x", type = SourceType.XTREAM, url = "http://x",
-            syncLive = true, syncMovies = false, syncSeries = true,
-        )
-        val effective = SyncContentTypes().effectiveFor(source)
-        assertEquals(SyncContentTypes(live = true, movies = false, series = true), effective)
-        assertTrue(effective.isCompleteFor(SyncContentTypes.enabledFor(source)))
+    fun `a pass that skipped live is not complete for a target that wants it`() {
+        val target = SyncContentTypes(live = true)
+        assertFalse(SyncContentTypes(live = false).isCompleteFor(target))
+        assertTrue(SyncContentTypes(live = true).isCompleteFor(target))
     }
 
     @Test
     fun `remainderAfter is enabled-relative`() {
-        val enabled = SyncContentTypes(live = true, movies = true, series = false)
-        val priority = SyncContentTypes(live = true, movies = false, series = false)
+        val enabled = SyncContentTypes(live = true)
         assertEquals(
-            SyncContentTypes(live = false, movies = true, series = false),
-            enabled.remainderAfter(priority),
+            SyncContentTypes(live = false),
+            enabled.remainderAfter(SyncContentTypes(live = true)),
+        )
+        assertEquals(
+            SyncContentTypes(live = true),
+            enabled.remainderAfter(SyncContentTypes(live = false)),
         )
     }
 
     @Test
     fun `choices derive enabled and priority scopes`() {
-        val enabled = SyncContentTypes.fromChoices(SyncScopeChoice.Now, SyncScopeChoice.Later, SyncScopeChoice.Off)
-        val priority = SyncContentTypes.priorityFromChoices(SyncScopeChoice.Now, SyncScopeChoice.Later, SyncScopeChoice.Off)
-        assertEquals(SyncContentTypes(live = true, movies = true, series = false), enabled)
-        assertEquals(SyncContentTypes(live = true, movies = false, series = false), priority)
+        assertEquals(SyncContentTypes(live = true), SyncContentTypes.fromChoices(SyncScopeChoice.Now))
+        assertEquals(SyncContentTypes(live = true), SyncContentTypes.fromChoices(SyncScopeChoice.Later))
+        assertEquals(SyncContentTypes(live = false), SyncContentTypes.fromChoices(SyncScopeChoice.Off))
+
+        assertEquals(SyncContentTypes(live = true), SyncContentTypes.priorityFromChoices(SyncScopeChoice.Now))
+        assertEquals(SyncContentTypes(live = false), SyncContentTypes.priorityFromChoices(SyncScopeChoice.Later))
+        assertEquals(SyncContentTypes(live = false), SyncContentTypes.priorityFromChoices(SyncScopeChoice.Off))
     }
 }

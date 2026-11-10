@@ -16,12 +16,10 @@ import tv.own.owntv.core.i18n.LocaleStore
  *
  * Without it a large guide can never finish. A plain background worker is frozen by the OEM battery
  * managers the moment the screen goes off — on a ColorOS phone, 29 seconds after the display dims,
- * with the process suspended *and* its network blacklisted — so the download dies mid-parse and the
+ * with the process suspended *and* its network blacklisted — so the sync dies mid-parse and the
  * next run starts again from the first byte. The rows already written survive, but `setSynced` never
- * runs, so the source stays stale and the whole thing loops forever. The sibling workers
- * ([tv.own.owntv.core.download.DownloadNotifications],
- * [tv.own.owntv.core.recording.RecordingNotifications]) have always done this; the guide was the one
- * long job that did not.
+ * runs, so the source stays stale and the whole thing loops forever. The sibling workers'
+ * notification channels have always done this; the guide was the one long job that did not.
  */
 internal object EpgSyncNotifications {
 

@@ -16,7 +16,6 @@ import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ProfileEntity
 import tv.own.owntv.core.database.entity.ProfileSourceCrossRef
 import tv.own.owntv.core.database.entity.SourceEntity
-import tv.own.owntv.core.launcher.LauncherIntegrationRepository
 import tv.own.owntv.core.model.SourceType
 import tv.own.owntv.core.network.ConnectivityObserver
 import tv.own.owntv.core.parser.XtreamClient
@@ -59,7 +58,6 @@ class SourceImporter(
     private val settings: SettingsRepository,
     private val connectivity: ConnectivityObserver,
     private val importFinalizer: ImportFinalizer,
-    private val launcherIntegrationRepository: LauncherIntegrationRepository,
     private val catalogSyncScheduler: CatalogSyncScheduler,
     private val stalkerAuth: StalkerAuthManager,
     private val xtreamClient: XtreamClient,
@@ -80,7 +78,7 @@ class SourceImporter(
         data class Success(
             val counts: SyncCounts? = null,
             val warnings: List<SyncWarning> = emptyList(),
-            val remainder: SyncContentTypes = SyncContentTypes(false, false, false),
+            val remainder: SyncContentTypes = SyncContentTypes(live = false),
             val restoredItems: Int? = null,
             val passwordsOmitted: Boolean = false,
             /** Restored Xtream playlists with no saved password, by name — not synced until one is entered. */
@@ -159,14 +157,12 @@ class SourceImporter(
         epgUrl: String = "",
         autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF,
         live: SyncScopeChoice = SyncScopeChoice.Now,
-        movies: SyncScopeChoice = SyncScopeChoice.Now,
-        series: SyncScopeChoice = SyncScopeChoice.Now,
         preferHls: Boolean = false,
         makeDefault: Boolean = false,
         httpReferer: String = "",
     ) {
-        val enabled = SyncContentTypes.fromChoices(live, movies, series)
-        val priority = SyncContentTypes.priorityFromChoices(live, movies, series)
+        val enabled = SyncContentTypes.fromChoices(live)
+        val priority = SyncContentTypes.priorityFromChoices(live)
         runImport(
             autoRefresh, priority, enabledScope = enabled, enqueueRemainder = true,
             requiresNetwork = true, makeDefault = makeDefault,
@@ -179,7 +175,7 @@ class SourceImporter(
                 password = password,
                 userAgent = userAgent.trim().takeIf { it.isNotBlank() },
                 epgUrl = epgUrl.trim().takeIf { it.isNotBlank() },
-                syncLive = enabled.live, syncMovies = enabled.movies, syncSeries = enabled.series,
+                syncLive = enabled.live,
                 preferHls = preferHls,
                 httpReferer = httpReferer.trim().takeIf { it.isNotBlank() },
             )
@@ -187,8 +183,7 @@ class SourceImporter(
     }
 
     /** Stalker/MAC portal: the handshake is verified BEFORE the source is saved, so a typo'd portal
-     *  or MAC fails with a clear error instead of leaving a dead source on a brand-new profile.
-     *  Defaults: Live Now, Movies/Series Later — Stalker VOD has no bulk endpoint. */
+     *  or MAC fails with a clear error instead of leaving a dead source on a brand-new profile. */
     suspend fun stalker(
         name: String,
         portalUrl: String,
@@ -200,8 +195,6 @@ class SourceImporter(
         userAgent: String = "",
         autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF,
         live: SyncScopeChoice = SyncScopeChoice.Now,
-        movies: SyncScopeChoice = SyncScopeChoice.Later,
-        series: SyncScopeChoice = SyncScopeChoice.Later,
         makeDefault: Boolean = false,
         httpReferer: String = "",
         /** The optional portal login on top of the MAC; blank for the usual MAC-only portal. */
@@ -215,8 +208,8 @@ class SourceImporter(
             _state.value = ImportState.Failed(SetupFailure.InvalidMac)
             return
         }
-        val enabled = SyncContentTypes.fromChoices(live, movies, series)
-        val priority = SyncContentTypes.priorityFromChoices(live, movies, series)
+        val enabled = SyncContentTypes.fromChoices(live)
+        val priority = SyncContentTypes.priorityFromChoices(live)
         runImport(
             autoRefresh, contentTypes = priority, enabledScope = enabled, enqueueRemainder = true,
             requiresNetwork = true, makeDefault = makeDefault,
@@ -244,7 +237,7 @@ class SourceImporter(
                 deviceId2.trim().takeIf { it.isNotBlank() },
                 signature.trim().takeIf { it.isNotBlank() },
                 userAgent.trim().takeIf { it.isNotBlank() },
-                syncLive = enabled.live, syncMovies = enabled.movies, syncSeries = enabled.series,
+                syncLive = enabled.live,
                 httpReferer = httpReferer.trim().takeIf { it.isNotBlank() },
                 login = portalLogin, password = portalPassword,
             )
@@ -322,7 +315,7 @@ class SourceImporter(
             val remainder = if (enqueueRemainder) {
                 enabledScope.remainderAfter(contentTypes)
             } else {
-                SyncContentTypes(live = false, movies = false, series = false)
+                SyncContentTypes(live = false)
             }
             settings.setPlaylistAutoRefresh(source.id, autoRefresh)
             when (val result = sourceRepository.sync(source, onProgress = { _progress.value = it }, contentTypes = contentTypes)) {
@@ -339,7 +332,6 @@ class SourceImporter(
                         remainder = remainder,
                         source = syncedSource,
                     )
-                    runCatching { launcherIntegrationRepository.refreshProfile(profileId) }
                 }
                 is SyncResult.Failed -> {
                     cleanupFailedAdd(source)
@@ -395,21 +387,20 @@ class SourceImporter(
             val pid = createdProfileId.takeIf { it > 0 } ?: ensureFallbackProfile()
             sourceIds.forEach { sourceDao.link(ProfileSourceCrossRef(profileId = pid, sourceId = it)) }
             val sources = sourceDao.getAllOnce().filter { it.id in sourceIds }
-            var total = SyncCounts(0, 0, 0, 0)
+            var total = SyncCounts(0, 0)
             var failure: String? = null
             val warnings = mutableListOf<SyncWarning>()
             for (source in sources) {
                 when (val result = sourceRepository.sync(source, onProgress = { _progress.value = it })) {
                     is SyncResult.Success -> {
                         val c = importFinalizer.finalize(source)
-                        total = SyncCounts(total.channels + c.channels, total.movies + c.movies, total.series + c.series, total.epg + c.epg)
+                        total = SyncCounts(total.channels + c.channels, total.epg + c.epg)
                         warnings += result.warnings
                     }
                     is SyncResult.Failed -> failure = result.message
                     SyncResult.Cancelled -> {}
                 }
             }
-            runCatching { launcherIntegrationRepository.refreshProfile(pid) }
             _state.value = failure?.let { ImportState.Failed(SetupFailure.Sync(classifySyncFailure(it, connectivity.isOnlineNow()))) }
                 ?: ImportState.Success(counts = total, warnings = warnings)
         } catch (c: CancellationException) {
@@ -513,7 +504,7 @@ class SourceImporter(
         val needPassword = mutableListOf<String>()
         sourceDao.getAllOnce().forEach { source ->
             val counts = importFinalizer.contentCounts(source.id)
-            if (counts.channels + counts.movies + counts.series > 0) return@forEach
+            if (counts.channels > 0) return@forEach
             val needsLogin = source.type == SourceType.XTREAM ||
                 (source.type == SourceType.STALKER && !source.username.isNullOrBlank())
             if (needsLogin && source.password.isNullOrBlank()) {

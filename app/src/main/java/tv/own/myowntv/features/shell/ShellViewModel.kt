@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -80,7 +73,6 @@ import tv.own.owntv.core.weather.WeatherInfo
 import tv.own.owntv.core.weather.WeatherRepository
 import tv.own.owntv.core.database.dao.resolveExistingProfileId
 import tv.own.owntv.core.repository.SourceRepository
-import tv.own.owntv.core.launcher.LauncherIntegrationRepository
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.theme.AccentColor
 import tv.own.owntv.core.theme.FontCustomization
@@ -96,7 +88,6 @@ class ShellViewModel(
     private val sourceRepository: SourceRepository,
     private val profileDao: tv.own.owntv.core.database.dao.ProfileDao,
     connectivity: ConnectivityObserver,
-    private val launcherIntegrationRepository: LauncherIntegrationRepository,
     private val epgMigration: tv.own.owntv.core.epg.EpgMigration,
     private val autoRefresh: tv.own.owntv.core.sync.AutoRefresh,
     private val weatherRepository: WeatherRepository,
@@ -135,9 +126,6 @@ class ShellViewModel(
                     // What the PIN opened belongs to the profile that entered it.
                     relock.profileChanged(pid)
                     Log.d(TAG, "activeProfileChanged profile=$pid androidTvHomeEnabled=${settings.androidTvHomeEnabled.first()}")
-                    if (pid >= 0 && settings.androidTvHomeEnabled.first()) {
-                        runCatching { launcherIntegrationRepository.refreshProfile(pid, allowBrowsableRequest = true) }
-                    }
                 }
         }
     }
@@ -185,7 +173,7 @@ class ShellViewModel(
                     source.id,
                     reason = "manual_resync",
                     contentTypes = tv.own.owntv.core.sync.SyncContentTypes.enabledOf(source),
-                    baseItemCount = counts.channels + counts.movies + counts.series,
+                    baseItemCount = counts.channels,
                     policy = androidx.work.ExistingWorkPolicy.KEEP,
                 )
             }

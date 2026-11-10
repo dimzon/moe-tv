@@ -33,7 +33,7 @@ class ReminderManager(
     }.stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     init {
-        // Every launch re-arms: some TVs never deliver BOOT_COMPLETED (see RecordingManager in DataModule).
+        // Every launch re-arms: some TVs never deliver BOOT_COMPLETED.
         scope.launch { scheduler.rearmAll() }
     }
 

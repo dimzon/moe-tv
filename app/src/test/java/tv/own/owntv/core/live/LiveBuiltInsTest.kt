@@ -20,7 +20,7 @@ class LiveBuiltInsTest {
     fun `without All the first category that opens without a PIN is the landing`() {
         assertEquals(
             LiveKey.Custom("custom:a"),
-            land(Row(LiveKey.Favorites), Row(LiveKey.Catchup), Row(LiveKey.Folder(1), sealed = true), Row(LiveKey.Custom("custom:a")), Row(LiveKey.Folder(2))),
+            land(Row(LiveKey.Favorites), Row(LiveKey.History), Row(LiveKey.Folder(1), sealed = true), Row(LiveKey.Custom("custom:a")), Row(LiveKey.Folder(2))),
         )
     }
 
@@ -30,10 +30,9 @@ class LiveBuiltInsTest {
     }
 
     @Test
-    fun `only the two built-ins can be hidden`() {
-        val none = LiveBuiltIns(showAll = false, showCatchup = false)
+    fun `only All can be hidden`() {
+        val none = LiveBuiltIns(showAll = false)
         assertFalse(none.shows(LiveKey.All))
-        assertFalse(none.shows(LiveKey.Catchup))
         listOf(LiveKey.Favorites, LiveKey.History, LiveKey.Folder(3), LiveKey.Custom("x")).forEach { assertTrue(none.shows(it)) }
         assertTrue(LiveBuiltIns().shows(LiveKey.All))
     }

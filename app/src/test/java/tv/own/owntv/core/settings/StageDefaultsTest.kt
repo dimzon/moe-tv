@@ -12,7 +12,7 @@ import tv.own.owntv.core.theme.GlassConfig
 class StageDefaultsTest {
 
     @Test
-    fun `an update gets the Stage rail, glass and background, and keeps its Movies layout`() {
+    fun `an update gets the Stage rail, glass and background`() {
         val prefs = mutablePreferencesOf(
             Keys.ACTIVE_PROFILE to 1L,
             Keys.NAV_STYLE to "FLOATING", Keys.NAV_SIZE to "WIDE", Keys.NAV_LENGTH to "FULL",
@@ -28,24 +28,15 @@ class StageDefaultsTest {
         assertEquals("STAGE", prefs[Keys.BG_STYLE])
         assertNull(prefs[Keys.BG_LOOK])
         assertNull(prefs[Keys.BG_DIM])
-        // No layout stored = the old default, Separate panels, written down so it does not change.
-        assertEquals("SEPARATE", prefs[Keys.VOD_LAYOUT])
         assertTrue(prefs[Keys.STAGE_DEFAULTS_APPLIED] == true)
     }
 
     @Test
-    fun `an update with a chosen Movies layout keeps it`() {
-        val prefs = mutablePreferencesOf(Keys.ACTIVE_PROFILE to 1L, Keys.VOD_LAYOUT to "CINEMATIC")
-        SettingsRepository.stageDefaults(prefs)
-        assertEquals("CINEMATIC", prefs[Keys.VOD_LAYOUT])
-    }
-
-    @Test
-    fun `a fresh install leaves Movies to the Cinematic default`() {
+    fun `a fresh install also lands on the Stage look`() {
         val prefs = mutablePreferencesOf()
         SettingsRepository.stageDefaults(prefs)
-        assertNull(prefs[Keys.VOD_LAYOUT])
         assertEquals("DOCKED", prefs[Keys.NAV_STYLE])
+        assertEquals("STAGE", prefs[Keys.BG_STYLE])
     }
 
     @Test

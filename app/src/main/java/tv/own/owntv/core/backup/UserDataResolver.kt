@@ -14,20 +14,14 @@ import tv.own.owntv.core.database.dao.ContentOrderDao
 import tv.own.owntv.core.database.dao.ContentOrderExportRow
 import tv.own.owntv.core.database.dao.CustomCategoryDao
 import tv.own.owntv.core.database.dao.CustomCategoryMemberExportRow
-import tv.own.owntv.core.database.dao.SeriesSortOrderDao
 import tv.own.owntv.core.database.dao.TombstoneDao
-import tv.own.owntv.core.database.dao.SeriesSortOrderExportRow
 import tv.own.owntv.core.database.dao.FavoriteDao
 import tv.own.owntv.core.database.dao.HistoryDao
-import tv.own.owntv.core.database.dao.MovieDao
-import tv.own.owntv.core.database.dao.ProgressDao
 import tv.own.owntv.core.database.dao.ProfileDao
-import tv.own.owntv.core.database.dao.SeriesDao
 import tv.own.owntv.core.database.dao.UserDataExportRow
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.database.entity.CustomCategoryMemberEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
-import tv.own.owntv.core.database.entity.PlaybackProgressEntity
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
 import tv.own.owntv.core.database.transaction
 import tv.own.owntv.core.model.MediaType
@@ -56,15 +50,11 @@ internal val PENDING_KEY = stringPreferencesKey("entries")
 class UserDataResolver(
     private val context: Context,
     private val channelDao: ChannelDao,
-    private val movieDao: MovieDao,
-    private val seriesDao: SeriesDao,
     private val profileDao: ProfileDao,
     private val favoriteDao: FavoriteDao,
     private val historyDao: HistoryDao,
-    private val progressDao: ProgressDao,
     private val contentOrderDao: ContentOrderDao,
     private val customCategoryDao: CustomCategoryDao,
-    private val seriesSortOrderDao: SeriesSortOrderDao,
     private val tombstoneDao: TombstoneDao,
     private val db: tv.own.owntv.core.database.OwnTVDatabase,
 ) {
@@ -187,7 +177,6 @@ class UserDataResolver(
         val deleted = when (kind) {
             "fav" -> favoriteDao.removeIfOlderThan(pid, type, itemId, at)
             "his" -> historyDao.removeIfOlderThan(pid, type, itemId, at)
-            "prog" -> progressDao.removeIfOlderThan(pid, type, itemId, at)
             // Memberships carry no timestamp of their own — the row is a position in a list, not an
             // event — so the deletion simply wins. Re-adding the item locally afterwards writes a
             // fresh row, and the stale tombstone only ever suppresses records older than itself.
@@ -200,19 +189,14 @@ class UserDataResolver(
         return deleted > 0
     }
 
-    /** Exports the chosen kinds ("fav" / "his" / "prog" / "order" / "sort" / "member") as stable-key records for the backup file. */
-    suspend fun exportAll(kinds: Set<String> = setOf("fav", "his", "prog", "order", "sort", "member")): JSONArray {
+    /** Exports the chosen kinds ("fav" / "his" / "order" / "member") as stable-key records for the backup file. */
+    suspend fun exportAll(kinds: Set<String> = setOf("fav", "his", "order", "member")): JSONArray {
         val out = JSONArray()
         if ("fav" in kinds) favoriteDao.getAllOnce().forEach { f ->
             describe(f.mediaType, f.itemId)?.let { out.put(it.put("p", f.profileId).put("kind", "fav").put("at", f.addedAt)) }
         }
         if ("his" in kinds) historyDao.getAllOnce().forEach { h ->
             describe(h.mediaType, h.itemId)?.let { out.put(it.put("p", h.profileId).put("kind", "his").put("at", h.watchedAt)) }
-        }
-        if ("prog" in kinds) progressDao.getAllOnce().forEach { pr ->
-            describe(pr.mediaType, pr.itemId)?.let {
-                out.put(it.put("p", pr.profileId).put("kind", "prog").put("at", pr.updatedAt).put("pos", pr.positionMs).put("dur", pr.durationMs))
-            }
         }
         if ("order" in kinds) contentOrderDao.getAllOnce().forEach { o ->
             describe(o.mediaType, o.itemId)?.let {
@@ -222,13 +206,6 @@ class UserDataResolver(
         if ("member" in kinds) customCategoryDao.getAllOnce().forEach { m ->
             describe(m.mediaType, m.itemId)?.let {
                 out.put(it.put("p", m.profileId).put("kind", "member").put("ctx", m.contextKey).put("pos", m.position))
-            }
-        }
-        // Per-series season/episode order. Always MediaType.SERIES, so it re-resolves through the
-        // ordinary SERIES branch of [resolveAndInsert].
-        if ("sort" in kinds) seriesSortOrderDao.getAllOnce().forEach { o ->
-            describe(MediaType.SERIES, o.seriesId)?.let {
-                out.put(it.put("p", o.profileId).put("kind", "sort").put("sdesc", o.seasonsDescending).put("edesc", o.episodesDescending))
             }
         }
         return out
@@ -241,13 +218,11 @@ class UserDataResolver(
      * favorites do — content is clear-then-insert, so every itemId in `content_order` goes stale —
      * and leaving them out of the snapshot silently threw away the user's hand-arranged folders.
      */
-    suspend fun exportForSource(sourceId: Long, kinds: Set<String> = setOf("fav", "his", "prog", "order", "sort", "member")): JSONArray {
+    suspend fun exportForSource(sourceId: Long, kinds: Set<String> = setOf("fav", "his", "order", "member")): JSONArray {
         val out = JSONArray()
         if ("fav" in kinds) favoriteDao.exportRowsForSource(sourceId).forEach { row -> row.toJson("fav")?.let { out.put(it) } }
         if ("his" in kinds) historyDao.exportRowsForSource(sourceId).forEach { row -> row.toJson("his")?.let { out.put(it) } }
-        if ("prog" in kinds) progressDao.exportRowsForSource(sourceId).forEach { row -> row.toJson("prog")?.let { out.put(it) } }
         if ("order" in kinds) contentOrderDao.exportRowsForSource(sourceId).forEach { row -> row.toJson()?.let { out.put(it) } }
-        if ("sort" in kinds) seriesSortOrderDao.exportRowsForSource(sourceId).forEach { row -> row.toJson()?.let { out.put(it) } }
         if ("member" in kinds) customCategoryDao.exportRowsForSource(sourceId).forEach { row -> row.toJson()?.let { out.put(it) } }
         return out
     }
@@ -266,29 +241,10 @@ class UserDataResolver(
             .put("oid", itemId)
     }
 
-    private fun SeriesSortOrderExportRow.toJson(): JSONObject? {
-        val itemName = name ?: return null
-        return JSONObject().put("t", MediaType.SERIES.name).put("src", sourceId).putOpt("rid", remoteId).put("name", itemName)
-            .put("p", profileId).put("kind", "sort").put("sdesc", seasonsDescending).put("edesc", episodesDescending)
-            .put("oid", seriesId)
-    }
-
     private fun UserDataExportRow.toJson(kind: String): JSONObject? {
-        val json = when (mediaType) {
-            MediaType.LIVE, MediaType.MOVIE, MediaType.SERIES -> {
-                val itemName = name ?: return null
-                JSONObject().put("t", mediaType.name).put("src", sourceId).putOpt("rid", remoteId).put("name", itemName)
-            }
-            MediaType.EPISODE -> {
-                val showName = seriesName ?: return null
-                JSONObject().put("t", mediaType.name).put("src", sourceId)
-                    .putOpt("srid", seriesRemoteId).put("sname", showName)
-                    .putOpt("rid", remoteId).put("season", seasonNumber ?: 0).put("ep", episodeNumber ?: 0)
-            }
-        }
-        json.put("p", profileId).put("kind", kind).put("at", at).put("oid", itemId)
-        if (kind == "prog") json.put("pos", positionMs).put("dur", durationMs)
-        return json
+        val itemName = name ?: return null
+        return JSONObject().put("t", mediaType.name).put("src", sourceId).putOpt("rid", remoteId).put("name", itemName)
+            .put("p", profileId).put("kind", kind).put("at", at).put("oid", itemId)
     }
 
     /**
@@ -334,8 +290,6 @@ class UserDataResolver(
             when (row.kind) {
                 "fav" -> favoriteDao.purgeSnapshotOrphan(row.profileId, row.type, row.itemId)
                 "his" -> historyDao.purgeSnapshotOrphan(row.profileId, row.type, row.itemId)
-                "prog" -> progressDao.purgeSnapshotOrphan(row.profileId, row.type, row.itemId)
-                "sort" -> seriesSortOrderDao.purgeSnapshotOrphan(row.profileId, row.itemId)
             }
         }
         // These two are keyed by folder first, so a one-row delete scans every row of the profile:
@@ -430,19 +384,9 @@ class UserDataResolver(
         MediaType.LIVE -> channelDao.getById(itemId)?.let {
             JSONObject().put("t", type.name).put("src", it.sourceId).putOpt("rid", it.remoteId).put("name", it.name)
         }
-        MediaType.MOVIE -> movieDao.getById(itemId)?.let {
-            JSONObject().put("t", type.name).put("src", it.sourceId).putOpt("rid", it.remoteId).put("name", it.name)
-        }
-        MediaType.SERIES -> seriesDao.getSeriesById(itemId)?.let {
-            JSONObject().put("t", type.name).put("src", it.sourceId).putOpt("rid", it.remoteId).put("name", it.name)
-        }
-        MediaType.EPISODE -> {
-            val ep = seriesDao.getEpisodeById(itemId) ?: return null
-            val show = seriesDao.getSeriesById(ep.seriesId) ?: return null
-            JSONObject().put("t", type.name).put("src", show.sourceId)
-                .putOpt("srid", show.remoteId).put("sname", show.name)
-                .putOpt("rid", ep.remoteId).put("season", ep.seasonNumber).put("ep", ep.episodeNumber)
-        }
+        // VOD media types carry no content rows any more (the app is live-only): their records
+        // describe nothing and are dropped rather than held pending.
+        else -> null
     }
 
     // --- restore side: stable identity → current content row ---
@@ -464,10 +408,8 @@ class UserDataResolver(
         return when (kind) {
             "fav" -> !favoriteDao.exists(profileId, type, itemId)
             "his" -> !historyDao.exists(profileId, type, itemId)
-            "prog" -> progressDao.get(profileId, type, itemId) == null
             "order" -> !contentOrderDao.exists(profileId, type, ctx, itemId)
             "member" -> !customCategoryDao.exists(profileId, type, ctx, itemId)
-            "sort" -> seriesSortOrderDao.findRowId(profileId, itemId) == null
             else -> false
         }
     }
@@ -482,7 +424,6 @@ class UserDataResolver(
         return when (kind) {
             "fav" -> favoriteDao.exists(profileId, type, itemId) && favoriteDao.addedAt(profileId, type, itemId).let { it != null && it <= at }
             "his" -> historyDao.watchedAt(profileId, type, itemId).let { it != null && it <= at }
-            "prog" -> progressDao.get(profileId, type, itemId)?.let { it.updatedAt <= at } == true
             "member" -> customCategoryDao.exists(profileId, type, e.optString("ctx"), itemId)
             else -> false
         }
@@ -494,15 +435,8 @@ class UserDataResolver(
         val rid = e.optStringOrNull("rid")
         return when (type) {
             MediaType.LIVE -> (rid?.let { channelDao.findByRemote(src, it) } ?: channelDao.findByName(src, e.getString("name")))?.id
-            MediaType.MOVIE -> (rid?.let { movieDao.findByRemote(src, it) } ?: movieDao.findByName(src, e.getString("name")))?.id
-            MediaType.SERIES -> (rid?.let { seriesDao.findSeriesByRemote(src, it) } ?: seriesDao.findSeriesByName(src, e.getString("name")))?.id
-            MediaType.EPISODE -> {
-                val srid = e.optStringOrNull("srid")
-                val show = (srid?.let { seriesDao.findSeriesByRemote(src, it) } ?: seriesDao.findSeriesByName(src, e.getString("sname")))
-                    ?: return null
-                (rid?.let { seriesDao.findEpisodeByRemote(show.id, it) }
-                    ?: seriesDao.findEpisodeByNumber(show.id, e.getInt("season"), e.getInt("ep")))?.id
-            }
+            // VOD media types carry no content rows any more (the app is live-only).
+            else -> null
         }
     }
 
@@ -523,7 +457,10 @@ class UserDataResolver(
     private suspend fun resolveAndInsert(e: JSONObject, tombstonesPresent: Boolean): Resolution {
         val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull()
             ?: return Resolution.HANDLED // drop garbage
-        val itemId: Long = locate(type, e) ?: return Resolution.PENDING
+        // A VOD record (movie/series/episode) has no content rows any more: it is dropped for good,
+        // never held pending — pending would retry it after every sync for ever.
+        val itemId: Long = locate(type, e)
+            ?: return if (type == MediaType.LIVE) Resolution.PENDING else Resolution.HANDLED
 
         // The record's own profile or nothing. This used to fall back to whichever profile happened to
         // be first, which is right for "the active profile was deleted, show me something" but wrong
@@ -556,26 +493,11 @@ class UserDataResolver(
                     historyDao.insertIfAbsent(WatchHistoryEntity(profileId = pid, mediaType = type, itemId = itemId, watchedAt = at))
                     historyDao.bumpIfNewer(pid, type, itemId, at)
                 }
-                "prog" -> {
-                    val positionMs = e.optLong("pos", 0)
-                    val durationMs = e.optLong("dur", 0)
-                    progressDao.insertIfAbsent(
-                        PlaybackProgressEntity(
-                            profileId = pid, mediaType = type, itemId = itemId,
-                            positionMs = positionMs, durationMs = durationMs, updatedAt = at,
-                        ),
-                    )
-                    progressDao.updateIfNewer(pid, type, itemId, positionMs, durationMs, at)
-                }
                 "order" -> contentOrderDao.insertAll(
                     listOf(ContentOrderEntity(profileId = pid, mediaType = type, contextKey = e.getString("ctx"), itemId = itemId, position = e.getInt("pos"))),
                 )
                 "member" -> customCategoryDao.insertAll(
                     listOf(CustomCategoryMemberEntity(profileId = pid, mediaType = type, contextKey = e.getString("ctx"), itemId = itemId, position = e.getInt("pos"))),
-                )
-                "sort" -> seriesSortOrderDao.setOrder(
-                    profileId = pid, seriesId = itemId,
-                    seasonsDescending = e.optBoolean("sdesc", false), episodesDescending = e.optBoolean("edesc", false),
                 )
             }
             Resolution.HANDLED
@@ -591,7 +513,7 @@ class UserDataResolver(
 
         /** Deletions that travel in a sync payload. Reorder positions are not among them: a position
          *  is overwritten by the newer one, never "missing", so it needs no marker. */
-        val TOMBSTONE_KINDS = setOf("fav", "his", "prog", "member")
+        val TOMBSTONE_KINDS = setOf("fav", "his", "member")
 
         /** Newest deletions kept. "Clear watch history" writes one per row, and a deletion is only
          *  useful until every device has seen it. */

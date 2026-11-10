@@ -238,36 +238,6 @@ class BackupMergeRemappingTest {
         assertEquals("{\"a\":1}", remapCustomizationValue("{\"a\":1}", emptyMap()))
     }
 
-    // --- remapTmdbOverrideKeys: "type:<sourceId>:<rest>" ---
-
-    @Test
-    fun `tmdb override keys rewrite only the middle source-id segment`() {
-        val raw = JSONObject()
-            .put("movie:10:42", "Blade Runner")
-            .put("series:10:some:id:with:colons", "The Show")
-            .put("movie:11:1", "Unmapped Source")
-            .toString()
-
-        val out = JSONObject(remapTmdbOverrideKeys(raw, mapOf(10L to 200L)))
-
-        assertEquals("Blade Runner", out.getString("movie:200:42"))
-        // split(limit = 3): everything after the source id is one opaque remainder, colons and all.
-        assertEquals("The Show", out.getString("series:200:some:id:with:colons"))
-        assertEquals("Unmapped Source", out.getString("movie:11:1"))
-    }
-
-    @Test
-    fun `tmdb override keys without three segments are passed through`() {
-        val raw = JSONObject().put("movie:10", "Two segments").toString()
-        val out = JSONObject(remapTmdbOverrideKeys(raw, mapOf(10L to 200L)))
-        assertEquals("Two segments", out.getString("movie:10"))
-    }
-
-    @Test
-    fun `malformed tmdb override json is returned verbatim`() {
-        assertEquals("{oops", remapTmdbOverrideKeys("{oops", mapOf(1L to 2L)))
-    }
-
     // --- filterByProfile: the "only the ticked profiles" gate ---
 
     @Test

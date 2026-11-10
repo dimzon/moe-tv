@@ -41,7 +41,6 @@ fun livePagingSource(
             LiveKey.All -> if (playlist) channelDao.pagingAllOriginal(ids) else channelDao.pagingAll(ids)
             LiveKey.Favorites -> channelDao.pagingFavoritesManual(profileId, ContentOrderEntity.FAV_CONTEXT, ids)
             LiveKey.History -> channelDao.pagingHistory(profileId, ids)
-            LiveKey.Catchup -> if (playlist) channelDao.pagingCatchupOriginal(ids) else channelDao.pagingCatchup(ids)
             is LiveKey.Custom -> customCategoryDao.pagingChannels(profileId, key.id, ids, alpha = !playlist)
             is LiveKey.Folder -> {
                 val ctxKey = contextKey(key.id) ?: ""
@@ -59,7 +58,6 @@ fun livePagingSource(
             LiveKey.All -> channelDao.searchAll(query, ids)
             LiveKey.Favorites -> channelDao.searchFavorites(query, profileId, ids)
             LiveKey.History -> channelDao.searchHistory(query, profileId, ids)
-            LiveKey.Catchup -> channelDao.searchCatchup(query, ids)
             is LiveKey.Custom -> customCategoryDao.searchChannels(query, profileId, key.id, ids)
             is LiveKey.Folder -> channelDao.searchInCategory(query, key.id)
         }
@@ -68,7 +66,7 @@ fun livePagingSource(
 
 /**
  * The live row count for one rail selection. [sealedCats] are the locked provider folders: unlike
- * [hiddenCats] they leave Favorites, History, Catch-up and custom categories too (see [isChannelVisible]).
+ * [hiddenCats] they leave Favorites, History and custom categories too (see [isChannelVisible]).
  */
 fun liveCountFlow(
     key: LiveKey,
@@ -87,8 +85,6 @@ fun liveCountFlow(
             else channelDao.countFavoritesExcluding(profileId, ids, sealed)
         LiveKey.History -> if (sealed.isEmpty()) channelDao.countHistory(profileId, ids)
             else channelDao.countHistoryExcluding(profileId, ids, sealed)
-        LiveKey.Catchup -> if (sealed.isEmpty()) channelDao.observeCatchupCount(ids)
-            else channelDao.observeCatchupCountExcluding(ids, sealed)
         is LiveKey.Custom -> if (sealed.isEmpty()) customCategoryDao.countMembers(profileId, MediaType.LIVE, key.id, ids)
             else customCategoryDao.countMembersExcluding(profileId, MediaType.LIVE, key.id, ids, sealed)
         is LiveKey.Folder -> channelDao.countByCategory(key.id)

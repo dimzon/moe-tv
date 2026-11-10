@@ -35,16 +35,20 @@ class SourceEditorTest {
     }
 
     @Test
-    fun `a rename or a section switched off does not`() {
+    fun `a rename or a retired section column does not`() {
         assertFalse(SourceEditor.needsResync(synced, synced.copy(name = "Renamed")))
+        // `syncMovies` is a retired column: it round-trips through backups but no longer covers a
+        // section, so flipping it must not trigger a sync.
         assertFalse(SourceEditor.needsResync(synced, synced.copy(syncMovies = false)))
     }
 
     @Test
-    fun `the scope rules are unchanged`() {
-        val moviesOff = synced.copy(syncMovies = false)
-        assertTrue(SourceEditor.needsResync(moviesOff, synced))
-        assertTrue(SourceEditor.scopeChanged(synced, moviesOff))
+    fun `the scope rules follow Live only`() {
+        val liveOff = synced.copy(syncLive = false)
+        // Turning Live on is the one direction that needs a fetch; turning it off does not.
+        assertTrue(SourceEditor.needsResync(liveOff, synced))
+        assertTrue(SourceEditor.scopeChanged(synced, liveOff))
+        assertFalse(SourceEditor.needsResync(synced, liveOff))
         assertFalse(SourceEditor.scopeChanged(synced, synced.copy(password = "secret")))
         assertTrue(SourceEditor.needsResync(synced.copy(lastSyncAt = null), synced.copy(lastSyncAt = null, name = "x")))
     }

@@ -11,7 +11,7 @@ import tv.own.owntv.core.live.LiveKey
  */
 class LiveRailVisibilityTest {
 
-    private fun keys(showAll: Boolean = true, showCatchup: Boolean = true) = railKeys(LiveBuiltIns(showAll, showCatchup))
+    private fun keys(showAll: Boolean = true) = railKeys(LiveBuiltIns(showAll))
 
     /** The rail the view model assembles: the built-ins, each kept only while its switch is on. */
     private fun railKeys(builtIns: LiveBuiltIns) = LiveViewModel.defaultRail.filter { builtIns.shows(it.key) }.map { it.key }
@@ -24,13 +24,6 @@ class LiveRailVisibilityTest {
     @Test
     fun `showAll false drops All only`() {
         assertEquals(listOf(LiveKey.Favorites, LiveKey.History), keys(showAll = false))
-    }
-
-    @Test
-    fun `the catch-up switch no longer moves anything — the rail has no catch-up row`() {
-        // The key itself survives in core (the guide still lists catch-up channels); the live rail
-        // simply has nothing for the switch to hide.
-        assertEquals(keys(), keys(showCatchup = false))
     }
 
     @Test

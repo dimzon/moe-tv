@@ -9,11 +9,5 @@ data class UserDataExportRow(
     val sourceId: Long,
     val remoteId: String?,
     val name: String?,
-    val seriesRemoteId: String?,
-    val seriesName: String?,
-    val seasonNumber: Int?,
-    val episodeNumber: Int?,
     val at: Long,
-    val positionMs: Long,
-    val durationMs: Long,
 )

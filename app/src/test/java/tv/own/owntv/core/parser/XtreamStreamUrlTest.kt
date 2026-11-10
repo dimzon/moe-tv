@@ -22,8 +22,6 @@ class XtreamStreamUrlTest {
     fun `plain credentials keep the URL they always had`() {
         val s = source("alice", "s3cret")
         assertEquals("http://panel.invalid:8080/live/alice/s3cret/7.ts", client.liveUrl(s, "7"))
-        assertEquals("http://panel.invalid:8080/movie/alice/s3cret/7.mkv", client.movieUrl(s, "7", "mkv"))
-        assertEquals("http://panel.invalid:8080/series/alice/s3cret/7.mp4", client.seriesEpisodeUrl(s, "7", null))
     }
 
     @Test

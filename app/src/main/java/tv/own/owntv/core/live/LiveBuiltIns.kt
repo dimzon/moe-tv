@@ -1,14 +1,13 @@
 package tv.own.owntv.core.live
 
 /**
- * Which of Live TV's two built-in lists the user keeps in the category list: All channels and
- * Catch-up. Favorites and History always stay. Both apps filter the same list with this, so the
- * Live TV categories, the guide's category list, the player's and Multiview's all agree.
+ * Whether the built-in All channels list stays in the user's category list. Favorites and History
+ * always stay. Both apps filter the same list with this, so the Live TV categories, the guide's
+ * category list, the player's and Multiview's all agree.
  */
-data class LiveBuiltIns(val showAll: Boolean = true, val showCatchup: Boolean = true) {
+data class LiveBuiltIns(val showAll: Boolean = true) {
     fun shows(key: LiveKey): Boolean = when (key) {
         LiveKey.All -> showAll
-        LiveKey.Catchup -> showCatchup
         else -> true
     }
 }

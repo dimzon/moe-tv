@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -72,8 +65,6 @@ internal val SETTING_LINE: Map<String, Int> = mapOf(
     "reminders" to R.string.settings_line_reminders,
     "reminder_lead" to R.string.settings_line_reminder_lead,
     "guide_days" to R.string.settings_line_guide_days,
-    "catchup" to R.string.settings_line_catchup,
-    "catchup_sources" to R.string.settings_line_catchup_sources,
     "accent" to R.string.settings_line_accent,
     "tab_GLASS_EFFECT" to R.string.settings_line_glass_bg,
     "fonts" to R.string.settings_line_fonts,
@@ -81,7 +72,6 @@ internal val SETTING_LINE: Map<String, Int> = mapOf(
     "animations" to R.string.settings_line_animations,
     "tab_WEATHER" to R.string.settings_line_weather,
     "live_opens_in" to R.string.settings_line_live_opens_in,
-    "vod_layout" to R.string.settings_line_vod_layout,
     "tab_PANEL_WIDTH" to R.string.settings_line_panel_width,
     "tab_GUIDE_WIDTH" to R.string.settings_line_guide_width,
     "browsing_lists" to R.string.settings_line_browsing,
@@ -125,8 +115,6 @@ internal val SETTING_LINE: Map<String, Int> = mapOf(
     "vp_live_preview" to R.string.settings_line_live_preview,
     "vp_preview_audio" to R.string.settings_line_preview_sound,
     "vp_preview_on_ok" to R.string.settings_line_preview_on_ok,
-    "vp_timeshift" to R.string.settings_line_timeshift,
-    "vp_timeshift_window" to R.string.settings_line_timeshift_window,
     "vp_live_latency" to R.string.settings_line_latency,
     "vp_latency_sources" to R.string.settings_line_override_playlist,
     "vp_preroll" to R.string.settings_line_preroll,
@@ -134,8 +122,6 @@ internal val SETTING_LINE: Map<String, Int> = mapOf(
     "vp_tune_timeout" to R.string.settings_line_tune_timeout,
     "vp_tune_timeout_sources" to R.string.settings_line_override_playlist,
     "vp_seek_step" to R.string.settings_line_seek_step,
-    "vp_resume" to R.string.settings_line_resume,
-    "vp_autoplay" to R.string.settings_line_autoplay,
     "vp_multiview" to R.string.settings_vp_cat_multiview_summary_mobile,
     "vp_multiview_tiles" to R.string.settings_line_tiles,
     "vp_mini" to R.string.settings_line_mini,
@@ -166,8 +152,6 @@ internal val SETTING_HELP: Map<String, Int> = mapOf(
     "reminders" to R.string.settings_reminders_description,
     "reminder_lead" to R.string.settings_reminder_lead_description,
     "guide_days" to R.string.settings_help_guide_days,
-    "catchup" to R.string.settings_help_catchup_timezone,
-    "catchup_sources" to R.string.settings_catchup_timezone_per_playlist_description,
     "theme" to R.string.settings_help_theme,
     "accent" to R.string.settings_help_accent,
     "focus_highlight" to R.string.settings_help_focus,
@@ -180,7 +164,6 @@ internal val SETTING_HELP: Map<String, Int> = mapOf(
     "navigation" to R.string.settings_help_navigation,
     "live_layout" to R.string.settings_help_live_layout,
     "live_opens_in" to R.string.settings_live_opens_in_description,
-    "vod_layout" to R.string.settings_help_vod_layout,
     "tab_PANEL_WIDTH" to R.string.settings_panel_width_description,
     "tab_GUIDE_WIDTH" to R.string.settings_guide_width_description,
     "browsing_lists" to R.string.settings_browsing_description,
@@ -208,9 +191,7 @@ internal val SETTING_HELP: Map<String, Int> = mapOf(
     "vp_live_preview" to R.string.settings_help_live_preview,
     "vp_preview_audio" to R.string.settings_help_preview_audio,
     "vp_preview_on_ok" to R.string.settings_help_preview_on_ok,
-    "vp_timeshift_window" to R.string.settings_help_timeshift_window,
     "vp_seek_step" to R.string.settings_help_seek_step,
-    "vp_resume" to R.string.settings_help_resume,
     "vp_mini" to R.string.settings_help_mini,
     "pb_hold_ok" to R.string.settings_help_player_hold_ok,
     "pb_short_ok" to R.string.settings_help_player_short_ok,

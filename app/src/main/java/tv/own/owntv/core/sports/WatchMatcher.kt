@@ -1,6 +1,5 @@
 package tv.own.owntv.core.sports
 
-import tv.own.owntv.core.catalog.ProviderCatalogMetadataParser
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.matchName
 import tv.own.owntv.core.epg.EpgMatcher
@@ -13,8 +12,8 @@ enum class WatchTier { GUIDE, EVENT, REMEMBERED, LIKELY }
 
 /**
  * What the filters read off a channel's name: its portable name (provider tags removed, [portableKey]
- * for comparing), country prefix ("DE|"), language and picture quality (ProviderCatalogMetadata ranks:
- * 0 unknown, 1 SD, 2 HD, 3 FHD, 4 UHD, 5 8K). Unknown is null / 0, never a guess.
+ * for comparing), country prefix ("DE|"), language and picture quality (quality ranks: 0 unknown,
+ * 1 SD, 2 HD, 3 FHD, 4 UHD, 5 8K). Unknown is null / 0, never a guess.
  */
 data class ChannelFacets(val name: String, val country: String?, val language: String?, val qualityRank: Int) {
     val portableKey: String get() = EpgMatcher.normalizeForEpg(name)
@@ -33,9 +32,9 @@ data class ChannelFacets(val name: String, val country: String?, val language: S
 
         fun of(channelName: String): ChannelFacets {
             val parsed = ProviderTags.parse(channelName)
-            val meta = ProviderCatalogMetadataParser.parse(parsed.name, null)
+            val meta = ChannelNameMetadata.parse(parsed.name)
             val tagRank = if (parsed.tags.isEmpty()) 0
-            else ProviderCatalogMetadataParser.parse(parsed.tags.joinToString(" "), null).qualityRank
+            else ChannelNameMetadata.parse(parsed.tags.joinToString(" ")).qualityRank
             val country = parsed.country
             return ChannelFacets(
                 name = parsed.name,

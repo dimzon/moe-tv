@@ -2,8 +2,6 @@ package tv.own.owntv.core.settings
 
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.network.StreamHeaders
-import java.util.SimpleTimeZone
-import java.util.TimeZone
 
 /**
  * The v44 per-playlist overrides, read the same way everywhere.
@@ -13,21 +11,6 @@ import java.util.TimeZone
  * (a name from a newer build, say) also reads as no override rather than as a guess.
  */
 object SourceOverrides {
-
-    /** [source]'s own catch-up zone, or null when it follows the global one. */
-    fun catchupTimeZoneOf(source: SourceEntity?): TimeZone? {
-        val mode = source?.catchupTimezone
-            ?.let { runCatching { SettingsRepository.CatchupTimezone.valueOf(it) }.getOrNull() } ?: return null
-        return when (mode) {
-            SettingsRepository.CatchupTimezone.AUTOMATIC -> panelTimeZoneOf(source) ?: TimeZone.getDefault()
-            SettingsRepository.CatchupTimezone.DEVICE -> TimeZone.getDefault()
-            SettingsRepository.CatchupTimezone.MANUAL -> SimpleTimeZone((source.catchupOffsetMin ?: 0) * 60_000, "catchup")
-        }
-    }
-
-    /** The zone the Xtream panel reported for itself at the last sync (v49), or null when unknown. */
-    fun panelTimeZoneOf(source: SourceEntity?): TimeZone? =
-        source?.serverTimeZone?.let { TimeZone.getTimeZone(it) }
 
     /** [source]'s own "Give up after" in seconds (0 = never), or null when it follows the global one. */
     fun liveTuneTimeoutSecsOf(source: SourceEntity?): Int? =

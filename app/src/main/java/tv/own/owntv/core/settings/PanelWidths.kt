@@ -2,8 +2,8 @@ package tv.own.owntv.core.settings
 
 import kotlin.math.roundToInt
 
-/** The three browse sections that own a 3-panel layout (category rail · item list/grid · preview). */
-enum class PanelSection { LIVE, MOVIES, SERIES }
+/** The browse section that owns a 3-panel layout (category rail · item list · preview). */
+enum class PanelSection { LIVE }
 
 /**
  * Manual panel-width adjustment (per section, per panel).
@@ -36,14 +36,6 @@ object PanelWidthLimits {
     /** The third panel has one extra state: exactly 0 means that it is not composed at all. */
     fun snapPreview(pct: Int): Int = if (pct <= 0) 0 else snap(pct)
 }
-
-/**
- * The Cinematic detail block's height, as a percentage of the screen. Its own scale, because it is
- * a height and takes part in no 100% row budget: 0 really does mean "no detail block", and the
- * ceiling only stops the posters being squeezed off the screen entirely.
- */
-const val CINEMATIC_DETAILS_MAX = 60
-const val CINEMATIC_DETAILS_DEFAULT = 40
 
 /**
  * Live TV in the Stage layout: the categories are a sheet that slides OVER the list, so its width is

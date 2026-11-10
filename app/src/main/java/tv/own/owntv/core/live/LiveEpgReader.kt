@@ -16,24 +16,6 @@ import tv.own.owntv.core.parser.XtEpgEntry
 import tv.own.owntv.core.parser.XtreamClient
 import tv.own.owntv.core.stalker.StreamUrlResolver
 
-/** Archive window assumed when the playlist doesn't say how many days it keeps. One shared value:
- *  the catch-up picker used to assume 1 day while live rewind assumed 7, so the same channel
- *  offered a day of programmes in the list and a week of rewinding on the timeline. */
-const val DEFAULT_CATCHUP_DAYS = 7
-
-/** Upper bound on a playlist's `catchup-days`. Guards the arithmetic that turns it into seconds. */
-const val MAX_CATCHUP_DAYS = 31
-
-// How far back the Live TV catch-up picker may look. Must stay within EpgRepository's retention (7
-// days) and matches the Guide's own cap, so the same channel offers the same archive from either
-// screen — this used to be 48h, left over from when only ~2 days of guide were retained, which meant
-// a programme the Guide happily replayed was not even listed in Live TV.
-private const val CATCHUP_LOOKBACK_CAP_MS = 7L * 24 * 60 * 60 * 1000
-
-// How far past a finished catch-up programme to look for the next one. Beyond this the guide has a
-// gap rather than a next programme, and auto-play stops instead of leaping hours ahead.
-private const val NEXT_PROGRAMME_GAP_CAP_MS = 3L * 60 * 60 * 1000
-
 /**
  * How long a resolved now/next stays usable. Long enough that scrolling back to a channel costs
  * nothing, short enough that a programme changing over is noticed.
@@ -51,8 +33,8 @@ private const val SHORT_EPG_LIMIT = 8
 private const val UPCOMING_LIMIT = 18
 
 /**
- * Every guide read Live TV performs: now/next for the focused channel, the batched "what's on now" for a
- * list of channels, the catch-up programme list, and the "Match EPG" picker.
+ * Every guide read Live TV performs: now/next for the focused channel and the batched "what's on now"
+ * for a list of channels.
  *
  * Split out of the TV app's Live view model, which kept none of this state beyond the now/next cache this class now
  * owns. Nothing here touches playback, the engine ladder or the tune state machine — it reads the
@@ -361,69 +343,6 @@ class LiveEpgReader(
         fun EpgProgrammeEntity.shifted() = EpgShift.apply(this, shift).toXt()
         EpgNowNext(playing?.shifted(), then?.shifted())
     }
-
-    /** Recent (already-aired) programmes for a catch-up channel, newest first — drives the Live TV
-     *  catch-up picker. Bounded to the EPG we retain (7 days) and the channel's archive window. */
-    suspend fun catchupProgrammes(
-        ch: ChannelEntity,
-        cust: SectionCustomizations,
-        globalShiftMinutes: Int,
-        liveSourceIds: List<Long>,
-    ): List<EpgProgrammeEntity> = withContext(Dispatchers.IO) {
-        if (!ch.catchup) return@withContext emptyList()
-        val epgKey = (cust.epgMatchResolver.epgIdFor(ch) ?: ch.epgChannelId)
-            ?.trim()?.lowercase()?.takeIf { it.isNotEmpty() } ?: return@withContext emptyList()
-        val now = System.currentTimeMillis()
-        val days = ch.catchupDays.takeIf { it > 0 } ?: DEFAULT_CATCHUP_DAYS
-        val windowMs = (days * 24L * 60 * 60 * 1000).coerceAtMost(CATCHUP_LOOKBACK_CAP_MS)
-        val ids = liveSourceIds + epgSourceStore.getAll().map { it.id }
-        // Shifted guide → shifted window, and the rows come back on the corrected clock, so the
-        // archive URL built from the picked programme asks for the time it really aired.
-        val shift = EpgShift.minutesFor(cust, ch, globalShiftMinutes)
-        val at = EpgShift.toStored(now, shift)
-        epgSourceStore.priority().resolve(epgDao.programmesForChannel(epgKey, at - windowMs, at + 60 * 60 * 1000))
-            .filter { it.startMs <= at }           // already started → catch-up applies
-            .sortedByDescending { it.startMs }      // most recent first
-            .take(80)
-            .map { EpgShift.apply(it, shift) }
-    }
-
-    /**
-     * The guide entry that follows [afterStopMs] on [ch] — what a finished catch-up programme rolls
-     * into. Null when the guide stops there, or when the gap to the next entry is longer than
-     * [NEXT_PROGRAMME_GAP_CAP_MS]: a channel whose guide resumes tomorrow morning has nothing to
-     * continue with tonight, and jumping hours forward is not "the next programme".
-     *
-     * [afterStopMs] is on the clock the user sees; the result comes back on it too, so the archive URL
-     * built from it asks for the time the programme really aired.
-     */
-    suspend fun programmeAfter(
-        ch: ChannelEntity,
-        afterStopMs: Long,
-        cust: SectionCustomizations,
-        globalShiftMinutes: Int,
-        liveSourceIds: List<Long>,
-    ): EpgProgrammeEntity? = withContext(Dispatchers.IO) {
-        val epgKey = (cust.epgMatchResolver.epgIdFor(ch) ?: ch.epgChannelId)
-            ?.trim()?.lowercase()?.takeIf { it.isNotEmpty() } ?: return@withContext null
-        val shift = EpgShift.minutesFor(cust, ch, globalShiftMinutes)
-        val from = EpgShift.toStored(afterStopMs, shift)
-        val ids = liveSourceIds + epgSourceStore.getAll().map { it.id }
-        epgSourceStore.priority().resolve(epgDao.programmesForChannel(epgKey, from, from + NEXT_PROGRAMME_GAP_CAP_MS))
-            // The query keeps anything still running at [from]; the next programme is the one that
-            // starts at or after it.
-            .firstOrNull { it.startMs >= from }
-            ?.let { EpgShift.apply(it, shift) }
-    }
-
-    /** Full description for a programme picked in the catch-up dialog. The list query drops it to stay
-     *  under the CursorWindow limit, so the detail popup fetches it on demand (same as the Guide). */
-    suspend fun programmeDescription(programmeId: Long): String? =
-        withContext(Dispatchers.IO) { runCatching { epgDao.programmeDescription(programmeId) }.getOrNull() }
-
-    // The "Match EPG" picker used to be answered from here, filtered to the profile's own sources.
-    // It is now [tv.own.owntv.core.epg.GuideCandidates], which filters by no source at all — the same
-    // rule every guide read already followed, and the half of it that was missing.
 
     /** The programme airing at [at] in start-ordered rows: the latest to have started, if two overlap. */
     private fun List<EpgProgrammeEntity>.onAirAt(at: Long): EpgProgrammeEntity? =

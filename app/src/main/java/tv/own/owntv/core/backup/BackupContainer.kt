@@ -48,16 +48,7 @@ object BackupContainer {
     const val WALLPAPER_DIR = "wallpaper/"
 
     /**
-     * Downloaded/imported subtitle files (v17). Like the wallpaper, these are real files the JSON can
-     * only *point* at: `subtitle_cache.cachedPath` is an absolute path into this device's private
-     * storage, so restoring the row alone gave the next device a remembered subtitle selection whose
-     * file did not exist. Entry names are `<cacheId>_<fileName>`, matched back to their row by the
-     * `file` field the manager writes alongside each exported cache row.
-     */
-    const val SUBTITLE_DIR = "subtitles/"
-
-    /**
-     * Profile pictures (v37) — the same problem as the wallpaper and the subtitle files: the JSON can
+     * Profile pictures (v37) — the same problem as the wallpaper: the JSON can
      * only point at `profiles.avatarPath`, which is an absolute path into *this* device's private
      * storage and means nothing on another one. Without the bytes, restoring a profile on a new
      * television would silently drop the picture the user chose.
@@ -82,8 +73,6 @@ object BackupContainer {
     data class Payload(
         val json: String,
         val wallpaper: Asset?,
-        /** Subtitle files, keyed by their container entry name (see [SUBTITLE_DIR]). */
-        val subtitles: Map<String, ByteArray> = emptyMap(),
         /** Profile pictures, keyed by their container entry name (see [AVATAR_DIR]). */
         val avatars: Map<String, ByteArray> = emptyMap(),
     )
@@ -133,11 +122,6 @@ object BackupContainer {
                 payload.wallpaper?.let { asset ->
                     zos.putNextEntry(ZipEntry(WALLPAPER_DIR + asset.name))
                     zos.write(asset.bytes)
-                    zos.closeEntry()
-                }
-                payload.subtitles.forEach { (name, bytes) ->
-                    zos.putNextEntry(ZipEntry(SUBTITLE_DIR + name))
-                    zos.write(bytes)
                     zos.closeEntry()
                 }
                 payload.avatars.forEach { (name, bytes) ->
@@ -194,7 +178,6 @@ object BackupContainer {
     private fun unzip(input: java.io.InputStream): Payload {
         var json: String? = null
         var wallpaper: Asset? = null
-        val subtitles = LinkedHashMap<String, ByteArray>()
         val avatars = LinkedHashMap<String, ByteArray>()
         ZipInputStream(input).use { zis ->
             while (true) {
@@ -206,8 +189,6 @@ object BackupContainer {
                     // path, but reject traversal outright so a hand-made container can't get creative.
                     name.startsWith(WALLPAPER_DIR) && !entry.isDirectory && !name.contains("..") ->
                         wallpaper = Asset(File(name).name, zis.readBytes())
-                    name.startsWith(SUBTITLE_DIR) && !entry.isDirectory && !name.contains("..") ->
-                        subtitles[File(name).name] = zis.readBytes()
                     name.startsWith(AVATAR_DIR) && !entry.isDirectory && !name.contains("..") ->
                         avatars[File(name).name] = zis.readBytes()
                 }
@@ -217,7 +198,6 @@ object BackupContainer {
         return Payload(
             json = json ?: error("Not an OwnTV backup file"),
             wallpaper = wallpaper,
-            subtitles = subtitles,
             avatars = avatars,
         )
     }

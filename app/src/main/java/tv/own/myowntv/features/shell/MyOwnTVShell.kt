@@ -3,7 +3,6 @@ import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
 import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
 import tv.own.owntv.core.categorylock.*
 import tv.own.owntv.core.companion.*
 import tv.own.owntv.core.content.*
@@ -12,7 +11,6 @@ import tv.own.owntv.core.database.*
 import tv.own.owntv.core.database.dao.*
 import tv.own.owntv.core.database.entity.*
 import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
 import tv.own.owntv.core.drm.*
 import tv.own.owntv.core.epg.*
 import tv.own.owntv.core.home.*
@@ -20,14 +18,12 @@ import tv.own.owntv.core.i18n.*
 import tv.own.owntv.core.launcher.*
 import tv.own.owntv.core.live.*
 import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -36,13 +32,10 @@ import tv.own.owntv.core.sports.*
 import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -103,8 +96,6 @@ import tv.own.myowntv.R
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.launcher.LauncherDeepLink
 import tv.own.owntv.core.nav.MainSection
-import tv.own.owntv.core.launcher.LauncherIntegrationRepository
-import tv.own.owntv.core.launcher.LauncherLaunch
 import tv.own.owntv.core.update.UpdateManager
 import tv.own.myowntv.features.update.UpdateDialog
 import tv.own.myowntv.features.update.UpdateStatusToast
@@ -267,24 +258,9 @@ fun MyOwnTVShell(
     var playlistPillBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
     var miniHasFocus by remember { mutableStateOf(false) }
     val shellToast = tv.own.myowntv.ui.components.rememberInAppToast()
-    // Metadata allowance: tell the user ONCE per app start that their daily share of the shared
-    // metadata service is gone, rather than letting posters and plots quietly stop appearing. Lives in
-    // the shell because it can happen on any screen, and the shell is the one toast that is always
-    // composed. `remember` (not rememberSaveable) is the once-per-launch scope we want.
-    val metadataBudget = koinInject<tv.own.owntv.core.metadata.MetadataBudget>()
-    val budgetRefusedAt by metadataBudget.refusedAt.collectAsStateWithLifecycle()
-    var budgetNoticeShown by remember { mutableStateOf(false) }
-    val budgetNotice = androidx.compose.ui.res.stringResource(tv.own.myowntv.R.string.settings_metadata_limit_reached)
-    LaunchedEffect(budgetRefusedAt) {
-        if (budgetRefusedAt > 0L && !budgetNoticeShown) {
-            budgetNoticeShown = true
-            shellToast.show(budgetNotice)
-        }
-    }
     // Audio focus + MediaSession. This is the only place that knows which engine currently owns
     // the speaker, so it hands that engine over and takes it back when the player closes.
     val playbackSession = koinInject<tv.own.owntv.player.PlaybackSession>()
-    val launcherIntegrationRepository = koinInject<LauncherIntegrationRepository>()
     val homeVm = org.koin.androidx.compose.koinViewModel<HomeViewModel>()
     val searchVm = org.koin.androidx.compose.koinViewModel<SearchViewModel>()
     // Same activity-scoped instances the Live/Guide screens use — lets the fullscreen HUD zap channels
@@ -364,12 +340,10 @@ fun MyOwnTVShell(
     // whenever the channel browser's heading switched between a built-in rail and a named category.
     val favoritesTitle = stringResource(R.string.content_category_favorites)
     val historyTitle = stringResource(R.string.content_category_history)
-    val catchupTitle = stringResource(R.string.content_catchup)
     val allChannelsTitle = stringResource(R.string.content_category_all_channels)
     fun builtInListTitle(key: LiveKey?): String = when (key) {
         LiveKey.Favorites -> favoritesTitle
         LiveKey.History -> historyTitle
-        LiveKey.Catchup -> catchupTitle
         else -> allChannelsTitle
     }
     val zapOverlayTitle = zapListTitle ?: builtInListTitle(zapListKey)
@@ -481,28 +455,27 @@ fun MyOwnTVShell(
             }
             tv.own.owntv.core.settings.StartupMode.SPECIFIC_CHANNEL -> {
                 val ref = resumeSettings.startupChannel(pid).first()
-                var launch: LauncherLaunch? = null
+                var channel: ChannelEntity? = null
                 if (ref != null) {
                     if (!ref.remoteId.isNullOrBlank()) {
-                        launch = launcherIntegrationRepository.resolveLaunch(
+                        channel = liveVm.resolveLauncherChannel(
                             pid,
                             LauncherDeepLink.Live(sourceId = ref.sourceId, remoteId = ref.remoteId),
                         )
                     }
-                    if (launch == null) {
-                        launch = launcherIntegrationRepository.resolveLaunch(
+                    if (channel == null) {
+                        channel = liveVm.resolveLauncherChannel(
                             pid,
                             LauncherDeepLink.Live(sourceId = ref.sourceId, name = ref.name),
                         )
                     }
-                    if (launch == null && ref.itemId > 0L) {
-                        launch = launcherIntegrationRepository.resolveLaunch(
+                    if (channel == null && ref.itemId > 0L) {
+                        channel = liveVm.resolveLauncherChannel(
                             pid,
                             LauncherDeepLink.Live(sourceId = ref.sourceId, itemId = ref.itemId),
                         )
                     }
                 }
-                val channel = (launch as? LauncherLaunch.Live)?.channel
                 if (channel != null && liveVm.isVisibleToActiveProfile(channel) && playerMode == PlayerMode.NONE) {
                     zapSource = MainSection.LIVE_TV
                     if (liveVm.watchFullscreen(channel, emptyList())) playerMode = PlayerMode.FULLSCREEN
@@ -814,18 +787,17 @@ fun MyOwnTVShell(
                 onSelectSection(MainSection.LIVE_TV)
                 onDeepLinkConsumed()
             }
-            else -> when (val launch = launcherIntegrationRepository.resolveLaunch(pid, deepLink)) {
-                is LauncherLaunch.Live -> {
+            else -> {
+                // Live links resolve through the live view model; old movie/episode/show links
+                // predate the live-only app and are consumed silently.
+                val channel = (deepLink as? LauncherDeepLink.Live)?.let { liveVm.resolveLauncherChannel(pid, it) }
+                if (channel != null && liveVm.isVisibleToActiveProfile(channel)) {
                     onSelectSection(MainSection.LIVE_TV)
                     // A launcher tile has no browse rail, so arm the channel's provider context before
                     // opening the player. A bare ensurePlaying() leaves CH+/CH- with no list to step through.
-                    if (liveVm.watchFullscreen(launch.channel, emptyList())) openFullscreen()
-                    onDeepLinkConsumed()
+                    if (liveVm.watchFullscreen(channel, emptyList())) openFullscreen()
                 }
-                else -> {
-                    // Movie/episode/show deep links predate the live-only app; consume them silently.
-                    onDeepLinkConsumed()
-                }
+                onDeepLinkConsumed()
             }
         }
     }
@@ -1778,18 +1750,6 @@ private const val EPG_MATCH_TOAST_MS = 6_000L
 @Composable
 private fun railDetail(section: MainSection, d: RailDetails): String? = when (section) {
     MainSection.LIVE_TV -> d.lastChannel?.let { stringResource(R.string.shell_rail_detail_last, it) }
-    MainSection.MOVIES -> d.resumeMovie?.let { stringResource(R.string.shell_rail_detail_resume, it) }
-    MainSection.SERIES -> d.episode?.let { e ->
-        val title = stringResource(R.string.shell_rail_detail_episode, e.series, stringResource(R.string.content_season_episode, e.season, e.episode))
-        stringResource(if (e.resume) R.string.shell_rail_detail_resume else R.string.shell_rail_detail_next, title)
-    }
-    MainSection.DOWNLOADS -> if (d.downloading == 0) null else {
-        val progress = d.downloadProgress?.let {
-            java.text.NumberFormat.getPercentInstance(androidx.compose.ui.platform.LocalConfiguration.current.locales[0]).format(it)
-        }
-        if (progress == null) null
-        else androidx.compose.ui.res.pluralStringResource(R.plurals.shell_rail_detail_downloads, d.downloading, d.downloading, progress)
-    }
     MainSection.MORE -> stringResource(R.string.shell_rail_detail_more)
     else -> null
 }

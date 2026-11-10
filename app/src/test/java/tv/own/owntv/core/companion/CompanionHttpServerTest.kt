@@ -43,7 +43,7 @@ class CompanionHttpServerTest {
     @Test
     fun `xtream form parses all fields`() {
         val body = "type=xtream&name=My+IPTV&server=http://h:80&user=u&pass=p&userAgent=UA&epgUrl=http://e" +
-            "&syncLive=now&syncMovies=later&syncSeries=off&isDefault=on&autoRefresh=HOURS_6"
+            "&syncLive=now&isDefault=on&autoRefresh=HOURS_6"
         val p = protocol.parsePayload(form, body, SourceType.XTREAM)!!
         assertEquals(SourceType.XTREAM, p.type)
         assertEquals("My IPTV", p.name)
@@ -54,8 +54,6 @@ class CompanionHttpServerTest {
         assertEquals("http://e", p.epgUrl)
         assertEquals("HOURS_6", p.autoRefresh)
         assertEquals(SyncScopeChoice.Now, p.syncLive)
-        assertEquals(SyncScopeChoice.Later, p.syncMovies)
-        assertEquals(SyncScopeChoice.Off, p.syncSeries)
         assertTrue(p.isDefault)
     }
 
@@ -72,25 +70,21 @@ class CompanionHttpServerTest {
     }
 
     @Test
-    fun `legacy boolean sync fields map to Now or Off`() {
+    fun `legacy boolean sync field maps to Now or Off`() {
         val off = protocol.parsePayload(
             form,
-            "type=xtream&server=h&user=u&pass=p&syncLive=false&syncMovies=false&syncSeries=false&isDefault=false",
+            "type=xtream&server=h&user=u&pass=p&syncLive=false&isDefault=false",
             SourceType.XTREAM,
         )!!
         assertEquals(SyncScopeChoice.Off, off.syncLive)
-        assertEquals(SyncScopeChoice.Off, off.syncMovies)
-        assertEquals(SyncScopeChoice.Off, off.syncSeries)
         assertFalse(off.isDefault)
 
         val on = protocol.parsePayload(
             form,
-            "type=xtream&server=h&user=u&pass=p&syncLive=true&syncMovies=on&syncSeries=1",
+            "type=xtream&server=h&user=u&pass=p&syncLive=true",
             SourceType.XTREAM,
         )!!
         assertEquals(SyncScopeChoice.Now, on.syncLive)
-        assertEquals(SyncScopeChoice.Now, on.syncMovies)
-        assertEquals(SyncScopeChoice.Now, on.syncSeries)
     }
 
     // ---- M3U ----

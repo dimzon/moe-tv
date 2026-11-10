@@ -9,12 +9,12 @@ const val MIN_MULTIVIEW_TILES = 1
 const val MAX_MULTIVIEW_TILES = 4
 const val DEFAULT_MULTIVIEW_TILES = 2
 
-/** What a stream is wanted for. A recording outranks a picture when the last connection is contested. */
-enum class StreamPurpose { WATCHING, RECORDING }
+/** What a stream is wanted for. Recordings are gone; the single value keeps the call shapes stable. */
+enum class StreamPurpose { WATCHING }
 
 /** How many of one playlist's connections are already spoken for. */
-data class OpenStreams(val watching: Int = 0, val recording: Int = 0) {
-    val total: Int get() = watching + recording
+data class OpenStreams(val watching: Int = 0) {
+    val total: Int get() = watching
 }
 
 /** Why one more stream from this playlist cannot start. Each maps to one sentence for the user. */
@@ -22,7 +22,7 @@ enum class StreamRefusal {
     /** The playlist allows exactly one stream, and something already has it. */
     SINGLE_CONNECTION,
 
-    /** Every connection this playlist allows is in use, by tiles, recordings or both. */
+    /** Every connection this playlist allows is in use. */
     ALL_IN_USE,
 
     /** There is a connection free, but it is being kept so the user can still watch something. */
@@ -43,19 +43,17 @@ sealed interface StreamGrant {
 /**
  * May one more stream start on this playlist?
  *
- * The rules below work together, and they are less contradictory than they look. **The
- * feature is never capped**: the tile-count setting always offers up to four and nothing reduces it
- * behind the user's back. **An individual stream is checked before it tunes**, and if there is
- * nothing spare that one tile — or that one recording — is told why, in a sentence, instead of
- * failing into a spinner. The provider's own HTTP 458 remains the backstop for a number that was
- * wrong or stale.
+ * The feature is never capped: the tile-count setting always offers up to four and nothing reduces
+ * it behind the user's back. An individual stream is checked before it tunes, and if there is
+ * nothing spare that one tile is told why, in a sentence, instead of failing into a spinner. The
+ * provider's own HTTP 458 remains the backstop for a number that was wrong or stale.
  *
  * Everything here is arithmetic over [SourceEntity.maxConnections]: no Android, no I/O, no clock.
  *
  * @param source the playlist the stream would come from; null or an unknown limit allows everything.
- * @param open the streams that playlist already has running — tiles *and* recordings.
- * @param reserveOneForWatching keeps one connection back so recordings can never take the last one.
- *   The user can give this up in Settings and record on every connection.
+ * @param open the streams that playlist already has running.
+ * @param reserveOneForWatching kept for API compatibility; recordings are gone, so it no longer
+ *   changes anything.
  */
 fun connectionBudget(
     source: SourceEntity?,
@@ -78,48 +76,22 @@ fun connectionBudget(
             max == 1 -> refuse(StreamRefusal.SINGLE_CONNECTION)
             else -> refuse(StreamRefusal.ALL_IN_USE)
         }
-        // A live programme is gone forever and a picture is not, so a recording is allowed to take the
-        // only connection a one-stream account has. What it may not do is take the *last* one on
-        // an account that has several, unless the user has said it may.
-        StreamPurpose.RECORDING -> {
-            val cap = when {
-                max == 1 -> 1
-                reserveOneForWatching -> max - 1
-                else -> max
-            }
-            when {
-                open.recording < cap -> StreamGrant.Allowed
-                max == 1 -> refuse(StreamRefusal.SINGLE_CONNECTION)
-                reserveOneForWatching && open.recording < max -> refuse(StreamRefusal.RESERVED_FOR_WATCHING)
-                else -> refuse(StreamRefusal.ALL_IN_USE)
-            }
-        }
     }
 }
 
 /**
  * The sentence a refused tile shows in place of a picture. Says what the playlist allows and what is
- * currently using it, because "one of them is recording" is the difference between a fault and a
- * choice the user made.
+ * currently using it.
  */
 fun StreamGrant.Refused.displayText(res: Resources): String = when (reason) {
-    StreamRefusal.SINGLE_CONNECTION -> if (open.recording > 0) {
-        res.getString(R.string.multiview_refused_single_recording)
-    } else {
-        res.getString(R.string.multiview_refused_single)
-    }
+    StreamRefusal.SINGLE_CONNECTION -> res.getString(R.string.multiview_refused_single)
     // Plurals keyed on the limit. This reason only arises when the playlist allows two or more, so
     // the singular forms are never seen in practice — but a sentence that agrees with its number is
     // the difference between a translation and a template, and Android lint is right to insist.
-    StreamRefusal.ALL_IN_USE -> if (open.recording > 0) {
-        res.getQuantityString(
-            R.plurals.multiview_refused_all_in_use_recording,
-            maxConnections,
-            maxConnections,
-            open.recording,
-        )
-    } else {
-        res.getQuantityString(R.plurals.multiview_refused_all_in_use, maxConnections, maxConnections)
-    }
+    StreamRefusal.ALL_IN_USE -> res.getQuantityString(
+        R.plurals.multiview_refused_all_in_use,
+        maxConnections,
+        maxConnections,
+    )
     StreamRefusal.RESERVED_FOR_WATCHING -> res.getString(R.string.multiview_refused_reserved)
 }
