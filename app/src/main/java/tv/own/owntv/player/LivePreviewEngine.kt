@@ -598,6 +598,10 @@ class LivePreviewEngine(
     @Volatile private var tunedManifestType: String? = null
     /** The panel's own URL for this channel, kept for the last-resort rung only (v43). */
     @Volatile private var tunedDirectSource: String? = null
+    /** Sidecar subtitles the current feed advertises (`play/options` `captions[]`, RuTube); kept like
+     *  the other [tuned*] fields so every reopen — retry, reconnect, alt-format, background restore —
+     *  goes through the same construction. Empty = the feed advertises none. */
+    @Volatile private var tunedCaptions: List<tv.own.owntv.core.sync.RutubeCaption> = emptyList()
 
     /** Technical readout for the stream-info overlay, from the active ExoPlayer formats. */
     override suspend fun streamInfo(): List<StreamInfoRow> {
@@ -1090,7 +1094,7 @@ class LivePreviewEngine(
      * retry is a channel error, a failed reconnect is a lost connection).
      */
     private fun reprepare(p: ExoPlayer, url: String) {
-        p.setMediaSource(mediaSourceFor(url))
+        p.setMediaSource(mediaSourceFor(url, tunedCaptions))
         p.prepare()
         p.playWhenReady = true
         // Delivered on the playback thread after it has applied the source above (it handles commands in
@@ -1640,6 +1644,10 @@ class LivePreviewEngine(
         /** The panel's own URL for this channel (Xtream `direct_source`); a LAST-RESORT retry only,
          *  never the URL tuned first — see [tv.own.owntv.core.database.entity.ChannelEntity.directSource]. */
         directSource: String? = null,
+        /** Sidecar SRT/VTT text the feed advertises beside the stream (`play/options` `captions[]`
+         *  for RuTube); merged under the video as single-sample text tracks. Empty = none
+         *  advertised, which is every broadcast the scans found so far. */
+        captions: List<tv.own.owntv.core.sync.RutubeCaption> = emptyList(),
     ) {
         LiveDiagnosticsLog.event("play() engine=$engineId url=${HttpClient.redactUrl(url)} muted=$muted")
         // THE reset. Everything a new channel must not inherit from the previous one lives in
@@ -1660,6 +1668,7 @@ class LivePreviewEngine(
         tunedDrmConfig = drmConfig
         tunedManifestType = manifestType
         tunedDirectSource = directSource
+        tunedCaptions = captions
         currentDrm = tv.own.owntv.core.drm.DrmConfig.decode(drmConfig)
         currentManifestType = tv.own.owntv.core.player.ManifestType.decode(manifestType)
         currentHeaders = StreamHeaders.decode(httpHeaders)
@@ -1933,19 +1942,20 @@ class LivePreviewEngine(
         val drmConfig: String?,
         val manifestType: String?,
         val directSource: String?,
+        val captions: List<tv.own.owntv.core.sync.RutubeCaption> = emptyList(),
     )
     @Volatile private var backgroundRestore: TunedRequest? = null
 
     /** The current channel as it was tuned, at [url] (a Stalker retry swaps in a freshly minted one). */
     private fun tunedRequest(url: String) = TunedRequest(
         url, muted, _currentMeta.value, tunedUserAgent, tunedPrerollSecs, tunedLiveBufferOverride,
-        tunedHttpHeaders, tunedDrmConfig, tunedManifestType, tunedDirectSource,
+        tunedHttpHeaders, tunedDrmConfig, tunedManifestType, tunedDirectSource, tunedCaptions,
     )
 
     private fun play(r: TunedRequest) = play(
         r.url, muted = r.muted, meta = r.meta, userAgent = r.userAgent, prerollSecsOverride = r.prerollSecs,
         liveBufferOverride = r.liveBufferOverride, httpHeaders = r.httpHeaders, drmConfig = r.drmConfig,
-        manifestType = r.manifestType, directSource = r.directSource,
+        manifestType = r.manifestType, directSource = r.directSource, captions = r.captions,
     )
 
     /** Backgrounded (screensaver / Home): remember what's playing, then free the stream. Paired with
@@ -3369,7 +3379,10 @@ class LivePreviewEngine(
     }
 
     /** HLS → caption-aware factory; everything else (raw MPEG-TS, etc.) → default. */
-    private fun mediaSourceFor(url: String): MediaSource {
+    private fun mediaSourceFor(
+        url: String,
+        captions: List<tv.own.owntv.core.sync.RutubeCaption>,
+    ): MediaSource {
         httpDataSourceFor(currentUa) // ensure factories match current UA
         // Live latency: a target live-edge offset for live streams (HLS/DASH). Ignored by
         // progressive/raw-TS sources, so it can only help where it applies. Unset (Balanced) keeps
@@ -3432,7 +3445,7 @@ class LivePreviewEngine(
                 "targetOffsetSec=${targetOffsetSecs ?: -1} " +
                 "url=${HttpClient.redactUrl(url)}",
         )
-        return when (route) {
+        val primary = when (route) {
             StreamRoute.HLS -> cachedHlsCcFactory!!.createMediaSource(item)
             // DASH has no bespoke factory: DefaultMediaSourceFactory builds a DashMediaSource itself
             // once the item names the MPD mime type, and takes the DRM configuration set above with it.
@@ -3441,6 +3454,33 @@ class LivePreviewEngine(
             )
             StreamRoute.PROGRESSIVE -> cachedDefaultFactory!!.createMediaSource(item)
         }
+        if (captions.isEmpty()) return primary
+        // Sidecars are independent of the video route: merged under whichever source won, the ordinary
+        // text renderers turn their samples into cues for the engine listener (and the SubtitleView).
+        val subs = captions.mapNotNull { captionSource(it) }
+        if (subs.isEmpty()) return primary
+        LiveDiagnosticsLog.event("media_source captions=${subs.size}")
+        return androidx.media3.exoplayer.source.MergingMediaSource(
+            *arrayOf<MediaSource>(primary, *subs.toTypedArray()),
+        )
+    }
+
+    /**
+     * One advertised sidecar as single-sample text: the URL downloaded as a standalone subtitle track
+     * carrying its language and label. MIME literals mirror the server spellings (`srt`/`vtt` —
+     * mostly-lowercase, case tolerated) that the reference client maps the same way.
+     */
+    private fun captionSource(caption: tv.own.owntv.core.sync.RutubeCaption): MediaSource {
+        val configuration = androidx.media3.common.MediaItem.SubtitleConfiguration.Builder(
+            android.net.Uri.parse(caption.file),
+        )
+            .setMimeType(if (caption.format.equals("vtt", ignoreCase = true)) "text/vtt" else "application/x-subrip")
+            .setLabel(caption.langTitle ?: caption.format)
+            .setId(caption.subId.toString())
+            .apply { if (!caption.langTitle.isNullOrBlank()) setLanguage(caption.langTitle) }
+            .build()
+        return androidx.media3.exoplayer.source.SingleSampleMediaSource.Factory(cachedHttpDataSource!!)
+            .createMediaSource(configuration, C.TIME_UNSET)
     }
 
     private fun build(): ExoPlayer {

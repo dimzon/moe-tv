@@ -14,6 +14,7 @@ import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.database.entity.playStreamUrl
 import tv.own.owntv.core.epg.displayLogoUrl
 import tv.own.owntv.core.player.contentKey
+import tv.own.owntv.core.sync.RutubeCaption
 import tv.own.owntv.core.settings.LiveBuffer
 import tv.own.owntv.core.settings.LiveLatency
 import tv.own.owntv.core.settings.SettingsRepository
@@ -31,6 +32,9 @@ data class LiveRequest(
     val drmConfig: String?,
     val manifestType: String?,
     val directSource: String?,
+    /** Sidecar subtitles the feed advertises beside this stream (RuTube `captions[]`); empty for
+     *  sources/feeds that carry none. */
+    val captions: List<RutubeCaption> = emptyList(),
 )
 
 /** Start [url] on the live ExoPlayer engine with everything [request] carries — a tune, or a Multiview tile. */
@@ -45,6 +49,7 @@ internal fun LivePreviewEngine.play(url: String, muted: Boolean, request: LiveRe
     drmConfig = request.drmConfig,
     manifestType = request.manifestType,
     directSource = request.directSource,
+    captions = request.captions,
 )
 
 /**
@@ -76,6 +81,10 @@ class LiveTuneController(
         /** A Stalker playlist stores a portal command, minted into a URL per play. */
         fun needsResolve(source: SourceEntity?): Boolean
         suspend fun resolve(source: SourceEntity, cmd: String): String?
+        /** Sidecar subtitles the feed advertises beside a resolved stream (RuTube `captions[]`); empty
+         *  for every other source — and for a source that is not loaded (yet) — so the caller can pass
+         *  it straight through unchecked. */
+        suspend fun captions(source: SourceEntity?, cmd: String): List<RutubeCaption> = emptyList()
         /** Settings → "Give up on a channel after", in seconds; 0 is Never. */
         suspend fun globalBudgetSecs(): Int
         fun meta(channel: ChannelEntity): MediaMeta
@@ -212,7 +221,7 @@ class LiveTuneController(
                 if (blockedBySingleSession(channel)) return@launch
                 exoStalkerCmd = channel.streamUrl
                 setReconnect(channel, source)
-                engine.play(url, muted, request(channel, source))
+                engine.play(url, muted, request(channel, source, host.captions(source, channel.streamUrl)))
                 return@launch
             }
             val url = exoUrlFor(channel, source)
@@ -223,7 +232,7 @@ class LiveTuneController(
             }
             exoStalkerCmd = null
             setReconnect(null, null)
-            engine.play(url, muted, request(channel, source))
+            engine.play(url, muted, request(channel, source, host.captions(source, channel.streamUrl)))
         }
     }
 
@@ -239,7 +248,7 @@ class LiveTuneController(
         } else {
             exoUrlFor(channel, source)
         }
-        engine.play(url, muted, request(channel, source))
+        engine.play(url, muted, request(channel, source, host.captions(source, channel.streamUrl)))
     }
 
     /**
@@ -302,7 +311,7 @@ class LiveTuneController(
             engine.releaseDecoderForUhd()
             exoStalkerCmd = null
             setReconnect(null, null)
-            engine.play(url, muted = false, request(channel, source))
+            engine.play(url, muted = false, request(channel, source, host.captions(source, channel.streamUrl)))
         }
         watchExo(channel, source)
     }
@@ -316,9 +325,12 @@ class LiveTuneController(
         }
         exoResolveJob?.cancel()
         engine.releaseDecoderForUhd()
+        // Best-effort, alongside minting: captions are read for the same channel, and a fetch that
+        // fails must not keep the stream it rides with from starting.
+        val captions = host.captions(source, channel.streamUrl)
         if (resolved != null) {
             // Already minted by this tune: start now, so the caller's next line finds the stream there.
-            playExoStalker(channel, source, resolved)
+            playExoStalker(channel, source, resolved, captions)
             return
         }
         // Detached: minting is a network call, and a ladder step that got here from a watcher must not
@@ -326,14 +338,14 @@ class LiveTuneController(
         exoResolveJob = scope.launch {
             val url = host.resolve(source, channel.streamUrl) ?: return@launch
             if (!isCurrent(channel)) return@launch // zapped away while minting
-            playExoStalker(channel, source, url)
+            playExoStalker(channel, source, url, captions)
         }
     }
 
-    private fun playExoStalker(channel: ChannelEntity, source: SourceEntity, url: String) {
+    private fun playExoStalker(channel: ChannelEntity, source: SourceEntity, url: String, captions: List<RutubeCaption>) {
         exoStalkerCmd = channel.streamUrl
         setReconnect(channel, source)
-        engine.play(url, muted = false, request(channel, source))
+        engine.play(url, muted = false, request(channel, source, captions))
         watchExo(channel, source)
     }
 
@@ -504,7 +516,11 @@ class LiveTuneController(
             }
     }
 
-    private fun request(channel: ChannelEntity, source: SourceEntity?) = LiveRequest(
+    private fun request(
+        channel: ChannelEntity,
+        source: SourceEntity?,
+        captions: List<RutubeCaption> = emptyList(),
+    ) = LiveRequest(
         meta = host.meta(channel),
         userAgent = source?.userAgent,
         prerollSecs = source?.livePrerollSecs?.takeIf { it >= 0 },
@@ -515,6 +531,7 @@ class LiveTuneController(
         drmConfig = channel.drmConfig,
         manifestType = channel.manifestType,
         directSource = channel.directSource,
+        captions = captions,
     )
 
     /** Routing decisions go to logcat unconditionally (`adb logcat -s LiveEngine`) and to the
@@ -550,6 +567,11 @@ class LiveTuneController(
             runCatching { resolver.resolve(source, cmd) }
                 .onFailure { android.util.Log.w(ENGINE_TAG, "stalker resolve failed", it) }
                 .getOrNull()
+
+        override suspend fun captions(source: SourceEntity?, cmd: String): List<RutubeCaption> =
+            runCatching { resolver.resolveCaptions(source, cmd) }
+                .onFailure { android.util.Log.w(ENGINE_TAG, "captions resolve failed", it) }
+                .getOrDefault(emptyList())
 
         // Waits for the settings snapshot, so a tune started at a cold start — Last-channel autoplay —
         // is budgeted by the stored settings, never by defaults.

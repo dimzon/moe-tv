@@ -30,10 +30,14 @@ files advertised by the play-options API**:
 `tools/scan_rutube_captions.py` (same endpoints/UA as the app; bypasses any proxy at two
 levels; writes `scan_results.json`). Result at scan time:
 
-- channel list `/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=false` → **246** channels;
-- play-options for **every** one: **`captions: []`** — 246 without, 0 with, 0 errors.
+- channel list `/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=false` → **246** channels
+  (2026-11-10);
+- play-options for **every** one: **`captions: []`** — 246 without, 0 with, 0 errors; no failures,
+  no rate-limit hits.
 - Live responses DO carry the field (`stream_type: "broadcast"`, `live_streams` present) — the
   server simply advertises no sidecar files for the current broadcasts.
+- Rescan 2026-11-11 (night window): **241** channels (the list drifts between scans), again
+  **`captions: []`** everywhere, 0 errors.
 
 Caveats: anonymous (no account); `captions` are per-broadcast — a special event may carry them
 later; the scan is a snapshot. **Rescan any time with the script.** A human report of a
@@ -43,8 +47,14 @@ per-broadcast captions, not with channel-level ones.
 ## OWNTV state / parity
 
 OWNTV's live engine already renders subtitles natively (HLS text renditions + CEA via
-ExoPlayer's text renderer + `ExoPreviewSurface`'s SubtitleView + style/delay settings).
-What OWNTV does NOT have yet is the RuTube `captions[]` sidecar acquisition (step 1–3 above).
-That chain is the follow-up that keeps the "ability to show subtitles" real for RuTube
-broadcasts when the server starts returning them. Preserve everything in the PRESERVE list
-of `WAVE2_CONTRACT.md` while deleting dead VOD core.
+ExoPlayer's text renderer + `ExoPreviewSurface`'s SubtitleView + style settings), and on
+branch `remove-mpv` the RuTube `captions[]` sidecar chain (steps 1–3 above) is now wired in:
+`RutubeParser.parsePlayOptions` carries the `captions[]` list on `RutubePlayback.Ready` →
+`StreamUrlResolver` exposes it (RuTube-only → every other source yields an empty list) →
+`LiveTuneController` threads it into `LiveRequest` → `LivePreviewEngine.mediaSourceFor`
+merges each sidecar as `SingleSampleMediaSource` under the video `MediaSource`
+(`MergingMediaSource`), so the existing text-track menu/selector and `SubtitleView` pick it up
+like any other text track. Best-effort by design: a failed/absent lookup is "no subtitles" and
+never costs the stream; a RuTube tune costs one extra anonymous `play/options` GET for the
+sidecars. Because both scans found the field always empty, it stays inert until the server
+starts advertising — no visible change on today's broadcasts.

@@ -61,12 +61,35 @@ class StreamUrlResolver(
      */
     private suspend fun resolveRutube(storedUrl: String): String {
         val api = rutube ?: throw java.io.IOException("RuTube playback resolver is not configured")
-        val videoId = storedUrl.removePrefix("rutube://").substringAfter('/').takeIf { it.isNotBlank() }
+        val videoId = rutubeVideoId(storedUrl)
             ?: throw java.io.IOException("RuTube channel has no video id: $storedUrl")
         return when (val result = api.playUrl(videoId)) {
             is tv.own.owntv.core.sync.RutubePlayback.Ready -> result.url
             is tv.own.owntv.core.sync.RutubePlayback.Unavailable ->
                 throw java.io.IOException("RuTube: ${result.reason.name}${result.detail?.let { " ($it)" } ?: ""}")
+        }
+    }
+
+    /** The `{videoId}` half of a stored `rutube://{sourceId}/{videoId}` marker. */
+    private fun rutubeVideoId(storedUrl: String): String? =
+        storedUrl.removePrefix("rutube://").substringAfter('/').takeIf { it.isNotBlank() }
+
+    /**
+     * Sidecar subtitles advertised beside a RuTube stream (`play/options` `captions[]` → SRT/VTT URLs,
+     * the same sidecars the reference client merges under the video). Empty for non-RuTube sources, an
+     * unconfigured client and feeds that advertise nothing — and best-effort throughout: subtitles
+     * must never cost the stream, so a missing/failed lookup is simply "no subtitles".
+     */
+    suspend fun resolveCaptions(
+        source: SourceEntity?,
+        storedUrl: String,
+    ): List<tv.own.owntv.core.sync.RutubeCaption> {
+        if (source?.type != SourceType.RUTUBE) return emptyList()
+        val api = rutube ?: return emptyList()
+        val id = rutubeVideoId(storedUrl) ?: return emptyList()
+        return when (val result = api.playUrl(id)) {
+            is tv.own.owntv.core.sync.RutubePlayback.Ready -> result.captions
+            is tv.own.owntv.core.sync.RutubePlayback.Unavailable -> emptyList()
         }
     }
 
