@@ -11,7 +11,6 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.Renderer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.audio.AudioCapabilities
-import androidx.media3.exoplayer.audio.AudioRendererEventListener
 import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.audio.ForwardingAudioSink
@@ -20,16 +19,15 @@ import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.video.MediaCodecVideoRenderer
 import androidx.media3.exoplayer.video.VideoRendererEventListener
 import tv.own.owntv.core.player.SurroundMode
-import tv.own.owntv.player.ffmpeg.FfmpegAudioRenderer
 
 /**
- * Session-wide state for the audio-output safety net, shared by **every** engine (mpv, the Live
- * preview/fullscreen ExoPlayer, the VOD ExoPlayer).
+ * Session-wide state for the audio-output safety net, shared by **every** engine (the Live
+ * preview/fullscreen ExoPlayer, the Multiview pool, the home hero preview).
  *
  * Why global and not per-engine: the fault being guarded against lives in the device's audio HAL or
  * in the HDMI/ARC sink, not in a stream. Once one engine has proved that this TV cannot actually
  * play what it claims to support, every other engine must inherit that lesson immediately —
- * otherwise the user zaps to the next channel, lands on the other engine, and loses sound again.
+ * otherwise the user zaps to the next channel, lands on another engine, and loses sound again.
  *
  * In-memory only, deliberately. A latch is a statement about "this output, right now" (an HDMI
  * handshake, a soundbar that woke up in the wrong mode); persisting it would silently downgrade a
@@ -93,9 +91,8 @@ object AudioOutputPolicy {
  * Dolby/DTS that the device can decode ([DecodedOnlyAudioSink]), so it is decoded here — multichannel
  * PCM still, when the output takes it.
  *
- * Audio decoders: the device's MediaCodec ones first, then — with the FFmpeg audio setting on — FFmpeg
- * ([FfmpegAudio]) for what the chip cannot decode. Never FFmpeg first — it would software-decode AAC and
- * take passthrough away.
+ * Audio decoders: the device's MediaCodec ones — what the chip cannot decode and the receiver will not
+ * take as a bitstream has no software fallback in this app.
  */
 @UnstableApi
 class OwnTVRenderersFactory(
@@ -166,23 +163,6 @@ class OwnTVRenderersFactory(
         return if (audioDelay != null) DelayedClockAudioSink(sink, audioDelay) else sink
     }
 
-    override fun buildAudioRenderers(
-        context: Context,
-        extensionRendererMode: Int,
-        mediaCodecSelector: MediaCodecSelector,
-        enableDecoderFallback: Boolean,
-        audioSink: AudioSink,
-        eventHandler: Handler,
-        eventListener: AudioRendererEventListener,
-        out: ArrayList<Renderer>,
-    ) {
-        super.buildAudioRenderers(
-            context, extensionRendererMode, mediaCodecSelector, enableDecoderFallback,
-            audioSink, eventHandler, eventListener, out,
-        )
-        if (FfmpegAudio.available) out.add(FfmpegAudioRenderer(eventHandler, eventListener, audioSink))
-    }
-
     private fun buildBaseAudioSink(
         context: Context,
         enableFloatOutput: Boolean,
@@ -213,9 +193,9 @@ class OwnTVRenderersFactory(
 }
 
 /**
- * A sink that will not take encoded audio the app can decode (a device decoder or FFmpeg), so the
- * renderer decodes it instead of bitstreaming it. A format nothing here decodes is still passed through:
- * sound from the receiver beats silence (and on the live engine, "no decoder" is what hands a channel to mpv).
+ * A sink that will not take encoded audio the device can decode, so the renderer decodes it instead of
+ * bitstreaming it. A format no decoder here handles is still passed through: sound from the receiver
+ * beats silence.
  */
 @UnstableApi
 class DecodedOnlyAudioSink(sink: AudioSink) : ForwardingAudioSink(sink) {
@@ -227,13 +207,13 @@ class DecodedOnlyAudioSink(sink: AudioSink) : ForwardingAudioSink(sink) {
 
     private fun mustDecode(format: Format): Boolean {
         val mime = format.sampleMimeType ?: return false
-        return mustDecode(mime, deviceDecoder = FfmpegAudio::deviceDecodes, ffmpeg = FfmpegAudio::supports)
+        return mustDecode(mime, ExoAudioGate::deviceDecodes)
     }
 
     companion object {
-        /** Encoded [mime] must be decoded in the app: something here can decode it. PCM never. */
-        fun mustDecode(mime: String, deviceDecoder: (String) -> Boolean, ffmpeg: (String) -> Boolean): Boolean =
-            mime != MimeTypes.AUDIO_RAW && (deviceDecoder(mime) || ffmpeg(mime))
+        /** Encoded [mime] must be decoded in the app: a device decoder can decode it. PCM never. */
+        fun mustDecode(mime: String, deviceDecoder: (String) -> Boolean): Boolean =
+            mime != MimeTypes.AUDIO_RAW && deviceDecoder(mime)
     }
 }
 

@@ -29,7 +29,6 @@ ksp = "2.3.11"
 room = "2.8.5"
 sqlite = "2.6.2"
 documentFile = "1.1.0"
-libmpv = "2026.11.0"
 paging = "3.5.1"
 
 # --- Media playback ---
@@ -130,8 +129,6 @@ androidx-sqlite-framework = { group = "androidx.sqlite", name = "sqlite-framewor
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentFile" }
 # Whether the app is in front ("Keep auto-sync listening" runs the listener only then).
 androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycle" }
-# libmpv engine (mpv/FFmpeg).
-libmpv = { group = "tv.own.owntv", name = "libmpv", version.ref = "libmpv" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }

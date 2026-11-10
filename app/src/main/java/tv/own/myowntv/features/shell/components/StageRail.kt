@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds

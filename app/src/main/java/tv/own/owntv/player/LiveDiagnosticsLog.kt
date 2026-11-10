@@ -40,7 +40,7 @@ object LiveDiagnosticsLog {
     @Volatile private var maxFileBytes = MAX_FILE_BYTES
     private val ring = ArrayDeque<String>()
     private val lock = Any()
-    // Immutable and thread-safe: events arrive from the main, player and mpv event threads at once, and
+    // Immutable and thread-safe: events arrive from the main, playback and loader threads at once, and
     // the SimpleDateFormat this replaced could print a garbled timestamp when two of them overlapped.
     private val timeFmt = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS", Locale.US)
     // File I/O used to run on whichever thread logged the line — often the main thread. One thread, so

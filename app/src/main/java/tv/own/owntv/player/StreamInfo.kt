@@ -8,23 +8,19 @@ import java.util.Locale
 import tv.own.myowntv.R
 
 /** Stable labels and typed values for the technical stream overlay. */
-enum class StreamInfoLabel { ENGINE, FORMAT, SOURCE, VIDEO, HDR, INTERLACING, BITRATE, DECODER, AUDIO, AUDIO_OUTPUT, BUFFER, LIVE_BUFFER }
+enum class StreamInfoLabel { ENGINE, FORMAT, SOURCE, VIDEO, HDR, BITRATE, DECODER, AUDIO, AUDIO_OUTPUT, BUFFER, LIVE_BUFFER }
 
-enum class StreamEngine { MPV, EXOPLAYER }
-
-enum class StreamEngineMode { NORMAL, PREFERRED, FALLBACK, IMAGE_SUBTITLE_HANDOFF }
+/** The engine a stream row was produced by — the live player, the only one the app has. */
+enum class StreamEngine { EXOPLAYER }
 
 enum class StreamHdrMode { HDR10_PQ, HLG, SDR }
-
-/** Whether the picture is interlaced and who removes the combing (mpv only; ExoPlayer cannot tell). */
-enum class InterlaceState { PROGRESSIVE, DEINTERLACED_BY_PLAYER, DEINTERLACED_BY_DEVICE, NOT_DEINTERLACED }
 
 enum class DecoderKind { HARDWARE, SOFTWARE, NAMED }
 
 enum class AudioOutputKind { PASSTHROUGH, DECODED_IN_APP, PCM }
 
 sealed interface StreamInfoValue {
-    data class Engine(val engine: StreamEngine, val mode: StreamEngineMode = StreamEngineMode.NORMAL) : StreamInfoValue
+    data class Engine(val engine: StreamEngine) : StreamInfoValue
     data class Format(val name: String) : StreamInfoValue
     data class Source(val url: String) : StreamInfoValue
     data class Video(
@@ -35,7 +31,6 @@ sealed interface StreamInfoValue {
         val bitDepth: Int? = null,
     ) : StreamInfoValue
     data class Hdr(val mode: StreamHdrMode) : StreamInfoValue
-    data class Interlacing(val state: InterlaceState) : StreamInfoValue
     data class Bitrate(val bitsPerSecond: Long) : StreamInfoValue
     data class Decoder(
         val kind: DecoderKind,
@@ -87,7 +82,6 @@ val StreamInfoLabel.titleRes: Int
         StreamInfoLabel.SOURCE -> R.string.player_stream_source
         StreamInfoLabel.VIDEO -> R.string.player_stream_video
         StreamInfoLabel.HDR -> R.string.player_stream_hdr
-        StreamInfoLabel.INTERLACING -> R.string.player_stream_interlacing
         StreamInfoLabel.BITRATE -> R.string.player_stream_bitrate
         StreamInfoLabel.DECODER -> R.string.player_stream_decoder
         StreamInfoLabel.AUDIO -> R.string.player_stream_audio
@@ -118,16 +112,7 @@ fun StreamInfoValue.displayText(res: Resources): String {
         else -> res.getQuantityString(R.plurals.player_audio_channels, count, count)
     }
     return when (this) {
-        is StreamInfoValue.Engine -> when (engine) {
-            StreamEngine.MPV -> res.getString(R.string.settings_player_mpv)
-            StreamEngine.EXOPLAYER -> when (mode) {
-                StreamEngineMode.PREFERRED -> res.getString(R.string.player_stream_engine_exo_preferred)
-                StreamEngineMode.FALLBACK -> res.getString(R.string.player_stream_engine_exo_fallback)
-                StreamEngineMode.IMAGE_SUBTITLE_HANDOFF ->
-                    res.getString(R.string.player_stream_engine_exo_image_subtitle)
-                StreamEngineMode.NORMAL -> res.getString(R.string.settings_player_exoplayer)
-            }
-        }
+        is StreamInfoValue.Engine -> res.getString(R.string.settings_player_exoplayer)
         is StreamInfoValue.Format -> name
         is StreamInfoValue.Source -> url
         is StreamInfoValue.Video -> listOfNotNull(
@@ -141,14 +126,6 @@ fun StreamInfoValue.displayText(res: Resources): String {
             StreamHdrMode.HLG -> res.getString(R.string.player_stream_hlg)
             StreamHdrMode.SDR -> res.getString(R.string.player_stream_sdr)
         }
-        is StreamInfoValue.Interlacing -> res.getString(
-            when (state) {
-                InterlaceState.PROGRESSIVE -> R.string.player_stream_progressive
-                InterlaceState.DEINTERLACED_BY_PLAYER -> R.string.player_stream_deinterlaced_by_player
-                InterlaceState.DEINTERLACED_BY_DEVICE -> R.string.player_stream_deinterlaced_by_device
-                InterlaceState.NOT_DEINTERLACED -> R.string.player_stream_not_deinterlaced
-            },
-        )
         is StreamInfoValue.Bitrate ->
             res.getString(R.string.player_stream_mbps, number(bitsPerSecond / 1_000_000.0))
         is StreamInfoValue.Decoder -> buildList {

@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -62,7 +61,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -87,10 +85,8 @@ import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.R
-import tv.own.owntv.core.home.TrendingHomeItem
 import tv.own.myowntv.features.home.HomeViewModel
 import tv.own.myowntv.ui.components.MyOwnTVIcon
-import tv.own.myowntv.ui.stage.StageProgress
 import tv.own.myowntv.ui.stage.drawInnerRing
 import tv.own.myowntv.ui.stage.drawOuterRing
 import tv.own.myowntv.ui.stage.stageBackground
@@ -102,16 +98,18 @@ import tv.own.myowntv.ui.theme.stageAccent
 import tv.own.myowntv.ui.theme.stageText
 
 /**
- * Settings › Appearance's LIVE PREVIEW: a small Home drawn from the first Trending title, at a
- * third of the screen's size. Not a second Home — no data of its own, nothing focusable — but it draws
- * with the live accent, focus colour, glass and font, so a change shows here before the row is left.
+ * Settings › Appearance's LIVE PREVIEW: a small Home drawn from the channel the profile is watching,
+ * at a third of the screen's size. Not a second Home — no data of its own, nothing focusable — but it
+ * draws with the live accent, focus colour, glass and font, so a change shows here before the row is
+ * left.
  */
 @Composable
 internal fun SettingsLivePreview() {
     val home: HomeViewModel = koinViewModel()
     val state by home.uiState.collectAsStateWithLifecycle()
-    val items = state.trendingItems
-    val lead = items.firstOrNull()
+    // Keep watching, live: the channels the profile last played. The lead one owns the hero.
+    val cards = state.heroCards
+    val lead = cards.firstOrNull()?.channel
     val a = stageAccent
     val ink = tv.own.myowntv.ui.theme.LocalStagePalette.current.ink
     SettingPanelHeading(stringResource(R.string.settings_quick_live_preview))
@@ -136,33 +134,33 @@ internal fun SettingsLivePreview() {
                 tv.own.myowntv.ui.components.BackgroundPicture(background, tv.own.myowntv.ui.theme.LocalBlurredBackdrop.current, Modifier.fillMaxSize())
             }
             Box(Modifier.fillMaxSize().stageBackground(a.accent))
-            if (lead != null) {
+            if (lead?.logoUrl != null) {
                 AsyncImage(
-                    model = backdropOf(lead),
+                    model = lead.logoUrl,
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.align(Alignment.TopEnd).size(1240.mpx, 760.mpx).dissolveEdges(start = 0.45f, bottom = 0.35f),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.align(Alignment.TopEnd).size(640.mpx, 400.mpx).padding(top = 80.mpx, end = 120.mpx).dissolveEdges(start = 0.45f, bottom = 0.35f),
                 )
             }
-            // The rail at rest: a glass capsule of icons.
+            // The rail at rest: a glass capsule of icons — the browse sections a live-only app has.
             Column(
                 Modifier.padding(start = 26.mpx, top = 230.mpx).width(60.mpx).stageGlass(30.mpx).padding(vertical = 18.mpx),
                 verticalArrangement = Arrangement.spacedBy(22.mpx),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                listOf(MyOwnTVIcon.SEARCH, MyOwnTVIcon.HOME, MyOwnTVIcon.LIVE_TV, MyOwnTVIcon.EPG, MyOwnTVIcon.MOVIES, MyOwnTVIcon.SERIES, MyOwnTVIcon.DOWNLOADS).forEachIndexed { i, icon ->
-                    MyOwnTVIcon(icon, if (i == 1) a.accent else StageColors.Muted, Modifier.size(26.mpx))
+                listOf(MyOwnTVIcon.SEARCH, MyOwnTVIcon.HOME, MyOwnTVIcon.LIVE_TV, MyOwnTVIcon.EPG).forEachIndexed { i, icon ->
+                    MyOwnTVIcon(icon, if (i == 2) a.accent else StageColors.Muted, Modifier.size(26.mpx))
                 }
             }
             Column(Modifier.padding(start = 150.mpx, top = 300.mpx).width(820.mpx)) {
-                Text(stringResource(R.string.home_row_now_trending).uppercase(), style = stageText(15, 800, 0.12.em), color = a.accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(stringResource(R.string.settings_live_tv).uppercase(), style = stageText(15, 800, 0.12.em), color = a.accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
-                    titleOf(lead) ?: stringResource(R.string.home_row_now_trending),
+                    lead?.name ?: stringResource(R.string.home_row_keep_watching),
                     style = stageText(92, 800, (-2.5f / 92f).em), color = StageColors.Text,
                     maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 10.mpx),
                 )
                 Row(Modifier.padding(top = 40.mpx), horizontalArrangement = Arrangement.spacedBy(16.mpx)) {
-                    // The hero's Play, drawn focused: the accent fill and the focus ring.
+                    // The hero's Watch live, drawn focused: the accent fill and the focus ring.
                     Row(
                         Modifier
                             .height(64.mpx)
@@ -173,28 +171,44 @@ internal fun SettingsLivePreview() {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         MyOwnTVIcon(MyOwnTVIcon.PLAY, a.onAccent, Modifier.size(22.mpx), filled = true)
-                        Text(stringResource(R.string.home_trending_play), style = stageText(22, 700), color = a.onAccent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(stringResource(R.string.content_play), style = stageText(22, 700), color = a.onAccent, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     Row(
                         Modifier.height(64.mpx).stageGlass(22.mpx).padding(horizontal = 30.mpx),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(stringResource(R.string.home_trending_trailer), style = stageText(22, 700), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(stringResource(R.string.common_nav_guide), style = stageText(22, 700), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
             Column(Modifier.padding(start = 150.mpx, top = 760.mpx)) {
                 Text(stringResource(R.string.home_row_keep_watching), style = stageText(27, 800), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Row(Modifier.padding(top = 18.mpx), horizontalArrangement = Arrangement.spacedBy(24.mpx)) {
-                    items.drop(1).take(5).forEachIndexed { i, item ->
+                    cards.drop(1).take(5).forEach { card ->
                         Column(Modifier.width(380.mpx)) {
-                            AsyncImage(
-                                model = backdropOf(item),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxWidth().height(214.mpx).clip(RoundedCornerShape(16.mpx)).background(ink.copy(alpha = 0.06f)),
+                            Box(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(214.mpx)
+                                    .clip(RoundedCornerShape(16.mpx))
+                                    .background(Color.Black.copy(alpha = 0.55f)),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                if (card.channel.logoUrl != null) {
+                                    AsyncImage(
+                                        model = card.channel.logoUrl,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier.padding(16.mpx).fillMaxSize(),
+                                    )
+                                } else {
+                                    MyOwnTVIcon(MyOwnTVIcon.LIVE_TV, StageColors.Muted, Modifier.size(56.mpx))
+                                }
+                            }
+                            Text(
+                                card.channel.name, style = stageText(19, 600), color = StageColors.Body,
+                                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 10.mpx),
                             )
-                            StageProgress(listOf(0.55f, 0.3f, 0.8f, 0.45f, 0.2f)[i], Modifier.padding(top = 10.mpx).fillMaxWidth())
                         }
                     }
                 }
@@ -207,13 +221,3 @@ internal fun SettingsLivePreview() {
     )
     Box(Modifier.padding(top = 22.mpx, bottom = 18.mpx).fillMaxWidth().height(1.mpx).background(ink.copy(alpha = 0.1f)))
 }
-
-private fun titleOf(item: TrendingHomeItem?): String? =
-    item?.snapshot?.let { it.localizedTitle.ifBlank { it.canonicalTitle } }
-
-internal fun backdropOf(item: TrendingHomeItem): String? =
-    tv.own.owntv.core.metadata.MetadataImages.backdrop(item.snapshot.backdropPath, size = "w780")
-        ?: when (item) {
-            is TrendingHomeItem.Movie -> item.movie.backdropUrl ?: item.movie.posterUrl
-            is TrendingHomeItem.Series -> item.series.backdropUrl ?: item.series.posterUrl
-        }

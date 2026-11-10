@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -119,8 +118,8 @@ internal fun rememberListPinFocus(
         // An opened category that stays empty still gets the list's own fallback (its search field).
         if (itemCount == 0) delay(LIST_WAIT_MS)
         if (itemCount > 0) {
-            // Not the screen's own way in: it keeps a focus already inside the list (Movies and Series
-            // count their search field), and it scrolls to the remembered item, so the first item could
+            // Not the screen's own way in: it keeps a focus already inside the list (a list counts its
+            // search field), and it scrolls to the remembered item, so the first item could
             // take focus while scrolled off screen. The list scrolls to it first instead.
             toFirst()
             focusFirstItem(pinFocus)

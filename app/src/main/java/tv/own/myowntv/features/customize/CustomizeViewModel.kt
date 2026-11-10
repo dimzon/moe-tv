@@ -52,7 +52,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -113,9 +112,10 @@ enum class CustomizeVisibilityFilter {
 }
 
 /**
- * Drives Settings → Customize: per-profile hide / rename / reorder of categories (Live/Movies/Series)
- * and the unhide list for hidden Live channels. All edits live in [CustomizationStore] (DataStore),
- * so they survive re-syncs and never touch the DB schema.
+ * Drives Settings → Customize: per-profile hide / rename / reorder of the Live TV categories and the
+ * unhide list for hidden channels. Movies and Series customization is gone with VOD; everything here
+ * works on the channel section only. All edits live in [CustomizationStore] (DataStore), so they
+ * survive re-syncs and never touch the DB schema.
  */
 class CustomizeViewModel(
     private val settings: SettingsRepository,
@@ -166,8 +166,8 @@ class CustomizeViewModel(
         }
     }
 
-    private val _section = MutableStateFlow(MediaType.LIVE)
-    val section: StateFlow<MediaType> = _section.asStateFlow()
+    /** The one section this screen customizes: Live TV channels. */
+    private val _section = MediaType.LIVE
 
     private val _visibilityFilter = MutableStateFlow(CustomizeVisibilityFilter.ALL)
     val visibilityFilter: StateFlow<CustomizeVisibilityFilter> = _visibilityFilter.asStateFlow()
@@ -177,22 +177,16 @@ class CustomizeViewModel(
         span.cancel()
     }
 
-    fun selectSection(type: MediaType) {
-        _section.value = type
-        // A pending range belongs to the section it was started in — switching sections cancels it.
-        span.cancel()
-    }
-
-    /** Categories of the selected section, in their customized order, including hidden ones. */
-    val rows: StateFlow<List<CustomizeCatRow>> = combine(_section, ctx, _visibilityFilter) { s, c, filter ->
-        Triple(s, c, filter)
-    }.flatMapLatest { (type, c, filter) ->
+    /** The channel categories, in their customized order, including hidden ones. */
+    val rows: StateFlow<List<CustomizeCatRow>> = combine(ctx, _visibilityFilter) { c, filter ->
+        c to filter
+    }.flatMapLatest { (c, filter) ->
             if (c.profileId < 0) flowOf(emptyList())
             else {
-                val sourceIds = c.sourceIdsFor(type)
+                val sourceIds = c.sourceIdsFor(_section)
                 combine(
-                    categoryDao.observe(sourceIds, type),
-                    customize.observe(c.profileId, type),
+                    categoryDao.observe(sourceIds, _section),
+                    customize.observe(c.profileId, _section),
                     sourceDao.observeForProfile(c.profileId),
                     profileDao.observeById(c.profileId),
                 ) { cats, cust, sources, profile ->
@@ -248,16 +242,16 @@ class CustomizeViewModel(
     val rangeMode: StateFlow<SpanSelector.Mode> = span.mode
     val rangeEndKey: StateFlow<String?> = span.endKey
 
-    /** Hidden items of the selected section (key → label) so they can be unhidden from here. */
-    val hiddenChannels: StateFlow<Map<String, String>> = combine(ctx, _section) { c, s -> c to s }
-        .flatMapLatest { (c, s) ->
+    /** Hidden channels (key → label) so they can be unhidden from here. */
+    val hiddenChannels: StateFlow<Map<String, String>> = ctx
+        .flatMapLatest { c ->
             if (c.profileId < 0) flowOf(emptyMap())
-            else customize.observe(c.profileId, s).map { it.hiddenItems }
+            else customize.observe(c.profileId, _section).map { it.hiddenItems }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     /** Whether a category this provider adds on a future resync should be hidden automatically, for
-     *  this profile — same across Live/Movies/Series, so it doesn't follow [_section]. */
+     *  this profile. */
     val hideNewCategories: StateFlow<Boolean> = ctx
         .flatMapLatest { c -> if (c.profileId < 0) flowOf(false) else settings.hideNewCategoriesDefault(c.profileId) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
@@ -268,30 +262,18 @@ class CustomizeViewModel(
         viewModelScope.launch { settings.setHideNewCategoriesDefault(pid, hidden) }
     }
 
-    // --- Sort (reuses SettingsRepository.SortMode — the same per-section value Browse uses) ---
+    // --- Sort (reuses SettingsRepository.SortMode — the same value the Live TV browse uses) ---
 
-    /** Current sort mode for the selected section, for the Sort pill in the header strip. */
-    val currentSort: StateFlow<SettingsRepository.SortMode> = combine(ctx, _section) { c, s -> c to s }
-        .flatMapLatest { (c, s) ->
+    /** Current sort mode for the channels list, for the Sort pill in the header strip. */
+    val currentSort: StateFlow<SettingsRepository.SortMode> = ctx
+        .flatMapLatest { c ->
             if (c.profileId < 0) flowOf(SettingsRepository.SortMode.PLAYLIST)
-            else when (s) {
-                MediaType.LIVE -> settings.sortLive
-                MediaType.MOVIE -> settings.sortMovies
-                MediaType.SERIES -> settings.sortSeries
-                MediaType.EPISODE -> flowOf(SettingsRepository.SortMode.PLAYLIST)
-            }
+            else settings.sortLive
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsRepository.SortMode.PLAYLIST)
 
     fun setSort(mode: SettingsRepository.SortMode) {
-        viewModelScope.launch {
-            when (_section.value) {
-                MediaType.LIVE -> settings.setSortLive(mode)
-                MediaType.MOVIE -> settings.setSortMovies(mode)
-                MediaType.SERIES -> settings.setSortSeries(mode)
-                MediaType.EPISODE -> { } // not applicable
-            }
-        }
+        viewModelScope.launch { settings.setSortLive(mode) }
     }
 
     // --- Items screen navigation ---
@@ -311,8 +293,8 @@ class CustomizeViewModel(
         if (c.profileId < 0) return null
         return ItemsCtx(
             categoryId = _selectedCategory.value?.categoryId,
-            mediaType = _section.value,
-            sourceIds = c.sourceIdsFor(_section.value),
+            mediaType = _section,
+            sourceIds = c.sourceIdsFor(_section),
         )
     }
 
@@ -323,7 +305,7 @@ class CustomizeViewModel(
         val pid = ctx.value.profileId
         if (pid < 0) return
         viewModelScope.launch {
-            customize.createCustomCategory(pid, _section.value, name)
+            customize.createCustomCategory(pid, _section, name)
         }
     }
 
@@ -336,7 +318,7 @@ class CustomizeViewModel(
         val pid = ctx.value.profileId
         if (pid < 0 || !CustomizeKeys.isCustom(row.key)) return
         viewModelScope.launch {
-            val type = _section.value
+            val type = _section
             // Capture stable member keys first so deleting a destination restores any provider
             // origins those items left when they were moved here.
             val formerMemberKeys = customCategoryDao.stableItemKeys(pid, row.key).toSet()
@@ -368,7 +350,7 @@ class CustomizeViewModel(
         val pid = ctx.value.profileId
         if (pid < 0) return
         viewModelScope.launch {
-            val type = _section.value
+            val type = _section
             val ids = ctx.value.sourceIdsFor(type).toSet()
             fun mine(key: String) = key.substringBefore(':').toLongOrNull() in ids
             contentOrderDao.observeContextKeys(pid, type).first()
@@ -389,14 +371,14 @@ class CustomizeViewModel(
 
     fun setCategoryHidden(row: CustomizeCatRow, hidden: Boolean) {
         viewModelScope.launch {
-            customize.setCategoryHidden(ctx.value.profileId, _section.value, row.key, hidden)
+            customize.setCategoryHidden(ctx.value.profileId, _section, row.key, hidden)
         }
     }
 
     /** Blank name restores the provider's original. */
     fun renameCategory(row: CustomizeCatRow, name: String?) {
         viewModelScope.launch {
-            customize.renameCategory(ctx.value.profileId, _section.value, row.key, name)
+            customize.renameCategory(ctx.value.profileId, _section, row.key, name)
         }
     }
 
@@ -415,7 +397,7 @@ class CustomizeViewModel(
                 val index = current.indexOfFirst { it.key == row.key }
                 if (index < 0) return@withLock
                 val reordered = moveBlock(current, index, index, kind) ?: return@withLock
-                customize.saveCategoryMove(ctx.value.profileId, _section.value, reordered.map { it.key }, setOf(row.key))
+                customize.saveCategoryMove(ctx.value.profileId, _section, reordered.map { it.key }, setOf(row.key))
             }
         }
     }
@@ -424,7 +406,7 @@ class CustomizeViewModel(
 
     fun unhideChannel(key: String) {
         viewModelScope.launch {
-            customize.setItemHidden(ctx.value.profileId, _section.value, key, "", false)
+            customize.setItemHidden(ctx.value.profileId, _section, key, "", false)
         }
     }
 
@@ -438,7 +420,7 @@ class CustomizeViewModel(
     fun applyRange(endRow: CustomizeCatRow, hidden: Boolean) {
         val keys = span.keysInRange(endRow) ?: return
         viewModelScope.launch {
-            customize.setCategoriesHidden(ctx.value.profileId, _section.value, keys, hidden)
+            customize.setCategoriesHidden(ctx.value.profileId, _section, keys, hidden)
         }
         span.cancel()
     }
@@ -456,7 +438,7 @@ class CustomizeViewModel(
                 val lo = minOf(anchorIndex, endIndex)
                 val hi = maxOf(anchorIndex, endIndex)
                 val reordered = moveBlock(current, lo, hi, kind) ?: return@withLock
-                customize.saveCategoryMove(ctx.value.profileId, _section.value, reordered.map { it.key }, current.subList(lo, hi + 1).map { it.key })
+                customize.saveCategoryMove(ctx.value.profileId, _section, reordered.map { it.key }, current.subList(lo, hi + 1).map { it.key })
             }
         }
     }
@@ -473,16 +455,16 @@ class CustomizeViewModel(
         scope = viewModelScope,
         persist = { renames ->
             val pid = ctx.value.profileId
-            if (pid >= 0) customize.applyBulkRenames(pid, _section.value, renames)
+            if (pid >= 0) customize.applyBulkRenames(pid, _section, renames)
         },
         restore = { keys ->
             val pid = ctx.value.profileId
-            if (pid >= 0) customize.clearCategoryNames(pid, _section.value, keys)
+            if (pid >= 0) customize.clearCategoryNames(pid, _section, keys)
         },
         existingNames = { selectedKeys ->
             val pid = ctx.value.profileId
             if (pid < 0) emptySet()
-            else customize.observe(pid, _section.value).first().categoryNames
+            else customize.observe(pid, _section).first().categoryNames
                 .filterKeys { it !in selectedKeys }
                 .values.toSet() + rows.value.filter { it.key !in selectedKeys }.map { it.originalName }
         },

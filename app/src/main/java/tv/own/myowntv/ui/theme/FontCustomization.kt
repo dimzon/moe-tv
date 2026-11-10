@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.font.Font
@@ -121,7 +120,7 @@ fun AppFontFamily.asComposeFamily(): FontFamily = when (this) {
     AppFontFamily.PLUS_JAKARTA_SANS -> PlusJakartaSansFamily
 }
 
-/** Android/mpv equivalents used by subtitle renderers outside Compose typography. */
+/** Android equivalents used by subtitle renderers outside Compose typography. */
 fun AppFontFamily.asAndroidTypeface(context: android.content.Context): android.graphics.Typeface = when (this) {
     AppFontFamily.SYSTEM_SANS -> android.graphics.Typeface.SANS_SERIF
     AppFontFamily.MONOSPACE -> android.graphics.Typeface.MONOSPACE

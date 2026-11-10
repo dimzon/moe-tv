@@ -26,8 +26,9 @@ internal object TrackMemory {
     }
 
     /**
-     * What to do with subtitles. [allowImage] is false where a bitmap subtitle would cost an engine
-     * handoff (mpv VOD) or cannot be drawn at all (mpv live) — a remembered choice never triggers that.
+     * What to do with subtitles. [allowImage] is false where a bitmap subtitle cannot be drawn on the
+     * current output — the live engine draws it on its own subtitle layer and passes true — so a
+     * remembered choice never selects an undrawable track.
      */
     fun subtitleAction(tracks: List<TrackOption>, choice: String?, allowImage: Boolean): SubtitleAction {
         if (choice.isNullOrBlank()) return SubtitleAction.None

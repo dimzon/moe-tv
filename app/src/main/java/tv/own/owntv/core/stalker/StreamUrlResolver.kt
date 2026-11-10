@@ -10,10 +10,10 @@ import tv.own.owntv.core.model.SourceType
  * one-shot token re-handshake on expiry. Keep the stored `cmd` as the item's identity everywhere;
  * only the value handed to the player engine comes from here.
  *
- * **Live URL expiry:** a Stalker resolved URL dies after ~2-4h, so the playback
- * engines' auto-reconnect must NOT replay the dead URL for Stalker. Instead they call back into a
+ * **Live URL expiry:** a Stalker resolved URL dies after ~2-4h, so playback's
+ * auto-reconnect must NOT replay the dead URL for Stalker. Instead the engine calls back into a
  * [ReconnectUrlProvider] (installed by `LiveViewModel` only for a Stalker source) to mint a fresh
- * URL before retrying. M3U/Xtream have no provider → the engines replay their stored URL as before.
+ * URL before retrying. M3U/Xtream have no provider → the stored URL is replayed as before.
  */
 class StreamUrlResolver(
     private val stalkerAuth: StalkerAuthManager,
@@ -33,7 +33,7 @@ class StreamUrlResolver(
      * else it returns [storedUrl] untouched. Throws on a portal/auth failure so the caller can show
      * an error instead of handing a dead URL to the engine.
      *
-     * Every call is a FRESH resolve (never cached) — this is what the engines' reconnect paths call
+     * Every call is a FRESH resolve (never cached) — this is what the reconnect paths call
      * ("resolve fresh"). For direct-play portals the fresh URL equals the stored one
      * (their embedded token is static); for placeholder-cmd portals it's a brand-new `create_link`.
      */
@@ -59,8 +59,8 @@ class StreamUrlResolver(
 
     /**
      * A RuTube channel's stored `rutube://{sourceId}/{videoId}` marker → the live HLS URL the
-     * official client would play. Fresh every call: play/options URLs expire, and the engines'
-     * reconnect paths call back here to mint a new one.
+     * official client would play. Fresh every call: play/options URLs expire, and the
+     * reconnect path calls back here to mint a new one.
      */
     private suspend fun resolveRutube(storedUrl: String): String {
         val api = rutube ?: throw java.io.IOException("RuTube playback resolver is not configured")
@@ -228,9 +228,9 @@ class StreamUrlResolver(
  * "replay the stored URL as-is" (also the default when no provider is set — i.e. M3U/Xtream, whose
  * URLs are stable forever).
  *
- * Engines call this on their MAIN scope (ExoPlayer is single-threaded; mpv dispatches to main) and
- * treat the returned value as the URL to (re)load. A throw means resolution failed — the engine
- * surfaces its normal reconnect-exhausted / error state.
+ * The engine calls this on its MAIN scope (ExoPlayer is single-threaded) and treats the returned
+ * value as the URL to (re)load. A throw means resolution failed — the engine surfaces its normal
+ * reconnect-exhausted / error state.
  */
 fun interface ReconnectUrlProvider {
     /** Return a fresh playable URL, or null to replay the current (non-expiring) URL as-is. */

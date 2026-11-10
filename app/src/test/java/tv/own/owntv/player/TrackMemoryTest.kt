@@ -8,11 +8,11 @@ import tv.own.owntv.core.player.PlaybackPrefsStore
 class TrackMemoryTest {
 
     private fun t(id: Int, lang: String?, selected: Boolean = false, image: Boolean = false) =
-        TrackOption(label = "", mpvId = id, selected = selected, image = image, lang = lang)
+        TrackOption(label = "", id = id, selected = selected, image = image, lang = lang)
 
     @Test fun audioSwitchesToTheRememberedLanguage() {
         val tracks = listOf(t(1, "eng", selected = true), t(2, "deu"))
-        assertEquals(2, TrackMemory.audioToSelect(tracks, "de")?.mpvId) // ISO-639-1 vs -2
+        assertEquals(2, TrackMemory.audioToSelect(tracks, "de")?.id) // ISO-639-1 vs -2
     }
 
     @Test fun bibliographicCodesMatchTheirModernForm() {

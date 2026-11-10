@@ -10,23 +10,25 @@ import android.content.Context
  * (observed: PSS 389–620 MB at death on a TCL G10, all reason=LOW_MEMORY).
  */
 data class PlayerBudget(
-    /** mpv demuxer-max-bytes (forward read-ahead cache). */
+    /** The tier's forward read-ahead cache, in bytes ("48MiB" style). */
     val demuxerMaxBytes: String,
-    /** mpv demuxer-max-back-bytes (kept-behind cache for small back-seeks). */
+    /** The tier's cache kept behind the playback position, for small back-seeks. */
     val demuxerBackBytes: String,
-    /** mpv demuxer-readahead-secs. */
+    /** The tier's read-ahead target, in seconds. */
     val readaheadSecs: String,
-    /** mpv cache-secs. */
+    /** Seconds of stream the tier's cache holds. */
     val cacheSecs: String,
     /** True on TV-class / low-RAM devices: also use cheaper rgba8 framebuffers (a 4K rgba16f
      *  intermediate is ~64 MB each; rgba8 halves that, invisible on 8-bit panels). */
     val lowSpec: Boolean,
     /**
-     * The most a film's forward buffer may hold when the user picked a Film buffer (Settings → Player
-     * → Streaming), in either engine; ExoPlayer is held lower still, to a quarter of the Java heap, because it
-     * buffers there rather than in native memory (`SmartBuffer.exoHeapCapBytes`). Auto never reaches it:
-     * Auto keeps exactly [demuxerMaxBytes] on mpv and ExoPlayer's tier target. 0 (the default) means "no raise", so the tier's own bytes stay the ceiling
-     * for any caller that doesn't set it. See `SmartBuffer` in player-core.
+     * The most a forward buffer may hold for a chosen depth, in bytes; the player is held lower
+     * still, to a quarter of the Java heap, because it buffers there rather than in native memory
+     * (`SmartBuffer.exoHeapCapBytes`). Auto never reaches it: Auto keeps the tier's own
+     * [demuxerMaxBytes]. 0 (the default) means "no raise", so the tier's own bytes stay the ceiling
+     * for any caller that doesn't set it. The film-buffer feature this capped is gone with VOD; the
+     * field stays while player-core still reads it, and falls away with it in the next cleanup wave.
+     * See `SmartBuffer` in player-core.
      */
     val filmCeilingBytes: Long = 0L,
 ) {
@@ -37,16 +39,16 @@ data class PlayerBudget(
         private const val MIB = 1024L * 1024L
 
         /**
-         * Film ceilings are twice each tier's mpv cache, the same 2x headroom the live buffer allows a
-         * TV-class device (LiveBuffer.targetBufferBytes). On a 2 GB TV that keeps a film under ~100 MB of
-         * buffer, still well inside the ~180 MB player budget described above.
+         * Film ceilings are twice each tier's forward cache, the same 2x headroom the live buffer
+         * allows a TV-class device (LiveBuffer.targetBufferBytes). On a 2 GB TV that kept a film under
+         * ~100 MB of buffer, still well inside the ~180 MB player budget described above.
          */
         const val LOW_FILM_CEILING_BYTES = 96 * MIB
         const val MID_FILM_CEILING_BYTES = 256 * MIB
         const val HIGH_FILM_CEILING_BYTES = 512 * MIB
 
-        // Total RAM never changes, so the answer is worked out once per process and shared by every
-        // engine build, the diagnostics log and the settings repository.
+        // Total RAM never changes, so the answer is worked out once per process and shared by the
+        // player build, the diagnostics log and the settings repository.
         @Volatile private var cached: PlayerBudget? = null
 
         fun of(context: Context): PlayerBudget = cached ?: compute(context).also { cached = it }

@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -99,7 +98,6 @@ import tv.own.myowntv.features.settings.settingHints
 import tv.own.myowntv.features.settings.StageAction
 import tv.own.myowntv.features.settings.StageActionColumn
 import tv.own.myowntv.features.settings.SpanHelpBlock
-import tv.own.owntv.core.model.MediaType
 import tv.own.myowntv.features.profiles.PinDialog
 import tv.own.myowntv.features.settings.PickerDialog
 import tv.own.myowntv.features.settings.SettingsViewModel
@@ -113,15 +111,14 @@ import tv.own.owntv.core.customize.MoveKind
 import tv.own.owntv.core.customize.SpanSelector
 
 /**
- * Settings → Customize Categories & Items: hide / rename / reorder categories per section, and unhide
- * hidden channels, movies and series. Everything is per-profile and survives source re-syncs.
+ * Settings → Customize Categories & Items: hide / rename / reorder the Live TV categories, and unhide
+ * hidden channels. Everything is per-profile and survives source re-syncs.
  * Optionally locked behind a PIN (set from this screen's top-right) so hidden items can't be
  * unhidden by someone else — the PIN is asked on every entry.
  */
 @Composable
 fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val vm: CustomizeViewModel = koinViewModel()
-    val section by vm.section.collectAsStateWithLifecycle()
     val rows by vm.rows.collectAsStateWithLifecycle()
     val hiddenChannels by vm.hiddenChannels.collectAsStateWithLifecycle()
     val hideNewCategories by vm.hideNewCategories.collectAsStateWithLifecycle()
@@ -178,7 +175,7 @@ fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     var listPaneFocused by remember { mutableStateOf(false) }
 
-    LaunchedEffect(section) {
+    LaunchedEffect(Unit) {
         listState.scrollToItem(0)
     }
     // Index (within `rows`) of the category row that currently holds focus — the paging anchor.
@@ -231,17 +228,14 @@ fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         modifier = modifier,
         handleBack = false,
         toolbar = {
-            tv.own.myowntv.ui.stage.StageSegmented(
-                options = listOf(stringResource(R.string.settings_live_tv), stringResource(R.string.settings_movies), stringResource(R.string.settings_series)),
-                selected = when (section) { MediaType.LIVE -> 0; MediaType.MOVIE -> 1; else -> 2 },
-                onSelect = { vm.selectSection(listOf(MediaType.LIVE, MediaType.MOVIE, MediaType.SERIES)[it]) },
-                modifier = Modifier.focusRequester(firstFocus),
-            )
+            // Live TV only — the Movies/Series section tabs are gone with VOD; the page customizes
+            // channel categories alone. firstFocus (the dialog-return anchor) sits on the Sort pill.
+            tv.own.myowntv.ui.stage.StageTag(stringResource(R.string.settings_live_tv))
             Spacer(Modifier.weight(1f))
             tv.own.myowntv.ui.stage.StageTool(
                 stringResource(R.string.settings_customize_sort_button, stringResource(if (currentSort == SettingsRepository.SortMode.PLAYLIST) R.string.content_provider else R.string.settings_sort_alpha)),
                 onClick = { dialogReturn = sortFocus; showSortPicker = true },
-                icon = MyOwnTVIcon.SORT, boxed = true, modifier = Modifier.focusRequester(sortFocus),
+                icon = MyOwnTVIcon.SORT, boxed = true, modifier = Modifier.focusRequester(firstFocus).focusRequester(sortFocus),
             )
             tv.own.myowntv.ui.stage.StageTool(
                 stringResource(
@@ -316,13 +310,7 @@ fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     if (hiddenChannels.isNotEmpty()) {
                         item {
                             StageSettingsHeading(
-                                stringResource(
-                                    when (section) {
-                                        MediaType.LIVE -> R.string.settings_customize_hidden_channels
-                                        MediaType.MOVIE -> R.string.settings_customize_hidden_movies
-                                        else -> R.string.settings_customize_hidden_series
-                                    },
-                                ),
+                                stringResource(R.string.settings_customize_hidden_channels),
                                 hiddenChannels.size, first = true,
                             )
                         }
@@ -477,13 +465,7 @@ fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         PinConfirmDialog(
             title = stringResource(
                 R.string.settings_customize_restore_defaults_title,
-                stringResource(
-                    when (section) {
-                        MediaType.LIVE -> R.string.settings_live_tv
-                        MediaType.MOVIE -> R.string.settings_movies
-                        else -> R.string.settings_series
-                    },
-                ),
+                stringResource(R.string.settings_live_tv),
                 restorePlaylist ?: stringResource(R.string.content_all_playlists),
             ),
             message = stringResource(R.string.settings_customize_restore_defaults_description),

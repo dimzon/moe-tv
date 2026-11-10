@@ -15,9 +15,6 @@
     <string name="player_mini_bottom_center">أسفل الوسط</string>
     <string name="player_mini_bottom_right">أسفل اليمين</string>
     <string name="player_channel_label">القناة</string>
-    <string name="player_at_live_edge">● عند حافة البث المباشر</string>
-    <string name="player_behind_live">● <xliff:g id="offset">%1$s</xliff:g> تأخيرًا عن البث المباشر</string>
-    <string name="player_live_offset">−<xliff:g id="offset">%1$s</xliff:g></string>
     <string name="player_go_live">الانتقال للبث</string>
     <string name="player_timeshift_resume_title">المتابعة من حيث توقفت؟</string>
     <string name="player_timeshift_resume_message">حُفظت هذه القناة أثناء غيابك.</string>
@@ -26,7 +23,6 @@
     <string name="player_sources_none">لم يُعثر على نسخة أخرى من هذه القناة.</string>
     <string name="player_next_channel_in_list">القناة التالية</string>
     <string name="player_previous_channel_in_list">القناة السابقة في القائمة</string>
-    <string name="player_live_scrub_at"><xliff:g id="time">%1$s</xliff:g> · <xliff:g id="programme">%2$s</xliff:g></string>
     <string name="player_tool_volume">مستوى الصوت</string>
     <string name="player_tool_brightness">السطوع</string>
     <string name="player_skip_back">رجوع</string>
@@ -51,11 +47,6 @@
     <string name="player_raw_error">خطأ: <xliff:g id="error">%1$s</xliff:g></string>
     <string name="player_audio_track">المسار الصوتي</string>
     <string name="player_subtitles">الترجمات</string>
-    <string name="player_subtitle_timing">توقيت الترجمة</string>
-    <string name="player_add_subtitles">إضافة ترجمات</string>
-    <string name="player_adjust">ضبط</string>
-    <string name="player_search_subtitles">بحث في OpenSubtitles</string>
-    <string name="player_select_local_subtitle">اختيار ملف ترجمة محلي</string>
     <string name="player_no_tracks">لا توجد مسارات متاحة.</string>
     <string name="player_image_track"><xliff:g id="label">%1$s</xliff:g> · صورية</string>
     <string name="player_av_sync">مزامنة الصوت/الفيديو</string>
@@ -66,51 +57,27 @@
     <string name="player_delay_zero">0 مللي ثانية</string>
     <string name="player_delay_positive">+<xliff:g id="ms">%1$d</xliff:g> مللي ثانية</string>
     <string name="player_delay_negative"><xliff:g id="ms">%1$d</xliff:g> مللي ثانية</string>
-    <string name="player_speed_normal">1.0x (عادية)</string>
-    <string name="player_speed_normal_short">1.0x</string>
-    <string name="player_speed"><xliff:g id="speed">%1$s</xliff:g>x</string>
-    <string name="player_next_episode">الحلقة التالية خلال <xliff:g id="seconds">%1$d</xliff:g> ث</string>
-    <string name="player_play_now">تشغيل الآن</string>
     <string name="player_volume">مستوى الصوت</string>
     <string name="player_unmute">إلغاء كتم الصوت</string>
     <string name="player_mute">كتم الصوت</string>
     <string name="player_percent"><xliff:g id="value">%1$d</xliff:g>%%</string>
     <string name="player_duration_minutes"><xliff:g id="minutes">%1$d</xliff:g> دقيقة</string>
     <string name="player_season_number">الموسم <xliff:g id="season">%1$d</xliff:g></string>
-    <string name="player_episode_number">الحلقة <xliff:g id="episode">%1$d</xliff:g></string>
-    <string name="player_episode_context_title"><xliff:g id="title">%1$s</xliff:g> · S<xliff:g id="season">%2$d</xliff:g>E<xliff:g id="episode">%3$d</xliff:g></string>
     <string name="player_channel_number">#<xliff:g id="number">%1$s</xliff:g></string>
     <string name="player_live">مباشر</string>
-    <string name="player_subtitle_delay_zero">0.0 ث</string>
-    <string name="player_subtitle_delay_positive">+<xliff:g id="seconds">%1$.1f</xliff:g> ث</string>
-    <string name="player_subtitle_delay_negative">−<xliff:g id="seconds">%1$.1f</xliff:g> ث</string>
-    <string name="player_time_progress"><xliff:g id="position">%1$s</xliff:g> / <xliff:g id="duration">%2$s</xliff:g></string>
-    <string name="player_time_remaining">−<xliff:g id="time">%1$s</xliff:g></string>
-    <string name="player_switch_exo">تم التبديل إلى ExoPlayer</string>
-    <string name="player_switch_mpv">تم التبديل إلى mpv</string>
-    <string name="player_smoothness_hint">هذه القناة تفقد إطارات. قد يؤدي التبديل إلى مشغّل mpv إلى تشغيلها بسلاسة أكبر.</string>
-    <string name="player_error_image_subtitle_audio">الترجمات الصورية غير متاحة مع تنسيق صوت هذا الفيديو.</string>
-    <string name="player_error_both_engines_exo_first">فشل التشغيل على كلا محرّكي الفيديو (ExoPlayer، ثم mpv). قد يكون الملف تالفًا أو يستخدم تنسيقًا لا يستطيع هذا التلفزيون تشغيله.</string>
-    <string name="player_error_both_engines_mpv_first">فشل التشغيل على كلا محرّكي الفيديو (mpv وExoPlayer). قد يكون الملف تالفًا أو يستخدم تنسيقًا لا يستطيع هذا التلفزيون تشغيله. (<xliff:g id="error">%1$s</xliff:g>)</string>
     <string name="player_error_stream_link">تعذّر الحصول على رابط بث من البوابة. تحقّق من الاتصال وحاول مجددًا.</string>
     <string name="player_error_not_streaming">هذا الفيديو غير مهيأ للبث. اطلب من المزوّد إعادة ترميزه مع تمكين البدء السريع، أو نزّله أولًا.</string>
     <string name="player_error_lost_connection">انقطع الاتصال بهذه القناة.</string>
     <string name="player_error_channel">تعذّر تشغيل هذه القناة.</string>
     <string name="player_error_exo_decode">لا يستطيع ExoPlayer فك ترميز تنسيق هذا الفيديو على هذا الجهاز (<xliff:g id="error">%1$s</xliff:g>).</string>
     <string name="player_error_exo_play">تعذّر على ExoPlayer تشغيل هذا البث (<xliff:g id="error">%1$s</xliff:g>).</string>
-    <string name="player_error_image_format">الترجمات الصورية غير متاحة مع تنسيق هذا الملف.</string>
-    <string name="player_error_image_show">تعذّر عرض الترجمات الصورية لهذا الملف.</string>
     <string name="player_external_could_not_open">تعذّر فتح هذا البث.</string>
     <string name="player_external_not_found">لم يتم العثور على مشغّل خارجي — ثبّت VLC أو MX Player.</string>
     <string name="player_error_audio_no_video">يجري تشغيل الصوت، ولكن تعذّر عرض الفيديو على هذا الجهاز.</string>
-    <string name="player_error_file_corrupt">ملف هذا الفيديو غير صالح أو تالف ولا يمكن تشغيله.</string>
-    <string name="player_error_multiple_videos">فشل تشغيل عدة فيديوهات. قد لا يكون المصدر متاحًا أو قد تكون الملفات تالفة.</string>
     <string name="player_error_decoder_busy">وحدة فك ترميز الفيديو في هذا التلفزيون مشغولة. حاول مجددًا بعد قليل.</string>
     <string name="player_error_no_internet">لا يوجد اتصال بالإنترنت. تحقّق من شبكتك وحاول مجددًا.</string>
     <string name="player_error_stream_unavailable">تعذّر تشغيل هذا البث. قد يكون المصدر غير متصل أو يستخدم تنسيقًا غير مدعوم. <xliff:g id="hint">%1$s</xliff:g></string>
     <string name="player_error_account_in_use">هذا الحساب قيد التشغيل بالفعل على جهاز أو تطبيق آخر. أوقفه هناك، ثم اضغط على إعادة المحاولة.</string>
-    <string name="player_error_mpv_open_decode">تعذّر على mpv فتح هذا الملف أو فك ترميزه.</string>
-    <string name="player_error_mpv_stream_never_started">لم يبدأ البث في mpv بعد عدة محاولات.</string>
     <string name="player_error_fairplay">هذا البث محمي بتقنية Apple FairPlay التي لا تستطيع أجهزة Android تشغيلها. قائمة التشغيل هذه مخصّصة لأجهزة Apple.</string>
     <string name="player_error_surround">لا يدعم مخرج الصوت هذا الصوت المحيطي — تم التبديل إلى صوت ستيريو.</string>
     <string name="player_error_hardware_fallback">تعذّر فك ترميز تنسيق هذا البث بالأجهزة على هذا التلفزيون، لذا تم الرجوع إلى فك الترميز بالبرامج — الذي لا يستطيع الحفاظ على تشغيل <xliff:g id="resolution">%1$s</xliff:g> دون تحميل التلفزيون فوق طاقته. قد يظل التلفزيون قادرًا على تشغيل محتوى 4K آخر دون مشكلة؛ تنسيق هذا البث تحديدًا هو السبب.</string>
@@ -142,18 +109,10 @@
     <string name="player_stream_hdr10_pq">HDR10 (PQ)</string>
     <string name="player_stream_hlg">HLG</string>
     <string name="player_stream_sdr">SDR</string>
-    <string name="player_stream_interlacing">التشابك</string>
-    <string name="player_stream_progressive">لا يوجد (تدريجي)</string>
-    <string name="player_stream_deinterlaced_by_player">متشابك · أزال المشغّل التشابك</string>
-    <string name="player_stream_deinterlaced_by_device">متشابك · أزال الجهاز التشابك</string>
-    <string name="player_stream_not_deinterlaced">متشابك · لم يُزَل التشابك</string>
     <string name="player_stream_bitrate">معدل البت</string>
     <string name="player_stream_decoder">وحدة فك الترميز</string>
     <string name="player_stream_audio">الصوت</string>
     <string name="player_stream_buffer">المخزن المؤقت</string>
-    <string name="player_stream_engine_exo_preferred">ExoPlayer (المفضّل)</string>
-    <string name="player_stream_engine_exo_fallback">ExoPlayer (بديل بعد فشل mpv)</string>
-    <string name="player_stream_engine_exo_image_subtitle">ExoPlayer (نقل معالجة الترجمة الصورية)</string>
     <string name="player_stream_fps"><xliff:g id="fps">%1$.2f</xliff:g> إطار/ث</string>
     <string name="player_stream_bit_depth"><xliff:g id="bits">%1$d</xliff:g> بت</string>
     <string name="player_stream_mbps"><xliff:g id="value">%1$s</xliff:g> ميغابت/ث</string>
@@ -189,31 +148,10 @@
     <string name="player_subtitles_edit_search">تعديل البحث</string>
     <string name="player_subtitles_title_label">العنوان</string>
     <string name="player_subtitles_delete_title">حذف ترجمات OpenSub</string>
-    <string name="player_subtitles_sign_in">تسجيل الدخول</string>
-    <string name="player_subtitles_sign_out">تسجيل الخروج</string>
-    <string name="player_subtitles_account">الحساب</string>
     <string name="player_subtitles_username">اسم المستخدم</string>
     <string name="player_subtitles_password">كلمة المرور</string>
     <string name="player_subtitles_stay_signed_in">البقاء مسجّلًا الدخول</string>
-    <string name="player_subtitles_sign_in_title">تسجيل الدخول إلى OpenSubtitles</string>
-    <string name="player_subtitles_connect_description">ربط حساب OpenSubtitles الخاص بهذا الملف الشخصي.</string>
-    <string name="player_subtitles_contacting">جارٍ الاتصال بـ OpenSubtitles…</string>
-    <string name="player_subtitles_api_notice">يستخدم هذا المنتج واجهة API من OpenSubtitles، لكنه غير معتمد أو مصدّق عليه من OpenSubtitles.</string>
-    <string name="player_subtitles_delete_description">إزالة الترجمات التي نزّلتها للأفلام والمسلسلات.</string>
-    <string name="player_subtitles_delete_login_message">يزيل بيانات تسجيل دخول OpenSubtitles الخاصة بهذا الملف الشخصي من هذا الجهاز. تظل الترجمات التي نُزّلت بالفعل متاحة عند عدم الاتصال.</string>
     <string name="player_subtitles_delete_action">حذف الترجمات</string>
-    <string name="player_subtitles_downloads">التنزيلات</string>
-    <string name="player_subtitles_vip">VIP</string>
-    <string name="player_subtitles_refresh">تحديث</string>
-    <string name="player_subtitles_sign_in_to_use">استخدم حسابك على opensubtitles.com. إنشاء حساب مجاني.</string>
-    <plurals name="player_subtitles_remaining">
-        <item quantity="zero"><xliff:g id="remaining">%1$d</xliff:g> تنزيلات متبقية اليوم من أصل <xliff:g id="total">%2$d</xliff:g></item>
-        <item quantity="one"><xliff:g id="remaining">%1$d</xliff:g> تنزيل واحد متبقٍ اليوم من أصل <xliff:g id="total">%2$d</xliff:g></item>
-        <item quantity="two"><xliff:g id="remaining">%1$d</xliff:g> تنزيلان متبقيان اليوم من أصل <xliff:g id="total">%2$d</xliff:g></item>
-        <item quantity="few"><xliff:g id="remaining">%1$d</xliff:g> تنزيلات متبقية اليوم من أصل <xliff:g id="total">%2$d</xliff:g></item>
-        <item quantity="many"><xliff:g id="remaining">%1$d</xliff:g> تنزيلًا متبقيًا اليوم من أصل <xliff:g id="total">%2$d</xliff:g></item>
-        <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> تنزيل متبقٍ اليوم من أصل <xliff:g id="total">%2$d</xliff:g></item>
-    </plurals>
     <plurals name="player_subtitles_remaining_short">
         <item quantity="zero"><xliff:g id="remaining">%1$d</xliff:g> تنزيلات متبقية اليوم</item>
         <item quantity="one"><xliff:g id="remaining">%1$d</xliff:g> تنزيل واحد متبقٍ اليوم</item>
@@ -238,7 +176,6 @@
         <item quantity="many"><xliff:g id="remaining">%1$d</xliff:g> تنزيلًا متبقيًا اليوم</item>
         <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> تنزيل متبقٍ اليوم</item>
     </plurals>
-    <string name="player_subtitles_session">تنتهي صلاحية جلسة الاتصال. أوقف هذا الخيار لتخزين جلسة مؤقتة فقط.</string>
     <string name="player_subtitles_free_description_full">OpenSubtitles خدمة مجتمعية مجانية ومفتوحة للترجمات. سجّل الدخول باستخدام حسابك على opensubtitles.com؛ إنشاء حساب مجاني. ينطبق هذا على الملف الشخصي الحالي فقط.</string>
     <string name="player_subtitles_session_expired">انتهت صلاحية جلسة OpenSubtitles. لمواصلة البحث عن الترجمات وتنزيلها، سجّل الدخول مجددًا من الإعدادات ← مشغّل الفيديو ← الترجمات ← OpenSubtitles.</string>
     <string name="player_subtitles_account_needed">يلزم حساب OpenSubtitles\n\nللبحث عن الترجمات وتنزيلها، سجّل الدخول من الإعدادات ← مشغّل الفيديو ← الترجمات ← OpenSubtitles. إن OpenSubtitles خدمة مجتمعية مجانية ومفتوحة — ويمكن لأي شخص إنشاء حساب مجاني على opensubtitles.com.</string>
@@ -251,34 +188,12 @@
     <string name="player_subtitles_trusted">موثوق</string>
     <string name="player_subtitles_sdh">SDH</string>
     <string name="player_subtitles_ai">AI</string>
-    <plurals name="player_subtitles_download_count">
-        <item quantity="zero"><xliff:g id="count">%1$d</xliff:g> تنزيلات</item>
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> تنزيل واحد</item>
-        <item quantity="two"><xliff:g id="count">%1$d</xliff:g> تنزيلان</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> تنزيلات</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> تنزيلًا</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> تنزيل</item>
-    </plurals>
-    <string name="player_subtitles_tags_separator">" · "</string>
-    <string name="player_subtitles_search">بحث</string>
     <string name="player_subtitles_connected_as">متصل باسم</string>
-    <string name="player_subtitles_connected_user">متصل باسم <xliff:g id="username">%1$s</xliff:g></string>
-    <string name="player_subtitles_resets">إعادة الضبط</string>
-    <string name="player_subtitles_free_account">مجاني</string>
-    <string name="player_subtitles_enter_credentials">أدخل اسم المستخدم وكلمة المرور لحساب OpenSubtitles.</string>
-    <string name="player_subtitles_invalid_credentials">تعذّر على OpenSubtitles تسجيل الدخول باستخدام بيانات الحساب هذه.</string>
-    <string name="player_subtitles_sign_in_network_error">تعذّر الوصول إلى OpenSubtitles. تحقّق من اتصالك بالإنترنت وحاول مجددًا.</string>
-    <string name="player_subtitles_sign_in_server_error">رفض OpenSubtitles الطلب (خطأ <xliff:g id="code">%1$d</xliff:g>). اتصالك بالإنترنت يعمل — أعد المحاولة لاحقًا، واذكر هذا الرقم إذا أبلغت عن المشكلة.</string>
-    <string name="player_subtitles_refresh_network_error">تعذّر تحديث OpenSubtitles. تحقّق من اتصالك بالإنترنت.</string>
     <string name="player_subtitles_no_matches_all_languages">لم يتم العثور على ترجمات مطابقة. جرّب تعديل عنوان البحث.</string>
     <string name="player_subtitles_no_matches_chosen_language">لم يتم العثور على ترجمات مطابقة في اللغة التي اخترتها.</string>
     <string name="player_subtitles_search_language">لغة البحث</string>
-    <string name="player_reason_software_fallback">تم الرجوع إلى فك الترميز البرمجي</string>
-    <string name="player_reason_copy_mode_fallback">تم الرجوع إلى فك الترميز بوضع النسخ</string>
-    <string name="player_reason_archive_software_fallback">تمت إعادة فتح أرشيف المشاهدة المتأخرة باستخدام فك الترميز البرمجي</string>
     <string name="player_reason_stereo_fallback">تم التبديل إلى صوت ستيريو</string>
     <string name="player_reason_one_session_provider">مزود الخدمة يسمح بجلسة واحدة في كل مرة</string>
-    <string name="player_reason_mpv_handoff">تم تسليم هذه القناة إلى mpv</string>
     <string name="player_reason_stream_report">تقرير البث</string>
     <string name="player_stream_audio_output">مخرج الصوت</string>
     <string name="player_stream_live_buffer">المخزن المؤقت للبث المباشر</string>
@@ -295,9 +210,6 @@
     <string name="player_error_hardware_format">عتاد الفيديو في هذا التلفزيون لا يستطيع فك ترميز <xliff:g id="resolution">%1$s</xliff:g> بدقة <xliff:g id="codec">%2$s</xliff:g>. الملف سليم، لكن التلفزيون لا يستطيع تشغيل هذا التنسيق بهذه الدقة.</string>
     <string name="player_report_saved">تم حفظ تقرير البث في سجل التشغيل</string>
     <string name="player_subtitles_filter_title">التصفية حسب اللغة</string>
-    <string name="player_subtitles_filter_description">عند الإيقاف، تظهر جميع اللغات التي يوفرها OpenSubtitles للعنوان، لتختار من القائمة الكاملة. عند التشغيل، تظهر لغتك المختارة فقط.</string>
-    <string name="player_subtitles_search_language_description">تظهر فقط الترجمات بهذه اللغة في نتائج البحث. ويمكنك أيضًا الضغط على «كل اللغات» في النتائج لرؤية كل شيء في بحث واحد.</string>
-    <string name="player_subtitles_language_not_set">غير محدد</string>
     <string name="player_frame_rate_prompt_title">قد تعاني هذه القناة من تقطيع الحركة</string>
     <string name="player_frame_rate_prompt_description">تعمل القناة بمعدل <xliff:g id="fps">%1$d</xliff:g> إطارًا في الثانية بينما يعمل تلفزيونك على <xliff:g id="current_hz">%2$d</xliff:g> هرتز، وهو ما لا يستطيع عرض هذه الإطارات بشكل متساوٍ — لذا تبدو الحركة متقطعة قليلًا.\n\nيعمل التبديل التلقائي لمعدل الإطارات على ضبط التلفزيون على <xliff:g id="target_hz">%3$d</xliff:g> هرتز أثناء المشاهدة، ثم يعيده إلى حالته بعد ذلك. تتحول شاشة بعض أجهزة التلفزيون إلى الأسود للحظة عند تغيّر المعدل؛ يمكنك إيقاف هذه الميزة مرة أخرى من الإعدادات ← الصورة ← معدل الإطارات.</string>
     <string name="player_frame_rate_turn_on">تشغيل</string>
@@ -309,8 +221,6 @@
     <string name="player_error_data_saver">توفير البيانات مُفعّل، لذا البث عبر بيانات الهاتف متوقف. اتصل بشبكة Wi-Fi أو أوقف توفير البيانات من الإعدادات.</string>
     <string name="player_sleep_timer">مؤقّت النوم</string>
     <string name="player_sleep_timer_end_of_programme">نهاية البرنامج</string>
-    <string name="player_sleep_timer_end_of_movie">نهاية الفيلم</string>
-    <string name="player_sleep_timer_end_of_episode">نهاية الحلقة</string>
     <string name="player_sleep_timer_remaining">يتوقف بعد <xliff:g id="time">%1$s</xliff:g></string>
     <string name="player_sleep_timer_screen_off">إيقاف الشاشة أيضًا</string>
     <string name="player_sleep_timer_screen_off_explanation">يُستخدم فقط لإيقاف الشاشة عند انتهاء المؤقت، ولا يُستخدم في أي وقت آخر.</string>

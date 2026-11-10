@@ -2,8 +2,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="settings_sort_playlist">प्लेलिस्ट</string>
     <string name="settings_sort_alpha">A–Z</string>
-    <string name="settings_sort_rating">रेटिंग</string>
-    <string name="settings_sort_date_added">जोड़े जाने की तारीख</string>
     <string name="settings_mini_player">मिनी-प्लेयर</string>
     <string name="settings_mini_player_description">चैनल ब्राउज़ करते समय उसे डॉक (PiP) करने पर दिखाई देने वाला छोटा फ़्लोटिंग प्लेयर। इन्हें यहाँ बदलें या मिनी-प्लेयर पर मौजूद आकार बदलने / खिसकाने वाले बटनों से कभी भी बदलें।</string>
     <string name="settings_size">आकार</string>
@@ -15,9 +13,7 @@
     <string name="settings_live_keep_watching">‘देखना जारी रखें’ में लाइव चैनल</string>
     <string name="settings_live_keep_watching_description">मुख्य पंक्ति में हाल में देखे गए लाइव चैनल दिखाएँ।</string>
     <string name="settings_movies_keep_watching">‘देखना जारी रखें’ में फ़िल्में</string>
-    <string name="settings_movies_keep_watching_description">मुख्य पंक्ति में फ़िल्म का प्लेबैक जारी रखने वाले कार्ड दिखाएँ।</string>
     <string name="settings_series_keep_watching">‘देखना जारी रखें’ में सीरीज़</string>
-    <string name="settings_series_keep_watching_description">मुख्य पंक्ति में एपिसोड का प्लेबैक जारी रखने वाले कार्ड दिखाएँ।</string>
     <string name="settings_hero_preview">मुख्य पंक्ति में वीडियो चलाएँ</string>
     <string name="settings_hero_preview_description">चयनित आइटम का वीडियो प्रीव्यू कुछ देर बाद चलता है। होम स्क्रीन ब्राउज़ करते समय बिजली और मेमोरी बचाने के लिए इसे बंद करें।</string>
     <string name="settings_android_tv_home">Android TV होम</string>
@@ -203,7 +199,6 @@
     <string name="settings_home_root">होम स्क्रीन</string>
     <string name="settings_home_root_description">होम पर पंक्तियाँ चुनें, उनका क्रम बदलें और उन्हें फ़िल्टर करें</string>
     <string name="settings_metadata_root_description">फ़िल्मों और सीरीज़ के पोस्टर, कथानक, कलाकार और रेटिंग</string>
-    <string name="settings_download_folder">डाउनलोड फ़ोल्डर</string>
     <string name="settings_backup_restore">बैकअप और रीस्टोर</string>
     <string name="settings_clear_history">देखने का इतिहास मिटाएँ</string>
     <string name="settings_appearance_group">दिखावट</string>
@@ -247,11 +242,6 @@
     <string name="settings_surround_sound">सराउंड साउंड</string>
     <string name="settings_surround_description_mobile">इस डिवाइस से जुड़े वास्तविक 5.1/7.1 रिसीवर के लिए Dolby/DTS को सराउंड (5.1/7.1) में डिकोड करें। बिल्ट-इन स्पीकर, हेडफ़ोन या स्टीरियो साउंडबार के लिए इसे बंद रखें — मल्टीचैनल ऑडियो वीडियो से पीछे हो सकता है। यदि सिंक बिगड़ता है, तो प्लेयर के ऑडियो मेन्यू → A/V सिंक को थोड़ा समायोजित करें।</string>
     <string name="settings_audio_passthrough">Dolby और DTS पासथ्रू</string>
-    <string name="settings_audio_passthrough_description">चालू: जब टीवी, साउंडबार या रिसीवर बताता है कि वह इन्हें चला सकता है, तो Dolby और DTS बिना डिकोड किए भेजे जाते हैं (ExoPlayer)। बंद: ऐप इन्हें डिकोड करता है, और जहाँ सराउंड साउंड अनुमति दे वहाँ सराउंड ही रहता है। mpv हमेशा डिकोड करता है। नाइट मोड या वॉल्यूम समतलन चालू रहने पर इस्तेमाल नहीं होता।</string>
-    <string name="settings_ffmpeg_audio">ExoPlayer के लिए FFmpeg ऑडियो</string>
-    <string name="settings_ffmpeg_audio_description">चालू: ExoPlayer वह आवाज़ भी डिकोड कर सकता है जिसके लिए डिवाइस में डिकोडर नहीं है, जैसे DTS, TrueHD या MP2। डिवाइस के अपने डिकोडर अब भी पहले आते हैं। बंद: ExoPlayer सिर्फ़ डिवाइस के डिकोडर इस्तेमाल करता है। mpv हमेशा FFmpeg से डिकोड करता है। इसे बदलने पर OwnTV रीस्टार्ट होता है।</string>
-    <string name="settings_line_ffmpeg_audio">उस आवाज़ के लिए जिसे डिवाइस डिकोड नहीं कर सकता</string>
-    <string name="settings_ffmpeg_audio_restart_message">OwnTV रीस्टार्ट होने के बाद ऑडियो डिकोडर बदल जाएगा।</string>
     <string name="settings_night_mode">नाइट मोड</string>
     <string name="settings_night_mode_description">तेज़ दृश्यों को धीमा और धीमे संवादों को तेज़ करता है, ताकि कम आवाज़ में देखा जा सके।</string>
     <string name="settings_volume_leveling">वॉल्यूम समतलन</string>
@@ -273,7 +263,6 @@
     <string name="settings_catchup_unavailable">इस प्लेलिस्ट पर कोई कैच-अप चैनल उपलब्ध नहीं है</string>
     <string name="settings_device">डिवाइस</string>
     <string name="settings_playback_error_log">त्रुटि लॉग</string>
-    <string name="settings_playback_speed">प्लेबैक की गति</string>
     <string name="settings_player_zoom">प्लेयर ज़ूम</string>
     <string name="settings_app_group">ऐप</string>
     <string name="settings_app_startup">ऐप शुरू होने पर</string>
@@ -350,7 +339,6 @@
     <string name="settings_vp_cat_picture">तस्वीर</string>
     <string name="settings_vp_cat_frame_rate">फ़्रेम रेट</string>
     <string name="settings_vp_cat_frame_rate_summary">स्क्रीन को वीडियो से मिलाएँ</string>
-    <string name="settings_vp_cat_streaming">स्ट्रीमिंग</string>
     <string name="settings_vp_cat_live_tuning">लाइव ट्यूनिंग</string>
     <string name="settings_vp_cat_multiview">मल्टीव्यू और मिनी-प्लेयर</string>
     <string name="settings_vp_cat_multiview_summary_mobile">एक साथ कई लाइव चैनल</string>
@@ -444,12 +432,6 @@
     <string name="settings_hardware_decoding_description">TV के हार्डवेयर डिकोडर का उपयोग करें। यदि कुछ स्ट्रीम अटकती हैं या उनमें दृश्य विकृतियाँ दिखाई देती हैं, तो इसे बंद कर दें।</string>
     <string name="settings_software_decode_above_1080p">1080p से ऊपर सॉफ़्टवेयर डिकोडिंग</string>
     <string name="settings_software_decode_above_1080p_description">TV का हार्डवेयर डिकोडर बंद होने या विफल होने पर 4K और 1080p से ऊपर के अन्य वीडियो सॉफ़्टवेयर से चलाता है। तेज़ प्रोसेसर चाहिए: अधिकांश TV पर यह अटकता है।</string>
-    <string name="settings_movies_series_player">फ़िल्मों और सीरीज़ का प्लेयर</string>
-    <string name="settings_live_tv_player">लाइव टीवी का प्लेयर</string>
-    <string name="settings_engine_order"><xliff:g id="first">%1$s</xliff:g>, फिर <xliff:g id="second">%2$s</xliff:g></string>
-    <string name="settings_engine_only">केवल <xliff:g id="engine">%1$s</xliff:g></string>
-    <string name="settings_engine_default"><xliff:g id="option">%1$s</xliff:g> (डिफ़ॉल्ट)</string>
-    <string name="settings_reset_player_choices">सहेजे गए प्लेयर विकल्प रीसेट करें</string>
     <string name="settings_external_player">बाहरी प्लेयर</string>
     <string name="settings_default_zoom">डिफ़ॉल्ट ज़ूम</string>
     <string name="settings_default_zoom_description">प्लेबैक शुरू होने पर लागू होने वाला आस्पेक्ट रेशियो/ज़ूम।</string>
@@ -469,15 +451,6 @@
     <string name="settings_reset_saved_audio_delay_confirm_description">हर चैनल, फ़िल्म और एपिसोड ऊपर वाले ऑडियो सिंक पर लौट आएगा। सहेजे गए ज़ूम और वॉल्यूम बने रहेंगे। आप प्लेयर से किसी एक को फिर से सेट कर सकते हैं।</string>
     <string name="settings_seek_step">सीक स्टेप</string>
     <string name="settings_seek_step_description">किसी फ़िल्म या एपिसोड में रिवाइंड और फ़ॉरवर्ड कितना छलांग लगाएँ।</string>
-    <string name="settings_vod_buffer">फ़िल्म बफ़र</string>
-    <string name="settings_vod_buffer_description">फ़िल्में, एपिसोड और कैच-अप कितना पहले से लोड हों। ऑटो इस डिवाइस के लिए सही मान चुनता है। लंबा बफ़र खराब कनेक्शन को बेहतर झेलता है; सीमा फिर भी डिवाइस की मेमोरी तय करती है, इसलिए ज़्यादा बिटरेट वाली फ़िल्म चुने गए से कम रख सकती है।</string>
-    <string name="settings_vod_network_timeout">नेटवर्क टाइमआउट</string>
-    <string name="settings_vod_network_timeout_description">कनेक्शन टूटा माने जाने से पहले फ़िल्में, एपिसोड और कैच-अप चुप सर्वर का कितना इंतज़ार करें। ऑटो हर प्लेयर का अपना इंतज़ार रखता है: mpv में 60 सेकंड, ExoPlayer में 20।</string>
-    <string name="settings_vod_reconnects">दोबारा जुड़ने के प्रयास</string>
-    <string name="settings_vod_reconnects_description">कनेक्शन खोने वाली फ़िल्म या एपिसोड त्रुटि दिखाने से पहले कितनी बार वहीं से दोबारा खोली जाए जहाँ वह रुकी थी। एक मिनट का स्थिर प्लेबैक प्रयास वापस दे देता है।</string>
-    <string name="settings_vod_network_auto">ऑटो</string>
-    <string name="settings_live_rewind_step">लाइव रिवाइंड स्टेप</string>
-    <string name="settings_live_rewind_step_description">लाइव चैनल पर पीछे और आगे करना कितना चलता है: उसके कैच-अप आर्काइव में, या लाइव टीवी रोकें और पीछे करें से सहेजी गई कॉपी में।</string>
     <string name="settings_resume_playback">प्लेबैक जारी रखें</string>
     <string name="settings_resume_playback_description">किसी फ़िल्म या एपिसोड की स्थिति सहेजी हुई होने पर क्या करना है।</string>
     <string name="settings_subtitle_appearance">सबटाइटल की दिखावट</string>
@@ -489,24 +462,13 @@
     <string name="settings_preferred_audio_language_description">स्ट्रीम में यह ऑडियो ट्रैक होने पर उसे चलाता है। \"मूल भाषा\" फ़िल्मों और सीरीज़ को उसी भाषा में चलाती है जिसमें वे बनी थीं।</string>
     <string name="settings_open_subtitles">OpenSubtitles</string>
     <string name="settings_open_subtitles_connected">कनेक्टेड</string>
-    <string name="settings_open_subtitles_reset_in"><xliff:g id="hours">%1$d</xliff:g> घं <xliff:g id="minutes">%2$d</xliff:g> मि में</string>
     <string name="settings_open_subtitles_description">सबटाइटल खोजने और डाउनलोड करने तथा डाउनलोड किए गए सबटाइटल प्रबंधित करने के लिए साइन इन करें। यह हर प्रोफ़ाइल के लिए अलग है; एक मुफ़्त opensubtitles.com खाता आवश्यक है।</string>
-    <string name="settings_open_subtitles_advanced">उन्नत विकल्प</string>
-    <string name="settings_open_subtitles_advanced_description">अपनी ऐप्लिकेशन API कुंजी या स्वयं होस्ट किया गया OpenSubtitles Worker इस्तेमाल करें।</string>
     <string name="settings_open_subtitles_setup_title">OpenSubtitles सेट अप करें</string>
-    <string name="settings_open_subtitles_setup_description">अपने OpenSubtitles खाते से साइन इन करें।</string>
-    <string name="settings_open_subtitles_setup_remote">दूर से</string>
-    <string name="settings_open_subtitles_setup_remote_description">उसी वाई-फ़ाई पर किसी दूसरे डिवाइस — फ़ोन, कंप्यूटर या दूसरा टीवी — के ब्राउज़र में अपनी जानकारी भरें।</string>
-    <string name="settings_open_subtitles_setup_local">यहाँ दर्ज करें</string>
-    <string name="settings_open_subtitles_setup_local_description">रिमोट की मदद से इसी टीवी पर अपनी जानकारी लिखें।</string>
     <string name="settings_open_subtitles_api_key">OpenSubtitles ऐप्लिकेशन API कुंजी</string>
     <string name="settings_worker_server_url">Worker / सर्वर URL</string>
     <string name="settings_shared">साझा</string>
-    <string name="settings_open_subtitles_access_priority">OwnTV की साझा Worker सेवा उपयोग करने के लिए दोनों खाली छोड़ें। कस्टम Worker URL को सीधी API कुंजी पर प्राथमिकता मिलती है। खाता सत्र हर प्रोफ़ाइल के लिए अलग रहते हैं।</string>
-    <string name="settings_remove_custom_access">कस्टम एक्सेस हटाएँ</string>
     <string name="settings_preferred_audio_language">पसंदीदा ऑडियो भाषा</string>
     <string name="settings_audio_sync">ऑडियो सिंक</string>
-    <string name="settings_audio_sync_description">वीडियो से मिलाने के लिए ऑडियो को पहले या बाद में करें। यह दोनों प्लेयर (mpv और ExoPlayer) पर काम करता है।</string>
     <string name="settings_output_audio_delay">इस आउटपुट के लिए देरी</string>
     <string name="settings_output_audio_delay_description">यह “ऑडियो सिंक” में जुड़ती है और हर आउटपुट के लिए अलग से सहेजी जाती है: HDMI, HDMI ARC पर साउंडबार, Bluetooth, बिल्ट-इन स्पीकर, हेडफ़ोन। इसे उसी आउटपुट पर सुनते हुए सेट करें।</string>
     <string name="settings_audio_output_speaker">बिल्ट-इन स्पीकर</string>
@@ -516,8 +478,6 @@
     <string name="settings_live_latency_bitrate_note">बहुत ज़्यादा बिटरेट वाले चैनल पर — खास तौर पर 4K में — बफ़र आपकी माँगी गई अवधि से कम रख पाता है, क्योंकि एक बार में मेमोरी में रखे जा सकने वाले वीडियो की एक सीमा है।</string>
     <string name="settings_channel_numbers">चैनल नंबर</string>
     <string name="settings_channel_numbers_description">लाइव टीवी सूची, चैनल सूची ओवरले और प्लेयर में नाम के पास अपने प्रदाता का चैनल नंबर दिखाएँ—और फ़ुल स्क्रीन प्लेबैक के दौरान रिमोट कंट्रोल पर नंबर लिखकर सीधे उस चैनल पर जाएँ (OK तुरंत चैनल चलाता है, Back रद्द करता है)। बंद करने पर सभी नंबर छिप जाते हैं और नंबर कुंजियाँ अनदेखी की जाती हैं; कुछ भी खोता नहीं है और इसे दोबारा चालू करने पर नंबर वापस दिखाई देते हैं।</string>
-    <string name="settings_live_left_right_rewinds">बाएँ और दाएँ से लाइव टीवी पीछे करें</string>
-    <string name="settings_live_left_right_rewinds_description">कंट्रोल छिपे होने पर, जिन चैनलों को पीछे किया जा सकता है (कैच-अप, या लाइव टीवी रोकें और पीछे करें से सहेजे गए) उन पर बाएँ और दाएँ चैनल सूची और इतिहास खोलने के बजाय पीछे और आगे करते हैं।</string>
     <string name="settings_timeshift">लाइव टीवी रोकें और पीछे करें</string>
     <string name="settings_timeshift_description">बिना कैच-अप वाले चैनल फ़ुल स्क्रीन में देखते समय इस डिवाइस पर सहेजे जाते हैं, ताकि आप रोक और पीछे कर सकें। स्टोरेज में लगातार लिखता है; कम से कम 1 GB हमेशा खाली रहता है।</string>
     <string name="settings_timeshift_window">पीछे करने की अवधि</string>
@@ -544,37 +504,18 @@
     <string name="settings_custom_live_buffer">कस्टम लाइव बफ़र</string>
     <string name="settings_live_buffer_seconds"><xliff:g id="seconds">%1$d</xliff:g> सेकंड</string>
     <string name="settings_audio_delay"><xliff:g id="delay">%1$d</xliff:g> मि.से.</string>
-    <string name="settings_external_player_description">चुनें कि कौन-से अनुभाग बाहरी ऐप में खुलेंगे।</string>
     <string name="settings_audio_delay_value"><xliff:g id="delay">%1$d</xliff:g> मि.से.</string>
-    <string name="settings_movies_player_description">mpv (सुझाया गया) सबसे अधिक फ़ॉर्मैट सपोर्ट करता है — DTS/TrueHD ऑडियो, असामान्य फ़ाइलें। कुछ टीवी पर ExoPlayer ऐसी स्ट्रीम चला देता है जो mpv नहीं चला पाता, लेकिन यह DTS/TrueHD ऑडियो डिकोड नहीं कर सकता। संयुक्त विकल्पों में पहला विफल होने पर दूसरा प्लेयर अपने आप आज़माया जाता है; एकल-प्लेयर विकल्पों में ऐसा कभी नहीं होता, जिससे दूसरा प्लेयर आपके टीवी पर काम न करने की स्थिति में कुछ सेकंड की काली स्क्रीन बच जाती है।</string>
-    <string name="settings_movies_player_description_mobile">mpv (सुझाया गया) सबसे अधिक फ़ॉर्मैट सपोर्ट करता है — DTS/TrueHD ऑडियो, असामान्य फ़ाइलें। कुछ डिवाइस पर ExoPlayer ऐसी स्ट्रीम चला देता है जो mpv नहीं चला पाता, लेकिन यह DTS/TrueHD ऑडियो डिकोड नहीं कर सकता। संयुक्त विकल्पों में पहला विफल होने पर दूसरा प्लेयर अपने आप आज़माया जाता है; एकल-प्लेयर विकल्पों में ऐसा कभी नहीं होता, जिससे दूसरा प्लेयर आपके डिवाइस पर काम न करने की स्थिति में कुछ सेकंड की काली स्क्रीन बच जाती है।</string>
-    <string name="settings_live_player_description">ExoPlayer (सुझाया गया) चैनल बहुत तेज़ी से खोलता है और लाइव सबटाइटल केवल इसी में हैं। mpv ऐसे चैनल भी चलाता है जो ExoPlayer नहीं चला पाता, जिनमें असामान्य ऑडियो वाले कुछ चैनल भी शामिल हैं। संयुक्त विकल्पों में पहला विफल होने पर दूसरा प्लेयर अपने आप आज़माया जाता है; एकल-प्लेयर विकल्पों में ऐसा कभी नहीं होता, जिससे दूसरा प्लेयर आपके टीवी पर काम न करने की स्थिति में कुछ सेकंड की काली स्क्रीन बच जाती है। प्लेयर में हाथ से बदले गए चैनल पर आपकी पसंद दोनों ही स्थितियों में बनी रहती है।</string>
-    <string name="settings_reset_player_choices_description">प्लेयर में किसी एक फ़िल्म या एपिसोड को mpv और ExoPlayer के बीच बदलने पर वह विकल्प अगली बार के लिए सहेज लिया जाता है। रीसेट करने पर सब कुछ फिर से ऊपर दी गई सेटिंग का पालन करेगा। लाइव चैनलों के सहेजे गए विकल्प बने रहते हैं।</string>
     <string name="settings_reset_player_choices_none">कोई सहेजा नहीं गया</string>
     <plurals name="settings_reset_player_choices_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> सहेजा गया</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> सहेजे गए</item>
     </plurals>
-    <string name="settings_reset_player_choices_confirm">सहेजे गए प्लेयर विकल्प रीसेट करें?</string>
-    <string name="settings_reset_player_choices_confirm_description">हर फ़िल्म और एपिसोड फिर से “फ़िल्मों और सीरीज़ का प्लेयर” सेटिंग का पालन करेगा। आप किसी एक को प्लेयर से कभी भी दोबारा बदल सकते हैं।</string>
-    <string name="settings_reset_live_player_choices">लाइव टीवी प्लेयर के सहेजे गए विकल्प रीसेट करें</string>
-    <string name="settings_reset_live_player_choices_description">प्लेयर में किसी चैनल को ExoPlayer और mpv के बीच बदलने पर वह विकल्प उस चैनल के लिए सहेज लिया जाता है। रीसेट करने पर हर चैनल फिर से “लाइव टीवी का प्लेयर” सेटिंग का पालन करेगा। फ़िल्मों और एपिसोड के सहेजे गए विकल्प बने रहते हैं।</string>
-    <string name="settings_reset_live_player_choices_confirm">लाइव टीवी प्लेयर के सहेजे गए विकल्प रीसेट करें?</string>
-    <string name="settings_reset_live_player_choices_confirm_description">हर चैनल फिर से “लाइव टीवी का प्लेयर” सेटिंग का पालन करेगा। आप किसी एक चैनल को प्लेयर से कभी भी दोबारा बदल सकते हैं।</string>
     <string name="settings_external_player_row_description">स्ट्रीम को अंतर्निहित प्लेयर के बजाय हर अनुभाग के लिए चुने गए बाहरी ऐप (VLC, MX प्लेयर) में खोलें। यह उन स्ट्रीम के लिए उपयोगी है जिन्हें यह ऐप डिकोड नहीं कर सकता, या यदि आप किसी दूसरे प्लेयर को पसंद करते हैं। बाहरी रूप से चलाते समय प्लेबैक जारी रखने की स्थिति और पिछला/अगला उपलब्ध नहीं होते; जिन स्ट्रीम के लिए कस्टम User-Agent या रेफ़रर आवश्यक है, वे शायद न चलें।</string>
     <string name="settings_resume_always">हमेशा जारी रखें</string>
     <string name="settings_resume_ask">जारी रखने से पहले पूछें</string>
     <string name="settings_resume_never">कभी जारी न रखें</string>
-    <string name="settings_delete_subtitles">सबटाइटल हटाएँ</string>
-    <string name="settings_delete_all">सभी हटाएँ</string>
     <string name="settings_movies">फ़िल्में</string>
     <string name="settings_series">सीरीज़</string>
-    <string name="settings_no_downloaded_subtitles"><xliff:g id="section">%1$s</xliff:g> के कोई डाउनलोड किए गए सबटाइटल नहीं हैं।</string>
-    <string name="settings_delete_subtitle">सबटाइटल हटाएँ</string>
-    <string name="settings_delete_subtitle_message">“<xliff:g id="title">%2$s</xliff:g>” का <xliff:g id="name">%1$s</xliff:g> सबटाइटल हटाएँ? इसे बाद में फिर से डाउनलोड किया जा सकता है।</string>
-    <string name="settings_delete_all_subtitles">सभी सबटाइटल हटाएँ</string>
-    <string name="settings_delete_all_movies">सभी फ़िल्मों के हटाएँ</string>
-    <string name="settings_delete_all_series">सभी सीरीज़ के हटाएँ</string>
     <string name="settings_section_count"><xliff:g id="section">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g>)</string>
     <string name="settings_sync_guide_question">टीवी गाइड अभी सिंक करें?</string>
     <string name="settings_sync_guide_description">“<xliff:g id="source">%1$s</xliff:g>” के लिए कार्यक्रम गाइड (EPG) डाउनलोड करें। आप इसे बाद में सेटिंग → स्रोत और गाइड → EPG स्रोत में भी कर सकते हैं।</string>
@@ -600,10 +541,6 @@
     <string name="settings_surface_transparency"><xliff:g id="percent">%1$d</xliff:g>%%</string>
     <string name="settings_catchup_timezone_automatic">अपने-आप</string>
     <string name="settings_catchup_timezone_device">डिवाइस</string>
-    <string name="settings_catchup_player_ask">हमेशा पूछें</string>
-    <string name="settings_catchup_player_internal">OwnTV प्लेयर</string>
-    <string name="settings_catchup_player_external">बाहरी प्लेयर</string>
-    <string name="settings_download_folder_title">डाउनलोड फ़ोल्डर चुनें</string>
     <string name="settings_pick_background_title">पृष्ठभूमि चित्र चुनें</string>
     <string name="settings_theme_dialog">थीम</string>
     <string name="settings_app_startup_dialog">ऐप स्टार्टअप</string>
@@ -625,7 +562,6 @@
     <string name="settings_browsing_last_item_description">हर श्रेणी ऊपर से शुरू होने के बजाय अपनी स्क्रॉल स्थिति बनाए रखती है। लाइव टीवी पिछली बार फ़ोकस में रहा चैनल भी वापस लाता है।</string>
     <string name="settings_browsing_live_categories">लाइव टीवी श्रेणियाँ</string>
     <string name="settings_browsing_live_categories_description">लाइव टीवी, गाइड, प्लेयर और मल्टीव्यू में दिखती हैं। सभी channels बंद होने पर लाइव टीवी आपकी पहली श्रेणी में खुलता है, और कोई श्रेणी न हो तो पसंदीदा में।</string>
-    <string name="settings_catchup_player">कैच-अप इसमें चलाएँ</string>
     <string name="settings_customize_title">श्रेणियाँ और आइटम कस्टमाइज़ करें</string>
     <string name="settings_customize_pin_locked">यह स्क्रीन PIN से लॉक है।</string>
     <string name="settings_customize_wrong_pin">गलत PIN—फिर कोशिश करें</string>
@@ -652,8 +588,6 @@
     <string name="settings_customize_behavior_hide">छिपाना</string>
     <string name="settings_customize_behavior_show">दिखाना</string>
     <string name="settings_customize_hidden_channels">छिपे हुए चैनल</string>
-    <string name="settings_customize_hidden_movies">छिपी हुई फ़िल्में</string>
-    <string name="settings_customize_hidden_series">छिपी हुई सीरीज़</string>
     <string name="settings_customize_unhide_description">किसी आइटम को सूचियों में वापस लाने के लिए उसे फिर से दिखाएँ।</string>
     <string name="settings_customize_categories">श्रेणियाँ</string>
     <string name="settings_customize_empty">इस अनुभाग में अभी कोई श्रेणी नहीं है—पहले एक स्रोत जोड़ें।</string>
@@ -972,8 +906,6 @@
     <string name="settings_customize_delete_category">“<xliff:g id="name">%1$s</xliff:g>” हटाएँ?</string>
     <string name="settings_customize_delete_category_description">संयुक्त श्रेणी हटा दी जाती है। उसके आइटम अपनी मूल श्रेणियों में बने रहते हैं।</string>
     <string name="settings_customize_channels_description">इस श्रेणी के चैनल — नाम बदलें, क्रम बदलें, छिपाएँ या फिर से दिखाएँ।</string>
-    <string name="settings_customize_movies_description">इस श्रेणी की फ़िल्में — क्रम बदलें, छिपाएँ या फिर से दिखाएँ।</string>
-    <string name="settings_customize_series_description">इस श्रेणी की सीरीज़ — क्रम बदलें, छिपाएँ या फिर से दिखाएँ।</string>
     <string name="settings_customize_hide_show_items">आइटम छिपाएँ या दिखाएँ</string>
     <plurals name="settings_customize_selected_items">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> आइटम चुना गया।</item>
@@ -985,7 +917,6 @@
     </plurals>
     <string name="settings_customize_rename_item_hint">केवल इस प्रोफ़ाइल के लिए। “<xliff:g id="name">%1$s</xliff:g>” रीस्टोर करने के लिए खाली छोड़ दें।</string>
     <string name="settings_customize_item_was">पहले “<xliff:g id="name">%1$s</xliff:g>” था</string>
-    <string name="settings_customize_rename_items">✎ आइटम के नाम बदलें</string>
     <string name="settings_customize_move_to">यहाँ ले जाएँ…</string>
     <string name="settings_customize_back">← वापस जाएँ</string>
     <string name="settings_move_category_title">श्रेणी में ले जाएँ</string>
@@ -1001,7 +932,6 @@
     <string name="settings_dns_server_hint">8.8.8.8 या https://dns.google/dns-query</string>
     <string name="settings_dns_test">DNS जाँचें</string>
     <string name="settings_dns_explanation">कस्टम DNS, ISP-स्तर पर डोमेन ब्लॉकिंग को बायपास करने या SmartDNS सेवाओं के माध्यम से भौगोलिक प्रतिबंध हटाने में मदद कर सकता है। DNS-over-HTTPS (DoH) का सुझाव दिया जाता है — यह आपके लुकअप एन्क्रिप्ट करता है।</string>
-    <string name="settings_dns_limitations">यह सेटिंग केवल OkHttp-आधारित ट्रैफ़िक (प्लेलिस्ट सिंक, EPG, API कॉल, चित्र, ExoPlayer स्ट्रीम) को प्रभावित करती है। mpv सिस्टम रिज़ॉल्वर का इस्तेमाल करता है और इससे प्रभावित नहीं होता।</string>
     <string name="settings_dns_resolved">रिज़ॉल्व हुआ ✓ (<xliff:g id="millis">%1$d</xliff:g> ms)</string>
     <string name="settings_dns_enter_server">DNS सर्वर होस्ट या DoH URL दर्ज करें।</string>
     <string name="settings_dns_not_reachable">DNS सर्वर तक नहीं पहुँचा जा सका।</string>
@@ -1043,14 +973,10 @@
     <string name="settings_live_tune_timeout_description">अगर इस समय तक किसी लाइव चैनल पर तस्वीर नहीं आई, तो OwnTV कोशिश करना बंद कर देगा और आपको बता देगा — अपने सारे प्लेयर एक-एक करके आज़माते हुए काली स्क्रीन छोड़ने के बजाय। “कभी नहीं” चुनने पर कोशिश चलती रहती है, और आपके प्रदाता द्वारा हटाए गए चैनल पर इसमें एक मिनट से भी ज़्यादा लग सकता है। प्रदाता खुद जो इंतज़ार माँगता है, वह इसमें नहीं गिना जाता।</string>
     <string name="settings_live_preroll_per_playlist">प्रति प्लेलिस्ट पहले से बफ़र करें</string>
     <string name="settings_live_preroll_per_playlist_description">ऊपर वाली सेटिंग को एक प्लेलिस्ट के लिए अलग से सेट करें, जबकि बाकी प्लेलिस्ट तेज़ बनी रहें।</string>
-    <string name="settings_live_engine_per_playlist">हर प्लेलिस्ट के लिए लाइव टीवी का प्लेयर</string>
-    <string name="settings_live_engine_per_playlist_description">ऊपर वाली सेटिंग को एक प्लेलिस्ट के लिए अलग से सेट करें — ऐसे प्रदाता के लिए जिसके चैनल सिर्फ़ एक ही प्लेयर पर ठीक चलते हैं।</string>
     <string name="settings_live_latency_per_playlist">हर प्लेलिस्ट के लिए लाइव विलंबता</string>
     <string name="settings_live_latency_per_playlist_description">ऊपर वाली सेटिंग को एक प्लेलिस्ट के लिए अलग से सेट करें — ऐसे प्रदाता के लिए जिसे बाकी से बड़ा या छोटा बफ़र चाहिए।</string>
     <string name="settings_catchup_timezone_per_playlist">प्लेलिस्ट के अनुसार कैच-अप समय क्षेत्र</string>
     <string name="settings_catchup_timezone_per_playlist_description">ऊपर दिए समय क्षेत्र को एक प्लेलिस्ट के लिए बदलें, उस प्रदाता के लिए जिसका आर्काइव दूसरी घड़ी पर चलता है।</string>
-    <string name="settings_vod_engine_per_playlist">प्लेलिस्ट के अनुसार फ़िल्म और सीरीज़ प्लेयर</string>
-    <string name="settings_vod_engine_per_playlist_description">ऊपर की सेटिंग को एक प्लेलिस्ट के लिए बदलें, उस प्रदाता के लिए जिसकी फ़िल्में और एपिसोड केवल एक प्लेयर ठीक से चलाता है।</string>
     <string name="settings_live_tune_timeout_per_playlist">प्लेलिस्ट के अनुसार कोशिश छोड़ने का समय</string>
     <string name="settings_live_tune_timeout_per_playlist_description">ऊपर की सेटिंग को एक प्लेलिस्ट के लिए बदलें, उस प्रदाता के लिए जिसके चैनल धीरे शुरू होते हैं या अक्सर बंद रहते हैं।</string>
     <plurals name="settings_live_preroll_overrides">
@@ -1175,8 +1101,6 @@
     <string name="settings_data_saver">डेटा बचत</string>
     <string name="settings_data_saver_description">मोबाइल डेटा पर स्ट्रीम न करें</string>
     <string name="settings_gesture_sensitivity">जेस्चर की संवेदनशीलता</string>
-    <string name="settings_downloads_wifi_only">सिर्फ़ Wi-Fi पर डाउनलोड करें</string>
-    <string name="settings_downloads_wifi_only_description">मोबाइल डेटा के बजाय Wi-Fi का इंतज़ार करें</string>
     <string name="settings_mini_player_style_description">ब्राउज़ करते समय प्लेबैक आपके साथ कैसे चले</string>
     <string name="settings_mini_player_style_floating">तैरती विंडो</string>
     <string name="settings_mini_player_style_docked">जुड़ी पट्टी</string>
@@ -1280,7 +1204,6 @@
     <string name="more_group_your_things">आपकी चीज़ें</string>
     <string name="more_group_keep_safe">सुरक्षित रखें</string>
     <string name="more_profile_switch">बदलें</string>
-    <string name="more_fav_movies_series">फ़िल्में और सीरीज़</string>
     <string name="more_fav_empty_title">अभी कोई पसंदीदा नहीं</string>
     <string name="more_fav_empty_body">किसी चैनल, फ़िल्म या शो पर OK दबाकर रखें और “पसंदीदा में जोड़ें” चुनें।</string>
     <string name="more_fav_empty_body_mobile">किसी चैनल, फ़िल्म या शो को दबाकर रखें और “पसंदीदा में जोड़ें” चुनें।</string>
@@ -1338,10 +1261,6 @@
     <plurals name="more_settings_pinned_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> पिन किए गए</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> पिन किए गए</item>
-    </plurals>
-    <plurals name="more_downloads_running_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> चल रहा है</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> चल रहे हैं</item>
     </plurals>
     <string name="settings_backup_location">स्थान</string>
     <string name="settings_multiview">मल्टीव्यू</string>
@@ -1464,7 +1383,6 @@
     <string name="settings_line_remote_shortcuts">रिमोट के खाली बटन असाइन करें</string>
     <string name="settings_line_customize">छिपाएँ और दिखाएँ, नाम बदलें और क्रम बदलें</string>
     <string name="settings_line_metadata">मूवी और सीरीज़ के पोस्टर, कहानी, कलाकार और रेटिंग</string>
-    <string name="settings_line_open_subtitles">सबटाइटल खोजें और डाउनलोड करें</string>
     <string name="settings_line_app_icon">लॉन्चर का आइकन</string>
     <string name="settings_line_brand_accent">लोगो का प्ले त्रिकोण आपके एक्सेंट रंग में</string>
     <string name="settings_line_check_updates">GitHub से नवीनतम संस्करण पाएँ</string>
@@ -1477,14 +1395,7 @@
     <string name="settings_line_quick_channel_numbers">चैनल बदलने के लिए रिमोट पर नंबर दबाएँ</string>
     <string name="settings_line_prefer_sdr">स्ट्रीम में दोनों हों तो SDR</string>
     <string name="settings_line_quick_autoplay">अगला एपिसोड अपने आप शुरू करें</string>
-    <string name="settings_line_live_engine">कौन-सा इंजन चैनल खोले, और विकल्प</string>
-    <string name="settings_line_saved_live_choices">जो चैनल आपने खुद बदले</string>
-    <string name="settings_line_vod_engine">कौन-सा इंजन फ़िल्में और एपिसोड खोले</string>
-    <string name="settings_line_saved_choices">जो फ़िल्में और एपिसोड आपने खुद बदले</string>
     <string name="settings_line_external">VLC, MX Player… हर सेक्शन के लिए</string>
-    <string name="settings_line_vod_buffer">फ़िल्में कितनी आगे तक लोड हों</string>
-    <string name="settings_line_vod_timeout">चुप सर्वर का कितना इंतज़ार</string>
-    <string name="settings_line_vod_reconnects">जहाँ रुका वहीं से फिर खोलें</string>
     <string name="settings_line_hw">टीवी का अपना डिकोडर इस्तेमाल करें</string>
     <string name="settings_line_max_quality">कई हों तो सबसे ऊँची तस्वीर</string>
     <string name="settings_line_tunneled">प्रायोगिक · ExoPlayer पर लाइव टीवी</string>
@@ -1504,8 +1415,6 @@
     <string name="settings_line_sub_lang">इस भाषा में सबटाइटल चालू करें</string>
     <string name="settings_line_sub_style">आकार, रंग, स्थिति, पृष्ठभूमि</string>
     <string name="settings_title_fonts">फ़ॉन्ट और टेक्स्ट आकार</string>
-    <string name="settings_title_saved_live_choices">सहेजे गए लाइव टीवी प्लेयर विकल्प</string>
-    <string name="settings_title_saved_choices">सहेजे गए प्लेयर विकल्प</string>
     <string name="settings_title_tunneled">टनल्ड प्लेबैक</string>
     <string name="settings_title_saved_zoom">सहेजा गया ज़ूम</string>
     <string name="settings_title_saved_volume">सहेजा गया वॉल्यूम</string>
@@ -1514,21 +1423,15 @@
     <string name="settings_line_live_preview">फ़ोकस किया चैनल चलाएँ</string>
     <string name="settings_line_timeshift">बिना कैच-अप वाले चैनल, देखते समय सहेजे जाते हैं</string>
     <string name="settings_line_timeshift_window">कितना पीछे जा सकते हैं</string>
-    <string name="settings_line_left_right">नियंत्रण छिपे होने पर</string>
     <string name="settings_line_latency">लाइव के कितने पास चलाएँ</string>
     <string name="settings_line_preroll">चैनल शुरू होने से पहले जमा वीडियो</string>
     <string name="settings_line_tune_timeout">कोशिश रोकें और बताएँ</string>
     <string name="settings_line_seek_step">फ़िल्म में पीछे और आगे कितना जाएँ</string>
-    <string name="settings_line_rewind_step">लाइव चैनल पर कितना जाएँ</string>
     <string name="settings_line_resume">जब फ़िल्म की स्थिति सहेजी हो</string>
     <string name="settings_line_autoplay">और अगले सीज़न में भी</string>
     <string name="settings_line_tiles">हर टाइल एक और स्ट्रीम है</string>
     <string name="settings_line_mini">आकार और स्थिति</string>
     <string name="settings_line_pip">छोटी विंडो में देखना जारी रखें</string>
-    <string name="settings_line_rec_reserve">कभी सभी कनेक्शन पर रिकॉर्ड न करें</string>
-    <string name="settings_line_rec_watching">दूसरी स्ट्रीम नहीं</string>
-    <string name="settings_line_rec_pre_roll">कार्यक्रम शुरू होने से पहले</string>
-    <string name="settings_line_rec_post_roll">जो कार्यक्रम देर तक चलें उनके लिए</string>
     <string name="settings_line_measured_stats">लाइव fps, बिटरेट और छूटे फ़्रेम</string>
     <string name="settings_line_logging">बग रिपोर्ट के लिए पूरा ट्रेस</string>
     <string name="settings_help_profiles">हर दर्शक के अपने पसंदीदा, देखने का इतिहास, फिर से शुरू करने की जगहें और होम पंक्तियाँ होती हैं। किड्स मोड सिर्फ़ आपकी अनुमति वाली श्रेणियाँ दिखाता है; PIN किसी और को प्रोफ़ाइल खोलने से रोकता है।</string>
@@ -1557,7 +1460,6 @@
     <string name="settings_help_auto_start_boot">टीवी शुरू होने के बाद OwnTV को अपने-आप खोलता है, ऐप शुरू होने पर सेटिंग में चुनी गई स्क्रीन पर। Android किसी ऐप को अपने-आप खुलने तभी देता है जब वह दूसरे ऐप्लिकेशन के ऊपर दिख सके, इसलिए इसे चालू करने पर उस अनुमति की स्क्रीन खुलती है। कुछ टीवी यह अनुमति नहीं देते, और उन पर अपने-आप शुरू होना काम नहीं कर सकता।</string>
     <string name="settings_help_auto_start_wake">हर बार टीवी के स्लीप से जागने पर OwnTV खोलता है, तब भी जब आपने उसे किसी दूसरे ऐप के लिए जगाया हो। अगर ऐप शुरू होने पर सेटिंग कोई चैनल खोलती है, तो हर बार जागने पर वह स्ट्रीम शुरू हो जाती है। यह चालू रहने तक OwnTV एक छोटी बैकग्राउंड सेवा और एक बिना आवाज़ वाली सूचना रखता है। चालू होने पर अपने-आप शुरू करने की तरह, इसे भी दूसरे ऐप्लिकेशन के ऊपर दिखने की अनुमति चाहिए।</string>
     <string name="settings_help_dns">आपके नेटवर्क के अपने DNS की जगह आपके चुने DNS सर्वर से प्रोवाइडर के पते खोजता है — जब नेटवर्क उन्हें रोके या मोड़ दे, तब काम आता है।</string>
-    <string name="settings_help_live_engine">ExoPlayer चैनल बहुत तेज़ी से खोलता है और लाइव सबटाइटल सिर्फ़ इसी में हैं। mpv वे चैनल चलाता है जो ExoPlayer नहीं चला पाता, कुछ असामान्य ऑडियो समेत। मिले-जुले विकल्प पहले के विफल होने पर दूसरा प्लेयर आज़माते हैं।</string>
     <string name="settings_help_hw">टीवी का हार्डवेयर डिकोडर इस्तेमाल करता है: स्मूद 4K और कम गर्मी। अगर कुछ स्ट्रीम अटकें या ब्लॉक दिखें तभी बंद करें; तब सॉफ़्टवेयर डिकोडर काम करता है।</string>
     <string name="settings_help_volume">हर चैनल, फ़िल्म और एपिसोड जिस वॉल्यूम पर शुरू होता है। 100%% से ऊपर धीमी स्ट्रीम तेज़ होती हैं। प्लेयर में बदला गया वॉल्यूम उस टाइटल के लिए तब तक रहता है जब तक आप रीसेट न करें।</string>
     <string name="settings_help_channel_numbers">लाइव टीवी सूची, चैनल-सूची ओवरले और प्लेयर में नाम के पास प्रोवाइडर का चैनल नंबर दिखाता है, और फ़ुल स्क्रीन में रिमोट पर नंबर दबाकर उस चैनल पर जाने देता है।</string>
@@ -1613,7 +1515,6 @@
     <string name="settings_clock_color_accent">एक्सेंट</string>
     <string name="settings_clock_color_help">OK रंग चुनने वाला खोलता है (प्रीसेट, पैलेट या हेक्स कोड), वही जो एक्सेंट रंग के लिए है। पूर्वावलोकन हर बदलाव के साथ बदलता है।</string>
     <string name="settings_key_pick_color">रंग चुनें</string>
-    <string name="settings_line_trending_layout">ट्रेंडिंग पंक्ति कैसे दिखती है</string>
     <string name="settings_home_shown">दिख रही है</string>
     <string name="settings_home_hide_row">यह पंक्ति छिपाएँ</string>
     <string name="settings_home_show_row">यह पंक्ति दिखाएँ</string>
@@ -1625,21 +1526,9 @@
     <string name="settings_line_metadata_source">फ़िल्मों और सीरीज़ की जानकारी कहाँ से आती है</string>
     <string name="settings_line_metadata_language">TMDB से कहानी, शैलियाँ और शीर्षक</string>
     <string name="settings_line_metadata_advanced">आपकी अपनी कुंजी या सेल्फ़-होस्टेड Worker</string>
-    <string name="settings_line_os_advanced">आपकी अपनी API कुंजी या Worker</string>
-    <string name="settings_line_os_filter">सिर्फ़ आपकी चुनी हुई भाषा</string>
-    <string name="settings_line_os_search_language">खोज नतीजों में दिखती है</string>
-    <string name="settings_subtitle_delete_help">हटाने से जगह खाली होती है; प्लेयर से इसे फिर डाउनलोड कर सकते हैं।</string>
     <plurals name="settings_home_row_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> पंक्ति</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> पंक्तियाँ</item>
-    </plurals>
-    <plurals name="settings_subtitles_downloaded_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> डाउनलोड हुई</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> डाउनलोड हुईं</item>
-    </plurals>
-    <plurals name="settings_subtitle_file_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> फ़ाइल</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> फ़ाइलें</item>
     </plurals>
     <string name="settings_line_add_from_phone">किसी दूसरे डिवाइस के ब्राउज़र में फ़ॉर्म भरें</string>
     <string name="settings_add_type_here">यहाँ लिखें</string>
@@ -1716,7 +1605,6 @@
     <string name="settings_line_vod_view_mobile">कोई श्रेणी कैसे खुलती है</string>
     <string name="settings_guide_size_mobile">कार्यक्रम गाइड का आकार</string>
     <string name="settings_line_guide_size_mobile">ग्रिड एक बार में कितना समय दिखाता है</string>
-    <string name="settings_line_download_folder_mobile">फ़िल्में, एपिसोड और रिकॉर्डिंग कहाँ सहेजी जाती हैं</string>
     <string name="settings_browsing_value_both">दोनों</string>
     <plurals name="settings_home_rows_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> पंक्ति</item>
@@ -1726,7 +1614,6 @@
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> छिपी</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> छिपी</item>
     </plurals>
-    <string name="settings_catchup_timezone_label">समय क्षेत्र</string>
     <string name="settings_help_add_from_phone_mobile">उसी वाई-फ़ाई पर किसी भी डिवाइस — कंप्यूटर, टैबलेट या टीवी — के ब्राउज़र में पता खोलें या कोड स्कैन करें, वहीं अपनी प्लेलिस्ट भरें और यहाँ भेजें। फ़ोन पर URL टाइप करने से कहीं तेज़।</string>
     <string name="settings_line_add_type_here_mobile">Xtream, M3U या Stalker</string>
     <string name="setup_local_file_hint_mobile">इस फ़ोन पर .m3u या .m3u8</string>
@@ -1769,9 +1656,5 @@
     <plurals name="settings_epg_line_programmes">
         <item quantity="one"><xliff:g id="count">%1$s</xliff:g> कार्यक्रम</item>
         <item quantity="other"><xliff:g id="count">%1$s</xliff:g> कार्यक्रम</item>
-    </plurals>
-    <plurals name="settings_epg_line_catchup">
-        <item quantity="one"><xliff:g id="count">%1$s</xliff:g> पर कैच-अप</item>
-        <item quantity="other"><xliff:g id="count">%1$s</xliff:g> पर कैच-अप</item>
     </plurals>
 </resources>

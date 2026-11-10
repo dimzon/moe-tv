@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.first
  * yielded once; a channel played for four minutes on the reference portal and the drain paged
  * straight through it.
  *
- * The engines in `:player-core` cannot raise this themselves — they are handed a URL and have no
+ * The player in `:player-core` cannot raise this itself — it is handed a URL and has no
  * notion of a `sourceId`. So it is the host's playback screen, which holds the row, that opens and
  * closes a session. That makes this one of core's assigned hooks, in the same family as
  * `CoreBuildInfo` and `CrashRecorder.diagnostics`: core owns the state and the meaning, the app

@@ -54,18 +54,6 @@ object VideoQuality {
         return null
     }
 
-    /**
-     * mpv: which of the video tracks ([id] to height) to select — [pick] exactly when there is one,
-     * else the tallest within [cap], else the smallest there is. Null = leave mpv's own choice (nothing
-     * to choose between, or no limit and no pick).
-     */
-    fun mpvTrack(tracks: List<Pair<Int, Int>>, cap: Int?, pick: Int?): Int? {
-        val sized = tracks.filter { it.second > 0 }
-        if (sized.map { it.second }.distinct().size < 2) return null
-        pick?.let { h -> sized.firstOrNull { it.second == h }?.let { return it.first } }
-        val limit = cap ?: return null
-        return (sized.filter { it.second <= limit }.maxByOrNull { it.second } ?: sized.minByOrNull { it.second })?.first
-    }
 }
 
 /**

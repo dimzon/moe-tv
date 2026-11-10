@@ -17,14 +17,13 @@
 1	app/src/main/java/tv/own/myowntv/features/customize/CustomizeScreen.kt	hid:${entry.key}
 1	app/src/main/java/tv/own/myowntv/features/customize/CustomizeViewModel.kt	Custom
 1	app/src/main/java/tv/own/myowntv/features/customize/MoveToCategoryDialog.kt	new
+1	app/src/main/java/tv/own/myowntv/features/more/MorePages.kt	jm
 8	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	\0
 1	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	${cfg.host}$p
 1	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	:${cfg.port}
 2	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	https://
-6	app/src/main/java/tv/own/myowntv/features/settings/OpenSubtitlesAccountScreen.kt	\0
-1	app/src/main/java/tv/own/myowntv/features/settings/OpenSubtitlesViewModel.kt	OpenSubtitles
-1	app/src/main/java/tv/own/myowntv/features/settings/OpenSubtitlesViewModel.kt	manual refresh failed: ${it.javaClass.simpleName}: ${it.message}
-1	app/src/main/java/tv/own/myowntv/features/settings/OpenSubtitlesViewModel.kt	sign-in failed: ${e.javaClass.simpleName}: ${e.message}
+1	app/src/main/java/tv/own/myowntv/features/settings/SettingsStage.kt	\0
+1	app/src/main/java/tv/own/myowntv/features/settings/SettingsStage.kt	jm
 1	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	UnknownHostException
 1	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	dns.google
 1	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	refused
@@ -35,16 +34,12 @@
 1	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	#FFEB3B
 2	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	#FFFFFF
 3	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	\0
-1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	ass
 1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	epg-preload
 1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	shell-composed
-1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	srt
-1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	ssa
 1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	startup-settled
-1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	vtt
-1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	webvtt
 1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	·
-1	app/src/main/java/tv/own/myowntv/features/shell/components/MediaDetailsScreen.kt	\0
+1	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	jm
+1	app/src/main/java/tv/own/myowntv/player/PlayerHud.kt	ExoPlayer
 1	app/src/main/java/tv/own/myowntv/ui/components/ColorPicker.kt	#%06X
 1	app/src/main/java/tv/own/myowntv/ui/components/MyOwnTVAvatar.kt	\0
 1	app/src/main/java/tv/own/myowntv/ui/components/TextInputDialog.kt	\0
@@ -108,6 +103,12 @@
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	^$wrapped(?![\\p{L}\\p{N}])
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	^(?:\\|?[A-Za-z]{2,4}\\s*\\||\\[[A-Za-z]{2,4}]|\\([A-Za-z]{2,4}\\))
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	{2,}
+1	app/src/main/java/tv/own/owntv/core/database/Migration55To56.kt	ALTER TABLE `playback_quirks` DROP COLUMN `enginePin`
+1	app/src/main/java/tv/own/owntv/core/database/Migration55To56.kt	ALTER TABLE `sources` DROP COLUMN `vodEnginePreference`
+1	app/src/main/java/tv/own/owntv/core/database/Migration55To56.kt	enginePin
+1	app/src/main/java/tv/own/owntv/core/database/Migration55To56.kt	playback_quirks
+1	app/src/main/java/tv/own/owntv/core/database/Migration55To56.kt	sources
+1	app/src/main/java/tv/own/owntv/core/database/Migration55To56.kt	vodEnginePreference
 1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `playback_prefs` ADD COLUMN `audioDelayMs` INTEGER
 1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `sources` ADD COLUMN `hlsSupported` INTEGER NOT NULL DEFAULT 0
 1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `sources` ADD COLUMN `liveEnginePreference` TEXT
@@ -177,6 +178,7 @@
 1	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	FROM epg_programmes WHERE epgChannelId IN (:epgKeys)
 1	app/src/main/java/tv/own/owntv/core/database/dao/PlaybackPrefsDao.kt	DELETE FROM playback_prefs WHERE zoomMode IS NULL AND volumeBoost IS NULL AND audioDelayMs IS NULL
 1	app/src/main/java/tv/own/owntv/core/database/dao/PlaybackPrefsDao.kt	UPDATE playback_prefs SET audioDelayMs = NULL
+1	app/src/main/java/tv/own/owntv/core/database/dao/PlaybackQuirkDao.kt	DELETE FROM playback_quirks WHERE audioOnly IS NULL AND audioDelayMs IS NULL
 1	app/src/main/java/tv/own/owntv/core/database/dao/SourceDao.kt	UPDATE sources SET liveEnginePreference = :preference WHERE id = :id
 1	app/src/main/java/tv/own/owntv/core/database/dao/SourceDao.kt	UPDATE sources SET liveLatencyMode = :mode, liveLatencyCustomSecs = :customSecs WHERE id = :id
 1	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	.m3u8
@@ -235,6 +237,7 @@
 2	app/src/main/java/tv/own/owntv/core/parser/XtreamClient.kt	m3u8
 1	app/src/main/java/tv/own/owntv/core/parser/XtreamClient.kt	ts
 1	app/src/main/java/tv/own/owntv/core/parser/XtreamClient.kt	user_output_formats
+1	app/src/main/java/tv/own/owntv/core/player/ContentKey.kt	$sourceId:$mediaType:$it
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	auto_frame_rate_reset_416
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	dns_doh_url
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	dns_enabled
@@ -249,14 +252,10 @@
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_style_enabled
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	\0
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	#
-2	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	#%08X
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	bottom_center
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	bottom_left
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	bottom_right
-1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	center
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	default
-1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	left
-1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	right
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	top_center
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	top_left
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	top_right
@@ -318,7 +317,10 @@
 1	app/src/main/java/tv/own/owntv/core/sync/work/TrendingRefreshWorker.kt	Playlist
 1	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})
 1	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	--- live diagnostics leading up to the crash ---
+1	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	audio decoder: $decoderName (init ${initializationDurationMs}ms)
 1	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	body="$failureText"
+1	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	buffering=${_buffering.value} reconnect=${tune.retryCount}/$MAX_RECONNECTS
+1	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	channel to the ladder
 1	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	decoder rebuild failed: ${it.message}
 1	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	default User-Agent refused — retrying once as ${HttpClient.FALLBACK_USER_AGENT}
 1	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	insufficient resource
@@ -328,20 +330,10 @@
 1	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	reclaim
 1	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	stream didn't open — trying the ${alt.substringBefore('?').substringAfterLast('.')} form of this channel
 1	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	trying alternate format: ${HttpClient.redactUrl(alt)}
-4	app/src/main/java/tv/own/owntv/player/LiveStreamQuirks.kt	.m3u8
-3	app/src/main/java/tv/own/owntv/player/LiveStreamQuirks.kt	.ts
-1	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	#00000000
-1	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	#FFFFFFFF
-1	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	demuxer
-1	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	file-format
-2	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	force
-1	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	playback failed — retrying once as ${HttpClient.FALLBACK_USER_AGENT}
-2	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	sub-align-x
-2	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	sub-ass-override
-2	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	sub-back-color
-2	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	sub-color
-2	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	sub-pos
-1	app/src/main/java/tv/own/owntv/player/OwnTVPlayer.kt	track-list/$i/selected
+3	app/src/main/java/tv/own/owntv/player/LiveStreamQuirks.kt	.m3u8
+2	app/src/main/java/tv/own/owntv/player/LiveStreamQuirks.kt	.ts
+1	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	'${channel.name}' — its ExoPlayer preview had already failed; trying the next rung
+1	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	tune '${channel.name}' -> ExoPlayer
 1	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	\0
 1	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	429
 1	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	458

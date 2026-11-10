@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -95,7 +94,6 @@ import tv.own.myowntv.features.settings.SettingHelp
 import tv.own.myowntv.features.settings.StageAction
 import tv.own.myowntv.features.settings.StageActionColumn
 import tv.own.myowntv.features.settings.SpanHelpBlock
-import tv.own.owntv.core.model.MediaType
 import tv.own.myowntv.features.settings.PickerDialog
 import tv.own.myowntv.features.settings.SettingsViewModel
 import tv.own.myowntv.ui.components.chNavPaging
@@ -106,8 +104,8 @@ import tv.own.owntv.core.customize.MoveKind
 import tv.own.owntv.core.customize.SpanSelector
 
 /**
- * Category items screen — shows every item (channel/movie/series) in a category, including hidden
- * ones (marked "Hidden"), with hide/show, rename (Live only), reorder controls and span selection.
+ * Category items screen — shows every channel in a category, including hidden
+ * ones (marked "Hidden"), with hide/show, rename, reorder controls and span selection.
  *
  * Reached from [CustomizeScreen] by pressing OK on a category name.
  */
@@ -119,8 +117,6 @@ fun CustomizeItemsScreen(
     val parentVm: CustomizeViewModel = koinViewModel()
     val vm: CustomizeItemsViewModel = koinViewModel()
     val selectedCategory by parentVm.selectedCategory.collectAsStateWithLifecycle()
-    val section by parentVm.section.collectAsStateWithLifecycle()
-    val isLive = section == MediaType.LIVE
     val catInfo by vm.catInfo.collectAsStateWithLifecycle()
     val rangeAnchorKey by vm.rangeAnchorKey.collectAsStateWithLifecycle()
     val rangeMode by vm.rangeMode.collectAsStateWithLifecycle()
@@ -167,8 +163,6 @@ fun CustomizeItemsScreen(
     var creatingCategory by remember { mutableStateOf(false) }
     val backFocus = remember { FocusRequester() }
     val filterFocus = remember { FocusRequester() }
-    val renameItemsFocus = remember { FocusRequester() }
-    val autoCleanupFocus = remember { FocusRequester() }
     val rowFocusers = remember { mutableMapOf<String, FocusRequester>() }
     val actionsFocus = remember { FocusRequester() }
     // Focus the row that opened a dialog (rename / move) when it closes (a dialog close can land
@@ -205,11 +199,7 @@ fun CustomizeItemsScreen(
 
     // Customize › the category. Its tool row above the list, the items as rows and the panel
     // with the focused item's actions and the span help.
-    val about = when (section) {
-        MediaType.LIVE -> stringResource(R.string.settings_customize_channels_description)
-        MediaType.MOVIE -> stringResource(R.string.settings_customize_movies_description)
-        else -> stringResource(R.string.settings_customize_series_description)
-    }
+    val about = stringResource(R.string.settings_customize_channels_description)
     StageFullPage(
         parents = listOf(stringResource(R.string.settings_customize_title)),
         settingsRoot = false,
@@ -219,20 +209,6 @@ fun CustomizeItemsScreen(
         modifier = modifier,
         handleBack = false,
         toolbar = {
-            // Bulk rename — Movies/Series only: rename the WHOLE category, optionally with the ✨ Auto
-            // cleanup preset applied immediately. Live renames go per row or via span.
-            if (!isLive) {
-                tv.own.myowntv.ui.stage.StageTool(
-                    stringResource(R.string.settings_customize_rename_items),
-                    onClick = { dialogReturn = renameItemsFocus; vm.bulkRenameAll(autocleanup = false) },
-                    icon = MyOwnTVIcon.PENCIL, boxed = true, modifier = Modifier.focusRequester(renameItemsFocus),
-                )
-                tv.own.myowntv.ui.stage.StageTool(
-                    stringResource(R.string.settings_bulk_rename_auto_cleanup),
-                    onClick = { dialogReturn = autoCleanupFocus; vm.bulkRenameAll(autocleanup = true) },
-                    icon = MyOwnTVIcon.SPARKLE, boxed = true, modifier = Modifier.focusRequester(autoCleanupFocus),
-                )
-            }
             Spacer(Modifier.weight(1f))
             tv.own.myowntv.ui.stage.StageTool(
                 stringResource(
@@ -306,7 +282,6 @@ fun CustomizeItemsScreen(
                         ItemRow(
                             row = row,
                             about = about,
-                            isLive = isLive,
                             inRangeMode = rangeAnchorKey != null && rangeMode == SpanSelector.Mode.HIDE,
                             inRenameRange = inRenameRange,
                             isInSpan = isInSpan,
@@ -445,7 +420,6 @@ private fun ItemRow(
     row: CustomizeItemRow,
     /** The page's explanation, shown in the panel. */
     about: String,
-    isLive: Boolean,
     inRangeMode: Boolean,
     inRenameRange: Boolean,
     isInSpan: Boolean,
@@ -480,8 +454,8 @@ private fun ItemRow(
         StageAction(MyOwnTVIcon.CHEVRON_UP, stringResource(R.string.settings_row_menu_move_up), onMoveUp, onMoveLongPress),
         StageAction(MyOwnTVIcon.CHEVRON_DOWN, stringResource(R.string.settings_row_menu_move_down), onMoveDown, onMoveLongPress),
         StageAction(MyOwnTVIcon.PAGE_TOWARD_LAST, stringResource(R.string.settings_customize_move_bottom), onMoveBottom, onMoveLongPress),
-        // Live TV channels get a per-row Rename; Movies/Series rename the whole category from the tool row.
-        if (isLive) StageAction(MyOwnTVIcon.PENCIL, stringResource(R.string.settings_customize_rename), { if (inRenameRange) onPickRenameEnd() else onRename() }, onRenameLongPress) else null,
+        // Channels get a per-row Rename (or a renamed span by holding OK).
+        StageAction(MyOwnTVIcon.PENCIL, stringResource(R.string.settings_customize_rename), { if (inRenameRange) onPickRenameEnd() else onRename() }, onRenameLongPress),
         StageAction(MyOwnTVIcon.FOLDER, stringResource(R.string.settings_customize_move_to), onMove),
         onRemoveFromCategory?.let { StageAction(MyOwnTVIcon.CLOSE, stringResource(R.string.content_remove_from_category), it) },
         StageAction(
@@ -492,7 +466,7 @@ private fun ItemRow(
         ),
     )
     StageSettingRow(
-        icon = if (isLive) MyOwnTVIcon.LIVE_TV else MyOwnTVIcon.MOVIES,
+        icon = MyOwnTVIcon.LIVE_TV,
         title = row.displayName,
         desc = meta.ifBlank { null },
         value = if (row.hidden) SettingValue.Custom {

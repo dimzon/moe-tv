@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -76,7 +75,7 @@ internal val PROXY_SEARCH_ROWS: List<Int> = listOf(R.string.settings_use_proxy, 
 
 /**
  * Network → Proxy: one app-wide HTTP proxy. Enabling it routes all app traffic (playlist,
- * Xtream API, EPG, images, downloads, updates, ExoPlayer) and mpv playback through the proxy.
+ * Xtream API, EPG, images, updates) and live stream playback through the proxy.
  */
 @Composable
 fun NetworkSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {

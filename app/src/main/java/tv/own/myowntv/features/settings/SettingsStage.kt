@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.stageTone
 import tv.own.myowntv.ui.theme.LocalStagePalette
@@ -618,15 +617,6 @@ fun PopupSizeSample(sizePercent: Int) {
 
 private val PanelText: Color @Composable get() = stageTone(Color(0xFFD3DCD8), StageColors.Body)
 
-/** A "label  value" line in the panel (OpenSubtitles' account details). */
-@Composable
-fun SettingPanelLine(label: String, value: String) {
-    Row(horizontalArrangement = Arrangement.spacedBy(10.mpx)) {
-        Text(label, style = stageText(16, 500), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(value, style = stageText(16, 700), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-    }
-}
-
 /** `.radio`: a 22 px circle, a 2 px dim ring; the chosen one a 7 px accent ring. */
 @Composable
 fun StageRadio(on: Boolean) {
@@ -870,6 +860,12 @@ fun StageSearchResultRow(icon: MyOwnTVIcon, path: String, title: String, value: 
     }
 }
 
+/** When a playlist last synced: "Today 14:05" style, built from the Guide's own day labels. */
+@Composable
+private fun playlistSyncWhen(atMs: Long): String =
+    tv.own.myowntv.features.epg.guideDayLabel(tv.own.myowntv.features.epg.localMidnight(atMs)) + " " +
+        tv.own.myowntv.ui.format.rememberBestDateFormatter("jm")(atMs)
+
 /** Playlists' panel: each playlist's mark, its name and when it last synced. */
 @Composable
 fun PlaylistSyncList(sources: List<tv.own.owntv.core.database.entity.SourceEntity>) {
@@ -880,7 +876,7 @@ fun PlaylistSyncList(sources: List<tv.own.owntv.core.database.entity.SourceEntit
                 Text(src.name, style = stageText(18, 700), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                 src.lastSyncAt?.let {
                     Text(
-                        stringResource(R.string.settings_synced_at, tv.own.myowntv.features.downloads.recordingWhen(it)),
+                        stringResource(R.string.settings_synced_at, playlistSyncWhen(it)),
                         style = stageText(15, 500), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis,
                     )
                 }

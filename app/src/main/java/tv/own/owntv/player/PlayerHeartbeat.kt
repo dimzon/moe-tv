@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.shareIn
  * The position readout, the stream-info overlay and the fps chip were three separate timers producing
  * a single visual frame — 500 ms, 1,000 ms and a 1,500 ms one-shot. Together with the watchdogs that is
  * six to eight coroutines waking on sub-three-second intervals during live playback, each doing real
- * work (mpv property reads across JNI, decoder counters, Compose recompositions), on hardware where
+ * work (decoder counters, stream-info pulls, Compose recompositions), on hardware where
  * that is not free.
  *
  * Everything here reads the SAME beat, so two readers cost one wake-up instead of two. 1 Hz because

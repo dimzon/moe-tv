@@ -26,7 +26,7 @@ class ThroughputTracker : TransferListener {
         get() = readAndReset()
 
     /** Every byte counted since [reset], for averages that must not be steered by when they are read
-     *  ([FileBitrate]); [bitsPerSecond] reads and clears its own count. */
+     *  read passively; [bitsPerSecond] reads and clears its own count. */
     @Volatile var totalBytes = 0L
         private set
 
@@ -42,8 +42,8 @@ class ThroughputTracker : TransferListener {
     /**
      * Network bytes since [resetPassive], counted whether or not tracking is enabled. Kept apart from the
      * overlay's count on purpose: [bitsPerSecond] reads-and-clears its own bytes and [reset] runs whenever
-     * the overlay opens, and neither touches this one — so the film buffer sizing ([SmartBuffer]) and the
-     * stream-info overlay can both read without stealing from each other.
+     * the overlay opens, and neither touches this one — the passive count stays intact for a later
+     * readout while the overlay's own number is consumed on every read.
      */
     private val passive = AtomicLong(0L)
     val passiveBytes: Long get() = passive.get()

@@ -83,7 +83,6 @@ class SettingsBackupCoverageTest {
     fun `a legacy key is exported only while it is still the value read`() {
         val old = mutablePreferencesOf(Keys.SUB_SCALE to 1.5f)
         assertTrue(BackupKeys.exports(Keys.SUB_SCALE, old))
-        old[Keys.SUB_SCALE_MPV] = 1.5f
         old[Keys.SUB_SCALE_EXO] = 1.5f
         assertTrue("sub_style_enabled still falls back to it", BackupKeys.exports(Keys.SUB_SCALE, old))
         old[Keys.SUB_STYLE_ENABLED] = true

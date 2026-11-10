@@ -38,8 +38,6 @@ class BackupManager(
     private val customize: CustomizationStore,
     private val userData: UserDataResolver,
     private val epgSources: tv.own.owntv.core.epg.EpgSourceStore,
-    private val forceMpvStore: tv.own.owntv.core.player.ForceMpvStore,
-    private val vodEngineStore: tv.own.owntv.core.player.VodEngineStore,
     private val db: tv.own.owntv.core.database.OwnTVDatabase,
     private val tmdbOverrides: tv.own.owntv.core.metadata.MetadataOverrideStore,
     private val metadataDao: tv.own.owntv.core.database.dao.MetadataDao,
@@ -113,7 +111,7 @@ class BackupManager(
             val seal: ((String) -> JSONObject)? = key?.let { k -> { plain -> BackupCrypto.encrypt(k, plain) } }
 
             val root = JSONObject().apply {
-                put("version", 26) // v26: "settingsPins" — each profile's Settings lock PIN hash, sealed like "customizePins" (encrypted backups only); "settingsLockMenus" — each profile's "also lock long-press changes" switch ({ "<profileId>": true }). "downloadsAllowed" — each profile's Allow downloads switch ({ "<profileId>": false }); a profile with no entry may download. "lastCategories" — each profile's remembered Live TV / Movies / Series category in portable form ({ "<profileId>": { "last_live_category": "FAV", … } }); the device-wide last_*_category values in "settings" are no longer written and, from older files, restore as the fallback for profiles with none of their own. Sources carry "ignoreConnectionLimit" (absent = off). A Move keeps only the moved items' positions (customizations "catPos" for categories, userData "order" rows for items); older files saved every item of a list, so their folder item orders and category orders ("catOrder") are dropped on import, Favorites kept. v25: "sportsConfigs" — each profile's Settings → Sports blob ({ "<profileId>": { ... } }: followed leagues and teams, filters, alerts, remembered channels by portable name); a file without it restores with the defaults. v24: "preferredLanguages" — each profile's preferred audio/subtitle language ({ "<profileId>": { "a", "s" } }); the shared pref_audio_lang/pref_sub_lang settings stay as the fallback for a profile with no entry. v23: "playbackQuirks" — what a stream needs, shared by every profile (sound-only marks and audio delays; the engine pins stay in compatMode so older readers still get them), and playbackPrefs carry the remembered track languages ("al"/"sl"). A playbackPrefs "d" from an older file restores into the shared delay. v22: sources carry the measured stream limit (maxConnections + maxConnectionsProbedAt), because measuring it costs minutes and interrupts playback and the answer belongs to the account, not the device. v21: "tombstones" — the user data the user DELETED, so a merge (restore or local sync) does not reinstate it. Older readers ignore the block and behave exactly as they do today. v20: playbackPrefs carry the per-item A/V-sync offset. v19: sources carry the per-playlist Live TV engine and Live latency overrides. v18: per-profile specific-channel startup targets. v17: startupModes/customizePins moved SOURCES→SETTINGS (readers accept both); PIN hashes and legacy URL-shaped player keys are encrypted-only; sources carry preferHls/livePrerollSecs/hlsSupported; source-keyed blocks scoped to the ticked profiles' sources. v16: optional Stalker serial/device IDs/signature. v15: custom category membership rides userData as kind "member"; customCategories blobs pass through unremapped. v14: .own container (wallpaper rides along). v13: sources.syncLive/Movies/Series. v12: per-profile OpenSubtitles login (encrypted-only). v11: profile-scoped export. v10: sources.mac. v9: custom TMDB names, encrypted TMDB key
+                put("version", 26) // v26: "settingsPins" — each profile's Settings lock PIN hash, sealed like "customizePins" (encrypted backups only); "settingsLockMenus" — each profile's "also lock long-press changes" switch ({ "<profileId>": true }). "downloadsAllowed" — each profile's Allow downloads switch ({ "<profileId>": false }); a profile with no entry may download. "lastCategories" — each profile's remembered Live TV / Movies / Series category in portable form ({ "<profileId>": { "last_live_category": "FAV", … } }); the device-wide last_*_category values in "settings" are no longer written and, from older files, restore as the fallback for profiles with none of their own. Sources carry "ignoreConnectionLimit" (absent = off). A Move keeps only the moved items' positions (customizations "catPos" for categories, userData "order" rows for items); older files saved every item of a list, so their folder item orders and category orders ("catOrder") are dropped on import, Favorites kept. v25: "sportsConfigs" — each profile's Settings → Sports blob ({ "<profileId>": { ... } }: followed leagues and teams, filters, alerts, remembered channels by portable name); a file without it restores with the defaults. v24: "preferredLanguages" — each profile's preferred audio/subtitle language ({ "<profileId>": { "a", "s" } }); the shared pref_audio_lang/pref_sub_lang settings stay as the fallback for a profile with no entry. v23: "playbackQuirks" — what a stream needs, shared by every profile (sound-only marks and audio delays; engine pins then still lived in "compatMode", a block dropped at v26 with the second playback engine), and playbackPrefs carry the remembered track languages ("al"/"sl"). A playbackPrefs "d" from an older file restores into the shared delay. v22: sources carry the measured stream limit (maxConnections + maxConnectionsProbedAt), because measuring it costs minutes and interrupts playback and the answer belongs to the account, not the device. v21: "tombstones" — the user data the user DELETED, so a merge (restore or local sync) does not reinstate it. Older readers ignore the block and behave exactly as they do today. v20: playbackPrefs carry the per-item A/V-sync offset. v19: sources carry the per-playlist Live TV engine and Live latency overrides. v18: per-profile specific-channel startup targets. v17: startupModes/customizePins moved SOURCES→SETTINGS (readers accept both); PIN hashes and legacy URL-shaped player keys are encrypted-only; sources carry preferHls/livePrerollSecs/hlsSupported; source-keyed blocks scoped to the ticked profiles' sources. v16: optional Stalker serial/device IDs/signature. v15: custom category membership rides userData as kind "member"; customCategories blobs pass through unremapped. v14: .own container (wallpaper rides along). v13: sources.syncLive/Movies/Series. v12: per-profile OpenSubtitles login (encrypted-only). v11: profile-scoped export. v10: sources.mac. v9: custom TMDB names, encrypted TMDB key
                 put("sections", JSONArray().apply { sections.forEach { put(it.name) } })
                 if (salt != null) put("crypto", BackupCrypto.cryptoBlock(salt))
                 // Ticked profiles always ride (backup is profile-based); restore needs SOURCES to apply them.
@@ -202,34 +200,28 @@ class BackupManager(
                         put("settingsPins", sealValues(filterByProfile(settings.exportSettingsLockPins(), pidKeys), seal))
                     }
                     put("settingsLockMenus", filterByProfile(settings.exportSettingsLockMenus(), pidKeys))
-                    // Per-item "compatibility mode" engine pins (Live + VOD).
-                    //
-                    // These are keyed by [enginePinKey] — "<sourceId>:<MEDIA_TYPE>:<remoteId>" — so the
-                    // source id DOES have to be remapped on restore (the older comment here claimed they
-                    // were stream-URL keyed; that stopped being true when the stable key was introduced,
-                    // and an unremapped id silently pinned the wrong source's items). Rows are scoped to
+                    // The per-item stores are keyed by [tv.own.owntv.core.player.contentKey] —
+                    // "<sourceId>:<MEDIA_TYPE>:<remoteId>" — so the source id DOES have to be remapped
+                    // on restore (an older comment claimed they were stream-URL keyed; that stopped
+                    // being true when the stable key was introduced, and an unremapped id silently
+                    // moved values onto the wrong source's items). Rows are scoped to
                     // the ticked profiles' sources for the same reason. Keys still in the legacy
                     // stream-URL shape carry no source id and frequently embed the account's username
                     // and password, so they ride only when there is a passphrase.
                     val urlKeysAllowed = seal != null
-                    put("compatMode", JSONObject().apply {
-                        put("liveMpvUrls", JSONArray(filterEnginePinKeys(forceMpvStore.exportUrls(), linkedSourceIds, urlKeysAllowed)))
-                        put("liveExoUrls", JSONArray(filterEnginePinKeys(forceMpvStore.exportExoUrls(), linkedSourceIds, urlKeysAllowed)))
-                        put("vodMpvUrls", JSONArray(filterEnginePinKeys(vodEngineStore.exportMpvUrls(), linkedSourceIds, urlKeysAllowed)))
-                        put("vodExoUrls", JSONArray(filterEnginePinKeys(vodEngineStore.exportExoUrls(), linkedSourceIds, urlKeysAllowed)))
-                    })
-                    // Per-item zoom / volume (DB v32). Same key shape as compatMode — [enginePinKey] —
+                    // Per-item zoom / volume (DB v32). Same key shape as every per-item store —
+                    // [tv.own.owntv.core.player.contentKey] —
                     // so BOTH ids travel and both are remapped on restore: the profile id (these rows
                     // are per profile) and the source id inside `contentKey`. Scoped to the ticked
                     // profiles and their sources; legacy stream-URL keys need a passphrase, exactly as
-                    // in compatMode above. Optional block: older readers skip it.
+                    // the key rule above says. Optional block: older readers skip it.
                     run {
                         val ticked = profiles.map { it.id }.toSet()
                         val rows = runCatching { db.playbackPrefsDao().getAllOnce() }.getOrDefault(emptyList())
                         put("playbackPrefs", JSONArray().apply {
                             rows.filter { row ->
                                 row.profileId in ticked &&
-                                    filterEnginePinKeys(listOf(row.contentKey), linkedSourceIds, urlKeysAllowed).isNotEmpty()
+                                    filterContentKeys(listOf(row.contentKey), linkedSourceIds, urlKeysAllowed).isNotEmpty()
                             }.forEach { row ->
                                 put(
                                     JSONObject().apply {
@@ -244,12 +236,12 @@ class BackupManager(
                             }
                         })
                         // v23: sound-only marks and audio delays, shared by every profile — scoped and
-                        // key-guarded exactly like the rows above. Engine pins ride in compatMode.
+                        // key-guarded exactly like the rows above.
                         val quirks = runCatching { db.playbackQuirkDao().getAllOnce() }.getOrDefault(emptyList())
                         put("playbackQuirks", JSONArray().apply {
                             quirks.filter { q ->
                                 (q.audioOnly == true || q.audioDelayMs != null) &&
-                                    filterEnginePinKeys(listOf(q.contentKey), linkedSourceIds, urlKeysAllowed).isNotEmpty()
+                                    filterContentKeys(listOf(q.contentKey), linkedSourceIds, urlKeysAllowed).isNotEmpty()
                             }.forEach { q ->
                                 put(
                                     JSONObject().apply {
@@ -682,7 +674,7 @@ class BackupManager(
         /** Rows this device would LOSE, because the other device deleted them more recently. */
         val deletions: Int = 0,
         /**
-         * The file comes from another device and carries its hardware settings or engine pins —
+         * The file comes from another device and carries its hardware settings —
          * which [import] keeps out unless `deviceSettings` is passed. The confirm step offers them.
          */
         val hasDeviceSettings: Boolean = false,
@@ -797,8 +789,7 @@ class BackupManager(
                 deletions = deletions,
                 hasDeviceSettings = Section.SETTINGS in sections &&
                     !DeviceIdentity.sameDevice(DeviceIdentity.fromJson(root.optJSONObject("device")), settings.deviceIdentity()) &&
-                    (root.optJSONObject("settings")?.let(settings::carriesDeviceSettings) == true ||
-                        root.optJSONObject("compatMode")?.keys()?.hasNext() == true),
+                    root.optJSONObject("settings")?.let(settings::carriesDeviceSettings) == true,
             )
         }
     }
@@ -851,8 +842,8 @@ class BackupManager(
         backupPassword: String? = null,
         mode: ImportMode = ImportMode.RESTORE,
         /**
-         * The user asked for the hardware settings of *another* device (decoder, engines, frame rate,
-         * HDR, surround) and its per-channel engine pins. A restore of this device's own
+         * The user asked for the hardware settings of *another* device (decoders, frame rate,
+         * HDR, surround). A restore of this device's own
          * backup applies them anyway; a file from elsewhere — a restore or a local sync alike — keeps
          * this device's unless this is true. Local sync follows the same rule.
          */
@@ -944,7 +935,7 @@ class BackupManager(
             // MERGE-restore: a restore never deletes existing profiles or sources.
             // One transaction wraps the profile/source/link row writes — the part where a partial
             // apply would be actively wrong (a source inserted but its profile link missing). The
-            // DataStore-backed sections below (settings, customizations, engine pins, logins) can't
+            // DataStore-backed sections below (settings, customizations, logins) can't
             // join it, and neither can the user-data resolve, which is deliberately chunked so
             // a large restore doesn't hold one write transaction for its whole duration.
             db.transaction {
@@ -1062,7 +1053,6 @@ class BackupManager(
                                         // v44 per-playlist overrides: the file wins only where it says anything.
                                         catchupTimezone = if (srcJson.has("catchupTimezone")) incoming.catchupTimezone else existing.catchupTimezone,
                                         catchupOffsetMin = if (srcJson.has("catchupOffsetMin")) incoming.catchupOffsetMin else existing.catchupOffsetMin,
-                                        vodEnginePreference = if (srcJson.has("vodEnginePreference")) incoming.vodEnginePreference else existing.vodEnginePreference,
                                         liveTuneTimeoutSecs = if (srcJson.has("liveTuneTimeoutSecs")) incoming.liveTuneTimeoutSecs else existing.liveTuneTimeoutSecs,
                                         httpReferer = if (srcJson.has("httpReferer")) incoming.httpReferer else existing.httpReferer,
                                         cleanChannelNames = if (srcJson.has("cleanChannelNames")) incoming.cleanChannelNames else existing.cleanChannelNames,
@@ -1245,8 +1235,8 @@ class BackupManager(
                 importProfileSettings(root, profileIdMap, sourceIdMap, profileDao.getAllOnce().map { it.id }.toSet())
             }
             if (Section.SETTINGS in sections) {
-                // Decision 9: another device's hardware settings — the global ones below and the
-                // per-channel engine pins — only come along when the user ticked them.
+                // Decision 9: another device's hardware settings — the global ones below —
+                // only come along when the user ticked them.
                 val fromHere = DeviceIdentity.sameDevice(DeviceIdentity.fromJson(root.optJSONObject("device")), settings.deviceIdentity())
                 val keepDeviceSettings = !fromHere && !deviceSettings
                 root.optJSONObject("settings")?.let { s ->
@@ -1289,21 +1279,8 @@ class BackupManager(
                     root.optJSONObject("settingsLockMenus")?.let { settings.importSettingsLockMenus(remapProfileKeys(it, profileIdMap), pids) }
                     }
                 }
-                // Per-item compatibility-mode engine pins. Optional; merged (union) into the current
-                // pins so a restore never drops locally-set pins. Corrupt/non-string entries ignored.
-                //
-                // The keys are [enginePinKey] ("<sourceId>:<MEDIA_TYPE>:<remoteId>"), so the source id
-                // has to be remapped to its device id first. Without this a merge restore either did
-                // nothing (the file's id is free on this device, so the pin named a source that does
-                // not exist) or, worse, pinned the items of whatever unrelated source already held
-                // that id. Legacy stream-URL keys carry no id and pass through untouched.
-                // Also device knowledge: a channel pinned to mpv because this box's decoder mangles it
-                // says nothing about a phone's. Held back with the other hardware settings.
-                root.optJSONObject("compatMode")?.takeIf { !keepDeviceSettings }?.let { c ->
-                    fun keys(name: String) = jsonStrings(c.optJSONArray(name)).mapNotNull { remapEnginePinKey(it, sourceIdMap) }
-                    runCatching { forceMpvStore.importUrls(keys("liveMpvUrls"), keys("liveExoUrls")) }
-                    runCatching { vodEngineStore.importUrls(keys("vodMpvUrls"), keys("vodExoUrls")) }
-                }
+                // Older files carry a "compatMode" block of per-item engine pins; the engine it pinned
+                // to is gone, so the block is read by nobody now — an old file simply loses those pins.
                 // Per-item zoom / volume / audio delay. Merged in (REPLACE on the same profile+key), so a restore
                 // never drops what this device already remembers for other items. Rows whose profile
                 // isn't on this device are skipped — a foreign key would reject them anyway.
@@ -1316,10 +1293,11 @@ class BackupManager(
                         // Unmapped = not on this device; the file's own number may be someone else here.
                         val pid = profileIdMap[filePid] ?: continue
                         if (pid !in deviceProfileIds) continue
-                        // Same [enginePinKey] shape as compatMode above — remap the source id, or the
+                        // Same [tv.own.owntv.core.player.contentKey] shape as every per-item store —
+                        // remap the source id, or the
                         // restored zoom/volume lands on the wrong item (or on nothing at all).
                         val key = e.optString("k").takeIf { it.isNotBlank() }
-                            ?.let { remapEnginePinKey(it, sourceIdMap) } ?: continue
+                            ?.let { remapContentKey(it, sourceIdMap) } ?: continue
                         val zoom = e.optString("z").takeIf { it.isNotBlank() }
                         val volume = if (e.has("v")) e.optInt("v").coerceIn(0, 150) else null
                         val audioLang = e.optString("al").takeIf { it.isNotBlank() }
@@ -1329,13 +1307,13 @@ class BackupManager(
                         if (e.has("d")) {
                             val delay = e.optInt("d").coerceIn(-5_000, 5_000)
                             runCatching {
-                                db.playbackQuirkDao().setAudioDelay(key, tv.own.owntv.core.player.sourceIdOfPinKey(key), tv.own.owntv.core.player.mediaTypeOfPinKey(key) ?: "LIVE", delay)
+                                db.playbackQuirkDao().setAudioDelay(key, tv.own.owntv.core.player.sourceIdOfContentKey(key), tv.own.owntv.core.player.mediaTypeOfContentKey(key) ?: "LIVE", delay)
                             }
                         }
                         if (zoom == null && volume == null && audioLang == null && subtitleLang == null) continue
                         rows += tv.own.owntv.core.database.entity.PlaybackPrefsEntity(
                             profileId = pid, contentKey = key, zoomMode = zoom, volumeBoost = volume,
-                            sourceId = tv.own.owntv.core.player.sourceIdOfPinKey(key),
+                            sourceId = tv.own.owntv.core.player.sourceIdOfContentKey(key),
                             audioLang = audioLang, subtitleLang = subtitleLang,
                         )
                     }
@@ -1348,9 +1326,9 @@ class BackupManager(
                     for (i in 0 until arr.length()) {
                         val e = arr.optJSONObject(i) ?: continue
                         val key = e.optString("k").takeIf { it.isNotBlank() }
-                            ?.let { remapEnginePinKey(it, sourceIdMap) } ?: continue
-                        val sourceId = tv.own.owntv.core.player.sourceIdOfPinKey(key)
-                        val type = e.optString("t").takeIf { it.isNotBlank() } ?: tv.own.owntv.core.player.mediaTypeOfPinKey(key) ?: "LIVE"
+                            ?.let { remapContentKey(it, sourceIdMap) } ?: continue
+                        val sourceId = tv.own.owntv.core.player.sourceIdOfContentKey(key)
+                        val type = e.optString("t").takeIf { it.isNotBlank() } ?: tv.own.owntv.core.player.mediaTypeOfContentKey(key) ?: "LIVE"
                         runCatching {
                             if (e.optBoolean("a", false)) dao.setAudioOnly(key, sourceId, type, true)
                             if (e.has("d")) dao.setAudioDelay(key, sourceId, type, e.optInt("d").coerceIn(-5_000, 5_000))
@@ -1691,7 +1669,6 @@ class BackupManager(
         put("liveLatencyMode", s.liveLatencyMode ?: JSONObject.NULL)
         put("catchupTimezone", s.catchupTimezone ?: JSONObject.NULL)
         put("catchupOffsetMin", s.catchupOffsetMin ?: JSONObject.NULL)
-        put("vodEnginePreference", s.vodEnginePreference ?: JSONObject.NULL)
         put("liveTuneTimeoutSecs", s.liveTuneTimeoutSecs ?: JSONObject.NULL)
         put("httpReferer", s.httpReferer ?: JSONObject.NULL)
         put("cleanChannelNames", s.cleanChannelNames)
@@ -1751,10 +1728,11 @@ class BackupManager(
             liveEnginePreference = o.optStringOrNull("liveEnginePreference"),
             liveLatencyMode = o.optStringOrNull("liveLatencyMode"),
             liveLatencyCustomSecs = o.optInt("liveLatencyCustomSecs", FOLLOW_GLOBAL_LATENCY_SECS),
-            // v44: absent (older backup) or null restores as "follow the global setting".
+            // v44: absent (older backup) or null restores as "follow the global setting". Files from
+            // the two-engine era also carry "vodEnginePreference"; there is no such choice now, so the
+            // key is simply not read.
             catchupTimezone = o.optStringOrNull("catchupTimezone"),
             catchupOffsetMin = o.optIntOrNull("catchupOffsetMin"),
-            vodEnginePreference = o.optStringOrNull("vodEnginePreference"),
             liveTuneTimeoutSecs = o.optIntOrNull("liveTuneTimeoutSecs"),
             httpReferer = o.optStringOrNull("httpReferer"),
             cleanChannelNames = o.optBoolean("cleanChannelNames", false),
@@ -2036,7 +2014,7 @@ internal fun filterByProfile(map: JSONObject, pidKeys: Set<String>): JSONObject 
 
 /**
  * Remaps the source id of a "<type>:<sourceId>:<rest>" content key — the shape the subtitle tables
- * and the TMDB overrides both use ("movie:7:1234", "episode:7:1234:S1E2"). Unlike [remapEnginePinKey]
+ * and the TMDB overrides both use ("movie:7:1234", "episode:7:1234:S1E2"). Unlike [remapContentKey]
  * the id is the SECOND segment, because the media type leads.
  */
 internal fun remapTypedContentKey(key: String, sourceIdMap: Map<Long, Long>): String {
@@ -2055,16 +2033,16 @@ internal fun filterBySourceId(map: JSONObject, sourceIds: Set<Long>): JSONObject
 }
 
 /**
- * Remaps the leading source id of a per-item player key — [tv.own.owntv.core.player.enginePinKey]'s
- * "<sourceId>:<MEDIA_TYPE>:<remoteId>". Used for the compatibility-mode pins and the per-item
- * zoom/volume rows, both of which embed the id of the source the item came from.
+ * Remaps the leading source id of a per-item player key — [tv.own.owntv.core.player.contentKey]'s
+ * "<sourceId>:<MEDIA_TYPE>:<remoteId>". Used for the per-item zoom/volume and quirk rows, which
+ * embed the id of the source the item came from.
  *
  * A key in the older stream-URL shape has no source id to remap ("http" never parses as a Long) and
  * passes through unchanged, as does every key when no sources took part ([sourceIdMap] empty). A key
  * whose source id has no entry in a non-empty map is **dropped** (null): its playlist was not restored,
- * and the same number here may be a different playlist, which would inherit the pin or zoom.
+ * and the same number here may be a different playlist, which would inherit its zoom or delay.
  */
-internal fun remapEnginePinKey(key: String, sourceIdMap: Map<Long, Long>): String? {
+internal fun remapContentKey(key: String, sourceIdMap: Map<Long, Long>): String? {
     if (sourceIdMap.isEmpty()) return key
     val sourceId = key.substringBefore(':').toLongOrNull() ?: return key
     val mapped = sourceIdMap[sourceId] ?: return null
@@ -2079,7 +2057,7 @@ internal fun remapEnginePinKey(key: String, sourceIdMap: Map<Long, Long>): Strin
  * in an unencrypted backup those keys are exactly the credential leak the secret policy exists to
  * prevent. A stable key is only ever "<sourceId>:<TYPE>:<remoteId>" and leaks nothing.
  */
-internal fun filterEnginePinKeys(
+internal fun filterContentKeys(
     keys: Collection<String>,
     sourceIds: Set<Long>,
     allowUrlKeys: Boolean,

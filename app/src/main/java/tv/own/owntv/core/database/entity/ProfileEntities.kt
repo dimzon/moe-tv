@@ -102,13 +102,10 @@ data class SourceEntity(
      */
     val livePrerollSecs: Int = FOLLOW_GLOBAL_PREROLL,
     /**
-     * Per-playlist Live TV engine override (v34), as an [tv.own.owntv.core.player.EnginePreference] name.
-     * `null` = follow the global Settings choice, which is what every existing row reads as.
-     *
-     * Per-playlist for the same reason as [livePrerollSecs]: which engine copes is a property of the
-     * *provider's* stream format, so a user with one panel that only mpv can play should not have to
-     * move all their playlists onto mpv. It sits **below** a per-channel pin and below the DRM rule —
-     * see the resolution order in `LiveViewModel`.
+     * Legacy (v34): a per-playlist Live TV engine override name from the time the app had two
+     * playback engines. The app ships one engine now, so the stored value changes nothing; the
+     * column and property stay until a later schema pass drops them. `null` — every existing row —
+     * meant "follow the global setting".
      */
     val liveEnginePreference: String? = null,
     /**
@@ -123,7 +120,7 @@ data class SourceEntity(
      * `user_info.max_connections`. `0` = unknown (M3U/Stalker, an older row, or a panel that doesn't
      * report it).
      *
-     * `1` is the interesting value: the two playback engines must never overlap on such an account, and
+     * `1` is the interesting value: playback streams must never overlap on such an account, and
      * until now the app only found that out by failing a tune and reading the 458 back. Knowing it at
      * sync time means the very first zap already behaves.
      */
@@ -142,14 +139,12 @@ data class SourceEntity(
     val maxConnectionsProbedAt: Long = 0,
     val createdAt: Long = System.currentTimeMillis(),
     val lastSyncAt: Long? = null,
-    // --- v44: four more per-playlist overrides. Each `null` = follow the global
-    // setting, which is what every existing row reads as after the upgrade.
+    // --- v44: the per-playlist overrides added then (the VOD-engine one was dropped at v56). Each
+    // `null` = follow the global setting, which is what every existing row reads as after the upgrade.
     /** Catch-up time zone for this provider's archive, as a `SettingsRepository.CatchupTimezone` name. */
     val catchupTimezone: String? = null,
     /** MANUAL [catchupTimezone]'s offset from UTC in minutes (unused for DEVICE). */
     val catchupOffsetMin: Int? = null,
-    /** Movies & Series engine for this playlist, as an [tv.own.owntv.core.player.EnginePreference] name. */
-    val vodEnginePreference: String? = null,
     /** "Give up after" for a live tune on this playlist, in seconds. */
     val liveTuneTimeoutSecs: Int? = null,
     /** An HTTP `Referer` this provider's streams require. */

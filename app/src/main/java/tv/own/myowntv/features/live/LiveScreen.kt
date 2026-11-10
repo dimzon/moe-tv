@@ -27,7 +27,6 @@ import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -41,7 +40,6 @@ import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
 import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
@@ -50,7 +48,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.components.onDpadLeft
 import tv.own.owntv.core.epg.displayLogoUrl
@@ -96,7 +93,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
@@ -137,8 +133,6 @@ import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.components.OwnTVSpinner
 import tv.own.myowntv.ui.components.TextInputDialog
 import tv.own.myowntv.ui.components.gridFocusTarget
-import tv.own.myowntv.ui.format.rememberBestDateFormatter
-import tv.own.myowntv.ui.format.rememberSystemTimeFormatter
 import tv.own.owntv.core.live.LiveKey
 import tv.own.owntv.core.live.ProviderTags
 
@@ -181,7 +175,6 @@ fun LiveScreen(
     val favoriteIds by vm.favoriteIds.collectAsStateWithLifecycle()
     val showChannelNumbers by vm.showChannelNumbers.collectAsStateWithLifecycle()
     val externalPlayerOn by vm.externalPlayerOn.collectAsStateWithLifecycle()
-    val catchupPlayer by vm.catchupPlayer.collectAsStateWithLifecycle()
     val previewChannel by vm.previewChannel.collectAsStateWithLifecycle()
     val previewCategoryName by vm.previewCategoryName.collectAsStateWithLifecycle()
     val previewArmed by vm.previewArmed.collectAsStateWithLifecycle()
@@ -277,15 +270,6 @@ fun LiveScreen(
     var renaming by remember { mutableStateOf<ChannelEntity?>(null) }
     var matchingEpg by remember { mutableStateOf<ChannelEntity?>(null) }
     var offsettingEpg by remember { mutableStateOf<ChannelEntity?>(null) }
-    var catchupChannel by remember { mutableStateOf<ChannelEntity?>(null) }
-    // The channel the "Schedule recording…" dialog is open for (#2).
-    var schedulingChannel by remember { mutableStateOf<ChannelEntity?>(null) }
-    // Programme picked in the catch-up dialog, awaiting the "Watch from start / Watch channel" choice.
-    // The Live picker used to start the archive straight from the pick, so the same programme opened
-    // from the Guide (which asks) and from here behaved differently — this makes the two match.
-    var catchupDetail by remember {
-        mutableStateOf<Pair<ChannelEntity, tv.own.owntv.core.database.entity.EpgProgrammeEntity>?>(null)
-    }
     var contextChannel by remember { mutableStateOf<ChannelEntity?>(null) } // long-press quick menu
     // Multiview: whether the menu offers it at all, how many tiles the grid has, and the confirmation
     // after a channel is kept (null = nothing to say).
@@ -294,9 +278,7 @@ fun LiveScreen(
     val multiviewTiles by liveSettings.multiviewTiles.collectAsStateWithLifecycle(
         tv.own.owntv.core.live.DEFAULT_MULTIVIEW_TILES,
     )
-    // Also says where a scheduled recording landed ("Will record Sat 21:00").
     val multiviewToast = tv.own.myowntv.ui.components.rememberInAppToast()
-    val recordingChannelIds by vm.recordingChannelIds.collectAsStateWithLifecycle()
     // Resolved through resources rather than stringResource: the count is only known inside the click.
     val multiviewRes = androidx.compose.ui.platform.LocalContext.current.resources
     var contextCategory by remember { mutableStateOf<LiveRailItem?>(null) }
@@ -380,9 +362,9 @@ fun LiveScreen(
         if (opened) { contextMenuOpen = true; return@LaunchedEffect }
         if (!contextMenuOpen) return@LaunchedEffect
         contextMenuOpen = false
-        // A follow-up dialog (rename / match EPG / catch-up / move) grabs focus itself — only restore
+        // A follow-up dialog (rename / match EPG / move) grabs focus itself — only restore
         // for plain closes (Cancel, Favourite, Hide, Close). Those dialogs restore on their own close.
-        if (renaming != null || matchingEpg != null || offsettingEpg != null || catchupChannel != null || schedulingChannel != null || enteringMoveMode ||
+        if (renaming != null || matchingEpg != null || offsettingEpg != null || enteringMoveMode ||
             moveItem != null || creatingCategory
         ) return@LaunchedEffect
         restoreToContextRow()
@@ -410,22 +392,6 @@ fun LiveScreen(
             delay(200)
             restoreToContextRow()
         }
-    }
-    // Catch-up restoration.
-    var catchupWasOpen by remember { mutableStateOf(false) }
-    LaunchedEffect(catchupChannel, catchupDetail) {
-        if (catchupChannel != null || catchupDetail != null) { catchupWasOpen = true; return@LaunchedEffect }
-        if (!catchupWasOpen) return@LaunchedEffect
-        catchupWasOpen = false
-        restoreToContextRow()
-    }
-    // Schedule-recording restoration.
-    var schedulingWasOpen by remember { mutableStateOf(false) }
-    LaunchedEffect(schedulingChannel) {
-        if (schedulingChannel != null) { schedulingWasOpen = true; return@LaunchedEffect }
-        if (!schedulingWasOpen) return@LaunchedEffect
-        schedulingWasOpen = false
-        restoreToContextRow()
     }
     // Channel reorder restoration.
     var reorderWasOpen by remember { mutableStateOf(false) }
@@ -986,43 +952,7 @@ fun LiveScreen(
             channel = ch,
             focusStartMs = null,
             onWatch = { if (vm.watchFullscreen(ch, emptyList()) && !externalPlayerOn) onFullscreen() },
-            onPlayFromStart = { p -> vm.playCatchupProgramme(ch, p); if (!externalPlayerOn) onFullscreen() },
             onDismiss = { programmeDetails = null; scope.launch { restoreToContextRow() } },
-        )
-    }
-    catchupChannel?.let { ch ->
-        CatchupDialog(
-            channelName = ch.name,
-            loadProgrammes = { vm.catchupProgrammes(ch) },
-            onPick = { prog -> catchupChannel = null; catchupDetail = ch to prog },
-            jumpOffsetsSec = remember(ch.id) { vm.catchupJumpOptions(ch) },
-            jumpWindowSec = remember(ch.id) { vm.catchupWindowOf(ch) },
-            onJump = { offset ->
-                catchupChannel = null
-                vm.playCatchupAt(ch, offset)
-                if (!externalPlayerOn) onFullscreen()
-            },
-            onDismiss = { catchupChannel = null },
-        )
-    }
-
-    // Same dialog the Guide shows for a programme, so both routes offer the identical choice:
-    // replay from the start, tune the channel live, favourite it, or back out.
-    catchupDetail?.let { (ch, prog) ->
-        tv.own.myowntv.features.epg.ProgrammeDetailDialog(
-            channelName = ch.name,
-            programme = prog,
-            loadDescription = { vm.programmeDescription(it) },
-            canCatchup = true, // only reachable from the catch-up picker, which already gated on this
-            isFavorite = favoriteIds.contains(ch.id),
-            onToggleFavorite = { vm.toggleFavorite(ch) },
-            onWatch = { catchupDetail = null; if (vm.watchFullscreen(ch, emptyList()) && !externalPlayerOn) onFullscreen() },
-            onPlayCatchup = { catchupDetail = null; vm.playCatchupProgramme(ch, prog); onFullscreen() },
-            // External: the archive went to another app, so don't mount the fullscreen player over it.
-            onPlayCatchupExternal = { catchupDetail = null; vm.playCatchupExternal(ch, prog) },
-            catchupPlayer = catchupPlayer,
-            onDismiss = { catchupDetail = null },
-            compact = true,
         )
     }
 
@@ -1073,10 +1003,6 @@ fun LiveScreen(
             onHide = { vm.hideChannel(ch); contextChannel = null },
             onMatchEpg = { matchingEpg = ch; contextChannel = null },
             onEpgOffset = { offsettingEpg = ch; contextChannel = null },
-            onCatchup = { catchupChannel = ch; contextChannel = null },
-            isRecording = ch.id in recordingChannelIds,
-            onRecord = { if (ch.id in recordingChannelIds) vm.stopRecordingOn(ch) else vm.recordNow(ch); contextChannel = null },
-            onScheduleRecord = { schedulingChannel = ch; contextChannel = null },
             onDetails = { programmeDetails = ch; contextChannel = null },
             onPlayExternal = { vm.playExternal(ch); contextChannel = null },
             // Only offered once Multiview is switched on. Adding is silent apart from the toast: the
@@ -1111,22 +1037,6 @@ fun LiveScreen(
             onRemoveFromHistory = { vm.removeFromHistory(ch.id); contextChannel = null },
             onRemoveFromCategory = (selectedKey as? LiveKey.Custom)?.let { k -> { vm.removeFromCustomCategory(ch, k); contextChannel = null } },
             onDismiss = { contextChannel = null },
-        )
-    }
-
-    val scheduledDay = tv.own.myowntv.ui.format.rememberBestDateFormatter("EEEMMMd")
-    val scheduledTime = tv.own.myowntv.ui.format.rememberSystemTimeFormatter()
-    schedulingChannel?.let { ch ->
-        ScheduleRecordingDialog(
-            channelName = ch.name,
-            clashesFor = { start, stop -> vm.recordingClashes(ch, start, stop) },
-            onSchedule = { start, stop ->
-                schedulingChannel = null
-                vm.scheduleRecording(ch, start, stop) { at ->
-                    multiviewToast.show(multiviewRes.getString(R.string.recording_scheduled_for, scheduledDay(at) + " " + scheduledTime(at)))
-                }
-            },
-            onDismiss = { schedulingChannel = null },
         )
     }
 
@@ -1209,7 +1119,7 @@ fun LiveScreen(
 /**
  * ☰ Channel options: the Stage options menu, 540 wide over the stage, above the scrim. Header
  * = the logo plate, "256 · Sky Cinema Premieren" and "category · playlist"; the actions in the groups
- * WATCH · CHANNEL · GUIDE DATA · ORGANISE with their values (Catch-up "7 days", Match EPG "Auto",
+ * WATCH · CHANNEL · GUIDE DATA · ORGANISE with their values (Match EPG "Auto",
  * EPG time offset "Global"). The order and visibility are the user's (Settings › Long-press menus ›
  * Live TV); in the shipped order a group label is drawn wherever the group changes, in the user's own
  * order there are none.
@@ -1229,11 +1139,6 @@ private fun ChannelContextMenu(
     onHide: () -> Unit,
     onMatchEpg: () -> Unit,
     onEpgOffset: () -> Unit,
-    onCatchup: () -> Unit,
-    // A recording of this channel is running: Record becomes Stop recording.
-    isRecording: Boolean,
-    onRecord: () -> Unit,
-    onScheduleRecord: () -> Unit,
     onPlayExternal: () -> Unit,
     // Null unless Multiview is switched on: keep this channel for the grid.
     onAddToMultiview: (() -> Unit)?,
@@ -1250,24 +1155,17 @@ private fun ChannelContextMenu(
     val focus = remember { androidx.compose.ui.focus.FocusRequester() }
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
     androidx.activity.compose.BackHandler { onDismiss() }
-    val catchupValue = channel.catchupDays.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.settings_epg_guide_days_value, it, it) }
     val matchValue = if (epgMatchManual) stringResource(R.string.settings_manual) else stringResource(R.string.settings_auto)
     val offsetValue = epgShiftMinutes?.let { liveEpgShiftLabel(it) } ?: stringResource(R.string.content_epg_offset_global_short)
     // Group ids = the four groups, in their order.
     val watch = 0; val chan = 1; val guide = 2; val organise = 3; val details = 4
     val actions = buildList {
         add(MenuAction("programme_details", stringResource(R.string.content_programme_details), MyOwnTVIcon.INFO, group = details, onClick = onDetails))
-        if (channel.catchup) add(MenuAction("catchup", stringResource(R.string.content_catchup), MyOwnTVIcon.REWIND, group = watch, onClick = onCatchup))
-        // Record this channel from now. The guide's Record needs a programme, so a channel
-        // the provider publishes no guide for can only be recorded from here. While it records, the
-        // same row stops it — pressing Record again would start a second copy on another connection.
-        add(MenuAction("record", stringResource(if (isRecording) R.string.recording_stop else R.string.recording_record), MyOwnTVIcon.REC, group = watch, onClick = onRecord))
-        add(MenuAction("schedule_record", stringResource(R.string.recording_schedule), MyOwnTVIcon.CLOCK, group = watch, onClick = onScheduleRecord))
         if (onAddToMultiview != null) {
             add(MenuAction("add_to_multiview", stringResource(R.string.multiview_add_to), MyOwnTVIcon.MULTIVIEW, group = watch, onClick = onAddToMultiview))
         }
         // Always offered, regardless of the Live TV external-player default — this is the per-channel
-        // escape hatch for a stream neither in-app engine can open (same as Movies/Series/Downloads).
+        // escape hatch for a stream the in-app live engine can't open.
         add(MenuAction("play_external", stringResource(R.string.content_play_external_short), MyOwnTVIcon.EXTERNAL, group = watch, onClick = onPlayExternal))
         add(MenuAction("favourite", if (isFavorite) stringResource(R.string.content_remove_favourite) else stringResource(R.string.content_add_favourite), MyOwnTVIcon.FAVORITE, group = chan, onClick = onToggleFavorite))
         add(MenuAction("rename", stringResource(R.string.content_rename), MyOwnTVIcon.PENCIL, group = chan, onClick = onRename))
@@ -1283,7 +1181,7 @@ private fun ChannelContextMenu(
             add(MenuAction("remove_from_category", stringResource(R.string.content_remove_from_category), MyOwnTVIcon.CLOSE, group = organise, onClick = onRemoveFromCategory))
         }
     }
-    val values = mapOf("catchup" to catchupValue, "match_epg" to matchValue, "epg_offset" to offsetValue)
+    val values = mapOf("match_epg" to matchValue, "epg_offset" to offsetValue)
     val groupLabels = listOf(
         stringResource(R.string.content_menu_group_watch),
         stringResource(R.string.content_menu_group_channel),
@@ -1319,95 +1217,10 @@ private fun ChannelContextMenu(
                     tv.own.myowntv.ui.stage.StageMenuItem(
                         text = action.label,
                         icon = action.icon,
-                        iconFilled = action.icon == MyOwnTVIcon.REC,
                         value = values[action.key],
                         onClick = action.onClick,
                         modifier = if (index == 0) Modifier.focusRequester(focus) else Modifier,
                     )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun formatCatchupTime(
-    startMs: Long,
-    stopMs: Long,
-    formatTime: (Long) -> String,
-): String {
-    val formatDay = rememberBestDateFormatter("EEE")
-    val day = formatDay(startMs)
-    return stringResource(R.string.content_live_day_time_range, day, formatTime(startMs), formatTime(stopMs))
-}
-
-/** Live TV catch-up: pick a recent (already-aired) programme on a catch-up channel to replay from start. */
-@Composable
-private fun CatchupDialog(
-    channelName: String,
-    loadProgrammes: suspend () -> List<tv.own.owntv.core.database.entity.EpgProgrammeEntity>,
-    onPick: (tv.own.owntv.core.database.entity.EpgProgrammeEntity) -> Unit,
-    // Fallback for a channel with an archive but no guide: there are no programmes to name, but the
-    // archive is still there, so offer times instead of a dead-end "go match your EPG" message.
-    jumpOffsetsSec: List<Int>,
-    jumpWindowSec: Int,
-    onJump: (Int) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val formatTime = rememberSystemTimeFormatter()
-    val list by androidx.compose.runtime.produceState<List<tv.own.owntv.core.database.entity.EpgProgrammeEntity>?>(initialValue = null) {
-        value = runCatching { loadProgrammes() }.getOrDefault(emptyList())
-    }
-    // "Choose exact time…" opens on top of this dialog, same as the player's route into it.
-    var manualTime by remember { mutableStateOf(false) }
-    if (manualTime) {
-        CatchupManualTimeDialog(
-            windowSec = jumpWindowSec,
-            onPick = { manualTime = false; onJump(it) },
-            onDismiss = { manualTime = false },
-        )
-    }
-    val firstFocus = remember { FocusRequester() }
-    LaunchedEffect(list) {
-        // Still loading, or nothing focusable at all (no programmes AND no archive to jump into).
-        if (list == null || (list!!.isEmpty() && jumpOffsetsSec.isEmpty())) return@LaunchedEffect
-        kotlinx.coroutines.delay(60); runCatching { firstFocus.requestFocus() }
-    }
-    val noGuide = list?.isEmpty() == true && jumpOffsetsSec.isNotEmpty()
-    // A Stage popup: its own window, so nothing behind can take focus (as EpgMatchDialog / the menus).
-    tv.own.myowntv.ui.stage.StagePopup(
-        onDismiss = onDismiss,
-        title = stringResource(R.string.content_catchup_title, channelName),
-        body = stringResource(if (noGuide) R.string.content_catchup_jump_prompt else R.string.content_catchup_prompt),
-        eyebrow = null,
-        scroll = false,
-        buttons = { tv.own.myowntv.ui.stage.StageButton(stringResource(R.string.content_close), onClick = onDismiss, height = 56.mpx, textSize = 19) },
-    ) {
-        when (val progs = list) {
-            null -> Box(Modifier.fillMaxWidth().height(100.mpx), contentAlignment = Alignment.Center) { OwnTVSpinner(sizeDp = 28) }
-            else -> if (progs.isEmpty()) {
-                // No guide for this channel. The archive still exists, so offer times to jump to; only
-                // fall back to the "match your EPG" note when there is no archive window either.
-                if (jumpOffsetsSec.isNotEmpty()) {
-                    CatchupJumpRows(
-                        offsetsSec = jumpOffsetsSec,
-                        firstFocus = firstFocus,
-                        onPick = onJump,
-                        modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
-                        onChooseExact = { manualTime = true },
-                    )
-                } else {
-                    Text(stringResource(R.string.content_catchup_empty), style = tv.own.myowntv.ui.theme.stageText(18, 500), color = tv.own.myowntv.ui.theme.StageColors.Muted)
-                }
-            } else {
-                LazyColumn(Modifier.fillMaxWidth().weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(2.mpx)) {
-                    items(progs, key = { it.id }) { p ->
-                        tv.own.myowntv.ui.stage.StagePopupOption(
-                            title = p.title, subtitle = formatCatchupTime(p.startMs, p.stopMs, formatTime), onClick = { onPick(p) },
-                            modifier = if (p == progs.first()) Modifier.focusRequester(firstFocus) else Modifier,
-                            leading = { tv.own.myowntv.ui.stage.StagePopupIcon(tv.own.myowntv.ui.components.MyOwnTVIcon.CATCHUP) },
-                        )
-                    }
                 }
             }
         }

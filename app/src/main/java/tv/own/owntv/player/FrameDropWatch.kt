@@ -7,8 +7,9 @@ package tv.own.owntv.player
  * the last [WINDOW_POLLS] polls, more than [MIN_DROPS] frames were dropped *and* more were dropped than
  * shown. Measured on an Android 11 TCL whose `OMX.realtek.video.decoder` hands reordered 1080p59.94
  * pictures back in decode order: ExoPlayer discards most of them as late, ~500 dropped against ~20 shown
- * per 2.5 s poll — a 7.5 fps slideshow. ExoPlayer cannot reorder a decoder's output, and mpv plays the
- * same stream cleanly on the same TV, so the answer is the other engine. A healthy 60 fps channel shows
+ * per 2.5 s poll — a 7.5 fps slideshow. ExoPlayer cannot reorder a decoder's output, and a decoder
+ * that hands frames back in decode order never recovers on this path: the answer is to fail the load
+ * and let the tune ladder move the channel to the other format. A healthy 60 fps channel shows
  * ~150 frames per poll and drops at most a few dozen while it joins, so it never qualifies.
  */
 internal class FrameDropWatch {

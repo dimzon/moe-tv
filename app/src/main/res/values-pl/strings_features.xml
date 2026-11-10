@@ -9,8 +9,6 @@
     <string name="profiles_avatar_own_picture">Własny obraz</string>
     <string name="profiles_kids">Profil dziecięcy</string>
     <string name="profiles_kids_description">Uproszczone, bezpieczne przeglądanie</string>
-    <string name="profiles_allow_downloads">Zezwalaj na pobieranie</string>
-    <string name="profiles_allow_downloads_description">Wyłączenie ukrywa wszystkie przyciski pobierania w tym profilu</string>
     <string name="profiles_remove_pin">Usuń blokadę PIN</string>
     <string name="profiles_no_pin">Ten profil otwiera się bez PIN-u</string>
     <string name="profiles_change_pin">Zmień PIN (puste pole = bez zmian)</string>
@@ -39,13 +37,9 @@
     <string name="search_nothing_in_list">Na liście <xliff:g id="list">%1$s</xliff:g> jeszcze nic nie ma.</string>
     <string name="search_clear">Wyczyść</string>
     <string name="search_jump_to">Przejdź do</string>
-    <string name="search_open_series">Otwórz serial</string>
-    <string name="search_movie">Film</string>
-    <string name="search_series">Serial</string>
     <string name="search_channels">Kanały</string>
     <string name="search_on_tv">Programy TV</string>
     <string name="search_go_to_channel">Przejdź do kanału</string>
-    <string name="search_go_to_movie">Przejdź do filmu</string>
     <string name="search_clear_recent">Wyczyść ostatnie wyszukiwania</string>
     <string name="search_field_hint">Kanały, filmy i seriale</string>
     <string name="search_voice">Wyszukiwanie głosowe</string>
@@ -72,13 +66,6 @@
     <string name="launcher_recent_live_description">Ostatnio oglądane kanały na żywo</string>
     <string name="launcher_movie_type">Film</string>
     <string name="launcher_episode_number">Odcinek <xliff:g id="episode">%1$d</xliff:g></string>
-    <plurals name="home_library_loading">
-        <item quantity="one">Wczytywanie biblioteki · na razie <xliff:g id="count">%1$s</xliff:g> tytuł</item>
-        <item quantity="few">Wczytywanie biblioteki · na razie <xliff:g id="count">%1$s</xliff:g> tytuły</item>
-        <item quantity="many">Wczytywanie biblioteki · na razie <xliff:g id="count">%1$s</xliff:g> tytułów</item>
-        <item quantity="other">Wczytywanie biblioteki · na razie <xliff:g id="count">%1$s</xliff:g> tytułów</item>
-    </plurals>
-    <string name="home_library_loading_trending">Sekcja Teraz popularne pojawi się w miarę wczytywania biblioteki.</string>
     <string name="home_no_preview">Nie ma jeszcze niczego do wyświetlenia w podglądzie.</string>
     <string name="home_no_rows">Wszystkie wiersze ekranu głównego są ukryte.</string>
     <string name="home_enable_rows">Włącz ponownie wiersze: Ustawienia → Ekran główny.</string>
@@ -152,39 +139,8 @@
     <string name="home_row_trending_description">Wyświetla 4–10 pozycji tylko wtedy, gdy popularne tytuły TMDB pasują do filmów lub seriali w katalogu dostawcy.</string>
     <string name="home_trending_style">Układ popularnych</string>
     <string name="home_trending_style_hero">Szczegółowa karta</string>
-    <string name="home_trending_style_posters">Tylko plakaty</string>
-    <string name="home_trending_rank">#<xliff:g id="rank">%1$d</xliff:g> w trendach · <xliff:g id="section">%2$s</xliff:g></string>
-    <string name="home_trending_in_playlist">NA TWOJEJ PLAYLIŚCIE</string>
-    <string name="home_trending_style_full_bleed">Na całą szerokość</string>
     <string name="home_duration_hours_minutes"><xliff:g id="hours">%1$d</xliff:g> godz. <xliff:g id="minutes">%2$02d</xliff:g> min</string>
     <string name="home_time_left">pozostało <xliff:g id="duration">%1$s</xliff:g></string>
-    <string name="settings_trending_status_off">Sekcja „Teraz popularne” jest wyłączona.</string>
-    <string name="settings_trending_status_building">Sekcja „Teraz popularne” jest przygotowywana po synchronizacji dostawcy.</string>
-    <string name="settings_trending_status_metadata_disabled">Sekcja „Teraz popularne” wymaga metadanych TMDB. Wybierz opcję „Tylko TMDB” lub „Dostawca + TMDB”.</string>
-    <string name="settings_trending_status_no_vod">Sekcja „Teraz popularne” jest ukryta, ponieważ dla tego dostawcy nie włączono filmów ani seriali.</string>
-    <string name="settings_trending_status_no_matches">Sekcja „Teraz popularne” jest ukryta, ponieważ nie dopasowano żadnych tytułów dostawcy.</string>
-    <string name="settings_trending_status_failed">Nie udało się odświeżyć sekcji „Teraz popularne”. Spróbuj ponownie zsynchronizować dostawcę.</string>
-    <string name="settings_trending_status_waiting">Zsynchronizuj dostawcę, aby utworzyć sekcję „Teraz popularne”.</string>
-    <plurals name="settings_trending_status_below_threshold">
-        <item quantity="one">Sekcja „Teraz popularne” jest ukryta, ponieważ dopasowano tylko <xliff:g id="count">%1$d</xliff:g> tytuł dostawcy. Wymagane są co najmniej 4.</item>
-        <item quantity="few">Sekcja „Teraz popularne” jest ukryta, ponieważ dopasowano tylko <xliff:g id="count">%1$d</xliff:g> tytuły dostawcy. Wymagane są co najmniej 4.</item>
-        <item quantity="many">Sekcja „Teraz popularne” jest ukryta, ponieważ dopasowano tylko <xliff:g id="count">%1$d</xliff:g> tytułów dostawcy. Wymagane są co najmniej 4.</item>
-        <item quantity="other">Sekcja „Teraz popularne” jest ukryta, ponieważ dopasowano tylko <xliff:g id="count">%1$d</xliff:g> tytułów dostawcy. Wymagane są co najmniej 4.</item>
-    </plurals>
-    <plurals name="settings_trending_status_showing">
-        <item quantity="one">Sekcja „Teraz popularne” wyświetla <xliff:g id="count">%1$d</xliff:g> dopasowany tytuł.</item>
-        <item quantity="few">Sekcja „Teraz popularne” wyświetla <xliff:g id="count">%1$d</xliff:g> dopasowane tytuły.</item>
-        <item quantity="many">Sekcja „Teraz popularne” wyświetla <xliff:g id="count">%1$d</xliff:g> dopasowanych tytułów.</item>
-        <item quantity="other">Sekcja „Teraz popularne” wyświetla <xliff:g id="count">%1$d</xliff:g> dopasowanych tytułów.</item>
-    </plurals>
-    <plurals name="settings_trending_status_showing_refresh_failed">
-        <item quantity="one">Sekcja „Teraz popularne” wyświetla <xliff:g id="count">%1$d</xliff:g> tytuł z ostatniego pomyślnego odświeżenia.</item>
-        <item quantity="few">Sekcja „Teraz popularne” wyświetla <xliff:g id="count">%1$d</xliff:g> tytuły z ostatniego pomyślnego odświeżenia.</item>
-        <item quantity="many">Sekcja „Teraz popularne” wyświetla <xliff:g id="count">%1$d</xliff:g> tytułów z ostatniego pomyślnego odświeżenia.</item>
-        <item quantity="other">Sekcja „Teraz popularne” wyświetla <xliff:g id="count">%1$d</xliff:g> tytułów z ostatniego pomyślnego odświeżenia.</item>
-    </plurals>
-    <string name="home_trending_movie">Film</string>
-    <string name="home_trending_series">Serial</string>
     <string name="home_trending_provider_match">Dopasowanie do dostawcy</string>
     <string name="home_trending_why_label">DLACZEGO TA POZYCJA JEST WYŚWIETLANA</string>
     <string name="home_trending_reason_title">Pozycja #<xliff:g id="rank">%1$d</xliff:g> w rankingu TMDB <xliff:g id="media_type">%2$s</xliff:g> + dopasowanie do dostawcy</string>
@@ -192,20 +148,10 @@
     <string name="home_trending_reason_english">Nie dopasowano wersji dostawcy w języku <xliff:g id="language">%1$s</xliff:g>, dlatego wybrano angielską pozycję dostawcy.</string>
     <string name="home_trending_reason_untagged">Nie dopasowano oznaczenia języka <xliff:g id="language">%1$s</xliff:g> ani języka angielskiego, dlatego wybrano pozycję dostawcy bez oznaczenia języka.</string>
     <string name="home_trending_reason_other">Wybrano najbardziej zbliżoną wersję dostawcy dostępną do odtworzenia, ponieważ pozycje w preferowanym języku i w języku angielskim były niedostępne.</string>
-    <plurals name="home_trending_seasons">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> sezon</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> sezony</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> sezonów</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> sezonów</item>
-    </plurals>
     <string name="home_trending_play">Odtwórz</string>
-    <string name="home_trending_open_episodes">Otwórz odcinki</string>
-    <string name="home_trending_trailer">Zwiastun</string>
     <string name="home_trending_more_details">Więcej szczegółów</string>
-    <string name="home_trending_all_versions">Wszystkie wersje</string>
     <string name="home_trending_why_menu">Dlaczego ten tytuł jest tutaj</string>
     <string name="home_trending_pause">Wstrzymaj</string>
-    <string name="home_trending_unavailable">Ta wersja nie jest już dostępna</string>
     <string name="recording_notification_title">Nagrywanie</string>
     <string name="auto_start_notification_channel">Autostart po wybudzeniu</string>
     <string name="auto_start_notification_text">OwnTV otworzy się, gdy telewizor się wybudzi</string>
@@ -216,38 +162,11 @@
     <string name="recording_failed_unavailable">Kanał nie chciał się odtworzyć</string>
     <string name="recording_failed_channel_gone">Tego kanału nie ma już na Twojej liście</string>
     <string name="recording_failed_unknown">Nie nagrano</string>
-    <string name="recording_title">Nagrania</string>
-    <string name="recording_empty">Nic jeszcze nie nagrano. Naciśnij Nagraj przy programie w przewodniku TV albo przytrzymaj kanał, aby go nagrać lub zaplanować czas.</string>
-    <string name="recording_group_now">Teraz nagrywa</string>
-    <string name="recording_group_scheduled">Zaplanowane</string>
-    <string name="recording_group_completed">Nagrane</string>
-    <string name="recording_group_failed">Nie powiodło się</string>
-    <string name="recording_group_missed">Pominięte</string>
     <string name="recording_record">Nagraj</string>
-    <string name="recording_stop">Zatrzymaj nagrywanie</string>
-    <string name="recording_delete_message">Usuwa nagranie i jego plik z tego urządzenia. Tej operacji nie można cofnąć.</string>
-    <string name="recording_record_series">Nagrywaj każdą emisję</string>
-    <string name="recording_stop_series">Przestań nagrywać każdą emisję</string>
-    <string name="recording_from_archive">Nagraj z archiwum</string>
     <string name="recording_schedule">Zaplanuj nagranie…</string>
-    <string name="recording_schedule_hint">Wybierz dzień, początek i koniec. Nagranie powstanie nawet wtedy, gdy kanał nie ma przewodnika TV.</string>
-    <string name="recording_schedule_start">Początek</string>
-    <string name="recording_schedule_end">Koniec</string>
-    <string name="recording_schedule_next_day">następny dzień</string>
-    <string name="recording_schedule_past">Ten czas już minął</string>
-    <string name="recording_scheduled_for">Nagra <xliff:g id="time">%1$s</xliff:g></string>
-    <string name="recording_badge">REC</string>
     <string name="recording_pill_line">Nagrywanie: <xliff:g id="title">%1$s</xliff:g></string>
     <string name="recording_pill_line_locked">Nagrywanie z zablokowanej kategorii</string>
-    <string name="recording_clash_with">Koliduje z <xliff:g id="programme">%1$s</xliff:g></string>
     <string name="recording_settings_group">Nagrywanie</string>
-    <string name="settings_recording_reserve">Zostaw jedno połączenie wolne do oglądania</string>
-    <string name="settings_recording_reserve_description">Nagrania zostawiają jedno połączenie dostawcy wolne, żeby zawsze było na czym oglądać. Wyłącz, aby nagrywać na wszystkich.</string>
-    <string name="settings_recording_pre_roll">Zacznij wcześniej</string>
-    <string name="settings_recording_pre_roll_description">Zacznij tyle przed podaną godziną rozpoczęcia, żeby nieco spieszący się program TV nie zgubił początku.</string>
-    <string name="settings_recording_post_roll">Kontynuuj po końcu</string>
-    <string name="settings_recording_post_roll_description">Kontynuuj tyle po podanej godzinie zakończenia, żeby przeciągająca się audycja nie została ucięta.</string>
-    <string name="settings_recording_timers_inexact">To urządzenie nie pozwala aplikacji OwnTV ustawiać dokładnych alarmów, więc nagranie może zacząć się kilka minut później. Nagrania startują wcześniej, aby to nadrobić.</string>
     <plurals name="recording_minutes">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> minuta</item>
         <item quantity="few"><xliff:g id="count">%1$d</xliff:g> minuty</item>
@@ -257,24 +176,6 @@
     <string name="recording_failed_encrypted">Ten kanał jest szyfrowany i nie można go nagrać</string>
     <string name="recording_failed_drm">Ten kanał jest chroniony przez DRM, więc można go oglądać, ale nie nagrywać. Ochronę stosuje Twój dostawca, a nie OwnTV.</string>
     <string name="recording_failed_metered">Nie nagrano przez dane komórkowe</string>
-    <string name="recording_card_empty_title">Nic jeszcze nie nagrano</string>
-    <string name="recording_card_body">Wybierz program w przewodniku TV i wybierz Nagraj albo przytrzymaj kanał i zaplanuj czas. Nagranie trafi tutaj, nawet gdy oglądasz coś innego.</string>
-    <string name="recording_open_guide">Otwórz przewodnik TV</string>
-    <plurals name="recording_card_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> nagranie</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> nagrania</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> nagrań</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> nagrań</item>
-    </plurals>
-    <string name="settings_recording_mobile_data">Nagrywaj przez dane komórkowe</string>
-    <string name="settings_record_watching">Nagrywaj to, co oglądam</string>
-    <string name="settings_record_watching_description">Dodaje do odtwarzacza przycisk nagrywania, który zapisuje oglądany kanał. Pobiera kanał samodzielnie, więc przez ten czas zajmuje jedno z połączeń dostawcy i nagrywa dalej po zmianie kanału lub wyjściu z odtwarzacza.</string>
-    <string name="settings_record_watching_warning_title">Tylko jedno połączenie</string>
-    <string name="settings_record_watching_warning_description">Nagrywanie pobiera kanał po raz drugi, więc zajmuje kolejne połączenie dostawcy. Na koncie, które pozwala tylko na jedno, nagrywanie zostanie odrzucone podczas oglądania. Po uruchomieniu działa samo — zmień kanał, wyjdź z odtwarzacza, a będzie trwać do końca audycji albo do zatrzymania w Nagraniach.</string>
-    <string name="settings_record_watching_keep_off">Zostaw wyłączone</string>
-    <string name="settings_record_watching_turn_on">Włącz</string>
-    <string name="player_recording_conflict">Twój dostawca pozwala tylko na jeden strumień naraz, a nagrywanie właśnie go używa.</string>
-    <string name="player_keep_watching_stop_recording">Oglądaj dalej (zatrzyma nagrywanie)</string>
     <string name="sports_channel_goal_alerts">Alerty o golach</string>
     <string name="sports_channel_live_match">Mecz na żywo</string>
     <string name="sports_channel_match_reminders">Przypomnienia o meczach</string>

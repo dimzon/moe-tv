@@ -24,7 +24,7 @@ class TuneStateTest {
             gaveUp = true
             everRendered = true
             lastCodecError = "0x80001000"
-            audioTrackList = listOf(TrackOption(label = "English", mpvId = 1, selected = false))
+            audioTrackList = listOf(TrackOption(label = "English", id = 1, selected = false))
             frozenChecks = 7
             playStartedMs = 12_345L
         }

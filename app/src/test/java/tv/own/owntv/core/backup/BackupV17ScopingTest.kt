@@ -8,13 +8,14 @@ import org.junit.Test
 import tv.own.owntv.core.database.entity.SourceEntity
 
 /**
- * Backup format v17: the fixes for the three silent-data-loss classes an audit found in the
+ * Backup format v17: the fixes for the silent-data-loss classes an audit found in the
  * export/restore path. Every case here failed before that change.
  *
- *  1. **Per-item player keys were never remapped.** [tv.own.owntv.core.player.enginePinKey] is
- *     "<sourceId>:<TYPE>:<remoteId>", but the compatibility-mode pins and the per-item zoom/volume
- *     rows were imported verbatim — so after a merge restore they named a source id that either did
- *     not exist here or, worse, belonged to somebody else's playlist.
+ *  1. **Per-item content keys were never remapped.** [tv.own.owntv.core.player.contentKey] is
+ *     "<sourceId>:<TYPE>:<remoteId>" and typed overrides lead with the media type, but their rows
+ *     were imported verbatim — so after a merge restore they named a source id that either did not
+ *     exist here or, worse, belonged to somebody else's playlist. (The per-item engine pins the same
+ *     audit found are gone with the second engine; old files lose those silently, by design.)
  *  2. **Source-keyed blocks were exported unscoped.** An id whose source is not in the file cannot
  *     be remapped on restore, and an unmapped numeric id happily matches whatever unrelated source
  *     holds that number on the target device.
@@ -26,30 +27,30 @@ class BackupV17ScopingTest {
 
     private val idMap = mapOf(7L to 91L, 8L to 92L)
 
-    // --- 1. per-item player keys ---
+    // --- 1. per-item content keys ---
 
     @Test
-    fun `engine pin key follows its source to the device id`() {
-        assertEquals("91:LIVE:bbc-one", remapEnginePinKey("7:LIVE:bbc-one", idMap))
-        assertEquals("92:MOVIE:12345", remapEnginePinKey("8:MOVIE:12345", idMap))
+    fun `per-item player key follows its source to the device id`() {
+        assertEquals("91:LIVE:bbc-one", remapContentKey("7:LIVE:bbc-one", idMap))
+        assertEquals("92:MOVIE:12345", remapContentKey("8:MOVIE:12345", idMap))
     }
 
     @Test
-    fun `engine pin key for a source that took no part in the restore is dropped`() {
+    fun `per-item player key for a source that took no part in the restore is dropped`() {
         // 5 is not in the map: the file's source was not merged, so there is no device id to point
         // at. Passing it through was not the safe failure it looked like — this device may have its
-        // own, unrelated source 5, which would inherit the pin or zoom. Dropped instead.
-        assertEquals(null, remapEnginePinKey("5:LIVE:abc", idMap))
+        // own, unrelated source 5, which would inherit its zoom or delay. Dropped instead.
+        assertEquals(null, remapContentKey("5:LIVE:abc", idMap))
         // With no sources in the restore at all there is nothing to remap against: unchanged.
-        assertEquals("7:LIVE:abc", remapEnginePinKey("7:LIVE:abc", emptyMap()))
+        assertEquals("7:LIVE:abc", remapContentKey("7:LIVE:abc", emptyMap()))
     }
 
     @Test
     fun `legacy stream-URL keys are not mistaken for ids`() {
-        // "http" is not a Long, so the key must survive untouched — these are the pins made before
+        // "http" is not a Long, so the key must survive untouched — these are the rows made before
         // the stable key existed, and they still work by URL.
         val url = "http://panel.example:8080/live/user/pass/123.ts"
-        assertEquals(url, remapEnginePinKey(url, idMap))
+        assertEquals(url, remapContentKey(url, idMap))
     }
 
     @Test
@@ -64,17 +65,17 @@ class BackupV17ScopingTest {
     // --- 2. export scoping ---
 
     @Test
-    fun `player keys are scoped to the sources riding in the backup`() {
+    fun `per-item player keys are scoped to the sources riding in the backup`() {
         val keys = listOf("7:LIVE:a", "8:MOVIE:b", "99:LIVE:c")
-        assertEquals(listOf("7:LIVE:a", "8:MOVIE:b"), filterEnginePinKeys(keys, setOf(7L, 8L), false))
+        assertEquals(listOf("7:LIVE:a", "8:MOVIE:b"), filterContentKeys(keys, setOf(7L, 8L), false))
     }
 
     @Test
     fun `a URL-shaped key needs a passphrase because the URL carries the account credentials`() {
         val url = "http://panel.example:8080/live/user/secret/123.ts"
         val keys = listOf("7:LIVE:a", url)
-        assertEquals(listOf("7:LIVE:a"), filterEnginePinKeys(keys, setOf(7L), allowUrlKeys = false))
-        assertEquals(keys, filterEnginePinKeys(keys, setOf(7L), allowUrlKeys = true))
+        assertEquals(listOf("7:LIVE:a"), filterContentKeys(keys, setOf(7L), allowUrlKeys = false))
+        assertEquals(keys, filterContentKeys(keys, setOf(7L), allowUrlKeys = true))
     }
 
     @Test
@@ -144,8 +145,9 @@ class BackupV17ScopingTest {
             // is the same wherever it is restored. The merge prefers whatever this device measured
             // itself.
             "maxConnections", "maxConnectionsProbedAt",
-            // v44: the four per-playlist overrides (five columns).
-            "catchupTimezone", "catchupOffsetMin", "vodEnginePreference", "liveTuneTimeoutSecs", "httpReferer",
+            // v44: the per-playlist overrides. `vodEnginePreference` left this list with v56 — the
+            // VOD engine choice is gone, and old files that carry the key are ignored on import.
+            "catchupTimezone", "catchupOffsetMin", "liveTuneTimeoutSecs", "httpReferer",
             // v50: the playlist's "Clean channel names" choice and its custom words.
             "cleanChannelNames", "channelNameStrip",
             // v53: the playlist's "Ignore connection limit" choice.
@@ -154,7 +156,9 @@ class BackupV17ScopingTest {
         // v49 `serverTimeZone`: the Xtream panel's own report, re-read at EVERY sync (unlike a measured
         // `maxConnections`, nothing expensive is lost) and only ever set for Xtream. A restored row
         // reads null — catch-up's Automatic falls back to the device zone — until its next sync.
-        val deliberatelyExcluded = setOf("serverTimeZone")
+        // v54 `isPaid` (RuTube): the same kind of fact — provider-reported, re-read at every sync,
+        // never a user choice — so it is not exported either.
+        val deliberatelyExcluded = setOf("serverTimeZone", "isPaid")
         // Not a field of the entity at all: the Compose compiler adds `$stable` as a static, and
         // Kotlin does not flag it synthetic.
         val compilerGenerated = setOf("\$stable")

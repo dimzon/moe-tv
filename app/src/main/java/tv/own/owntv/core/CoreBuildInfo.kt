@@ -37,7 +37,7 @@ object CoreBuildInfo {
 
     /**
      * The host app's `BuildConfig.DEBUG`. Read by the engine to decide between a hard `error()` and a
-     * logged warning, and to turn up mpv's own log level. Defaulting to `false` means a host that
+     * logged warning. Defaulting to `false` means a host that
      * forgets to set it gets the release behaviour, which is the safe direction.
      */
     var debug: Boolean = false

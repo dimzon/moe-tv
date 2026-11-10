@@ -8,7 +8,7 @@ import tv.own.owntv.core.i18n.LocaleStore
 
 /**
  * Resolves player toasts at display time, not when the process-wide player was constructed.
- * [OwnTVPlayer] is a singleton and can outlive an in-session locale switch, so every render uses a
+ * The live engine is a singleton and can outlive an in-session locale switch, so every render uses a
  * fresh configuration context from the shared [LocaleStore]. Nested failures are rendered
  * recursively; `toString()` is never used as user-facing copy.
  */

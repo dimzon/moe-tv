@@ -48,7 +48,7 @@ class CategoryRelock(
     private var resumeAfterCheck: Job? = null
 
     /**
-     * The app left the screen. Call it before the engines free their streams: what is playing is read
+     * The app left the screen. Call it before the player frees its stream: what is playing is read
      * first, then stopped if now sealed.
      */
     fun leftApp() = relockFor(relockProfile.current, skipWithoutLocks = true)
@@ -74,7 +74,7 @@ class CategoryRelock(
      * the app may [skipWithoutLocks]: on a profile change the lock state can still be the outgoing profile's.
      */
     private fun relockFor(opener: Long?, skipWithoutLocks: Boolean = false) {
-        // Leaving again before the last return's resume ran: it must not start the engines in the background.
+        // Leaving again before the last return's resume ran: it must not start the player in the background.
         resumeAfterCheck?.cancel()
         val guard = guard
         val playing = guard?.snapshot()

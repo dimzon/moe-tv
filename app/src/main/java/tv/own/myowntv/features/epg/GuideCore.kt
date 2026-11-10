@@ -27,7 +27,6 @@ import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -41,7 +40,6 @@ import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
 import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
@@ -50,35 +48,21 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.LocalStagePalette
 import tv.own.myowntv.ui.theme.stageText
 import tv.own.myowntv.ui.theme.StageColors
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.text.style.TextOverflow
@@ -86,15 +70,9 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.focus.FocusRequester
-import androidx.tv.material3.Text
 import tv.own.myowntv.R
-import tv.own.owntv.core.model.RecordingStatus
-import tv.own.owntv.core.database.entity.RecordingEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
-import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.myowntv.ui.components.MyOwnTVIcon
-import tv.own.myowntv.ui.components.longPressMenuGuard
 import tv.own.myowntv.ui.format.rememberSystemTimeFormatter
 import tv.own.myowntv.ui.theme.mpx
 import tv.own.myowntv.ui.stage.drawBoxShadow
@@ -113,8 +91,8 @@ internal object GuideGridDefaults {
 
 /**
  * One channel's programmes as Stage cells (`.gcell`): white 4.5%, the one on now 8.5%, past ones
- * at half opacity, radius 14, 3 px apart; title 18/700, then the recording ● / reminder bell / catch-up
- * ↺ icons and the time in 14 dim. The cell at [focusTime] is the focused one: accent fill, 2 px focus
+ * at half opacity, radius 14, 3 px apart; title 18/700, then the reminder bell icon and the time in
+ * 14 dim. The cell at [focusTime] is the focused one: accent fill, 2 px focus
  * ring and glow. One Canvas per row rather than a node per programme, so a week of guide scrolls light.
  */
 @Composable
@@ -124,8 +102,6 @@ internal fun ProgrammeStripCanvas(
     windowEnd: Long,
     now: Long,
     focusTime: Long?,
-    catchupIds: Set<Long>,
-    recordingStarts: Set<Long>,
     reminderStarts: Set<Long>,
     /** How far the timeline is scrolled, shared by every row and the ruler. Read only while drawing. */
     scrollPx: () -> Int,
@@ -142,7 +118,6 @@ internal fun ProgrammeStripCanvas(
     val labels = remember(programmes, formatTime, rangeTemplate) {
         programmes.map { String.format(java.util.Locale.ROOT, rangeTemplate, formatTime(it.startMs), formatTime(it.stopMs)) }
     }
-    val recRed = Color(0xFFFF5B5B)
     val textColor = tv.own.myowntv.ui.theme.StageColors.Text
     val dimColor = tv.own.myowntv.ui.theme.StageColors.Dim
     val ink = tv.own.myowntv.ui.theme.StageColors.Ink
@@ -225,9 +200,7 @@ internal fun ProgrammeStripCanvas(
                 drawStageGlyph(g, c, Offset(cx, lineTop + 2 * px), icon, filled)
                 cx += icon + 8 * px
             }
-            if (p.startMs in recordingStarts) glyph(MyOwnTVIcon.REC, if (focused) a.onAccent else recRed.copy(alpha = fade), filled = true)
             if (p.startMs in reminderStarts) glyph(MyOwnTVIcon.BELL, iconColor)
-            if (p.id in catchupIds) glyph(MyOwnTVIcon.REWIND, iconColor)
             val timeW = (x + w - 14 * px - cx).toInt()
             if (timeW > 4) {
                 val time = measurer.measure(labels[i], timeStyle.copy(color = smallColor), overflow = TextOverflow.Ellipsis, maxLines = 1, softWrap = false, constraints = Constraints(maxWidth = timeW))
@@ -243,190 +216,3 @@ internal fun ProgrammeStripCanvas(
     } }
 }
 
-@Composable
-@OptIn(ExperimentalLayoutApi::class)
-internal fun ProgrammeDetailDialog(
-    channelName: String,
-    programme: EpgProgrammeEntity,
-    loadDescription: suspend (Long) -> String?,
-    canCatchup: Boolean,
-    isFavorite: Boolean,
-    onToggleFavorite: () -> Unit,
-    onWatch: () -> Unit,
-    onPlayCatchup: () -> Unit,
-    onDismiss: () -> Unit,
-    // Where "Watch from start" sends the archive. ASK shows a chooser popup on top of this dialog;
-    // INTERNAL/EXTERNAL go straight there. Defaulted so non-catch-up callers can ignore it.
-    catchupPlayer: SettingsRepository.CatchupPlayer = SettingsRepository.CatchupPlayer.INTERNAL,
-    onPlayCatchupExternal: () -> Unit = {},
-    // Denser variant for the Live TV catch-up picker, which opens this on top of an already-small
-    // popup chain — full-size chrome dwarfed the picker it came from. Guide keeps the roomy layout.
-    compact: Boolean = false,
-    // --- Recording. All defaulted, so the Live TV catch-up picker — which opens
-    // this dialog on top of the player and has no business scheduling anything — is unchanged.
-    /** Whether Record can be offered at all: still to come, or on a catch-up channel and already aired. */
-    canRecord: Boolean = false,
-    /** The recording already covering this programme, which decides what the button says. */
-    recording: RecordingEntity? = null,
-    /** The title of a recording this one would contend with, shown as a warning before committing. */
-    clashWith: String? = null,
-    onRecord: () -> Unit = {},
-    onStopRecording: () -> Unit = {},
-    onCancelRecording: () -> Unit = {},
-    /** Non-null when a standing "record every showing" rule already covers this title. */
-    seriesRuleActive: Boolean = false,
-    onRecordSeries: () -> Unit = {},
-    onStopSeries: () -> Unit = {},
-) {
-    val formatTime = rememberSystemTimeFormatter()
-    // The grid load drops `description` to stay under the CursorWindow limit, so fetch it on demand
-    // here (fall back to the row's own value when it was loaded by the lazy per-row path).
-    val description by produceState(programme.description, programme.id) {
-        value = programme.description ?: loadDescription(programme.id)
-    }
-    val fr = remember { FocusRequester() }
-    LaunchedEffect(Unit) { runCatching { fr.requestFocus() } }
-    // "Always ask" → a second, small popup asking which player takes the archive.
-    var showPlayerChooser by remember { mutableStateOf(false) }
-    if (showPlayerChooser) {
-        CatchupPlayerChooser(
-            onInternal = { showPlayerChooser = false; onPlayCatchup() },
-            onExternal = { showPlayerChooser = false; onPlayCatchupExternal() },
-            onDismiss = { showPlayerChooser = false },
-        )
-    }
-    tv.own.myowntv.ui.stage.StagePopup(
-        onDismiss = onDismiss,
-        eyebrow = channelName.uppercase(),
-        eyebrowAccent = true,
-        title = programme.title,
-        body = stringResource(R.string.content_epg_time_range, formatTime(programme.startMs), formatTime(programme.stopMs)),
-        width = 1008.mpx,
-        modifier = Modifier.longPressMenuGuard(),
-    ) {
-        BackHandler { onDismiss() }
-                if (!description.isNullOrBlank()) {
-                    Text(description.orEmpty(), style = stageText(18, 400), color = StageColors.Muted)
-                }
-                // The clash, said before the user commits to anything. A live programme cannot wait
-                // its turn — "start when the other finishes" would mean "start half-way through"
-                // so this is a warning at the moment of choosing, not a failure afterwards.
-                if (canRecord && clashWith != null && recording == null) {
-                    Spacer(Modifier.height(14.mpx))
-                    Text(
-                        stringResource(R.string.recording_clash_with, clashWith),
-                        style = if (compact) tv.own.myowntv.ui.theme.stageText(15, 500) else tv.own.myowntv.ui.theme.stageText(18, 400),
-                        color = StageColors.Danger,
-                    )
-                }
-                Spacer(Modifier.height(24.mpx))
-                // FlowRow so the actions wrap to a second line on narrower screens instead of the last
-                // button being clipped off the dialog edge (4 buttons don't fit one row when catch-up adds
-                // "Watch from start" + "Watch channel").
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(14.mpx, Alignment.End),
-                    verticalArrangement = Arrangement.spacedBy(14.mpx),
-                ) {
-                    // Catch-up channels: replay this programme from its start (seekable archive playback).
-                    if (canCatchup) {
-                        val startCatchup = {
-                            when (catchupPlayer) {
-                                SettingsRepository.CatchupPlayer.ASK -> showPlayerChooser = true
-                                SettingsRepository.CatchupPlayer.INTERNAL -> onPlayCatchup()
-                                SettingsRepository.CatchupPlayer.EXTERNAL -> onPlayCatchupExternal()
-                            }
-                        }
-                        tv.own.myowntv.ui.stage.StagePopupButton(stringResource(R.string.content_epg_watch_start), onClick = startCatchup, modifier = Modifier.focusRequester(fr), icon = MyOwnTVIcon.PLAY, compact = compact)
-                        tv.own.myowntv.ui.stage.StagePopupButton(stringResource(R.string.content_epg_watch_channel), onClick = onWatch, primary = false, compact = compact)
-                    } else {
-                        tv.own.myowntv.ui.stage.StagePopupButton(stringResource(R.string.content_epg_watch_channel), onClick = onWatch, modifier = Modifier.focusRequester(fr), icon = MyOwnTVIcon.PLAY, compact = compact)
-                    }
-                    // Record. What it offers depends on what is already true of this programme, so
-                    // the button never lies: nothing yet → Record (or "from catch-up" when the
-                    // programme has already been on); running → Stop; scheduled → Cancel.
-                    if (canRecord) {
-                        when (recording?.status) {
-                            RecordingStatus.RECORDING -> tv.own.myowntv.ui.stage.StagePopupButton(
-                                stringResource(R.string.recording_stop),
-                                onClick = onStopRecording,
-                                primary = false,
-                                compact = compact,
-                            )
-                            RecordingStatus.SCHEDULED -> tv.own.myowntv.ui.stage.StagePopupButton(
-                                stringResource(R.string.common_cancel),
-                                onClick = onCancelRecording,
-                                primary = false,
-                                compact = compact,
-                            )
-                            // Already recorded, or failed and worth another go: Record again is the
-                            // honest offer, and the Recordings screen is where the result lives.
-                            else -> tv.own.myowntv.ui.stage.StagePopupButton(
-                                stringResource(
-                                    if (programme.stopMs <= System.currentTimeMillis()) {
-                                        R.string.recording_from_archive
-                                    } else {
-                                        R.string.recording_record
-                                    },
-                                ),
-                                onClick = onRecord,
-                                primary = false,
-                                compact = compact,
-                            )
-                        }
-                    }
-                    // "Every showing" only for a programme still to come — a rule is a standing
-                    // instruction about the future, and offering it on last night's repeat would
-                    // promise something it cannot do.
-                    if (canRecord && programme.stopMs > System.currentTimeMillis()) {
-                        tv.own.myowntv.ui.stage.StagePopupButton(
-                            stringResource(
-                                if (seriesRuleActive) R.string.recording_stop_series
-                                else R.string.recording_record_series,
-                            ),
-                            onClick = if (seriesRuleActive) onStopSeries else onRecordSeries,
-                            primary = false,
-                            compact = compact,
-                        )
-                    }
-                    // Favourite the channel without leaving the guide; the label flips in place.
-                    tv.own.myowntv.ui.stage.StagePopupButton(
-                        stringResource(if (isFavorite) R.string.content_epg_unfavourite else R.string.content_epg_favourite),
-                        onClick = onToggleFavorite,
-                        primary = false,
-                        icon = MyOwnTVIcon.FAVORITE,
-                        compact = compact,
-                    )
-                    tv.own.myowntv.ui.stage.StagePopupButton(stringResource(R.string.settings_close), onClick = onDismiss, primary = false, compact = compact)
-                }
-    }
-}
-
-/** The "Always ask" chooser: which player takes this catch-up archive. Deliberately tiny — it sits on
- *  top of the programme dialog, so it only asks the one question and gets out of the way. */
-@Composable
-internal fun CatchupPlayerChooser(
-    onInternal: () -> Unit,
-    onExternal: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val fr = remember { FocusRequester() }
-    LaunchedEffect(Unit) { runCatching { fr.requestFocus() } }
-    tv.own.myowntv.ui.stage.StagePopup(
-        onDismiss = onDismiss,
-        title = stringResource(R.string.settings_catchup_player),
-        body = stringResource(R.string.content_epg_player_choice_description),
-        width = 700.mpx,
-        buttons = { tv.own.myowntv.ui.stage.StagePopupButton(stringResource(R.string.common_cancel), onClick = onDismiss, primary = false) },
-    ) {
-        BackHandler { onDismiss() }
-        tv.own.myowntv.ui.stage.StagePopupOption(
-            title = stringResource(R.string.content_epg_own_player), onClick = onInternal,
-            modifier = Modifier.focusRequester(fr), leading = { tv.own.myowntv.ui.stage.StagePopupIcon(MyOwnTVIcon.PLAY) },
-        )
-        tv.own.myowntv.ui.stage.StagePopupOption(
-            title = stringResource(R.string.content_epg_external_player), onClick = onExternal,
-            leading = { tv.own.myowntv.ui.stage.StagePopupIcon(MyOwnTVIcon.EXTERNAL) },
-        )
-    }
-}

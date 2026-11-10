@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.stageTone
 import androidx.activity.compose.BackHandler
@@ -87,7 +86,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,7 +94,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -106,7 +103,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.em
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
-import coil3.compose.AsyncImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -116,10 +112,8 @@ import tv.own.myowntv.R
 import tv.own.owntv.core.i18n.SupportedLocales
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.update.UpdateManager
-import tv.own.myowntv.features.downloads.recordingWhen
 import tv.own.myowntv.features.home.ChannelPlate
 import tv.own.myowntv.features.home.OnNowCard
-import tv.own.myowntv.features.home.timeLeftText
 import tv.own.myowntv.features.shell.components.ClearHistoryDialog
 import tv.own.myowntv.features.shell.components.GITHUB_REPO
 import tv.own.myowntv.features.shell.components.TELEGRAM_LINK
@@ -140,9 +134,6 @@ import tv.own.myowntv.ui.stage.StageFocus
 import tv.own.myowntv.ui.stage.StageMenu
 import tv.own.myowntv.ui.stage.StageMenuHeader
 import tv.own.myowntv.ui.stage.StageMenuItem
-import tv.own.myowntv.ui.stage.StagePoster
-import tv.own.myowntv.ui.stage.StageProgress
-import tv.own.myowntv.ui.stage.StageSegmented
 import tv.own.myowntv.ui.stage.StageSurface
 import tv.own.myowntv.ui.stage.StageTile
 import tv.own.myowntv.ui.stage.StageTool
@@ -155,11 +146,16 @@ import tv.own.myowntv.ui.theme.stageText
 import tv.own.myowntv.ui.format.formatBestDateTime
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import tv.own.myowntv.features.home.durationText
 
 // ---------------------------------------------------------------------------------------------
 // Shared parts
 // ---------------------------------------------------------------------------------------------
+
+/** "Today 21:10", "Tomorrow 06:00", "Thu 2 Oct 20:15" — the guide's own day words. */
+@Composable
+private fun feedDayWhen(atMs: Long): String =
+    tv.own.myowntv.features.epg.guideDayLabel(tv.own.myowntv.features.epg.localMidnight(atMs)) + " " +
+        tv.own.myowntv.ui.format.rememberBestDateFormatter("jm")(atMs)
 
 /** "Favourites" 42/800 −1, then whatever sits beside it (the segmented control, a count, tools). */
 @Composable
@@ -246,10 +242,6 @@ private fun EmptyNote(title: String, body: String? = null) {
     }
 }
 
-/** "Live TV 2" — a segment's name and its count. */
-@Composable
-private fun counted(nameRes: Int, n: Int) = stringResource(nameRes) + " " + n
-
 // ---------------------------------------------------------------------------------------------
 // Settings: Search and the twelve group cards
 // ---------------------------------------------------------------------------------------------
@@ -330,22 +322,16 @@ internal fun SettingsPage(entry: FocusRequester, pinned: Int, onOpenGroup: (Int)
 // Favourites
 // ---------------------------------------------------------------------------------------------
 
-private enum class FavFilter { ALL, LIVE, MOVIES, SERIES }
-
 @Composable
 internal fun FavouritesPage(
     vm: MoreCountsViewModel,
-    /** Hands More what OK / ▶ on the sheet does: focus the first card, or the filter when there is none. */
+    /** Hands More what OK / ▶ on the sheet does: focus the first card. */
     setEntry: (() -> Boolean) -> Unit,
     onPlayChannel: (Long) -> Unit,
-    onPlayMovie: (Long) -> Unit,
-    onOpenSeries: (Long) -> Unit,
 ) {
     val counts by vm.favorites.collectAsStateWithLifecycle()
     val lists by vm.favouriteLists.collectAsStateWithLifecycle()
     val move by vm.move.collectAsStateWithLifecycle()
-    var filter by rememberSaveable { mutableStateOf(FavFilter.ALL) }
-    val segFocus = remember { FocusRequester() }
     // Hold OK: the item whose small menu is open, and the card to return to when it closes.
     var menu by remember { mutableStateOf<Triple<MediaType, Long, String>?>(null) }
     val itemFocus = remember { HashMap<Pair<MediaType, Long>, FocusRequester>() }
@@ -355,38 +341,17 @@ internal fun FavouritesPage(
         if (menu == null && move == null) returnTo?.let { withFrameNanos { }; runCatching { it.requestFocus() }; returnTo = null }
     }
 
-    val showLive = filter == FavFilter.ALL || filter == FavFilter.LIVE
-    val vodShown = when (filter) {
-        FavFilter.ALL -> lists.movies.map { MediaType.MOVIE to it } + lists.series.map { MediaType.SERIES to it }
-        FavFilter.MOVIES -> lists.movies.map { MediaType.MOVIE to it }
-        FavFilter.SERIES -> lists.series.map { MediaType.SERIES to it }
-        FavFilter.LIVE -> emptyList()
-    }
-    // OK / ▶ from the sheet lands on the first card, as drawn; on the filter when there is none.
-    val firstTarget = when {
-        showLive && lists.live.isNotEmpty() -> focusOf(MediaType.LIVE, lists.live.first().id)
-        vodShown.isNotEmpty() -> vodShown.first().let { (t, item) -> focusOf(t, (item as? tv.own.owntv.core.database.entity.MovieEntity)?.id ?: (item as tv.own.owntv.core.database.entity.SeriesEntity).id) }
-        else -> segFocus
-    }
+    // OK / ▶ from the sheet lands on the first favourite channel, as drawn.
+    val firstTarget = lists.live.firstOrNull()?.let { focusOf(MediaType.LIVE, it.id) }
 
     Column(Modifier.fillMaxSize().focusGroup()) {
-        PageHead(stringResource(R.string.content_category_favorites)) {
-            StageSegmented(
-                options = listOf(
-                    counted(R.string.content_epg_all, counts.total), counted(R.string.common_nav_live_tv, counts.live),
-                    counted(R.string.common_nav_movies, counts.movies), counted(R.string.common_nav_series, counts.series),
-                ),
-                selected = filter.ordinal,
-                onSelect = { filter = FavFilter.entries[it] },
-                modifier = Modifier.focusRequester(segFocus),
-            )
-        }
-        androidx.compose.runtime.SideEffect { setEntry { runCatching { firstTarget.requestFocus() }.getOrDefault(false) } }
+        PageHead(stringResource(R.string.content_category_favorites))
+        androidx.compose.runtime.SideEffect { setEntry { firstTarget?.let { f -> runCatching { f.requestFocus() }.getOrDefault(false) } ?: false } }
         if (counts.total == 0) {
             EmptyNote(stringResource(R.string.more_fav_empty_title), stringResource(R.string.more_fav_empty_body))
             return@Column
         }
-        if (showLive && lists.live.isNotEmpty()) {
+        if (lists.live.isNotEmpty()) {
             RowHead(stringResource(R.string.common_nav_live_tv), stringResource(R.string.home_row_on_now), top = 34.mpx)
             LazyRow(horizontalArrangement = Arrangement.spacedBy(20.mpx), contentPadding = PaddingValues(end = 24.mpx)) {
                 items(lists.live, key = { it.id }) { ch ->
@@ -398,37 +363,6 @@ internal fun FavouritesPage(
                         width = 420.mpx, oneLine = true,
                         modifier = Modifier.focusRequester(f),
                     )
-                }
-            }
-        }
-        if (vodShown.isNotEmpty()) {
-            val heading = when (filter) {
-                FavFilter.MOVIES -> stringResource(R.string.common_nav_movies)
-                FavFilter.SERIES -> stringResource(R.string.common_nav_series)
-                else -> stringResource(R.string.more_fav_movies_series)
-            }
-            RowHead(heading, null, top = if (showLive && lists.live.isNotEmpty()) 36.mpx else 34.mpx)
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(24.mpx), contentPadding = PaddingValues(end = 24.mpx, bottom = 24.mpx)) {
-                items(vodShown, key = { (t, item) -> t.name + ((item as? tv.own.owntv.core.database.entity.MovieEntity)?.id ?: (item as tv.own.owntv.core.database.entity.SeriesEntity).id) }) { (type, item) ->
-                    val movie = item as? tv.own.owntv.core.database.entity.MovieEntity
-                    val series = item as? tv.own.owntv.core.database.entity.SeriesEntity
-                    val id = movie?.id ?: series!!.id
-                    val name = movie?.name ?: series!!.name
-                    val f = focusOf(type, id)
-                    StagePoster(
-                        title = name,
-                        line = stringResource(if (type == MediaType.MOVIE) R.string.search_movie else R.string.search_series),
-                        onClick = { if (movie != null) onPlayMovie(id) else onOpenSeries(id) },
-                        onLongClick = { returnTo = f; menu = Triple(type, id, name) },
-                        width = 200.mpx, height = 300.mpx,
-                        modifier = Modifier.focusRequester(f),
-                    ) {
-                        val art = movie?.posterUrl ?: series?.posterUrl
-                        if (!art.isNullOrBlank()) AsyncImage(model = art, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                        else Box(Modifier.fillMaxSize().background(StageColors.ControlFill), contentAlignment = Alignment.Center) {
-                            MyOwnTVIcon(if (movie != null) MyOwnTVIcon.MOVIES else MyOwnTVIcon.SERIES, StageColors.Dim, Modifier.size(40.mpx))
-                        }
-                    }
                 }
             }
         }
@@ -444,7 +378,7 @@ internal fun FavouritesPage(
             Box(Modifier.fillMaxSize().background(stageTone(Color.Black.copy(alpha = 0.45f), StageColors.Scrim)).longPressMenuGuard().trapAllFocusExit().focusGroup(), contentAlignment = Alignment.Center) {
                 StageMenu(Modifier.width(440.mpx)) {
                     StageMenuHeader(name, null)
-                    StageMenuItem(stringResource(R.string.content_remove_favourite), onClick = { vm.removeFavourite(type, id); returnTo = segFocus; close() }, icon = MyOwnTVIcon.FAVORITE, modifier = Modifier.focusRequester(first))
+                    StageMenuItem(stringResource(R.string.content_remove_favourite), onClick = { vm.removeFavourite(type, id); close() }, icon = MyOwnTVIcon.FAVORITE, modifier = Modifier.focusRequester(first))
                     StageMenuItem(stringResource(R.string.content_move), onClick = { close(); vm.startMove(type, id) }, icon = MyOwnTVIcon.MOVE)
                 }
             }
@@ -481,94 +415,45 @@ internal fun HistoryPage(
     setEntry: (() -> Boolean) -> Unit,
     onClearHistory: (MediaType?) -> Unit,
     onPlayChannel: (Long) -> Unit,
-    onPlayMovie: (Long, Long) -> Unit,
-    onPlayEpisode: (Long, Long, Long) -> Unit,
-    onOpenSeries: (Long) -> Unit,
 ) {
     val counts by vm.history.collectAsStateWithLifecycle()
-    val lists by vm.historyLists.collectAsStateWithLifecycle()
-    // Opens on the type watched most recently.
-    val latest = listOfNotNull(
-        lists.live.firstOrNull()?.let { MediaType.LIVE to it.watchedAt },
-        lists.movies.firstOrNull()?.let { MediaType.MOVIE to it.watchedAt },
-        lists.series.firstOrNull()?.let { MediaType.SERIES to it.watchedAt },
-    ).maxByOrNull { it.second }?.first ?: MediaType.MOVIE
-    var tab by rememberSaveable { mutableStateOf<MediaType?>(null) }
-    val type = tab ?: latest
-    val rows = when (type) { MediaType.LIVE -> lists.live; MediaType.MOVIE -> lists.movies; else -> lists.series }
+    val rows = vm.historyLists.collectAsStateWithLifecycle().value.live
     var showClear by remember { mutableStateOf(false) }
     val clearFocus = remember { FocusRequester() }
-    val segFocus = remember { FocusRequester() }
     val rowFocus = remember { HashMap<Long, FocusRequester>() }
     fun focusOf(id: Long) = rowFocus.getOrPut(id) { FocusRequester() }
     var clearWasOpen by remember { mutableStateOf(false) }
     LaunchedEffect(showClear) { if (showClear) clearWasOpen = true else if (clearWasOpen) { clearWasOpen = false; withFrameNanos { }; runCatching { clearFocus.requestFocus() } } }
 
     val sep = stringResource(R.string.content_epg_bits_separator)
-    val play: (HistoryEntry) -> Unit = { e ->
-        when (e.type) {
-            MediaType.LIVE -> onPlayChannel(e.id)
-            MediaType.MOVIE -> onPlayMovie(e.id, e.positionMs)
-            else -> e.episode?.let { onPlayEpisode(e.id, it.id, e.positionMs) } ?: onOpenSeries(e.id)
-        }
-    }
 
     Column(Modifier.fillMaxSize().focusGroup()) {
         PageHead(stringResource(R.string.content_category_history)) {
-            val order = listOf(MediaType.LIVE, MediaType.MOVIE, MediaType.SERIES)
-            StageSegmented(
-                options = listOf(counted(R.string.common_nav_live_tv, counts.live), counted(R.string.common_nav_movies, counts.movies), counted(R.string.common_nav_series, counts.series)),
-                selected = order.indexOf(type),
-                onSelect = { tab = order[it] },
-                modifier = Modifier.focusRequester(segFocus),
-            )
             Spacer(Modifier.weight(1f))
             if (counts.total > 0) StageTool(stringResource(R.string.settings_clear_history), onClick = { showClear = true }, icon = MyOwnTVIcon.TRASH, danger = true, modifier = Modifier.focusRequester(clearFocus))
         }
-        androidx.compose.runtime.SideEffect { setEntry { runCatching { (rows.firstOrNull()?.let { r -> focusOf(r.id) } ?: segFocus).requestFocus() }.getOrDefault(false) } }
+        androidx.compose.runtime.SideEffect { setEntry { rows.firstOrNull()?.let { r -> runCatching { focusOf(r.id).requestFocus() }.getOrDefault(false) } ?: false } }
         if (rows.isEmpty()) {
             EmptyNote(stringResource(R.string.more_history_empty))
             return@Column
         }
         LazyColumn(Modifier.padding(top = 26.mpx).fillMaxSize(), contentPadding = PaddingValues(bottom = 40.mpx)) {
-            items(rows, key = { it.type.name + it.id }) { e ->
-                val left = when {
-                    e.durationMs > 0 && e.positionMs > 0 -> timeLeftText(((e.durationMs - e.positionMs).coerceAtLeast(0L) + 59_999L) / 60_000L)
-                    // "0:14 watched": hours and minutes.
-                    e.positionMs > 0 -> (e.positionMs / 60_000L).let { m -> stringResource(R.string.content_watched_duration, String.format(androidx.compose.ui.platform.LocalConfiguration.current.locales[0], "%d:%02d", m / 60, m % 60)) }
-                    else -> null
-                }
-                val line = when (e.type) {
-                    MediaType.LIVE -> listOf(stringResource(R.string.common_nav_live_tv), recordingWhen(e.watchedAt))
-                    MediaType.MOVIE -> listOfNotNull(stringResource(R.string.search_movie), e.year?.toString(), recordingWhen(e.watchedAt), left)
-                    else -> listOfNotNull(
-                        e.episode?.let { ep -> stringResource(R.string.content_season_episode, ep.seasonNumber, ep.episodeNumber) + (ep.name.takeIf { it.isNotBlank() }?.let { " $it" } ?: "") },
-                        recordingWhen(e.watchedAt), left,
-                    )
-                }.joinToString(sep)
+            items(rows, key = { it.id }) { e ->
+                val line = listOf(stringResource(R.string.common_nav_live_tv), feedDayWhen(e.watchedAt)).joinToString(sep)
                 StageActionRow(
                     height = 118.mpx,
                     focus = focusOf(e.id),
-                    onClick = { play(e) },
+                    onClick = { onPlayChannel(e.id) },
                     leading = {
                         Box(Modifier.size(176.mpx, 99.mpx).clip(RoundedCornerShape(14.mpx)).background(tv.own.myowntv.ui.stage.stageStillBack), contentAlignment = Alignment.Center) {
-                            when {
-                                e.channel != null -> ChannelPlate(e.channel, Modifier.size(110.mpx, 70.mpx))
-                                !e.art.isNullOrBlank() -> AsyncImage(model = e.art, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                                else -> MyOwnTVIcon(if (e.type == MediaType.MOVIE) MyOwnTVIcon.MOVIES else MyOwnTVIcon.SERIES, StageColors.Dim, Modifier.size(36.mpx))
-                            }
+                            if (e.channel != null) ChannelPlate(e.channel, Modifier.size(110.mpx, 70.mpx))
+                            else MyOwnTVIcon(MyOwnTVIcon.LIVE_TV, StageColors.Dim, Modifier.size(36.mpx))
                         }
                     },
                     title = e.title,
                     line = line,
-                    extra = {
-                        if (e.durationMs > 0 && e.positionMs > 0) {
-                            StageProgress((e.positionMs.toFloat() / e.durationMs).coerceIn(0f, 1f), Modifier.padding(top = 10.mpx).width(280.mpx))
-                        }
-                    },
                     actions = listOf(
-                        if (e.type == MediaType.LIVE) RowAction(stringResource(R.string.content_key_watch), MyOwnTVIcon.PLAY) { play(e) }
-                        else RowAction(stringResource(R.string.common_resume), MyOwnTVIcon.PLAY) { play(e) },
+                        RowAction(stringResource(R.string.content_key_watch), MyOwnTVIcon.PLAY) { onPlayChannel(e.id) },
                         RowAction(stringResource(R.string.settings_customize_remove), MyOwnTVIcon.CLOSE) {
                             // The removed row takes its focus with it: the next one takes over.
                             val i = rows.indexOf(e)
@@ -712,7 +597,7 @@ internal fun AboutPage(vm: MoreCountsViewModel, entry: FocusRequester, onOpenLan
                 }
                 Text(
                     listOfNotNull(
-                        checkedAt?.let { stringResource(R.string.more_about_checked, recordingWhen(it)) },
+                        checkedAt?.let { stringResource(R.string.more_about_checked, feedDayWhen(it)) },
                         stringResource(R.string.more_about_license),
                     ).joinToString(sep),
                     style = stageText(17, 500), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis,

@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -112,7 +111,10 @@ import tv.own.myowntv.ui.components.restoreAfterDialogClose
 
 /**
  * Panel Width Adjustment — lets the user re-balance the three browse panels (category rail · item
- * list/grid · preview/poster) independently for Live TV, Movies and Series.
+ * list/grid · preview/poster) for Live TV.
+ *
+ * Core still keys the widths per section, but the Movies and Series browse screens are gone with VOD,
+ * so only the Live TV row is offered.
  *
  * Each panel holds its share of the screen in percent, and the three must add up to exactly 100%.
  * The dialog shows a running total and refuses to save while it doesn't read 100, so the numbers
@@ -158,12 +160,12 @@ fun PanelWidthSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) 
         StageFullPage(
             parents = listOf(stringResource(R.string.settings_group_layout)),
             title = stringResource(R.string.settings_panel_width),
-            count = pluralStringResource(R.plurals.settings_setting_count, PanelSection.entries.size, PanelSection.entries.size),
+            count = pluralStringResource(R.plurals.settings_setting_count, 1, 1),
             onBack = onBack,
             modifier = Modifier,
             scroll = scrollState,
         ) {
-            PanelSection.entries.forEach { section ->
+            listOf(PanelSection.LIVE).forEach { section ->
                 val enabled by vm.panelWidthEnabled.getValue(section).collectAsStateWithLifecycle()
                 val shares by vm.panelShares.getValue(section).collectAsStateWithLifecycle()
                 val current = shares ?: defaultPanelShares(section, rowWidth)

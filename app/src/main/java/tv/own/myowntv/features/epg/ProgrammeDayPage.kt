@@ -27,7 +27,6 @@ import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -41,7 +40,6 @@ import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
 import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
@@ -50,7 +48,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -135,13 +132,13 @@ internal fun openingIndex(list: List<EpgProgrammeEntity>, wantedStartMs: Long?, 
     return 0
 }
 
-internal enum class PageAction { WATCH, WATCH_FROM_START, RECORD, RECORD_SERIES, RECORD_FROM_CATCHUP, REMIND }
+internal enum class PageAction { WATCH, REMIND }
 
 /** The buttons an open programme shows, by where it sits; ones the channel cannot do are dimmed, not hidden. */
 internal fun pageActions(time: ProgrammeTime): List<PageAction> = when (time) {
-    ProgrammeTime.PAST -> listOf(PageAction.WATCH_FROM_START, PageAction.RECORD_FROM_CATCHUP)
-    ProgrammeTime.NOW -> listOf(PageAction.WATCH, PageAction.WATCH_FROM_START, PageAction.RECORD, PageAction.RECORD_SERIES)
-    ProgrammeTime.LATER -> listOf(PageAction.REMIND, PageAction.RECORD, PageAction.RECORD_SERIES)
+    ProgrammeTime.PAST -> emptyList() // replay and recording are gone; a finished programme offers nothing
+    ProgrammeTime.NOW -> listOf(PageAction.WATCH)
+    ProgrammeTime.LATER -> listOf(PageAction.REMIND)
 }
 
 private const val DAY_MS = 24L * 60 * 60 * 1000
@@ -157,7 +154,7 @@ private sealed interface PageLine {
  * opened in place with its facts, categories, whole description and what it can do. Yesterday, Today and
  * Tomorrow at the top; today is grouped Earlier · On now · Later.
  *
- * The page owns the remote, as the film details page does, and draws its own highlight: ▲▼ programmes,
+ * The page owns the remote, and draws its own highlight: ▲▼ programmes,
  * ▶ or OK into the open programme's buttons, ◀▶ between them, OK runs one, ▲▼ or Back leave them; ▲ from
  * the first programme reaches the days, where ◀▶ change the day. Back closes. Keys act on release so the
  * release of a press that closes the page cannot land on the screen behind it.
@@ -169,7 +166,6 @@ internal fun ProgrammeDayPage(
     /** Open on this programme (its start time, on the user's clock); null opens on the one on now. */
     focusStartMs: Long?,
     onWatch: () -> Unit,
-    onPlayFromStart: (EpgProgrammeEntity) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -293,7 +289,6 @@ internal fun ProgrammeDayPage(
                                                 inActions = inActions, action = action,
                                                 onActions = { count, run -> actionCount = count; runAction = run },
                                                 onWatch = { onDismiss(); onWatch() },
-                                                onPlayFromStart = { onDismiss(); onPlayFromStart(p) },
                                             )
                                         } else {
                                             ProgrammeLine(p, now, highlighted = line.index == index)
@@ -382,31 +377,27 @@ private fun OpenProgramme(
     action: Int,
     onActions: (count: Int, run: (Int) -> Boolean) -> Unit,
     onWatch: () -> Unit,
-    onPlayFromStart: () -> Unit,
 ) {
     val a = stageAccent
     val formatTime = rememberSystemTimeFormatter()
     val time = programmeTime(p, now)
     val actions = guideProgrammeActions(
         vm, channel, p, now,
-        onWatch = onWatch, onPlayFromStart = onPlayFromStart,
+        onWatch = onWatch,
         onPickEpg = {}, onEpgOffset = {}, autoMatch = false,
     )
     val buttons = pageActions(time).map { kind ->
         when (kind) {
             PageAction.WATCH -> Triple(stringResource(R.string.content_epg_watch_channel), true, actions.onWatchChannel)
-            PageAction.WATCH_FROM_START -> Triple(stringResource(R.string.content_epg_watch_start), actions.onWatchFromStart != null, { actions.onWatchFromStart?.invoke(); Unit })
-            PageAction.RECORD -> Triple(actions.recordLabel, actions.onRecord != null, { actions.onRecord?.invoke(); Unit })
-            PageAction.RECORD_SERIES -> Triple(stringResource(R.string.recording_record_series), actions.onSeries != null, { actions.onSeries?.invoke(); Unit })
-            PageAction.RECORD_FROM_CATCHUP -> Triple(stringResource(R.string.recording_from_archive), actions.onRecordFromCatchup != null, { actions.onRecordFromCatchup?.invoke(); Unit })
             PageAction.REMIND -> Triple(
                 stringResource(if (actions.reminderSet) R.string.content_reminder_set else R.string.content_remind_me),
                 actions.onReminder != null, { actions.onReminder?.invoke(); Unit },
             )
         }
     }
-    val checked = pageActions(time).map { (it == PageAction.REMIND && actions.reminderSet) || (it == PageAction.RECORD_SERIES && actions.seriesActive) }
-    // Read at the moment OK is pressed: after Record the same button stops, and must not record twice.
+    val checked = pageActions(time).map { it == PageAction.REMIND && actions.reminderSet }
+    // Read at the moment OK is pressed: a pressed button's label and enabled state are the latest,
+    // so Remind toggling on the spot acts on what is true now rather than on what was drawn.
     val latest = androidx.compose.runtime.rememberUpdatedState(buttons)
     LaunchedEffect(buttons.size) {
         onActions(buttons.size) { i -> latest.value.getOrNull(i)?.takeIf { it.second }?.let { it.third(); true } ?: false }

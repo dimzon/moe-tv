@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -661,7 +660,7 @@ internal fun SectionPickerDialog(
     onConfirm: (Set<BackupManager.Section>) -> Unit,
     onDismiss: () -> Unit,
     /**
-     * Restore only: offer to take the *other* device's hardware settings too (engine, decoder, frame
+     * Restore only: offer to take the *other* device's hardware settings too (decoder, frame
      * rate, HDR, surround). Null hides the row — export, or a backup this device wrote itself, whose
      * hardware settings core restores anyway. Unticked unless the user ticks it; not part of
      * "Everything", which is about what the file holds, not about this device.

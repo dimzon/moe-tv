@@ -52,7 +52,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.owntv.core.brand.AppIcon
 import android.util.Log
@@ -133,13 +132,10 @@ class SettingsViewModel(
     private val xtreamClient: tv.own.owntv.core.parser.XtreamClient,
     private val sourceTester: tv.own.owntv.core.repository.SourceTester,
     private val companion: tv.own.owntv.core.companion.CompanionController,
-    private val vodEngineStore: tv.own.owntv.core.player.VodEngineStore,
-    private val forceMpvStore: tv.own.owntv.core.player.ForceMpvStore,
     private val playbackPrefs: tv.own.owntv.core.player.PlaybackPrefsStore,
     private val connectionLimits: tv.own.owntv.core.live.ConnectionLimits,
     // The measurement opens streams, so whatever is playing has to stop first — on a
     // single-connection account the measurement IS the thing that cuts the picture off.
-    private val player: tv.own.owntv.player.OwnTVPlayer,
     private val livePreview: tv.own.owntv.player.LivePreviewEngine,
     private val enginePool: tv.own.owntv.player.LiveEnginePool,
     // Adding a playlist is core's sequence, not a copy of it — see [importState].
@@ -175,10 +171,8 @@ class SettingsViewModel(
 
     /** TMDB settings handed over from another device, so a 32-character key never has to be typed with the remote. */
     val remoteTmdbConfigs get() = companion.tmdbConfigs
-    val remoteOpenSubtitlesConfigs get() = companion.openSubtitlesConfigs
 
     fun startRemoteTmdbConfigListener(port: Int) = companion.startForTmdbConfig(port)
-    fun startRemoteOpenSubtitlesConfigListener(port: Int) = companion.startForOpenSubtitlesConfig(port)
 
     // Semi-auto EPG: after a playlist import, if the playlist has a guide URL we offer to sync the EPG now
     // (rather than a slow automatic sync). "Sync now" shows a live programme count, just like the import.
@@ -194,16 +188,15 @@ class SettingsViewModel(
     /** Skip (from the prompt) or acknowledge (after Done) — either way, close the EPG flow. */
     fun dismissPendingEpg() { pendingEpgSource = null; _epgSync.value = EpgSyncUi.Hidden }
 
-    /** Clear the active profile's watch history (the "recently watched" / continue rows).
+    /** Clear the active profile's watch history (the "recently watched" rows).
      *  [type] null = everything; otherwise just LIVE / MOVIE / SERIES. */
     fun clearWatchHistory(type: tv.own.owntv.core.model.MediaType? = null) {
         viewModelScope.launch {
             val pid = settings.activeProfileId.first()
             if (pid < 0) return@launch
-            // Home's Movies/Series continue-watching comes from the resume (progress) table, not
-            // history, and series progress is stored under EPISODE — so the resume rows go with it.
-            // Live has none to clear. All of that lives in userDataWriter, which also records each
-            // deletion so a local sync does not hand the cleared history straight back.
+            // The [type] split covers the old Movies/Series scopes — the callers pass LIVE today,
+            // and the core tables for the other scopes are pruned in wave 2. userDataWriter records
+            // each deletion so a local sync does not hand the cleared history straight back.
             userDataWriter.clearHistory(pid, type)
             // Rebuild the Android TV home cards so the cleared items also leave the system Continue Watching row.
             runCatching { launcherIntegrationRepository.refreshProfile(pid) }
@@ -287,14 +280,6 @@ class SettingsViewModel(
             kotlinx.coroutines.flow.flow { emit(if (ids.isEmpty()) 0 else channelDao.countCatchup(ids)) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
-
-    /** Configured download folder ("" = app-specific storage). */
-    val downloadRoot: StateFlow<String> = settings.downloadRoot
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
-
-    fun setDownloadRoot(path: String) {
-        viewModelScope.launch { settings.setDownloadRoot(path) }
-    }
 
     /** The source marked as default/active (shown in the sidebar). */
     val defaultSourceId: StateFlow<Long> = settings.defaultSourceId
@@ -438,13 +423,6 @@ class SettingsViewModel(
     val catchupOffsetStepMinutes: Int = settings.catchupOffsetStepMinutes
     val catchupOffsetChoicesMinutes: List<Int> = settings.catchupOffsetChoicesMinutes
 
-    val catchupPlayer: StateFlow<SettingsRepository.CatchupPlayer> = settings.catchupPlayer
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsRepository.CatchupPlayer.INTERNAL)
-
-    fun setCatchupPlayer(mode: SettingsRepository.CatchupPlayer) {
-        viewModelScope.launch { settings.setCatchupPlayer(mode) }
-    }
-
     fun setCatchupTimezone(mode: SettingsRepository.CatchupTimezone) {
         viewModelScope.launch { settings.setCatchupTimezone(mode) }
     }
@@ -514,38 +492,6 @@ class SettingsViewModel(
     val softwareDecodeAbove1080p: StateFlow<Boolean> = settings.softwareDecodeAbove1080p.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
     fun setSoftwareDecodeAbove1080p(enabled: Boolean) { viewModelScope.launch { settings.setSoftwareDecodeAbove1080p(enabled) } }
 
-    val vodEnginePreference: StateFlow<tv.own.owntv.core.player.EnginePreference> = settings.vodEnginePreference
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.player.EnginePreference.MPV_FIRST)
-    fun setVodEnginePreference(preference: tv.own.owntv.core.player.EnginePreference) {
-        viewModelScope.launch { settings.setVodEnginePreference(preference) }
-    }
-
-    val liveEnginePreference: StateFlow<tv.own.owntv.core.player.EnginePreference> = settings.liveEnginePreference
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.player.EnginePreference.EXO_FIRST)
-    fun setLiveEnginePreference(preference: tv.own.owntv.core.player.EnginePreference) {
-        viewModelScope.launch { settings.setLiveEnginePreference(preference) }
-    }
-
-    /** How many movies/episodes are pinned to a specific engine — the row is only worth showing when
-     *  there is something to forget. Counts both directions: a pin to mpv and a pin to ExoPlayer both
-     *  override the setting above. */
-    val vodEnginePinCount: StateFlow<Int> =
-        combine(vodEngineStore.mpvUrls, vodEngineStore.exoUrls) { mpv, exo -> mpv.size + exo.size }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
-
-    /** Forget every per-item engine pin, so everything follows the "Movies & Series player" setting
-     *  again. Also the escape hatch for pins older builds wrote automatically after a decode failure —
-     *  those are stored identically to the user's own, so they can only be cleared wholesale. */
-    fun clearVodEnginePins() { viewModelScope.launch { vodEngineStore.clearAll() } }
-
-    /** How many channels are pinned to one engine (either direction), for the live reset row. */
-    val livePinCount: StateFlow<Int> =
-        combine(forceMpvStore.urls, forceMpvStore.exoUrls) { mpv, exo -> mpv.size + exo.size }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
-
-    /** Every channel follows the Live TV player setting again; films' pins are kept. */
-    fun clearLivePins() { viewModelScope.launch { forceMpvStore.clearAll() } }
-
     /** Volume every item starts at, before any per-item value the player remembered. */
     val defaultVolume: StateFlow<Int> = settings.defaultVolume.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 100)
     fun setDefaultVolume(percent: Int) { viewModelScope.launch { settings.setDefaultVolume(percent) } }
@@ -569,15 +515,10 @@ class SettingsViewModel(
 
     fun clearSavedAudioDelay() { viewModelScope.launch { playbackPrefs.clearAudioDelay() } }
 
-    /** Rewind/forward step in a movie or episode, and the separate one for a live archive. */
+    /** Rewind/forward step. The separate live-archive one went with catch-up. */
     val seekStepSec: StateFlow<Int> = settings.seekStepSec
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.settings.SeekSteps.DEFAULT_SEEK_STEP_SEC)
     fun setSeekStepSec(seconds: Int) { viewModelScope.launch { settings.setSeekStepSec(seconds) } }
-
-    val liveRewindStepSec: StateFlow<Int> = settings.liveRewindStepSec
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.settings.SeekSteps.DEFAULT_LIVE_REWIND_STEP_SEC)
-    fun setLiveRewindStepSec(seconds: Int) { viewModelScope.launch { settings.setLiveRewindStepSec(seconds) } }
-
 
     val measuredStreamStats: StateFlow<Boolean> = settings.measuredStreamStats.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), settings.measuredStreamStatsDefault)
     fun setMeasuredStreamStats(enabled: Boolean) { viewModelScope.launch { settings.setMeasuredStreamStats(enabled) } }
@@ -587,9 +528,6 @@ class SettingsViewModel(
 
     val directTune: StateFlow<Boolean> = settings.directTune.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
     fun setDirectTune(enabled: Boolean) { viewModelScope.launch { settings.setDirectTune(enabled) } }
-
-    val liveLeftRightRewinds: StateFlow<Boolean> = settings.liveLeftRightRewinds.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-    fun setLiveLeftRightRewinds(enabled: Boolean) { viewModelScope.launch { settings.setLiveLeftRightRewinds(enabled) } }
 
     // Pause and rewind channels without catch-up, from a copy saved while watching.
     val timeshiftEnabled: StateFlow<Boolean> = settings.timeshiftEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
@@ -606,17 +544,6 @@ class SettingsViewModel(
         }
     }
 
-    // Films' buffer, network timeout and reconnect attempts.
-    val vodBufferChoicesSecs: List<Int> get() = settings.vodBufferChoicesSecs
-    val vodNetworkTimeoutChoicesSecs: List<Int> get() = settings.vodNetworkTimeoutChoicesSecs
-    val vodReconnectChoices: List<Int> get() = settings.vodReconnectChoices
-    val vodBufferSecs: StateFlow<Int> = settings.vodBufferSecs.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
-    fun setVodBufferSecs(secs: Int) { viewModelScope.launch { settings.setVodBufferSecs(secs) } }
-    val vodNetworkTimeoutSecs: StateFlow<Int> = settings.vodNetworkTimeoutSecs.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
-    fun setVodNetworkTimeoutSecs(secs: Int) { viewModelScope.launch { settings.setVodNetworkTimeoutSecs(secs) } }
-    val vodReconnects: StateFlow<Int> = settings.vodReconnects.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 1)
-    fun setVodReconnects(count: Int) { viewModelScope.launch { settings.setVodReconnects(count) } }
-
     // Auto frame rate's film extras.
     val afrPauseMaxSecs: Int get() = settings.afrPauseMaxSecs
     val afrPauseSecs: StateFlow<Int> = settings.afrPauseSecs.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
@@ -624,11 +551,10 @@ class SettingsViewModel(
     val afrMatchResolution: StateFlow<Boolean> = settings.afrMatchResolution.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
     fun setAfrMatchResolution(enabled: Boolean) { viewModelScope.launch { settings.setAfrMatchResolution(enabled) } }
 
-    // External player is per-section (Live TV / Movies / Series) — the settings row opens a popup with
-    // one toggle each rather than a single global On/Off.
+    // External player is a Live TV toggle — handing a live channel's URL to VLC/MX Player. The Movies
+    // and Series switches went with those sections; the repository's per-section keys stay readable so
+    // older backups still import (wave 2 will prune them).
     val externalPlayerLive: StateFlow<Boolean> = settings.externalPlayerLive.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-    val externalPlayerMovies: StateFlow<Boolean> = settings.externalPlayerMovies.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-    val externalPlayerSeries: StateFlow<Boolean> = settings.externalPlayerSeries.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     fun setExternalPlayer(section: SettingsRepository.ExternalPlayerSection, enabled: Boolean) {
         viewModelScope.launch { settings.setExternalPlayer(section, enabled) }
@@ -748,12 +674,9 @@ class SettingsViewModel(
     val subtitleStyleEnabled: StateFlow<Boolean> = settings.subtitleStyleEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
     fun setSubtitleStyleEnabled(enabled: Boolean) { viewModelScope.launch { settings.setSubtitleStyleEnabled(enabled) } }
 
-    // One size per engine: the same multiplier reads much larger on ExoPlayer than on mpv.
+    // The one subtitle size: ExoPlayer renders overlays, so the multiplier is tuned for it.
     val subtitleScaleExo: StateFlow<Float> = settings.subtitleScaleExo.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SubtitleStyle.SCALE_DEFAULT)
     fun setSubtitleScaleExo(scale: Float) { viewModelScope.launch { settings.setSubtitleScaleExo(scale) } }
-
-    val subtitleScaleMpv: StateFlow<Float> = settings.subtitleScaleMpv.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SubtitleStyle.SCALE_DEFAULT)
-    fun setSubtitleScaleMpv(scale: Float) { viewModelScope.launch { settings.setSubtitleScaleMpv(scale) } }
 
     val subtitleFont: StateFlow<tv.own.owntv.core.theme.AppFontFamily?> = settings.subtitleFont
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -775,20 +698,6 @@ class SettingsViewModel(
     fun setOutputAudioDelay(kind: tv.own.owntv.core.player.AudioOutputKind, ms: Int) { viewModelScope.launch { settings.setOutputAudioDelay(kind, ms) } }
 
     // --- CH+- key paging (browse panels): master toggle + per-direction skip counts ---
-    // --- Recording ---
-    val recordWhatImWatching: StateFlow<Boolean> =
-        settings.recordWhatImWatching.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-    fun setRecordWhatImWatching(enabled: Boolean) { viewModelScope.launch { settings.setRecordWhatImWatching(enabled) } }
-    val recordingReserveConnection: StateFlow<Boolean> =
-        settings.recordingReserveConnection.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
-    fun setRecordingReserveConnection(reserve: Boolean) { viewModelScope.launch { settings.setRecordingReserveConnection(reserve) } }
-    val recordingPreRollMinutes: StateFlow<Int> = settings.recordingPreRollMinutes
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.recording.RecordingSchedule.DEFAULT_PRE_ROLL_MINUTES)
-    fun setRecordingPreRollMinutes(minutes: Int) { viewModelScope.launch { settings.setRecordingPreRollMinutes(minutes) } }
-    val recordingPostRollMinutes: StateFlow<Int> = settings.recordingPostRollMinutes
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.recording.RecordingSchedule.DEFAULT_POST_ROLL_MINUTES)
-    fun setRecordingPostRollMinutes(minutes: Int) { viewModelScope.launch { settings.setRecordingPostRollMinutes(minutes) } }
-
     val chNavEnabled: StateFlow<Boolean> = settings.chNavEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
     fun setChNavEnabled(enabled: Boolean) { viewModelScope.launch { settings.setChNavEnabled(enabled) } }
     val chNavUpSkip: StateFlow<Int> = settings.chNavUpSkip.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ChNavLimits.DEFAULT_SKIP)
@@ -855,15 +764,6 @@ class SettingsViewModel(
 
     val preferredSubLang: StateFlow<String> = settings.preferredSubLang.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
     fun setPreferredSubLang(lang: String) { viewModelScope.launch { settings.setPreferredSubLang(lang) } }
-
-    /** OpenSubtitles search language filter — off (the default) means results come back in every language. */
-    val subSearchFilterEnabled: StateFlow<Boolean> =
-        settings.subSearchFilterEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-    fun setSubSearchFilterEnabled(enabled: Boolean) { viewModelScope.launch { settings.setSubSearchFilterEnabled(enabled) } }
-
-    val subSearchLanguages: StateFlow<String> =
-        settings.subSearchLanguages.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
-    fun setSubSearchLanguages(codes: String) { viewModelScope.launch { settings.setSubSearchLanguages(codes) } }
 
     // --- Personalization (theme / accent / UI zoom) ---
     val themeMode: StateFlow<ThemeMode> = settings.themeMode.stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.DARK)
@@ -1011,16 +911,6 @@ class SettingsViewModel(
     }
 
 
-    /** Per-playlist Live TV engine override; `null` = follow the global setting. */
-    fun setSourceLiveEngine(sourceId: Long, preference: String?) {
-        viewModelScope.launch { sourceDao.updateLiveEnginePreference(sourceId, preference) }
-    }
-
-    /** Per-playlist Movies & Series engine override; `null` = follow the global setting. */
-    fun setSourceVodEngine(sourceId: Long, preference: String?) {
-        viewModelScope.launch { sourceDao.updateVodEnginePreference(sourceId, preference) }
-    }
-
     /** Per-playlist "Give up after" override in seconds (0 = never); `null` = follow the global setting. */
     fun setSourceTuneTimeout(sourceId: Long, secs: Int?) {
         viewModelScope.launch { sourceDao.updateLiveTuneTimeout(sourceId, secs) }
@@ -1086,17 +976,11 @@ class SettingsViewModel(
         settings.clockColors.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.settings.ClockColors())
     fun setClockColor(part: tv.own.owntv.core.settings.ClockPart, value: String) { viewModelScope.launch { settings.setClockColor(part, value) } }
 
-    // Per-section "remember last item per category" (default OFF). OFF resets the browse list to the top
-    // when switching category; ON keeps a separate scroll position per category. The Live toggle also
-    // gates the last-focused-channel restore on re-entry.
+    // Live TV's "remember last item per category" (default ON). OFF resets the browse list to the top
+    // when switching category; ON keeps a separate scroll position per category. The toggle also
+    // gates the last-focused-channel restore on re-entry. The Movies/Series versions went with VOD.
     val rememberCategoryLive: StateFlow<Boolean> =
         settings.rememberCategoryLive.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
-
-    val rememberCategoryMovies: StateFlow<Boolean> =
-        settings.rememberCategoryMovies.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
-
-    val rememberCategorySeries: StateFlow<Boolean> =
-        settings.rememberCategorySeries.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
     fun setRememberCategoryLive(enabled: Boolean) {
         viewModelScope.launch { settings.setRememberCategoryLive(enabled) }
@@ -1115,27 +999,15 @@ class SettingsViewModel(
         viewModelScope.launch { settings.setLiveShowAllRail(enabled) }
     }
 
-    fun setLiveShowCatchupRail(enabled: Boolean) {
-        viewModelScope.launch { settings.setLiveShowCatchupRail(enabled) }
-    }
-
-    fun setRememberCategoryMovies(enabled: Boolean) {
-        viewModelScope.launch { settings.setRememberCategoryMovies(enabled) }
-    }
-
-    fun setRememberCategorySeries(enabled: Boolean) {
-        viewModelScope.launch { settings.setRememberCategorySeries(enabled) }
-    }
-
     val rememberLastLive: StateFlow<Boolean> =
         settings.rememberLastLive.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
     fun setRememberLastLive(enabled: Boolean) { viewModelScope.launch { settings.setRememberLastLive(enabled) } }
+    // The Movies/Series switches went with those screens, but the shell's root still reads these two
+    // flows (its own cleanup owns the call); the repository keeps the prefs.
     val rememberLastMovies: StateFlow<Boolean> =
         settings.rememberLastMovies.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-    fun setRememberLastMovies(enabled: Boolean) { viewModelScope.launch { settings.setRememberLastMovies(enabled) } }
     val rememberLastSeries: StateFlow<Boolean> =
         settings.rememberLastSeries.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-    fun setRememberLastSeries(enabled: Boolean) { viewModelScope.launch { settings.setRememberLastSeries(enabled) } }
 
     /** Per-source playlist auto-refresh selection (Off / Startup / staleness threshold). */
     val playlistAutoRefresh: StateFlow<Map<Long, PlaylistRefresh>> = settings.playlistAutoRefresh
@@ -1355,7 +1227,6 @@ class SettingsViewModel(
 
     /** Every engine that could be holding one of this provider's connections. */
     private fun stopAllPlayback() {
-        runCatching { player.stop() }
         runCatching { livePreview.stop() }
         runCatching { enginePool.releaseAll() }
     }
@@ -1693,14 +1564,6 @@ class SettingsViewModel(
     val metadataServerUrl: StateFlow<String> =
         settings.metadataServerUrl.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
     fun setMetadataServerUrl(url: String) { viewModelScope.launch { settings.setMetadataServerUrl(url) } }
-
-    val openSubtitlesApiKey: StateFlow<String> = settings.openSubtitlesApiKey
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
-    fun setOpenSubtitlesApiKey(key: String) { viewModelScope.launch { settings.setOpenSubtitlesApiKey(key) } }
-
-    val openSubtitlesServerUrl: StateFlow<String> = settings.openSubtitlesServerUrl
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
-    fun setOpenSubtitlesServerUrl(url: String) { viewModelScope.launch { settings.setOpenSubtitlesServerUrl(url) } }
 
     /** TMDB content language ("" = TMDB default en-US, "auto" = device locale, else an ISO 639-1 code). */
     val metadataLanguage: StateFlow<String> =

@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
@@ -79,8 +78,6 @@ import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.R
 import tv.own.owntv.core.model.HeroKind
 import tv.own.owntv.core.model.HomeRow
-import tv.own.owntv.core.model.HomeTrendingStyle
-import tv.own.owntv.core.trending.TrendingAvailability
 import tv.own.myowntv.features.home.displayLabel
 import tv.own.myowntv.features.home.displayTitle
 import tv.own.myowntv.features.home.settingsDescription
@@ -89,22 +86,24 @@ import tv.own.myowntv.ui.theme.StageColors
 import tv.own.myowntv.ui.theme.stageAccent
 import tv.own.myowntv.ui.theme.stageText
 
+/** The Home rails a live-only app can show: the hero, sports hub and the two live channel rows. */
+private val LIVE_HOME_ROWS = setOf(HomeRow.HERO, HomeRow.LIVE_SPORTS, HomeRow.RECENT_CHANNELS, HomeRow.FAVORITE_CHANNELS)
+
 /**
- * Settings › Layout › Home screen: Now trending and its layout, the Home rows (shown or hidden,
+ * Settings › Layout › Home screen: the Home rows (shown or hidden,
  * in Home's order; the focused row's Hide / Move / Mode in the panel, Hold OK = Move), then Keep watching
- * and Android TV home.
+ * and Android TV home. Trending and the Movies/Series rails went with VOD — the row list shows only the
+ * live rails Home still draws.
  */
 @Composable
 fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val vm: HomeSettingsViewModel = koinViewModel()
     val settingsVm: SettingsViewModel = koinViewModel()
     val config by vm.config.collectAsStateWithLifecycle()
-    val trendingAvailability by vm.trendingAvailability.collectAsStateWithLifecycle()
     val heroPreviewEnabled by vm.heroPreviewEnabled.collectAsStateWithLifecycle()
     val androidTvHomeEnabled by settingsVm.androidTvHomeEnabled.collectAsStateWithLifecycle()
     val tvHomeRefresh by settingsVm.tvHomeRefresh.collectAsStateWithLifecycle()
-    val trendingEnabled = HomeRow.TRENDING !in config.hidden
-    val trendingStatus = trendingStatusText(hidden = !trendingEnabled, availability = trendingAvailability)
+    val homeRows = config.settingsRows.filter { it in LIVE_HOME_ROWS }
 
     val rowsFocus = remember { FocusRequester() }
     val actionsFocus = remember { FocusRequester() }
@@ -118,7 +117,7 @@ fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val ok = stringResource(R.string.common_ok)
     val back = stringResource(R.string.common_back)
     val layout = stringResource(R.string.settings_group_layout)
-    val rowCount = (if (trendingEnabled) 2 else 1) + config.settingsRows.size
+    val rowCount = homeRows.size
     StageFullPage(
         parents = listOf(layout),
         title = stringResource(R.string.settings_home_screen),
@@ -128,41 +127,9 @@ fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         rowsFocus = rowsFocus,
         handleBack = moving == null,
     ) {
-        StageSettingsHeading(stringResource(R.string.home_row_now_trending), null, first = true)
-        val trendingTitle = stringResource(R.string.home_row_now_trending)
-        val trendingValue = SettingValue.Switch(trendingEnabled)
-        StageSettingRow(
-            icon = MyOwnTVIcon.STAR,
-            title = trendingTitle,
-            desc = trendingStatus,
-            value = trendingValue,
-            onClick = { vm.setRowHidden(HomeRow.TRENDING, trendingEnabled) },
-            help = settingHelp(null, trendingTitle, HomeRow.TRENDING.settingsDescription(), trendingValue, pinnable = false),
-        )
-        // Only while the row is on: with Trending off there is nothing for the choice to apply to.
-        if (trendingEnabled) {
-            val styleTitle = stringResource(R.string.home_trending_style)
-            val styleValue = SettingValue.Segmented(
-                listOf(stringResource(R.string.home_trending_style_full_bleed), stringResource(R.string.home_trending_style_posters)),
-                if (config.trendingStyle == HomeTrendingStyle.HERO) 0 else 1,
-            )
-            val flip = {
-                vm.setTrendingStyle(if (config.trendingStyle == HomeTrendingStyle.HERO) HomeTrendingStyle.POSTERS else HomeTrendingStyle.HERO)
-            }
-            StageSettingRow(
-                icon = MyOwnTVIcon.MOVIES,
-                title = styleTitle,
-                desc = stringResource(R.string.settings_line_trending_layout),
-                value = styleValue,
-                onClick = flip,
-                onStep = { step -> vm.setTrendingStyle(if (step < 0) HomeTrendingStyle.HERO else HomeTrendingStyle.POSTERS) },
-                help = settingHelp(null, styleTitle, stringResource(R.string.home_row_trending_description), styleValue, choices = styleValue.options, pinnable = false),
-            )
-        }
-
-        StageSettingsHeading(stringResource(R.string.settings_sections), config.settingsRows.size)
+        StageSettingsHeading(stringResource(R.string.settings_sections), homeRows.size, first = true)
         val hiddenNote = stringResource(R.string.settings_hidden_sections)
-        config.settingsRows.forEach { row ->
+        homeRows.forEach { row ->
             key(row) {
                 val hidden = row in config.hidden
                 val liveMode = when (row) {
@@ -233,15 +200,9 @@ fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             }
         }
 
-        StageSettingsHeading(stringResource(R.string.settings_keep_watching), 4)
+        StageSettingsHeading(stringResource(R.string.settings_keep_watching), 2)
         HomeSwitchRow(MyOwnTVIcon.LIVE_TV, R.string.settings_live_keep_watching, R.string.settings_live_keep_watching_description, config.heroIncludeLive) {
             vm.setHeroInclude(HeroKind.LIVE, !config.heroIncludeLive)
-        }
-        HomeSwitchRow(MyOwnTVIcon.MOVIES, R.string.settings_movies_keep_watching, R.string.settings_movies_keep_watching_description, config.heroIncludeMovies) {
-            vm.setHeroInclude(HeroKind.MOVIES, !config.heroIncludeMovies)
-        }
-        HomeSwitchRow(MyOwnTVIcon.SERIES, R.string.settings_series_keep_watching, R.string.settings_series_keep_watching_description, config.heroIncludeSeries) {
-            vm.setHeroInclude(HeroKind.SERIES, !config.heroIncludeSeries)
         }
         HomeSwitchRow(MyOwnTVIcon.PLAY, R.string.settings_hero_preview, R.string.settings_hero_preview_description, heroPreviewEnabled) {
             vm.setHeroPreviewEnabled(!heroPreviewEnabled)
@@ -297,33 +258,4 @@ private val HomeRow.icon: MyOwnTVIcon get() = when (this) {
     HomeRow.FAVORITE_SERIES -> MyOwnTVIcon.SERIES
     HomeRow.CONTINUE_MOVIES -> MyOwnTVIcon.MOVIES
     HomeRow.CONTINUE_SERIES -> MyOwnTVIcon.SERIES
-}
-
-@Composable
-private fun trendingStatusText(hidden: Boolean, availability: TrendingAvailability): String = when {
-    hidden -> stringResource(R.string.settings_trending_status_off)
-    availability == TrendingAvailability.Building -> stringResource(R.string.settings_trending_status_building)
-    availability == TrendingAvailability.MetadataDisabled -> stringResource(R.string.settings_trending_status_metadata_disabled)
-    availability == TrendingAvailability.NoVodScope -> stringResource(R.string.settings_trending_status_no_vod)
-    availability == TrendingAvailability.Failed -> stringResource(R.string.settings_trending_status_failed)
-    availability == TrendingAvailability.WaitingForSync -> stringResource(R.string.settings_trending_status_waiting)
-    availability is TrendingAvailability.BelowThreshold && availability.matched == 0 -> stringResource(
-        R.string.settings_trending_status_no_matches,
-    )
-    availability is TrendingAvailability.BelowThreshold -> pluralStringResource(
-        R.plurals.settings_trending_status_below_threshold,
-        availability.matched,
-        availability.matched,
-    )
-    availability is TrendingAvailability.Showing && availability.refreshFailed -> pluralStringResource(
-        R.plurals.settings_trending_status_showing_refresh_failed,
-        availability.count,
-        availability.count,
-    )
-    availability is TrendingAvailability.Showing -> pluralStringResource(
-        R.plurals.settings_trending_status_showing,
-        availability.count,
-        availability.count,
-    )
-    else -> stringResource(R.string.settings_trending_status_waiting)
 }

@@ -112,6 +112,14 @@
 - **📺 Sports: a broadcaster's unrelated channels are no longer "likely"**
 - **📥 Adding an Xtream playlist no longer fails with "Expected a string but was BOOLEAN" (#349)**
 
+### 🗑️ Removed
+- **🎞️ The mpv playback engine is gone; ExoPlayer is the single playback engine**
+- **🎬 Movies and Series (VOD) are removed**
+- **⏪ Catch-up and timeshift are removed**
+- **⏺️ DVR recordings are removed**
+- **⬇️ Downloads are removed**
+- **🗄️ Database 55 → 56: player-engine preferences dropped**
+
 ## v5.2.1 — 2026-10-21
 
 ### ✨ New features

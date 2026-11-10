@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -74,7 +73,7 @@ import tv.own.myowntv.ui.components.MyOwnTVIcon
 
 /**
  * "Audio only" plate, drawn over the (black) video surface while the playing item carries no video track
- * of its own — a radio channel in a TV playlist, a music-only file filed under Movies.
+ * of its own — a radio channel in a TV playlist.
  *
  * **Why it exists.** The player deliberately does NOT treat a missing video track as a failure: the
  * stream is healthy and the sound is correct. But sound over a black screen is indistinguishable from a
@@ -82,8 +81,8 @@ import tv.own.myowntv.ui.components.MyOwnTVIcon
  * reported as one. This says which it is, and it stays up — a toast would vanish and leave the same
  * black screen behind it for whoever walks in two minutes later.
  *
- * **Hardware-overlay note.** Composing anything over the video SurfaceView costs mpv's direct scan-out
- * path (4K drops to a slideshow). That is why this is mounted only while
+ * **Hardware-overlay note.** Composing anything over the video SurfaceView costs the decoder's direct
+ * scan-out path (4K drops to a slideshow). That is why this is mounted only while
  * [PlaybackEngine.audioOnlyMedia] is true: an item with no video has no scan-out to lose, so the
  * invariant holds by construction.
  *

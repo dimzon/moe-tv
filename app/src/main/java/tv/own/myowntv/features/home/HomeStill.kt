@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 /** What a Keep watching card shows in its 16:9 frame. */
 sealed interface HomeStill {
@@ -64,20 +63,10 @@ sealed interface HomeStill {
 }
 
 /**
- * The still for a Keep watching card, best first: the TMDB backdrop (for an episode, the show's backdrop
- * and then the episode's own still — what [HomeHeroMetadata.backdropUrl] already resolves to), then the
- * provider's backdrop, then its poster, cropped. A channel has none of those, so it shows its logo.
+ * The still for a Keep watching card. The cards are the last-watched channels, so it is the channel
+ * logo on the plate backdrop; nothing else is left with the VOD rails gone.
  */
-fun homeStill(
-    tmdbBackdrop: String?,
-    providerBackdrop: String?,
-    poster: String?,
-    channelLogo: String?,
-): HomeStill {
+fun homeStill(channelLogo: String?): HomeStill {
     fun String?.usable() = this?.takeIf { it.isNotBlank() }
-    return tmdbBackdrop.usable()?.let(HomeStill::Picture)
-        ?: providerBackdrop.usable()?.let(HomeStill::Picture)
-        ?: poster.usable()?.let(HomeStill::Picture)
-        ?: channelLogo.usable()?.let(HomeStill::Logo)
-        ?: HomeStill.None
+    return channelLogo.usable()?.let(HomeStill::Logo) ?: HomeStill.None
 }

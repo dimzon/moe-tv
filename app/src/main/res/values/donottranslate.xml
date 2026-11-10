@@ -7,11 +7,8 @@
 <resources>
     <string name="app_name" translatable="false">OwnTV</string>
     <string name="settings_player_exoplayer" translatable="false">ExoPlayer</string>
-    <string name="settings_player_mpv" translatable="false">mpv</string>
     <string name="settings_degree_celsius" translatable="false">°C</string>
     <string name="settings_degree_fahrenheit" translatable="false">°F</string>
-    <string name="player_engine_mpv" translatable="false">MPV</string>
-    <string name="player_engine_exo" translatable="false">EXO</string>
     <!-- The −/+ glyphs on every stepper control: mathematical symbols, identical in every language. -->
     <string name="common_stepper_minus" translatable="false">–</string>
     <string name="common_stepper_plus" translatable="false">+</string>
@@ -21,8 +18,6 @@
     <string name="settings_font_dancing_script" translatable="false">Dancing Script</string>
     <string name="settings_font_poppins" translatable="false">Poppins</string>
     <string name="settings_font_plus_jakarta_sans" translatable="false">Plus Jakarta Sans</string>
-    <!-- Film reconnect attempts as a count, "3×": a number and a sign, the same in every language. -->
-    <string name="settings_vod_reconnects_value" translatable="false">%1$d×</string>
     <!-- A picture height as a quality label, "1080p": a number and a letter, the same in every language. -->
     <string name="settings_video_quality_lines" translatable="false">%1$dp</string>
     <!-- An episode in the series page's list, "3. It's Like a Game": the number (already localized) and the title. -->

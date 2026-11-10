@@ -63,7 +63,7 @@ interface PlaybackPrefsDao {
     private fun fresh(profileId: Long, contentKey: String) = PlaybackPrefsEntity(
         profileId = profileId,
         contentKey = contentKey,
-        sourceId = tv.own.owntv.core.player.sourceIdOfPinKey(contentKey),
+        sourceId = tv.own.owntv.core.player.sourceIdOfContentKey(contentKey),
     )
 
     /** v44: every row written before its `sourceId` column existed learns it from its key. */

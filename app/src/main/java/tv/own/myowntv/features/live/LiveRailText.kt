@@ -27,7 +27,6 @@ import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -41,7 +40,6 @@ import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
 import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
@@ -50,7 +48,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
@@ -63,8 +60,8 @@ import tv.own.owntv.core.live.LiveKey
 fun LiveRailItem.displayLabel(@StringRes allLabelRes: Int = R.string.content_category_all_channels): String = title ?: when (key) {
     LiveKey.Favorites -> stringResource(R.string.content_category_favorites)
     LiveKey.History -> stringResource(R.string.content_category_history)
-    LiveKey.Catchup -> stringResource(R.string.content_catchup)
     LiveKey.All -> stringResource(allLabelRes)
-    is LiveKey.Folder -> stringResource(allLabelRes)
-    is LiveKey.Custom -> stringResource(allLabelRes)
+    // LiveKey.Catchup is still a core rail key until the wave-2 cleanup; the Catch-up folder is no
+    // longer built, so it falls through with the other unlabelled keys.
+    LiveKey.Catchup, is LiveKey.Folder, is LiveKey.Custom -> stringResource(allLabelRes)
 }

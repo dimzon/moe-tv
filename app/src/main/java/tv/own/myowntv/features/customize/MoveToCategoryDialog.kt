@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.StageColors
 import tv.own.myowntv.ui.theme.stageText
@@ -77,8 +76,8 @@ import tv.own.myowntv.ui.theme.mpx
 
 /**
  * One destination row in the "Move to…" dialog: a user-created custom category plus how
- * many items it currently holds. Exposed here (not in the view models) so Live TV, Movies and Series
- * all share the same dialog and the same target model.
+ * many items it currently holds. Exposed here (not in the view models) so both Customize
+ * screens share the same dialog and the same target model.
  */
 data class MoveTarget(val id: String, val displayName: String, val count: Int)
 

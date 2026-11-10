@@ -1,56 +1,4 @@
 package tv.own.myowntv.features.live
-import tv.own.owntv.*
-import tv.own.owntv.core.*
-import tv.own.owntv.core.backup.*
-import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
-import tv.own.owntv.core.categorylock.*
-import tv.own.owntv.core.companion.*
-import tv.own.owntv.core.content.*
-import tv.own.owntv.core.customize.*
-import tv.own.owntv.core.database.*
-import tv.own.owntv.core.database.dao.*
-import tv.own.owntv.core.database.entity.*
-import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
-import tv.own.owntv.core.drm.*
-import tv.own.owntv.core.epg.*
-import tv.own.owntv.core.home.*
-import tv.own.owntv.core.i18n.*
-import tv.own.owntv.core.launcher.*
-import tv.own.owntv.core.live.*
-import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
-import tv.own.owntv.core.model.*
-import tv.own.owntv.core.nav.*
-import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
-import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
-import tv.own.owntv.core.reminder.*
-import tv.own.owntv.core.repository.*
-import tv.own.owntv.core.settings.*
-import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
-import tv.own.owntv.core.stalker.*
-import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
-import tv.own.owntv.core.sync.*
-import tv.own.owntv.core.sync.local.*
-import tv.own.owntv.core.sync.work.*
-import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
-import tv.own.owntv.core.tv.*
-import tv.own.owntv.core.ui.*
-import tv.own.owntv.core.ui.stage.*
-import tv.own.owntv.core.update.*
-import tv.own.owntv.core.util.*
-import tv.own.owntv.core.weather.*
-import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
@@ -65,7 +13,7 @@ import tv.own.owntv.core.live.LiveBuiltIns
 import tv.own.owntv.core.live.LiveKey
 
 /**
- * The selection move when All or Catch-up is hidden. No view model — the flows are the inputs.
+ * The selection move when All is hidden. No view model — the flows are the inputs.
  */
 class HiddenSelectionReconcilerTest {
 
@@ -81,8 +29,12 @@ class HiddenSelectionReconcilerTest {
         }
     }
 
-    private fun rail(showAll: Boolean, showCatchup: Boolean = true, hasCatchup: Boolean = false, withFolder: Boolean = true) =
-        LiveViewModel.railWithCatchup(hasCatchup, LiveBuiltIns(showAll, showCatchup)).let { if (withFolder) it + folder else it }
+    /** The built-in rows a rail shows under [builtIns] — the shape [LiveViewModel] assembles now. */
+    private fun builtins(builtIns: LiveBuiltIns) =
+        LiveViewModel.defaultRail.filter { builtIns.shows(it.key) }
+
+    private fun rail(showAll: Boolean, withFolder: Boolean = true) =
+        builtins(LiveBuiltIns(showAll = showAll)).let { if (withFolder) it + folder else it }
 
     @Test
     fun `hiding All moves to the first folder and unhiding does not jump back`() = runBlocking {
@@ -108,21 +60,6 @@ class HiddenSelectionReconcilerTest {
             reconcileHiddenSelection(rail, LiveViewModel.defaultRail, MutableStateFlow(LiveBuiltIns(showAll = false)), selected) { false }
         }
         await("favorites") { selected.value == LiveKey.Favorites }
-        job.cancel()
-    }
-
-    @Test
-    fun `hiding Catch-up moves to All when All is shown`() = runBlocking {
-        val rail = MutableStateFlow(rail(showAll = true, showCatchup = true, hasCatchup = true))
-        val builtIns = MutableStateFlow(LiveBuiltIns())
-        val selected = MutableStateFlow<LiveKey>(LiveKey.Catchup)
-        val job = launch {
-            reconcileHiddenSelection(rail, LiveViewModel.defaultRail, builtIns, selected) { false }
-        }
-        delay(40)
-        assertEquals(LiveKey.Catchup, selected.value)
-        builtIns.value = LiveBuiltIns(showCatchup = false)
-        await("all") { selected.value == LiveKey.All }
         job.cancel()
     }
 
@@ -160,7 +97,7 @@ class HiddenSelectionReconcilerTest {
     @Test
     fun `a selected folder is never changed`() = runBlocking {
         val selected = MutableStateFlow<LiveKey>(LiveKey.Folder(1))
-        val builtIns = MutableStateFlow(LiveBuiltIns(showAll = false, showCatchup = false))
+        val builtIns = MutableStateFlow(LiveBuiltIns(showAll = false))
         val job = launch {
             reconcileHiddenSelection(
                 MutableStateFlow(rail(showAll = false)),
@@ -170,7 +107,7 @@ class HiddenSelectionReconcilerTest {
             ) { false }
         }
         delay(40)
-        builtIns.value = LiveBuiltIns(showCatchup = false)
+        builtIns.value = LiveBuiltIns(showAll = true)
         delay(40)
         assertEquals(LiveKey.Folder(1), selected.value)
         job.cancel()
@@ -179,18 +116,18 @@ class HiddenSelectionReconcilerTest {
     @Test
     fun `a switch waits for a rail without the stale folder then lands on the new first folder`() = runBlocking {
         val placeholder = LiveViewModel.defaultRail
-        val rail = MutableStateFlow(LiveViewModel.railWithCatchup(false, LiveBuiltIns(showAll = false)) + LiveRailItem(LiveKey.Folder(1), title = "Old"))
+        val rail = MutableStateFlow(builtins(LiveBuiltIns(showAll = false)) + LiveRailItem(LiveKey.Folder(1), title = "Old"))
         val deferred = async { fallbackAfterSwitch(rail, placeholder, LiveKey.Folder(1)) }
         delay(40)
         assertEquals(false, deferred.isCompleted)
-        rail.value = LiveViewModel.railWithCatchup(false, LiveBuiltIns(showAll = false)) + LiveRailItem(LiveKey.Folder(7), title = "New")
+        rail.value = builtins(LiveBuiltIns(showAll = false)) + LiveRailItem(LiveKey.Folder(7), title = "New")
         await("folder 7") { deferred.isCompleted }
         assertEquals(LiveKey.Folder(7), deferred.await())
     }
 
     @Test
     fun `a switch with All shown lands on All`() = runBlocking {
-        val rail = MutableStateFlow(LiveViewModel.railWithCatchup(false) + LiveRailItem(LiveKey.Folder(7), title = "New"))
+        val rail = MutableStateFlow(LiveViewModel.defaultRail + LiveRailItem(LiveKey.Folder(7), title = "New"))
         assertEquals(LiveKey.All, fallbackAfterSwitch(rail, LiveViewModel.defaultRail, LiveKey.Folder(1)))
     }
 

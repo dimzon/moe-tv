@@ -17,8 +17,8 @@ import tv.own.owntv.core.database.entity.ChannelEntity
  * Split out of `LiveViewModel`, which was doing four jobs at once. The seam is deliberately narrow —
  * **offset in, archive load out**: this class owns how far back the user is, when to (re)load, and the
  * two counters that tick while an archive plays. It owns nothing about *how* a stream is opened: the
- * URL construction, the engine handover and `player.play` stay with the view model and arrive here as
- * [loadArchive]. The ladder and its outcome watcher are untouched by design.
+ * URL construction, the preview-to-fullscreen handover and `player.play` stay with the view model and
+ * arrive here as [loadArchive]. The ladder and its outcome watcher are untouched by design.
  *
  * Everything time-related is injected ([nowMs], [coalesceMs], [tickMs]) and playback is read through
  * [Playback], so the sequencing is unit-testable without a player, a database or a view model.
@@ -143,9 +143,9 @@ class LiveTimeshift(
      * reads from.
      *
      * Anything that puts the channel back on a real-time stream has to call this. The rewind lives in
-     * its own state, apart from tune state, so an engine change (compatibility mode, a ladder fallback)
-     * would otherwise throw the user back to the live edge while the counter kept ticking upward
-     * against a stream that was no longer the archive.
+     * its own state, apart from tune state, so a ladder fallback (the same channel re-opened on a
+     * different stream URL) would otherwise throw the user back to the live edge while the counter kept
+     * ticking upward against a stream that was no longer the archive.
      */
     fun clear() {
         loadJob?.cancel()

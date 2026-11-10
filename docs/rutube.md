@@ -257,7 +257,9 @@ GET https://rutube.ru/api/play/options/{videoId}/
 - v54 (`MIGRATION_53_54`): `sources.isPaid` — оставлен для совместимости, не используется.
 - v55 (`MIGRATION_54_55`): `channels.isPaid INTEGER NOT NULL DEFAULT 0` — реальный признак
   подписки (из `is_paid` + `common_subscription_product_codes`); бейдж в списке каналов.
-- Версия БД: **55**, имя `owntv.db`.
+- v56 (`MIGRATION_55_56`): вместе со вторым движком удалены колонки `playback_quirks.enginePin`
+  и `sources.vodEnginePreference`.
+- Версия БД: **56**, имя `owntv.db`.
 - Естественный ключ программ: `(sourceId, epgChannelId, startMs)` — не менялся.
 
 ---
@@ -298,16 +300,20 @@ GET https://rutube.ru/api/play/options/{videoId}/
 
 ## 6. Нативные библиотеки
 
-В APK (arm64 — 22.7 MiB нативных `.so`):
+В APK (arm64 — ~1.2 MiB нативных `.so`):
 
 | Библиотека | Источник | Размер | Можно ли убрать |
 |---|---|---|---|
-| `libmpv.so`, `libavcodec/format/util/filter/swscale/swresample`, `libc++_shared`, `libplayer`, `libowntvffmpeg` | `tv.own.owntv:libmpv` | ~21.8 MiB | Да, если оставить только ExoPlayer. Для RuTube потерь по кодекам нет: каталог — только H.264+AAC. Теряется софт-фолбэк на «капризных» MediaCodec |
 | `libsqliteJni.so` | `androidx.sqlite:sqlite-bundled` | ~1.2 MiB | Только вместе с переходом на `AndroidSQLiteDriver` + правкой SQL (DAO используют `ON CONFLICT DO UPDATE` и `OVER (…)`, нужен SQLite ≥3.25; на Android 8 системный 3.18) |
 | `libandroidx.graphics.path.so` | Compose UI | ~0.01 MiB | Нет смысла — нужна Compose |
 | `libdatastore_shared_counter.so` | DataStore | ~0.01 MiB | Нет смысла — нужна DataStore |
 
 ZXing (QR), juniversalchardet, OkHttp, Coil, Koin, Room, Media3 — чистый Java/Kotlin, без `.so`.
+
+> Удалён AAR `tv.own.owntv:libmpv` (~21.8 MiB: `libmpv.so`, `libavcodec/format/util/filter/
+> swscale/swresample`, `libc++_shared`, `libplayer`, `libowntvffmpeg`) вместе с mpv-движком.
+> Для RuTube потерь по кодекам нет: каталог — только H.264+AAC, live играет один ExoPlayer.
+> Потерян лишь софт-фолбэк на «капризных» MediaCodec.
 
 ---
 
@@ -330,7 +336,8 @@ app/src/main/java/tv/own/owntv/core/stalker/StreamUrlResolver.kt
 
 app/src/main/java/tv/own/owntv/core/database/
 ├── Migration53To54.kt    # sources.isPaid
-└── OwnTVDatabase.kt      # version = 54
+├── Migration55To56.kt    # удаление enginePin/vodEnginePreference
+└── OwnTVDatabase.kt      # version = 56
 
 app/src/main/java/tv/own/owntv/core/di/DataModule.kt
                           # rutubeOkHttp (NO_PROXY), rutube HttpClient, RutubeApi, resolver

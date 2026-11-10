@@ -142,8 +142,8 @@ class SubtitleRepository(
         val raw = file.readBytes()
         if (raw.isEmpty()) throw IOException()
         val utf8 = SubtitleCharset.toUtf8(raw)
-        // The managed copy gets the NORMALIZED extension (".webvtt" → ".vtt"): both engines pick
-        // their parser from the path extension, and only the canonical ones are mapped.
+        // The managed copy gets the NORMALIZED extension (".webvtt" → ".vtt"): the player picks its
+        // parser from the path extension, and only the canonical ones are mapped.
         val format = normalizeFormat(file.extension)
         val copy = File(cacheDir, "local_${now()}_${file.nameWithoutExtension}.$format")
         copy.writeBytes(utf8)

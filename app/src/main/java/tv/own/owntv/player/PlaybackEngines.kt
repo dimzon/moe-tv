@@ -2,6 +2,7 @@ package tv.own.owntv.player
 
 import android.app.ActivityManager
 import android.content.ComponentCallbacks2
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.media3.common.util.UnstableApi
@@ -28,7 +29,8 @@ import kotlinx.coroutines.launch
  */
 @UnstableApi
 class PlaybackEngines(
-    private val player: OwnTVPlayer,
+    /** For the Android 14+ memory poll's system service; usually the application context. */
+    private val context: Context,
     private val livePreview: LivePreviewEngine,
     private val pool: LiveEnginePool,
     private val heroPreview: HeroPreviewEngine? = null,
@@ -44,7 +46,7 @@ class PlaybackEngines(
         // signal left is asking. Polled only while something plays; older Android keeps the callback.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             scope.launch {
-                combine(player.isPlaying, livePreview.isPlaying, pool.inUse) { a, b, c -> a || b || c }
+                combine(livePreview.isPlaying, pool.inUse) { a, b -> a || b }
                     .distinctUntilChanged()
                     .collectLatest { playing -> if (playing) pollMemory() }
             }
@@ -52,7 +54,7 @@ class PlaybackEngines(
     }
 
     private suspend fun pollMemory() {
-        val am = player.appContext.getSystemService(ActivityManager::class.java) ?: return
+        val am = context.getSystemService(ActivityManager::class.java) ?: return
         val info = ActivityManager.MemoryInfo()
         var applied = Pressure.NONE
         Log.i(TAG, "memory poll on")
@@ -77,17 +79,13 @@ class PlaybackEngines(
     fun onTrimMemory(level: Int) = applyPressure(pressureOf(level))
 
     private fun applyPressure(pressure: Pressure) {
-        if (pressure == Pressure.NONE) return
-        player.onTrimMemory()
-        if (pressure == Pressure.CRITICAL) {
-            livePreview.onMemoryPressure()
-            pool.onMemoryPressure()
-        }
+        if (pressure != Pressure.CRITICAL) return
+        livePreview.onMemoryPressure()
+        pool.onMemoryPressure()
     }
 
     /** Television: Home / screensaver / another app. Every engine remembers what it had and frees it. */
     fun onAppBackgrounded() {
-        player.onAppBackgrounded()
         livePreview.onAppBackgrounded()
         pool.onAppBackgrounded()
         heroPreview?.stop()
@@ -95,7 +93,6 @@ class PlaybackEngines(
 
     /** Television: back in front. Paired with [onAppBackgrounded]; a no-op on a fresh launch. */
     fun onAppForegrounded() {
-        player.onAppForegrounded()
         livePreview.onAppForegrounded()
         pool.onAppForegrounded()
     }
@@ -105,17 +102,16 @@ class PlaybackEngines(
      * about to take the screen, and nothing of the session before it may play again behind it.
      */
     fun discardBackgroundRestore() {
-        player.discardBackgroundRestore()
         livePreview.discardBackgroundRestore()
         pool.discardBackgroundRestore()
     }
 
     companion object {
         /**
-         * `RUNNING_LOW` shrinks mpv's cache; `RUNNING_CRITICAL` and `COMPLETE` also move the ExoPlayer
-         * engines to the low-RAM buffer. `UI_HIDDEN` fires on every Home press and is deliberately
-         * not pressure — it used to trim mpv's cache for the rest of the session. `BACKGROUND` and
-         * `MODERATE` arrive while nothing is playing (the television frees its streams on Home).
+         * `RUNNING_CRITICAL` and `COMPLETE` move the ExoPlayer engines to the low-RAM buffer;
+         * `RUNNING_LOW` is watched but has no live action of its own. `UI_HIDDEN` fires on every Home
+         * press and is deliberately not pressure. `BACKGROUND` and `MODERATE` arrive while nothing is
+         * playing (the television frees its streams on Home).
          */
         @Suppress("DEPRECATION") // the RUNNING_* levels are still the only signal on older TV builds
         fun pressureOf(level: Int): Pressure = when (level) {

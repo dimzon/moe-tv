@@ -12,8 +12,8 @@ import kotlin.concurrent.thread
 /**
  * Serves timeshift buffers to the players over loopback HTTP.
  *
- * Both engines already play a live `.ts` (or fragmented-MP4) stream over HTTP better than anything
- * else, so the saved copy is handed to them in exactly that shape: `GET /<token>/<piece>` streams the
+ * The player already plays a live `.ts` (or fragmented-MP4) stream over HTTP better than anything
+ * else, so the saved copy is handed to it in exactly that shape: `GET /<token>/<piece>` streams the
  * buffer from that piece onwards and never ends while the channel is saved. A rewind is a new request
  * at an earlier piece — the same "open the stream at a point" the catch-up rewind already does.
  *

@@ -8,35 +8,32 @@ import kotlinx.coroutines.yield
 import kotlinx.coroutines.flow.first
 
 /**
- * Everything that decides a live channel on ExoPlayer is not working, and that mpv should be given a
- * turn.
+ * Everything that decides a live channel on ExoPlayer is not working, and that the ladder's next rung
+ * — or the failure — should follow.
  *
- * **This is the part that makes live TV survive real hardware**, and it is the reason a second engine
- * is worth having at all. The engine itself opens a stream and reports what happens; none of that
- * says when to stop believing it. These rungs were each added because a real channel on a real device
- * failed in a way nothing else caught:
+ * **This is the part that makes live TV survive real hardware.** The engine itself opens a stream and
+ * reports what happens; none of that says when to stop believing it. These verdicts were each added
+ * because a real channel on a real device failed in a way nothing else caught:
  *
  * - **A picture that never arrives while the audio plays.** ExoPlayer never errors, so nothing times
  *   out — the user simply watches a black screen with sound.
  * - **Signed segment URLs the provider refuses.** Media3 can only re-issue the URL it already
- *   resolved, so retrying cannot recover it; mpv re-reads the playlist with a fresh token.
+ *   resolved, so no retry on the same playlist snapshot can recover it.
  * - **A stream that opens its playlist and then delivers nothing.** No frame, no error. The engine's
  *   own stall watchdog is armed only *after* the first successful play, so nothing fires and the
  *   spinner sits there for ever.
- * - **No decodable audio track.** Audio neither the box's decoders nor FFmpeg ([FfmpegAudio]) can
- *   decode (or FFmpeg missing from an old engine) plays silently and forever.
+ * - **No decodable audio track.** Audio none of the box's decoders can handle plays silently and
+ *   forever.
  * - **Played, then froze.** The engine's reconnect ladder is deliberately patient — well over two
- *   minutes of frozen picture before it admits defeat — and mpv, which often plays the very same
- *   channel, was never given a turn.
+ *   minutes of frozen picture before it admits defeat — which is far longer than a user will watch a
+ *   still frame before blaming the app.
  *
- * It lived inside the television's `LiveViewModel` until now, which is why the phone had no second
- * engine to offer: not because anyone decided a phone should go without, but because the logic sat
- * where a phone could not reach it. Nothing here knows what a television is. It talks to a
- * [LivePreviewEngine] and calls back.
+ * It lived inside the television's `LiveViewModel` until the tune orchestration moved here. Nothing
+ * here knows what a television is. It talks to a [LivePreviewEngine] and calls back.
  *
- * **Every rung is gated on [stillOurs].** A watchdog outlives the tune that armed it — the user zaps,
- * backs out, or starts a film — and firing after that would stop a stream nobody complained about.
- * On the television's single-Activity player that stream can be a completely different programme.
+ * **Every verdict is gated on [stillOurs].** A watchdog outlives the tune that armed it — the user
+ * zaps, or backs out to the preview pane — and firing after that would stop a stream nobody complained
+ * about. On the television's single-Activity player that stream can be a completely different channel.
  */
 class LiveExoWatchdog(
     private val engine: LivePreviewEngine,
@@ -126,7 +123,7 @@ class LiveExoWatchdog(
         // channel played, wedged with the watchers still waiting, or the watcher never ran.
         log("'$channelName' opened on ExoPlayer")
         onOpened()
-        // Give the track list a moment to settle, then route silent streams to the other engine.
+        // Give the track list a moment to settle, then hand silently-unplayable streams to the ladder.
         delay(TRACK_SETTLE_MS)
         if (!stillOurs()) return@coroutineScope
         if (engine.audioUnsupported.value) {
@@ -184,7 +181,7 @@ class LiveExoWatchdog(
             handOver(reason)
             // Handed over, but with nowhere to go ExoPlayer kept the channel and is still reconnecting.
             // Keep watching for one outcome the ladder can still answer: the stream's content turning
-            // out unplayable on ExoPlayer, which mpv may play.
+            // out unplayable, which makes the other format worth the attempt a fresh tune will make.
             if (!stillOurs() || !engine.stillReconnecting) return
             val settled = engine.state.first { it != LivePreviewEngine.State.LOADING }
             if (!stillOurs()) return
@@ -206,7 +203,7 @@ class LiveExoWatchdog(
          * about four seconds and fails the load ([LivePreviewEngine]'s open watchdog), so the only
          * thing left to wait for is a genuinely slow panel. Still not 5s: a 4K channel on a distant
          * panel legitimately spends several seconds on the first segment plus decoder setup, and
-         * bouncing those off the faster engine costs more than the extra seconds save.
+         * bouncing those off a premature fallback costs more than the extra seconds save.
          */
         const val OPEN_TIMEOUT_MS = 12_000L
 
@@ -220,8 +217,8 @@ class LiveExoWatchdog(
          * already been tried and failed.
          *
          * The grace on top is one reconnect's worth: the engine's first retry gets a fair chance to
-         * actually open before the channel is offered to the other player. Sitting through a SECOND
-         * one is what this no longer does.
+         * actually open before the channel is handed to the ladder's next rung. Sitting through a
+         * SECOND one is what this no longer does.
          */
         val STALL_HANDOFF_MS = LivePreviewEngine.DEATH_VERDICT_MS + STALL_HANDOFF_GRACE_MS
 

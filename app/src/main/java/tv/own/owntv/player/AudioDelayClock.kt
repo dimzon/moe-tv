@@ -8,8 +8,8 @@ import androidx.media3.exoplayer.audio.ForwardingAudioSink
  * A/V sync for the ExoPlayer engines, which have no offset setting of their own.
  *
  * ExoPlayer plays video against the audio sink's clock. [DelayedClockAudioSink] reports that clock
- * [delayMs] ahead, so every video frame is released that much earlier than its sound — which is
- * exactly mpv's positive `audio-delay` ("sound later"). The samples themselves are never touched, so
+ * [delayMs] ahead, so every video frame is released that much earlier than its sound — a positive
+ * delay means "sound later", the sign the HUD's A/V-delay slider shows. The samples themselves are never touched, so
  * it works the same on bitstreamed (passthrough) Dolby/DTS as on decoded PCM.
  *
  * Changing it mid-play is safe in both directions: a larger value jumps the clock and video drops the

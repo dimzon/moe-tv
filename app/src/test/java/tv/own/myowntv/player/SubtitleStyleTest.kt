@@ -1,56 +1,4 @@
 package tv.own.myowntv.player
-import tv.own.owntv.*
-import tv.own.owntv.core.*
-import tv.own.owntv.core.backup.*
-import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.catalog.*
-import tv.own.owntv.core.categorylock.*
-import tv.own.owntv.core.companion.*
-import tv.own.owntv.core.content.*
-import tv.own.owntv.core.customize.*
-import tv.own.owntv.core.database.*
-import tv.own.owntv.core.database.dao.*
-import tv.own.owntv.core.database.entity.*
-import tv.own.owntv.core.di.*
-import tv.own.owntv.core.download.*
-import tv.own.owntv.core.drm.*
-import tv.own.owntv.core.epg.*
-import tv.own.owntv.core.home.*
-import tv.own.owntv.core.i18n.*
-import tv.own.owntv.core.launcher.*
-import tv.own.owntv.core.live.*
-import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.metadata.*
-import tv.own.owntv.core.model.*
-import tv.own.owntv.core.nav.*
-import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
-import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
-import tv.own.owntv.core.reminder.*
-import tv.own.owntv.core.repository.*
-import tv.own.owntv.core.settings.*
-import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
-import tv.own.owntv.core.stalker.*
-import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.subtitles.*
-import tv.own.owntv.core.sync.*
-import tv.own.owntv.core.sync.local.*
-import tv.own.owntv.core.sync.work.*
-import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
-import tv.own.owntv.core.tv.*
-import tv.own.owntv.core.ui.*
-import tv.own.owntv.core.ui.stage.*
-import tv.own.owntv.core.update.*
-import tv.own.owntv.core.util.*
-import tv.own.owntv.core.weather.*
-import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -60,11 +8,11 @@ import tv.own.owntv.core.settings.SubtitleStyle
 import tv.own.owntv.core.settings.SubtitleStyle.Position
 
 /**
- * The subtitle-anchor mapping the three renderers agree on — mpv's own OSD, Media3's `SubtitleView`
- * and the Compose overlay drawn over mpv's direct-render path.
+ * The subtitle-anchor mapping the live renderer reads — Media3's `SubtitleView`, driven through the
+ * fractions [SubtitleStyle] derives from the picked anchor.
  *
- * Pinned before any work on subtitle geometry: the mapping is currently applied in several places, and
- * a consolidation is only safe if "the anchor a position resolves to" is something a test states rather
+ * Pinned before any work on subtitle geometry: the mapping is applied in the preview surface, and a
+ * consolidation is only safe if "the anchor a position resolves to" is something a test states rather
  * than something each call site re-derives. The "Default" values matter as much as the anchors — every
  * option's default means *leave this renderer alone*, which is what keeps the master toggle from
  * changing anything on its own, including broadcaster-styled Live TV cues.
@@ -118,34 +66,17 @@ class SubtitleStyleTest {
     }
 
     @Test
-    fun `mpv sub-pos is a percentage of height, bottom by default`() {
-        assertEquals(SubtitleStyle.MPV_POS_BOTTOM, SubtitleStyle.mpvSubPos(Position.DEFAULT))
-        assertEquals(SubtitleStyle.MPV_POS_BOTTOM, SubtitleStyle.mpvSubPos(Position.BOTTOM_CENTER))
-        assertEquals(SubtitleStyle.MPV_POS_TOP, SubtitleStyle.mpvSubPos(Position.TOP_CENTER))
-        assertEquals(SubtitleStyle.MPV_POS_TOP, SubtitleStyle.mpvSubPos(Position.TOP_RIGHT))
-    }
-
-    @Test
-    fun `mpv horizontal alignment follows the anchor column`() {
-        assertEquals("left", SubtitleStyle.mpvAlignX(Position.BOTTOM_LEFT))
-        assertEquals("right", SubtitleStyle.mpvAlignX(Position.TOP_RIGHT))
-        assertEquals(SubtitleStyle.MPV_ALIGN_X_DEFAULT, SubtitleStyle.mpvAlignX(Position.BOTTOM_CENTER))
-        assertEquals(SubtitleStyle.MPV_ALIGN_X_DEFAULT, SubtitleStyle.mpvAlignX(Position.DEFAULT))
-    }
-
-    @Test
-    fun `the fraction mapping agrees with the mpv mapping for every anchor`() {
-        // The Compose overlay and mpv's OSD must place the same line in the same place, or the same
-        // subtitle jumps when playback changes engine.
+    fun `the fraction mapping follows the anchor flags for every anchor`() {
+        // The cue fractions handed to `SubtitleView` must say what the picker's flags say: a "top"
+        // anchor lands near the top, a side column lands off centre, and the rest is centred.
         for (p in Position.entries) {
             val nearTop = SubtitleStyle.lineFraction(p) < 0.5f
             assertEquals("vertical agreement for $p", p.isTop, nearTop)
-            assertEquals("vertical agreement for $p", SubtitleStyle.mpvSubPos(p) == SubtitleStyle.MPV_POS_TOP, nearTop)
 
             val x = SubtitleStyle.positionFraction(p)
-            when (SubtitleStyle.mpvAlignX(p)) {
-                "left" -> assertTrue("left anchor for $p", x < 0.5f)
-                "right" -> assertTrue("right anchor for $p", x > 0.5f)
+            when {
+                p.isLeft -> assertTrue("left anchor for $p", x < 0.5f)
+                p.isRight -> assertTrue("right anchor for $p", x > 0.5f)
                 else -> assertEquals("centre anchor for $p", 0.5f, x, 0.0001f)
             }
         }
@@ -177,11 +108,5 @@ class SubtitleStyleTest {
         assertEquals(0x7F000000, SubtitleStyle.backgroundArgb(50))
         assertEquals(0xFF000000.toInt(), SubtitleStyle.backgroundArgb(500)) // clamped
         assertEquals(0x00000000, SubtitleStyle.backgroundArgb(-20)) // clamped
-    }
-
-    @Test
-    fun `mpv gets its colors in the AARRGGBB form it expects`() {
-        assertEquals("#FFFFEE00", SubtitleStyle.mpvColor("#FFEE00"))
-        assertEquals("#7F000000", SubtitleStyle.mpvBackColor(50))
     }
 }

@@ -31,7 +31,7 @@ class PlaybackErrorLogTest {
     fun `structured unknown decoder names are retained`() {
         val entry = PlaybackErrorLog.Entry(
             atMs = 0L,
-            engine = "mpv",
+            engine = "ExoPlayer",
             live = false,
             reason = null,
             spec = null,
@@ -64,7 +64,7 @@ class PlaybackErrorLogTest {
         val parsed = parsePersistedReason(rawText)
         val entry = PlaybackErrorLog.Entry(
             atMs = 0L,
-            engine = "mpv",
+            engine = "ExoPlayer",
             live = false,
             reason = parsed.semantic,
             legacyReason = parsed.legacyText,
@@ -84,7 +84,7 @@ class PlaybackErrorLogTest {
         val parsed = parsePersistedReason(PlayerFailureReason.NETWORK.name)
         val entry = PlaybackErrorLog.Entry(
             atMs = 0L,
-            engine = "mpv",
+            engine = "ExoPlayer",
             live = false,
             reason = parsed.semantic,
             legacyReason = parsed.legacyText,
@@ -101,7 +101,7 @@ class PlaybackErrorLogTest {
 
     private fun entry(spec: String) = PlaybackErrorLog.Entry(
         atMs = 0L,
-        engine = "mpv",
+        engine = "ExoPlayer",
         live = false,
         reason = null,
         spec = spec,

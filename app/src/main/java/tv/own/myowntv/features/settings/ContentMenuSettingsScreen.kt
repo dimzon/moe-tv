@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
@@ -114,13 +113,15 @@ private fun menuIcon(menu: ContentMenu) = when (menu) {
 }
 
 /**
- * Long-press menus — the order of the actions in each of the four content menus, and which of them
+ * Long-press menus — the order of the actions in the Live TV menu, and which of them
  * are shown at all.
  *
- * Four rows, one per menu. Opening one shows that menu's actions in the Move overlay, where OK shows
- * or hides an action, holding OK picks it up and Up/Down carries it. Nothing is written until Save,
- * so Cancel and Back always leave the menu exactly as it was. "Close" is not listed because it is
- * pinned to the bottom of every menu, outside the arrangeable part.
+ * One row: core still carries the Movies/Series/Episode menu keys, but the screens that opened those
+ * menus are gone with VOD, so only the Live TV menu can be arranged here. Opening one shows that
+ * menu's actions in the Move overlay, where OK shows or hides an action, holding OK picks it up and
+ * Up/Down carries it. Nothing is written until Save, so Cancel and Back always leave the menu exactly
+ * as it was. "Close" is not listed because it is pinned to the bottom of every menu, outside the
+ * arrangeable part.
  */
 @Composable
 fun ContentMenuSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
@@ -129,17 +130,17 @@ fun ContentMenuSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier)
     val rowFocus = remember { ContentMenu.entries.associateWith { FocusRequester() } }
     var openMenu by remember { mutableStateOf<ContentMenu?>(null) }
     LaunchedEffect(Unit) { runCatching { rowFocus.getValue(ContentMenu.LIVE).requestFocus() } }
-    // Four menu rows and Reset; the panel lists the focused menu's actions in their order.
+    // One menu row and Reset; the panel lists the focused menu's actions in their order.
     val about = stringResource(R.string.settings_content_menus_description)
     StageFullPage(
         parents = listOf(stringResource(R.string.settings_group_layout)),
         title = stringResource(R.string.settings_content_menus_title),
-        count = pluralStringResource(R.plurals.settings_setting_count, ContentMenu.entries.size, ContentMenu.entries.size),
+        count = pluralStringResource(R.plurals.settings_setting_count, 1, 1),
         onBack = onBack,
         modifier = modifier,
         scroll = scrollState,
     ) {
-        ContentMenu.entries.forEach { menu ->
+        listOf(ContentMenu.LIVE).forEach { menu ->
             val layout by remember(menu) { vm.menuLayout(menu) }.collectAsStateWithLifecycle(MenuLayout())
             val refs = catalogue(menu)
             val order = applyMenuOrder(refs.map { it.key }, layout.order) { it }

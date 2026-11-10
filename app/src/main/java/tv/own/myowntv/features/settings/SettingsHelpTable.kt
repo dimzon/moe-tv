@@ -50,13 +50,12 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.R
 
 /*
  * The words of each Settings row on a Stage page, by row key: root rows by their own key
- * ("theme", "tab_SOURCES"), Video player rows by their Quick key ("vp_hw"), Recording rows by "rec_*", Player buttons rows by "pb_*".
+ * ("theme", "tab_SOURCES"), Video player rows by their Quick key ("vp_hw"), Player buttons rows by "pb_*".
  * A row's own title and description are used wherever a key is missing here; a long description
  * the row used to carry becomes its panel text when [SETTING_HELP] has nothing better.
  */
@@ -91,7 +90,6 @@ internal val SETTING_LINE: Map<String, Int> = mapOf(
     "tab_CH_NAV" to R.string.settings_line_remote_shortcuts,
     "tab_CUSTOMIZE" to R.string.settings_line_customize,
     "tab_METADATA" to R.string.settings_line_metadata,
-    "tab_OPEN_SUBTITLES" to R.string.settings_line_open_subtitles,
     "app_icon" to R.string.settings_line_app_icon,
     "brand_accent" to R.string.settings_line_brand_accent,
     "settings_lock" to R.string.settings_line_settings_lock,
@@ -100,16 +98,7 @@ internal val SETTING_LINE: Map<String, Int> = mapOf(
     "update_startup" to R.string.settings_line_when_app_opens,
     "tab_NETWORK" to R.string.settings_line_proxy,
     "tab_DNS" to R.string.settings_line_dns,
-    "vp_live_engine" to R.string.settings_line_live_engine,
-    "vp_live_engine_sources" to R.string.settings_line_override_playlist,
-    "vp_reset_live_pins" to R.string.settings_line_saved_live_choices,
-    "vp_vod_engine" to R.string.settings_line_vod_engine,
-    "vp_vod_engine_sources" to R.string.settings_line_override_playlist,
-    "vp_reset_pins" to R.string.settings_line_saved_choices,
     "vp_external" to R.string.settings_line_external,
-    "vp_vod_buffer" to R.string.settings_line_vod_buffer,
-    "vp_vod_timeout" to R.string.settings_line_vod_timeout,
-    "vp_vod_reconnects" to R.string.settings_line_vod_reconnects,
     "vp_hw" to R.string.settings_line_hw,
     "vp_hdr" to R.string.settings_line_prefer_sdr,
     "vp_max_quality" to R.string.settings_line_max_quality,
@@ -124,7 +113,6 @@ internal val SETTING_LINE: Map<String, Int> = mapOf(
     "vp_reset_volume" to R.string.settings_line_saved_volume,
     "vp_surround" to R.string.settings_line_surround,
     "vp_passthrough" to R.string.settings_line_passthrough,
-    "vp_ffmpeg_audio" to R.string.settings_line_ffmpeg_audio,
     "vp_night_mode" to R.string.settings_line_night_mode,
     "vp_volume_leveling" to R.string.settings_line_leveling,
     "vp_audio_sync" to R.string.settings_line_audio_sync,
@@ -139,7 +127,6 @@ internal val SETTING_LINE: Map<String, Int> = mapOf(
     "vp_preview_on_ok" to R.string.settings_line_preview_on_ok,
     "vp_timeshift" to R.string.settings_line_timeshift,
     "vp_timeshift_window" to R.string.settings_line_timeshift_window,
-    "vp_live_left_right" to R.string.settings_line_left_right,
     "vp_live_latency" to R.string.settings_line_latency,
     "vp_latency_sources" to R.string.settings_line_override_playlist,
     "vp_preroll" to R.string.settings_line_preroll,
@@ -147,7 +134,6 @@ internal val SETTING_LINE: Map<String, Int> = mapOf(
     "vp_tune_timeout" to R.string.settings_line_tune_timeout,
     "vp_tune_timeout_sources" to R.string.settings_line_override_playlist,
     "vp_seek_step" to R.string.settings_line_seek_step,
-    "vp_rewind_step" to R.string.settings_line_rewind_step,
     "vp_resume" to R.string.settings_line_resume,
     "vp_autoplay" to R.string.settings_line_autoplay,
     "vp_multiview" to R.string.settings_vp_cat_multiview_summary_mobile,
@@ -156,18 +142,12 @@ internal val SETTING_LINE: Map<String, Int> = mapOf(
     "vp_pip" to R.string.settings_line_pip,
     "vp_measured_stats" to R.string.settings_line_measured_stats,
     "vp_logging" to R.string.settings_line_logging,
-    "rec_reserve" to R.string.settings_line_rec_reserve,
-    "rec_watching" to R.string.settings_line_rec_watching,
-    "rec_pre_roll" to R.string.settings_line_rec_pre_roll,
-    "rec_post_roll" to R.string.settings_line_rec_post_roll,
 )
 
 /** A row's name where the page words it differently from the app's older screens. */
 internal val SETTING_TITLE: Map<String, Int> = mapOf(
     "fonts" to R.string.settings_title_fonts,
     "tab_WEATHER" to R.string.settings_title_date_time_weather,
-    "vp_reset_live_pins" to R.string.settings_title_saved_live_choices,
-    "vp_reset_pins" to R.string.settings_title_saved_choices,
     "vp_tunneled" to R.string.settings_title_tunneled,
     "vp_reset_zoom" to R.string.settings_title_saved_zoom,
     "vp_reset_volume" to R.string.settings_title_saved_volume,
@@ -209,7 +189,6 @@ internal val SETTING_HELP: Map<String, Int> = mapOf(
     "tab_CH_NAV" to R.string.settings_ch_paging_description,
     "tab_CUSTOMIZE" to R.string.settings_help_customize,
     "tab_METADATA" to R.string.settings_metadata_root_description,
-    "tab_OPEN_SUBTITLES" to R.string.settings_open_subtitles_description,
     "app_icon" to R.string.settings_help_app_icon,
     "brand_accent" to R.string.settings_help_brand_accent,
     "app_startup" to R.string.settings_help_startup,
@@ -221,7 +200,6 @@ internal val SETTING_HELP: Map<String, Int> = mapOf(
     "auto_start_wake" to R.string.settings_help_auto_start_wake,
     "tab_NETWORK" to R.string.settings_proxy_description,
     "tab_DNS" to R.string.settings_help_dns,
-    "vp_live_engine" to R.string.settings_help_live_engine,
     "vp_hw" to R.string.settings_help_hw,
     "vp_zoom" to R.string.settings_help_zoom_mode,
     "vp_volume" to R.string.settings_help_volume,
@@ -247,5 +225,4 @@ internal val SWITCH_RECOMMENDED: Map<String, Boolean> = mapOf(
     "vp_sw_above_1080p" to false,
     "vp_measured_stats" to false,
     "vp_logging" to false,
-    "rec_reserve" to true,
 )

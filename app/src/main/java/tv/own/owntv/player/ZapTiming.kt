@@ -2,10 +2,10 @@ package tv.own.owntv.player
 
 /**
  * Channel-change timing for the diagnostics log: how long from a CH+/− key press until the zapped
- * channel's picture, whichever engine plays it.
+ * channel's picture, whichever live engine plays it.
  *
  * The app marks the press ([markPress]). The engine **claims** it when the tune it caused starts
- * ([claim], from ExoPlayer's `play()` or mpv's `loadUrl`), keeps it with that tune, and times its own
+ * ([claim], from the engine's `play()`), keeps it with that tune, and times its own
  * first frame against it. Claiming at the start, not at the first frame, is what keeps a press on its own
  * tune: a channel that never shows a picture (a radio stream, a failed open) used to leave its press
  * lying around for the next unrelated tune to read. A press is claimed at most once, and only within

@@ -9,7 +9,7 @@ import tv.own.myowntv.R
 
 /**
  * Tails the app's OWN logcat for the below-the-engine playback failures the player objects can't expose:
- * Android **MediaCodec** (e.g. `Codec reported err 0x80001000`) and **AudioTrack** errors. mpv/ExoPlayer sit
+ * Android **MediaCodec** (e.g. `Codec reported err 0x80001000`) and **AudioTrack** errors. ExoPlayer sits
  * on top of MediaCodec, so a hardware decode/audio failure only names itself in the system log — and most
  * users can't run adb. Reading your *own* process's logs needs no permission.
  *
@@ -109,8 +109,6 @@ sealed interface PlaybackFailure {
     data object StreamLink : PlaybackFailure
     data object NotStreaming : PlaybackFailure
     data object AudioNoVideo : PlaybackFailure
-    data object FileCorrupt : PlaybackFailure
-    data object MultipleVideos : PlaybackFailure
     data object DecoderBusy : PlaybackFailure
 
     /**
@@ -122,11 +120,6 @@ sealed interface PlaybackFailure {
     data object DecoderExhausted : PlaybackFailure
     data object NoInternet : PlaybackFailure
     data object Surround : PlaybackFailure
-    data object ImageSubtitleAudio : PlaybackFailure
-    data object ImageFormat : PlaybackFailure
-    data object ImageShow : PlaybackFailure
-    data object BothEnginesExoFirst : PlaybackFailure
-    data class BothEnginesMpvFirst(val exoError: PlaybackFailure) : PlaybackFailure
     data class ExoDecode(val code: String) : PlaybackFailure
     data class ExoPlay(val code: String) : PlaybackFailure
     data class HardwareFallback(val resolution: String) : PlaybackFailure
@@ -139,11 +132,8 @@ sealed interface PlaybackFailure {
      * insists on its own request headers simply cannot be cast, and nothing on this side changes it.
      */
     data object CastUnsupported : PlaybackFailure
-    /** Fixed mpv diagnostics produced by OwnTV, not provider text; resolve at the UI boundary. */
-    data object MpvOpenDecode : PlaybackFailure
     /** HTTP 458: the account is already streaming elsewhere — said plainly, so nobody blames the stream. */
     data object AccountInUse : PlaybackFailure
-    data object MpvStreamNeverStarted : PlaybackFailure
     /** The playlist marks the stream as Apple FairPlay protected, which no Android device can decrypt. */
     data object FairPlay : PlaybackFailure
     /** Genuine unknown engine/provider text; intentionally not translated. */
@@ -171,18 +161,10 @@ fun PlaybackFailure.describe(resolve: (Int, List<Any>) -> String): String {
         PlaybackFailure.StreamLink -> str(R.string.player_error_stream_link)
         PlaybackFailure.NotStreaming -> str(R.string.player_error_not_streaming)
         PlaybackFailure.AudioNoVideo -> str(R.string.player_error_audio_no_video)
-        PlaybackFailure.FileCorrupt -> str(R.string.player_error_file_corrupt)
-        PlaybackFailure.MultipleVideos -> str(R.string.player_error_multiple_videos)
         PlaybackFailure.DecoderBusy -> str(R.string.player_error_decoder_busy)
         PlaybackFailure.DecoderExhausted -> str(R.string.multiview_decoder_exhausted)
         PlaybackFailure.NoInternet -> str(R.string.player_error_no_internet)
         PlaybackFailure.Surround -> str(R.string.player_error_surround)
-        PlaybackFailure.ImageSubtitleAudio -> str(R.string.player_error_image_subtitle_audio)
-        PlaybackFailure.ImageFormat -> str(R.string.player_error_image_format)
-        PlaybackFailure.ImageShow -> str(R.string.player_error_image_show)
-        PlaybackFailure.BothEnginesExoFirst -> str(R.string.player_error_both_engines_exo_first)
-        is PlaybackFailure.BothEnginesMpvFirst ->
-            str(R.string.player_error_both_engines_mpv_first, exoError.describe(resolve))
         is PlaybackFailure.ExoDecode -> str(R.string.player_error_exo_decode, code)
         is PlaybackFailure.ExoPlay -> str(R.string.player_error_exo_play, code)
         is PlaybackFailure.HardwareFallback -> str(R.string.player_error_hardware_fallback, resolution)
@@ -193,9 +175,7 @@ fun PlaybackFailure.describe(resolve: (Int, List<Any>) -> String): String {
             if (customUserAgentHint) str(R.string.player_error_custom_user_agent) else "",
         )
         PlaybackFailure.CastUnsupported -> str(R.string.player_error_cast_unsupported)
-        PlaybackFailure.MpvOpenDecode -> str(R.string.player_error_mpv_open_decode)
         PlaybackFailure.AccountInUse -> str(R.string.player_error_account_in_use)
-        PlaybackFailure.MpvStreamNeverStarted -> str(R.string.player_error_mpv_stream_never_started)
         PlaybackFailure.FairPlay -> str(R.string.player_error_fairplay)
         is PlaybackFailure.Raw -> message
     }
@@ -234,12 +214,8 @@ enum class PlayerFailureReason(@StringRes val messageRes: Int) {
     FORMAT(R.string.player_reason_format),
     NETWORK(R.string.player_reason_network),
     AUDIO(R.string.player_reason_audio),
-    SOFTWARE_FALLBACK(R.string.player_reason_software_fallback),
-    COPY_MODE_FALLBACK(R.string.player_reason_copy_mode_fallback),
-    ARCHIVE_SOFTWARE_FALLBACK(R.string.player_reason_archive_software_fallback),
     STEREO_FALLBACK(R.string.player_reason_stereo_fallback),
     ONE_SESSION_PROVIDER(R.string.player_reason_one_session_provider),
-    MPV_HANDOFF(R.string.player_reason_mpv_handoff),
     LIVE_FALLBACK(R.string.player_reason_live_fallback),
     LIVE_NO_FALLBACK(R.string.player_reason_live_no_fallback),
     STREAM_REPORT(R.string.player_reason_stream_report),
@@ -262,9 +238,9 @@ object PlayerErrors {
     /**
      * The HTTP status behind an ExoPlayer load failure, following the cause chain Media3 wraps it in.
      *
-     * The counterpart to [httpStatusIn] for the engines that get a real exception rather than a line of
-     * log text: mpv only ever hands us a string, Media3 hands us a typed cause chain. Both live here so
-     * "what status was this?" has one answer per input shape instead of a copy per engine.
+     * The counterpart to [httpStatusIn] for the path that gets a real exception rather than a line of
+     * log text: Media3 hands us a typed cause chain. Both live here so "what status was this?" has one
+     * answer per input shape instead of a copy per consumer.
      *
      * Hop-capped because a cause chain can be cyclic.
      */
@@ -314,7 +290,7 @@ object PlayerErrors {
     /** Prefer genuine provider text, otherwise keep the caller's localized semantic failure. */
     fun visibleFailure(raw: String?, url: String?, fallback: PlaybackFailure): PlaybackFailure {
         // "Account already in use" is not a broken stream: the generic "offline or unsupported format"
-        // title read as one, on live channels and films alike.
+        // title read as one.
         if (raw != null && httpStatusIn(raw) == 458) return PlaybackFailure.AccountInUse
         val providerText = raw?.let { providerMessageFor(it, url) }
         return providerText?.let(PlaybackFailure::Raw) ?: fallback

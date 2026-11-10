@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.layout.size
 import androidx.activity.compose.BackHandler
@@ -105,7 +104,6 @@ import tv.own.myowntv.BuildConfig
 import tv.own.myowntv.R
 import tv.own.myowntv.features.profiles.PinPrompt
 import tv.own.myowntv.features.settings.BackupScreen
-import tv.own.myowntv.features.settings.DeveloperScreen
 import tv.own.myowntv.features.settings.LocalSyncScreen
 import tv.own.myowntv.features.settings.SettingsViewModel
 import tv.own.myowntv.features.settings.lock.SettingsPinViewModel
@@ -122,11 +120,11 @@ import tv.own.myowntv.ui.theme.mpx
 import tv.own.myowntv.ui.theme.stageAccent
 import tv.own.myowntv.ui.theme.stageText
 
-/** The sheet's items, top to bottom. [DEVELOPER] exists only in local builds (BuildConfig.DEV_TOOLS). */
-private enum class MoreItem { SETTINGS, FAVORITES, HISTORY, BACKUP, LOCAL_SYNC, ERROR_LOG, ABOUT, DEVELOPER }
+/** The sheet's items, top to bottom. */
+private enum class MoreItem { SETTINGS, FAVORITES, HISTORY, BACKUP, LOCAL_SYNC, ERROR_LOG, ABOUT }
 
 /** The pages that ask for the Settings PIN when it is on. */
-private val PIN_PAGES = setOf(MoreItem.BACKUP, MoreItem.LOCAL_SYNC, MoreItem.DEVELOPER)
+private val PIN_PAGES = setOf(MoreItem.BACKUP, MoreItem.LOCAL_SYNC)
 
 /**
  * More: the glass section sheet, topped by the profile, and one page on the right
@@ -144,10 +142,8 @@ fun MoreScreen(
     /** OK on the avatar: the avatar picker, with "Your own picture". */
     onPickAvatar: () -> Unit,
     onOpenSettings: (group: Int?, search: Boolean) -> Unit,
+    /** ▶ / OK on a Favourites or History row: the same path Home uses, straight to the channel. */
     onPlayChannel: (Long) -> Unit,
-    onPlayMovie: (Long, Long) -> Unit,
-    onPlayEpisode: (seriesId: Long, episodeId: Long, positionMs: Long) -> Unit,
-    onOpenSeries: (Long) -> Unit,
     onChildFocused: () -> Unit,
     onEntryHook: (((() -> Boolean)?) -> Unit)? = null,
     /** Back from Settings: land on the Settings page's first card instead of the rail. */
@@ -246,8 +242,6 @@ fun MoreScreen(
             GroupLabel(stringResource(R.string.settings_app_group))
             item(MoreItem.ERROR_LOG, MyOwnTVIcon.WARNING, stringResource(R.string.settings_playback_error_log), logCount.toString(), false)
             item(MoreItem.ABOUT, MyOwnTVIcon.INFO, stringResource(R.string.settings_about), BuildConfig.VERSION_NAME, false)
-            // Maintainer-only; DEV_TOOLS is a compile-time constant, so R8 removes it from published APKs.
-            if (BuildConfig.DEV_TOOLS) item(MoreItem.DEVELOPER, MyOwnTVIcon.GEAR, "Developer", "DEV", false)
             Spacer(Modifier.weight(1f))
             StageKeyHints(
                 listOf(
@@ -276,18 +270,17 @@ fun MoreScreen(
                 )
                 MoreItem.FAVORITES -> FavouritesPage(
                     vm = vm, setEntry = setEntry,
-                    onPlayChannel = onPlayChannel, onPlayMovie = { onPlayMovie(it, 0L) }, onOpenSeries = onOpenSeries,
+                    onPlayChannel = onPlayChannel,
                 )
                 MoreItem.HISTORY -> HistoryPage(
                     vm = vm, setEntry = setEntry,
                     onClearHistory = { settingsVm.clearWatchHistory(it) },
-                    onPlayChannel = onPlayChannel, onPlayMovie = onPlayMovie, onPlayEpisode = onPlayEpisode, onOpenSeries = onOpenSeries,
+                    onPlayChannel = onPlayChannel,
                 )
                 MoreItem.BACKUP -> BackupScreen(entry = pageTarget, modifier = Modifier.fillMaxSize())
                 MoreItem.LOCAL_SYNC -> LocalSyncScreen(entry = pageTarget, modifier = Modifier.fillMaxSize())
                 MoreItem.ERROR_LOG -> ErrorLogPage(setEntry = setEntry, onCountChanged = { logVersion++ })
                 MoreItem.ABOUT -> AboutPage(vm = vm, entry = pageTarget, onOpenLanguage = { onOpenSettings(8, false) })
-                MoreItem.DEVELOPER -> Box(Modifier.focusRequester(pageTarget).focusGroup()) { DeveloperScreen(onBack = backToSheet) }
             }
         }
     }

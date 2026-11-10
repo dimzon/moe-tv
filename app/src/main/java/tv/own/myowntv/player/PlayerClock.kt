@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.hudShade
 import tv.own.myowntv.ui.theme.hudInk
@@ -87,20 +86,16 @@ import tv.own.myowntv.ui.format.rememberSystemTimeFormatter
 /**
  * The player's clock, centred at the top of the HUD.
  *
- * Sits in the middle rather than a corner because that band is empty in every mode — so the guide card
- * on the right keeps exactly the position it has always had, and on movies and episodes nothing moves
- * at all. A corner clock would have pushed the guide down on live channels for no gain.
+ * Sits in the middle rather than a corner because that band is empty — so the guide card on the right
+ * keeps exactly the position it has always had. A corner clock would have pushed the guide down on
+ * live channels for no gain.
  *
- * One panel, one or two columns. Normally it holds only **Current time**. When [watchingMs] is non-null
- * an archive is on screen, and **Programme time** joins it on the left: the recording's own date and
- * time, advancing as it plays. Both are needed at once — a lone real clock reads 10:00 over a picture
- * from yesterday afternoon, which is worse than showing no clock at all.
- *
- * Both columns are labelled, including when only one is present. The label is what stops a lone
- * "13:00" from being read as a broken device clock, and it costs one small line.
+ * The single column is labelled. The label is what stops a lone "13:00" from being read as a broken
+ * device clock, and it costs one small line. (There is no second "Programme time" column any more:
+ * the archive clock belonged to catch-up, which is gone — what is on screen is always now.)
  */
 @Composable
-internal fun PlayerClock(watchingMs: Long?, modifier: Modifier = Modifier) {
+internal fun PlayerClock(modifier: Modifier = Modifier) {
     val formatTime = rememberSystemTimeFormatter()
     val formatDate = rememberBestDateFormatter("EEEdMMM")
     // Minute precision is all that is displayed, so a 10 s tick keeps it honest without waking the
@@ -117,18 +112,6 @@ internal fun PlayerClock(watchingMs: Long?, modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (watchingMs != null) {
-            ClockColumn(
-                label = stringResource(R.string.content_clock_programme),
-                time = formatTime(watchingMs),
-                date = formatDate(watchingMs),
-                labelColor = tv.own.myowntv.ui.theme.stageAccent.accent,
-                timeColor = tv.own.myowntv.ui.theme.stageAccent.accent,
-                dateColor = tv.own.myowntv.ui.theme.stageAccent.accent.copy(alpha = 0.7f),
-            )
-            // Hairline between the two, exactly like the guide card's own divider.
-            Box(Modifier.height(38.dp).width(1.dp).background(hudInk.copy(alpha = 0.18f)))
-        }
         ClockColumn(
             label = stringResource(R.string.content_clock_current),
             time = formatTime(nowMs),

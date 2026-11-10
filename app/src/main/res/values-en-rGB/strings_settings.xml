@@ -107,7 +107,6 @@
     <string name="app_icon_restart_title">Restart OwnTV?</string>
     <string name="app_icon_restart_message">You chose a new icon and logo. They take effect after OwnTV restarts.</string>
     <string name="app_icon_restart_now">Restart now</string>
-    <string name="settings_audio_passthrough_description">On: Dolby and DTS go undecoded to the TV, soundbar or receiver when it says it can play them (ExoPlayer). Off: the app decodes them, still as surround where Surround sound allows. mpv always decodes. Not used while Night mode or Volume levelling is on.</string>
     <string name="settings_volume_leveling">Volume levelling</string>
     <string name="settings_volume_leveling_description">Brings every channel and film slowly to the same loudness, so switching does not jump in volume.</string>
     <string name="settings_max_video_quality_description">The highest picture played when a channel or film offers several. Saves bandwidth and eases the decoder.</string>
@@ -125,8 +124,6 @@
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> favourites</item>
     </plurals>
     <string name="settings_line_sub_style">Size, colour, position, background</string>
-    <string name="settings_line_rec_pre_roll">Before the programme begins</string>
-    <string name="settings_line_rec_post_roll">For programmemes that overrun</string>
     <string name="settings_help_focus">The ring drawn around whatever has focus. Pick its colour and thickness so it stays easy to follow from the sofa.</string>
     <string name="settings_help_epg_sources">Add an XMLTV guide feed by its link, refresh it, or remove it. Feeds fill the TV Guide and the programme lines in Live TV.</string>
     <string name="settings_help_guide_days">How many days of programmemes the guide stores ahead. Fewer days make guide refreshes faster and the database smaller.</string>

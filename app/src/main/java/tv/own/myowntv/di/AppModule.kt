@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.features.sports.SportsPlayback
 import tv.own.myowntv.features.pip.PictureInPicture
@@ -66,8 +65,6 @@ import tv.own.myowntv.features.categorylock.CategoryLockViewModel
 import tv.own.myowntv.features.customize.CustomizeItemsViewModel
 import tv.own.myowntv.features.customize.CustomizeViewModel
 import tv.own.myowntv.features.settings.lock.SettingsPinViewModel
-import tv.own.myowntv.features.downloads.DownloadsViewModel
-import tv.own.myowntv.features.recordings.RecordingsViewModel
 import tv.own.myowntv.features.epg.EpgViewModel
 import tv.own.owntv.core.content.SearchReader
 import tv.own.owntv.core.home.HomeFeedReader
@@ -75,26 +72,21 @@ import tv.own.owntv.core.live.GuideReader
 import tv.own.owntv.core.live.LiveEpgReader
 import tv.own.myowntv.features.home.HomeViewModel
 import tv.own.myowntv.features.live.LiveViewModel
-import tv.own.myowntv.features.movies.MovieViewModel
 import tv.own.myowntv.features.profiles.ProfileGateSessionViewModel
 import tv.own.myowntv.features.profiles.ProfilesViewModel
 import tv.own.myowntv.features.search.SearchViewModel
-import tv.own.myowntv.features.series.SeriesViewModel
 import tv.own.myowntv.features.settings.LocalAutoSyncViewModel
 import tv.own.myowntv.features.settings.LocalSyncViewModel
 import tv.own.myowntv.features.settings.BackupViewModel
 import tv.own.myowntv.features.settings.ChannelNameCleanupViewModel
-import tv.own.myowntv.features.settings.DeleteSubtitlesViewModel
 import tv.own.myowntv.features.settings.EpgSourcesViewModel
 import tv.own.myowntv.features.settings.HomeSettingsViewModel
 import tv.own.myowntv.features.settings.LanguageSettingsViewModel
-import tv.own.myowntv.features.settings.OpenSubtitlesViewModel
 import tv.own.myowntv.features.settings.PlayerButtonsSettingsViewModel
 import tv.own.myowntv.features.settings.SettingsViewModel
 import tv.own.myowntv.features.setup.DisplaySizeViewModel
 import tv.own.myowntv.features.setup.SetupViewModel
 import tv.own.myowntv.features.shell.ShellViewModel
-import tv.own.myowntv.features.subtitles.SubtitleSearchViewModel
 
 /**
  * Root Koin module. Each feature will contribute its own bindings as the app grows;
@@ -131,48 +123,42 @@ val appModule = module {
     // Takes a Context first; Koin resolves it from androidContext().
     //
     // Spelled out rather than `viewModelOf(::LiveViewModel)`: that reflective helper is generated for
-    // up to 22 constructor parameters and this class now has 24. The failure is a "none of the
+    // up to 22 constructor parameters and this class has 20. The failure is a "none of the
     // following candidates is applicable" at the call above, which says nothing about arity — hence
-    // this note. Every argument is resolved by type, so the order here does not matter.
+    // this note. Every argument is resolved by type, in declared order.
     viewModel {
         LiveViewModel(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
+            get(), // appContext
+            get(), // channelDao
+            get(), // categoryDao
+            get(), // favoriteDao
+            get(), // historyDao
+            get(), // userDataWriter
+            get(), // profileDao
+            get(), // sourceDao
+            get(), // settings
+            get(), // customize
+            get(), // launcherIntegrationRepository
+            get(), // epgDao
+            get(), // epgReader
+            get(), // previewEngine
+            get(), // contentOrderDao
+            get(), // customCategoryDao
+            get(), // streamUrlResolver
+            get(), // epgRepository
+            get(), // externalPlayerLauncher
+            get(), // downloadWatchGuard
         )
     }
-    viewModelOf(::MovieViewModel)
     viewModelOf(::SportsViewModel)
     viewModelOf(::SportsSettingsViewModel)
     viewModelOf(::PlayerButtonsSettingsViewModel)
-    viewModelOf(::SeriesViewModel)
     viewModelOf(::SearchViewModel)
     viewModelOf(::ProfilesViewModel)
     // Activity-scoped session state for the profile gate (configuration-only retention, no saved
     // state — see ProfileGateSessionViewModel).
     viewModelOf(::ProfileGateSessionViewModel)
-    // 24 constructor parameters — past the highest arity Koin's `*Of` DSL generates, so this one
+    // 29 constructor parameters — past the highest arity Koin's `*Of` DSL generates, so this one
     // binding stays explicit. Named arguments give it the same guarantee viewModelOf gives the rest:
     // reordering the constructor is safe, and adding a parameter is a compile error here, not a
     // silently mis-wired dependency at runtime.
@@ -201,11 +187,8 @@ val appModule = module {
             xtreamClient = get(),
             sourceTester = get(),
             companion = get(),
-            vodEngineStore = get(),
-            forceMpvStore = get(),
             playbackPrefs = get(),
             connectionLimits = get(),
-            player = get(),
             livePreview = get(),
             enginePool = get(),
             importer = get(),
@@ -216,37 +199,27 @@ val appModule = module {
     viewModelOf(::LocalAutoSyncViewModel)
     viewModelOf(::HomeSettingsViewModel)
     viewModelOf(::LanguageSettingsViewModel)
-    viewModelOf(::OpenSubtitlesViewModel)
-    viewModelOf(::DeleteSubtitlesViewModel)
-    viewModelOf(::SubtitleSearchViewModel)
-    viewModelOf(::DownloadsViewModel)
-    viewModelOf(::RecordingsViewModel)
-    // 23 constructor parameters — past the highest arity viewModelOf generates (see LiveViewModel).
+    // 18 constructor parameters — past the highest arity viewModelOf generates (see LiveViewModel).
     viewModel {
         EpgViewModel(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
+            get(), // settings
+            get(), // sourceRepository
+            get(), // channelDao
+            get(), // epgDao
+            get(), // profileDao
+            get(), // epgRepository
+            get(), // epgSourceStore
+            get(), // connectivity
+            get(), // customize
+            get(), // sourceDao
+            get(), // favoriteDao
+            get(), // userDataWriter
+            get(), // categoryDao
+            get(), // customCategoryDao
+            get(), // liveEpgReader
+            get(), // epgActivity
+            get(), // historyDao
+            get(), // reminderManager
         )
     }
     viewModelOf(::CustomizeViewModel)

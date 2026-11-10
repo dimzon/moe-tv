@@ -27,7 +27,6 @@ import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -41,7 +40,6 @@ import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
 import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
@@ -50,7 +48,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.stageTone
 import tv.own.myowntv.ui.theme.stageShadow
@@ -180,7 +177,7 @@ internal fun LiveHeader(category: String, count: Int?, showChevron: Boolean, mod
 /**
  * `.chrow`: 84 high, 20 padding, 18 gap — number (50, right-aligned, 20/600 dim), white logo plate
  * 76×54, name 22/700, "programme · time left" 17 muted (the time part at 60%), a 300×4 progress line;
- * then the provider tags, ↺ for catch-up, ♥ when a favourite, and the playlist mark. Focused = FX.
+ * then the provider tags, ♥ when a favourite, and the playlist mark. Focused = FX.
  * [trailing] replaces that end group (the player's History sheet shows when each was watched).
  */
 @Composable
@@ -237,7 +234,6 @@ internal fun LiveStageRow(
         if (trailing != null) trailing()
         else Row(horizontalArrangement = Arrangement.spacedBy(8.mpx), verticalAlignment = Alignment.CenterVertically) {
             name.tags.forEach { StageTag(it) }
-            if (channel.catchup) MyOwnTVIcon(MyOwnTVIcon.REWIND, StageColors.Dim, Modifier.size(22.mpx))
             if (isFavorite) MyOwnTVIcon(MyOwnTVIcon.FAVORITE, stageAccent.accent, Modifier.size(22.mpx), filled = true)
             mark?.let { StagePlaylistMark(it) }
         }
@@ -461,7 +457,6 @@ internal fun liveCategoryEntries(railItems: List<LiveRailItem>, railCounts: Map<
             icon = when (item.key) {
                 tv.own.owntv.core.live.LiveKey.Favorites -> MyOwnTVIcon.FAVORITE
                 tv.own.owntv.core.live.LiveKey.History -> MyOwnTVIcon.HISTORY
-                tv.own.owntv.core.live.LiveKey.Catchup -> MyOwnTVIcon.REWIND
                 tv.own.owntv.core.live.LiveKey.All -> MyOwnTVIcon.LIVE_TV
                 else -> if (item.locked) MyOwnTVIcon.LOCK else null
             },

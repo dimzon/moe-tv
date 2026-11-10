@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalResources
@@ -86,4 +85,4 @@ fun TrackOption.displayLabel(): String {
     return raw ?: language ?: fallback
 }
 
-private fun TrackOption.displayNumber(): Int = (typeIndex.takeIf { it >= 0 } ?: mpvId) + 1
+private fun TrackOption.displayNumber(): Int = (typeIndex.takeIf { it >= 0 } ?: id) + 1

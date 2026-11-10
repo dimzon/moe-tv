@@ -159,7 +159,7 @@ class HttpClient(private val client: OkHttpClient) {
         // `timeshift` is the catch-up/archive form (/timeshift/user/pass/duration/start/id.ts) — it embeds
         // the same credentials as a live URL, so it must be masked here too.
         private val PATH_CREDENTIALS = Regex("(?i)(://[^/]+/(?:live|movie|series|vod|timeshift)/)([^/]+)/([^/]+)/")
-        // Userinfo credentials in a `scheme://user:pass@host` URL (e.g. a proxy URL handed to mpv, or any
+        // Userinfo credentials in a `scheme://user:pass@host` URL (a proxy URL in that shape, or any
         // source URL with embedded creds).
         private val USERINFO = Regex("(?i)(://)([^/@:]+)(:[^/@]*)?@")
 

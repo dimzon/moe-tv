@@ -118,7 +118,7 @@ class TimeshiftDownloader(
                 delay(TimeshiftRules.reconnectDelayMs(TimeshiftRules.MAX_RECONNECTS))
                 continue
             }
-            // Earned back by a long run of good downloading, as the live engines' reconnect budget is.
+            // Earned back by a long run of good downloading, as the live player's reconnect budget is.
             if (clock() - attemptStart >= TimeshiftRules.HEALTHY_MS) failures = 0
             failures++
             // The piece the drop cut short is closed on the wall clock; the next one follows a hole.

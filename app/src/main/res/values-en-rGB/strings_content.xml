@@ -5,7 +5,6 @@
     <string name="content_remove_favourite">Remove from Favourites</string>
     <string name="content_favorited">Favourited</string>
     <string name="content_favorite">Favourite</string>
-    <string name="content_catchup_prompt">Pick a recent programme to replay from the start.</string>
     <string name="content_category_favorites">Favourites</string>
     <string name="content_epg_matched_no_programmes">Matched — but this guide channel has no current programmes in the EPG feed yet.</string>
     <string name="content_epg_no_programme">No programme at this time.</string>

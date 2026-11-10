@@ -2,8 +2,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="settings_sort_playlist">Wiedergabeliste</string>
     <string name="settings_sort_alpha">A–Z</string>
-    <string name="settings_sort_rating">Bewertung</string>
-    <string name="settings_sort_date_added">Hinzugefügt am</string>
     <string name="settings_mini_player">Mini-Player</string>
     <string name="settings_mini_player_description">Der kleine schwebende Player, der angezeigt wird, wenn Sie beim Durchsuchen einen Sender andocken (PiP). Ändern Sie diese Einstellungen hier oder direkt über die Schaltflächen zum Ändern der Größe und Verschieben am Mini-Player.</string>
     <string name="settings_size">Größe</string>
@@ -15,9 +13,7 @@
     <string name="settings_live_keep_watching">Live-Sender unter „Weiterschauen“</string>
     <string name="settings_live_keep_watching_description">Zuletzt angesehene Live-Sender in der hervorgehobenen Zeile anzeigen.</string>
     <string name="settings_movies_keep_watching">Filme unter „Weiterschauen“</string>
-    <string name="settings_movies_keep_watching_description">Karten zum Fortsetzen von Filmen in der hervorgehobenen Zeile anzeigen.</string>
     <string name="settings_series_keep_watching">Serien unter „Weiterschauen“</string>
-    <string name="settings_series_keep_watching_description">Karten zum Fortsetzen von Folgen in der hervorgehobenen Zeile anzeigen.</string>
     <string name="settings_hero_preview">Video in der hervorgehobenen Zeile abspielen</string>
     <string name="settings_hero_preview_description">Die Videovorschau des markierten Titels startet nach einem Moment. Zum Sparen von Strom und Speicher beim Durchsuchen des Startbildschirms ausschalten.</string>
     <string name="settings_android_tv_home">Android TV-Startbildschirm</string>
@@ -203,7 +199,6 @@
     <string name="settings_home_root">Startbildschirm</string>
     <string name="settings_home_root_description">Zeilen auf der Startseite auswählen, neu anordnen und filtern</string>
     <string name="settings_metadata_root_description">Poster, Handlungen, Besetzung und Bewertungen für Filme und Serien</string>
-    <string name="settings_download_folder">Download-Ordner</string>
     <string name="settings_backup_restore">Sicherung und Wiederherstellen</string>
     <string name="settings_clear_history">Wiedergabeverlauf löschen</string>
     <string name="settings_appearance_group">Darstellung</string>
@@ -247,11 +242,6 @@
     <string name="settings_surround_sound">Surround-Sound</string>
     <string name="settings_surround_description_mobile">Dolby/DTS für einen echten, mit diesem Gerät verbundenen 5.1-/7.1-Receiver als Surround-Sound (5.1/7.1) decodieren. Für den eingebauten Lautsprecher, Kopfhörer oder eine Stereo-Soundbar DEAKTIVIERT lassen — Mehrkanalton kann zu einer Verzögerung des Tons gegenüber dem Bild führen. Falls der Ton abdriftet, passen Sie ihn im Audiomenü des Players unter A/V-Synchronisierung an.</string>
     <string name="settings_audio_passthrough">Dolby- und DTS-Passthrough</string>
-    <string name="settings_audio_passthrough_description">An: Dolby und DTS gehen undecodiert an Fernseher, Soundbar oder Receiver, wenn diese sie abspielen können (ExoPlayer). Aus: Die App decodiert sie, weiterhin als Surround, wo Surround-Sound es erlaubt. mpv decodiert immer. Nicht aktiv, solange Nachtmodus oder Lautstärkeangleichung an ist.</string>
-    <string name="settings_ffmpeg_audio">FFmpeg-Audio für ExoPlayer</string>
-    <string name="settings_ffmpeg_audio_description">An: ExoPlayer kann auch Ton decodieren, für den das Gerät keinen Decoder hat, etwa DTS, TrueHD oder MP2. Die eigenen Decoder des Geräts haben weiterhin Vorrang. Aus: ExoPlayer nutzt nur die Decoder des Geräts. mpv decodiert immer mit FFmpeg. Eine Änderung startet OwnTV neu.</string>
-    <string name="settings_line_ffmpeg_audio">Für Ton, den das Gerät nicht decodieren kann</string>
-    <string name="settings_ffmpeg_audio_restart_message">Der Audio-Decoder wechselt, sobald OwnTV neu startet.</string>
     <string name="settings_night_mode">Nachtmodus</string>
     <string name="settings_night_mode_description">Senkt laute Szenen ab und hebt leise Dialoge an – zum Schauen bei geringer Lautstärke.</string>
     <string name="settings_volume_leveling">Lautstärkeangleichung</string>
@@ -273,7 +263,6 @@
     <string name="settings_catchup_unavailable">In dieser Wiedergabeliste sind keine Sender mit Catch-up verfügbar</string>
     <string name="settings_device">Gerät</string>
     <string name="settings_playback_error_log">Fehlerprotokoll</string>
-    <string name="settings_playback_speed">Wiedergabegeschwindigkeit</string>
     <string name="settings_player_zoom">Player-Zoom</string>
     <string name="settings_app_group">App</string>
     <string name="settings_app_startup">App-Start</string>
@@ -350,7 +339,6 @@
     <string name="settings_vp_cat_picture">Bild</string>
     <string name="settings_vp_cat_frame_rate">Bildrate</string>
     <string name="settings_vp_cat_frame_rate_summary">Bildschirm an das Video anpassen</string>
-    <string name="settings_vp_cat_streaming">Streaming</string>
     <string name="settings_vp_cat_live_tuning">Live-Abstimmung</string>
     <string name="settings_vp_cat_multiview">Multiview und Mini-Player</string>
     <string name="settings_vp_cat_multiview_summary_mobile">Mehrere Live-Sender gleichzeitig</string>
@@ -444,12 +432,6 @@
     <string name="settings_hardware_decoding_description">Den Hardwaredecoder des Fernsehers verwenden. Deaktivieren Sie diese Option, wenn einige Streams ruckeln oder Bildfehler zeigen.</string>
     <string name="settings_software_decode_above_1080p">Softwaredecodierung über 1080p</string>
     <string name="settings_software_decode_above_1080p_description">Spielt 4K und anderes Video über 1080p per Software ab, wenn der Hardwaredecoder des Fernsehers aus ist oder versagt. Braucht einen schnellen Prozessor: Auf den meisten Fernsehern ruckelt es.</string>
-    <string name="settings_movies_series_player">Player für Filme und Serien</string>
-    <string name="settings_live_tv_player">Player für Live-TV</string>
-    <string name="settings_engine_order"><xliff:g id="first">%1$s</xliff:g>, dann <xliff:g id="second">%2$s</xliff:g></string>
-    <string name="settings_engine_only">Nur <xliff:g id="engine">%1$s</xliff:g></string>
-    <string name="settings_engine_default"><xliff:g id="option">%1$s</xliff:g> (Standard)</string>
-    <string name="settings_reset_player_choices">Gespeicherte Player-Auswahl zurücksetzen</string>
     <string name="settings_external_player">Externer Player</string>
     <string name="settings_default_zoom">Standardzoom</string>
     <string name="settings_default_zoom_description">Seitenverhältnis/Zoom, das bzw. der beim Start der Wiedergabe angewendet wird.</string>
@@ -469,15 +451,6 @@
     <string name="settings_reset_saved_audio_delay_confirm_description">Jeder Sender, Film und jede Folge kehrt zur Audiosynchronisierung oben zurück. Gespeicherter Zoom und gespeicherte Lautstärke bleiben erhalten. Einzelne Werte lassen sich jederzeit wieder im Player setzen.</string>
     <string name="settings_seek_step">Sprungweite</string>
     <string name="settings_seek_step_description">Wie weit Rück- und Vorlauf in einem Film oder einer Folge springen.</string>
-    <string name="settings_vod_buffer">Film-Puffer</string>
-    <string name="settings_vod_buffer_description">Wie weit Filme, Folgen und Catch-up im Voraus geladen werden. Auto nutzt, was zu diesem Gerät passt. Ein längerer Puffer überbrückt eine schlechte Verbindung besser; die Grenze setzt weiterhin der Speicher dieses Geräts, daher hält ein Film mit hoher Bitrate womöglich weniger als gewählt.</string>
-    <string name="settings_vod_network_timeout">Netzwerk-Zeitlimit</string>
-    <string name="settings_vod_network_timeout_description">Wie lange Filme, Folgen und Catch-up auf einen stummen Server warten, bevor die Verbindung als verloren gilt. Auto behält die Wartezeit jedes Players bei: 60 Sekunden bei mpv, 20 bei ExoPlayer.</string>
-    <string name="settings_vod_reconnects">Verbindungsversuche</string>
-    <string name="settings_vod_reconnects_description">Wie oft ein Film oder eine Folge nach einem Verbindungsabbruch an der gleichen Stelle neu geöffnet wird, bevor ein Fehler erscheint. Eine Minute störungsfreie Wiedergabe gibt die Versuche zurück.</string>
-    <string name="settings_vod_network_auto">Auto</string>
-    <string name="settings_live_rewind_step">Live-Rücklaufschritt</string>
-    <string name="settings_live_rewind_step_description">Wie weit Zurück- und Vorspulen auf einem Live-Sender springen: in seinem Catch-up-Archiv oder in der von Live-TV anhalten und zurückspulen gespeicherten Kopie.</string>
     <string name="settings_resume_playback">Wiedergabe fortsetzen</string>
     <string name="settings_resume_playback_description">Legt fest, was geschieht, wenn für einen Film oder eine Folge eine Position gespeichert ist.</string>
     <string name="settings_subtitle_appearance">Untertiteldarstellung</string>
@@ -489,24 +462,13 @@
     <string name="settings_preferred_audio_language_description">Spielt diese Tonspur ab, wenn der Stream sie hat. „Originalsprache“ spielt Filme und Serien in der Sprache ab, in der sie gedreht wurden.</string>
     <string name="settings_open_subtitles">OpenSubtitles</string>
     <string name="settings_open_subtitles_connected">Verbunden</string>
-    <string name="settings_open_subtitles_reset_in">In <xliff:g id="hours">%1$d</xliff:g> Std. <xliff:g id="minutes">%2$d</xliff:g> Min.</string>
     <string name="settings_open_subtitles_description">Anmelden, um Untertitel zu suchen, herunterzuladen und heruntergeladene Untertitel zu verwalten. Gilt pro Profil; ein kostenloses Konto bei opensubtitles.com ist erforderlich.</string>
-    <string name="settings_open_subtitles_advanced">Erweiterte Optionen</string>
-    <string name="settings_open_subtitles_advanced_description">Verwende deinen eigenen Anwendungs-API-Schlüssel oder einen selbst gehosteten OpenSubtitles-Worker.</string>
     <string name="settings_open_subtitles_setup_title">OpenSubtitles einrichten</string>
-    <string name="settings_open_subtitles_setup_description">Melde dich mit deinem OpenSubtitles-Konto an.</string>
-    <string name="settings_open_subtitles_setup_remote">Extern</string>
-    <string name="settings_open_subtitles_setup_remote_description">Geben Sie Ihre Daten im Browser eines anderen Geräts im selben WLAN ein – Smartphone, Computer oder ein anderer Fernseher.</string>
-    <string name="settings_open_subtitles_setup_local">Hier eingeben</string>
-    <string name="settings_open_subtitles_setup_local_description">Gib deine Daten mit der Fernbedienung direkt an diesem TV ein.</string>
     <string name="settings_open_subtitles_api_key">OpenSubtitles-Anwendungs-API-Schlüssel</string>
     <string name="settings_worker_server_url">Worker-/Server-URL</string>
     <string name="settings_shared">Gemeinsam</string>
-    <string name="settings_open_subtitles_access_priority">Lasse beide Felder leer, um den gemeinsamen Worker von OwnTV zu nutzen. Eine eigene Worker-URL hat Vorrang vor einem direkten API-Schlüssel. Kontositzungen bleiben profilspezifisch.</string>
-    <string name="settings_remove_custom_access">Eigenen Zugang entfernen</string>
     <string name="settings_preferred_audio_language">Bevorzugte Audiosprache</string>
     <string name="settings_audio_sync">Audio-Synchronisierung</string>
-    <string name="settings_audio_sync_description">Audio zeitlich vor- oder zurückversetzen, um es an das Video anzupassen. Funktioniert mit beiden Playern (mpv und ExoPlayer).</string>
     <string name="settings_output_audio_delay">Verzögerung für diesen Ausgang</string>
     <string name="settings_output_audio_delay_description">Kommt zu „Audio-Synchronisierung“ hinzu und wird für jeden Ausgang getrennt gespeichert – HDMI, eine Soundbar über HDMI ARC, Bluetooth, die eingebauten Lautsprecher, Kopfhörer. Stelle sie ein, während du über diesen Ausgang hörst.</string>
     <string name="settings_audio_output_speaker">Eingebaute Lautsprecher</string>
@@ -516,8 +478,6 @@
     <string name="settings_live_latency_bitrate_note">Bei einem Sender mit sehr hoher Bitrate – besonders in 4K – kann der Puffer weniger Zeit fassen, als du eingestellt hast, denn es gibt eine Grenze dafür, wie viel Video gleichzeitig im Speicher gehalten werden kann.</string>
     <string name="settings_channel_numbers">Sendernummern</string>
     <string name="settings_channel_numbers_description">Die Sendernummer deines Anbieters neben dem Namen in der Live-TV-Liste, in der Senderlisten-Einblendung und im Player anzeigen – und während der Wiedergabe im Vollbild eine Nummer über die Fernbedienung eingeben, um direkt zu diesem Sender zu wechseln (OK schaltet sofort um, Zurück bricht ab). Wenn diese Option ausgeschaltet ist, werden alle Nummern ausgeblendet und die Zifferntasten ignoriert; es geht nichts verloren, und nach dem erneuten Einschalten werden die Nummern wieder angezeigt.</string>
-    <string name="settings_live_left_right_rewinds">Links/Rechts spult Live-TV zurück</string>
-    <string name="settings_live_left_right_rewinds_description">Bei ausgeblendeter Steuerung spulen Links und Rechts auf Sendern, die sich zurückspulen lassen (Catch-up oder gespeichert von Live-TV anhalten und zurückspulen), zurück und vor, statt die Senderliste und den Verlauf zu öffnen.</string>
     <string name="settings_timeshift">Live-TV anhalten und zurückspulen</string>
     <string name="settings_timeshift_description">Sender ohne Catch-up werden beim Ansehen im Vollbild auf diesem Gerät gespeichert, damit du anhalten und zurückspulen kannst. Schreibt ständig in den Speicher; mindestens 1 GB bleibt immer frei.</string>
     <string name="settings_timeshift_window">Rückspul-Länge</string>
@@ -544,37 +504,18 @@
     <string name="settings_custom_live_buffer">Benutzerdefinierter Live-Puffer</string>
     <string name="settings_live_buffer_seconds"><xliff:g id="seconds">%1$d</xliff:g> s</string>
     <string name="settings_audio_delay"><xliff:g id="delay">%1$d</xliff:g> ms</string>
-    <string name="settings_external_player_description">Auswählen, welche Bereiche in einer externen App geöffnet werden.</string>
     <string name="settings_audio_delay_value"><xliff:g id="delay">%1$d</xliff:g> ms</string>
-    <string name="settings_movies_player_description">mpv (empfohlen) bietet die umfassendste Formatunterstützung — DTS/TrueHD-Audio, ungewöhnliche Dateien. ExoPlayer gibt auf bestimmten Fernsehern einige Streams wieder, die mpv nicht schafft, kann jedoch kein DTS/TrueHD-Audio decodieren. Die kombinierten Optionen probieren automatisch den anderen Player, wenn der erste scheitert; die Optionen mit nur einem Player tun das nie, was ein paar Sekunden Schwarzbild spart, falls der zweite Player auf deinem Fernseher ohnehin nicht funktioniert.</string>
-    <string name="settings_movies_player_description_mobile">mpv (empfohlen) bietet die umfassendste Formatunterstützung — DTS/TrueHD-Audio, ungewöhnliche Dateien. ExoPlayer gibt auf bestimmten Geräten einige Streams wieder, die mpv nicht schafft, kann jedoch kein DTS/TrueHD-Audio decodieren. Die kombinierten Optionen probieren automatisch den anderen Player, wenn der erste scheitert; die Optionen mit nur einem Player tun das nie, was ein paar Sekunden Schwarzbild spart, falls der zweite Player auf deinem Gerät ohnehin nicht funktioniert.</string>
-    <string name="settings_live_player_description">ExoPlayer (empfohlen) öffnet Sender deutlich schneller und ist der einzige mit Untertiteln im Live-TV. mpv gibt Sender wieder, die ExoPlayer nicht schafft, darunter manche mit ungewöhnlichem Ton. Die kombinierten Optionen probieren automatisch den anderen Player, wenn der erste scheitert; die Optionen mit nur einem Player tun das nie, was ein paar Sekunden Schwarzbild spart, falls der zweite Player auf deinem Fernseher ohnehin nicht funktioniert. Bei einem Sender, den du im Player von Hand umschaltest, bleibt deine Auswahl in beiden Fällen erhalten.</string>
-    <string name="settings_reset_player_choices_description">Wenn du einen einzelnen Film oder eine Folge im Player zwischen mpv und ExoPlayer umschaltest, wird diese Auswahl für das nächste Mal gespeichert. Beim Zurücksetzen folgt wieder alles der Einstellung oben. Gespeicherte Auswahlen für Live-Kanäle bleiben erhalten.</string>
     <string name="settings_reset_player_choices_none">Nichts gespeichert</string>
     <plurals name="settings_reset_player_choices_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> gespeichert</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> gespeichert</item>
     </plurals>
-    <string name="settings_reset_player_choices_confirm">Gespeicherte Player-Auswahl zurücksetzen?</string>
-    <string name="settings_reset_player_choices_confirm_description">Jeder Film und jede Folge folgt wieder der Einstellung „Player für Filme und Serien“. Du kannst einzelne Titel jederzeit erneut im Player umschalten.</string>
-    <string name="settings_reset_live_player_choices">Gespeicherte Player-Auswahl für Live-TV zurücksetzen</string>
-    <string name="settings_reset_live_player_choices_description">Wenn du einen Sender im Player zwischen ExoPlayer und mpv umschaltest, wird diese Auswahl für den Sender gespeichert. Beim Zurücksetzen folgen alle Sender wieder der Einstellung „Player für Live-TV“. Gespeicherte Auswahlen für Filme und Folgen bleiben erhalten.</string>
-    <string name="settings_reset_live_player_choices_confirm">Gespeicherte Player-Auswahl für Live-TV zurücksetzen?</string>
-    <string name="settings_reset_live_player_choices_confirm_description">Jeder Sender folgt wieder der Einstellung „Player für Live-TV“. Du kannst einzelne Sender jederzeit erneut im Player umschalten.</string>
     <string name="settings_external_player_row_description">Streams in einer externen App (VLC, MX Player) statt im integrierten Player öffnen, separat für jeden Bereich auswählbar. Nützlich für Streams, die diese App nicht decodieren kann, oder wenn du einen anderen Player bevorzugst. Die Fortsetzungsposition und „Zurück/Weiter“ sind bei externer Wiedergabe nicht verfügbar; Streams, die einen benutzerdefinierten User-Agent oder Referer benötigen, werden möglicherweise nicht wiedergegeben.</string>
     <string name="settings_resume_always">Immer fortsetzen</string>
     <string name="settings_resume_ask">Vor dem Fortsetzen fragen</string>
     <string name="settings_resume_never">Nie fortsetzen</string>
-    <string name="settings_delete_subtitles">Untertitel löschen</string>
-    <string name="settings_delete_all">Alle löschen</string>
     <string name="settings_movies">Filme</string>
     <string name="settings_series">Serien</string>
-    <string name="settings_no_downloaded_subtitles">Keine heruntergeladenen Untertitel für <xliff:g id="section">%1$s</xliff:g>.</string>
-    <string name="settings_delete_subtitle">Untertitel löschen</string>
-    <string name="settings_delete_subtitle_message">Den Untertitel „<xliff:g id="name">%1$s</xliff:g>“ für „<xliff:g id="title">%2$s</xliff:g>“ löschen? Er kann später erneut heruntergeladen werden.</string>
-    <string name="settings_delete_all_subtitles">Alle Untertitel löschen</string>
-    <string name="settings_delete_all_movies">Alle Filmuntertitel löschen</string>
-    <string name="settings_delete_all_series">Alle Serienuntertitel löschen</string>
     <string name="settings_section_count"><xliff:g id="section">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g>)</string>
     <string name="settings_sync_guide_question">Programmübersicht jetzt synchronisieren?</string>
     <string name="settings_sync_guide_description">Die Programmübersicht (EPG) für „<xliff:g id="source">%1$s</xliff:g>“ herunterladen. Du kannst dies auch später unter Einstellungen → Quellen und Programm → EPG-Quellen tun.</string>
@@ -600,10 +541,6 @@
     <string name="settings_surface_transparency"><xliff:g id="percent">%1$d</xliff:g>%%</string>
     <string name="settings_catchup_timezone_automatic">Automatisch</string>
     <string name="settings_catchup_timezone_device">Gerät</string>
-    <string name="settings_catchup_player_ask">Immer fragen</string>
-    <string name="settings_catchup_player_internal">OwnTV-Player</string>
-    <string name="settings_catchup_player_external">Externer Player</string>
-    <string name="settings_download_folder_title">Download-Ordner auswählen</string>
     <string name="settings_pick_background_title">Hintergrundbild auswählen</string>
     <string name="settings_theme_dialog">Design</string>
     <string name="settings_app_startup_dialog">App-Start</string>
@@ -625,7 +562,6 @@
     <string name="settings_browsing_last_item_description">Jede Kategorie behält ihre eigene Scrollposition, statt wieder ganz oben zu beginnen. Live-TV stellt außerdem den zuletzt fokussierten Sender wieder her.</string>
     <string name="settings_browsing_live_categories">Live-TV-Kategorien</string>
     <string name="settings_browsing_live_categories_description">Gilt für Live-TV, die Programmübersicht, den Player und Multiview. Ist „Alle Sender“ aus, öffnet Live-TV deine erste Kategorie oder die Favoriten, wenn du keine hast.</string>
-    <string name="settings_catchup_player">Catch-up wiedergeben mit</string>
     <string name="settings_customize_title">Kategorien und Elemente anpassen</string>
     <string name="settings_customize_pin_locked">Dieser Bildschirm ist mit einer PIN gesperrt.</string>
     <string name="settings_customize_wrong_pin">Falsche PIN – erneut versuchen</string>
@@ -652,8 +588,6 @@
     <string name="settings_customize_behavior_hide">Ausblenden</string>
     <string name="settings_customize_behavior_show">Anzeigen</string>
     <string name="settings_customize_hidden_channels">Ausgeblendete Sender</string>
-    <string name="settings_customize_hidden_movies">Ausgeblendete Filme</string>
-    <string name="settings_customize_hidden_series">Ausgeblendete Serien</string>
     <string name="settings_customize_unhide_description">Blende ein Element wieder ein, damit es erneut in den Listen erscheint.</string>
     <string name="settings_customize_categories">Kategorien</string>
     <string name="settings_customize_empty">In diesem Bereich gibt es noch keine Kategorien – füge zuerst eine Quelle hinzu.</string>
@@ -972,8 +906,6 @@
     <string name="settings_customize_delete_category">„<xliff:g id="name">%1$s</xliff:g>“ löschen?</string>
     <string name="settings_customize_delete_category_description">Die kombinierte Kategorie wird entfernt. Ihre Elemente bleiben in ihren ursprünglichen Kategorien.</string>
     <string name="settings_customize_channels_description">Sender in dieser Kategorie – umbenennen, neu anordnen, aus- oder einblenden.</string>
-    <string name="settings_customize_movies_description">Filme in dieser Kategorie – neu anordnen, aus- oder einblenden.</string>
-    <string name="settings_customize_series_description">Serien in dieser Kategorie – neu anordnen, aus- oder einblenden.</string>
     <string name="settings_customize_hide_show_items">Elemente aus- oder einblenden</string>
     <plurals name="settings_customize_selected_items">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> Element ausgewählt.</item>
@@ -985,7 +917,6 @@
     </plurals>
     <string name="settings_customize_rename_item_hint">Gilt nur für dieses Profil. Leer lassen, um „<xliff:g id="name">%1$s</xliff:g>“ wiederherzustellen.</string>
     <string name="settings_customize_item_was">war „<xliff:g id="name">%1$s</xliff:g>“</string>
-    <string name="settings_customize_rename_items">✎ Elemente umbenennen</string>
     <string name="settings_customize_move_to">Verschieben nach…</string>
     <string name="settings_customize_back">← Zurück</string>
     <string name="settings_move_category_title">In Kategorie verschieben</string>
@@ -1001,7 +932,6 @@
     <string name="settings_dns_server_hint">8.8.8.8 oder https://dns.google/dns-query</string>
     <string name="settings_dns_test">DNS testen</string>
     <string name="settings_dns_explanation">Benutzerdefiniertes DNS kann dabei helfen, Domain-Sperren durch den Internetanbieter oder Geoblocking mithilfe von SmartDNS-Diensten zu umgehen. DNS-over-HTTPS (DoH) wird empfohlen – dabei werden Ihre Abfragen verschlüsselt.</string>
-    <string name="settings_dns_limitations">Diese Einstellung betrifft nur OkHttp-basierten Datenverkehr (Synchronisieren von Wiedergabelisten, EPG, API-Aufrufe, Bilder, ExoPlayer-Streams). mpv verwendet den Systemresolver und ist nicht betroffen.</string>
     <string name="settings_dns_resolved">Aufgelöst ✓ (<xliff:g id="millis">%1$d</xliff:g> ms)</string>
     <string name="settings_dns_enter_server">Geben Sie den Host eines DNS-Servers oder eine DoH-URL ein.</string>
     <string name="settings_dns_not_reachable">DNS-Server nicht erreichbar.</string>
@@ -1043,14 +973,10 @@
     <string name="settings_live_tune_timeout_description">Zeigt ein Live-Sender bis dahin kein Bild, hört OwnTV auf und sagt Ihnen Bescheid, statt einen schwarzen Bildschirm stehen zu lassen, während nacheinander alle Player durchprobiert werden. „Nie“ probiert weiter, was bei einem vom Anbieter entfernten Sender deutlich über eine Minute dauern kann. Wartezeiten, die Ihr Anbieter selbst verlangt, zählen nicht mit.</string>
     <string name="settings_live_preroll_per_playlist">Pro Playlist vorpuffern</string>
     <string name="settings_live_preroll_per_playlist_description">Überschreibt die obige Einstellung für eine Playlist, während die anderen Playlists schnell starten.</string>
-    <string name="settings_live_engine_per_playlist">Player für Live-TV pro Playlist</string>
-    <string name="settings_live_engine_per_playlist_description">Überschreibt die obige Einstellung für eine Playlist — für einen Anbieter, dessen Sender nur einer der beiden Player gut wiedergibt.</string>
     <string name="settings_live_latency_per_playlist">Live-Latenz pro Playlist</string>
     <string name="settings_live_latency_per_playlist_description">Überschreibt die obige Einstellung für eine Playlist — für einen Anbieter, der einen größeren oder kleineren Puffer als die anderen braucht.</string>
     <string name="settings_catchup_timezone_per_playlist">Catch-up-Zeitzone pro Playlist</string>
     <string name="settings_catchup_timezone_per_playlist_description">Überschreibt die obige Zeitzone für eine Playlist — für einen Anbieter, dessen Archiv nach einer anderen Uhr läuft.</string>
-    <string name="settings_vod_engine_per_playlist">Player für Filme &amp; Serien pro Playlist</string>
-    <string name="settings_vod_engine_per_playlist_description">Überschreibt die obige Einstellung für eine Playlist — für einen Anbieter, dessen Filme und Folgen nur einer der Player gut abspielt.</string>
     <string name="settings_live_tune_timeout_per_playlist">Aufgeben nach, pro Playlist</string>
     <string name="settings_live_tune_timeout_per_playlist_description">Überschreibt die obige Einstellung für eine Playlist — für einen Anbieter, dessen Sender langsam starten oder oft ausfallen.</string>
     <plurals name="settings_live_preroll_overrides">
@@ -1175,8 +1101,6 @@
     <string name="settings_data_saver">Datensparmodus</string>
     <string name="settings_data_saver_description">Nicht über mobile Daten streamen</string>
     <string name="settings_gesture_sensitivity">Gestenempfindlichkeit</string>
-    <string name="settings_downloads_wifi_only">Nur über WLAN herunterladen</string>
-    <string name="settings_downloads_wifi_only_description">Auf WLAN warten, statt mobile Daten zu nutzen</string>
     <string name="settings_mini_player_style_description">Wie die Wiedergabe dir beim Stöbern folgt</string>
     <string name="settings_mini_player_style_floating">Schwebendes Fenster</string>
     <string name="settings_mini_player_style_docked">Angedockte Leiste</string>
@@ -1280,7 +1204,6 @@
     <string name="more_group_your_things">Deine Sachen</string>
     <string name="more_group_keep_safe">Sicher aufbewahren</string>
     <string name="more_profile_switch">Wechseln</string>
-    <string name="more_fav_movies_series">Filme und Serien</string>
     <string name="more_fav_empty_title">Noch keine Favoriten</string>
     <string name="more_fav_empty_body">Halte OK auf einem Sender, Film oder einer Serie gedrückt und wähle „Zu Favoriten hinzufügen“.</string>
     <string name="more_fav_empty_body_mobile">Halte einen Sender, Film oder eine Serie gedrückt und wähle „Zu Favoriten hinzufügen“.</string>
@@ -1338,10 +1261,6 @@
     <plurals name="more_settings_pinned_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> angeheftet</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> angeheftet</item>
-    </plurals>
-    <plurals name="more_downloads_running_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> läuft</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> laufen</item>
     </plurals>
     <string name="settings_backup_location">Speicherort</string>
     <string name="settings_multiview">Multiview</string>
@@ -1464,7 +1383,6 @@
     <string name="settings_line_remote_shortcuts">Freie Fernbedienungstasten belegen</string>
     <string name="settings_line_customize">Aus- und einblenden, umbenennen und sortieren</string>
     <string name="settings_line_metadata">Poster, Handlung, Besetzung und Bewertungen für Filme und Serien</string>
-    <string name="settings_line_open_subtitles">Untertitel suchen und herunterladen</string>
     <string name="settings_line_app_icon">Das Symbol im Launcher</string>
     <string name="settings_line_brand_accent">Das Play-Dreieck des Logos in deiner Akzentfarbe</string>
     <string name="settings_line_check_updates">Die neueste Version von GitHub holen</string>
@@ -1477,14 +1395,7 @@
     <string name="settings_line_quick_channel_numbers">Zum Umschalten eine Nummer auf der Fernbedienung eingeben</string>
     <string name="settings_line_prefer_sdr">SDR, wenn ein Stream beides bietet</string>
     <string name="settings_line_quick_autoplay">Die nächste Folge von selbst starten</string>
-    <string name="settings_line_live_engine">Welcher Player Sender öffnet, und der Ersatz</string>
-    <string name="settings_line_saved_live_choices">Sender, die Sie von Hand umgestellt haben</string>
-    <string name="settings_line_vod_engine">Welcher Player Filme und Folgen öffnet</string>
-    <string name="settings_line_saved_choices">Filme und Folgen, die Sie von Hand umgestellt haben</string>
     <string name="settings_line_external">VLC, MX Player … je Bereich</string>
-    <string name="settings_line_vod_buffer">Wie weit Filme im Voraus geladen werden</string>
-    <string name="settings_line_vod_timeout">Warten auf einen stummen Server</string>
-    <string name="settings_line_vod_reconnects">Dort wieder öffnen, wo es abbrach</string>
     <string name="settings_line_hw">Den Decoder des Fernsehers verwenden</string>
     <string name="settings_line_max_quality">Das beste Bild, wenn es mehrere gibt</string>
     <string name="settings_line_tunneled">Experimentell · Live-TV mit ExoPlayer</string>
@@ -1504,8 +1415,6 @@
     <string name="settings_line_sub_lang">Untertitel in dieser Sprache einschalten</string>
     <string name="settings_line_sub_style">Größe, Farbe, Position, Hintergrund</string>
     <string name="settings_title_fonts">Schriften &amp; Textgröße</string>
-    <string name="settings_title_saved_live_choices">Gespeicherte Live-TV-Player-Auswahl</string>
-    <string name="settings_title_saved_choices">Gespeicherte Player-Auswahl</string>
     <string name="settings_title_tunneled">Getunnelte Wiedergabe</string>
     <string name="settings_title_saved_zoom">Gespeicherter Zoom</string>
     <string name="settings_title_saved_volume">Gespeicherte Lautstärke</string>
@@ -1514,21 +1423,15 @@
     <string name="settings_line_live_preview">Den fokussierten Sender abspielen</string>
     <string name="settings_line_timeshift">Sender ohne Catch-up, beim Ansehen gespeichert</string>
     <string name="settings_line_timeshift_window">Wie weit Sie zurückspulen können</string>
-    <string name="settings_line_left_right">Bei ausgeblendeter Steuerung</string>
     <string name="settings_line_latency">Wie nah am Live-Bild abgespielt wird</string>
     <string name="settings_line_preroll">Video, das vor dem Senderstart gesammelt wird</string>
     <string name="settings_line_tune_timeout">Aufhören und Bescheid geben</string>
     <string name="settings_line_seek_step">Wie weit Zurück und Vor in einem Film springen</string>
-    <string name="settings_line_rewind_step">Wie weit sie bei einem Live-Sender springen</string>
     <string name="settings_line_resume">Wenn ein Film eine gespeicherte Position hat</string>
     <string name="settings_line_autoplay">Und weiter in die nächste Staffel</string>
     <string name="settings_line_tiles">Jede Kachel ist ein weiterer Stream</string>
     <string name="settings_line_mini">Größe und Position</string>
     <string name="settings_line_pip">In einem kleinen Fenster weiterschauen</string>
-    <string name="settings_line_rec_reserve">Nie auf allen Verbindungen aufnehmen</string>
-    <string name="settings_line_rec_watching">Kein zweiter Stream</string>
-    <string name="settings_line_rec_pre_roll">Vor Beginn der Sendung</string>
-    <string name="settings_line_rec_post_roll">Für Sendungen, die überziehen</string>
     <string name="settings_line_measured_stats">Live-FPS, Bitrate und verworfene Bilder</string>
     <string name="settings_line_logging">Ein vollständiges Protokoll für Fehlerberichte</string>
     <string name="settings_help_profiles">Jede Person hat eigene Favoriten, einen eigenen Verlauf, eigene Fortsetzungspunkte und Startseiten-Zeilen. Der Kindermodus zeigt nur die erlaubten Kategorien; eine PIN verhindert, dass andere das Profil öffnen.</string>
@@ -1557,7 +1460,6 @@
     <string name="settings_help_auto_start_boot">Öffnet OwnTV von selbst, sobald der Fernseher gestartet ist, auf dem unter App-Start gewählten Bildschirm. Android erlaubt einer App das selbstständige Öffnen nur, wenn sie über anderen Apps eingeblendet werden darf; beim Einschalten öffnet sich daher die Seite für diese Berechtigung. Manche Fernseher bieten sie nicht an, dann funktioniert der Autostart dort nicht.</string>
     <string name="settings_help_auto_start_wake">Öffnet OwnTV jedes Mal, wenn der Fernseher aus dem Standby aufwacht – auch wenn er für eine andere App geweckt wurde. Öffnet App-Start einen Sender, startet jedes Aufwachen diesen Stream. Solange dies an ist, läuft ein kleiner Hintergrunddienst mit einer stummen Benachrichtigung. Wie der Autostart beim Einschalten braucht er die Berechtigung, über anderen Apps eingeblendet zu werden.</string>
     <string name="settings_help_dns">Löst die Adressen Ihres Anbieters über einen DNS-Server Ihrer Wahl statt über den Ihres Netzes auf — hilfreich, wenn Ihr Netz sie sperrt oder umleitet.</string>
-    <string name="settings_help_live_engine">ExoPlayer öffnet Sender viel schneller und kann als einziger Live-Untertitel. mpv spielt Sender, die ExoPlayer nicht schafft, auch manche ungewöhnliche Tonspur. Die kombinierten Optionen versuchen den anderen Player, wenn der erste scheitert.</string>
     <string name="settings_help_hw">Nutzt den Hardware-Decoder des Fernsehers: flüssiges 4K und weniger Wärme. Schalten Sie ihn nur aus, wenn Streams ruckeln oder Blöcke zeigen; dann übernimmt der Software-Decoder.</string>
     <string name="settings_help_volume">Die Lautstärke, mit der jeder Sender, Film und jede Folge startet. Über 100 %% werden leise Streams verstärkt. Eine im Player geänderte Lautstärke bleibt für diesen Titel, bis Sie sie zurücksetzen.</string>
     <string name="settings_help_channel_numbers">Zeigt die Sendernummer Ihres Anbieters neben dem Namen in der Live-TV-Liste, der Senderliste im Player und im Player selbst, und Sie können im Vollbild eine Nummer auf der Fernbedienung eingeben, um zu diesem Sender zu springen.</string>
@@ -1613,7 +1515,6 @@
     <string name="settings_clock_color_accent">Akzent</string>
     <string name="settings_clock_color_help">OK öffnet die Farbauswahl (Vorlagen, Palette oder Hex-Code), dieselbe wie bei der Akzentfarbe. Die Vorschau folgt jeder Änderung.</string>
     <string name="settings_key_pick_color">Farbe wählen</string>
-    <string name="settings_line_trending_layout">Wie die Trend-Zeile aussieht</string>
     <string name="settings_home_shown">Angezeigt</string>
     <string name="settings_home_hide_row">Diese Zeile ausblenden</string>
     <string name="settings_home_show_row">Diese Zeile einblenden</string>
@@ -1625,21 +1526,9 @@
     <string name="settings_line_metadata_source">Woher die Details zu Filmen &amp; Serien kommen</string>
     <string name="settings_line_metadata_language">Handlungen, Genres und Titel von TMDB</string>
     <string name="settings_line_metadata_advanced">Eigener Schlüssel oder selbst gehosteter Worker</string>
-    <string name="settings_line_os_advanced">Eigener API-Schlüssel oder Worker</string>
-    <string name="settings_line_os_filter">Nur die gewählte Sprache</string>
-    <string name="settings_line_os_search_language">In den Suchergebnissen angezeigt</string>
-    <string name="settings_subtitle_delete_help">Löschen gibt den Speicher frei; im Player können Sie die Datei erneut herunterladen.</string>
     <plurals name="settings_home_row_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> Zeile</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> Zeilen</item>
-    </plurals>
-    <plurals name="settings_subtitles_downloaded_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> heruntergeladen</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> heruntergeladen</item>
-    </plurals>
-    <plurals name="settings_subtitle_file_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> Datei</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> Dateien</item>
     </plurals>
     <string name="settings_line_add_from_phone">Formular im Browser eines anderen Geräts ausfüllen</string>
     <string name="settings_add_type_here">Hier eingeben</string>
@@ -1716,7 +1605,6 @@
     <string name="settings_line_vod_view_mobile">Wie eine Kategorie geöffnet wird</string>
     <string name="settings_guide_size_mobile">Größe der Programmübersicht</string>
     <string name="settings_line_guide_size_mobile">Wie viel Zeit das Raster auf einmal zeigt</string>
-    <string name="settings_line_download_folder_mobile">Wohin Filme, Folgen und Aufnahmen gespeichert werden</string>
     <string name="settings_browsing_value_both">Beide</string>
     <plurals name="settings_home_rows_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> Zeile</item>
@@ -1726,7 +1614,6 @@
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> ausgeblendet</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> ausgeblendet</item>
     </plurals>
-    <string name="settings_catchup_timezone_label">Zeitzone</string>
     <string name="settings_help_add_from_phone_mobile">Öffnen Sie die Adresse oder scannen Sie den Code im Browser eines beliebigen Geräts im selben WLAN – Computer, Tablet oder Fernseher –, füllen Sie dort Ihre Playlist aus und senden Sie sie hierher. Viel schneller, als eine URL auf dem Telefon zu tippen.</string>
     <string name="settings_line_add_type_here_mobile">Xtream, M3U oder Stalker</string>
     <string name="setup_local_file_hint_mobile">.m3u oder .m3u8 auf diesem Telefon</string>
@@ -1769,9 +1656,5 @@
     <plurals name="settings_epg_line_programmes">
         <item quantity="one"><xliff:g id="count">%1$s</xliff:g> Sendung</item>
         <item quantity="other"><xliff:g id="count">%1$s</xliff:g> Sendungen</item>
-    </plurals>
-    <plurals name="settings_epg_line_catchup">
-        <item quantity="one">Catch-up auf <xliff:g id="count">%1$s</xliff:g></item>
-        <item quantity="other">Catch-up auf <xliff:g id="count">%1$s</xliff:g></item>
     </plurals>
 </resources>

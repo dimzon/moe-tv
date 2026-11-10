@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets
 /**
  * Charset normalisation for local subtitle files. Local .srt/.ass
  * files are frequently NOT UTF-8 — Windows-1256 (Arabic), Windows-1252 and ISO-8859 variants are
- * common — and both engines assume UTF-8, so a raw copy would render mojibake. Detection uses
+ * common — and the player assumes UTF-8, so a raw copy would render mojibake. Detection uses
  * juniversalchardet (Mozilla's universalchardet port).
  */
 object SubtitleCharset {
@@ -40,7 +40,7 @@ object SubtitleCharset {
         runCatching { Charset.forName(name) }.getOrNull()
             ?: runCatching { Charset.forName("windows-1252") }.getOrDefault(StandardCharsets.ISO_8859_1)
 
-    /** Drops a UTF-8/UTF-16 BOM if present — mpv copes, but Exo's parsers can choke on it mid-label. */
+    /** Drops a UTF-8/UTF-16 BOM if present — the player's subtitle parsers can choke on it mid-label. */
     private fun stripBom(bytes: ByteArray, charset: Charset): ByteArray = when {
         charset == StandardCharsets.UTF_8 && bytes.size >= 3 &&
             bytes[0] == 0xEF.toByte() && bytes[1] == 0xBB.toByte() && bytes[2] == 0xBF.toByte() ->

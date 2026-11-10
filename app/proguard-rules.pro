@@ -1,12 +1,9 @@
 # OwnTV release keep rules (R8). Each rule guards a runtime lookup that R8 can't see
-# statically — trim only with a full on-device regression (sync, both engines, backup).
+# statically — trim only with a full on-device regression (sync, playback, backup).
 
 # --- Crash reports: keep readable stack traces (mapping.txt still needed for names) ---
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
-
-# --- libmpv JNI: native code resolves MPVLib and its event callbacks by name ---
--keep class dev.jdtech.mpv.** { *; }
 
 # --- WorkManager: workers are re-instantiated by FQCN string (KoinWorkerFactory matches
 #     workerClassName against ::class.java.name, and WorkManager persists the name in its DB
@@ -22,14 +19,3 @@
 #     EpgAutoRefresh, PlaylistAutoRefresh, ...) round-trip through Enum.name/valueOf.
 #     Renaming a constant would silently reset settings and break old backups. ---
 -keep enum tv.own.myowntv.** { *; }
-
-# --- ExoPlayer FFmpeg audio decoder (tv.own.owntv.player.ffmpeg, moved here with player-core):
-#     libowntvffmpeg.so binds its natives with RegisterNatives by class and method name and calls
-#     growOutputBuffer back from C++, so R8 must keep those names. ---
--keep class tv.own.owntv.player.ffmpeg.FfmpegLibrary {
-    native <methods>;
-}
--keep class tv.own.owntv.player.ffmpeg.FfmpegAudioDecoder {
-    native <methods>;
-    private java.nio.ByteBuffer growOutputBuffer(androidx.media3.decoder.SimpleDecoderOutputBuffer, int);
-}

@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -72,7 +71,7 @@ import tv.own.owntv.core.live.LiveKey
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.settings.SettingsRepository
 
-/** Core's [CategoryLockFlow] for the Live TV, Movies and Series screens, which each show their own prompts. */
+/** Core's [CategoryLockFlow] for the Live TV screen, which shows its own prompts. */
 class CategoryLockViewModel(
     settings: SettingsRepository,
     profileDao: ProfileDao,

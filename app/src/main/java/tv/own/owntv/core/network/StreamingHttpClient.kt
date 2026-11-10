@@ -5,7 +5,7 @@ import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
 /**
- * The OkHttp client the **playback** engines stream through.
+ * The OkHttp client playback streams through.
  *
  * It is derived from the app-wide singleton with [OkHttpClient.newBuilder], so it keeps every piece of
  * shared configuration — proxy selector/authenticator, custom DNS, timeouts, HTTP/1.1, the default
@@ -13,8 +13,8 @@ import java.util.concurrent.TimeUnit
  * share is the **connection pool**: this one owns its sockets.
  *
  * That split is the whole point. A panel that allows one session per account refuses the second
- * client, so after an engine handoff a pooled ExoPlayer connection can lock mpv out of the channel the
- * user just asked for — the live engine therefore evicts its idle sockets on every stop. Evicting the
+ * connection, so a pooled leftover from the previous tune can lock the player out of the channel the
+ * user just asked for — the live player therefore evicts its idle sockets on every stop. Evicting the
  * *singleton's* pool did that to the whole app: EPG downloads, panel API calls, TMDB metadata and Coil
  * image loads all lost keep-alive on every zap and paid a fresh TCP+TLS handshake afterwards.
  * [evictAll] here touches stream connections only.

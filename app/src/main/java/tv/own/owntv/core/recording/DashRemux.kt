@@ -17,9 +17,9 @@ import java.nio.ByteBuffer
  * carries both.
  *
  * **`MediaExtractor` and `MediaMuxer` only.** Both are plain `android.media` framework classes, so
- * this needs no FFmpeg and no new dependency — which matters, because FFmpeg and libmpv live in
- * `:player-core` and the dependency arrow runs `player-core → core`, never back. Recording lives
- * here, so reaching for them would break the module boundary outright.
+ * this needs no demuxer library and no new dependency — which still matters: the dependency arrow
+ * runs `player-core → core`, never back, so even a demuxer the player used would be unreachable
+ * from here, where recording lives.
  *
  * **No re-encoding.** Samples are copied across untouched: the picture is bit-for-bit what the
  * provider sent, and the cost is one pass over the file rather than a decode and encode.

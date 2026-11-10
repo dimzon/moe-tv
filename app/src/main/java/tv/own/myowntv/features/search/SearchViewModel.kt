@@ -52,7 +52,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -71,15 +70,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.transformLatest
-import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ProfileDao
-import tv.own.owntv.core.database.entity.MetadataCacheEntity
-import tv.own.owntv.core.database.entity.MovieEntity
-import tv.own.owntv.core.database.entity.SeriesEntity
-import tv.own.owntv.core.metadata.MetadataRepository
 import tv.own.myowntv.ui.stage.PlaylistMark
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.dao.resolveExistingProfileId
@@ -92,20 +83,20 @@ import tv.own.owntv.core.repository.activeProfileSources
 import tv.own.owntv.core.settings.SettingsRepository
 
 /**
- * Cross-section search over a profile's channels, movies and series.
+ * Cross-section search over a profile's channels and the guide.
  *
  * The searching itself is core's [SearchReader]: the FTS expression, the hidden items and
  * categories, the kids filter and the Customize renames are the same rules on a phone as on a
  * television, so they are not written twice. What stays here is the screen's own behaviour —
- * debouncing and the recents list. A result is never played here: OK goes to it.
+ * debouncing and the recents list. A result is never played here: OK goes to it. Core's result
+ * object still carries the (VOD-dead) movie and series lists; the television only ever reads the
+ * channels and programmes out of it.
  */
 class SearchViewModel(
     private val profileDao: ProfileDao,
     private val sourceDao: SourceDao,
-    private val categoryDao: CategoryDao,
     private val settings: SettingsRepository,
     private val searchReader: SearchReader,
-    private val metadata: MetadataRepository,
 ) : ViewModel() {
 
     // Observe the active profile's sources reactively so adding/removing a playlist refreshes Search
@@ -185,36 +176,6 @@ class SearchViewModel(
     val playlistMarks: StateFlow<Map<Long, PlaylistMark>> = ctx
         .map { aps -> if (aps.sources.size < 2) emptyMap() else aps.sources.withIndex().associate { (i, s) -> s.id to PlaylistMark.of(s.name, i) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
-
-    /** Category names for the movie and series rows ("2005 · ★ 6.2 · Disney+ Movies"). */
-    val categoryNames: StateFlow<Map<Long, String>> = combine(results, curatedResults) { a, b ->
-        (a.movies.mapNotNull { it.categoryId } + a.series.mapNotNull { it.categoryId } +
-            b.movies.mapNotNull { it.categoryId } + b.series.mapNotNull { it.categoryId }).toSet()
-    }
-        .distinctUntilChanged()
-        .mapLatest { ids -> ids.mapNotNull { id -> categoryDao.getById(id)?.let { id to it.name } }.toMap() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
-
-    val metadataMode: StateFlow<tv.own.owntv.core.metadata.MetadataMode> = settings.metadataMode
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.metadata.MetadataMode.PROVIDER_PLUS_TMDB)
-
-    /** The focused movie or series, for the poster panel's TMDB details (backdrop, genres, cast). */
-    private val _focusedVod = MutableStateFlow<Any?>(null)
-    fun focusVod(item: Any?) { _focusedVod.value = item }
-
-    /** The focused title's key ("m34" / "s56") and its TMDB details, after the same focus debounce the
-     *  browse screens use, so passing over rows looks nothing up. */
-    val focusedMeta: StateFlow<Pair<String, MetadataCacheEntity?>?> = _focusedVod
-        .transformLatest { item ->
-            val key = when (item) { is MovieEntity -> "m${item.id}"; is SeriesEntity -> "s${item.id}"; else -> null }
-            if (key == null) { emit(null); return@transformLatest }
-            delay(MetadataRepository.FOCUS_DEBOUNCE_MS)
-            val cache = runCatching {
-                when (item) { is MovieEntity -> metadata.resolveMovie(item); is SeriesEntity -> metadata.resolveSeries(item); else -> null }
-            }.getOrNull()
-            emit(key to cache)
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private suspend fun currentProfileId(): Long? {
         val preferred = settings.activeProfileId.first()

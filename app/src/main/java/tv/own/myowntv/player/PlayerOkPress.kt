@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.ui.input.key.Key
 import tv.own.owntv.core.settings.PlayerHoldOkAction
@@ -73,8 +72,8 @@ data class PlayerOkPlan(val hold: PlayerOkOutcome?, val short: PlayerOkOutcome) 
 
 /**
  * The plan for OK under [options], or null when OK keeps its ordinary path — Hold OK off and a short
- * press showing the controls, or a choice that is not available here (a film has no channel list).
- * Null means the press is not intercepted at all, so it waits for nothing.
+ * press showing the controls, or a choice that is not available here (a player with no channel list
+ * has no list to open). Null means the press is not intercepted at all, so it waits for nothing.
  */
 fun playerOkPlan(options: PlayerRemoteOptions, targets: PlayerOkTargets): PlayerOkPlan? {
     val hold = when (options.holdOk) {

@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import android.content.Intent
 import android.os.Bundle
@@ -144,7 +143,7 @@ open class MainActivity : ComponentActivity() {
     @Volatile
     private var startupSettled = false
 
-    private val player: tv.own.owntv.player.OwnTVPlayer by inject()
+    private val livePreview: tv.own.owntv.player.LivePreviewEngine by inject()
     private val engines: tv.own.owntv.player.PlaybackEngines by inject()
     private val visibility: tv.own.owntv.core.player.PlaybackVisibilityWatch by inject()
     private val handOff: tv.own.myowntv.features.pip.AppHandOff by inject()
@@ -176,12 +175,12 @@ open class MainActivity : ComponentActivity() {
      * Left the app — Home, another app, exited, logged out, the picture-in-picture window closed, or the
      * television switched off while this activity kept running: stop playback and free the demuxer cache +
      * decoder buffers — holding them while invisible got the process LMK-killed on real TVs. Every engine:
-     * mpv, the Live engine (its audio must stop too), each Multiview tile and the hero. The relock first: it
+     * the Live engine (its audio must stop too), each Multiview tile and the hero. The relock first: it
      * reads what is playing before the engines free it.
      *
-     * Back: bring back what was freed — a VOD restored paused at its position, a live channel re-tuned to
-     * the live edge — so Play resumes instead of sitting on a dead stream. No-op on a fresh launch. Not
-     * before the relock check is done: what it found sealed must not come back first.
+     * Back: bring back what was freed — a live channel re-tuned to the live edge — so Play resumes
+     * instead of sitting on a dead stream. No-op on a fresh launch. Not before the relock check is done:
+     * what it found sealed must not come back first.
      */
     private val onVisibility: (Boolean) -> Unit = { visible ->
         if (visible) shellViewModel.afterSealCheck { engines.onAppForegrounded() }
@@ -206,7 +205,7 @@ open class MainActivity : ComponentActivity() {
         handOff.onActivityResumed()
     }
 
-    /** Every screen this activity opens (a trailer in YouTube, a system settings page) is a hand-off. */
+    /** Every screen this activity opens (an external player, a system settings page) is a hand-off. */
     override fun startActivity(intent: Intent, options: Bundle?) {
         tv.own.myowntv.features.pip.startAsHandOff(intent) { super.startActivity(it, options) }
     }
@@ -298,12 +297,12 @@ open class MainActivity : ComponentActivity() {
             remember { Perf.stamp("first-composition"); Unit }
 
             // Hold the screen on while video is actually playing, so the TV screensaver doesn't
-            // start mid-channel/episode; released when paused/stopped (then the screensaver is fine).
+            // start mid-channel; released when paused/stopped (then the screensaver is fine).
             // Buffering counts as playing: the screensaver timer runs from the last remote press, so
-            // releasing for a one-second rebuffer deep into a film started the screensaver at once.
-            val playing by player.isPlaying.collectAsStateWithLifecycle()
-            val buffering by player.buffering.collectAsStateWithLifecycle()
-            val failed by player.error.collectAsStateWithLifecycle()
+            // releasing for a one-second rebuffer mid-channel started the screensaver at once.
+            val playing by livePreview.isPlaying.collectAsStateWithLifecycle()
+            val buffering by livePreview.buffering.collectAsStateWithLifecycle()
+            val failed by livePreview.error.collectAsStateWithLifecycle()
             val keepAwake = (playing || buffering) && failed == null
             LaunchedEffect(keepAwake) {
                 if (keepAwake) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

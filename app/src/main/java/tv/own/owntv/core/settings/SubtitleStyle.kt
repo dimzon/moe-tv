@@ -1,12 +1,12 @@
 package tv.own.owntv.core.settings
 
 /**
- * Shared contract for the custom subtitle look — the single place the three very different
- * subtitle renderers agree on values, defaults and geometry:
+ * Shared contract for the custom subtitle look — the single place the two subtitle renderers
+ * agree on values, defaults and geometry:
  *
- *  - mpv's own OSD (`sub-scale` / `sub-color` / `sub-back-color` / `sub-pos` / `sub-align-x`),
- *  - Media3's [androidx.media3.ui.SubtitleView] (Live TV and the VOD image-subtitle handoff),
- *  - the app-drawn Compose overlay used on mpv's direct-render path.
+ *  - Media3's [androidx.media3.ui.SubtitleView] (Live TV cues, including the embedded
+ *    broadcaster styling of CEA-608/teletext),
+ *  - the app-drawn Compose overlay.
  *
  * **Every option has its own "Default" value** ([SCALE_DEFAULT], [COLOR_DEFAULT],
  * [Position.DEFAULT], [OPACITY_DEFAULT]) meaning *leave this alone*. Turning the master toggle on
@@ -76,25 +76,7 @@ object SubtitleStyle {
     /** Black background box at the requested opacity, as an ARGB int. */
     fun backgroundArgb(opacityPct: Int): Int = (clampOpacity(opacityPct) * 255 / 100) shl 24
 
-    /** mpv wants colors as "#AARRGGBB". */
-    fun mpvColor(hex: String): String = "#%08X".format(colorArgb(hex))
-
-    fun mpvBackColor(opacityPct: Int): String = "#%08X".format(backgroundArgb(opacityPct))
-
     // --- Geometry ---------------------------------------------------------------------------
-    // mpv `sub-pos` is a percentage of screen height: 100 = bottom (its default), 0 = top.
-
-    const val MPV_POS_BOTTOM = 100
-    const val MPV_POS_TOP = 5
-    const val MPV_ALIGN_X_DEFAULT = "center"
-
-    fun mpvSubPos(position: Position): Int = if (position.isTop) MPV_POS_TOP else MPV_POS_BOTTOM
-
-    fun mpvAlignX(position: Position): String = when {
-        position.isLeft -> "left"
-        position.isRight -> "right"
-        else -> MPV_ALIGN_X_DEFAULT
-    }
 
     /** Vertical placement as a fraction of the video height, measured from the top edge. */
     fun lineFraction(position: Position): Float = if (position.isTop) 0.05f else 0.95f

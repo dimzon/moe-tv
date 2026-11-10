@@ -15,9 +15,6 @@
     <string name="player_mini_bottom_center">U dołu na środku</string>
     <string name="player_mini_bottom_right">U dołu po prawej</string>
     <string name="player_channel_label">KANAŁ</string>
-    <string name="player_at_live_edge">● Bieżący punkt transmisji</string>
-    <string name="player_behind_live">● <xliff:g id="offset">%1$s</xliff:g> za transmisją na żywo</string>
-    <string name="player_live_offset">−<xliff:g id="offset">%1$s</xliff:g></string>
     <string name="player_go_live">Na żywo</string>
     <string name="player_timeshift_resume_title">Kontynuować od miejsca, w którym skończono?</string>
     <string name="player_timeshift_resume_message">Ten kanał był zapisywany podczas Twojej nieobecności.</string>
@@ -26,7 +23,6 @@
     <string name="player_sources_none">Nie znaleziono innej wersji tego kanału.</string>
     <string name="player_next_channel_in_list">Następny kanał</string>
     <string name="player_previous_channel_in_list">Poprzedni kanał na liście</string>
-    <string name="player_live_scrub_at"><xliff:g id="time">%1$s</xliff:g> · <xliff:g id="programme">%2$s</xliff:g></string>
     <string name="player_tool_volume">Głośność</string>
     <string name="player_tool_brightness">Jasność</string>
     <string name="player_skip_back">Przeskocz wstecz</string>
@@ -51,11 +47,6 @@
     <string name="player_raw_error">błąd: <xliff:g id="error">%1$s</xliff:g></string>
     <string name="player_audio_track">Ścieżka dźwiękowa</string>
     <string name="player_subtitles">Napisy</string>
-    <string name="player_subtitle_timing">Synchronizacja napisów</string>
-    <string name="player_add_subtitles">DODAJ NAPISY</string>
-    <string name="player_adjust">DOSTOSUJ</string>
-    <string name="player_search_subtitles">Wyszukaj w OpenSubtitles</string>
-    <string name="player_select_local_subtitle">Wybierz lokalny plik napisów</string>
     <string name="player_no_tracks">Brak dostępnych ścieżek.</string>
     <string name="player_image_track"><xliff:g id="label">%1$s</xliff:g> · graficzne</string>
     <string name="player_av_sync">Synchronizacja A/V</string>
@@ -66,51 +57,27 @@
     <string name="player_delay_zero">0 ms</string>
     <string name="player_delay_positive">+<xliff:g id="ms">%1$d</xliff:g> ms</string>
     <string name="player_delay_negative"><xliff:g id="ms">%1$d</xliff:g> ms</string>
-    <string name="player_speed_normal">1.0x (normalna)</string>
-    <string name="player_speed_normal_short">1.0x</string>
-    <string name="player_speed"><xliff:g id="speed">%1$s</xliff:g>x</string>
-    <string name="player_next_episode">Następny odcinek za <xliff:g id="seconds">%1$d</xliff:g> s</string>
-    <string name="player_play_now">Odtwórz teraz</string>
     <string name="player_volume">Głośność</string>
     <string name="player_unmute">Włącz dźwięk</string>
     <string name="player_mute">Wycisz</string>
     <string name="player_percent"><xliff:g id="value">%1$d</xliff:g>%%</string>
     <string name="player_duration_minutes"><xliff:g id="minutes">%1$d</xliff:g> min</string>
     <string name="player_season_number">Sezon <xliff:g id="season">%1$d</xliff:g></string>
-    <string name="player_episode_number">Odcinek <xliff:g id="episode">%1$d</xliff:g></string>
-    <string name="player_episode_context_title"><xliff:g id="title">%1$s</xliff:g> · S<xliff:g id="season">%2$d</xliff:g>E<xliff:g id="episode">%3$d</xliff:g></string>
     <string name="player_channel_number">#<xliff:g id="number">%1$s</xliff:g></string>
     <string name="player_live">NA ŻYWO</string>
-    <string name="player_subtitle_delay_zero">0.0 s</string>
-    <string name="player_subtitle_delay_positive">+<xliff:g id="seconds">%1$.1f</xliff:g> s</string>
-    <string name="player_subtitle_delay_negative">−<xliff:g id="seconds">%1$.1f</xliff:g> s</string>
-    <string name="player_time_progress"><xliff:g id="position">%1$s</xliff:g> / <xliff:g id="duration">%2$s</xliff:g></string>
-    <string name="player_time_remaining">−<xliff:g id="time">%1$s</xliff:g></string>
-    <string name="player_switch_exo">Przełączono na ExoPlayer</string>
-    <string name="player_switch_mpv">Przełączono na mpv</string>
-    <string name="player_smoothness_hint">Ten kanał gubi klatki. Przełączenie odtwarzacza na mpv może poprawić płynność.</string>
-    <string name="player_error_image_subtitle_audio">Napisy graficzne nie są dostępne dla formatu dźwięku tego materiału wideo.</string>
-    <string name="player_error_both_engines_exo_first">Odtwarzanie nie powiodło się w obu silnikach wideo (najpierw ExoPlayer, potem mpv). Plik może być uszkodzony lub używać formatu, którego ten telewizor nie obsługuje.</string>
-    <string name="player_error_both_engines_mpv_first">Odtwarzanie nie powiodło się w obu silnikach wideo (mpv i ExoPlayer). Plik może być uszkodzony lub używać formatu, którego ten telewizor nie obsługuje. (<xliff:g id="error">%1$s</xliff:g>)</string>
     <string name="player_error_stream_link">Nie udało się pobrać łącza do strumienia z portalu. Sprawdź połączenie i spróbuj ponownie.</string>
     <string name="player_error_not_streaming">Ten materiał wideo nie jest sformatowany do przesyłania strumieniowego. Poproś dostawcę o ponowne zakodowanie z funkcją szybkiego startu albo najpierw go pobierz.</string>
     <string name="player_error_lost_connection">Utracono połączenie z tym kanałem.</string>
     <string name="player_error_channel">Nie udało się odtworzyć tego kanału.</string>
     <string name="player_error_exo_decode">ExoPlayer nie może zdekodować formatu tego materiału wideo na tym urządzeniu (<xliff:g id="error">%1$s</xliff:g>).</string>
     <string name="player_error_exo_play">ExoPlayer nie mógł odtworzyć tego strumienia (<xliff:g id="error">%1$s</xliff:g>).</string>
-    <string name="player_error_image_format">Napisy graficzne nie są dostępne dla formatu tego pliku.</string>
-    <string name="player_error_image_show">Nie udało się wyświetlić napisów graficznych dla tego pliku.</string>
     <string name="player_external_could_not_open">Nie udało się otworzyć tego strumienia.</string>
     <string name="player_external_not_found">Nie znaleziono odtwarzacza zewnętrznego — zainstaluj VLC lub MX Player.</string>
     <string name="player_error_audio_no_video">Dźwięk jest odtwarzany, ale na tym urządzeniu nie udało się wyświetlić obrazu.</string>
-    <string name="player_error_file_corrupt">Plik tego materiału wideo jest nieprawidłowy lub uszkodzony i nie można go odtworzyć.</string>
-    <string name="player_error_multiple_videos">Nie udało się odtworzyć wielu materiałów wideo. Źródło może być niedostępne lub pliki są uszkodzone.</string>
     <string name="player_error_decoder_busy">Dekoder wideo tego telewizora jest zajęty. Spróbuj ponownie za chwilę.</string>
     <string name="player_error_no_internet">Brak połączenia z internetem. Sprawdź sieć i spróbuj ponownie.</string>
     <string name="player_error_stream_unavailable">Nie udało się odtworzyć tego strumienia. Źródło może być bez połączenia lub używać nieobsługiwanego formatu. <xliff:g id="hint">%1$s</xliff:g></string>
     <string name="player_error_account_in_use">To konto już odtwarza na innym urządzeniu lub w innej aplikacji. Zatrzymaj odtwarzanie tam, a potem naciśnij Spróbuj ponownie.</string>
-    <string name="player_error_mpv_open_decode">mpv nie mógł otworzyć ani zdekodować tego pliku.</string>
-    <string name="player_error_mpv_stream_never_started">Po kilku próbach strumień nadal nie uruchomił się w mpv.</string>
     <string name="player_error_fairplay">Ten strumień jest chroniony przez Apple FairPlay, którego urządzenia z Androidem nie potrafią odtworzyć. Lista jest przeznaczona dla urządzeń Apple.</string>
     <string name="player_error_surround">To wyjście audio nie obsługuje dźwięku przestrzennego — przełączono na stereo.</string>
     <string name="player_error_hardware_fallback">Formatu tego strumienia nie udało się zdekodować sprzętowo na tym telewizorze, dlatego użyto dekodowania programowego — które nie może płynnie obsłużyć <xliff:g id="resolution">%1$s</xliff:g> bez przeciążenia telewizora. Telewizor może nadal bez problemu odtwarzać inne treści 4K; problem dotyczy formatu tego konkretnego strumienia.</string>
@@ -142,18 +109,10 @@
     <string name="player_stream_hdr10_pq">HDR10 (PQ)</string>
     <string name="player_stream_hlg">HLG</string>
     <string name="player_stream_sdr">SDR</string>
-    <string name="player_stream_interlacing">Przeplot</string>
-    <string name="player_stream_progressive">Brak (progresywny)</string>
-    <string name="player_stream_deinterlaced_by_player">Z przeplotem · usunięty przez odtwarzacz</string>
-    <string name="player_stream_deinterlaced_by_device">Z przeplotem · usunięty przez urządzenie</string>
-    <string name="player_stream_not_deinterlaced">Z przeplotem · nieusunięty</string>
     <string name="player_stream_bitrate">Przepływność</string>
     <string name="player_stream_decoder">Dekoder</string>
     <string name="player_stream_audio">Dźwięk</string>
     <string name="player_stream_buffer">Bufor</string>
-    <string name="player_stream_engine_exo_preferred">ExoPlayer (preferowany)</string>
-    <string name="player_stream_engine_exo_fallback">ExoPlayer (awaryjny po błędzie mpv)</string>
-    <string name="player_stream_engine_exo_image_subtitle">ExoPlayer (przejęcie napisów graficznych)</string>
     <string name="player_stream_fps"><xliff:g id="fps">%1$.2f</xliff:g> fps</string>
     <string name="player_stream_bit_depth"><xliff:g id="bits">%1$d</xliff:g> bitów</string>
     <string name="player_stream_mbps"><xliff:g id="value">%1$s</xliff:g> Mbps</string>
@@ -185,29 +144,10 @@
     <string name="player_subtitles_edit_search">Edytuj wyszukiwanie</string>
     <string name="player_subtitles_title_label">Tytuł</string>
     <string name="player_subtitles_delete_title">Usuń napisy z OpenSub</string>
-    <string name="player_subtitles_sign_in">Zaloguj się</string>
-    <string name="player_subtitles_sign_out">Wyloguj się</string>
-    <string name="player_subtitles_account">Konto</string>
     <string name="player_subtitles_username">Nazwa użytkownika</string>
     <string name="player_subtitles_password">Hasło</string>
     <string name="player_subtitles_stay_signed_in">Nie wylogowuj</string>
-    <string name="player_subtitles_sign_in_title">Zaloguj się do OpenSubtitles</string>
-    <string name="player_subtitles_connect_description">Połącz konto OpenSubtitles z tym profilem.</string>
-    <string name="player_subtitles_contacting">Łączenie z OpenSubtitles…</string>
-    <string name="player_subtitles_api_notice">Ten produkt korzysta z API OpenSubtitles, ale nie jest wspierany ani certyfikowany przez OpenSubtitles.</string>
-    <string name="player_subtitles_delete_description">Usuń napisy pobrane do filmów i seriali.</string>
-    <string name="player_subtitles_delete_login_message">Usuwa dane logowania tego profilu do OpenSubtitles z tego urządzenia. Pobrane wcześniej napisy pozostaną dostępne bez połączenia.</string>
     <string name="player_subtitles_delete_action">Usuń napisy</string>
-    <string name="player_subtitles_downloads">Pobrane</string>
-    <string name="player_subtitles_vip">VIP</string>
-    <string name="player_subtitles_refresh">Odśwież</string>
-    <string name="player_subtitles_sign_in_to_use">Użyj swojego konta opensubtitles.com. Możesz je utworzyć bezpłatnie.</string>
-    <plurals name="player_subtitles_remaining">
-        <item quantity="one">Pozostało dziś <xliff:g id="remaining">%1$d</xliff:g> pobranie z <xliff:g id="total">%2$d</xliff:g></item>
-        <item quantity="few">Pozostały dziś <xliff:g id="remaining">%1$d</xliff:g> pobrania z <xliff:g id="total">%2$d</xliff:g></item>
-        <item quantity="many">Pozostało dziś <xliff:g id="remaining">%1$d</xliff:g> pobrań z <xliff:g id="total">%2$d</xliff:g></item>
-        <item quantity="other">Pozostało dziś <xliff:g id="remaining">%1$d</xliff:g> pobrań z <xliff:g id="total">%2$d</xliff:g></item>
-    </plurals>
     <plurals name="player_subtitles_remaining_short">
         <item quantity="one">Pozostało dziś <xliff:g id="remaining">%1$d</xliff:g> pobranie</item>
         <item quantity="few">Pozostały dziś <xliff:g id="remaining">%1$d</xliff:g> pobrania</item>
@@ -226,7 +166,6 @@
         <item quantity="many">Pozostało dziś <xliff:g id="remaining">%1$d</xliff:g> pobrań</item>
         <item quantity="other">Pozostało dziś <xliff:g id="remaining">%1$d</xliff:g> pobrań</item>
     </plurals>
-    <string name="player_subtitles_session">Sesja połączenia wygasa. Wyłącz tę opcję, aby przechowywać tylko sesję tymczasową.</string>
     <string name="player_subtitles_free_description_full">OpenSubtitles to bezpłatna, otwarta społecznościowa usługa napisów. Zaloguj się przy użyciu własnego konta opensubtitles.com; możesz je utworzyć bezpłatnie. Dotyczy to tylko bieżącego profilu.</string>
     <string name="player_subtitles_session_expired">Twoja sesja OpenSubtitles wygasła. Aby nadal wyszukiwać i pobierać napisy, zaloguj się ponownie w Ustawienia → Odtwarzacz wideo → Napisy → OpenSubtitles.</string>
     <string name="player_subtitles_account_needed">Wymagane konto OpenSubtitles\n\nAby wyszukiwać i pobierać napisy, zaloguj się w Ustawienia → Odtwarzacz wideo → Napisy → OpenSubtitles. OpenSubtitles to bezpłatna, otwarta usługa społecznościowa — każdy może utworzyć bezpłatne konto na opensubtitles.com.</string>
@@ -239,32 +178,12 @@
     <string name="player_subtitles_trusted">Zaufany</string>
     <string name="player_subtitles_sdh">SDH</string>
     <string name="player_subtitles_ai">AI</string>
-    <plurals name="player_subtitles_download_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> pobranie</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> pobrania</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> pobrań</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> pobrań</item>
-    </plurals>
-    <string name="player_subtitles_tags_separator">" · "</string>
-    <string name="player_subtitles_search">Wyszukaj</string>
     <string name="player_subtitles_connected_as">Połączono jako</string>
-    <string name="player_subtitles_connected_user">Połączono jako <xliff:g id="username">%1$s</xliff:g></string>
-    <string name="player_subtitles_resets">Odnowienie</string>
-    <string name="player_subtitles_free_account">Bezpłatne</string>
-    <string name="player_subtitles_enter_credentials">Wprowadź nazwę użytkownika i hasło do OpenSubtitles.</string>
-    <string name="player_subtitles_invalid_credentials">OpenSubtitles nie mógł zalogować się przy użyciu tych danych konta.</string>
-    <string name="player_subtitles_sign_in_network_error">Nie udało się połączyć z OpenSubtitles. Sprawdź połączenie z internetem i spróbuj ponownie.</string>
-    <string name="player_subtitles_sign_in_server_error">OpenSubtitles odrzucił żądanie (błąd <xliff:g id="code">%1$d</xliff:g>). Twoje połączenie internetowe działa – spróbuj ponownie później i podaj ten numer, zgłaszając problem.</string>
-    <string name="player_subtitles_refresh_network_error">Nie udało się odświeżyć OpenSubtitles. Sprawdź połączenie z internetem.</string>
     <string name="player_subtitles_no_matches_all_languages">Nie znaleziono pasujących napisów. Spróbuj zmienić tytuł wyszukiwania.</string>
     <string name="player_subtitles_no_matches_chosen_language">Nie znaleziono pasujących napisów w wybranym języku.</string>
     <string name="player_subtitles_search_language">Język wyszukiwania</string>
-    <string name="player_reason_software_fallback">Przełączono na dekodowanie programowe</string>
-    <string name="player_reason_copy_mode_fallback">Przełączono na dekodowanie w trybie copy-mode</string>
-    <string name="player_reason_archive_software_fallback">Ponownie otwarto archiwum catch-up w trybie dekodowania programowego</string>
     <string name="player_reason_stereo_fallback">Przełączono na dźwięk stereo</string>
     <string name="player_reason_one_session_provider">Dostawca pozwala na jedną sesję naraz</string>
-    <string name="player_reason_mpv_handoff">Przekazano ten kanał do mpv</string>
     <string name="player_reason_stream_report">Raport strumienia</string>
     <string name="player_stream_audio_output">Wyjście audio</string>
     <string name="player_stream_live_buffer">Bufor na żywo</string>
@@ -281,9 +200,6 @@
     <string name="player_error_hardware_format">Sprzęt wideo tego telewizora nie może zdekodować <xliff:g id="resolution">%1$s</xliff:g> <xliff:g id="codec">%2$s</xliff:g>. Plik jest w porządku, ale telewizor nie może odtworzyć tego formatu w tej rozdzielczości.</string>
     <string name="player_report_saved">Raport strumienia zapisano w dzienniku odtwarzania</string>
     <string name="player_subtitles_filter_title">Filtruj według języka</string>
-    <string name="player_subtitles_filter_description">Wyłączone pokazuje wszystkie języki, jakie OpenSubtitles ma dla danego tytułu, więc możesz wybierać z pełnej listy. Włączone pokazuje tylko wybrany język.</string>
-    <string name="player_subtitles_search_language_description">W wynikach wyszukiwania pojawiają się tylko napisy w tym języku. Nadal możesz nacisnąć „Wszystkie języki” w wynikach, aby zobaczyć wszystko dla jednego wyszukiwania.</string>
-    <string name="player_subtitles_language_not_set">Nie ustawiono</string>
     <string name="player_frame_rate_prompt_title">Ten kanał może mieć niepłynny ruch</string>
     <string name="player_frame_rate_prompt_description">Odtwarza z prędkością <xliff:g id="fps">%1$d</xliff:g> fps, podczas gdy telewizor pracuje z częstotliwością <xliff:g id="current_hz">%2$d</xliff:g> Hz, co uniemożliwia równomierne wyświetlanie tych klatek — ruch wygląda na lekko szarpany.\n\nAutomatyczne dopasowanie częstotliwości odświeżania przełącza telewizor na <xliff:g id="target_hz">%3$d</xliff:g> Hz podczas oglądania, a po zakończeniu przywraca poprzednie ustawienie. Niektóre telewizory na chwilę wygaszają obraz przy zmianie częstotliwości; możesz ją ponownie wyłączyć w Ustawieniach → Obraz → Liczba klatek.</string>
     <string name="player_frame_rate_turn_on">Włącz</string>
@@ -295,8 +211,6 @@
     <string name="player_error_data_saver">Oszczędzanie danych jest włączone, więc odtwarzanie przez dane komórkowe jest wyłączone. Połącz się z Wi-Fi lub wyłącz oszczędzanie danych w ustawieniach.</string>
     <string name="player_sleep_timer">Wyłącznik czasowy</string>
     <string name="player_sleep_timer_end_of_programme">Koniec audycji</string>
-    <string name="player_sleep_timer_end_of_movie">Koniec filmu</string>
-    <string name="player_sleep_timer_end_of_episode">Koniec odcinka</string>
     <string name="player_sleep_timer_remaining">Zatrzyma się za <xliff:g id="time">%1$s</xliff:g></string>
     <string name="player_sleep_timer_screen_off">Wyłącz też ekran</string>
     <string name="player_sleep_timer_screen_off_explanation">Używane tylko do wyłączenia ekranu po zakończeniu odliczania, nigdy w innym momencie.</string>

@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -96,24 +95,16 @@ import tv.own.myowntv.ui.theme.mpx
 import tv.own.myowntv.ui.theme.stageText
 import tv.own.myowntv.ui.theme.stageAccent
 import tv.own.myowntv.ui.theme.StageColors
-import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.components.displayLabel
-import tv.own.myowntv.ui.format.localizedDecimal
 
 /**
- * Every dialog the HUD opens — tracks, speed, zoom, volume and subtitle timing — plus the scaffold and
- * row they share. Split out of [PlayerHud]; behaviour unchanged.
+ * Every dialog the HUD opens — tracks, zoom, quality, volume, sources and the sleep timer — plus the
+ * scaffold and rows they share. Split out of [PlayerHud]; behaviour unchanged.
  */
-
-private val SPEEDS = listOf(0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0)
 
 /** A/V-sync nudge step, kept identical to the Settings stepper so a value found in the player can be
  *  reproduced there exactly. */
 private const val AV_SYNC_STEP_MS = 25
-
-/** Subtitle timing: 0.1 s per ◀ ▶, up to a minute either way. */
-private const val SUB_DELAY_STEP_MS = 100
-private const val SUB_DELAY_MAX_MS = 60_000
 
 @Composable
 internal fun TrackDialog(
@@ -122,22 +113,12 @@ internal fun TrackDialog(
     onSelect: (TrackOption) -> Unit,
     onOff: (() -> Unit)?,
     onDismiss: () -> Unit,
-    audioDelayMs: Int? = null,                 // non-null on the Audio dialog (VOD) → show the A/V-sync nudge
+    audioDelayMs: Int? = null,                 // non-null on the Audio dialog → show the A/V-sync nudge
     onAdjustAudioDelay: ((Int) -> Unit)? = null,
-    // Whether this item already has a remembered A/V-sync offset, and the action that remembers or
-    // forgets it. Both accompany [onAdjustAudioDelay].
+    // Whether this channel already has a remembered A/V-sync offset, and the action that remembers
+    // or forgets it. Both accompany [onAdjustAudioDelay].
     audioDelayRemembered: Boolean = false,
     onToggleRememberAudioDelay: (() -> Unit)? = null,
-    // Non-null on the Subtitles dialog for a movie/episode → an "ADD SUBTITLES" row that opens the
-    // OpenSubtitles search. Absent for Live TV and when no item context exists.
-    onSearchSubtitles: (() -> Unit)? = null,
-    // Non-null on the Subtitles dialog for a movie/episode → "Select local subtitle file".
-    onSelectLocalSubtitle: (() -> Unit)? = null,
-    // Non-null on the Subtitles dialog when timing adjustment applies to the active track →
-    // an "ADJUST" section with a "Subtitle timing" row: ◀ ▶ nudge it, OK sets it back to zero.
-    subDelayMs: Int = 0,
-    onAdjustSubDelay: ((Int) -> Unit)? = null,
-    onResetSubDelay: () -> Unit = {},
 ) {
     val focus = remember { FocusRequester() }
     BackHandler { onDismiss() }
@@ -179,40 +160,16 @@ internal fun TrackDialog(
             val focusThis = index == selectedIndex || (selectedIndex < 0 && onOff == null && index == 0)
             if (focusThis) LaunchedEffect(Unit) { androidx.compose.runtime.withFrameNanos {}; runCatching { focus.requestFocus() } }
             OptionRow(
-                // Image-based subs (PGS/VOBSUB/DVB) play via the ExoPlayer handoff on VOD — mark them so
-                // it's clear they're a different kind of track, but they're fully selectable.
+                // Image-based subs (PGS/VOBSUB/DVB) are rendered by ExoPlayer on its own layer —
+                // mark them so it's clear they're a different kind of track, but they're fully selectable.
                 label = if (!track.image) track.displayLabel() else stringResource(R.string.player_image_track, track.displayLabel()),
                 selected = track.selected,
                 modifier = if (focusThis) Modifier.focusRequester(focus) else Modifier,
                 onClick = { onSelect(track) },
             )
         }
-        // ADD SUBTITLES (subtitles dialog, movie/episode only) — OpenSubtitles search + local file.
-        if (onSearchSubtitles != null || onSelectLocalSubtitle != null) {
-            item { tv.own.myowntv.ui.stage.StagePopupLabel(stringResource(R.string.player_add_subtitles), Modifier.padding(top = 12.mpx)) }
-            if (onSearchSubtitles != null) {
-                item { ActionRow(stringResource(R.string.player_search_subtitles), MyOwnTVIcon.SEARCH, onSearchSubtitles) }
-            }
-            if (onSelectLocalSubtitle != null) {
-                item { ActionRow(stringResource(R.string.player_select_local_subtitle), MyOwnTVIcon.FOLDER, onSelectLocalSubtitle) }
-            }
-        }
-        // ADJUST (subtitles dialog): timing panel for the active subtitle.
-        if (onAdjustSubDelay != null) {
-            item { tv.own.myowntv.ui.stage.StagePopupLabel(stringResource(R.string.player_adjust), Modifier.padding(top = 12.mpx)) }
-            item {
-                StepperRow(
-                    title = stringResource(R.string.player_subtitle_timing),
-                    value = formatSubDelay(subDelayMs),
-                    step = SUB_DELAY_STEP_MS,
-                    canStep = { it in -SUB_DELAY_MAX_MS..SUB_DELAY_MAX_MS },
-                    current = subDelayMs,
-                    onStep = onAdjustSubDelay,
-                    onClick = onResetSubDelay,
-                )
-            }
-        }
-        // A/V-sync nudge (audio dialog, VOD only) — fixes a badly-muxed file where audio leads/lags the video.
+        // A/V-sync nudge (audio dialog) — fixes a stream arriving with the provider's own drift,
+        // or a display whose picture-processing delay pushes the image behind the sound.
         if (onAdjustAudioDelay != null) {
             item {
                 // 25 ms steps, matching Settings: what this corrects is the display's own picture-processing
@@ -227,7 +184,7 @@ internal fun TrackDialog(
                 )
             }
             // Lip-sync error belongs to the stream, not to the user: this keeps the offset for THIS
-            // film or channel, so it comes back next time without following you onto anything else.
+            // channel, so it comes back next time without following you onto anything else.
             if (onToggleRememberAudioDelay != null) {
                 item {
                     tv.own.myowntv.ui.stage.StagePopupOption(
@@ -260,29 +217,9 @@ private fun formatDelay(ms: Int): String = when {
     else -> stringResource(R.string.player_delay_negative, ms)
 }
 
-@Composable
-internal fun SpeedDialog(current: Double, onSelect: (Double) -> Unit, onDismiss: () -> Unit) {
-    val focus = remember { FocusRequester() }
-    LaunchedEffect(Unit) { requestFocusRetrying(focus) }
-    BackHandler { onDismiss() }
-    val selectedIndex = SPEEDS.indexOfFirst { kotlin.math.abs(it - current) < 0.01 }.coerceAtLeast(0)
-    DialogScaffold(title = stringResource(R.string.settings_playback_speed), onDismiss = onDismiss) {
-        items(SPEEDS.size) { index ->
-            val speed = SPEEDS[index]
-            OptionRow(
-                label = if (speed == 1.0) stringResource(R.string.player_speed_normal) else stringResource(R.string.player_speed, localizedDecimal(speed)),
-                selected = kotlin.math.abs(speed - current) < 0.01,
-                modifier = if (index == selectedIndex) Modifier.focusRequester(focus) else Modifier,
-                onClick = { onSelect(speed) },
-            )
-        }
-    }
-}
-
 /**
- * The sleep timer's choices, the phone's sheet in the television's dialog: Off while one is
- * running, the shared minute choices, "End of programme" only when the guide says when that is, and
- * "End of movie / episode" only while one plays.
+ * The sleep timer's choices, in the television's dialog: Off while one is running, the shared minute
+ * choices, and "End of programme" only when the guide says when that is.
  * The title turns into the countdown while a timer runs, so re-opening it says what is set.
  */
 @Composable
@@ -301,7 +238,6 @@ internal fun SleepTimerDialog(
     } ?: stringResource(R.string.player_sleep_timer)
     // Read once, as the dialog opens: the rows must not change under the D-pad while it is up.
     val running = remember { remaining != null }
-    val endKind = remember { timer.itemEndKind() }
     DialogScaffold(title = title, onDismiss = onDismiss) {
         if (running) {
             item {
@@ -328,15 +264,6 @@ internal fun SleepTimerDialog(
                     label = stringResource(R.string.player_sleep_timer_end_of_programme),
                     selected = false,
                     onClick = { timer.start(endMs - System.currentTimeMillis()); onDismiss() },
-                )
-            }
-        }
-        endKind?.let { kind ->
-            item {
-                OptionRow(
-                    label = stringResource(if (kind == SleepTimer.EndKind.EPISODE) R.string.player_sleep_timer_end_of_episode else R.string.player_sleep_timer_end_of_movie),
-                    selected = false,
-                    onClick = { timer.startUntilItemEnd(); onDismiss() },
                 )
             }
         }
@@ -470,13 +397,6 @@ internal fun VolumeDialog(player: PlaybackEngine, onDismiss: () -> Unit) {
     }
 }
 
-@Composable
-private fun formatSubDelay(ms: Int): String = when {
-    ms == 0 -> stringResource(R.string.player_subtitle_delay_zero)
-    ms > 0 -> stringResource(R.string.player_subtitle_delay_positive, ms / 1000.0)
-    else -> stringResource(R.string.player_subtitle_delay_negative, -ms / 1000.0)
-}
-
 /**
  * The settings-row stepper in a popup: the row holds focus, ◀ ▶ move [current] by [step] while
  * [canStep] allows the result, and the value sits on the right as "− 0 ms +".
@@ -506,7 +426,7 @@ private fun StepButton(label: String, enabled: Boolean, modifier: Modifier = Mod
 }
 
 /**
- * The player's pick-one popups (tracks, speed, zoom, quality, sleep timer) as Stage popups: the title,
+ * The player's pick-one popups (tracks, zoom, quality, sources, sleep timer) as Stage popups: the title,
  * then `.opt` rows. A REAL dialog window, not an in-place overlay: it owns the D-pad focus scope, so
  * nothing in the HUD behind it (play button, catch-all focusable, stream-info chips) can compete for or
  * steal focus — which is what intermittently locked the subtitle/audio pickers out of focus on
@@ -535,8 +455,3 @@ private fun OptionRow(label: String, selected: Boolean, modifier: Modifier = Mod
     )
 }
 
-/** `.opt` that opens something (search, a file, the timing panel): its icon instead of a radio. */
-@Composable
-private fun ActionRow(label: String, icon: MyOwnTVIcon, onClick: () -> Unit) {
-    tv.own.myowntv.ui.stage.StagePopupOption(title = label, onClick = onClick, leading = { tv.own.myowntv.ui.stage.StagePopupIcon(icon) })
-}

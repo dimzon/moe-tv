@@ -231,7 +231,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 /**
  * The positions written while the user browses — last channel, last category per section — kept apart
  * from the settings file. Each one used to be a write to `owntv_settings`, and every write there
- * re-runs every settings collector in both engines and every screen. Copied over once, on first open.
+ * re-runs every settings collector in the player and every screen. Copied over once, on first open.
  */
 private val Context.positionStore: DataStore<Preferences> by preferencesDataStore(
     name = "owntv_positions",
@@ -269,15 +269,11 @@ object ChNavLimits {
     const val DEFAULT_SKIP = 10
 }
 
-/** Seek/rewind step choices. Top-level so the settings UI and the defaults share one list. */
+/** Seek step choices. Top-level so the settings UI and the defaults share one list. */
 object SeekSteps {
     /** Rewind/forward inside a movie or episode — the player's long-standing 10 s. */
     const val DEFAULT_SEEK_STEP_SEC = 10
     val SEEK_CHOICES = listOf(5, 10, 15, 30, 60)
-
-    /** Stepping through a live channel's catch-up archive — the long-standing 30 s. */
-    const val DEFAULT_LIVE_REWIND_STEP_SEC = 30
-    val LIVE_REWIND_CHOICES = listOf(10, 15, 30, 60, 120)
 }
 
 /**
@@ -415,9 +411,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val AUTO_FRAME_RATE_LIVE = booleanPreferencesKey("auto_frame_rate_live")
         val AFR_PAUSE_SECS = intPreferencesKey("afr_pause_secs")
         val AFR_MATCH_RESOLUTION = booleanPreferencesKey("afr_match_resolution")
-        val VOD_BUFFER_SECS = intPreferencesKey("vod_buffer_secs")
-        val VOD_NETWORK_TIMEOUT_SECS = intPreferencesKey("vod_network_timeout_secs")
-        val VOD_RECONNECTS = intPreferencesKey("vod_reconnects")
         val AUDIO_PASSTHROUGH = booleanPreferencesKey("audio_passthrough")
         val NIGHT_MODE = booleanPreferencesKey("night_mode")
         val VOLUME_LEVELLING = booleanPreferencesKey("volume_levelling")
@@ -451,13 +444,9 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         // Video Player Settings
         val HW_DECODING = booleanPreferencesKey("hw_decoding")
         val SOFTWARE_DECODE_ABOVE_1080P = booleanPreferencesKey("software_decode_above_1080p")
-        val VOD_PREFER_EXO = booleanPreferencesKey("vod_prefer_exo") // legacy; read for migration only
-        val LIVE_ENGINE = stringPreferencesKey("live_engine")
-        val VOD_ENGINE = stringPreferencesKey("vod_engine")
         val MEASURED_STREAM_STATS = booleanPreferencesKey("measured_stream_stats")
         val DETAILED_DIAGNOSTICS = booleanPreferencesKey("detailed_diagnostics")
         val DIRECT_TUNE = booleanPreferencesKey("direct_tune")
-        val LIVE_LEFT_RIGHT_REWINDS = booleanPreferencesKey("live_left_right_rewinds")
         val TIMESHIFT_ENABLED = booleanPreferencesKey("timeshift_enabled")
         val TIMESHIFT_WINDOW_MINUTES = intPreferencesKey("timeshift_window_minutes")
         val TIMESHIFT_RESUME_MODE = stringPreferencesKey("timeshift_resume_mode")
@@ -473,11 +462,9 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val DEFAULT_ZOOM = stringPreferencesKey("default_zoom")
         val DEFAULT_VOLUME = intPreferencesKey("default_volume")
         val SEEK_STEP_SEC = intPreferencesKey("seek_step_sec")
-        val LIVE_REWIND_STEP_SEC = intPreferencesKey("live_rewind_step_sec")
-        /** Legacy single subtitle size, superseded by the two per-engine keys below but still read as
-         *  their default so an existing size survives an upgrade — and still written by nothing. */
+        /** Legacy single subtitle size, superseded by the ExoPlayer key below but still read as its
+         *  default so an existing size survives an upgrade — and still written by nothing. */
         val SUB_SCALE = floatPreferencesKey("sub_scale")
-        val SUB_SCALE_MPV = floatPreferencesKey("sub_scale_mpv")
         val SUB_SCALE_EXO = floatPreferencesKey("sub_scale_exo")
         // Subtitle appearance: off by default so every renderer keeps its stock look —
         // notably the embedded broadcaster styling of Live TV CEA-608/teletext cues.
@@ -506,7 +493,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val RESUME_MODE = stringPreferencesKey("resume_mode")
         val UPDATE_CHECK_ON_START = booleanPreferencesKey("update_check_on_start")
         val CATCHUP_TZ = stringPreferencesKey("catchup_timezone")
-        val CATCHUP_PLAYER = stringPreferencesKey("catchup_player")
         val CATCHUP_OFFSET_MIN = intPreferencesKey("catchup_offset_minutes")
         val EPG_OFFSET_MIN = intPreferencesKey("epg_offset_minutes")
         val GUIDE_DAYS_TO_KEEP = intPreferencesKey("guide_days_to_keep")
@@ -1121,19 +1107,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         context.dataStore.edit { it[Keys.CATCHUP_TZ] = mode.name }
     }
 
-    /** Which player takes a catch-up archive programme. Archives are mid-GOP MPEG-TS, the hardest thing
-     *  the in-app engines have to swallow, so handing them to VLC/MX is a genuine escape hatch — but the
-     *  in-app player keeps the HUD, resume and engine toggle, so **INTERNAL stays the default**. */
-    enum class CatchupPlayer { ASK, INTERNAL, EXTERNAL }
-
-    val catchupPlayer: Flow<CatchupPlayer> = prefsFlow { prefs ->
-        prefs[Keys.CATCHUP_PLAYER]?.let { runCatching { CatchupPlayer.valueOf(it) }.getOrNull() } ?: CatchupPlayer.INTERNAL
-    }
-
-    suspend fun setCatchupPlayer(mode: CatchupPlayer) {
-        context.dataStore.edit { it[Keys.CATCHUP_PLAYER] = mode.name }
-    }
-
     suspend fun setCatchupOffsetMinutes(minutes: Int) {
         context.dataStore.edit { it[Keys.CATCHUP_OFFSET_MIN] = minutes.coerceIn(catchupOffsetRangeMinutes) }
     }
@@ -1614,8 +1587,8 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     // --- Video Player Settings ---
 
-    /** Hardware decoding: mpv's `hwdec=mediacodec`, and hardware decoders first on ExoPlayer. Off = software
-     *  decoders first on both engines, for streams a vendor decoder mishandles. */
+    /** Hardware decoding: hardware (MediaCodec) decoders first on the player. Off = software
+     *  decoders first, for streams a vendor hardware decoder mishandles. */
     val hwDecoding: Flow<Boolean> = prefsFlow { it[Keys.HW_DECODING] ?: true }
 
     suspend fun setHwDecoding(enabled: Boolean) {
@@ -1632,59 +1605,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     suspend fun setSoftwareDecodeAbove1080p(enabled: Boolean) {
         context.dataStore.edit { it[Keys.SOFTWARE_DECODE_ABOVE_1080P] = enabled }
-    }
-
-    /**
-     * Which engine Live TV starts a channel on, and whether it may hand over to the other one.
-     *
-     * Default is [EnginePreference.EXO_FIRST] — ExoPlayer opens far faster, which is what channel
-     * surfing is made of, and it is the only engine with live closed captions; mpv catches what it
-     * cannot play. The other three exist because that automatic handover is not always wanted:
-     *
-     *  - **mpv first** for a panel or a TV where ExoPlayer is the one that usually loses.
-     *  - **The two "only" modes** for anyone who has established that the second engine never works for
-     *    them. A handover costs a stop, a surface release and a re-open — several seconds of black on
-     *    every unplayable channel — so paying it for an engine that was never going to help is pure loss.
-     *    "Only" still keeps that engine's own `.m3u8` → `.ts` step; what it drops is the other engine.
-     *
-     * A channel pinned with the HUD "compatibility mode" toggle ignores this setting — see [ForceMpvStore].
-     */
-    val liveEnginePreference: Flow<tv.own.owntv.core.player.EnginePreference> = prefsFlow { prefs ->
-        prefs[Keys.LIVE_ENGINE]?.let { runCatching { tv.own.owntv.core.player.EnginePreference.valueOf(it) }.getOrNull() }
-            ?: tv.own.owntv.core.player.EnginePreference.EXO_FIRST
-    }
-
-    suspend fun setLiveEnginePreference(preference: tv.own.owntv.core.player.EnginePreference) {
-        context.dataStore.edit { it[Keys.LIVE_ENGINE] = preference.name }
-    }
-
-    /**
-     * Which engine Movies & Series start on, and whether it may hand over to the other one.
-     *
-     * Default is [EnginePreference.MPV_FIRST] — the opposite of Live TV's, deliberately: a film is one
-     * long open where breadth of codec support beats speed of opening, and mpv has the wider set
-     * (DTS/TrueHD audio, odd containers) plus the A/V-sync nudge. ExoPlayer-first is for devices and
-     * providers where mpv's path can't open files ExoPlayer plays fine.
-     *
-     * The two "only" modes drop the automatic handover for anyone whose second engine never works —
-     * see [liveEnginePreference] for the reasoning, which is identical. Two caveats specific to VOD:
-     * ExoPlayer cannot decode DTS/TrueHD at all (the handoff is refused rather than attempted, so
-     * "only ExoPlayer" means those files simply don't play), and the image-subtitle handoff to
-     * ExoPlayer is not a fallback — it stays available in both "only" modes, since it is the only way
-     * PGS/VOBSUB subtitles are ever rendered.
-     *
-     * Migrated in place from the older `vod_prefer_exo` switch, which is still read when the new key
-     * has never been written: on → [EnginePreference.EXO_FIRST], off → [EnginePreference.MPV_FIRST].
-     * Nobody's playback changes on upgrade.
-     */
-    val vodEnginePreference: Flow<tv.own.owntv.core.player.EnginePreference> = prefsFlow { prefs ->
-        prefs[Keys.VOD_ENGINE]?.let { runCatching { tv.own.owntv.core.player.EnginePreference.valueOf(it) }.getOrNull() }
-            ?: if (prefs[Keys.VOD_PREFER_EXO] == true) tv.own.owntv.core.player.EnginePreference.EXO_FIRST
-            else tv.own.owntv.core.player.EnginePreference.MPV_FIRST
-    }
-
-    suspend fun setVodEnginePreference(preference: tv.own.owntv.core.player.EnginePreference) {
-        context.dataStore.edit { it[Keys.VOD_ENGINE] = preference.name }
     }
 
     /** Measure live fps / bitrate / dropped frames for the stream-info overlay. On (default) = the
@@ -1719,15 +1639,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     suspend fun setDirectTune(enabled: Boolean) {
         context.dataStore.edit { it[Keys.DIRECT_TUNE] = enabled }
-    }
-
-    /** With the TV player's controls hidden, Left/Right on a catch-up channel rewind and go
-     *  forward instead of opening the channel list and history. Off (default) keeps the lists; a
-     *  channel with no archive has nothing to rewind and always keeps them. Films always seek. */
-    val liveLeftRightRewinds: Flow<Boolean> = prefsFlow { it[Keys.LIVE_LEFT_RIGHT_REWINDS] ?: false }
-
-    suspend fun setLiveLeftRightRewinds(enabled: Boolean) {
-        context.dataStore.edit { it[Keys.LIVE_LEFT_RIGHT_REWINDS] = enabled }
     }
 
     /** Pause and rewind live channels that have no catch-up, from a copy saved while watching
@@ -1779,12 +1690,10 @@ class SettingsRepository(private val context: Context, private val localeStore: 
      * Multichannel output fails in two known ways. Flaky vendor audio HALs and HDMI-ARC chips claim 5.1
      * then mis-play it (drained 2× → "fast video, no sound"). And even when multichannel LPCM plays
      * correctly, the wider HDMI/ARC buffer adds latency the TV/soundbar doesn't report back, so audio lags
-     * video (lip-sync drift) on VODs. mpv never bitstreams (its passthrough AudioTrack reports no clock and
-     * stutters video to a slideshow); ExoPlayer may, under the separate [audioPassthrough] switch.
+     * video (lip-sync drift). Dolby/DTS bitstreaming is the separate [audioPassthrough] switch.
      *
-     * The old boolean was a poor fit for two reasons. It only ever reached **mpv** — Live TV's default
-     * engine is ExoPlayer, where "off" changed nothing at all, so a TV that mis-plays multichannel kept
-     * mis-playing it however the switch was set. And "off" is the wrong default to *have* to choose: a
+     * The old boolean was a poor fit for two reasons — a TV that mis-plays multichannel kept mis-playing
+     * it on the decoder paths the switch never reached, and "off" is the wrong default to *have* to choose: a
      * user with a real receiver should get surround without reading a changelog, and a user whose TV
      * lies about its capabilities should get sound back without knowing why it went.
      *
@@ -1806,7 +1715,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
     }
 
     /** ExoPlayer may hand Dolby/DTS to the TV or receiver undecoded when the output claims it can
-     *  play it (on, as before). Off: decoded in the app. mpv always decodes. */
+     *  play it (on, as before). Off: decoded in the app. */
     val audioPassthrough: Flow<Boolean> = prefsFlow { it[Keys.AUDIO_PASSTHROUGH] ?: true }
 
     suspend fun setAudioPassthrough(enabled: Boolean) {
@@ -1897,10 +1806,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     /**
      * How far the player's rewind/forward buttons and the seek bar's ◀/▶ jump in a movie or episode.
-     *
-     * Separate from [liveRewindStepSec] on purpose: skipping an ad break in a film and stepping back
-     * through a live channel's archive are different journeys, and one number can't be right for both
-     * — which is why the two have always had different hardcoded values (10 s and 30 s).
      */
     val seekStepSec: Flow<Int> = prefsFlow { it[Keys.SEEK_STEP_SEC] ?: SeekSteps.DEFAULT_SEEK_STEP_SEC }
 
@@ -1908,33 +1813,15 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         context.dataStore.edit { it[Keys.SEEK_STEP_SEC] = seconds }
     }
 
-    /** How far one press of Rewind/Forward moves inside a live channel's catch-up archive. */
-    val liveRewindStepSec: Flow<Int> = prefsFlow { it[Keys.LIVE_REWIND_STEP_SEC] ?: SeekSteps.DEFAULT_LIVE_REWIND_STEP_SEC }
-
-    suspend fun setLiveRewindStepSec(seconds: Int) {
-        context.dataStore.edit { it[Keys.LIVE_REWIND_STEP_SEC] = seconds }
-    }
-
     // --- Subtitle appearance: size, text color, screen position, background transparency ---
     // Two levels of opt-in. The master toggle gates everything: while it's off NOTHING here is
-    // applied and every renderer keeps its stock look (mpv defaults, the overlay's hardcoded 45%
+    // applied and every renderer keeps its stock look (the overlay's hardcoded 45%
     // box, and — the case that matters most — SubtitleView's embedded broadcaster styling).
     // Each option then has its own "Default" value, so turning the toggle ON still changes nothing
     // until the user picks something: only the options actually set reach a renderer.
 
-    // Subtitle size is per engine: mpv and ExoPlayer draw the same multiplier at visibly different
-    // sizes, so one shared value cannot be right for both. Each new key falls back to the legacy
-    // single [Keys.SUB_SCALE] until it is set, so an upgrade keeps the size the user already chose on
-    // both engines and nothing changes until they move one of them.
-
-    /** Subtitle scale multiplier for mpv (sub-scale); [SubtitleStyle.SCALE_DEFAULT] = untouched. */
-    val subtitleScaleMpv: Flow<Float> = prefsFlow {
-        it[Keys.SUB_SCALE_MPV] ?: it[Keys.SUB_SCALE] ?: SubtitleStyle.SCALE_DEFAULT
-    }
-
-    suspend fun setSubtitleScaleMpv(scale: Float) {
-        context.dataStore.edit { it[Keys.SUB_SCALE_MPV] = scale }
-    }
+    // The size key falls back to the legacy single [Keys.SUB_SCALE] until it is set, so an upgrade
+    // keeps the size the user already chose and nothing changes until they move it.
 
     /** Subtitle scale multiplier for the Media3 SubtitleView; [SubtitleStyle.SCALE_DEFAULT] = untouched. */
     val subtitleScaleExo: Flow<Float> = prefsFlow {
@@ -1994,7 +1881,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         context.dataStore.edit { it[Keys.SUB_BG_OPACITY] = value }
     }
 
-    /** Audio sync offset in milliseconds, on both engines (mpv `audio-delay`, ExoPlayer's audio clock); +ve delays audio. */
+    /** Audio sync offset in milliseconds (ExoPlayer's audio clock); +ve delays audio. */
     val audioDelayMs: Flow<Int> = prefsFlow { it[Keys.AUDIO_DELAY_MS] ?: 0 }
 
     suspend fun setAudioDelayMs(ms: Int) {
@@ -2227,16 +2114,16 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     // Preferred languages are per profile: "pref_audio_lang_<id>" / "pref_sub_lang_<id>". A profile
     // that never chose one follows the old shared key, so nobody's language changed with the upgrade.
-    // Both flows follow the active profile, so a profile switch reaches the engines like any other change.
+    // Both flows follow the active profile, so a profile switch reaches the player like any other change.
 
-    /** Preferred audio language of the active profile (ISO code, mpv alang); blank = no preference. */
+    /** Preferred audio language of the active profile (ISO code, the player's track preference); blank = no preference. */
     val preferredAudioLang: Flow<String> = prefsFlow { profileLang(it, PREF_AUDIO_LANG_PREFIX, Keys.PREF_AUDIO_LANG) }
 
     suspend fun setPreferredAudioLang(lang: String) {
         context.dataStore.edit { it[activeProfileLangKey(it, PREF_AUDIO_LANG_PREFIX)] = lang }
     }
 
-    /** Preferred subtitle language of the active profile (ISO code, mpv slang); blank = no preference. */
+    /** Preferred subtitle language of the active profile (ISO code); blank = no preference. */
     val preferredSubLang: Flow<String> = prefsFlow { profileLang(it, PREF_SUB_LANG_PREFIX, Keys.PREF_SUB_LANG) }
 
     suspend fun setPreferredSubLang(lang: String) {
@@ -2245,7 +2132,8 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     // --- OpenSubtitles search language filter ---
     // Deliberately its own setting rather than reusing [preferredSubLang]: that one picks an EMBEDDED
-    // track inside the stream (a 15-language mpv list that has no Greek, among others), which is a
+    // track inside the stream (from the player's fixed language list, which has no Greek, among
+    // others), which is a
     // different question from "which languages should an online search return". Default OFF = show
     // everything OpenSubtitles has for the title and let the user choose.
 
@@ -2500,8 +2388,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     /**
      * An HLS stream offering both an SDR and an HDR picture plays the SDR one, for a TV whose HDR looks
-     * washed out. Streams with one kind only are untouched. ExoPlayer only: mpv's HLS reader does not see
-     * which variant is which.
+     * washed out. Streams with one kind only are untouched.
      */
     val preferSdr: Flow<Boolean> = prefsFlow { it[Keys.PREFER_SDR] ?: false }
 
@@ -2629,9 +2516,9 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     /**
      * Switch the display's refresh rate to match the video frame rate (24/25/30/50/60 fps and the
-     * 23.976/29.97/59.94 variants) during full-screen playback, and restore it on exit. Applies to both
-     * engines. Films and series here, Live TV in [autoFrameRateLive]: a 24 Hz switch can be a nuisance
-     * on films on one TV while 25/50 fps broadcast judders without it. Default off; users whose display
+     * 23.976/29.97/59.94 variants) during full-screen playback, and restore it on exit. Films and
+     * series here, Live TV in [autoFrameRateLive]: a 24 Hz switch can be a nuisance on films on one
+     * TV while 25/50 fps broadcast judders without it. Default off; users whose display
      * switches cleanly can opt in.
      */
     val autoFrameRateFilms: Flow<Boolean> = prefsFlow { prefs ->
@@ -2652,43 +2539,11 @@ class SettingsRepository(private val context: Context, private val localeStore: 
      * Whether the one-time Auto-frame-rate suggestion has already been answered.
      *
      * The suggestion only appears when a 24/25/50 fps stream is playing full-screen on a display whose
-     * refresh rate is not a multiple of it *and* a matching mode exists — the case where mpv's direct
-     * `mediacodec_embed` path judders and AFR is the only cure. Answering it either way (or turning AFR
+     * refresh rate is not a multiple of it *and* a matching mode exists — the case where the direct
+     * surface path judders and AFR is the only cure. Answering it either way (or turning AFR
      * on by hand) sets this for good; it is never shown twice.
      */
     val autoFrameRatePrompted: Flow<Boolean> = prefsFlow { it[Keys.AUTO_FRAME_RATE_PROMPTED] ?: false }
-
-    /** The choices for films' buffer (seconds; 0 = Auto, the device tier). */
-    val vodBufferChoicesSecs: List<Int> = listOf(0, 30, 60, 120, 300)
-
-    /** How far ahead a film is loaded, in seconds; 0 = Auto (the device tier, as before). The
-     *  memory ceiling is the tier's either way, so this is "up to". */
-    val vodBufferSecs: Flow<Int> = prefsFlow { (it[Keys.VOD_BUFFER_SECS] ?: 0).takeIf { v -> v in vodBufferChoicesSecs } ?: 0 }
-
-    suspend fun setVodBufferSecs(secs: Int) {
-        context.dataStore.edit { it[Keys.VOD_BUFFER_SECS] = secs.takeIf { v -> v in vodBufferChoicesSecs } ?: 0 }
-    }
-
-    /** The choices for films' network timeout (seconds; 0 = Auto, each engine's own). */
-    val vodNetworkTimeoutChoicesSecs: List<Int> = listOf(0, 10, 20, 30, 60)
-
-    /** How long a film waits on a silent server; 0 = Auto (mpv 60 s, ExoPlayer 20 s, as before). */
-    val vodNetworkTimeoutSecs: Flow<Int> =
-        prefsFlow { (it[Keys.VOD_NETWORK_TIMEOUT_SECS] ?: 0).takeIf { v -> v in vodNetworkTimeoutChoicesSecs } ?: 0 }
-
-    suspend fun setVodNetworkTimeoutSecs(secs: Int) {
-        context.dataStore.edit { it[Keys.VOD_NETWORK_TIMEOUT_SECS] = secs.takeIf { v -> v in vodNetworkTimeoutChoicesSecs } ?: 0 }
-    }
-
-    /** The choices for films' reconnect attempts; 1 is what films always had. */
-    val vodReconnectChoices: List<Int> = listOf(1, 3, 5, 10)
-
-    /** Times a film that loses its connection mid-play is reopened where it stopped before the error. */
-    val vodReconnects: Flow<Int> = prefsFlow { (it[Keys.VOD_RECONNECTS] ?: 1).takeIf { v -> v in vodReconnectChoices } ?: 1 }
-
-    suspend fun setVodReconnects(count: Int) {
-        context.dataStore.edit { it[Keys.VOD_RECONNECTS] = count.takeIf { v -> v in vodReconnectChoices } ?: 1 }
-    }
 
     /** The longest pause [afrPauseSecs] offers; the TV's picker lists 0 (off) to this. */
     val afrPauseMaxSecs: Int = 5
@@ -2964,7 +2819,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     /**
      * "Pre-buffer": how many seconds to fill before a live channel starts playing,
-     * and how many to refill after a rebuffer. 0 = Off, which keeps the engines' existing 1 s / 2 s
+     * and how many to refill after a rebuffer. 0 = Off, which keeps the player's existing 1 s / 2 s
      * start thresholds. A per-playlist override lives on `SourceEntity.livePrerollSecs`.
      */
     val livePrerollSecs: Flow<Int> = prefsFlow { prefs ->
@@ -2977,7 +2832,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     /**
      * "Give up after": how long a live channel may take to produce a picture before OwnTV stops trying
-     * and shows the error, however many engine/format combinations the fallback ladder has left.
+     * and shows the error, however many formats the fallback ladder has left.
      *
      * 0 = Never, the behaviour before this setting existed: each rung keeps its own timeout and nothing
      * bounds their sum, which on a removed channel is about a minute and a half of black screen. Kept as
@@ -2993,7 +2848,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         context.dataStore.edit { it[Keys.LIVE_TUNE_TIMEOUT_SECS] = secs.coerceIn(0, 60) }
     }
 
-    /** Effective live buffer in seconds the engines apply (null = keep engine defaults, i.e. Balanced). */
+    /** Effective live buffer in seconds the player applies (null = keep its defaults, i.e. Balanced). */
     val liveBufferSeconds: Flow<Int?> = combine(liveLatencyMode, liveLatencyCustomSecs) { mode, custom ->
         LiveBuffer.effectiveSeconds(LiveLatency.fromName(mode), custom)
     }
@@ -3138,8 +2993,8 @@ class SettingsRepository(private val context: Context, private val localeStore: 
     }
 
     // --- Global proxy (Approach 1 — one app-wide HTTP proxy) ---
-    // Covers all OkHttp traffic (playlist/API/EPG/images/downloads/updates/weather + ExoPlayer) and mpv
-    // playback via its http-proxy option. Per-source overrides and SOCKS are future work; the proxy
+    // Covers all OkHttp traffic (playlist/API/EPG/images/downloads/updates/weather) and ExoPlayer
+    // playback. Per-source overrides and SOCKS are future work; the proxy
     // password is intentionally NOT part of settings backup/export — see extras/PROXY_SUPPORT_PLAN.md.
 
     /** Live snapshot of the proxy settings as a single object (consumed by ProxyConfigHolder). */
@@ -3173,12 +3028,9 @@ class SettingsRepository(private val context: Context, private val localeStore: 
     internal object BackupKeys {
         val strings = listOf(
             Keys.THEME_MODE, Keys.ACCENT, Keys.ACCENT_CUSTOM, Keys.FOCUS_HIGHLIGHT, Keys.DEFAULT_ZOOM,
-            // Current global engine choices. VOD_PREFER_EXO below is migration-only and cannot represent
-            // all four EnginePreference modes, so the two string values must travel themselves.
-            Keys.LIVE_ENGINE, Keys.VOD_ENGINE,
             Keys.MAIN_FONT_FAMILY, Keys.POPUP_FONT_FAMILY,
             Keys.PREF_AUDIO_LANG, Keys.PREF_SUB_LANG, Keys.SUB_SEARCH_LANGS, Keys.SORT_LIVE, Keys.SORT_GUIDE, Keys.SORT_MOVIES,
-            Keys.SORT_SERIES, Keys.RESUME_MODE, Keys.TIMESHIFT_RESUME_MODE, Keys.DOWNLOAD_WATCH_CHOICE, Keys.CATCHUP_TZ, Keys.CATCHUP_PLAYER, Keys.ANIMATION_LEVEL, Keys.VOD_VIEW_MODE, Keys.GUIDE_VIEW,
+            Keys.SORT_SERIES, Keys.RESUME_MODE, Keys.TIMESHIFT_RESUME_MODE, Keys.DOWNLOAD_WATCH_CHOICE, Keys.CATCHUP_TZ, Keys.ANIMATION_LEVEL, Keys.VOD_VIEW_MODE, Keys.GUIDE_VIEW,
             Keys.EPISODE_VIEW_MODE, Keys.VOD_LAYOUT, Keys.LIVE_LAYOUT, Keys.LIVE_VIEW, Keys.REMINDER_MODE, Keys.PLAYER_HOLD_OK, Keys.PLAYER_SHORT_OK,
             Keys.WEATHER_LOCATION, Keys.RECENT_SEARCHES,
             Keys.CLOCK_TIME_COLOR, Keys.CLOCK_DATE_COLOR, Keys.CLOCK_WEATHER_COLOR,
@@ -3231,7 +3083,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             Keys.NAV_MENU_HIDDEN,
             Keys.REMOTE_SHORTCUT_BINDINGS,
         )
-        val ints = listOf(Keys.GUIDE_DAYS_TO_KEEP, Keys.FOCUS_HIGHLIGHT_WIDTH, Keys.DEFAULT_VOLUME, Keys.SEEK_STEP_SEC, Keys.LIVE_REWIND_STEP_SEC, Keys.UI_ZOOM_PCT, Keys.FONT_SIZE_PCT, Keys.AUDIO_DELAY_MS, Keys.CATCHUP_OFFSET_MIN, Keys.EPG_OFFSET_MIN, Keys.PROXY_PORT, Keys.DNS_PORT, Keys.CH_NAV_UP_SKIP, Keys.CH_NAV_DOWN_SKIP, Keys.MINI_PLAYER_SIZE_PCT, Keys.LIVE_LATENCY_CUSTOM_SECS, Keys.LIVE_PREROLL_SECS, Keys.LIVE_TUNE_TIMEOUT_SECS, Keys.GLASS_SCOPE, Keys.GLASS_ALPHA, Keys.BG_DIM, Keys.BG_BLUR, Keys.SUB_BG_OPACITY,
+        val ints = listOf(Keys.GUIDE_DAYS_TO_KEEP, Keys.FOCUS_HIGHLIGHT_WIDTH, Keys.DEFAULT_VOLUME, Keys.SEEK_STEP_SEC, Keys.UI_ZOOM_PCT, Keys.FONT_SIZE_PCT, Keys.AUDIO_DELAY_MS, Keys.CATCHUP_OFFSET_MIN, Keys.EPG_OFFSET_MIN, Keys.PROXY_PORT, Keys.DNS_PORT, Keys.CH_NAV_UP_SKIP, Keys.CH_NAV_DOWN_SKIP, Keys.MINI_PLAYER_SIZE_PCT, Keys.LIVE_LATENCY_CUSTOM_SECS, Keys.LIVE_PREROLL_SECS, Keys.LIVE_TUNE_TIMEOUT_SECS, Keys.GLASS_SCOPE, Keys.GLASS_ALPHA, Keys.BG_DIM, Keys.BG_BLUR, Keys.SUB_BG_OPACITY,
             Keys.PANEL_W_LIVE_CAT, Keys.PANEL_W_LIVE_LIST, Keys.PANEL_W_LIVE_PREVIEW,
             Keys.LIVE_STAGE_SHEET, Keys.LIVE_STAGE_LIST, Keys.LIVE_STAGE_PREVIEW,
             Keys.PANEL_W_MOVIES_CAT, Keys.PANEL_W_MOVIES_LIST, Keys.PANEL_W_MOVIES_PREVIEW,
@@ -3244,9 +3096,8 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             Keys.NAV_HIDE_AFTER_MS, Keys.REMINDER_LEAD_MIN,
             // Multiview's tile count and recording's start-early / finish-late minutes (readers clamp them).
             Keys.MULTIVIEW_TILES, Keys.RECORDING_PRE_ROLL_MINUTES, Keys.RECORDING_POST_ROLL_MINUTES,
-            // Auto frame rate's pause and films' buffer / timeout / reconnects; the readers
-            // accept only their own choices.
-            Keys.AFR_PAUSE_SECS, Keys.VOD_BUFFER_SECS, Keys.VOD_NETWORK_TIMEOUT_SECS, Keys.VOD_RECONNECTS,
+            // Auto frame rate's pause; the reader accepts only its own choices.
+            Keys.AFR_PAUSE_SECS,
             // The two quality limits; the readers accept only their own choices.
             Keys.MAX_VIDEO_HEIGHT, Keys.MOBILE_DATA_MAX_VIDEO_HEIGHT,
             // The saved-copy length; the reader accepts only its own choices.
@@ -3254,7 +3105,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val bools = listOf(
             Keys.GUIDE_SHOW_EMPTY, Keys.GUIDE_PREVIEW,
             Keys.LIVE_PREVIEW, Keys.LIVE_PREVIEW_AUDIO, Keys.GUIDE_PREVIEW_ON_OK, Keys.LIVE_PREVIEW_ON_OK, Keys.HERO_PREVIEW, Keys.PREFER_SDR, Keys.AUTO_FRAME_RATE, Keys.AUTO_FRAME_RATE_LIVE, Keys.AFR_MATCH_RESOLUTION, Keys.AUTO_FRAME_RATE_PROMPTED, Keys.ANDROID_TV_HOME, Keys.HW_DECODING, Keys.SOFTWARE_DECODE_ABOVE_1080P,
-            Keys.VOD_PREFER_EXO, Keys.MEASURED_STREAM_STATS, Keys.DETAILED_DIAGNOSTICS, Keys.DIRECT_TUNE, Keys.LIVE_LEFT_RIGHT_REWINDS, Keys.EXTERNAL_PLAYER,
+            Keys.MEASURED_STREAM_STATS, Keys.DETAILED_DIAGNOSTICS, Keys.DIRECT_TUNE, Keys.EXTERNAL_PLAYER,
             Keys.EXTERNAL_PLAYER_LIVE, Keys.EXTERNAL_PLAYER_MOVIES, Keys.EXTERNAL_PLAYER_SERIES, Keys.UPDATE_CHECK_ON_START, Keys.SURROUND_SOUND, Keys.AUTO_PLAY_NEXT, Keys.PROXY_ENABLED,
             Keys.WEATHER_ENABLED, Keys.WEATHER_FAHRENHEIT, Keys.RESUME_LAST_CHANNEL, Keys.METADATA_ENABLED, Keys.CH_NAV_ENABLED, Keys.PLAYER_SWAP_CHANNEL_KEYS, Keys.PLAYER_NUMBER_KEYS_TUNE,
             Keys.DNS_ENABLED,
@@ -3276,7 +3127,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             Keys.AUDIO_PASSTHROUGH, Keys.NIGHT_MODE, Keys.VOLUME_LEVELLING, Keys.TUNNELED_PLAYBACK,
             Keys.TIMESHIFT_ENABLED,
         )
-        val floats = listOf(Keys.SUB_SCALE, Keys.SUB_SCALE_MPV, Keys.SUB_SCALE_EXO)
+        val floats = listOf(Keys.SUB_SCALE, Keys.SUB_SCALE_EXO)
 
         /**
          * Old keys that are still *imported* (older backups carry them) but exported only while they
@@ -3284,10 +3135,9 @@ class SettingsRepository(private val context: Context, private val localeStore: 
          * are written. `pip_on_back` has no reader at all, so it is never exported.
          */
         val legacySuccessors: Map<Preferences.Key<*>, List<Preferences.Key<*>>> = mapOf(
-            Keys.VOD_PREFER_EXO to listOf(Keys.VOD_ENGINE),
             Keys.SURROUND_SOUND to listOf(Keys.SURROUND_MODE),
             Keys.EXTERNAL_PLAYER to listOf(Keys.EXTERNAL_PLAYER_MOVIES, Keys.EXTERNAL_PLAYER_SERIES),
-            Keys.SUB_SCALE to listOf(Keys.SUB_SCALE_MPV, Keys.SUB_SCALE_EXO, Keys.SUB_STYLE_ENABLED),
+            Keys.SUB_SCALE to listOf(Keys.SUB_SCALE_EXO, Keys.SUB_STYLE_ENABLED),
         )
 
         /** Whether [k] goes into a new backup, given this device's stored [p]. */
@@ -3357,14 +3207,14 @@ class SettingsRepository(private val context: Context, private val localeStore: 
     fun deviceIdentity(): tv.own.owntv.core.backup.DeviceIdentity = tv.own.owntv.core.backup.DeviceIdentity.of(context)
 
     /**
-     * The settings that describe this device's hardware rather than the user's taste: which player
-     * engine copes with its decoders, whether hardware decoding works on it, whether its display can
+     * The settings that describe this device's hardware rather than the user's taste: whether hardware
+     * decoding works on it, whether its display can
      * switch frame rate, HDR, what its audio output accepts. Restored from another
      * device only when the user says so ([importSettings]'s `keepDeviceSettings`) — a phone's or an
      * Android 11 box's values were simply copied onto whatever the backup was restored to.
      */
     private val deviceSpecificSettings: Set<String> = listOf(
-        Keys.LIVE_ENGINE, Keys.VOD_ENGINE, Keys.VOD_PREFER_EXO, Keys.HW_DECODING, Keys.SOFTWARE_DECODE_ABOVE_1080P, Keys.AUTO_FRAME_RATE, Keys.AUTO_FRAME_RATE_LIVE,
+        Keys.HW_DECODING, Keys.SOFTWARE_DECODE_ABOVE_1080P, Keys.AUTO_FRAME_RATE, Keys.AUTO_FRAME_RATE_LIVE,
         Keys.AFR_PAUSE_SECS, Keys.AFR_MATCH_RESOLUTION,
         Keys.PREFER_SDR, Keys.SURROUND_MODE, Keys.SURROUND_SOUND, Keys.AUDIO_PASSTHROUGH,
         Keys.TUNNELED_PLAYBACK,

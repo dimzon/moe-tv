@@ -4,9 +4,9 @@ package tv.own.owntv.core.subtitles
  * Builds the engine label for an attached external subtitle.
  *
  * The label is not decoration: every lookup that matters keys off it — which file a timing offset
- * shifts, which track is re-selected after a re-prepare, whether mpv's re-list treats a subtitle as
- * already attached. Two subtitles sharing a label are therefore indistinguishable to the player,
- * which is exactly how three same-language downloads used to collapse onto the first one.
+ * shifts, which track is re-selected after a re-prepare. Two subtitles sharing a label are therefore
+ * indistinguishable to the player, which is exactly how three same-language downloads used to
+ * collapse onto the first one.
  *
  * So a label must satisfy two things at once:
  *

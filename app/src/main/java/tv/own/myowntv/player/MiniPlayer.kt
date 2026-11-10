@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.hudOnAccent
 import tv.own.myowntv.ui.theme.hudAccent
@@ -83,10 +82,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -102,9 +97,9 @@ import tv.own.myowntv.ui.stage.StageSurface
 import tv.own.myowntv.ui.components.MyOwnTVIcon
 
 /**
- * The docked mini-player (dock-to-corner model). The mpv surface is rendered behind this by the shell;
- * this overlays the title, the window's own progress hairline and one floating control pill. Navigate
- * to it with the D-pad to use it; expand returns to fullscreen.
+ * The docked mini-player (dock-to-corner model). The live engine's ExoPlayer surface is rendered
+ * behind this by the shell; this overlays the title and one floating control pill. Navigate to it
+ * with the D-pad to use it; expand returns to fullscreen.
  */
 @Composable
 fun MiniPlayer(
@@ -123,10 +118,6 @@ fun MiniPlayer(
     val isPlaying by player.isPlaying.collectAsStateWithLifecycle()
     val meta by player.currentMeta.collectAsStateWithLifecycle()
     val volume by player.volume.collectAsStateWithLifecycle()
-    // Held as State and read only in the hairline's draw lambda, so the once-a-second tick redraws
-    // that line instead of recomposing the whole window.
-    val positionState = player.position.collectAsStateWithLifecycle()
-    val duration by player.duration.collectAsStateWithLifecycle()
 
     // Show the title + controls only while the mini-player has D-pad focus; otherwise fade to just the
     // video. The controls stay composed (and focusable) even when hidden, so pressing toward the
@@ -150,20 +141,7 @@ fun MiniPlayer(
             Box(Modifier.matchParentSize().border(2.dp, accent, RoundedCornerShape(14.dp)))
         }
 
-        // Progress along the TOP edge — the bottom belongs to the pill and its shadow. Live streams
-        // have no duration, so the hairline simply isn't there.
-        if (duration > 0L) {
-            Box(
-                Modifier.align(Alignment.TopStart).fillMaxWidth().height(2.dp)
-                    .background(hudInk.copy(alpha = 0.18f))
-                    .drawBehind {
-                        val frac = (positionState.value.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
-                        val w = size.width * frac
-                        val x = if (layoutDirection == LayoutDirection.Rtl) size.width - w else 0f
-                        drawRect(accent, topLeft = Offset(x, 0f), size = Size(w, size.height))
-                    },
-            )
-        }
+        // A live stream has no progress to draw: the top edge is clear, the bottom belongs to the pill.
 
         Row(
             modifier = Modifier.align(Alignment.TopStart).fillMaxWidth().alpha(controlsAlpha)

@@ -21,10 +21,10 @@ class SubtitleLanguageTest {
     }
 
     @Test
-    fun `mpv gets every spelling of the preferred language`() {
-        assertEquals("deu,ger,de", mpvLanguageList("deu"))
-        assertEquals("fra,fre,fr", mpvLanguageList("fra"))
-        assertEquals("eng,en", mpvLanguageList("eng"))
-        assertEquals("", mpvLanguageList(""))
+    fun `every spelling of a language matches its own`() {
+        assertTrue(subtitleLanguageMatches("deu", "ger"))
+        assertTrue(subtitleLanguageMatches("ger", "deu"))
+        assertTrue(subtitleLanguageMatches("zho", "chi"))
+        assertFalse(subtitleLanguageMatches("deu", "fra"))
     }
 }

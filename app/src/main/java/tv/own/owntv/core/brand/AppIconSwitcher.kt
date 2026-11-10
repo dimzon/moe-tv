@@ -82,8 +82,8 @@ object AppIconSwitcher {
     }
 
     /**
-     * "Restart now" for a setting that applies at start (the FFmpeg audio decoder): the same restart,
-     * into the launcher activity that is enabled now. The caller must have finished saving the choice first.
+     * "Restart now" for a setting that applies at start: the same restart, into the launcher activity
+     * that is enabled now. The caller must have finished saving the choice first.
      */
     fun restart(activity: Activity) = restartInto(activity, launchComponent(activity))
 

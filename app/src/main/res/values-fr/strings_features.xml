@@ -9,8 +9,6 @@
     <string name="profiles_avatar_own_picture">Votre propre image</string>
     <string name="profiles_kids">Profil enfant</string>
     <string name="profiles_kids_description">Navigation simplifiée et sécurisée</string>
-    <string name="profiles_allow_downloads">Autoriser les téléchargements</string>
-    <string name="profiles_allow_downloads_description">Désactivé masque tous les boutons de téléchargement de ce profil</string>
     <string name="profiles_remove_pin">Supprimer le verrouillage par PIN</string>
     <string name="profiles_no_pin">Ce profil s’ouvre sans PIN</string>
     <string name="profiles_change_pin">Modifier le PIN (laisser vide pour le conserver)</string>
@@ -39,13 +37,9 @@
     <string name="search_nothing_in_list">Aucun élément dans <xliff:g id="list">%1$s</xliff:g> pour le moment.</string>
     <string name="search_clear">Effacer</string>
     <string name="search_jump_to">Accéder à</string>
-    <string name="search_open_series">Ouvrir la série</string>
-    <string name="search_movie">Film</string>
-    <string name="search_series">Série</string>
     <string name="search_channels">Chaînes</string>
     <string name="search_on_tv">Émissions TV</string>
     <string name="search_go_to_channel">Aller à la chaîne</string>
-    <string name="search_go_to_movie">Aller au film</string>
     <string name="search_clear_recent">Effacer les recherches récentes</string>
     <string name="search_field_hint">Chaînes, films et séries</string>
     <string name="search_voice">Recherche vocale</string>
@@ -70,12 +64,6 @@
     <string name="launcher_recent_live_description">Chaînes en direct vues récemment</string>
     <string name="launcher_movie_type">Film</string>
     <string name="launcher_episode_number">Épisode <xliff:g id="episode">%1$d</xliff:g></string>
-    <plurals name="home_library_loading">
-        <item quantity="one">Chargement de votre bibliothèque · <xliff:g id="count">%1$s</xliff:g> titre pour l’instant</item>
-        <item quantity="many">Chargement de votre bibliothèque · <xliff:g id="count">%1$s</xliff:g> de titres pour l’instant</item>
-        <item quantity="other">Chargement de votre bibliothèque · <xliff:g id="count">%1$s</xliff:g> titres pour l’instant</item>
-    </plurals>
-    <string name="home_library_loading_trending">Tendances actuelles apparaîtra à mesure que votre bibliothèque se remplit.</string>
     <string name="home_no_preview">Rien à prévisualiser pour le moment.</string>
     <string name="home_no_rows">Toutes les rangées de l’écran d’accueil sont masquées.</string>
     <string name="home_enable_rows">Réactivez les rangées dans Paramètres → Écran d’accueil.</string>
@@ -146,36 +134,8 @@
     <string name="home_row_trending_description">Affiche de 4 à 10 éléments uniquement lorsque les tendances TMDB correspondent à des films ou séries du catalogue de votre fournisseur.</string>
     <string name="home_trending_style">Disposition des tendances</string>
     <string name="home_trending_style_hero">Fiche détaillée</string>
-    <string name="home_trending_style_posters">Affiches uniquement</string>
-    <string name="home_trending_rank">N°<xliff:g id="rank">%1$d</xliff:g> des tendances · <xliff:g id="section">%2$s</xliff:g></string>
-    <string name="home_trending_in_playlist">DANS VOTRE PLAYLIST</string>
-    <string name="home_trending_style_full_bleed">Plein cadre</string>
     <string name="home_duration_hours_minutes"><xliff:g id="hours">%1$d</xliff:g> h <xliff:g id="minutes">%2$02d</xliff:g> min</string>
     <string name="home_time_left">encore <xliff:g id="duration">%1$s</xliff:g></string>
-    <string name="settings_trending_status_off">Les tendances du moment sont désactivées.</string>
-    <string name="settings_trending_status_building">Les tendances du moment sont en cours de préparation après la synchronisation du fournisseur.</string>
-    <string name="settings_trending_status_metadata_disabled">Les tendances du moment nécessitent les métadonnées TMDB. Choisissez TMDB uniquement ou Fournisseur + TMDB.</string>
-    <string name="settings_trending_status_no_vod">Les tendances du moment sont masquées, car aucun film ni aucune série n’est activé pour ce fournisseur.</string>
-    <string name="settings_trending_status_no_matches">Les tendances du moment sont masquées, car aucun titre du fournisseur ne correspond.</string>
-    <string name="settings_trending_status_failed">Impossible d’actualiser les tendances du moment. Essayez de synchroniser à nouveau le fournisseur.</string>
-    <string name="settings_trending_status_waiting">Effectuez une synchronisation du fournisseur pour créer les tendances du moment.</string>
-    <plurals name="settings_trending_status_below_threshold">
-        <item quantity="one">Les tendances du moment sont masquées, car seul <xliff:g id="count">%1$d</xliff:g> titre du fournisseur correspond. Il en faut au moins 4.</item>
-        <item quantity="many">Les tendances du moment sont masquées, car seuls <xliff:g id="count">%1$d</xliff:g> titres du fournisseur correspondent. Il en faut au moins 4.</item>
-        <item quantity="other">Les tendances du moment sont masquées, car seuls <xliff:g id="count">%1$d</xliff:g> titres du fournisseur correspondent. Il en faut au moins 4.</item>
-    </plurals>
-    <plurals name="settings_trending_status_showing">
-        <item quantity="one">Les tendances du moment affichent <xliff:g id="count">%1$d</xliff:g> titre correspondant.</item>
-        <item quantity="many">Les tendances du moment affichent <xliff:g id="count">%1$d</xliff:g> titres correspondants.</item>
-        <item quantity="other">Les tendances du moment affichent <xliff:g id="count">%1$d</xliff:g> titres correspondants.</item>
-    </plurals>
-    <plurals name="settings_trending_status_showing_refresh_failed">
-        <item quantity="one">Les tendances du moment affichent <xliff:g id="count">%1$d</xliff:g> titre issu de la dernière actualisation réussie.</item>
-        <item quantity="many">Les tendances du moment affichent <xliff:g id="count">%1$d</xliff:g> titres issus de la dernière actualisation réussie.</item>
-        <item quantity="other">Les tendances du moment affichent <xliff:g id="count">%1$d</xliff:g> titres issus de la dernière actualisation réussie.</item>
-    </plurals>
-    <string name="home_trending_movie">Film</string>
-    <string name="home_trending_series">Série</string>
     <string name="home_trending_provider_match">Correspondance avec le fournisseur</string>
     <string name="home_trending_why_label">POURQUOI CET ÉLÉMENT APPARAÎT</string>
     <string name="home_trending_reason_title">Classement TMDB n°<xliff:g id="rank">%1$d</xliff:g> <xliff:g id="media_type">%2$s</xliff:g> + correspondance avec le fournisseur</string>
@@ -183,19 +143,10 @@
     <string name="home_trending_reason_english">Aucune version <xliff:g id="language">%1$s</xliff:g> du fournisseur ne correspondait, l’entrée en anglais du fournisseur a donc été sélectionnée.</string>
     <string name="home_trending_reason_untagged">Aucune étiquette de langue <xliff:g id="language">%1$s</xliff:g> ou anglaise ne correspondait, l’entrée sans étiquette du fournisseur a donc été sélectionnée.</string>
     <string name="home_trending_reason_other">La version lisible la plus proche du fournisseur a été sélectionnée, car aucune entrée dans la langue préférée ni en anglais n’était disponible.</string>
-    <plurals name="home_trending_seasons">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> saison</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> saisons</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> saisons</item>
-    </plurals>
     <string name="home_trending_play">Lire</string>
-    <string name="home_trending_open_episodes">Ouvrir les épisodes</string>
-    <string name="home_trending_trailer">Bande-annonce</string>
     <string name="home_trending_more_details">Plus de détails</string>
-    <string name="home_trending_all_versions">Toutes les versions</string>
     <string name="home_trending_why_menu">Pourquoi ce titre est ici</string>
     <string name="home_trending_pause">Pause</string>
-    <string name="home_trending_unavailable">Cette version n’est plus disponible</string>
     <string name="recording_notification_title">Enregistrement</string>
     <string name="auto_start_notification_channel">Démarrage auto au réveil</string>
     <string name="auto_start_notification_text">OwnTV s’ouvre quand le téléviseur se réveille</string>
@@ -206,38 +157,11 @@
     <string name="recording_failed_unavailable">La chaîne n’a pas démarré</string>
     <string name="recording_failed_channel_gone">Cette chaîne ne figure plus dans votre liste</string>
     <string name="recording_failed_unknown">Rien n’a été enregistré</string>
-    <string name="recording_title">Enregistrements</string>
-    <string name="recording_empty">Aucun enregistrement pour l’instant. Appuyez sur Enregistrer sur un programme du guide TV, ou faites un appui long sur une chaîne pour l’enregistrer ou programmer une heure.</string>
-    <string name="recording_group_now">Enregistrement en cours</string>
-    <string name="recording_group_scheduled">Programmé</string>
-    <string name="recording_group_completed">Enregistré</string>
-    <string name="recording_group_failed">Échec</string>
-    <string name="recording_group_missed">Manqué</string>
     <string name="recording_record">Enregistrer</string>
-    <string name="recording_stop">Arrêter l’enregistrement</string>
-    <string name="recording_delete_message">Supprime l\'enregistrement et son fichier de cet appareil. Cette action est irréversible.</string>
-    <string name="recording_record_series">Enregistrer chaque diffusion</string>
-    <string name="recording_stop_series">Ne plus enregistrer chaque diffusion</string>
-    <string name="recording_from_archive">Enregistrer depuis le replay</string>
     <string name="recording_schedule">Programmer un enregistrement…</string>
-    <string name="recording_schedule_hint">Choisissez le jour, le début et la fin. L’enregistrement a lieu même si cette chaîne n’a pas de guide TV.</string>
-    <string name="recording_schedule_start">Début</string>
-    <string name="recording_schedule_end">Fin</string>
-    <string name="recording_schedule_next_day">jour suivant</string>
-    <string name="recording_schedule_past">Cette heure est déjà passée</string>
-    <string name="recording_scheduled_for">Enregistrera <xliff:g id="time">%1$s</xliff:g></string>
-    <string name="recording_badge">REC</string>
     <string name="recording_pill_line">Enregistrement de <xliff:g id="title">%1$s</xliff:g></string>
     <string name="recording_pill_line_locked">Enregistrement depuis une catégorie verrouillée</string>
-    <string name="recording_clash_with">En conflit avec <xliff:g id="programme">%1$s</xliff:g></string>
     <string name="recording_settings_group">Enregistrement</string>
-    <string name="settings_recording_reserve">Garder une connexion libre pour regarder</string>
-    <string name="settings_recording_reserve_description">Les enregistrements laissent une connexion de votre fournisseur libre, pour qu’il en reste toujours une pour regarder. Désactivez pour enregistrer sur toutes les connexions.</string>
-    <string name="settings_recording_pre_roll">Commencer en avance</string>
-    <string name="settings_recording_pre_roll_description">Commencer ce temps avant l’heure annoncée, pour qu’un guide un peu en avance ne rate pas le début.</string>
-    <string name="settings_recording_post_roll">Continuer après la fin</string>
-    <string name="settings_recording_post_roll_description">Continuer ce temps après l’heure de fin annoncée, pour qu’un programme qui déborde ne soit pas coupé.</string>
-    <string name="settings_recording_timers_inexact">Cet appareil n’autorise pas OwnTV à programmer des alarmes exactes, donc un enregistrement peut démarrer avec quelques minutes de retard. Les enregistrements commencent plus tôt pour compenser.</string>
     <plurals name="recording_minutes">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> minute</item>
         <item quantity="many"><xliff:g id="count">%1$d</xliff:g> minutes</item>
@@ -246,23 +170,6 @@
     <string name="recording_failed_encrypted">Cette chaîne est chiffrée et ne peut pas être enregistrée</string>
     <string name="recording_failed_drm">Cette chaîne est protégée par DRM : elle peut être regardée mais pas enregistrée. La protection vient de votre fournisseur, pas d\'OwnTV.</string>
     <string name="recording_failed_metered">Non enregistré sur les données mobiles</string>
-    <string name="recording_card_empty_title">Aucun enregistrement pour l’instant</string>
-    <string name="recording_card_body">Choisissez un programme dans le guide TV puis Enregistrer, ou faites un appui long sur une chaîne et programmez une heure. Il arrive ici, même pendant que vous regardez autre chose.</string>
-    <string name="recording_open_guide">Ouvrir le guide TV</string>
-    <plurals name="recording_card_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> enregistrement</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> enregistrements</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> enregistrements</item>
-    </plurals>
-    <string name="settings_recording_mobile_data">Enregistrer sur les données mobiles</string>
-    <string name="settings_record_watching">Enregistrer ce que je regarde</string>
-    <string name="settings_record_watching_description">Ajoute au lecteur un bouton d’enregistrement qui sauvegarde la chaîne que vous regardez. Il récupère la chaîne lui-même : il occupe donc l’une des connexions de votre fournisseur pendant ce temps, et continue d’enregistrer si vous changez de chaîne ou quittez le lecteur.</string>
-    <string name="settings_record_watching_warning_title">Une seule connexion</string>
-    <string name="settings_record_watching_warning_description">L’enregistrement récupère la chaîne une seconde fois et occupe donc une autre connexion de votre fournisseur. Sur un compte qui n’en autorise qu’une, l’enregistrement est refusé pendant que vous regardez. Une fois lancé il continue seul : changez de chaîne, quittez le lecteur, il poursuit jusqu’à la fin de l’émission ou jusqu’à ce que vous l’arrêtiez depuis Enregistrements.</string>
-    <string name="settings_record_watching_keep_off">Laisser désactivé</string>
-    <string name="settings_record_watching_turn_on">Activer</string>
-    <string name="player_recording_conflict">Votre fournisseur n’autorise qu’un flux à la fois, et l’enregistrement l’utilise.</string>
-    <string name="player_keep_watching_stop_recording">Continuer à regarder (arrête l’enregistrement)</string>
     <string name="sports_channel_goal_alerts">Alertes de buts</string>
     <string name="sports_channel_live_match">Match en direct</string>
     <string name="sports_channel_match_reminders">Rappels de matchs</string>

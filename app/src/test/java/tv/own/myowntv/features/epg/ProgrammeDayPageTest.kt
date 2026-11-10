@@ -41,8 +41,6 @@ import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -50,7 +48,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -100,8 +97,10 @@ class ProgrammeDayPageTest {
 
     @Test
     fun `buttons by where the programme sits`() {
-        assertEquals(listOf(PageAction.WATCH_FROM_START, PageAction.RECORD_FROM_CATCHUP), pageActions(ProgrammeTime.PAST))
-        assertEquals(listOf(PageAction.WATCH, PageAction.WATCH_FROM_START, PageAction.RECORD, PageAction.RECORD_SERIES), pageActions(ProgrammeTime.NOW))
-        assertEquals(listOf(PageAction.REMIND, PageAction.RECORD, PageAction.RECORD_SERIES), pageActions(ProgrammeTime.LATER))
+        // Replay and recording are gone: a finished programme offers nothing, NOW only watches,
+        // LATER only reminds.
+        assertEquals(emptyList<PageAction>(), pageActions(ProgrammeTime.PAST))
+        assertEquals(listOf(PageAction.WATCH), pageActions(ProgrammeTime.NOW))
+        assertEquals(listOf(PageAction.REMIND), pageActions(ProgrammeTime.LATER))
     }
 }

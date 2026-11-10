@@ -2,8 +2,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="settings_sort_playlist">Playlist</string>
     <string name="settings_sort_alpha">A–Z</string>
-    <string name="settings_sort_rating">Hodnocení</string>
-    <string name="settings_sort_date_added">Datum přidání</string>
     <string name="settings_mini_player">Minipřehrávač</string>
     <string name="settings_mini_player_description">Malý plovoucí přehrávač, který se zobrazí, když při procházení ukotvíte kanál v režimu PiP. Tato nastavení můžete změnit zde nebo za běhu pomocí tlačítek pro změnu velikosti a přesunutí přímo na minipřehrávači.</string>
     <string name="settings_size">Velikost</string>
@@ -15,9 +13,7 @@
     <string name="settings_live_keep_watching">Živé kanály v řádku Pokračovat ve sledování</string>
     <string name="settings_live_keep_watching_description">Zobrazit nedávno sledované živé kanály v hlavním řádku.</string>
     <string name="settings_movies_keep_watching">Filmy v řádku Pokračovat ve sledování</string>
-    <string name="settings_movies_keep_watching_description">Zobrazit v hlavním řádku karty pro pokračování ve sledování filmů.</string>
     <string name="settings_series_keep_watching">Seriály v řádku Pokračovat ve sledování</string>
-    <string name="settings_series_keep_watching_description">Zobrazit v hlavním řádku karty pro pokračování ve sledování epizod.</string>
     <string name="settings_hero_preview">Přehrávat video v hlavním řádku</string>
     <string name="settings_hero_preview_description">Po chvíli se přehraje ukázka videa vybrané položky. Vypněte pro úsporu energie a paměti při procházení domovské obrazovky.</string>
     <string name="settings_android_tv_home">Domovská obrazovka Android TV</string>
@@ -205,7 +201,6 @@
     <string name="settings_home_root">Domovská obrazovka</string>
     <string name="settings_home_root_description">Vybírejte, řaďte a filtrujte řádky na domovské obrazovce</string>
     <string name="settings_metadata_root_description">Plakáty, popisy děje, obsazení a hodnocení filmů a seriálů</string>
-    <string name="settings_download_folder">Složka pro stahování</string>
     <string name="settings_backup_restore">Záloha a obnovení</string>
     <string name="settings_clear_history">Vymazat historii sledování</string>
     <string name="settings_appearance_group">Vzhled</string>
@@ -249,11 +244,6 @@
     <string name="settings_surround_sound">Prostorový zvuk</string>
     <string name="settings_surround_description_mobile">Dekódovat Dolby/DTS do prostorového zvuku (5.1/7.1) pro skutečný přijímač 5.1/7.1 připojený k tomuto zařízení. U vestavěného reproduktoru, sluchátek nebo stereofonního soundbaru ponechte VYPNUTO — vícekanálový zvuk může zaostávat za obrazem. Pokud se rozchází, upravte v nabídce Zvuk přehrávače → Synchronizace A/V.</string>
     <string name="settings_audio_passthrough">Passthrough Dolby a DTS</string>
-    <string name="settings_audio_passthrough_description">Zapnuto: Dolby a DTS jdou nedekódované do televizoru, soundbaru nebo receiveru, pokud hlásí, že je umí přehrát (ExoPlayer). Vypnuto: aplikace je dekóduje, stále jako prostorový zvuk tam, kde to Prostorový zvuk dovoluje. mpv dekóduje vždy. Nepoužívá se, dokud běží Noční režim nebo Vyrovnání hlasitosti.</string>
-    <string name="settings_ffmpeg_audio">Zvuk FFmpeg pro ExoPlayer</string>
-    <string name="settings_ffmpeg_audio_description">Zapnuto: ExoPlayer umí dekódovat i zvuk, pro který zařízení nemá dekodér, například DTS, TrueHD nebo MP2. Vlastní dekodéry zařízení mají stále přednost. Vypnuto: ExoPlayer používá jen dekodéry zařízení. mpv vždy dekóduje pomocí FFmpeg. Změna restartuje OwnTV.</string>
-    <string name="settings_line_ffmpeg_audio">Pro zvuk, který zařízení neumí dekódovat</string>
-    <string name="settings_ffmpeg_audio_restart_message">Zvukový dekodér se změní po restartu OwnTV.</string>
     <string name="settings_night_mode">Noční režim</string>
     <string name="settings_night_mode_description">Ztlumí hlasité scény a zesílí tichý dialog, pro sledování při nízké hlasitosti.</string>
     <string name="settings_volume_leveling">Vyrovnání hlasitosti</string>
@@ -277,7 +267,6 @@
     <string name="settings_catchup_unavailable">V tomto playlistu nejsou k dispozici žádné kanály s TV archivem</string>
     <string name="settings_device">Zařízení</string>
     <string name="settings_playback_error_log">Protokol chyb</string>
-    <string name="settings_playback_speed">Rychlost přehrávání</string>
     <string name="settings_player_zoom">Přiblížení obrazu přehrávače</string>
     <string name="settings_app_group">Aplikace</string>
     <string name="settings_app_startup">Spuštění aplikace</string>
@@ -354,7 +343,6 @@
     <string name="settings_vp_cat_picture">Obraz</string>
     <string name="settings_vp_cat_frame_rate">Snímková frekvence</string>
     <string name="settings_vp_cat_frame_rate_summary">Přizpůsobit obrazovku videu</string>
-    <string name="settings_vp_cat_streaming">Streamování</string>
     <string name="settings_vp_cat_live_tuning">Ladění živého vysílání</string>
     <string name="settings_vp_cat_multiview">Multiview a minipřehrávač</string>
     <string name="settings_vp_cat_multiview_summary_mobile">Několik živých kanálů najednou</string>
@@ -448,12 +436,6 @@
     <string name="settings_hardware_decoding_description">Používat hardwarový dekodér televizoru. Vypněte, pokud se některé streamy sekají nebo zobrazují obrazové vady.</string>
     <string name="settings_software_decode_above_1080p">Softwarové dekódování nad 1080p</string>
     <string name="settings_software_decode_above_1080p_description">Přehrává 4K a další video nad 1080p softwarově, když je hardwarový dekodér televizoru vypnutý nebo selže. Vyžaduje rychlý procesor: na většině televizorů se obraz seká.</string>
-    <string name="settings_movies_series_player">Přehrávač filmů a seriálů</string>
-    <string name="settings_live_tv_player">Přehrávač živého vysílání</string>
-    <string name="settings_engine_order"><xliff:g id="first">%1$s</xliff:g>, poté <xliff:g id="second">%2$s</xliff:g></string>
-    <string name="settings_engine_only">Pouze <xliff:g id="engine">%1$s</xliff:g></string>
-    <string name="settings_engine_default"><xliff:g id="option">%1$s</xliff:g> (výchozí)</string>
-    <string name="settings_reset_player_choices">Resetovat uložené volby přehrávače</string>
     <string name="settings_external_player">Externí přehrávač</string>
     <string name="settings_default_zoom">Výchozí přiblížení</string>
     <string name="settings_default_zoom_description">Poměr stran a přiblížení použité při zahájení přehrávání.</string>
@@ -473,15 +455,6 @@
     <string name="settings_reset_saved_audio_delay_confirm_description">Každý kanál, film i epizoda se vrátí k synchronizaci zvuku výše. Uložené přiblížení a hlasitost zůstanou zachovány. Jednotlivou hodnotu můžete kdykoli nastavit znovu z přehrávače.</string>
     <string name="settings_seek_step">Krok převíjení</string>
     <string name="settings_seek_step_description">O kolik posune převíjení vzad a vpřed ve filmu nebo epizodě.</string>
-    <string name="settings_vod_buffer">Vyrovnávací paměť filmů</string>
-    <string name="settings_vod_buffer_description">Jak daleko dopředu se načítají filmy, díly a zpětné sledování. Auto použije to, co se hodí pro toto zařízení. Delší vyrovnávací paměť lépe překlene špatné připojení; limit ale dál určuje paměť zařízení, takže film s vysokým datovým tokem může pojmout méně, než je zvoleno.</string>
-    <string name="settings_vod_network_timeout">Časový limit sítě</string>
-    <string name="settings_vod_network_timeout_description">Jak dlouho filmy, díly a zpětné sledování čekají na mlčící server, než se připojení považuje za ztracené. Auto ponechá vlastní čekání každého přehrávače: 60 sekund u mpv, 20 u ExoPlayeru.</string>
-    <string name="settings_vod_reconnects">Pokusy o opětovné připojení</string>
-    <string name="settings_vod_reconnects_description">Kolikrát se film nebo díl, který ztratí připojení, znovu otevře v místě zastavení, než se zobrazí chyba. Minuta plynulého přehrávání pokusy vrátí.</string>
-    <string name="settings_vod_network_auto">Auto</string>
-    <string name="settings_live_rewind_step">Krok převíjení živého vysílání</string>
-    <string name="settings_live_rewind_step_description">Jak daleko se přetáčí zpět a vpřed na živém kanálu: v archivu zpětného sledování, nebo v kopii uložené funkcí Pozastavit a přetáčet živé vysílání.</string>
     <string name="settings_resume_playback">Pokračovat v přehrávání</string>
     <string name="settings_resume_playback_description">Co udělat, když má film nebo epizoda uloženou pozici.</string>
     <string name="settings_subtitle_appearance">Vzhled titulků</string>
@@ -493,24 +466,13 @@
     <string name="settings_preferred_audio_language_description">Přehraje tuto zvukovou stopu, pokud ji stream obsahuje. „Původní jazyk“ přehrává filmy a seriály v jazyce, ve kterém vznikly.</string>
     <string name="settings_open_subtitles">OpenSubtitles</string>
     <string name="settings_open_subtitles_connected">Připojeno</string>
-    <string name="settings_open_subtitles_reset_in">Za <xliff:g id="hours">%1$d</xliff:g> h <xliff:g id="minutes">%2$d</xliff:g> min</string>
     <string name="settings_open_subtitles_description">Přihlaste se, abyste mohli vyhledávat a stahovat titulky a spravovat stažené titulky. Nastavení platí pro každý profil zvlášť a vyžaduje bezplatný účet na opensubtitles.com.</string>
-    <string name="settings_open_subtitles_advanced">Pokročilé možnosti</string>
-    <string name="settings_open_subtitles_advanced_description">Použijte vlastní aplikační klíč API nebo vlastní OpenSubtitles Worker.</string>
     <string name="settings_open_subtitles_setup_title">Nastavit OpenSubtitles</string>
-    <string name="settings_open_subtitles_setup_description">Přihlaste se svým účtem OpenSubtitles.</string>
-    <string name="settings_open_subtitles_setup_remote">Vzdáleně</string>
-    <string name="settings_open_subtitles_setup_remote_description">Vyplňte své údaje v prohlížeči na jiném zařízení ve stejné Wi-Fi — telefonu, počítači nebo jiné televizi.</string>
-    <string name="settings_open_subtitles_setup_local">Zadat zde</string>
-    <string name="settings_open_subtitles_setup_local_description">Zadejte údaje přímo na této TV pomocí dálkového ovladače.</string>
     <string name="settings_open_subtitles_api_key">Aplikační klíč API pro OpenSubtitles</string>
     <string name="settings_worker_server_url">Adresa Workeru / serveru</string>
     <string name="settings_shared">Společné</string>
-    <string name="settings_open_subtitles_access_priority">Pro společný Worker OwnTV nechte obojí prázdné. Vlastní adresa Workeru má přednost před přímým klíčem API. Přihlášení k účtu zůstává specifické pro profil.</string>
-    <string name="settings_remove_custom_access">Odebrat vlastní přístup</string>
     <string name="settings_preferred_audio_language">Preferovaný jazyk zvuku</string>
     <string name="settings_audio_sync">Synchronizace zvuku</string>
-    <string name="settings_audio_sync_description">Posuňte zvuk dopředu nebo dozadu, aby odpovídal obrazu. Funguje v obou přehrávačích (mpv i ExoPlayer).</string>
     <string name="settings_output_audio_delay">Zpoždění pro tento výstup</string>
     <string name="settings_output_audio_delay_description">Přičítá se k nastavení „Synchronizace zvuku“ a ukládá se zvlášť pro každý výstup: HDMI, soundbar přes HDMI ARC, Bluetooth, vestavěné reproduktory, sluchátka. Nastavte ho při poslechu z výstupu, kterého se týká.</string>
     <string name="settings_audio_output_speaker">Vestavěné reproduktory</string>
@@ -520,8 +482,6 @@
     <string name="settings_live_latency_bitrate_note">U kanálu s velmi vysokým datovým tokem — zvláště ve 4K — může vyrovnávací paměť pojmout kratší dobu, než jste zadali, protože množství videa uchovávaného v paměti je omezené.</string>
     <string name="settings_channel_numbers">Čísla kanálů</string>
     <string name="settings_channel_numbers_description">Zobrazovat číslo kanálu od poskytovatele vedle jeho názvu v seznamu živého vysílání, překryvu seznamu kanálů a přehrávači. Během přehrávání na celé obrazovce také můžete zadat číslo na dálkovém ovladači a přejít přímo na daný kanál (tlačítko OK přepne okamžitě, tlačítko Zpět zadání zruší). Vypnutím se skryjí všechna čísla a číselná tlačítka se budou ignorovat. Nic se neztratí a po opětovném zapnutí se čísla obnoví.</string>
-    <string name="settings_live_left_right_rewinds">Vlevo a vpravo přetáčí živé vysílání</string>
-    <string name="settings_live_left_right_rewinds_description">Když jsou ovládací prvky skryté, šipky vlevo a vpravo přetáčejí zpět a vpřed na kanálech, které lze přetáčet (zpětné sledování, nebo uložené funkcí Pozastavit a přetáčet živé vysílání), místo aby otevřely seznam kanálů a historii.</string>
     <string name="settings_timeshift">Pozastavit a přetáčet živé vysílání</string>
     <string name="settings_timeshift_description">Kanály bez zpětného sledování se při sledování na celou obrazovku ukládají do tohoto zařízení, takže je můžete pozastavit a přetáčet. Neustále zapisuje do úložiště; vždy zůstane volný alespoň 1 GB.</string>
     <string name="settings_timeshift_window">Délka přetáčení</string>
@@ -548,12 +508,7 @@
     <string name="settings_custom_live_buffer">Vlastní vyrovnávací paměť živého vysílání</string>
     <string name="settings_live_buffer_seconds"><xliff:g id="seconds">%1$d</xliff:g>s</string>
     <string name="settings_audio_delay"><xliff:g id="delay">%1$d</xliff:g> ms</string>
-    <string name="settings_external_player_description">Vyberte, které sekce se mají otevírat v externí aplikaci.</string>
     <string name="settings_audio_delay_value"><xliff:g id="delay">%1$d</xliff:g> ms</string>
-    <string name="settings_movies_player_description">mpv (doporučeno) má nejširší podporu formátů — zvuk DTS/TrueHD, neobvyklé soubory. ExoPlayer na některých televizích přehraje streamy, na které mpv nestačí, neumí však dekódovat zvuk DTS/TrueHD. Kombinované možnosti při selhání prvního přehrávače automaticky zkusí druhý; možnosti s jediným přehrávačem to nedělají nikdy, což ušetří několik vteřin černé obrazovky, pokud druhý přehrávač na vaší televizi stejně nefunguje.</string>
-    <string name="settings_movies_player_description_mobile">mpv (doporučeno) má nejširší podporu formátů — zvuk DTS/TrueHD, neobvyklé soubory. ExoPlayer na některých zařízeních přehraje streamy, na které mpv nestačí, neumí však dekódovat zvuk DTS/TrueHD. Kombinované možnosti při selhání prvního přehrávače automaticky zkusí druhý; možnosti s jediným přehrávačem to nedělají nikdy, což ušetří několik vteřin černé obrazovky, pokud druhý přehrávač na vašem zařízení stejně nefunguje.</string>
-    <string name="settings_live_player_description">ExoPlayer (doporučeno) otevírá kanály mnohem rychleji a jako jediný zvládá titulky v živém vysílání. mpv přehraje kanály, na které ExoPlayer nestačí, včetně některých s neobvyklým zvukem. Kombinované možnosti při selhání prvního přehrávače automaticky zkusí druhý; možnosti s jediným přehrávačem to nedělají nikdy, což ušetří několik vteřin černé obrazovky, pokud druhý přehrávač na vaší televizi stejně nefunguje. U kanálu přepnutého ručně v přehrávači zůstane vaše volba tak jako tak.</string>
-    <string name="settings_reset_player_choices_description">Když v přehrávači přepnete jednotlivý film nebo epizodu mezi mpv a ExoPlayerem, tato volba se uloží pro příště. Reset vrátí vše zpět k nastavení výše. Uložené volby pro živé kanály zůstávají zachovány.</string>
     <string name="settings_reset_player_choices_none">Nic uloženo</string>
     <plurals name="settings_reset_player_choices_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> uložená volba</item>
@@ -561,26 +516,12 @@
         <item quantity="many"><xliff:g id="count">%1$d</xliff:g> uložených voleb</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> uložených voleb</item>
     </plurals>
-    <string name="settings_reset_player_choices_confirm">Resetovat uložené volby přehrávače?</string>
-    <string name="settings_reset_player_choices_confirm_description">Každý film i epizoda se vrátí k nastavení „Přehrávač filmů a seriálů“. Jednotlivou položku můžete kdykoli znovu přepnout přímo v přehrávači.</string>
-    <string name="settings_reset_live_player_choices">Resetovat uložené volby přehrávače živého vysílání</string>
-    <string name="settings_reset_live_player_choices_description">Když v přehrávači přepnete kanál mezi ExoPlayerem a mpv, tato volba se pro kanál uloží. Reset vrátí všechny kanály k nastavení „Přehrávač živého vysílání“. Uložené volby pro filmy a epizody zůstávají zachovány.</string>
-    <string name="settings_reset_live_player_choices_confirm">Resetovat uložené volby přehrávače živého vysílání?</string>
-    <string name="settings_reset_live_player_choices_confirm_description">Každý kanál se vrátí k nastavení „Přehrávač živého vysílání“. Jednotlivý kanál můžete kdykoli znovu přepnout přímo v přehrávači.</string>
     <string name="settings_external_player_row_description">Otevírat streamy v externí aplikaci (VLC, MX Player) namísto vestavěného přehrávače, s volbou pro každou sekci. Užitečné pro streamy, které tato aplikace nedokáže dekódovat, nebo pokud dáváte přednost jinému přehrávači. Při externím přehrávání není k dispozici pokračování v přehrávání od poslední pozice ani předchozí/další; streamy vyžadující vlastní User-Agent nebo referer se nemusí přehrát.</string>
     <string name="settings_resume_always">Vždy pokračovat</string>
     <string name="settings_resume_ask">Zeptat se na pokračování</string>
     <string name="settings_resume_never">Nikdy nepokračovat</string>
-    <string name="settings_delete_subtitles">Odstranit titulky</string>
-    <string name="settings_delete_all">Odstranit vše</string>
     <string name="settings_movies">Filmy</string>
     <string name="settings_series">Seriály</string>
-    <string name="settings_no_downloaded_subtitles">Žádné stažené titulky pro sekci <xliff:g id="section">%1$s</xliff:g>.</string>
-    <string name="settings_delete_subtitle">Odstranit titulek</string>
-    <string name="settings_delete_subtitle_message">Odstranit titulek <xliff:g id="name">%1$s</xliff:g> pro „<xliff:g id="title">%2$s</xliff:g>“? Později jej bude možné stáhnout znovu.</string>
-    <string name="settings_delete_all_subtitles">Odstranit všechny titulky</string>
-    <string name="settings_delete_all_movies">Odstranit všechny titulky k filmům</string>
-    <string name="settings_delete_all_series">Odstranit všechny titulky k seriálům</string>
     <string name="settings_section_count"><xliff:g id="section">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g>)</string>
     <string name="settings_sync_guide_question">Synchronizovat TV program nyní?</string>
     <string name="settings_sync_guide_description">Stáhnout TV program (EPG) pro „<xliff:g id="source">%1$s</xliff:g>“. Můžete to provést také později v části Nastavení → Zdroje a program → Zdroje EPG.</string>
@@ -606,10 +547,6 @@
     <string name="settings_surface_transparency"><xliff:g id="percent">%1$d</xliff:g>%%</string>
     <string name="settings_catchup_timezone_automatic">Automaticky</string>
     <string name="settings_catchup_timezone_device">Zařízení</string>
-    <string name="settings_catchup_player_ask">Vždy se zeptat</string>
-    <string name="settings_catchup_player_internal">Přehrávač OwnTV</string>
-    <string name="settings_catchup_player_external">Externí přehrávač</string>
-    <string name="settings_download_folder_title">Vyberte složku pro stahování</string>
     <string name="settings_pick_background_title">Vyberte obrázek na pozadí</string>
     <string name="settings_theme_dialog">Motiv</string>
     <string name="settings_app_startup_dialog">Spuštění aplikace</string>
@@ -631,7 +568,6 @@
     <string name="settings_browsing_last_item_description">Každá kategorie si zachová vlastní pozici posunu namísto návratu na začátek. Živé vysílání také obnoví poslední zaměřený kanál.</string>
     <string name="settings_browsing_live_categories">Kategorie živého vysílání</string>
     <string name="settings_browsing_live_categories_description">Zobrazují se v živém vysílání, v TV programu, v přehrávači i v režimu Multiview. Když vypnete Všechny kanály, živé vysílání se otevře ve vaší první kategorii, nebo v Oblíbených, pokud žádnou nemáte.</string>
-    <string name="settings_catchup_player">Přehrávat TV archiv v</string>
     <string name="settings_customize_title">Přizpůsobení kategorií a položek</string>
     <string name="settings_customize_pin_locked">Tato obrazovka je chráněna zámkem PIN.</string>
     <string name="settings_customize_wrong_pin">Nesprávný PIN — zkuste to znovu</string>
@@ -658,8 +594,6 @@
     <string name="settings_customize_behavior_hide">Skrývat</string>
     <string name="settings_customize_behavior_show">Zobrazovat</string>
     <string name="settings_customize_hidden_channels">Skryté kanály</string>
-    <string name="settings_customize_hidden_movies">Skryté filmy</string>
-    <string name="settings_customize_hidden_series">Skryté seriály</string>
     <string name="settings_customize_unhide_description">Znovu zobrazte položku, aby se vrátila do seznamů.</string>
     <string name="settings_customize_categories">Kategorie</string>
     <string name="settings_customize_empty">V této sekci zatím nejsou žádné kategorie — nejprve přidejte zdroj.</string>
@@ -1004,8 +938,6 @@
     <string name="settings_customize_delete_category">Smazat „<xliff:g id="name">%1$s</xliff:g>“?</string>
     <string name="settings_customize_delete_category_description">Kombinovaná kategorie bude odstraněna. Její položky zůstanou ve svých původních kategoriích.</string>
     <string name="settings_customize_channels_description">Kanály v této kategorii – můžete je přejmenovat, změnit jejich pořadí, skrýt je nebo znovu zobrazit.</string>
-    <string name="settings_customize_movies_description">Filmy v této kategorii – můžete změnit jejich pořadí, skrýt je nebo znovu zobrazit.</string>
-    <string name="settings_customize_series_description">Seriály v této kategorii – můžete změnit jejich pořadí, skrýt je nebo znovu zobrazit.</string>
     <string name="settings_customize_hide_show_items">Skrýt nebo zobrazit položky</string>
     <plurals name="settings_customize_selected_items">
         <item quantity="one">Vybrána <xliff:g id="count">%1$d</xliff:g> položka.</item>
@@ -1021,7 +953,6 @@
     </plurals>
     <string name="settings_customize_rename_item_hint">Platí pouze pro tento profil. Ponecháním prázdného pole obnovíte „<xliff:g id="name">%1$s</xliff:g>“.</string>
     <string name="settings_customize_item_was">původně „<xliff:g id="name">%1$s</xliff:g>“</string>
-    <string name="settings_customize_rename_items">✎ Přejmenovat položky</string>
     <string name="settings_customize_move_to">Přesunout do…</string>
     <string name="settings_customize_back">← Zpět</string>
     <string name="settings_move_category_title">Přesunout do kategorie</string>
@@ -1037,7 +968,6 @@
     <string name="settings_dns_server_hint">8.8.8.8 nebo https://dns.google/dns-query</string>
     <string name="settings_dns_test">Otestovat DNS</string>
     <string name="settings_dns_explanation">Vlastní DNS může pomoci obejít blokování domén poskytovatelem internetového připojení nebo zpřístupnit obsah omezený podle polohy pomocí služeb SmartDNS. Doporučujeme DNS-over-HTTPS (DoH) – šifruje vaše dotazy.</string>
-    <string name="settings_dns_limitations">Toto nastavení má vliv pouze na provoz využívající OkHttp (synchronizaci playlistu, EPG, volání API, obrázky a streamy ExoPlayer). mpv používá systémový resolver a toto nastavení se ho netýká.</string>
     <string name="settings_dns_resolved">Přeloženo ✓ (<xliff:g id="millis">%1$d</xliff:g> ms)</string>
     <string name="settings_dns_enter_server">Zadejte název hostitele serveru DNS nebo adresu URL DoH.</string>
     <string name="settings_dns_not_reachable">Server DNS není dostupný.</string>
@@ -1079,14 +1009,10 @@
     <string name="settings_live_tune_timeout_description">Pokud se u živého kanálu do této doby neobjeví obraz, OwnTV to vzdá a dá vám vědět, místo aby nechal černou obrazovku, zatímco zkouší všechny své přehrávače. Volba „Nikdy“ zkouší dál, což u kanálu, který váš poskytovatel zrušil, může trvat výrazně přes minutu. Čekání, o které si řekne poskytovatel, se nezapočítává.</string>
     <string name="settings_live_preroll_per_playlist">Přednačítání podle playlistu</string>
     <string name="settings_live_preroll_per_playlist_description">Přepíše výše uvedené nastavení pro jeden playlist, zatímco ostatní playlisty zůstanou rychlé.</string>
-    <string name="settings_live_engine_per_playlist">Přehrávač živého vysílání pro playlist</string>
-    <string name="settings_live_engine_per_playlist_description">Přepíše výše uvedené nastavení pro jeden playlist — pro poskytovatele, jehož kanály zvládá dobře jen jeden z přehrávačů.</string>
     <string name="settings_live_latency_per_playlist">Zpoždění živého vysílání pro playlist</string>
     <string name="settings_live_latency_per_playlist_description">Přepíše výše uvedené nastavení pro jeden playlist — pro poskytovatele, který potřebuje hlubší nebo mělčí vyrovnávací paměť než ostatní.</string>
     <string name="settings_catchup_timezone_per_playlist">Časové pásmo záznamů podle playlistu</string>
     <string name="settings_catchup_timezone_per_playlist_description">Přepíše časové pásmo výše pro jeden playlist – pro poskytovatele, jehož archiv běží podle jiných hodin.</string>
-    <string name="settings_vod_engine_per_playlist">Přehrávač filmů a seriálů podle playlistu</string>
-    <string name="settings_vod_engine_per_playlist_description">Přepíše nastavení výše pro jeden playlist – pro poskytovatele, jehož filmy a díly dobře zvládá jen jeden z přehrávačů.</string>
     <string name="settings_live_tune_timeout_per_playlist">Vzdát to po, podle playlistu</string>
     <string name="settings_live_tune_timeout_per_playlist_description">Přepíše nastavení výše pro jeden playlist – pro poskytovatele, jehož kanály startují pomalu nebo často nefungují.</string>
     <plurals name="settings_live_preroll_overrides">
@@ -1217,8 +1143,6 @@
     <string name="settings_data_saver">Spořič dat</string>
     <string name="settings_data_saver_description">Nepřehrávat přes mobilní data</string>
     <string name="settings_gesture_sensitivity">Citlivost gest</string>
-    <string name="settings_downloads_wifi_only">Stahovat jen přes Wi-Fi</string>
-    <string name="settings_downloads_wifi_only_description">Počkat na Wi-Fi místo použití mobilních dat</string>
     <string name="settings_mini_player_style_description">Jak vás přehrávání provází při prohlížení</string>
     <string name="settings_mini_player_style_floating">Plovoucí okno</string>
     <string name="settings_mini_player_style_docked">Ukotvená lišta</string>
@@ -1322,7 +1246,6 @@
     <string name="more_group_your_things">Vaše věci</string>
     <string name="more_group_keep_safe">Zálohování</string>
     <string name="more_profile_switch">Přepnout</string>
-    <string name="more_fav_movies_series">Filmy a seriály</string>
     <string name="more_fav_empty_title">Zatím žádné oblíbené</string>
     <string name="more_fav_empty_body">Podržte OK na kanálu, filmu nebo seriálu a zvolte „Přidat k oblíbeným“.</string>
     <string name="more_fav_empty_body_mobile">Podržte prst na kanálu, filmu nebo seriálu a zvolte „Přidat k oblíbeným“.</string>
@@ -1390,12 +1313,6 @@
         <item quantity="few">Připnuto: <xliff:g id="count">%1$d</xliff:g></item>
         <item quantity="many">Připnuto: <xliff:g id="count">%1$d</xliff:g></item>
         <item quantity="other">Připnuto: <xliff:g id="count">%1$d</xliff:g></item>
-    </plurals>
-    <plurals name="more_downloads_running_count">
-        <item quantity="one">Probíhá: <xliff:g id="count">%1$d</xliff:g></item>
-        <item quantity="few">Probíhá: <xliff:g id="count">%1$d</xliff:g></item>
-        <item quantity="many">Probíhá: <xliff:g id="count">%1$d</xliff:g></item>
-        <item quantity="other">Probíhá: <xliff:g id="count">%1$d</xliff:g></item>
     </plurals>
     <string name="settings_backup_location">Umístění</string>
     <string name="settings_multiview">Multiview</string>
@@ -1520,7 +1437,6 @@
     <string name="settings_line_remote_shortcuts">Přiřadit volná tlačítka ovladače</string>
     <string name="settings_line_customize">Skrýt a zobrazit, přejmenovat a seřadit</string>
     <string name="settings_line_metadata">Plakáty, děj, obsazení a hodnocení pro filmy a seriály</string>
-    <string name="settings_line_open_subtitles">Hledat a stahovat titulky</string>
     <string name="settings_line_app_icon">Ikona na ploše</string>
     <string name="settings_line_brand_accent">Trojúhelník přehrávání v logu ve vaší barvě zvýraznění</string>
     <string name="settings_line_check_updates">Získat nejnovější verzi z GitHubu</string>
@@ -1533,14 +1449,7 @@
     <string name="settings_line_quick_channel_numbers">Naladit kanál zadáním čísla na ovladači</string>
     <string name="settings_line_prefer_sdr">SDR, když stream nabízí obojí</string>
     <string name="settings_line_quick_autoplay">Další díl se spustí sám</string>
-    <string name="settings_line_live_engine">Který přehrávač otevírá kanály a záloha</string>
-    <string name="settings_line_saved_live_choices">Kanály, které jste přepnuli ručně</string>
-    <string name="settings_line_vod_engine">Který přehrávač otevírá filmy a díly</string>
-    <string name="settings_line_saved_choices">Filmy a díly, které jste přepnuli ručně</string>
     <string name="settings_line_external">VLC, MX Player… pro každou sekci</string>
-    <string name="settings_line_vod_buffer">Jak daleko dopředu se filmy načítají</string>
-    <string name="settings_line_vod_timeout">Čekání na neodpovídající server</string>
-    <string name="settings_line_vod_reconnects">Znovu otevřít tam, kde se zastavilo</string>
     <string name="settings_line_hw">Použít vlastní dekodér televize</string>
     <string name="settings_line_max_quality">Nejvyšší obraz, když je jich víc</string>
     <string name="settings_line_tunneled">Experimentální · živá TV v ExoPlayeru</string>
@@ -1560,8 +1469,6 @@
     <string name="settings_line_sub_lang">Zapnout titulky v tomto jazyce</string>
     <string name="settings_line_sub_style">Velikost, barva, poloha, pozadí</string>
     <string name="settings_title_fonts">Písma a velikost textu</string>
-    <string name="settings_title_saved_live_choices">Uložené volby přehrávače živé TV</string>
-    <string name="settings_title_saved_choices">Uložené volby přehrávače</string>
     <string name="settings_title_tunneled">Tunelované přehrávání</string>
     <string name="settings_title_saved_zoom">Uložené přiblížení</string>
     <string name="settings_title_saved_volume">Uložená hlasitost</string>
@@ -1570,21 +1477,15 @@
     <string name="settings_line_live_preview">Přehrát vybraný kanál</string>
     <string name="settings_line_timeshift">Kanály bez archivu, ukládané během sledování</string>
     <string name="settings_line_timeshift_window">Jak daleko zpět můžete jít</string>
-    <string name="settings_line_left_right">Když jsou ovládací prvky skryté</string>
     <string name="settings_line_latency">Jak blízko živému vysílání přehrávat</string>
     <string name="settings_line_preroll">Video nasbírané před spuštěním kanálu</string>
     <string name="settings_line_tune_timeout">Přestat zkoušet a oznámit to</string>
     <string name="settings_line_seek_step">Jak daleko skáče přetáčení ve filmu</string>
-    <string name="settings_line_rewind_step">Jak daleko skáčou u živého kanálu</string>
     <string name="settings_line_resume">Když má film uloženou pozici</string>
     <string name="settings_line_autoplay">A do další řady</string>
     <string name="settings_line_tiles">Každá dlaždice je další stream</string>
     <string name="settings_line_mini">Velikost a poloha</string>
     <string name="settings_line_pip">Sledujte dál v malém okně</string>
-    <string name="settings_line_rec_reserve">Nikdy nenahrávat na všech připojeních</string>
-    <string name="settings_line_rec_watching">Bez druhého streamu</string>
-    <string name="settings_line_rec_pre_roll">Před začátkem pořadu</string>
-    <string name="settings_line_rec_post_roll">Pro pořady, které se protáhnou</string>
     <string name="settings_line_measured_stats">Aktuální fps, datový tok a zahozené snímky</string>
     <string name="settings_line_logging">Úplný záznam pro hlášení chyb</string>
     <string name="settings_help_profiles">Každý divák má vlastní oblíbené, historii sledování, místa pro pokračování a řádky na Domů. Dětský režim zobrazí jen povolené kategorie; PIN zabrání ostatním profil otevřít.</string>
@@ -1613,7 +1514,6 @@
     <string name="settings_help_auto_start_boot">Otevře OwnTV samo, jakmile televize nastartuje, na obrazovce zvolené v nastavení Spuštění aplikace. Android dovolí aplikaci otevřít se sama, jen pokud smí zobrazovat přes ostatní aplikace, proto se po zapnutí otevře obrazovka tohoto oprávnění. Některé televize ho nenabízejí a tam automatické spuštění fungovat nemůže.</string>
     <string name="settings_help_auto_start_wake">Otevře OwnTV pokaždé, když se televize probudí z režimu spánku, i když jste ji probudili kvůli jiné aplikaci. Pokud Spuštění aplikace otevírá kanál, každé probuzení spustí tento stream. Dokud je to zapnuté, OwnTV udržuje malou službu na pozadí s tichým oznámením. Stejně jako automatické spuštění po zapnutí potřebuje oprávnění zobrazovat přes ostatní aplikace.</string>
     <string name="settings_help_dns">Vyhledává adresy poskytovatele přes zvolený server DNS místo serveru vaší sítě — hodí se, když je síť blokuje nebo přesměrovává.</string>
-    <string name="settings_help_live_engine">ExoPlayer otevírá kanály mnohem rychleji a jako jediný umí živé titulky. mpv přehraje kanály, které ExoPlayer nezvládne, včetně neobvyklého zvuku. Kombinované volby zkusí druhý přehrávač, když první selže.</string>
     <string name="settings_help_hw">Používá hardwarový dekodér televize: plynulé 4K a méně tepla. Vypněte jen tehdy, když se některé streamy trhají nebo ukazují kostičky; práci pak převezme softwarový dekodér.</string>
     <string name="settings_help_volume">Hlasitost, kterou začíná každý kanál, film a díl. Nad 100 %% se tiché streamy zesílí. Hlasitost změněná v přehrávači se pro daný titul uchová, dokud ji neresetujete.</string>
     <string name="settings_help_channel_numbers">Zobrazí číslo kanálu od poskytovatele vedle názvu v seznamu živé TV, v překryvném seznamu kanálů a v přehrávači a umožní na celé obrazovce zadat číslo na ovladači a přejít na kanál.</string>
@@ -1675,7 +1575,6 @@
     <string name="settings_clock_color_accent">Zvýraznění</string>
     <string name="settings_clock_color_help">OK otevře výběr barvy (předvolby, paleta nebo hex kód), stejný jako u barvy zvýraznění. Náhled sleduje každou změnu.</string>
     <string name="settings_key_pick_color">Vybrat barvu</string>
-    <string name="settings_line_trending_layout">Jak se zobrazuje řádek trendů</string>
     <string name="settings_home_shown">Zobrazeno</string>
     <string name="settings_home_hide_row">Skrýt tento řádek</string>
     <string name="settings_home_show_row">Zobrazit tento řádek</string>
@@ -1687,27 +1586,11 @@
     <string name="settings_line_metadata_source">Odkud pocházejí podrobnosti filmů a seriálů</string>
     <string name="settings_line_metadata_language">Děje, žánry a názvy z TMDB</string>
     <string name="settings_line_metadata_advanced">Vlastní klíč nebo vlastní Worker</string>
-    <string name="settings_line_os_advanced">Vlastní klíč API nebo Worker</string>
-    <string name="settings_line_os_filter">Jen zvolený jazyk</string>
-    <string name="settings_line_os_search_language">Zobrazuje se ve výsledcích hledání</string>
-    <string name="settings_subtitle_delete_help">Smazáním uvolníte místo; z přehrávače je můžete stáhnout znovu.</string>
     <plurals name="settings_home_row_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> řádek</item>
         <item quantity="few"><xliff:g id="count">%1$d</xliff:g> řádky</item>
         <item quantity="many"><xliff:g id="count">%1$d</xliff:g> řádků</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> řádků</item>
-    </plurals>
-    <plurals name="settings_subtitles_downloaded_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> stažený</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> stažené</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> stažených</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> stažených</item>
-    </plurals>
-    <plurals name="settings_subtitle_file_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> soubor</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> soubory</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> souborů</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> souborů</item>
     </plurals>
     <string name="settings_line_add_from_phone">Vyplňte formulář v prohlížeči na jiném zařízení</string>
     <string name="settings_add_type_here">Zadat zde</string>
@@ -1784,7 +1667,6 @@
     <string name="settings_line_vod_view_mobile">Jak se kategorie otevře</string>
     <string name="settings_guide_size_mobile">Velikost TV programu</string>
     <string name="settings_line_guide_size_mobile">Kolik času mřížka ukazuje najednou</string>
-    <string name="settings_line_download_folder_mobile">Kam se ukládají filmy, díly a nahrávky</string>
     <string name="settings_browsing_value_both">Obojí</string>
     <plurals name="settings_home_rows_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> řádek</item>
@@ -1798,7 +1680,6 @@
         <item quantity="many"><xliff:g id="count">%1$d</xliff:g> skrytých</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> skrytých</item>
     </plurals>
-    <string name="settings_catchup_timezone_label">Časové pásmo</string>
     <string name="settings_help_add_from_phone_mobile">Otevřete adresu nebo naskenujte kód v prohlížeči libovolného zařízení ve stejné Wi-Fi — počítače, tabletu nebo televize —, vyplňte tam svůj playlist a odešlete ho sem. Mnohem rychlejší než psát adresu URL na telefonu.</string>
     <string name="settings_line_add_type_here_mobile">Xtream, M3U nebo Stalker</string>
     <string name="setup_local_file_hint_mobile">.m3u nebo .m3u8 v tomto telefonu</string>
@@ -1847,11 +1728,5 @@
         <item quantity="few"><xliff:g id="count">%1$s</xliff:g> pořady</item>
         <item quantity="many"><xliff:g id="count">%1$s</xliff:g> pořadů</item>
         <item quantity="other"><xliff:g id="count">%1$s</xliff:g> pořadů</item>
-    </plurals>
-    <plurals name="settings_epg_line_catchup">
-        <item quantity="one">catch-up na <xliff:g id="count">%1$s</xliff:g></item>
-        <item quantity="few">catch-up na <xliff:g id="count">%1$s</xliff:g></item>
-        <item quantity="many">catch-up na <xliff:g id="count">%1$s</xliff:g></item>
-        <item quantity="other">catch-up na <xliff:g id="count">%1$s</xliff:g></item>
     </plurals>
 </resources>

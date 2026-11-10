@@ -19,10 +19,6 @@
     <string name="profiles_kids">Kids profile</string>
     <!-- Translators: Description beneath the kids-mode toggle in the profile editor. -->
     <string name="profiles_kids_description">Simplified, safe browsing</string>
-    <!-- Translators: Switch in the profile editor: whether this profile may download films and episodes. -->
-    <string name="profiles_allow_downloads">Allow downloads</string>
-    <!-- Translators: Description under the Allow downloads switch in the profile editor. -->
-    <string name="profiles_allow_downloads_description">Off hides every Download button for this profile</string>
     <!-- Translators: Button in the profile editor to remove the PIN lock. -->
     <string name="profiles_remove_pin">Remove PIN lock</string>
     <!-- Translators: Status text indicating the profile has no PIN lock. -->
@@ -81,20 +77,12 @@
     <string name="search_clear">Clear</string>
     <!-- Translators: Search-results section heading for jumping to a result in its native screen. -->
     <string name="search_jump_to">Jump to</string>
-    <!-- Translators: Action button in search results to open a series detail screen. -->
-    <string name="search_open_series">Open series</string>
-    <!-- Translators: Content type label in search results. -->
-    <string name="search_movie">Movie</string>
-    <!-- Translators: Content type label in search results. -->
-    <string name="search_series">Series</string>
     <!-- Translators: Content type label in search results. -->
     <string name="search_channels">Channels</string>
     <!-- Translators: Search filter button and results heading for TV guide programmes (on now or later today) whose title matches, with the channel showing them. Not films or series from the catalogue. -->
     <string name="search_on_tv">TV Shows</string>
     <!-- Translators: Key hint on a channel search result: OK takes you to the channel in Live TV (it does not play it). -->
     <string name="search_go_to_channel">Go to channel</string>
-    <!-- Translators: Key hint on a movie search result: OK takes you to the movie in Movies (it does not play it). -->
-    <string name="search_go_to_movie">Go to movie</string>
     <!-- Translators: Button under the recent searches list that deletes them all. -->
     <string name="search_clear_recent">Clear recent searches</string>
     <!-- Translators: Placeholder in the empty search field. -->
@@ -135,13 +123,6 @@
     <string name="launcher_movie_type">Movie</string>
     <!-- Translators: Episode number display for the Android TV home screen. "episode" is the episode number. -->
     <string name="launcher_episode_number">Episode <xliff:g id="episode">%1$d</xliff:g></string>
-    <!-- Translators: Home note while a large playlist keeps loading in the background after setup. "count" is the number of movies and series stored so far, already formatted (e.g. "34,120"). -->
-    <plurals name="home_library_loading">
-        <item quantity="one">Loading your library · <xliff:g id="count">%1$s</xliff:g> title so far</item>
-        <item quantity="other">Loading your library · <xliff:g id="count">%1$s</xliff:g> titles so far</item>
-    </plurals>
-    <!-- Translators: Second line of the Home loading note, shown only while the Now Trending row is switched on but not showing yet. Use the same name for the row as elsewhere in the app. -->
-    <string name="home_library_loading_trending">Now Trending appears as your library fills in.</string>
     <!-- Translators: Empty-state message on the Home screen when nothing is available to preview. -->
     <string name="home_no_preview">Nothing to preview yet.</string>
     <!-- Translators: Empty-state message when all Home rows are hidden. -->
@@ -195,39 +176,10 @@
     <string name="home_trending_style">Trending layout</string>
     <!-- Translators: Now Trending layout option: the large card with artwork, badges and reasons. -->
     <string name="home_trending_style_hero">Detailed card</string>
-    <!-- Translators: Now Trending layout option: a plain row of posters with titles. -->
-    <string name="home_trending_style_posters">Posters only</string>
-    <!-- Translators: Eyebrow above the Trending title on Home. "rank" is its trending position; "section" is Movies or Series. -->
-    <string name="home_trending_rank">#<xliff:g id="rank">%1$d</xliff:g> in Trending · <xliff:g id="section">%2$s</xliff:g></string>
-    <!-- Translators: Small tag beside that eyebrow: this trending title exists in the user's own playlist. Written in capitals. -->
-    <string name="home_trending_in_playlist">IN YOUR PLAYLIST</string>
-    <!-- Translators: Settings choice for the Trending layout on Home: artwork across the whole screen behind the title. -->
-    <string name="home_trending_style_full_bleed">Full-bleed</string>
     <!-- Translators: A running time or time left in hours and minutes, abbreviated, e.g. "1 h 05 min". -->
     <string name="home_duration_hours_minutes"><xliff:g id="hours">%1$d</xliff:g> h <xliff:g id="minutes">%2$02d</xliff:g> min</string>
     <!-- Translators: Time remaining, e.g. "31 min left". "duration" is a formatted duration. -->
     <string name="home_time_left"><xliff:g id="duration">%1$s</xliff:g> left</string>
-    <string name="settings_trending_status_off">Now Trending is turned off.</string>
-    <string name="settings_trending_status_building">Now Trending is being prepared after provider sync.</string>
-    <string name="settings_trending_status_metadata_disabled">Now Trending needs TMDB metadata. Choose TMDB only or Provider + TMDB.</string>
-    <string name="settings_trending_status_no_vod">Now Trending is hidden because this provider has no Movies or Series enabled.</string>
-    <string name="settings_trending_status_no_matches">Now Trending is hidden because no provider titles matched.</string>
-    <string name="settings_trending_status_failed">Now Trending could not be refreshed. Try syncing the provider again.</string>
-    <string name="settings_trending_status_waiting">Complete a provider sync to build Now Trending.</string>
-    <plurals name="settings_trending_status_below_threshold">
-        <item quantity="one">Now Trending is hidden because only <xliff:g id="count">%1$d</xliff:g> provider title matched. At least 4 are needed.</item>
-        <item quantity="other">Now Trending is hidden because only <xliff:g id="count">%1$d</xliff:g> provider titles matched. At least 4 are needed.</item>
-    </plurals>
-    <plurals name="settings_trending_status_showing">
-        <item quantity="one">Now Trending is showing <xliff:g id="count">%1$d</xliff:g> matched title.</item>
-        <item quantity="other">Now Trending is showing <xliff:g id="count">%1$d</xliff:g> matched titles.</item>
-    </plurals>
-    <plurals name="settings_trending_status_showing_refresh_failed">
-        <item quantity="one">Now Trending is showing <xliff:g id="count">%1$d</xliff:g> title from the last successful refresh.</item>
-        <item quantity="other">Now Trending is showing <xliff:g id="count">%1$d</xliff:g> titles from the last successful refresh.</item>
-    </plurals>
-    <string name="home_trending_movie">Movie</string>
-    <string name="home_trending_series">Series</string>
     <string name="home_trending_provider_match">Provider match</string>
     <string name="home_trending_why_label">WHY THIS ITEM APPEARS</string>
     <string name="home_trending_reason_title">TMDB rank #<xliff:g id="rank">%1$d</xliff:g> <xliff:g id="media_type">%2$s</xliff:g> + provider match</string>
@@ -235,19 +187,11 @@
     <string name="home_trending_reason_english">No <xliff:g id="language">%1$s</xliff:g> provider version matched, so the English provider entry was selected.</string>
     <string name="home_trending_reason_untagged">No <xliff:g id="language">%1$s</xliff:g> or English language tag matched, so the untagged provider entry was selected.</string>
     <string name="home_trending_reason_other">The closest playable provider version was selected after preferred-language and English entries were unavailable.</string>
-    <plurals name="home_trending_seasons">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> season</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> seasons</item>
-    </plurals>
     <string name="home_trending_play">Play</string>
-    <string name="home_trending_open_episodes">Open episodes</string>
-    <string name="home_trending_trailer">Trailer</string>
     <string name="home_trending_more_details">More Details</string>
-    <string name="home_trending_all_versions">All versions</string>
     <!-- Translators: Menu item on a Home Trending title's long-press menu; opens the sheet explaining why the title is on Home. -->
     <string name="home_trending_why_menu">Why this title is here</string>
     <string name="home_trending_pause">Pause</string>
-    <string name="home_trending_unavailable">This version is no longer available</string>
     <!-- Translators: Home row description in Settings for "Continue Watching Movies". -->
     <string name="home_row_continue_movies_description">Movies with a saved position</string>
     <!-- Translators: Home row description in Settings for "Continue Watching Series". -->
@@ -343,70 +287,16 @@
     <!-- Translators: Shown on a recording that failed for a reason the app could not identify. -->
     <string name="recording_failed_unknown">It did not record</string>
 
-    <!-- Translators: Screen title for the Recordings screen, and the name of the list of recorded live TV programmes. -->
-    <string name="recording_title">Recordings</string>
-    <!-- Translators: Empty-state message on the Recordings screen, directing the user to the TV guide. -->
-    <string name="recording_empty">Nothing recorded yet. Press Record on a programme in the TV guide, or long-press a channel to record it or schedule a time.</string>
-    <!-- Translators: Section heading for recordings that are being written right now. -->
-    <string name="recording_group_now">Recording now</string>
-    <!-- Translators: Section heading for recordings set to happen later. -->
-    <string name="recording_group_scheduled">Scheduled</string>
-    <!-- Translators: Section heading for recordings that finished and can be watched. -->
-    <string name="recording_group_completed">Recorded</string>
-    <!-- Translators: Section heading for recordings that started but stopped before the end. -->
-    <string name="recording_group_failed">Failed</string>
-    <!-- Translators: Section heading for recordings that never started at all, so the programme was not captured. -->
-    <string name="recording_group_missed">Missed</string>
     <!-- Translators: Button that starts recording a programme, or schedules it. -->
     <string name="recording_record">Record</string>
-    <!-- Translators: Button that ends a recording that is currently running. Whatever was captured is kept. -->
-    <string name="recording_stop">Stop recording</string>
-    <!-- Translators: Body of the question before a recording of live TV is deleted from the device. A live programme usually cannot be recorded again. -->
-    <string name="recording_delete_message">Removes the recording and its file from this device. This cannot be undone.</string>
-    <!-- Translators: Button that records every future showing of this programme title on this channel. -->
-    <string name="recording_record_series">Record every showing</string>
-    <!-- Translators: Button that cancels the standing "record every showing" instruction. -->
-    <string name="recording_stop_series">Stop recording every showing</string>
-    <!-- Translators: Button that records a programme which has already been broadcast, from the provider's catch-up archive. -->
-    <string name="recording_from_archive">Record from catch-up</string>
     <!-- Translators: Channel menu item and dialog title: record this channel between two times the user picks, even with no TV guide. -->
     <string name="recording_schedule">Schedule recording…</string>
-    <!-- Translators: Body of the schedule-recording dialog. -->
-    <string name="recording_schedule_hint">Pick the day, the start and the end. It records even if this channel has no TV guide.</string>
-    <!-- Translators: Schedule-recording dialog: label over the start time. -->
-    <string name="recording_schedule_start">Start</string>
-    <!-- Translators: Schedule-recording dialog: label over the end time. -->
-    <string name="recording_schedule_end">End</string>
-    <!-- Translators: Schedule-recording dialog: shown under the end time when it falls on the day after the start (e.g. 23:00 to 01:00). -->
-    <string name="recording_schedule_next_day">next day</string>
-    <!-- Translators: Schedule-recording dialog: shown when the chosen time window has already ended. -->
-    <string name="recording_schedule_past">That time has already passed</string>
-    <!-- Translators: Status line on a scheduled recording. "time" is a formatted date and time, e.g. "Sat 21:00". -->
-    <string name="recording_scheduled_for">Will record <xliff:g id="time">%1$s</xliff:g></string>
-    <!-- Translators: Short badge shown over the video while a recording is running. Keep it very short; many languages keep the English "REC". -->
-    <string name="recording_badge">REC</string>
     <!-- Translators: Line in the status pill while a programme is being recorded. "title" is the programme name. -->
     <string name="recording_pill_line">Recording <xliff:g id="title">%1$s</xliff:g></string>
     <!-- Translators: Line in the status pill while a programme on a channel locked with the PIN is being recorded; its name stays hidden until the PIN opens the category. -->
     <string name="recording_pill_line_locked">Recording from a locked category</string>
-    <!-- Translators: Warning shown when a new recording would overlap one already scheduled, and the provider has no spare connection. "programme" is the other recording's title. -->
-    <string name="recording_clash_with">Clashes with <xliff:g id="programme">%1$s</xliff:g></string>
     <!-- Translators: Heading of the Recording group on the settings screen. -->
     <string name="recording_settings_group">Recording</string>
-    <!-- Translators: Settings toggle. A TV provider allows a limited number of simultaneous streams; this keeps one of them unused so the user can always watch something. -->
-    <string name="settings_recording_reserve">Keep one stream free for watching</string>
-    <!-- Translators: Description under the "keep one stream free" toggle. -->
-    <string name="settings_recording_reserve_description">Recordings leave one of your provider\'s connections free, so there is always one to watch on. Turn this off to record on every connection.</string>
-    <!-- Translators: Settings row for how many minutes before a programme starts recording should begin. -->
-    <string name="settings_recording_pre_roll">Start early</string>
-    <!-- Translators: Description under the "start early" setting. TV guide times are often slightly wrong. -->
-    <string name="settings_recording_pre_roll_description">Begin this long before the listed start time, so a guide that runs a little early still catches the opening.</string>
-    <!-- Translators: Settings row for how many minutes after a programme ends recording should continue. -->
-    <string name="settings_recording_post_roll">Keep going after the end</string>
-    <!-- Translators: Description under the "keep going after the end" setting. -->
-    <string name="settings_recording_post_roll_description">Carry on this long past the listed end time, so a programme that overruns is not cut off.</string>
-    <!-- Translators: Warning on the recording settings screen when Android will not let the app set exact alarms, so recordings may begin late. -->
-    <string name="settings_recording_timers_inexact">This device does not allow OwnTV to set exact alarms, so a recording may begin a few minutes late. Recordings start earlier to make up for it.</string>
     <!-- Translators: A number of minutes, used as the value of the "start early" and "keep going after the end" settings. -->
     <plurals name="recording_minutes">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> minute</item>
@@ -418,35 +308,6 @@
     <string name="recording_failed_drm">This channel is DRM-protected, so it can be watched but not recorded. The protection comes from your provider, not from OwnTV.</string>
     <!-- Translators: Shown on a recording that was skipped because the device was on a metered (mobile data) connection and the user has turned off recording over mobile data. -->
     <string name="recording_failed_metered">Not recorded on mobile data</string>
-    <!-- Translators: Downloads screen, Recordings card: nothing has been recorded so far. -->
-    <string name="recording_card_empty_title">Nothing recorded yet</string>
-    <!-- Translators: Downloads screen, Recordings card: how to record a programme. -->
-    <string name="recording_card_body">Pick a programme in the TV Guide and choose Record, or long-press a channel and schedule a time. It lands here, even while you watch something else.</string>
-    <!-- Translators: Downloads screen, Recordings card: button that opens the TV Guide. -->
-    <string name="recording_open_guide">Open TV Guide</string>
-    <!-- Translators: Downloads screen, Recordings card: how many recordings are stored. -->
-    <plurals name="recording_card_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> recording</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> recordings</item>
-    </plurals>
-    <!-- Translators: Settings toggle on a phone: may a recording run when the device is on mobile data rather than Wi-Fi. -->
-    <string name="settings_recording_mobile_data">Record on mobile data</string>
-    <!-- Translators: Settings toggle. Adds a record button to the video player that records the channel already playing, using the connection already open, instead of opening a second one. -->
-    <string name="settings_record_watching">Record what I’m watching</string>
-    <!-- Translators: Description under the "record what I am watching" toggle. -->
-    <string name="settings_record_watching_description">Adds a record button to the player that saves the channel you are watching. It fetches the channel itself, so it uses one of your provider’s connections while it runs, and it keeps recording after you change channel or leave the player.</string>
-    <!-- Translators: Title of the dialog shown when turning on "record what I am watching", explaining the trade-off before it is accepted. -->
-    <string name="settings_record_watching_warning_title">One connection only</string>
-    <!-- Translators: Body of that dialog. Explains that this mode needs no second provider connection, but stops when the channel changes and cannot be scheduled. -->
-    <string name="settings_record_watching_warning_description">Recording fetches the channel a second time, so it uses another of your provider’s connections. On an account that allows only one, the recording is refused while you are watching. Once started it keeps going on its own — change channel, leave the player, and it carries on until the programme ends or you stop it from Recordings.</string>
-    <!-- Translators: Button that dismisses the dialog and leaves the setting off. -->
-    <string name="settings_record_watching_keep_off">Keep off</string>
-    <!-- Translators: Button that accepts the trade-off and turns the setting on. -->
-    <string name="settings_record_watching_turn_on">Turn it on</string>
-    <!-- Translators: Shown on the player's failure screen when playback stopped because a recording is using the provider's only allowed stream. -->
-    <string name="player_recording_conflict">Your provider allows one stream at a time, and the recording is using it.</string>
-    <!-- Translators: Button on that failure screen. Stops the recording so the picture can come back. Keep the parenthetical: it is the consequence the user needs before pressing. -->
-    <string name="player_keep_watching_stop_recording">Keep watching (stops the recording)</string>
 
     <!-- Sports Hub: notifications (phone) -->
     <!-- Translators: Android notification channel name (Settings → Notifications) for goals and other match events of followed teams. -->

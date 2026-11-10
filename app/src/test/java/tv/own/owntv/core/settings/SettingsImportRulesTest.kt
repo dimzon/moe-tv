@@ -12,8 +12,6 @@ class SettingsImportRulesTest {
         assertNull(SettingsImportRules.int("seek_step_sec", 0))
         assertNull(SettingsImportRules.int("seek_step_sec", -10))
         assertEquals(30, SettingsImportRules.int("seek_step_sec", 30))
-        assertNull(SettingsImportRules.int("live_rewind_step_sec", 7))
-        assertEquals(120, SettingsImportRules.int("live_rewind_step_sec", 120))
     }
 
     @Test

@@ -12,9 +12,8 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 /**
- * Night mode and volume levelling on 16-bit PCM, for ExoPlayer. mpv gets the same through
- * FFmpeg filters — [mpvFilter] — which OwnTV's own libmpv build (tv.own.owntv:libmpv) compiles in; the
- * earlier jdtech build had none, and an `af=lavfi=[…]` there played silence.
+ * Night mode and volume levelling on 16-bit PCM, for ExoPlayer: the one implementation, applied in
+ * the audio sink of every live engine.
  *
  * - **Levelling** is a slow automatic gain: the loudness of the last few seconds is brought towards one
  *   target, at most ±[LEVEL_MAX_DB], so a quiet channel and a loud one end up alike. Silence holds the
@@ -139,29 +138,6 @@ class AudioDynamics(private val sampleRate: Int, private val channels: Int) {
         /** Settings → night mode / volume levelling, pushed in by [PlaybackStartup]; read on every buffer. */
         @Volatile var nightMode = false
         @Volatile var levelling = false
-
-        /**
-         * The same two effects for mpv, as its `af` value ("" = none). Levelling is `dynaudnorm` (towards
-         * −20 dBFS RMS, at most +12 dB, a few seconds of smoothing); night mode is `acompressor` with this
-         * class's threshold, ratio, attack, release and make-up; `alimiter` then keeps the result under
-         * full scale, as [CEILING] does here. Order as in [process]: levelling first, then the compressor.
-         */
-        fun mpvFilter(night: Boolean, levelling: Boolean): String {
-            if (!night && !levelling) return ""
-            val chain = buildList {
-                if (levelling) add("dynaudnorm=f=250:g=15:p=0.95:m=${fmt(LEVEL_MAX.toDouble())}:r=${fmt(TARGET_RMS)}")
-                if (night) add(
-                    "acompressor=threshold=${fmt(NIGHT_THRESHOLD.toDouble())}:ratio=${NIGHT_RATIO.toInt()}" +
-                        ":attack=${(NIGHT_ATTACK_SECS * 1000).toInt()}:release=${(NIGHT_RELEASE_SECS * 1000).toInt()}" +
-                        ":makeup=${fmt(NIGHT_MAKEUP.toDouble())}",
-                )
-                // level=0: alimiter's default scales its output back up by 1/limit, to full scale.
-                add("alimiter=limit=$CEILING:level=0")
-            }
-            return "lavfi=[${chain.joinToString(",")}]"
-        }
-
-        private fun fmt(v: Double): String = String.format(java.util.Locale.ROOT, "%.4f", v)
 
         /** Whether ExoPlayer may bitstream: the passthrough setting, and neither switch on (a processor cannot
          *  touch an encoded stream, so either would silently do nothing). */

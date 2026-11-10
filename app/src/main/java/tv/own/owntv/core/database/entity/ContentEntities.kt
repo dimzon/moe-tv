@@ -87,9 +87,9 @@ data class ChannelEntity(
      *  `#KODIPROP` directives or a `url|Key=Value` suffix; null for providers that carry none. */
     val httpHeaders: String? = null,
     /** Widevine/ClearKey licence details — see [tv.own.owntv.core.drm.DrmConfig] (v33). Non-null
-     *  makes this channel ExoPlayer-only: mpv/FFmpeg can decrypt CENC given a raw key
-     *  (`--demuxer-lavf-o=decryption_key=…`) but has no CDM, so it cannot FETCH one from a licence
-     *  server — which is the only thing a `license_key` URL offers. The ladder must not offer mpv. */
+     *  means the stream must go through the platform DRM stack: a raw CENC key could be used by any
+     *  decrypter, but a `license_key` URL is a request to a licence server, and only ExoPlayer's
+     *  Content Decryption Module answers one. */
     val drmConfig: String? = null,
     /** The container this channel declares for itself (M3U `#KODIPROP:…manifest_type`), stored as
      *  [tv.own.owntv.core.player.ManifestType.key] (v43). Independent of [drmConfig] — an unprotected

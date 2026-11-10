@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.owntv.player.PlaybackEngine
 import tv.own.myowntv.ui.theme.stageTone
@@ -149,13 +148,12 @@ import tv.own.myowntv.ui.theme.animationsOn
  * The trap is enforced manually with [onPreviewKeyEvent] because Compose's default 2D focus search
  * would let left/right leak out to the neighbouring top-bar chips.
  *
- * The equaliser animates only while playing and freezes flat when paused, on every state. prev/next are
- * context-wired by the shell (channel zap / episode queue / disabled for a standalone movie).
+ * The equaliser animates only while playing and freezes flat when paused, on every state. prev/next
+ * are context-wired by the shell to the channel zap.
  */
 @Composable
 fun AudioNowPlayingBar(
     player: PlaybackEngine,
-    isLive: Boolean,
     canPrev: Boolean,
     canNext: Boolean,
     onPrev: () -> Unit,
@@ -165,7 +163,7 @@ fun AudioNowPlayingBar(
     focusable: Boolean,
     /** Focus target for "enter the audio session" from the sidebar's Now Playing item. Lands on stage 1. */
     entryFocusRequester: FocusRequester? = null,
-    /** The favourite state of whatever is playing — the same channel/movie/series the fullscreen HUD toggles. */
+    /** The favourite state of the channel playing — the same one the fullscreen HUD toggles. */
     favorite: Boolean = false,
     onToggleFavorite: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
@@ -175,11 +173,6 @@ fun AudioNowPlayingBar(
     val isPlaying by player.isPlaying.collectAsStateWithLifecycle()
     val meta by player.currentMeta.collectAsStateWithLifecycle()
     val volume by player.volume.collectAsStateWithLifecycle()
-    // Held as State and read only by the time label and the hairline's draw lambda, so the
-    // once-a-second tick does not recompose the whole bar.
-    val positionState = player.position.collectAsStateWithLifecycle()
-    val duration by player.duration.collectAsStateWithLifecycle()
-    val seekStep by player.seekStepMs.collectAsStateWithLifecycle()
 
     var hasFocus by remember { mutableStateOf(false) } // any part of the bar holds focus (stage 1 or 2)
     var active by remember { mutableStateOf(false) }    // stage 2 — inner buttons live and trapped
@@ -187,21 +180,16 @@ fun AudioNowPlayingBar(
 
     val pillFocus = remember { FocusRequester() }
 
-    // Button slots, fixed order: 0=back 1=play 2=forward 3=favourite 4=volume 5=fullscreen 6=close.
-    // Slots 0 and 2 are prev/next channel on a live stream and seek on a recording — same place, same
-    // shape, different verb, because seeking a live stream means nothing. Both are only focusable when
-    // there is somewhere to go; favourite only when the shell knows what to favourite.
+    // Button slots, fixed order: 0=prev channel 1=play 2=next channel 3=favourite 4=volume
+    // 5=fullscreen 6=close. The two channel steps are only focusable when there is somewhere to go;
+    // favourite only when the shell knows what to favourite. (Seeking a live stream means nothing.)
     val slotCount = 7
     val requesters = remember { List(slotCount) { FocusRequester() } }
-    val seekable = !isLive && duration > 0L
-    val canBack = if (isLive) canPrev else seekable
-    val canForward = if (isLive) canNext else seekable
-    val enabled = booleanArrayOf(canBack, true, canForward, onToggleFavorite != null, true, true, true)
+    val enabled = booleanArrayOf(canPrev, true, canNext, onToggleFavorite != null, true, true, true)
     val navSlots = (0 until slotCount).filter { enabled[it] }
     var focusedSlot by remember { mutableIntStateOf(1) } // play by default
 
     val expanded = (hasFocus || active) && focusable
-    val hasTime = !isLive && duration > 0L
 
     fun moveFocus(dir: Int) {
         val pos = navSlots.indexOf(focusedSlot)
@@ -309,18 +297,14 @@ fun AudioNowPlayingBar(
                         ),
                     )
                     Spacer(Modifier.height(3.mpx))
-                    // The station line: what is playing, then LIVE; or how far through a recording you are.
-                    // The dot between them is drawn, not typed, so it needs no separator string.
+                    // The station line: what is playing, then LIVE. The dot between them is drawn,
+                    // not typed, so it needs no separator string.
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.mpx)) {
-                        if (isLive) {
-                            meta.localizedSubtitle()?.let { station ->
-                                Text(station, style = stageText(15, 600), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                                StationDot(StageColors.Muted.copy(alpha = 0.5f))
-                            }
-                            LiveRow()
-                        } else if (hasTime) {
-                            TimeLabel({ positionState.value }, duration)
+                        meta.subtitle?.let { station ->
+                            Text(station, style = stageText(15, 600), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                            StationDot(StageColors.Muted.copy(alpha = 0.5f))
                         }
+                        LiveRow()
                     }
                 }
                 Row(
@@ -328,13 +312,13 @@ fun AudioNowPlayingBar(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.mpx),
                 ) {
-                    AudioBtn(0, if (isLive) MyOwnTVIcon.SKIP_PREVIOUS else MyOwnTVIcon.SEEK_BACK, active && enabled[0], enabled[0], requesters, { focusedSlot = it }) {
-                        if (isLive) onPrev() else player.seekBy(-seekStep)
+                    AudioBtn(0, MyOwnTVIcon.SKIP_PREVIOUS, active && enabled[0], enabled[0], requesters, { focusedSlot = it }) {
+                        onPrev()
                     }
                     // Play/pause leads the row: one step bigger, on its own white-10% disc.
                     AudioBtn(1, if (isPlaying) MyOwnTVIcon.PAUSE else MyOwnTVIcon.PLAY, active, true, requesters, { focusedSlot = it }, big = true) { player.togglePlayPause() }
-                    AudioBtn(2, if (isLive) MyOwnTVIcon.SKIP_NEXT else MyOwnTVIcon.SEEK_FORWARD, active && enabled[2], enabled[2], requesters, { focusedSlot = it }) {
-                        if (isLive) onNext() else player.seekBy(seekStep)
+                    AudioBtn(2, MyOwnTVIcon.SKIP_NEXT, active && enabled[2], enabled[2], requesters, { focusedSlot = it }) {
+                        onNext()
                     }
                     // The heart keeps its coral wherever it appears in the app, so one colour still
                     // means "favourite" here as it does on a poster.
@@ -347,24 +331,6 @@ fun AudioNowPlayingBar(
                     // used to be the same key, which is why there was no way to end a session here.
                     AudioBtn(6, MyOwnTVIcon.CLOSE, active, true, requesters, { focusedSlot = it }, onClick = onClose)
                 }
-            }
-            // The progress hairline along the card's bottom edge (recordings only), inset 22.
-            if (hasTime) {
-                val lineColor = accent.accent
-                val track = StageColors.Ink.copy(alpha = 0.12f)
-                Box(
-                    Modifier.matchParentSize().drawBehind {
-                        val inset = 22.mpx.toPx()
-                        val h = 3.mpx.toPx()
-                        val w = size.width - 2 * inset
-                        val frac = (positionState.value.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
-                        val top = size.height - h
-                        val corner = CornerRadius(2.mpx.toPx())
-                        drawRoundRect(track, Offset(inset, top), Size(w, h), corner)
-                        val x = if (layoutDirection == LayoutDirection.Rtl) inset + w * (1 - frac) else inset
-                        drawRoundRect(lineColor, Offset(x, top), Size(w * frac, h), corner)
-                    },
-                )
             }
         }
 
@@ -379,18 +345,6 @@ fun AudioNowPlayingBar(
                 .clickable(remember { MutableInteractionSource() }, null) { active = true },
         )
     }
-}
-
-/** The elapsed/total label, its own scope so only it recomposes as the position ticks. */
-@Composable
-private fun TimeLabel(position: () -> Long, duration: Long) {
-    Text(
-        stringResource(R.string.player_time_progress, fmtTime(position()), fmtTime(duration)),
-        style = stageText(15, 600).copy(fontFeatureSettings = "tnum"),
-        color = StageColors.Muted,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-    )
 }
 
 /** The separator in the station line, drawn rather than typed so it needs no string in 24 languages. */
@@ -516,6 +470,3 @@ private fun AudioBtn(
         )
     }
 }
-
-@Composable
-private fun fmtTime(ms: Long): String = tv.own.myowntv.ui.components.formatTimestamp(ms)

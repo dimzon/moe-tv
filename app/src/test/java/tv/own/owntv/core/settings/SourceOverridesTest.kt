@@ -6,22 +6,20 @@ import org.junit.Test
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.SourceType
 import tv.own.owntv.core.network.StreamHeaders
-import tv.own.owntv.core.player.EnginePreference
 
 class SourceOverridesTest {
 
     private fun source(
-        tz: String? = null, offset: Int? = null, vod: String? = null, timeout: Int? = null, referer: String? = null,
+        tz: String? = null, offset: Int? = null, timeout: Int? = null, referer: String? = null,
     ) = SourceEntity(
         name = "p", type = SourceType.M3U, url = "http://x",
-        catchupTimezone = tz, catchupOffsetMin = offset, vodEnginePreference = vod,
+        catchupTimezone = tz, catchupOffsetMin = offset,
         liveTuneTimeoutSecs = timeout, httpReferer = referer,
     )
 
     @Test fun nullColumnsFollowTheGlobalSetting() {
         val s = source()
         assertNull(SourceOverrides.catchupTimeZoneOf(s))
-        assertNull(SourceOverrides.vodEngineOf(s))
         assertNull(SourceOverrides.liveTuneTimeoutSecsOf(s))
         assertEquals("Cookie: a", SourceOverrides.headersWithReferer("Cookie: a", s))
         assertNull(SourceOverrides.catchupTimeZoneOf(null))
@@ -44,11 +42,9 @@ class SourceOverridesTest {
 
     @Test fun unknownNamesReadAsNoOverride() {
         assertNull(SourceOverrides.catchupTimeZoneOf(source(tz = "MARS")))
-        assertNull(SourceOverrides.vodEngineOf(source(vod = "VLC")))
     }
 
-    @Test fun vodEngineAndTimeoutParse() {
-        assertEquals(EnginePreference.EXO_ONLY, SourceOverrides.vodEngineOf(source(vod = "EXO_ONLY")))
+    @Test fun tuneTimeoutParse() {
         assertEquals(0, SourceOverrides.liveTuneTimeoutSecsOf(source(timeout = 0)))
         assertEquals(60, SourceOverrides.liveTuneTimeoutSecsOf(source(timeout = 999)))
     }

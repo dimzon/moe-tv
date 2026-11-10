@@ -26,7 +26,7 @@ internal object LiveStartRungs {
         ALT_FORMAT,
         /** The panel's own address for the channel — the last rung. */
         DIRECT_SOURCE,
-        /** Nothing left: the error, which hands the channel to mpv. */
+        /** Nothing left: the error, which ends the tune. */
         FAIL,
     }
 

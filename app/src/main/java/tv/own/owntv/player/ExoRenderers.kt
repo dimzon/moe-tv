@@ -8,8 +8,8 @@ import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 /**
  * The one place every in-app ExoPlayer's renderers are configured.
  *
- * Three engines build an ExoPlayer — [LivePreviewEngine] (Live TV's default engine),
- * [ExoSubtitleEngine] (VOD / image-subtitle handoff / mpv fallback) and [HeroPreviewEngine] (the
+ * Three engines build an ExoPlayer — [LivePreviewEngine] (Live TV's only engine),
+ * its pool clones in [LiveEnginePool] (Multiview tiles) and [HeroPreviewEngine] (the
  * home hero). Each used to configure its own, so a decode-path setting could land on one and not the
  * others: the async-queueing workaround below was live-only, and decoder fallback was on none of
  * them. Anything about *how the device decodes* belongs here so it cannot go missing on one engine
@@ -17,7 +17,7 @@ import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
  * call site, where they legitimately differ.
  */
 /**
- * What every ExoPlayer here plays: media, a movie. Left at the default, the players said "unknown" while the
+ * What every ExoPlayer here plays: media, a live channel. Left at the default, the players said "unknown" while the
  * session's audio focus said "movie", and some TV audio HALs pick their movie path from the content type.
  * Also what the passthrough check asks the output about, so it judges the same route the player takes. Focus
  * stays with [PlaybackSession], so the players are given these without handling it.
@@ -49,8 +49,9 @@ fun ownTVRenderers(
         // (`com.amazon.hardware.tv_screen`) from API 28 up. That async path corrupts (macroblocks)
         // some UHD-HEVC content on Realtek/Amlogic VPUs — the synchronous path is what players like
         // TiviMate use to avoid it. The corruption is a property of the VPU, not of the transport, so
-        // a 4K HEVC *file* needs this exactly as much as a 4K HEVC channel does. Content it still
-        // can't decode cleanly is handed to mpv (per-channel "force mpv" routing / the VOD fallback).
+        // every mux a live channel arrives in (HLS or raw TS) needs this equally. There is no second
+        // engine to hand a still-dirty stream to: decoder fallback and the ladder's other format are
+        // the last resort.
         .forceDisableMediaCodecAsynchronousQueueing()
         // If the chosen decoder fails to initialise or throws while configuring, try the next one the
         // device offers (usually the software decoder) instead of surfacing the error. A free rung on

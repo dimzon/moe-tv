@@ -91,7 +91,7 @@ class PlaybackVisibility {
  * [PlaybackVisibility] on a device: the activity reports start/stop, and this watches the audio outputs,
  * `ACTION_HDMI_AUDIO_PLUG` and display changes itself. [listeners] hear each change once, newest first —
  * the order lifecycle observers ran in before the activity's own code, so a screen reads what is playing
- * before the activity frees the engines. Main thread only; one per process.
+ * before the activity frees the player. Main thread only; one per process.
  */
 class PlaybackVisibilityWatch(context: Context) {
 

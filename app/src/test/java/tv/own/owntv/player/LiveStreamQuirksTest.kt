@@ -26,7 +26,6 @@ class LiveStreamQuirksTest {
         assertFalse(LiveStreamQuirks.isKnownHls(sibling))
         LiveStreamQuirks.rememberHlsRedirect(taught)
         assertTrue(LiveStreamQuirks.isKnownHls(sibling))
-        assertTrue(LiveStreamQuirks.isHlsUrl(sibling))
     }
 
     /**
@@ -47,7 +46,7 @@ class LiveStreamQuirksTest {
     fun `a learned host does not make a ts URL count as explicitly HLS`() {
         val ts = "http://panel.example:80/live/user/pass/136875.ts"
         LiveStreamQuirks.rememberHlsRedirect(ts)
-        assertTrue(LiveStreamQuirks.isHlsUrl(ts))
+        assertTrue(LiveStreamQuirks.isKnownHls(ts))
         assertFalse(LiveStreamQuirks.isExplicitHlsUrl(ts))
     }
 
@@ -79,7 +78,6 @@ class LiveStreamQuirksTest {
         LiveStreamQuirks.forgetHlsRedirect(plain)
         // The channel that taught us still opens as HLS first time; the plain one and the untried one don't.
         assertTrue(LiveStreamQuirks.isKnownHls(redirecting))
-        assertTrue(LiveStreamQuirks.isHlsUrl(redirecting))
         assertFalse(LiveStreamQuirks.isKnownHls(plain))
         assertFalse(LiveStreamQuirks.isKnownHls(other))
         // A redirecting channel discovered after the panel was proved mixed is remembered on its own.
@@ -127,74 +125,31 @@ class LiveStreamQuirksTest {
     @Test
     fun `an offline channel's 404 leaves a redirecting panel's lesson alone`() {
         // The traced case: a dead channel on a redirecting panel 404s on its manifest. Counting that as
-        // "plain TS" put the panel on the mixed list, and every mpv channel after it timed out.
+        // "plain TS" put the panel on the mixed list, and every redirecting channel after it paid a
+        // failed plain open before its learned HLS rung.
         assertFalse(LiveStreamQuirks.disprovesHlsLesson(isFormatFailure = true, httpStatus = 404))
         assertFalse(LiveStreamQuirks.disprovesHlsLesson(isFormatFailure = true, httpStatus = 415))
     }
 
     @Test
-    fun `ffmpeg re-reading a short playlist at EOF is recognised`() {
-        // Verbatim shape from the traced mpv-only failure (a 222-byte manifest behind a `.ts` URL).
-        assertEquals(222L, LiveStreamQuirks.eofReconnectOffset("http: Will reconnect at 222 in 0 second(s), error=End of file."))
-    }
-
-    @Test
-    fun `other reconnects and big offsets are not a playlist loop`() {
-        assertNull(LiveStreamQuirks.eofReconnectOffset("http: Will reconnect at 222 in 1 second(s), error=Connection reset by peer."))
-        assertNull(LiveStreamQuirks.eofReconnectOffset("http: Will reconnect at 9000000 in 0 second(s), error=End of file."))
-        assertNull(LiveStreamQuirks.eofReconnectOffset("http: Will reconnect at 0 in 0 second(s), error=End of file."))
-        assertNull(LiveStreamQuirks.eofReconnectOffset("http: HTTP error 404 Not Found"))
-    }
-
-    @Test
-    fun `both FFmpeg wordings of the EOF reconnect are recognised`() {
-        assertEquals(222L, LiveStreamQuirks.eofReconnectOffset("http: Will retry at 222 in 0 second(s), error=End of file."))
-        assertEquals(65536L, LiveStreamQuirks.eofReconnectOffset("http: Will reconnect at 65536 in 0 second(s), error=End of file."))
-        assertNull(LiveStreamQuirks.eofReconnectOffset("http: Will reconnect at 65537 in 0 second(s), error=End of file."))
-    }
-
-    @Test
-    fun `only a body that starts with EXTM3U is a playlist`() {
-        val start = LiveStreamQuirks::classifyResponseStart
-        assertEquals(LiveStreamQuirks.ResponseStart.HLS_PLAYLIST, start("#EXTM3U\n#EXT-X-VERSION:3\n".toByteArray()))
-        // A byte-order mark and blank lines in front are allowed.
-        assertEquals(
-            LiveStreamQuirks.ResponseStart.HLS_PLAYLIST,
-            start(byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()) + "\r\n  #EXTM3U\n".toByteArray()),
-        )
-        assertEquals(LiveStreamQuirks.ResponseStart.HLS_PLAYLIST, start(" \n\t#EXTM3U".toByteArray()))
-        // The MPEG-TS sync byte: a real feed that ended early.
-        assertEquals(LiveStreamQuirks.ResponseStart.MPEG_TS, start(byteArrayOf(0x47, 0x40, 0x00, 0x10)))
-        // An HTML error page — even one served as "mpegurl" — an empty body, a cut tag: none is a playlist.
-        assertEquals(LiveStreamQuirks.ResponseStart.OTHER, start("<html><body>Stream offline</body></html>".toByteArray()))
-        assertEquals(LiveStreamQuirks.ResponseStart.OTHER, start(ByteArray(0)))
-        assertEquals(LiveStreamQuirks.ResponseStart.OTHER, start("#EXTM".toByteArray()))
-        assertEquals(LiveStreamQuirks.ResponseStart.OTHER, start("#EXTINF:-1,Channel".toByteArray()))
-    }
-
-    @Test
-    fun `an early EOF is checked only on a looping live ts open, once`() {
-        assertTrue(LiveStreamQuirks.eofCheckWanted(live = true, opening = true, loopingTsOpen = true, alreadyChecked = false))
-        // Already playing: an EOF there is a dropped feed, which reconnect_at_eof exists for.
-        assertFalse(LiveStreamQuirks.eofCheckWanted(live = true, opening = false, loopingTsOpen = true, alreadyChecked = false))
-        // Opened as HLS (no reconnect_at_eof), or a film / catch-up: no loop to break.
-        assertFalse(LiveStreamQuirks.eofCheckWanted(live = true, opening = true, loopingTsOpen = false, alreadyChecked = false))
-        assertFalse(LiveStreamQuirks.eofCheckWanted(live = false, opening = true, loopingTsOpen = true, alreadyChecked = false))
-        // Once per channel.
-        assertFalse(LiveStreamQuirks.eofCheckWanted(live = true, opening = true, loopingTsOpen = true, alreadyChecked = true))
+    fun `the DASH redirect lesson is panel-wide too`() {
+        val taught = "http://proxy.example/live/mpd/173"
+        assertFalse(LiveStreamQuirks.isKnownDashHost("http://proxy.example/live/mpd/174"))
+        LiveStreamQuirks.rememberDashRedirect(taught)
+        assertTrue(LiveStreamQuirks.isKnownDashHost("http://proxy.example/live/mpd/174"))
+        assertFalse(LiveStreamQuirks.isKnownDashHost("http://other.example/live/mpd/174"))
     }
 
     @Test
     fun `a different provider is unaffected by what one panel taught us`() {
         LiveStreamQuirks.rememberHlsRedirect("http://panel.example:80/live/u/p/1.ts")
         assertFalse(LiveStreamQuirks.isKnownHls("http://other.example:80/live/u/p/1.ts"))
-        assertFalse(LiveStreamQuirks.isHlsUrl("http://other.example:80/live/u/p/1.ts"))
     }
 
     @Test
-    fun `an m3u8 URL is HLS without anyone having to learn it`() {
-        assertTrue(LiveStreamQuirks.isHlsUrl("http://panel.example/live/u/p/1.m3u8?token=abc"))
-        assertFalse(LiveStreamQuirks.isHlsUrl("http://panel.example/live/u/p/1.ts"))
+    fun `an m3u8 URL is explicitly HLS without anyone having to learn it`() {
+        assertTrue(LiveStreamQuirks.isExplicitHlsUrl("http://panel.example/live/u/p/1.m3u8?token=abc"))
+        assertFalse(LiveStreamQuirks.isExplicitHlsUrl("http://panel.example/live/u/p/1.ts"))
     }
 
     @Test
@@ -209,17 +164,22 @@ class LiveStreamQuirksTest {
     }
 
     @Test
-    fun `rewriting to HLS keeps the signed query intact and leaves other URLs alone`() {
+    fun `the format sibling keeps the signed query and refuses URLs without an extension`() {
         assertEquals(
             "http://panel.example/live/u/p/1.m3u8?token=abc&expires=1",
-            LiveStreamQuirks.toHlsUrl("http://panel.example/live/u/p/1.ts?token=abc&expires=1"),
+            LiveStreamQuirks.alternateFormatUrl("http://panel.example/live/u/p/1.ts?token=abc&expires=1"),
         )
-        assertEquals("http://panel.example/live/u/p/1.m3u8", LiveStreamQuirks.toHlsUrl("http://panel.example/live/u/p/1.ts"))
-        val extensionless = "http://panel.example/live/u/p/1"
-        assertEquals(extensionless, LiveStreamQuirks.toHlsUrl(extensionless))
+        assertEquals(
+            "http://panel.example/live/u/p/1.ts",
+            LiveStreamQuirks.alternateFormatUrl("http://panel.example/live/u/p/1.m3u8"),
+        )
+        assertNull(LiveStreamQuirks.alternateFormatUrl("http://panel.example/live/u/p/1"))
+        // The extension is tested on the PATH only, so a `.ts` sitting in a query token never drives
+        // the swap: a URL like `…/stream-output?mode=hls.ts` has no extension to exchange.
+        assertNull(LiveStreamQuirks.alternateFormatUrl("http://panel.example/live/u/p/stream-output?mode=hls.ts"))
     }
 
-    // --- "the provider refuses its own signed segment URLs" ----------------------------------------
+    // --- refusals -----------------------------------------------------------------------------------
 
     @Test
     fun `only a refusal status counts as the provider refusing us — a server fault must not`() {
@@ -232,27 +192,48 @@ class LiveStreamQuirksTest {
     }
 
     @Test
-    fun `one refusal is not enough to give up on ExoPlayer`() {
+    fun `one refusal is not enough to give up on the load`() {
         // A single 403 can be a segment that rolled out of the window mid-flight; the load-error policy
         // absorbs that with one quick retry. Only a second, *different* refused segment is the signature.
         assertTrue(LiveStreamQuirks.REFUSALS_BEFORE_HANDOFF > 1)
     }
 
     @Test
-    fun `a panel caught refusing segments is remembered for every one of its channels`() {
-        val taught = "http://off20.example:2086/live/u/p/136875.m3u8"
-        val sibling = "http://off20.example:2086/live/u/p/999.m3u8"
-        assertFalse(LiveStreamQuirks.refusesSegments(sibling))
-        LiveStreamQuirks.rememberSegmentRefusal(taught)
-        assertTrue(LiveStreamQuirks.refusesSegments(sibling))
+    fun `a WAF refusal is worth a different identity, a server fault is not`() {
+        assertTrue(LiveStreamQuirks.isIdentityRefusal(403))
+        assertTrue(LiveStreamQuirks.isIdentityRefusal(503))
+        assertFalse(LiveStreamQuirks.isIdentityRefusal(404))
+        assertFalse(LiveStreamQuirks.isIdentityRefusal(500))
     }
 
     @Test
-    fun `a refusing panel does not condemn a different provider`() {
-        LiveStreamQuirks.rememberSegmentRefusal("http://off20.example:2086/live/u/p/1.m3u8")
-        assertFalse(LiveStreamQuirks.refusesSegments("http://good.example:2086/live/u/p/1.m3u8"))
-        // Nor does it make that panel's URLs look like HLS — the two quirks are independent.
-        assertFalse(LiveStreamQuirks.isKnownHls("http://off20.example:2086/live/u/p/1.ts"))
+    fun `a request refusal says nothing about the stream format`() {
+        // The panel refusing the *request* — a busy 458, a rate limit, a 401 — cannot be answered by a
+        // different file extension; only a container problem can.
+        for (status in listOf(401, 402, 403, 429, 503, 509, 458)) {
+            assertTrue("$status", LiveStreamQuirks.isRequestRefusal(status))
+        }
+        assertFalse(LiveStreamQuirks.isRequestRefusal(500))
+        assertFalse(LiveStreamQuirks.isRequestRefusal(404))
+    }
+
+    @Test
+    fun `a panel blocklisting the default User-Agent is remembered panel-wide`() {
+        val taught = "http://cf.example:2086/live/u/p/1.m3u8"
+        assertFalse(LiveStreamQuirks.blocksDefaultUserAgent("http://cf.example:2086/live/u/p/2.ts"))
+        LiveStreamQuirks.rememberBlocksDefaultUserAgent(taught)
+        assertTrue(LiveStreamQuirks.blocksDefaultUserAgent("http://cf.example:2086/live/u/p/2.ts"))
+        assertFalse(LiveStreamQuirks.blocksDefaultUserAgent("http://good.example:2086/live/u/p/2.ts"))
+    }
+
+    @Test
+    fun `the panel's own refusal wording is kept per status`() {
+        val url = "http://limit.example:80/live/u/p/1.ts"
+        LiveStreamQuirks.rememberProviderMessage(url, 429, "Channel limit has been reached")
+        assertEquals("Channel limit has been reached", LiveStreamQuirks.providerMessage(url, 429))
+        // Quoting the "channel limit" line under a later 404 would be worse than no message at all.
+        assertNull(LiveStreamQuirks.providerMessage(url, 404))
+        assertNull(LiveStreamQuirks.providerMessage("http://other.example/live/u/p/1.ts", 429))
     }
 
     // --- the HLS lesson never leaves the channel it was learned on ---------------------------------
@@ -278,98 +259,13 @@ class LiveStreamQuirksTest {
         val host = "http://nohls.example:8080/live/u/p/"
         repeat(10) { LiveStreamQuirks.rememberNoHlsVariant("$host$it.ts") }
         assertFalse(LiveStreamQuirks.lacksHlsVariant("${host}999.ts"))
-        assertFalse(LiveStreamQuirks.lacksHlsVariantMpv("${host}999.ts"))
         // Each taught channel still keeps its own lesson.
         assertTrue(LiveStreamQuirks.lacksHlsVariant("${host}3.ts"))
     }
 
     @Test
-    fun `an engine's HLS lesson stays with that engine`() {
-        // Traced on a 4K channel whose `.m3u8` plays on mpv while ExoPlayer's audio renderer never
-        // produces a sample from it: a shared verdict cost the one combination that worked.
-        val url = "http://panel.example:80/live/u/p/7.ts"
-        LiveStreamQuirks.rememberNoHlsVariant(url)
-        assertTrue(LiveStreamQuirks.lacksHlsVariant(url))
-        assertFalse(LiveStreamQuirks.lacksHlsVariantMpv(url))
-    }
-
-    // --- "the account only gets one session" -------------------------------------------------------
-
-    @Test
-    fun `the session-limit status is matched exactly, not as a class of refusals`() {
-        // 458 means "the stream is fine, you are the second client" — the opposite conclusion to a 403,
-        // which is why it must not be lumped in with the edge refusals that trigger the mpv handoff.
-        assertTrue(LiveStreamQuirks.isSessionLimit(458))
-        assertFalse(LiveStreamQuirks.isSessionLimit(403))
-        assertFalse(LiveStreamQuirks.isSessionLimit(459))
-        assertFalse(LiveStreamQuirks.isSessionLimit(200))
-        assertFalse(LiveStreamQuirks.isEdgeRefusal(458))
-    }
-
-    @Test
-    fun `a one-session panel is remembered for the whole account, not one channel`() {
-        val taught = "http://cf.example:80/live/u/p/440438.m3u8"
-        val sibling = "http://cf.example:80/live/u/p/1.ts"
-        assertFalse(LiveStreamQuirks.isSingleSession(sibling))
-        LiveStreamQuirks.rememberSessionLimit(taught)
-        assertTrue(LiveStreamQuirks.isSingleSession(sibling))
-        assertFalse(LiveStreamQuirks.isSingleSession("http://other.example:80/live/u/p/1.ts"))
-        // Independent of the other two quirks.
-        assertFalse(LiveStreamQuirks.refusesSegments(sibling))
-        assertFalse(LiveStreamQuirks.isKnownHls(sibling))
-    }
-
-    // --- "this feed's timestamps are broken" -------------------------------------------------------
-
-    @Test
-    fun `broken timestamps are learned per stream, never for the whole panel`() {
-        // Free-running video timing is unsynced from audio by definition, so a healthy neighbour on the
-        // same panel must not inherit it — that is what drifted the sound on a working raw MPEG-TS feed.
-        val broken = "http://panel.example:80/live/u/p/4k.ts"
-        val neighbour = "http://panel.example:80/live/u/p/sd.ts"
-        LiveStreamQuirks.rememberBrokenTimestamps(broken)
-        assertTrue(LiveStreamQuirks.hasBrokenTimestamps(broken))
-        assertFalse(LiveStreamQuirks.hasBrokenTimestamps(neighbour))
-    }
-
-    @Test
-    fun `one timestamp complaint is not enough to give up accurate timing`() {
-        // A discontinuity at an ad break is normal live TV; the pathological feeds complain every frame.
-        assertTrue(OwnTVPlayer.BROKEN_PTS_HITS > 1)
-        assertTrue(OwnTVPlayer.BROKEN_PTS_RX.containsMatchIn("Invalid video timestamp: 5.000000 -> 4.000000"))
-        assertTrue(OwnTVPlayer.BROKEN_PTS_RX.containsMatchIn("Audio/Video desynchronisation detected!"))
-        assertFalse(OwnTVPlayer.BROKEN_PTS_RX.containsMatchIn("Using hardware decoding (mediacodec)."))
-    }
-
-    // --- "this panel's catch-up archive needs a software decoder" ----------------------------------
-
-    @Test
-    fun `an archive that renders no video teaches the whole panel, not just that programme`() {
-        // Catch-up used to be pinned to software unconditionally, which cost every provider hardware
-        // decoding. It is learned instead: mid-GOP archives are a property of the panel's timeshift
-        // server, so one blank programme covers the rest of that panel's archive for this session…
-        val archive = "http://panel.example:80/timeshift/u/p/60/2026-08-03:10-00/12.ts"
-        val otherProgramme = "http://panel.example:80/timeshift/u/p/60/2026-08-03:22-00/9.ts"
-        val otherPanel = "http://second.example:8080/timeshift/u/p/60/2026-08-03:10-00/12.ts"
-        assertFalse(LiveStreamQuirks.archiveNeedsSoftware(archive))
-        LiveStreamQuirks.rememberArchiveNeedsSoftware(archive)
-        assertTrue(LiveStreamQuirks.archiveNeedsSoftware(otherProgramme))
-        // …and nothing beyond it: a healthy provider keeps hardware decoding.
-        assertFalse(LiveStreamQuirks.archiveNeedsSoftware(otherPanel))
-    }
-
-    @Test
-    fun `a software archive panel does not inherit the other panel-wide quirks`() {
-        val archive = "http://panel.example:80/timeshift/u/p/60/2026-08-03:10-00/12.ts"
-        LiveStreamQuirks.rememberArchiveNeedsSoftware(archive)
-        assertFalse(LiveStreamQuirks.isSingleSession(archive))
-        assertFalse(LiveStreamQuirks.refusesSegments(archive))
-        assertFalse(LiveStreamQuirks.isKnownHls(archive))
-    }
-
-    @Test
     fun `a URL-keyed lesson set forgets its oldest entries instead of growing forever`() {
-        // These five sets are keyed by stream URL, so they grew with every channel ever tuned and never
+        // These sets are keyed by stream URL, so they grew with every channel ever tuned and never
         // evicted anything. Host-keyed sets are naturally bounded and are deliberately left alone.
         val recent = "http://bound.example:80/live/u/p/99999.ts"
         LiveStreamQuirks.rememberNoHlsVariant(recent)
@@ -387,11 +283,46 @@ class LiveStreamQuirksTest {
         assertTrue(LiveStreamQuirks.lacksHlsVariant("http://bound.example:80/live/u/p/1900.ts"))
     }
 
+    // --- "the account only gets one session" -------------------------------------------------------
+
     @Test
-    fun `the waits around a handoff are long enough to matter and short enough to feel instant`() {
-        // The traced panel needed ~2 s after the other engine's socket closed before it let us back in.
+    fun `the session-limit status is matched exactly, not as a class of refusals`() {
+        // 458 means "the stream is fine, you are the second client" — the opposite conclusion to a 403,
+        // which is why it must not be lumped in with the edge refusals that end a load.
+        assertTrue(LiveStreamQuirks.isSessionLimit(458))
+        assertFalse(LiveStreamQuirks.isSessionLimit(403))
+        assertFalse(LiveStreamQuirks.isSessionLimit(459))
+        assertFalse(LiveStreamQuirks.isSessionLimit(200))
+        assertFalse(LiveStreamQuirks.isEdgeRefusal(458))
+    }
+
+    @Test
+    fun `a one-session panel is remembered for the whole account, not one channel`() {
+        val taught = "http://cf.example:80/live/u/p/440438.m3u8"
+        val sibling = "http://cf.example:80/live/u/p/1.ts"
+        assertFalse(LiveStreamQuirks.isSingleSession(sibling))
+        LiveStreamQuirks.rememberSessionLimit(taught)
+        assertTrue(LiveStreamQuirks.isSingleSession(sibling))
+        assertFalse(LiveStreamQuirks.isSingleSession("http://other.example:80/live/u/p/1.ts"))
+        // Independent of the other quirks.
+        assertFalse(LiveStreamQuirks.isKnownHls(sibling))
+    }
+
+    // --- "this stream can't meet the pre-roll" -----------------------------------------------------
+
+    @Test
+    fun `a pre-roll the stream can never satisfy is learned per stream, not per panel`() {
+        // It is a property of one feed's bitrate: the same provider's HD channels satisfy it fine.
+        val broken = "http://panel.example:80/live/u/p/4k.ts"
+        val neighbour = "http://panel.example:80/live/u/p/sd.ts"
+        LiveStreamQuirks.rememberPrerollDefeated(broken)
+        assertTrue(LiveStreamQuirks.defeatsPreroll(broken))
+        assertFalse(LiveStreamQuirks.defeatsPreroll(neighbour))
+    }
+
+    @Test
+    fun `the wait around a session release is long enough to matter and short enough to feel instant`() {
+        // The traced panel needed ~2 s after the previous stream's socket closed before it let us back in.
         assertTrue(LivePreviewEngine.SESSION_RELEASE_MS in 1_000L..5_000L)
-        // …but a wedged mpv core must never freeze the engine toggle for that long.
-        assertTrue(OwnTVPlayer.MPV_RELEASE_TIMEOUT_MS < LivePreviewEngine.SESSION_RELEASE_MS)
     }
 }

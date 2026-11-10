@@ -84,7 +84,8 @@ interface SourceDao {
     @Query("UPDATE sources SET livePrerollSecs = :secs WHERE id = :id")
     suspend fun updateLivePreroll(id: Long, secs: Int)
 
-    /** Per-playlist Live TV engine override (an `EnginePreference` name); `null` follows the global setting. */
+    /** Legacy per-playlist Live TV engine override (v34, from the two-engine era the app no longer
+     *  has); `null` follows the global setting. Kept so old rows round-trip until the column is dropped. */
     @Query("UPDATE sources SET liveEnginePreference = :preference WHERE id = :id")
     suspend fun updateLiveEnginePreference(id: Long, preference: String?)
 
@@ -97,10 +98,6 @@ interface SourceDao {
      *  offset is written alongside so a MANUAL choice can never land without its value. */
     @Query("UPDATE sources SET catchupTimezone = :mode, catchupOffsetMin = :offsetMin WHERE id = :id")
     suspend fun updateCatchupTimezone(id: Long, mode: String?, offsetMin: Int?)
-
-    /** Per-playlist Movies & Series engine (an `EnginePreference` name); `null` follows the global setting. */
-    @Query("UPDATE sources SET vodEnginePreference = :preference WHERE id = :id")
-    suspend fun updateVodEnginePreference(id: Long, preference: String?)
 
     /** Per-playlist "Give up after" in seconds (0 = never); `null` follows the global setting. */
     @Query("UPDATE sources SET liveTuneTimeoutSecs = :secs WHERE id = :id")

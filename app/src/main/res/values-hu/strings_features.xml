@@ -9,8 +9,6 @@
     <string name="profiles_avatar_own_picture">Saját kép</string>
     <string name="profiles_kids">Gyerekprofil</string>
     <string name="profiles_kids_description">Egyszerűsített, biztonságos böngészés</string>
-    <string name="profiles_allow_downloads">Letöltések engedélyezése</string>
-    <string name="profiles_allow_downloads_description">Kikapcsolva ennél a profilnál minden letöltés gomb rejtve marad</string>
     <string name="profiles_remove_pin">PIN-zár eltávolítása</string>
     <string name="profiles_no_pin">Ez a profil PIN-kód nélkül nyílik meg</string>
     <string name="profiles_change_pin">PIN módosítása (üresen hagyva marad a régi)</string>
@@ -39,13 +37,9 @@
     <string name="search_nothing_in_list">Még nincs semmi itt: <xliff:g id="list">%1$s</xliff:g>.</string>
     <string name="search_clear">Törlés</string>
     <string name="search_jump_to">Ugrás ide</string>
-    <string name="search_open_series">Sorozat megnyitása</string>
-    <string name="search_movie">Film</string>
-    <string name="search_series">Sorozatok</string>
     <string name="search_channels">Csatornák</string>
     <string name="search_on_tv">Tévéműsorok</string>
     <string name="search_go_to_channel">Ugrás a csatornára</string>
-    <string name="search_go_to_movie">Ugrás a filmre</string>
     <string name="search_clear_recent">Legutóbbi keresések törlése</string>
     <string name="search_field_hint">Csatornák, filmek és sorozatok</string>
     <string name="search_voice">Hangalapú keresés</string>
@@ -68,11 +62,6 @@
     <string name="launcher_recent_live_description">Legutóbb nézett élő csatornák</string>
     <string name="launcher_movie_type">Film</string>
     <string name="launcher_episode_number"><xliff:g id="episode">%1$d</xliff:g>. rész</string>
-    <plurals name="home_library_loading">
-        <item quantity="one">A könyvtár betöltése · eddig <xliff:g id="count">%1$s</xliff:g> cím</item>
-        <item quantity="other">A könyvtár betöltése · eddig <xliff:g id="count">%1$s</xliff:g> cím</item>
-    </plurals>
-    <string name="home_library_loading_trending">A Most felkapott sor a könyvtár betöltése közben jelenik meg.</string>
     <string name="home_no_preview">Még nincs mit előnézetben megjeleníteni.</string>
     <string name="home_no_rows">Minden kezdőlapi sor el van rejtve.</string>
     <string name="home_enable_rows">A sorokat a Beállítások → Kezdőképernyő menüben kapcsolhatod vissza.</string>
@@ -140,33 +129,8 @@
     <string name="home_row_trending_description">Csak 4–10 elemet mutat, ha a TMDB felkapott címei egyeznek a szolgáltatód katalógusában lévő filmekkel vagy sorozatokkal.</string>
     <string name="home_trending_style">Népszerűek elrendezése</string>
     <string name="home_trending_style_hero">Részletes kártya</string>
-    <string name="home_trending_style_posters">Csak plakátok</string>
-    <string name="home_trending_rank">#<xliff:g id="rank">%1$d</xliff:g> a trendekben · <xliff:g id="section">%2$s</xliff:g></string>
-    <string name="home_trending_in_playlist">A LEJÁTSZÁSI LISTÁDBAN</string>
-    <string name="home_trending_style_full_bleed">Teljes szélességű</string>
     <string name="home_duration_hours_minutes"><xliff:g id="hours">%1$d</xliff:g> ó <xliff:g id="minutes">%2$02d</xliff:g> p</string>
     <string name="home_time_left">még <xliff:g id="duration">%1$s</xliff:g></string>
-    <string name="settings_trending_status_off">A „Most felkapott” ki van kapcsolva.</string>
-    <string name="settings_trending_status_building">A „Most felkapott” a szolgáltatóval való szinkronizálás után készül el.</string>
-    <string name="settings_trending_status_metadata_disabled">A „Most felkapott” TMDB-metaadatokat igényel. Válaszd a „Csak TMDB” vagy a „Szolgáltató + TMDB” lehetőséget.</string>
-    <string name="settings_trending_status_no_vod">A „Most felkapott” rejtve van, mert ehhez a szolgáltatóhoz sem a filmek, sem a sorozatok nincsenek bekapcsolva.</string>
-    <string name="settings_trending_status_no_matches">A „Most felkapott” rejtve van, mert a szolgáltató egyetlen címe sem egyezik.</string>
-    <string name="settings_trending_status_failed">A „Most felkapott” frissítése nem sikerült. Próbáld újra szinkronizálni a szolgáltatót.</string>
-    <string name="settings_trending_status_waiting">Fejezz be egy szinkronizálást a szolgáltatóval a „Most felkapott” összeállításához.</string>
-    <plurals name="settings_trending_status_below_threshold">
-        <item quantity="one">A „Most felkapott” rejtve van, mert csak <xliff:g id="count">%1$d</xliff:g> szolgáltatói cím egyezik. Legalább 4 szükséges.</item>
-        <item quantity="other">A „Most felkapott” rejtve van, mert csak <xliff:g id="count">%1$d</xliff:g> szolgáltatói cím egyezik. Legalább 4 szükséges.</item>
-    </plurals>
-    <plurals name="settings_trending_status_showing">
-        <item quantity="one">A „Most felkapott” <xliff:g id="count">%1$d</xliff:g> egyező címet mutat.</item>
-        <item quantity="other">A „Most felkapott” <xliff:g id="count">%1$d</xliff:g> egyező címet mutat.</item>
-    </plurals>
-    <plurals name="settings_trending_status_showing_refresh_failed">
-        <item quantity="one">A „Most felkapott” <xliff:g id="count">%1$d</xliff:g> címet mutat a legutóbbi sikeres frissítésből.</item>
-        <item quantity="other">A „Most felkapott” <xliff:g id="count">%1$d</xliff:g> címet mutat a legutóbbi sikeres frissítésből.</item>
-    </plurals>
-    <string name="home_trending_movie">Film</string>
-    <string name="home_trending_series">Sorozat</string>
     <string name="home_trending_provider_match">Szolgáltatói egyezés</string>
     <string name="home_trending_why_label">MIÉRT LÁTOD EZT A CÍMET</string>
     <string name="home_trending_reason_title">TMDB-helyezés #<xliff:g id="rank">%1$d</xliff:g> <xliff:g id="media_type">%2$s</xliff:g> + szolgáltatói egyezés</string>
@@ -174,18 +138,10 @@
     <string name="home_trending_reason_english">Nem volt egyező <xliff:g id="language">%1$s</xliff:g> nyelvű szolgáltatói változat, ezért az angol nyelvű tétel lett kiválasztva.</string>
     <string name="home_trending_reason_untagged">Sem a(z) <xliff:g id="language">%1$s</xliff:g>, sem az angol nyelvi címke nem egyezett, ezért a nyelvi címke nélküli szolgáltatói tétel lett kiválasztva.</string>
     <string name="home_trending_reason_other">A leghasonlóbb lejátszható szolgáltatói változat lett kiválasztva, miután sem a kívánt nyelvű, sem angol tétel nem volt elérhető.</string>
-    <plurals name="home_trending_seasons">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> évad</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> évad</item>
-    </plurals>
     <string name="home_trending_play">Lejátszás</string>
-    <string name="home_trending_open_episodes">Epizódok megnyitása</string>
-    <string name="home_trending_trailer">Előzetes</string>
     <string name="home_trending_more_details">További részletek</string>
-    <string name="home_trending_all_versions">Összes változat</string>
     <string name="home_trending_why_menu">Miért van itt ez a cím</string>
     <string name="home_trending_pause">Szünet</string>
-    <string name="home_trending_unavailable">Ez a változat már nem érhető el</string>
     <string name="recording_notification_title">Felvétel</string>
     <string name="auto_start_notification_channel">Automatikus indítás ébredéskor</string>
     <string name="auto_start_notification_text">Az OwnTV megnyílik, amikor a tévé felébred</string>
@@ -196,38 +152,11 @@
     <string name="recording_failed_unavailable">A csatorna nem indult el</string>
     <string name="recording_failed_channel_gone">Ez a csatorna már nincs a lejátszási listádon</string>
     <string name="recording_failed_unknown">Nem készült felvétel</string>
-    <string name="recording_title">Felvételek</string>
-    <string name="recording_empty">Még nincs felvétel. Nyomd meg a Felvétel gombot egy műsoron a műsorújságban, vagy tartsd nyomva egy csatornát a felvételhez vagy egy időpont ütemezéséhez.</string>
-    <string name="recording_group_now">Most rögzít</string>
-    <string name="recording_group_scheduled">Ütemezve</string>
-    <string name="recording_group_completed">Rögzítve</string>
-    <string name="recording_group_failed">Sikertelen</string>
-    <string name="recording_group_missed">Kimaradt</string>
     <string name="recording_record">Felvétel</string>
-    <string name="recording_stop">Felvétel leállítása</string>
-    <string name="recording_delete_message">Eltávolítja a felvételt és a fájlját erről az eszközről. Ez nem vonható vissza.</string>
-    <string name="recording_record_series">Minden adás felvétele</string>
-    <string name="recording_stop_series">Ne vegye fel minden adását</string>
-    <string name="recording_from_archive">Felvétel az archívumból</string>
     <string name="recording_schedule">Felvétel ütemezése…</string>
-    <string name="recording_schedule_hint">Válaszd ki a napot, a kezdést és a véget. Akkor is felvesz, ha a csatornának nincs műsorújságja.</string>
-    <string name="recording_schedule_start">Kezdés</string>
-    <string name="recording_schedule_end">Vége</string>
-    <string name="recording_schedule_next_day">másnap</string>
-    <string name="recording_schedule_past">Ez az időpont már elmúlt</string>
-    <string name="recording_scheduled_for">Rögzíti: <xliff:g id="time">%1$s</xliff:g></string>
-    <string name="recording_badge">REC</string>
     <string name="recording_pill_line"><xliff:g id="title">%1$s</xliff:g> rögzítése</string>
     <string name="recording_pill_line_locked">Rögzítés zárolt kategóriából</string>
-    <string name="recording_clash_with">Ütközik ezzel: <xliff:g id="programme">%1$s</xliff:g></string>
     <string name="recording_settings_group">Felvétel</string>
-    <string name="settings_recording_reserve">Egy adatfolyam maradjon szabadon a nézéshez</string>
-    <string name="settings_recording_reserve_description">A felvételek szabadon hagyják a szolgáltatód egyik kapcsolatát, hogy mindig legyen min nézni. Kapcsold ki, ha mindegyiken szeretnél rögzíteni.</string>
-    <string name="settings_recording_pre_roll">Korábbi kezdés</string>
-    <string name="settings_recording_pre_roll_description">Ennyivel a megadott kezdés előtt induljon, hogy egy kissé siető műsorújság se vágja le az elejét.</string>
-    <string name="settings_recording_post_roll">Folytatás a vége után</string>
-    <string name="settings_recording_post_roll_description">Ennyivel a megadott befejezés után folytassa, hogy egy elhúzódó műsor ne szakadjon félbe.</string>
-    <string name="settings_recording_timers_inexact">Ez az eszköz nem engedi az OwnTV-nek a pontos ébresztők beállítását, ezért egy felvétel néhány perccel később indulhat. A felvételek emiatt korábban kezdődnek.</string>
     <plurals name="recording_minutes">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> perc</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> perc</item>
@@ -235,22 +164,6 @@
     <string name="recording_failed_encrypted">Ez a csatorna titkosított, nem rögzíthető</string>
     <string name="recording_failed_drm">Ez a csatorna DRM-védett, ezért megnézhető, de nem rögzíthető. A védelmet a szolgáltatója alkalmazza, nem az OwnTV.</string>
     <string name="recording_failed_metered">Nem készült felvétel mobiladaton</string>
-    <string name="recording_card_empty_title">Még nincs felvétel</string>
-    <string name="recording_card_body">Válassz egy műsort a műsorújságban, és válaszd a Felvételt, vagy tartsd nyomva egy csatornát, és ütemezz egy időpontot. Ide kerül, akkor is, ha közben mást nézel.</string>
-    <string name="recording_open_guide">Műsorújság megnyitása</string>
-    <plurals name="recording_card_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> felvétel</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> felvétel</item>
-    </plurals>
-    <string name="settings_recording_mobile_data">Felvétel mobiladaton</string>
-    <string name="settings_record_watching">Rögzítsd, amit nézek</string>
-    <string name="settings_record_watching_description">Felvétel gombot tesz a lejátszóba, amely elmenti a nézett csatornát. Magát a csatornát tölti le, ezért közben lefoglalja a szolgáltató egyik kapcsolatát, és csatornaváltás vagy a lejátszó elhagyása után is tovább rögzít.</string>
-    <string name="settings_record_watching_warning_title">Csak egy kapcsolat</string>
-    <string name="settings_record_watching_warning_description">A felvétel másodszor is letölti a csatornát, így a szolgáltató egy további kapcsolatát foglalja. Olyan fióknál, amely csak egyet enged, a felvétel nézés közben elutasításra kerül. Ha egyszer elindult, magától fut tovább — válts csatornát, hagyd el a lejátszót, és megy tovább a műsor végéig, vagy amíg le nem állítod a Felvételeknél.</string>
-    <string name="settings_record_watching_keep_off">Maradjon kikapcsolva</string>
-    <string name="settings_record_watching_turn_on">Bekapcsolás</string>
-    <string name="player_recording_conflict">A szolgáltatód egyszerre csak egy adatfolyamot enged, és most a felvétel használja.</string>
-    <string name="player_keep_watching_stop_recording">Nézem tovább (leállítja a felvételt)</string>
     <string name="sports_channel_goal_alerts">Gólértesítések</string>
     <string name="sports_channel_live_match">Élő meccs</string>
     <string name="sports_channel_match_reminders">Meccsemlékeztetők</string>

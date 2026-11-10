@@ -5,8 +5,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import tv.own.owntv.player.PlaybackEngines.Pressure
 
-/** Which `onTrimMemory` levels count as pressure. `UI_HIDDEN` on every Home press used to shrink
- *  mpv's cache for the rest of the session. */
+/** Which `onTrimMemory` levels count as pressure. `UI_HIDDEN` on every Home press must not shrink
+ *  the live engine's buffers for the rest of the session. */
 @Suppress("DEPRECATION")
 class PlaybackEnginesTest {
 

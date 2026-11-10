@@ -114,9 +114,8 @@ data class ContentOrderEntity(
  *
  * [contentKey] is deliberately NOT the volatile Room `itemId` that favorites/history use. It is the
  * stable identity — `sourceId:mediaType:remoteId` from
- * [tv.own.owntv.core.player.enginePinKey], falling back to the stream URL for rows with no provider
- * id — exactly like the engine pins ([tv.own.owntv.core.player.VodEngineStore],
- * `ForceMpvStore`) and the subtitle tables. That key survives the clear-then-insert of a re-sync on
+ * [tv.own.owntv.core.player.contentKey], falling back to the stream URL for rows with no provider
+ * id — exactly like the per-item stores and the subtitle tables. That key survives the clear-then-insert of a re-sync on
  * its own, so unlike `content_order` these rows need no snapshot/relink pass: after a re-sync the
  * same film computes the same key and finds its own row again.
  */
@@ -130,7 +129,7 @@ data class ContentOrderEntity(
 )
 data class PlaybackPrefsEntity(
     val profileId: Long,
-    /** [tv.own.owntv.core.player.enginePinKey] result, or the stream URL when the row has none. */
+    /** [tv.own.owntv.core.player.contentKey] result, or the stream URL when the row has none. */
     val contentKey: String,
     /** A [tv.own.owntv.player.ZoomMode] name; null = follow the global default zoom. */
     val zoomMode: String? = null,
@@ -159,12 +158,11 @@ data class PlaybackPrefsEntity(
 /**
  * What a **stream** needs, whoever is watching (v44). [playback_prefs][PlaybackPrefsEntity]
  * is what a *person* prefers — zoom and volume — and stays per profile; the facts here belong to the
- * stream and the device's output, so they are shared: the engine a channel only plays on, whether it is
- * sound only, its lip-sync correction.
+ * stream and the device's output, so they are shared: whether it is sound only, its lip-sync correction.
  *
- * Keyed by [tv.own.owntv.core.player.enginePinKey] like every per-item store. Replaces the DataStore
- * sets `ForceMpvStore` / `VodEngineStore` / `AudioOnlyStore`, which are copied in once at startup and
- * kept readable for one release. [sourceId] lets a playlist's rows go with it.
+ * Keyed by [tv.own.owntv.core.player.contentKey] like every per-item store. The per-stream engine
+ * pin it also used to carry is gone with the second engine (v56); what is left is the audio-only
+ * choice and the lip-sync correction. [sourceId] lets a playlist's rows go with it.
  */
 @Entity(
     tableName = "playback_quirks",
@@ -176,12 +174,10 @@ data class PlaybackQuirkEntity(
     val sourceId: Long,
     /**
      * `LIVE`, `MOVIE` or `EPISODE` — the kind of item, recorded by whoever wrote the row. The key
-     * alone cannot say: an item with no provider id is keyed by its stream URL. Lets the channel
-     * pins and the film pins be counted and reset separately, as their two Settings rows do.
+     * alone cannot say: an item with no provider id is keyed by its stream URL. Live rows are what
+     * the surviving stores write; the older VOD kinds still sit in rows carried from before.
      */
     val mediaType: String,
-    /** "MPV" or "EXO"; null = no pin, follow the settings. */
-    val enginePin: String? = null,
     val audioOnly: Boolean? = null,
     /** A/V-sync offset in ms (-5000..5000, positive = audio delayed); null = follow the global default. */
     val audioDelayMs: Int? = null,

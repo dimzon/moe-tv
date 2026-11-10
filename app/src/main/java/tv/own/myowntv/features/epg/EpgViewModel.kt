@@ -29,7 +29,6 @@ import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -43,7 +42,6 @@ import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
 import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
@@ -52,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.owntv.core.epg.displayLogoUrl
 import androidx.lifecycle.ViewModel
@@ -88,12 +85,9 @@ import tv.own.owntv.core.database.dao.EpgDao
 import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.dao.resolveExistingProfileId
-import tv.own.owntv.core.epg.CatchupUrl
 import tv.own.owntv.core.epg.EpgAutoMatcher
 import tv.own.owntv.core.epg.GuideCandidate
 import tv.own.owntv.core.epg.GuideCandidates
-import tv.own.owntv.core.model.SourceType
-import tv.own.owntv.core.parser.XtreamClient
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.customize.railCategories
@@ -115,7 +109,6 @@ sealed interface EpgMessage {
 }
 
 sealed interface EpgMatchSummary {
-    data object CatchupUnavailable : EpgMatchSummary
     data object MatchedNoProgrammes : EpgMatchSummary
     data object AddPlaylist : EpgMatchSummary
     data object NoData : EpgMatchSummary
@@ -153,14 +146,10 @@ class EpgViewModel(
     private val connectivity: ConnectivityObserver,
     private val customize: CustomizationStore,
     private val sourceDao: SourceDao,
-    private val xtream: XtreamClient,
     private val favoriteDao: tv.own.owntv.core.database.dao.FavoriteDao,
     private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
     private val categoryDao: tv.own.owntv.core.database.dao.CategoryDao,
-    private val streamUrlResolver: tv.own.owntv.core.stalker.StreamUrlResolver,
-    private val externalPlayerLauncher: tv.own.owntv.core.player.ExternalPlayerLauncher,
     private val customCategoryDao: tv.own.owntv.core.database.dao.CustomCategoryDao,
-    private val recordings: tv.own.owntv.core.recording.RecordingManager,
     /** The provider-guide half of a row, for channels whose stored guide stops short — the app-wide
      *  reader Live TV uses too, so both screens share one cache. */
     private val liveEpgReader: tv.own.owntv.core.live.LiveEpgReader,
@@ -169,7 +158,6 @@ class EpgViewModel(
     /** "Recently watched" in the category list reads the same history Live TV does. */
     private val historyDao: tv.own.owntv.core.database.dao.HistoryDao,
     private val reminderManager: tv.own.owntv.core.reminder.ReminderManager,
-    private val archiveGuide: tv.own.owntv.core.epg.ArchiveGuideFiller,
 ) : ViewModel() {
 
     /** The categories' search text, held here so it survives the player (see LiveViewModel). */
@@ -182,108 +170,6 @@ class EpgViewModel(
 
     /** The match scan itself — core's, so the television, the phone and the single-channel run agree. */
     private val autoMatcher = EpgAutoMatcher(channelDao, guideCandidates)
-
-    // --- Recording, from the guide ---------------------------------------------------------------
-
-    /**
-     * This profile's recordings, so a programme cell knows whether it is already spoken for.
-     *
-     * The whole list rather than a per-programme lookup: the guide draws hundreds of cells and a
-     * query each would be hundreds of queries. There are never many recordings.
-     */
-    val recordingRows: StateFlow<List<tv.own.owntv.core.database.entity.RecordingEntity>> =
-        settings.activeProfileId
-            .flatMapLatest { pid -> if (pid < 0) flowOf(emptyList()) else recordings.observe(pid) }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
-    /** The recording already covering this programme, if there is one. */
-    fun recordingFor(
-        channel: ChannelEntity,
-        programme: EpgProgrammeEntity,
-    ): tv.own.owntv.core.database.entity.RecordingEntity? = recordingRows.value.firstOrNull {
-        it.channelId == channel.id && it.programmeStartMs == programme.startMs &&
-            it.status != tv.own.owntv.core.model.RecordingStatus.CANCELLED
-    }
-
-    /**
-     * Record this programme — scheduled if it is still to come, pulled from the archive if it has
-     * already been on and the channel keeps one.
-     *
-     * A programme that has already finished and whose channel has no catch-up cannot be recorded at
-     * all; [canRecord] is what stops the button being offered for it.
-     */
-    fun record(channel: ChannelEntity, programme: EpgProgrammeEntity) {
-        viewModelScope.launch {
-            val pid = currentProfileId() ?: return@launch
-            val source = sourceDao.getById(channel.sourceId) ?: return@launch
-            val now = System.currentTimeMillis()
-            if (programme.stopMs <= now) {
-                recordings.recordFromArchive(
-                    profileId = pid,
-                    channel = channel,
-                    programme = programme,
-                    source = source,
-                    timeZone = settings.resolveCatchupTimeZone(source),
-                    xtream = xtream,
-                )
-                return@launch
-            }
-            val window = recordings.windowFor(programme.startMs, programme.stopMs)
-            recordings.schedule(
-                tv.own.owntv.core.database.entity.RecordingEntity(
-                    profileId = pid,
-                    sourceId = channel.sourceId,
-                    channelId = channel.id,
-                    channelName = channel.name,
-                    channelIconUrl = channel.logoUrl,
-                    epgChannelId = channel.epgChannelId,
-                    streamUrl = channel.streamUrl,
-                    httpHeaders = channel.httpHeaders,
-                    title = programme.title,
-                    description = programme.description,
-                    programmeStartMs = programme.startMs,
-                    programmeStopMs = programme.stopMs,
-                    startMs = window.first,
-                    stopMs = window.last,
-                ),
-            )
-        }
-    }
-
-    /**
-     * Whether Record can be offered for this programme at all: still to come, or already been on and
-     * within a catch-up channel's archive.
-     */
-    fun canRecord(channel: ChannelEntity, programme: EpgProgrammeEntity, now: Long): Boolean =
-        programme.stopMs > now || canCatchup(channel, programme, now)
-
-    fun stopRecording(recording: tv.own.owntv.core.database.entity.RecordingEntity) =
-        recordings.stop(recording)
-
-    fun cancelRecording(recording: tv.own.owntv.core.database.entity.RecordingEntity) =
-        recordings.cancel(recording)
-
-    /** The standing "record every showing" rule covering this programme, or null. */
-    suspend fun seriesRuleFor(
-        channel: ChannelEntity,
-        programme: EpgProgrammeEntity,
-    ): tv.own.owntv.core.database.entity.RecordingRuleEntity? {
-        val pid = currentProfileId() ?: return null
-        return recordings.ruleFor(pid, channel.id, programme.title)
-    }
-
-    /** Record every future showing of this title on this channel. */
-    fun recordSeries(channel: ChannelEntity, programme: EpgProgrammeEntity) {
-        viewModelScope.launch {
-            val pid = currentProfileId() ?: return@launch
-            recordings.addSeriesRule(pid, channel, programme.title)
-        }
-    }
-
-    /** Stop the standing rule, and drop the showings it had queued but not yet recorded. */
-    fun stopSeries(rule: tv.own.owntv.core.database.entity.RecordingRuleEntity) {
-        viewModelScope.launch { recordings.removeSeriesRule(rule) }
-    }
 
     /** Every windowed guide read this screen makes. The caches around it stay here — what to keep
      *  depends on how the grid scrolls, which is the screen's business, not core's. */
@@ -351,25 +237,6 @@ class EpgViewModel(
     }
 
     private fun cachedRowCount(): Int = synchronized(rowCache) { rowCache.size }
-
-    /**
-     * Ask for the past days a catch-up [channel]'s guide feed lacks, from its provider's archive. Called
-     * for a row that stays on screen, so the past is there by the time the user scrolls back to it; the
-     * queue, its pacing and the "once every few hours per channel" rule are core's
-     * ([tv.own.owntv.core.epg.ArchiveGuideFiller]).
-     */
-    fun requestArchiveGuide(channel: ChannelEntity) = archiveGuide.request(channel, custom.value)
-
-    /** Drop the cached rows of one channel (every shift), so the next read of that row goes to the DB. */
-    private fun dropRows(channelId: Long) {
-        val prefix = "$channelId|"
-        synchronized(rowCache) { rowCache.keys.removeAll { it.startsWith(prefix) } }
-    }
-
-    override fun onCleared() {
-        // Rows of a guide nobody is looking at any more are not asked for.
-        archiveGuide.forgetPending()
-    }
 
     /** The row prefetch in flight. One at a time — see [prefetchAfter]. */
     private var prefetchJob: kotlinx.coroutines.Job? = null
@@ -512,16 +379,6 @@ class EpgViewModel(
             .drop(if (epgActivity.active.value.isEmpty()) 1 else 0)
             .onEach { load() }
             .launchIn(viewModelScope)
-        // Re-read a row when its channel's past days arrive from the provider's archive (asked for by the
-        // rows on screen, see requestArchiveGuide). They are stored apart from every feed, so the stored
-        // count load() compares does not move: that channel's cached rows are dropped instead, and the
-        // other visible rows answer from the cache.
-        archiveGuide.added
-            .onEach {
-                dropRows(it)
-                _cacheRevision.value++
-            }
-            .launchIn(viewModelScope)
         // Reload when a category lock closes or opens (the relock on leaving the app, a PIN entry), so
         // the grid and the zap list armed from it follow. drop(1): the screen triggers the initial load.
         settings.activeProfileId
@@ -581,61 +438,11 @@ class EpgViewModel(
         lastTunedChannelId = channel.id
     }
 
-    // Two more live-start paths used to live here — a `play(channel)` that tuned a Guide channel
-    // straight on mpv, and a `playCatchup(...)` that opened the archive itself. Both bypassed the
-    // ExoPlayer-first ladder, the per-channel engine pin and the learned decode quirks, and `play()`
-    // also recorded its own history row. They were unreachable (the shell always supplies the
-    // callbacks), so EpgScreen now REQUIRES them and these copies are gone: LiveViewModel is the one
-    // place a live channel or an archive programme starts. `playCatchupExternal` below is different —
-    // it hands the URL to another app, so it stays.
-
-    /** Which player takes a catch-up archive — read by the Guide's programme dialog to route itself. */
-    val catchupPlayer: StateFlow<SettingsRepository.CatchupPlayer> = settings.catchupPlayer
-        .stateIn(viewModelScope, SharingStarted.Eagerly, SettingsRepository.CatchupPlayer.INTERNAL)
-
-    /** Hand an archive programme to an external app (VLC, MX Player) instead of the in-app player. */
-    fun playCatchupExternal(channel: ChannelEntity, programme: EpgProgrammeEntity) {
-        viewModelScope.launch {
-            val profileId = settings.activeProfileId.first()
-            if (!tv.own.owntv.core.content.AdultCategoryClassifier.allows(profileId, channel.categoryId, profileDao, categoryDao) || customize.sealsCategory(profileId, channel.categoryId)) return@launch
-            val url = withContext(kotlinx.coroutines.Dispatchers.IO) { catchupUrlFor(channel, programme) }
-            if (url == null) {
-                _matchSummary.value = EpgMatchSummary.CatchupUnavailable
-                return@launch
-            }
-            val source = withContext(kotlinx.coroutines.Dispatchers.IO) { sourceDao.getById(channel.sourceId) }
-            externalPlayerLauncher.launch(
-                url = url,
-                title = channel.name,
-                subtitle = programme.title,
-                userAgent = source?.userAgent,
-                httpHeaders = tv.own.owntv.core.settings.SourceOverrides.headersWithReferer(channel.httpHeaders, source),
-            )
-        }
-    }
-
-    /** Build the catch-up URL for a [programme] on [channel], or null if the provider can't serve it. */
-    private suspend fun catchupUrlFor(channel: ChannelEntity, programme: EpgProgrammeEntity): String? {
-        val source = sourceDao.getById(channel.sourceId) ?: return null
-        // Stalker archive URLs are minted per-play via create_link; the others are
-        // pure string templates handled by CatchupUrl.
-        if (source.type == SourceType.STALKER) {
-            return channel.remoteId?.let { rid ->
-                runCatching { streamUrlResolver.resolveCatchup(source, rid, programme.startMs, programme.stopMs) }
-                    .onFailure { android.util.Log.w("EpgViewModel", "Stalker catch-up resolve failed channelId=${channel.id}", it) }
-                    .getOrNull()
-            }
-        }
-        return CatchupUrl.forSource(channel, programme, source, settings.resolveCatchupTimeZone(source), xtream)
-    }
-
-    /** True when a programme can be played from the archive: a catch-up channel, already started, and
-     *  still inside the channel's archive window. The Guide gates its "Watch from start" button on this. */
-    fun canCatchup(channel: ChannelEntity, programme: EpgProgrammeEntity, now: Long): Boolean {
-        if (!channel.catchup || programme.startMs > now) return false
-        val windowMs = channel.catchupDays.coerceAtLeast(1) * 24L * 60 * 60 * 1000
-        return now - programme.startMs <= windowMs
-    }
+    // A live-start path used to live here — a `play(channel)` that tuned a Guide channel straight
+    // onto its own engine copy. It bypassed the ExoPlayer-first ladder and the learned decode
+    // quirks, and it recorded its own history row. It was unreachable (the shell always supplies
+    // the callbacks), so EpgScreen now REQUIRES them and this copy is gone: LiveViewModel is the
+    // one place a live channel starts.
 
     /** Live channels this profile has favourited — so the Guide can show/toggle a channel's star. */
     val favoriteChannelIds: StateFlow<Set<Long>> = settings.activeProfileId
@@ -682,11 +489,6 @@ class EpgViewModel(
                 programme.startMs, programme.stopMs, reminderLeadMinutes.value,
             )
         }
-    }
-
-    /** "Play catch-up in…" in the programme menu steps through Ask · OwnTV player · External player. */
-    fun setCatchupPlayer(mode: SettingsRepository.CatchupPlayer) {
-        viewModelScope.launch { settings.setCatchupPlayer(mode) }
     }
 
     /** The channel's current manual EPG match (or null if auto-matched). */
@@ -992,11 +794,7 @@ class EpgViewModel(
         val now = System.currentTimeMillis()
         val nowAligned = now - (now % HALF_HOUR_MS) // align to the half hour
         // Always retain two recent hours so the centered "now" marker has programmes on its left.
-        // Catch-up channels can extend the same window farther back to their archive limit.
-        val maxCatchupDays = channelDao.maxCatchupDays(playlistIds)
-        val catchupLookbackMs = if (maxCatchupDays > 0)
-            minOf(maxCatchupDays * DAY_MS, CATCHUP_LOOKBACK_CAP_MS) else 0L
-        val lookbackMs = maxOf(GUIDE_VISIBLE_PAST_MS, catchupLookbackMs)
+        val lookbackMs = GUIDE_VISIBLE_PAST_MS
         val windowStart = nowAligned - lookbackMs
         // How far the grid can scroll forward is the SAME value that decides how much is stored.
         // Storing a week and only letting the user reach tomorrow would be half a feature — and the
@@ -1056,7 +854,8 @@ class EpgViewModel(
                 .map { ch -> cust.itemNames[CustomizeKeys.channel(ch)]?.let { ch.copy(name = it) } ?: ch }
             val matched = applyEpgMatches(auto, cust, playlistIds, q)
             // The Order menu: Provider (also the old stored LIVE_TV value), A–Z,
-            // Catch-up first, Favourites first. The last two only float those channels to the top.
+            // Favourites first (and the legacy CATCHUP value, no longer offered in the menu).
+            // The last two only float those channels to the top.
             val byAlpha = compareBy<ChannelEntity> { it.name.lowercase() }
             val byProvider = compareBy<ChannelEntity>({ it.sourceId }, { it.sortOrder }, { it.name.lowercase() })
             val byLiveTv = liveOrder?.let { order -> compareBy<ChannelEntity> { order[it.id] ?: Int.MAX_VALUE }.then(if (alphaSort) byAlpha else byProvider) }
@@ -1135,7 +934,7 @@ class EpgViewModel(
                 "totalMs=${android.os.SystemClock.elapsedRealtime() - loadStartedAt}"
         }
 
-        // A second background pass used to merge the older catch-up history in afterwards, because
+        // A second background pass used to merge the older guide history in afterwards, because
         // the blocking pass could not afford the whole lookback. Both are gone: a row is read for
         // the full window in one query, so the history is simply there when the row is drawn.
     }
@@ -1215,8 +1014,6 @@ class EpgViewModel(
         // measure before making it two screens; do not raise it on a hunch.
         private const val PREFETCH_AHEAD = 10
         private const val DAY_MS = 24L * 60 * 60 * 1000
-        // How far back the Guide may extend for catch-up (must stay within EpgRepository's retention).
-        private const val CATCHUP_LOOKBACK_CAP_MS = 7L * 24 * 60 * 60 * 1000
         // Generous safety bound only (rows load lazily, so this is about the channel list itself).
         private const val MAX_CHANNELS = 20_000
         // Cap the candidate set the bulk matcher scans against (keeps the O(channels×candidates) scan bounded).

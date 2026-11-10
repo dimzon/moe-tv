@@ -11,8 +11,8 @@ import tv.own.owntv.core.database.entity.PlaybackQuirkEntity
 /**
  * What a stream needs, shared by every profile — see [PlaybackQuirkEntity].
  *
- * Each value is written on its own and never clears the others: pinning a channel to mpv must not
- * forget that it is sound only. A row whose values have all gone back to null is dropped.
+ * Each value is written on its own and never clears the others: correcting a channel's lip-sync must
+ * not forget that it is sound only. A row whose values have all gone back to null is dropped.
  */
 @Dao
 interface PlaybackQuirkDao {
@@ -23,25 +23,14 @@ interface PlaybackQuirkDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIfMissing(row: PlaybackQuirkEntity)
 
-    @Query("UPDATE playback_quirks SET enginePin = :pin, updatedAt = :now WHERE contentKey = :contentKey")
-    suspend fun updateEnginePin(contentKey: String, pin: String?, now: Long)
-
     @Query("UPDATE playback_quirks SET audioOnly = :audioOnly, updatedAt = :now WHERE contentKey = :contentKey")
     suspend fun updateAudioOnly(contentKey: String, audioOnly: Boolean?, now: Long)
 
     @Query("UPDATE playback_quirks SET audioDelayMs = :audioDelayMs, updatedAt = :now WHERE contentKey = :contentKey")
     suspend fun updateAudioDelay(contentKey: String, audioDelayMs: Int?, now: Long)
 
-    @Query("DELETE FROM playback_quirks WHERE enginePin IS NULL AND audioOnly IS NULL AND audioDelayMs IS NULL")
+    @Query("DELETE FROM playback_quirks WHERE audioOnly IS NULL AND audioDelayMs IS NULL")
     suspend fun dropEmptyRows()
-
-    /** [pin] "MPV" / "EXO", or null to forget it. */
-    @Transaction
-    suspend fun setEnginePin(contentKey: String, sourceId: Long, mediaType: String, pin: String?) {
-        if (pin != null) insertIfMissing(PlaybackQuirkEntity(contentKey, sourceId, mediaType))
-        updateEnginePin(contentKey, pin, System.currentTimeMillis())
-        if (pin == null) dropEmptyRows()
-    }
 
     /** Only a sound-only item is recorded; false forgets it. */
     @Transaction
@@ -59,32 +48,8 @@ interface PlaybackQuirkDao {
         if (audioDelayMs == null) dropEmptyRows()
     }
 
-    /** Keys pinned to [pin], of the live kind or of every other kind. */
-    @Query("SELECT contentKey FROM playback_quirks WHERE enginePin = :pin AND (mediaType = 'LIVE') = :live")
-    fun observePinned(pin: String, live: Boolean): Flow<List<String>>
-
     @Query("SELECT contentKey FROM playback_quirks WHERE audioOnly = 1")
     fun observeAudioOnly(): Flow<List<String>>
-
-    /** "Reset saved player choices" for films and episodes; the channels' pins are kept. */
-    @Transaction
-    suspend fun clearVodPins() {
-        clearVodPinColumn()
-        dropEmptyRows()
-    }
-
-    @Query("UPDATE playback_quirks SET enginePin = NULL WHERE mediaType != 'LIVE'")
-    suspend fun clearVodPinColumn()
-
-    /** "Reset saved live TV player choices"; the films' and episodes' pins are kept. */
-    @Transaction
-    suspend fun clearLivePins() {
-        clearLivePinColumn()
-        dropEmptyRows()
-    }
-
-    @Query("UPDATE playback_quirks SET enginePin = NULL WHERE mediaType = 'LIVE'")
-    suspend fun clearLivePinColumn()
 
     @Transaction
     suspend fun clearAudioDelays() {
@@ -97,10 +62,6 @@ interface PlaybackQuirkDao {
 
     @Query("SELECT COUNT(*) FROM playback_quirks WHERE audioDelayMs IS NOT NULL")
     fun observeAudioDelayCount(): Flow<Int>
-
-    /** A legacy stream-URL row moves to the stable key, keeping its values (see ForceMpvStore.migrateKey). */
-    @Query("UPDATE OR IGNORE playback_quirks SET contentKey = :stableKey, sourceId = :sourceId WHERE contentKey = :legacyKey")
-    suspend fun migrateKey(legacyKey: String, stableKey: String, sourceId: Long)
 
     /** A deleted playlist takes what was remembered for its items with it. */
     @Query("DELETE FROM playback_quirks WHERE sourceId = :sourceId")

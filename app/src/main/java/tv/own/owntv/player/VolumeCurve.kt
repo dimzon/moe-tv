@@ -1,20 +1,19 @@
 package tv.own.owntv.player
 
-import kotlin.math.cbrt
 import kotlin.math.log10
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
 /**
- * What the HUD's volume number means, identically on every engine.
+ * What the HUD's volume number means, identically in every live engine.
  *
- * - **0–100 %** is linear amplitude: 50 % is half, −6 dB. ExoPlayer's `volume` is already linear; mpv
- *   cubes its own `volume` property (`gain = (volume/100)³`), so it is handed the cube root.
- * - **100–150 %** is a boost of [BOOST_DB_PER_PERCENT] per percent, so 150 % ≈ +10 dB — ExoPlayer via
- *   the LoudnessEnhancer ([VolumeBoost]), mpv via the same cube root of the amplitude.
+ * - **0–100 %** is linear amplitude: 50 % is half, −6 dB. ExoPlayer's `volume` is already linear.
+ * - **100–150 %** is a boost of [BOOST_DB_PER_PERCENT] per percent, so 150 % ≈ +10 dB, via the
+ *   LoudnessEnhancer ([VolumeBoost]).
  *
- * Before this, mpv's 150 % was +10.6 dB and ExoPlayer's +3.5 dB, 50 % was −18 dB against −6 dB, and
- * a remembered "130 %" sounded different whenever the fallback ladder moved a channel between engines.
+ * The curve is shared by every engine (preview, Multiview pool, hero) precisely because the remembered
+ * per-channel number moves with a channel between them: a remembered "130 %" must sound the same in
+ * each. An earlier flat +3.5 dB ceiling made 150 % and 50 % land in different places everywhere.
  */
 internal object VolumeCurve {
     const val MAX_PERCENT = 150
@@ -25,9 +24,6 @@ internal object VolumeCurve {
         val p = percent.coerceIn(0, MAX_PERCENT)
         return if (p <= 100) p / 100.0 else 10.0.pow((p - 100) * BOOST_DB_PER_PERCENT / 20.0)
     }
-
-    /** mpv's `volume` property for a HUD [percent]. At most ≈146.8, inside `volume-max = 150`. */
-    fun mpvVolume(percent: Int): Double = 100.0 * cbrt(amplitude(percent))
 
     /** LoudnessEnhancer target gain in millibels; 0 at or below 100 %. */
     fun boostMillibels(percent: Int): Int =

@@ -14,7 +14,6 @@ import java.net.Proxy
 import java.net.ProxySelector
 import java.net.SocketAddress
 import java.net.URI
-import java.net.URLEncoder
 
 /**
  * Immutable snapshot of the global app proxy (Approach 1 — one app-wide HTTP proxy). SOCKS and
@@ -36,9 +35,7 @@ data class ProxyConfig(
  * Single source of truth for the live proxy config. Holds a volatile snapshot kept up to date from a
  * DataStore flow, and exposes an OkHttp [ProxySelector] + [Authenticator] that read that snapshot on
  * every request. This lets the proxy be toggled at runtime WITHOUT rebuilding the singleton
- * [okhttp3.OkHttpClient] — so Coil and the ExoPlayer engines keep using the same client instance.
- *
- * mpv (libmpv / FFmpeg) does its own networking, so it reads [mpvProxyUrl] before each load instead.
+ * [okhttp3.OkHttpClient] — so Coil and the player keep using the same client instance.
  */
 class ProxyConfigHolder(configFlow: Flow<ProxyConfig>) {
 
@@ -55,7 +52,7 @@ class ProxyConfigHolder(configFlow: Flow<ProxyConfig>) {
 
     fun snapshot(): ProxyConfig = current
 
-    /** [current] once the stored setting has been read — what every request and mpv load routes by. */
+    /** [current] once the stored setting has been read — what every request routes by. */
     private fun live(): ProxyConfig {
         firstRead.await()
         return current
@@ -88,24 +85,6 @@ class ProxyConfigHolder(configFlow: Flow<ProxyConfig>) {
         response.request.newBuilder()
             .header("Proxy-Authorization", Credentials.basic(c.username, c.password))
             .build()
-    }
-
-    /**
-     * mpv `http-proxy` value — `http://[user:pass@]host:port`, or null when the proxy is off/invalid.
-     * Credentials are URL-encoded and embedded in the URL (the only way mpv/FFmpeg takes proxy auth).
-     * NEVER log the returned string — use [HttpClient.redactUrl] if it must appear anywhere.
-     */
-    fun mpvProxyUrl(): String? {
-        val c = live()
-        if (!c.usable) return null
-        val auth = if (c.hasAuth) {
-            val u = URLEncoder.encode(c.username, "UTF-8")
-            val p = URLEncoder.encode(c.password, "UTF-8")
-            "$u:$p@"
-        } else {
-            ""
-        }
-        return "http://$auth${c.host}:${c.port}"
     }
 
     private companion object {

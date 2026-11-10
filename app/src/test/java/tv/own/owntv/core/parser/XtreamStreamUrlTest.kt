@@ -4,7 +4,6 @@ import okhttp3.OkHttpClient
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import tv.own.owntv.core.database.entity.SourceEntity
-import tv.own.owntv.core.epg.CatchupUrl
 import tv.own.owntv.core.model.SourceType
 import tv.own.owntv.core.network.HttpClient
 
@@ -39,16 +38,5 @@ class XtreamStreamUrlTest {
         assertEquals("%C3%A9t%C3%A9", xtreamPathSegment("été"))
         assertEquals("-._~!$&'()*+,;=:@", xtreamPathSegment("-._~!$&'()*+,;=:@"))
         assertEquals("", xtreamPathSegment(null))
-    }
-
-    @Test
-    fun `the timeshift PHP form carries the decoded credentials as query values`() {
-        val s = source("alice", "a+b&c#d")
-        val path = client.timeshiftUrl(s, "9", startMs = 0L, durationMinutes = 60)
-        assertEquals("http://panel.invalid:8080/timeshift/alice/a+b&c%23d/60/1970-01-01:00-00/9.ts", path)
-        assertEquals(
-            "http://panel.invalid:8080/streaming/timeshift.php?username=alice&password=a%2Bb%26c%23d&stream=9&start=1970-01-01:00-00&duration=60",
-            CatchupUrl.timeshiftPhpAlternate(path),
-        )
     }
 }

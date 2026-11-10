@@ -30,15 +30,15 @@ import kotlinx.coroutines.launch
  * apps could play over each other and the TV's transport keys / Assistant "pause" never reached the
  * player.
  *
- * It is engine-agnostic on purpose. OwnTV plays through mpv *and* two ExoPlayer engines, and which one
- * owns the speaker changes with the content; all three already implement [PlaybackEngine], so this class
- * only ever talks to that interface. `OwnTVShell` is the one place that knows which engine is live, so it
- * [attach]es it and passes `null` when the player closes.
+ * It is engine-agnostic on purpose. OwnTV plays through the live ExoPlayer engine (and its pool
+ * siblings), all of which implement [PlaybackEngine], so this class only ever talks to that interface.
+ * `OwnTVShell` is the one place that knows which engine holds the speaker, so it [attach]es it and
+ * passes `null` when the player closes.
  *
  * ### Focus policy: duck, don't pause
  * A TV is not a phone. A navigation prompt, a doorbell camera notification or an Assistant reply must not
  * stop a live channel — a paused live stream falls behind the edge and comes back either late or as a
- * fresh reconnect, and a paused film loses the moment being watched. So:
+ * fresh reconnect. So:
  *
  * | Focus change | What we do |
  * |---|---|
@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
  *
  * ### …unless the host is a phone
  * That table is the right answer for a television and the wrong one for a handset: a phone call must
- * **stop** the film, not play it quietly under the caller's voice, and the user expects it back when
+ * **stop** the stream, not play it quietly under the caller's voice, and the user expects it back when
  * the call ends. So the policy is a constructor choice — [FocusPolicy.DUCK] is what the TV app has
  * always done and stays the default, [FocusPolicy.PAUSE] is what the mobile app passes. A notification
  * sound still only ducks under either policy: it is `CAN_DUCK`, and the platform attenuates us itself.
@@ -57,7 +57,7 @@ import kotlinx.coroutines.launch
  * duck, not a pause) — see [FocusPolicy.onTransientLoss]. A VoIP call that takes no focus at all is
  * caught from the mode change itself ([FocusPolicy.pausesForMode], Android 12 and later).
  *
- * [pauseWhenOutputDisconnects] is the other phone-shaped difference: pulling headphones out mid-film
+ * [pauseWhenOutputDisconnects] is the other phone-shaped difference: pulling headphones out mid-stream
  * must not carry on through the loudspeaker. It is off by default, because a television's speakers
  * cannot be unplugged from underneath it.
  */
@@ -80,7 +80,7 @@ class PlaybackSession(
         /**
          * What a transient focus loss does under this policy. [audioMode] is `AudioManager.mode` at the
          * moment of the loss. A phone used to ask the platform to turn every duck into a pause, so a
-         * notification sound stopped the film; now only a call does, read from the mode because some
+         * notification sound stopped playback; now only a call does, read from the mode because some
          * dialers hand out `CAN_DUCK` for a ringing phone.
          */
         internal fun onTransientLoss(canDuck: Boolean, audioMode: Int): FocusReaction = when (this) {
@@ -109,7 +109,7 @@ class PlaybackSession(
     /**
      * True while an engine is attached — both apps attach whatever is playing and pass `null` only when
      * playback has really stopped, so this is the one "is anything playing" both can share. A pause does
-     * not clear it; a switch from a channel to a film may clear it for a moment.
+     * not clear it; an engine swap may clear it for a moment.
      */
     val active: StateFlow<Boolean> = _active.asStateFlow()
 
@@ -161,9 +161,7 @@ class PlaybackSession(
         collectJob = combine(
             engine.isPlaying,
             engine.currentMeta,
-            engine.position,
-            engine.duration,
-        ) { playing, meta, position, duration -> State(playing, meta, position, duration, engine.isLiveContent) }
+        ) { playing, meta -> State(playing, meta) }
             .onEach(::publish)
             .launchIn(scope)
     }
@@ -172,8 +170,9 @@ class PlaybackSession(
      * The platform session's token, or null while nothing is attached.
      *
      * A host that shows a media notification needs it: hanging `MediaStyle` on this token is what puts
-     * the transport controls on the lockscreen and lets the system draw the seek bar from the state
-     * this class already publishes. The television has no such notification and never reads it.
+     * the transport controls on the lockscreen. The system bar shows no seek row — a live stream has
+     * none — but play/pause and "previous channel" come through the state this class publishes. The
+     * television has no such notification and never reads it.
      */
     val token: MediaSession.Token?
         get() = runCatching { session?.sessionToken }.getOrNull()
@@ -186,9 +185,6 @@ class PlaybackSession(
     private data class State(
         val playing: Boolean,
         val meta: MediaMeta,
-        val positionMs: Long,
-        val durationMs: Long,
-        val live: Boolean,
     )
 
     private fun publish(state: State) {
@@ -197,20 +193,17 @@ class PlaybackSession(
         //
         // The one exception is a pause THIS class performed for a call or a navigation prompt: the
         // resume is driven by the AUDIOFOCUS_GAIN callback, and abandoning the request is what stops
-        // that callback ever arriving. Dropping focus here would leave the film paused for good.
+        // that callback ever arriving. Dropping focus here would leave the stream paused for good.
         if (state.playing) requestFocus() else if (!pausedByUs) abandonFocus()
         val s = session ?: return
         runCatching {
-            // Metadata only when it actually changed. This is driven by a combine() that also
-            // carries the position, so it fires on every position tick — but the title, subtitle and
-            // duration only change when the ITEM does. Rebuilding and re-publishing MediaMetadata dozens
-            // of times a second was pure waste, and every controller on the TV had to process each one.
-            // The playback state below still updates every tick: a controller needs the moving position.
+            // Metadata only when it actually changed: re-publishing MediaMetadata on every state flip
+            // makes every controller on the TV process a no-op. A pause is one of those flips.
             val metaKey = MetaKey(
                 title = state.meta.title.orEmpty(),
                 subtitle = state.meta.subtitle.orEmpty(),
                 // Live has no meaningful duration; -1 tells a controller "not seekable/unknown".
-                durationMs = if (state.live) -1L else state.durationMs,
+                durationMs = -1L,
             )
             if (metaKey != lastMetaKey) {
                 lastMetaKey = metaKey
@@ -222,19 +215,19 @@ class PlaybackSession(
                         .build(),
                 )
             }
-            var actions = PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE or
-                PlaybackState.ACTION_PLAY_PAUSE or PlaybackState.ACTION_STOP or
-                PlaybackState.ACTION_SKIP_TO_NEXT or PlaybackState.ACTION_SKIP_TO_PREVIOUS
-            if (!state.live) {
-                actions = actions or PlaybackState.ACTION_SEEK_TO or
-                    PlaybackState.ACTION_FAST_FORWARD or PlaybackState.ACTION_REWIND
-            }
+            // A live stream has no position to seek within: no SEEK/FF/REWIND actions, and the position
+            // the state carries is 0. "Previous" is the one queue-ish control live offers — the channel
+            // watched before, which the app wired through [livePrevious].
             s.setPlaybackState(
                 PlaybackState.Builder()
-                    .setActions(actions)
+                    .setActions(
+                        PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE or
+                            PlaybackState.ACTION_PLAY_PAUSE or PlaybackState.ACTION_STOP or
+                            PlaybackState.ACTION_SKIP_TO_PREVIOUS,
+                    )
                     .setState(
                         if (state.playing) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
-                        state.positionMs,
+                        0L,
                         if (state.playing) 1f else 0f,
                     )
                     .build(),
@@ -277,19 +270,9 @@ class PlaybackSession(
             // Nothing here may tear the player down — this session doesn't own the UI. "Stop" from a
             // system control therefore means "silence it", which is a pause the user can undo.
             override fun onStop() = withEngine { if (it.isPlaying.value) it.togglePlayPause() }
-            override fun onSeekTo(pos: Long) = withEngine {
-                if (!it.isLiveContent) it.seekBy(pos - it.position.value)
-            }
-            // Settings → Seek step, the same value the on-screen buttons use: a Bluetooth remote or the
-            // system media notification must not move by a different amount than the HUD does.
-            override fun onFastForward() = withEngine {
-                if (!it.isLiveContent) it.seekBy(it.seekStepMs.value)
-            }
-            override fun onRewind() = withEngine {
-                if (!it.isLiveContent) it.seekBy(-it.seekStepMs.value)
-            }
-            override fun onSkipToNext() = withEngine { it.next() }
-            override fun onSkipToPrevious() = withEngine { if (it.isLiveContent) livePrevious?.invoke() else it.previous() }
+            // No seek/FF/rewind/next: a live stream has no position to move within and no queue behind
+            // it, and those actions are not advertised above.
+            override fun onSkipToPrevious() = withEngine { livePrevious?.invoke() }
         })
     }
 
@@ -356,7 +339,7 @@ class PlaybackSession(
 
     /**
      * Unplugging headphones or walking out of Bluetooth range: pause, and do **not** arm a resume.
-     * Plugging back in must not blast a film out of a pocket, so this deliberately does not go through
+     * Plugging back in must not blast sound out of a pocket, so this deliberately does not go through
      * [pauseForInterruption].
      */
     private val noisyReceiver = object : BroadcastReceiver() {
@@ -486,8 +469,8 @@ class PlaybackSession(
             KeyEvent.KEYCODE_MEDIA_PLAY, KeyEvent.KEYCODE_MEDIA_PAUSE, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
         )
         /** How far down a manual duck goes — quiet enough to talk over, loud enough not to look broken.
-         *  In dB, so it is the same drop on every engine and from any starting volume (a quarter of
-         *  the HUD number used to be −12 dB on ExoPlayer and −36 dB, effectively mute, on mpv). */
+         *  In dB, so it is the same drop on every engine and from any starting volume: a quarter of
+         *  the HUD's linear amplitude is exactly −12 dB. */
         const val DUCK_DB = -12.0
         /** `AudioManager.mode` values meaning the phone is ringing or in a call (voice or VoIP). */
         val CALL_MODES = setOf(

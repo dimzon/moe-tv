@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -75,16 +74,9 @@ import tv.own.owntv.core.customize.SectionCustomizations
 import tv.own.owntv.core.customize.sealsItemIn
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.ContentOrderDao
-import tv.own.owntv.core.database.dao.HistoryDao
-import tv.own.owntv.core.database.dao.MovieDao
-import tv.own.owntv.core.database.dao.ProgressDao
-import tv.own.owntv.core.database.dao.SeriesDao
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.ContentOrderEntity
-import tv.own.owntv.core.database.entity.EpisodeEntity
-import tv.own.owntv.core.database.entity.MovieEntity
-import tv.own.owntv.core.database.entity.SeriesEntity
 import tv.own.owntv.core.live.GuideReader
 import tv.own.owntv.core.live.GuideSlot
 import tv.own.owntv.core.model.MediaType
@@ -96,44 +88,31 @@ import tv.own.owntv.core.sync.local.PairedDevice
 import tv.own.owntv.core.categorylock.lockAwareCount
 import tv.own.owntv.core.categorylock.sealedCategoryIds
 
-/** How many channels, films and shows a list holds, one number per type. */
-data class TypeCounts(val live: Int = 0, val movies: Int = 0, val series: Int = 0) {
-    val total: Int get() = live + movies + series
+/** How many channels a list holds. The app is live TV only; films and shows are gone. */
+data class TypeCounts(val live: Int = 0) {
+    val total: Int get() = live
 }
 
 /** Whether this device is reachable for Local sync, and who it is paired with. */
 data class SyncSnapshot(val listening: Boolean = false, val devices: List<PairedDevice> = emptyList())
 
-/** More › Favourites: the starred items in the user's own order, with what is on each channel now. */
+/** More › Favourites: the starred channels in the user's own order, with what is on each one now. */
 data class FavouriteLists(
     val live: List<ChannelEntity> = emptyList(),
     val onNow: Map<Long, GuideSlot> = emptyMap(),
-    val movies: List<MovieEntity> = emptyList(),
-    val series: List<SeriesEntity> = emptyList(),
     val now: Long = 0L,
 )
 
-/**
- * One More › History row. [episode] is the show's last-watched episode; [positionMs] / [durationMs] its
- * (or the film's) saved progress, 0 when there is none.
- */
+/** One More › History row: a channel the profile last watched. */
 data class HistoryEntry(
-    val type: MediaType,
     val id: Long,
     val title: String,
-    val art: String?,
     val channel: ChannelEntity?,
-    val year: Int?,
-    val episode: EpisodeEntity?,
     val watchedAt: Long,
-    val positionMs: Long,
-    val durationMs: Long,
 )
 
 data class HistoryLists(
     val live: List<HistoryEntry> = emptyList(),
-    val movies: List<HistoryEntry> = emptyList(),
-    val series: List<HistoryEntry> = emptyList(),
 )
 
 /** A favourite being moved in More › Favourites: the type's whole list and where the moving one is. */
@@ -143,16 +122,12 @@ data class FavouriteMove(val type: MediaType, val ids: List<Long>, val names: Li
  * More's data: the sheet's counts, and the Favourites and History pages.
  *
  * Deliberately its own view model and plain DAO reads, never a browse view model: on the TV
- * `koinViewModel()` scopes to the Activity, so borrowing `MoviesScreen`'s would share its pinned folder.
+ * `koinViewModel()` scopes to the Activity, so borrowing another screen's would share its state.
  * Writes go through the same [UserDataWriter] and order table the browse screens use.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MoreCountsViewModel(
     private val channelDao: ChannelDao,
-    private val movieDao: MovieDao,
-    private val seriesDao: SeriesDao,
-    private val historyDao: HistoryDao,
-    private val progressDao: ProgressDao,
     private val contentOrderDao: ContentOrderDao,
     private val userDataWriter: UserDataWriter,
     private val guide: GuideReader,
@@ -226,46 +201,17 @@ class MoreCountsViewModel(
             // A real window: an empty one (now..now) finds no programme at all.
             lookAheadMs = 60 * 60_000L,
         )
-        return FavouriteLists(
-            live = live,
-            onNow = onNow,
-            movies = movieDao.snapshotFavoritesManual(c.profileId, key, ids(c, MediaType.MOVIE), LIST_LIMIT)
-                .filterNot { sealed.holds(MediaType.MOVIE, it.categoryId) },
-            series = seriesDao.snapshotFavoritesManual(c.profileId, key, ids(c, MediaType.SERIES), LIST_LIMIT)
-                .filterNot { sealed.holds(MediaType.SERIES, it.categoryId) },
-            now = now,
-        )
+        return FavouriteLists(live = live, onNow = onNow, now = now)
     }
 
     private suspend fun loadHistory(c: ActiveProfileSources, sealed: Sealed): HistoryLists {
         val pid = c.profileId
         if (pid < 0) return HistoryLists()
-        fun watched(type: MediaType) = suspend { historyDao.getForProfileType(pid, type).associate { it.itemId to it.watchedAt } }
         val live = channelDao.recentlyWatchedWithTimestampFiltered(pid, ids(c, MediaType.LIVE), LIST_LIMIT).first()
             .filterNot { sealed.holds(MediaType.LIVE, it.channel.categoryId) }.map {
-            HistoryEntry(MediaType.LIVE, it.channel.id, it.channel.name, null, it.channel, null, null, it.watchedAt, 0L, 0L)
+            HistoryEntry(it.channel.id, it.channel.name, it.channel, it.watchedAt)
         }
-        val movieAt = watched(MediaType.MOVIE)()
-        val movieProgress = progressDao.getForProfileType(pid, MediaType.MOVIE).associateBy { it.itemId }
-        val movies = movieDao.recentlyWatchedSnapshot(pid, ids(c, MediaType.MOVIE), LIST_LIMIT)
-            .filterNot { sealed.holds(MediaType.MOVIE, it.categoryId) }.map { m ->
-            val p = movieProgress[m.id]
-            HistoryEntry(
-                MediaType.MOVIE, m.id, m.name, m.backdropUrl ?: m.posterUrl, null, m.year ?: m.parsedYear, null,
-                movieAt[m.id] ?: 0L, p?.positionMs ?: 0L, p?.durationMs ?: 0L,
-            )
-        }
-        val seriesAt = watched(MediaType.SERIES)()
-        val series = seriesDao.recentlyWatchedSnapshot(pid, ids(c, MediaType.SERIES), LIST_LIMIT)
-            .filterNot { sealed.holds(MediaType.SERIES, it.categoryId) }.map { s ->
-            val episode = progressDao.lastWatchedEpisodeId(pid, s.id)?.let { seriesDao.getEpisodeById(it) }
-            val p = episode?.let { progressDao.get(pid, MediaType.EPISODE, it.id) }
-            HistoryEntry(
-                MediaType.SERIES, s.id, s.name, s.backdropUrl ?: s.posterUrl, null, s.year ?: s.parsedYear, episode,
-                seriesAt[s.id] ?: 0L, p?.positionMs ?: 0L, p?.durationMs ?: 0L,
-            )
-        }
-        return HistoryLists(live, movies, series)
+        return HistoryLists(live)
     }
 
     fun removeFavourite(type: MediaType, id: Long) {
@@ -273,28 +219,18 @@ class MoreCountsViewModel(
         viewModelScope.launch { userDataWriter.removeFavorite(pid, type, id) }
     }
 
-    /** The same removal each browse screen's "Remove from History" does, per type. */
+    /** The same removal the Live TV list's "Remove from History" does. */
     fun removeHistory(entry: HistoryEntry) {
         val pid = ctx.value.profileId.takeIf { it >= 0 } ?: return
-        viewModelScope.launch {
-            when (entry.type) {
-                MediaType.SERIES -> userDataWriter.removeSeriesHistory(pid, entry.id)
-                MediaType.MOVIE -> {
-                    userDataWriter.removeHistory(pid, MediaType.MOVIE, entry.id)
-                    userDataWriter.clearProgress(pid, MediaType.MOVIE, entry.id)
-                }
-                else -> userDataWriter.removeHistory(pid, entry.type, entry.id)
-            }
-        }
+        viewModelScope.launch { userDataWriter.removeHistory(pid, MediaType.LIVE, entry.id) }
     }
 
-    /** Move starts on the type's whole favourite list, in its current order. */
+    /** Move starts on the favourite channels' whole list, in its current order. */
     fun startMove(type: MediaType, id: Long) {
         val lists = favouriteLists.value
         val pairs = when (type) {
             MediaType.LIVE -> lists.live.map { it.id to it.name }
-            MediaType.MOVIE -> lists.movies.map { it.id to it.name }
-            else -> lists.series.map { it.id to it.name }
+            else -> return // Favourite films and shows are gone; only channels move.
         }
         val index = pairs.indexOfFirst { it.first == id }.takeIf { it >= 0 } ?: return
         _move.value = FavouriteMove(type, pairs.map { it.first }, pairs.map { it.second }, index)
@@ -331,15 +267,10 @@ class MoreCountsViewModel(
                 // What a locked category holds leaves the counts too, so they agree with the lists.
                 fun count(type: MediaType, all: (Long, List<Long>) -> Flow<Int>, excluding: (Long, List<Long>, List<Long>) -> Flow<Int>) =
                     lockAwareCount(customize.sealedCategoryIds(c.profileId, type), { all(c.profileId, ids(c, type)) }) { excluding(c.profileId, ids(c, type), it) }
-                combine(
+                (
                     if (favorites) count(MediaType.LIVE, channelDao::countFavorites, channelDao::countFavoritesExcluding)
-                    else count(MediaType.LIVE, channelDao::countHistory, channelDao::countHistoryExcluding),
-                    if (favorites) count(MediaType.MOVIE, movieDao::countFavorites, movieDao::countFavoritesExcluding)
-                    else count(MediaType.MOVIE, movieDao::countHistory, movieDao::countHistoryExcluding),
-                    if (favorites) count(MediaType.SERIES, seriesDao::countFavorites, seriesDao::countFavoritesExcluding)
-                    else count(MediaType.SERIES, seriesDao::countHistory, seriesDao::countHistoryExcluding),
-                    ::TypeCounts,
-                )
+                    else count(MediaType.LIVE, channelDao::countHistory, channelDao::countHistoryExcluding)
+                ).map { TypeCounts(it) }
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TypeCounts())
@@ -348,6 +279,6 @@ class MoreCountsViewModel(
         /** Enough for any real list, bounded so a runaway history cannot load the whole catalogue. */
         const val LIST_LIMIT = 500
 
-        val LISTED = listOf(MediaType.LIVE, MediaType.MOVIE, MediaType.SERIES)
+        val LISTED = listOf(MediaType.LIVE)
     }
 }

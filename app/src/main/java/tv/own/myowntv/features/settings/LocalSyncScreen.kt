@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
@@ -783,7 +782,7 @@ private fun SectionsBlock(vm: LocalSyncViewModel, step: LocalSyncViewModel.Step.
 @Composable
 private fun ConfirmBlock(vm: LocalSyncViewModel, step: LocalSyncViewModel.Step.Confirm) {
     val preview = step.preview
-    // The other device's hardware settings and engine pins: offered only when it sent some, unticked.
+    // The other device's hardware settings: offered only when it sent some, unticked.
     var deviceSettings by remember(step.file) { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(4.mpx)) {
         Text(stringResource(R.string.local_sync_confirm_title), style = stageText(38, 800), color = StageColors.Text)

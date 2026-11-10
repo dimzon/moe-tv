@@ -156,7 +156,6 @@
     <string name="sync_error_server">A kiszolgálón hiba történt. Kérjük, próbáld újra később.</string>
     <string name="sync_error_secure">A biztonságos kapcsolat nem jött létre — lehet, hogy a kiszolgáló tanúsítványa érvénytelen.</string>
     <string name="sync_error_malformed_guide">A kiszolgálóról érkező műsorújság-adatok hibásak voltak. Egy részük így is betöltődhetett — kérjük, próbáld újra, vagy ellenőrizd az EPG URL-t.</string>
-    <string name="common_minutes">Perc</string>
     <string name="common_size_mb"><xliff:g id="size">%1$s</xliff:g> MB</string>
     <string name="common_size_gb"><xliff:g id="size">%1$s</xliff:g> GB</string>
     <string name="common_plus">+</string>

@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit
 
 /** Networking, parsers, sync engine, and repositories. */
 val dataModule = module {
-    // Live snapshot of the global proxy. Backs OkHttp's ProxySelector/Authenticator AND mpv's http-proxy,
+    // Live snapshot of the global proxy. Backs OkHttp's ProxySelector/Authenticator,
     // so the proxy can be toggled at runtime without rebuilding the singleton OkHttpClient below.
     single { tv.own.owntv.core.network.ProxyConfigHolder(get<tv.own.owntv.core.settings.SettingsRepository>().proxyConfig) }
     // Live snapshot of the global custom DNS (plain UDP or DoH). Same pattern as proxy — reads the
@@ -78,7 +78,7 @@ val dataModule = module {
             }
             .build()
     }
-    // The playback engines' client: same proxy/DNS/UA/protocol configuration as the singleton above,
+    // The playback client: same proxy/DNS/UA/protocol configuration as the singleton above,
     // but its own connection pool, so a live stop can evict *stream* sockets without dropping keep-alive
     // for EPG, panel API, metadata and image traffic.
     single { tv.own.owntv.core.network.StreamingHttpClient(get()) }
@@ -125,7 +125,6 @@ val dataModule = module {
     single { CustomizationStore(androidContext(), get()) }
     single { tv.own.owntv.core.customize.LockedNotificationTitles(get(), get(), get(), get(), get(), get()) }
     single { tv.own.owntv.core.epg.EpgSourceStore(androidContext()) }
-    single { tv.own.owntv.core.player.ForceMpvStore(androidContext(), get()) }
     // Per-channel "watched without a picture" memory, for the mobile audio-only mode.
     single { tv.own.owntv.core.player.AudioOnlyStore(androidContext(), get()) }
     // Per-item zoom/volume the player remembers (playbackPrefsDao, settings).
@@ -224,8 +223,6 @@ val dataModule = module {
         tv.own.owntv.core.sports.MatchAlertScheduler(androidContext(), get(), java.io.File(androidContext().filesDir, "sports"))
     }
     single { tv.own.owntv.core.sports.SportsAlertsSetup(androidContext(), get(), get(), get(), get(), get()) }
-    // Per-item VOD engine pins made with the player's gear toggle (VOD counterpart of ForceMpvStore).
-    single { tv.own.owntv.core.player.VodEngineStore(androidContext(), get()) }
     // Remote (companion) add-source LAN server — one shared instance for Setup + Settings.
     single { tv.own.owntv.core.companion.CompanionController(androidContext(), get()) }
     // Local sync between two OwnTV devices on the same Wi-Fi. The payload is a
@@ -431,12 +428,12 @@ val dataModule = module {
     single { tv.own.owntv.core.reminder.ReminderScheduler(androidContext(), get()) }
     single(createdAtStart = true) { tv.own.owntv.core.reminder.ReminderManager(get(), get()) }
     // profileDao, sourceDao, settings, customizationStore, userDataResolver, epgSourceStore,
-    // forceMpvStore, vodEngineStore, db, metadataOverrideStore, metadataDao, openSubtitlesAuthStore,
+    // db, metadataOverrideStore, metadataDao, openSubtitlesAuthStore,
     // backgroundsDir (same folder ingestBackgroundImage writes to — the .own container carries the wallpaper),
     // subtitlesDir (SubtitleRepository's shared cache — the container carries the subtitle files too)
     single {
         BackupManager(
-            get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
+            get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
             java.io.File(androidContext().filesDir, "backgrounds"),
             java.io.File(androidContext().filesDir, "subtitles"),
             get(),

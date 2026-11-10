@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import android.content.Context
 import android.graphics.SurfaceTexture
@@ -68,143 +67,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.settings.SubtitleStyle
 import tv.own.myowntv.ui.theme.asAndroidTypeface
 
-private const val SURFACE_LAYOUT_NUDGES = 30
-private const val SURFACE_LAYOUT_NUDGE_MS = 100L
-
-private class MpvSurfaceView(context: Context, private val player: OwnTVPlayer) :
-    SurfaceView(context), SurfaceHolder.Callback {
-
-    private var pendingFps = 0f
-
-    init {
-        holder.addCallback(this)
-    }
-
-    /** Ask the display to switch to a refresh rate matching the video (TVs that support it drop the
-     *  3:2-pulldown judder of 24fps content on a fixed 60Hz panel). Re-applied on each fps change and
-     *  on surface (re)create. No-op below Android 11, or where the panel can't switch (harmless). */
-    fun applyVideoFrameRate(fps: Float) {
-        pendingFps = fps
-        val surface = holder.surface ?: return
-        SurfaceFrameRate.apply(surface, fps, seamlessOnly = false) // a TV may do a real mode switch
-    }
-
-    override fun surfaceCreated(holder: SurfaceHolder) {
-        player.attachSurface(holder.surface)
-        if (pendingFps > 0f) applyVideoFrameRate(pendingFps) // re-assert after a surface recreate
-    }
-
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        player.setSurfaceSize(width, height)
-    }
-
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
-        player.detachSurface()
-    }
-}
-
-/**
- * Hosts the mpv video output (a [SurfaceView]) in Compose.
- *
- * The decoder always fills the surface edge-to-edge (mpv is told, via [OwnTVPlayer.setZoomMode], to
- * never letterbox/crop/override internally), so zoom/aspect is done entirely by **sizing the view
- * itself** — see [Modifier.videoZoom] for the shared sizing math (also used by the ExoPlayer live path,
- * so Live TV and VOD zoom behave identically).
- */
-@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-@Composable
-fun MpvVideoSurface(
-    player: OwnTVPlayer,
-    modifier: Modifier = Modifier,
-    // Settings › Picture › Frame rate: one switch for films and series, one for Live TV.
-    autoFrameRateFilms: Boolean = true,
-    autoFrameRateLive: Boolean = true,
-    // Auto frame rate's two film extras (Settings › Picture › Frame rate). Ignored on live.
-    afrMatchResolution: Boolean = false,
-    afrHoldSecs: Int = 0,
-) {
-    val aspect by player.videoAspect.collectAsStateWithLifecycle()
-    val videoSize by player.videoSize.collectAsStateWithLifecycle()
-    val zoom by player.zoomMode.collectAsStateWithLifecycle()
-    val fps by player.videoFps.collectAsStateWithLifecycle()
-
-    // Auto frame rate, mechanism 2: window-level display-mode switch. Complements the per-surface
-    // setFrameRate() hint below, which is a no-op before Android 11 (e.g. Fire OS 7 boxes). Read per
-    // composition, and a new item always recomposes (its size arrives), so live vs film is current.
-    val engine = androidx.compose.runtime.remember(player) { MpvPlaybackEngine(player) }
-    val film = engine.takeIf { !player.isLiveContent }
-    val autoFrameRate = if (film != null) autoFrameRateFilms else autoFrameRateLive
-    AutoFrameRateEffect(fps, autoFrameRate, film = film, videoSize = videoSize, matchResolution = afrMatchResolution, holdSecs = afrHoldSecs)
-
-    BoxWithConstraints(modifier.background(Color.Black).clipToBounds(), contentAlignment = Alignment.Center) {
-        val viewModifier = Modifier.videoZoom(zoom, aspect, videoSize, maxWidth, maxHeight)
-        // key(surfaceResetToken): when the player bumps the token, this whole AndroidView is disposed and
-        // recreated — destroying the old Surface and making a FRESH one. The Realtek decoder needs a clean
-        // Surface for a back-to-back 4K-class session (reusing the dirty one throws 0x80001000).
-        val surfaceResetToken by player.surfaceResetToken.collectAsStateWithLifecycle()
-        // The new SurfaceView gets its surface only once the window lays it out, and nothing else may ask
-        // for a frame: zapped by deep link or autoplay with no key pressed, the screen sat idle and the
-        // waiting load never started until the next remote press. Ask for layout until the surface comes.
-        val hostView = androidx.compose.ui.platform.LocalView.current
-        LaunchedEffect(surfaceResetToken) {
-            if (surfaceResetToken == 0) return@LaunchedEffect
-            repeat(SURFACE_LAYOUT_NUDGES) {
-                hostView.requestLayout()
-                hostView.invalidate()
-                kotlinx.coroutines.delay(SURFACE_LAYOUT_NUDGE_MS)
-                if (player.hasAttachedSurface) return@LaunchedEffect
-            }
-        }
-        androidx.compose.runtime.key(surfaceResetToken) {
-            AndroidView(
-                modifier = viewModifier,
-                factory = { ctx -> MpvSurfaceView(ctx, player) },
-                // The surface-level hint is part of AFR too. Previously this stayed active when the
-                // setting was Off, so Android 11+ TVs could still perform the exact HDMI handshake the
-                // user had disabled AFR to avoid.
-                update = { it.applyVideoFrameRate(if (autoFrameRate) fps ?: 0f else 0f) },
-            )
-        }
-        // Image-subtitle (PGS/VOBSUB/DVB) overlay for the ExoPlayer handoff. Mounted ONLY while ExoPlayer
-        // owns playback — putting ANY view over the SurfaceView (even an empty one) knocks it off the
-        // hardware-overlay / direct scan-out path, which stutters 4K to a ~2 fps slideshow under GPU
-        // composition. During normal mpv playback this isn't composed, so the surface scans out directly.
-        // And only while a subtitle track is actually on, as the live path already does with
-        // `subOn`: a film on ExoPlayer with subtitles off would otherwise keep an empty view over it.
-        val exoActive by player.exoActiveState.collectAsStateWithLifecycle()
-        val exoSubOn by player.exoSubtitleOn.collectAsStateWithLifecycle()
-        if (exoActive && exoSubOn) {
-            val cues by player.exoCues.collectAsStateWithLifecycle()
-            StyledSubtitleView(cues = cues, modifier = viewModifier)
-        }
-        // Freeze-frame: the last mpv frame, shown over the surface during the mpv→ExoPlayer swap so the
-        // decoder switch doesn't flash black. Same geometry as the surface; cleared on Exo's first frame.
-        val freeze by player.freezeFrame.collectAsStateWithLifecycle()
-        freeze?.let { bmp ->
-            androidx.compose.foundation.Image(
-                bitmap = bmp.asImageBitmap(),
-                contentDescription = null,
-                modifier = viewModifier,
-                contentScale = androidx.compose.ui.layout.ContentScale.FillBounds,
-            )
-        }
-    }
-}
-
 /**
  * Hosts the [LivePreviewEngine]'s ExoPlayer video (a [SurfaceView]) for the Live preview pane AND the
- * promoted full-screen live player. Zoom/aspect is done by sizing the view itself via [Modifier.videoZoom]
- * — the same math as the mpv path, so a Live channel zooms identically whether it plays on ExoPlayer
- * (the default live engine) or mpv (a "compatibility mode" pin). The surface is handed to the engine on
- * create and released on destroy. [keepAwake] holds the screen on (TV screensaver off) while actively
- * watching full-screen/PiP.
+ * promoted full-screen live player — the app's one and only video surface. Zoom/aspect is done by
+ * sizing the view itself via [Modifier.videoZoom]: the picture is scaled by the view, never inside the
+ * decoder, so every surface behaves identically. The surface is handed to the engine on create and
+ * released on destroy. [keepAwake] holds the screen on (TV screensaver off) while actively watching
+ * full-screen/PiP.
  */
 @Composable
 fun ExoPreviewSurface(
@@ -290,8 +165,8 @@ fun ExoPreviewSurface(
         }
         // Subtitle overlay — mounted ONLY while subs are on, so 4K live keeps its direct hardware-overlay path.
         // Sized like the video, not like the screen: at any zoom other than Fit the two differ, and
-        // mounting this full-screen put the same subtitle in a different place depending on which engine
-        // happened to be running. The picture is the reference, so a line stays inside the frame the user
+        // mounting this full-screen put the same subtitle in a different place depending on where the
+        // surface was composed. The picture is the reference, so a line stays inside the frame the user
         // is actually looking at.
         val subOn by engine.subtitleOn.collectAsStateWithLifecycle()
         val cues by engine.cues.collectAsStateWithLifecycle()
@@ -303,8 +178,7 @@ fun ExoPreviewSurface(
 
 /**
  * Media3's [androidx.media3.ui.SubtitleView] with the user's subtitle appearance applied —
- * shared by Live TV (the default live engine) and the VOD image-subtitle handoff, so a subtitle
- * looks the same on both.
+ * the one place live subtitles draw, so they always look the same.
  *
  * Every option is independent, and each one that's left on "Default" (or the whole thing while the
  * master toggle is off) leaves this the plain, unstyled view it has always been. In particular
@@ -324,8 +198,6 @@ fun ExoPreviewSurface(
 private fun StyledSubtitleView(cues: List<androidx.media3.common.text.Cue>, modifier: Modifier = Modifier) {
     val settings = org.koin.compose.koinInject<SettingsRepository>()
     val styleOn by settings.subtitleStyleEnabled.collectAsStateWithLifecycle(initialValue = false)
-    // Media3 cues, so this is the ExoPlayer size — both the live ExoPlayer path and the VOD
-    // image-subtitle handoff render through here.
     val scale by settings.subtitleScaleExo.collectAsStateWithLifecycle(initialValue = SubtitleStyle.SCALE_DEFAULT)
     val font by settings.subtitleFont.collectAsStateWithLifecycle(initialValue = null)
     val colorHex by settings.subtitleColor.collectAsStateWithLifecycle(initialValue = SubtitleStyle.COLOR_DEFAULT)

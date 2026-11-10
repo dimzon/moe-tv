@@ -14,7 +14,7 @@
   <img alt="Platform" src="https://img.shields.io/badge/platform-Android%20TV-3DDC84?logo=android&logoColor=white">
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.4.20-7F52FF?logo=kotlin&logoColor=white">
   <img alt="Compose for TV" src="https://img.shields.io/badge/Jetpack%20Compose-for%20TV-4285F4?logo=jetpackcompose&logoColor=white">
-  <img alt="Player" src="https://img.shields.io/badge/engines-libmpv%20%2B%20ExoPlayer-FB8C00">
+  <img alt="Player" src="https://img.shields.io/badge/player-ExoPlayer%20%2F%20Media3-FB8C00">
   <img alt="License" src="https://img.shields.io/badge/license-GPLv3-blue">
   <img alt="Built with the help of AI" src="https://img.shields.io/badge/built%20with-the%20help%20of%20AI-8A2BE2">
 </p>
@@ -22,10 +22,9 @@
 ---
 
 MyOwnTV is a native **Android TV** live-TV **player** built with Kotlin and Jetpack Compose for
-TV. It runs **two playback engines** — libmpv (FFmpeg) for the widest compatibility and
-ExoPlayer (Media3) for near-instant Live TV — and it is a *player only*: the channel list and
-the programme guide come from **RuTube's public API**, with no playlist, login or setup screen
-needed.
+TV. It plays Live TV on **ExoPlayer (Media3)** for near-instant channel changes, and it is a
+*player only*: the channel list and the programme guide come from **RuTube's public API**, with no
+playlist, login or setup screen needed.
 
 > ⚠️ MyOwnTV ships **no** channels, playlists, subscriptions or streams of its own. It plays
 > RuTube's publicly listed live streams. You are responsible for what you watch and for
@@ -39,10 +38,10 @@ D-pad first.
 ## ✨ Features
 
 ### 🎬 Playback
-- **Two engines** — mpv for compatibility, ExoPlayer for instant Live TV, with automatic fallback
+- **ExoPlayer (Media3)** — one playback engine tuned for instant Live TV zapping
 - **4K HDR** direct rendering, optional auto frame-rate matching, surround sound, 150% volume boost
-- **Subtitles** — text, image and closed captions, plus OpenSubtitles search and local files
-- Resume, mini-player/PiP, picture-in-picture when you press Home, audio-only mode, live stream-info overlay
+- **Subtitles** — text, image and closed captions
+- Mini-player/PiP, picture-in-picture when you press Home, audio-only mode, live stream-info overlay
 - Media-session transport keys and proper audio focus — it behaves like a TV app
 
 ### 📺 Live TV & guide
@@ -63,7 +62,7 @@ D-pad first.
 | Language | Kotlin 2.4.20 |
 | Build | AGP 9.4.0 / Gradle 9.8.2, KSP2, JDK 25 |
 | UI | Jetpack Compose for TV (`androidx.tv:tv-material`), Compose BOM 2026.08.00 |
-| Media | **libmpv** (FFmpeg) · **ExoPlayer/Media3** |
+| Media | **ExoPlayer/Media3** |
 | Database | Room + Paging + FTS4 |
 | DI · Network · Images | Koin · OkHttp · Coil |
 
@@ -80,9 +79,8 @@ tv.own.myowntv/
 └── di/          Koin modules
 ```
 
-The database, sync, parsers, EPG storage and the playback engines live in this module under
-`tv/own/owntv/**` — one source tree, no separate library to fetch. Only the libmpv engine
-(`tv.own.owntv:libmpv`) comes from a public Maven repository.
+The database, sync, parsers, EPG storage and the live playback engine live in this module under
+`tv/own/owntv/**` — one source tree, no separate library to fetch.
 
 The RuTube API contract, channel/EPG rules, database details and the native-library inventory are
 documented in [docs/rutube.md](docs/rutube.md).
@@ -101,7 +99,7 @@ documented in [docs/rutube.md](docs/rutube.md).
 1. **Get the code** — `git clone <this repository>` (or download the ZIP).
 2. **Open it** in [Android Studio](https://developer.android.com/studio) and let Gradle sync.
 3. **Pick the build variant** — `standard` for real devices and arm emulators, `x86_64` for
-   x86_64 emulators. The native player only loads on a matching ABI.
+   x86_64 emulators.
 4. **Run** ▶. Minimum **Android 8.0 / API 26**.
 
 Command line: `./gradlew assembleDebug` (`gradlew.bat` on Windows). The APK lands in
@@ -119,12 +117,10 @@ the project's player-only positioning and match the existing code style.
 The lowercase **owntv** wordmark was designed for OwnTV by [@m3th0d93](https://github.com/m3th0d93)
 in [issue #227](https://github.com/ahXN00/OwnTV/issues/227).
 
-### ▶️ Playback engines
+### ▶️ Playback
 
-- **[mpv](https://mpv.io/)** (via [libmpv](https://github.com/mpv-android/mpv-android), built on
-  [FFmpeg](https://ffmpeg.org/)) — the default engine, for the widest codec, audio and HDR support.
-- **[Media3 / ExoPlayer](https://github.com/androidx/media)** — the fast-start engine for Live TV
-  preview and HLS.
+- **[Media3 / ExoPlayer](https://github.com/androidx/media)** — the playback engine for Live TV
+  and HLS.
 
 ### 🧩 Built with
 
@@ -134,9 +130,6 @@ in [issue #227](https://github.com/ahXN00/OwnTV/issues/227).
 [OkHttp](https://square.github.io/okhttp/) ·
 [Coil](https://coil-kt.github.io/coil/) ·
 [ZXing](https://github.com/zxing/zxing) — and the wider Kotlin / AndroidX open-source ecosystem.
-
-Subtitle search & download is powered by [OpenSubtitles.com](https://www.opensubtitles.com/).
-**This product uses the OpenSubtitles API but is not endorsed or certified by OpenSubtitles.**
 
 ## ⚖️ Legal
 

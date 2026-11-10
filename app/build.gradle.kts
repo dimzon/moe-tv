@@ -216,8 +216,8 @@ android {
 
     packaging {
         jniLibs {
-            // Every .so we package is a prebuilt from a dependency (libmpv/FFmpeg, libc++_shared,
-            // androidx graphics-path and datastore) and all of them are already stripped at the
+            // Every .so we package is a prebuilt from a dependency (the bundled SQLite engine from
+            // the androidx.sqlite artifacts) and all of them are already stripped at the
             // source — none carries a .debug_info or .symtab section. AGP's strip step therefore has
             // nothing to remove, and on a machine without an NDK it can't run at all, which is where
             // the "Unable to strip the following libraries, packaging them as they are" line on every
@@ -354,9 +354,8 @@ tasks.named("preBuild") { dependsOn(verifyI18nLiterals) }
 
 dependencies {
     // The engine (database, sync, parsers, EPG, playback) used to be a separate :core/:player-core
-    // module. Its sources now live in this module under tv/own/owntv/**; only the mpv engine stays
-    // an external artifact.
-    implementation(libs.libmpv)
+    // module. Its sources now live in this module under tv/own/owntv/**; nothing of the engine is
+    // an external artifact anymore — playback runs on Media3/ExoPlayer, declared below.
 
     // Core
     implementation(libs.androidx.core.ktx)
@@ -419,12 +418,9 @@ dependencies {
     implementation(libs.zxing.core) // QR generation for the Remote (companion) add-source flow
     implementation(libs.juniversalchardet) // local subtitle charset detection
 
-    // Media playback — libmpv (FFmpeg) is NOT declared here. `:player-core` exposes it as `api`, so it
-    // arrives with core, on core's version. Two hosts each naming their own copy is exactly the
-    // duplicate-class / duplicate-.so conflict the swap to OwnTV's own libmpv build ran into.
-    // Media3 / ExoPlayer — used ONLY for the VOD + image-subtitle (PGS/VOBSUB/DVB) handoff, where it
-    // keeps video zero-copy AND renders bitmap subs on its own layer (mpv's direct path can't). Not a
-    // sidecar: mpv is stopped first, so the provider only ever sees one connection.
+    // Media playback — Media3 / ExoPlayer is the app's single playback engine. The external prebuilt
+    // engine AAR it used to pair with is gone, and with it the FFmpeg software audio decoder: audio
+    // now decodes on the device's own MediaCodec decoders only.
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.hls) // HLS (.m3u8) support for the Live preview engine
     // DASH (.mpd) — the container protected channels use. DefaultMediaSourceFactory only

@@ -164,8 +164,8 @@ class M3uHeaderParsingTest {
         val encoded = StreamHeaders.encode(headers)
         assertEquals("User-Agent: UA/1\nReferer: http://r/", encoded)
         assertEquals(headers, StreamHeaders.decode(encoded))
-        // mpv carries the UA in its own property, so it is not repeated in the field list.
-        assertEquals("Referer: http://r/", StreamHeaders.toMpvHeaderFields(headers))
+        // The UA is read back on its own, the way the request builder takes it.
+        assertEquals("UA/1", StreamHeaders.userAgentOf(StreamHeaders.decode(encoded)))
     }
 
     /** Headers the transport owns would break the request rather than fix it. */

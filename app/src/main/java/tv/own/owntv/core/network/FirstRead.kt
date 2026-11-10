@@ -10,8 +10,9 @@ import java.util.concurrent.TimeUnit
  * The holders start from "off" and learn the real value from DataStore's first emission. A cold start
  * with Last-channel autoplay could tune before that arrived, so the first stream went out directly: an
  * IP leak for someone using the proxy for privacy, and a failed tune for someone using it to reach the
- * provider at all. Only callers on network threads wait (OkHttp's proxy selector and DNS, mpv's load
- * on its own executor) — never the main thread — and only until the first read, [timeoutMs] at most.
+ * provider at all. Only callers on network threads wait (OkHttp's proxy selector and DNS, the
+ * player's loading executors) — never the main thread — and only until the first read, [timeoutMs] at
+ * most.
  */
 internal class FirstRead(private val name: String, open: Boolean = false) {
 

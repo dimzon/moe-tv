@@ -2,8 +2,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="settings_sort_playlist">Erreprodukzio-zerrenda</string>
     <string name="settings_sort_alpha">A–Z</string>
-    <string name="settings_sort_rating">Balorazioa</string>
-    <string name="settings_sort_date_added">Gehitze-data</string>
     <string name="settings_mini_player">Mini erreproduzigailua</string>
     <string name="settings_mini_player_description">Nabigatzen ari zarela kanal bat ainguratzen (PiP) duzunean ateratzen den erreproduzigailu flotatzaile txikia. Aldatu hemen, edo une berean mini erreproduzigailuaren tamaina aldatzeko / mugitzeko botoiekin.</string>
     <string name="settings_size">Tamaina</string>
@@ -15,9 +13,7 @@
     <string name="settings_live_keep_watching">Zuzeneko kanalak Jarraitu ikusten atalean</string>
     <string name="settings_live_keep_watching_description">Erakutsi duela gutxi ikusitako zuzeneko kanalak goiburuko errenkadan.</string>
     <string name="settings_movies_keep_watching">Filmak Jarraitu ikusten atalean</string>
-    <string name="settings_movies_keep_watching_description">Erakutsi filmak jarraitzeko txartelak goiburuko errenkadan.</string>
     <string name="settings_series_keep_watching">Telesailak Jarraitu ikusten atalean</string>
-    <string name="settings_series_keep_watching_description">Erakutsi atalak jarraitzeko txartelak goiburuko errenkadan.</string>
     <string name="settings_hero_preview">Erreproduzitu bideoa goiburuko errenkadan</string>
     <string name="settings_hero_preview_description">Aurreikusi nabarmendutako elementuaren bideoa une bat igaro ondoren. Desaktibatu energia eta memoria aurrezteko Hasieran arakatzean.</string>
     <string name="settings_android_tv_home">Android TV hasiera</string>
@@ -142,19 +138,10 @@
     <string name="settings_metadata_connection">Konexioa</string>
     <string name="settings_metadata_remote_advanced">Lortu TMDB informazio aurreratua</string>
     <string name="settings_metadata_remote_advanced_description">Erabili zure TMDB API gakoa edo auto-ostatatutako Worker bat partekatutako lehenetsiaren ordez.</string>
-    <string name="settings_open_subtitles_advanced">Aukera aurreratuak</string>
-    <string name="settings_open_subtitles_advanced_description">Erabili zure aplikazioaren API gakoa edo auto-ostatatutako OpenSubtitles Worker bat.</string>
     <string name="settings_open_subtitles_setup_title">Konfiguratu OpenSubtitles</string>
-    <string name="settings_open_subtitles_setup_description">Hasi saioa zure OpenSubtitles kontuarekin.</string>
-    <string name="settings_open_subtitles_setup_remote">Urrutikoa</string>
-    <string name="settings_open_subtitles_setup_remote_description">Bete zure datuak Wi-Fi sare berean dagoen beste gailu bateko nabigatzailean — telefonoa, tableta edo ordenagailua.</string>
-    <string name="settings_open_subtitles_setup_local">Idatzi hemen</string>
-    <string name="settings_open_subtitles_setup_local_description">Idatzi zure datuak telebista honetan urrutiko agintearekin.</string>
     <string name="settings_open_subtitles_api_key">OpenSubtitles aplikazioaren API gakoa</string>
     <string name="settings_worker_server_url">Worker / zerbitzariaren URLa</string>
     <string name="settings_shared">Partekatua</string>
-    <string name="settings_open_subtitles_access_priority">Utzi bietan hutsik OwnTVren Worker partekatua erabiltzeko. Worker URL pertsonalizatu batek lehentasuna du zuzeneko API gako baten aurretik. Kontu-saioak profilarekiko espezifikoak izaten jarraitzen dute.</string>
-    <string name="settings_remove_custom_access">Kendu sarbide pertsonalizatua</string>
     <string name="settings_metadata_key_label">Gakoa</string>
     <string name="settings_metadata_server_label">Zerbitzaria</string>
     <string name="settings_metadata_clear_advanced_title">Zure gakoa erabiltzeari utzi?</string>
@@ -191,14 +178,7 @@
     <string name="settings_quick_prefer_sdr">Hobetsi SDR</string>
     <string name="settings_line_prefer_sdr">SDR, jarioak biak eskaintzen dituenean</string>
     <string name="settings_line_quick_autoplay">Hasi hurrengo atala bere kabuz</string>
-    <string name="settings_line_live_engine">Zein motorrek irekitzen dituen kanalak, eta ordezkoa</string>
-    <string name="settings_line_saved_live_choices">Eskuz aldatu dituzun kanalak</string>
-    <string name="settings_line_vod_engine">Zein motorrek irekitzen dituen filmak eta atalak</string>
-    <string name="settings_line_saved_choices">Eskuz aldatu dituzun filmak eta atalak</string>
     <string name="settings_line_external">VLC, MX Player… atalka</string>
-    <string name="settings_line_vod_buffer">Zenbat aurrera kargatzen diren filmak</string>
-    <string name="settings_line_vod_timeout">Itxaron zerbitzari isil baten zain</string>
-    <string name="settings_line_vod_reconnects">Berrireki gelditu zen tokian</string>
     <string name="settings_line_hw">Erabili telebistaren deskodetzaile propioa</string>
     <string name="settings_line_max_quality">Irudirik altuena hainbat daudenean</string>
     <string name="settings_line_tunneled">Esperimentala · Zuzeneko telebista ExoPlayerrekin</string>
@@ -254,7 +234,6 @@
     <string name="settings_home_root">Hasierako pantaila</string>
     <string name="settings_home_root_description">Aukeratu, berrantolatu eta iragazi Hasierako errenkadak</string>
     <string name="settings_metadata_root_description">Posterrak, sinopsiak, aktoreak, generoak, balorazioak eta atzealdeak Filmetarako eta Telesailetarako.</string>
-    <string name="settings_download_folder">Deskarga-karpeta</string>
     <string name="settings_backup_restore">Babeskopia eta leheneratzea</string>
     <string name="settings_clear_history">Garbitu ikusitakoen historia</string>
     <string name="settings_appearance_group">Itxura</string>
@@ -322,11 +301,6 @@
     <string name="settings_surround_sound">Surround soinua</string>
     <string name="settings_surround_description_mobile">Deskodetu Dolby/DTS surround-era (5.1/7.1) gailu honetara konektatutako benetako 5.1/7.1 hartzaile baterako. Utzi DESAKTIBATUTA barneko bozgorailurako, aurikularretarako edo soinu-barra estereo baterako — kanal anitzek audioa bideoaren atzean utz dezakete. Desinkronizatzen bada, doitu erreproduzigailuaren Audio menua → A/B sinkronizazioa.</string>
     <string name="settings_audio_passthrough">Dolby eta DTS passthrough</string>
-    <string name="settings_audio_passthrough_description">Aktibatuta: Dolby eta DTS deskodetu gabe doaz telebistara, soinu-barrara edo hartzailera hark erreproduzitu ditzakeela esaten duenean (ExoPlayer). Desaktibatuta: aplikazioak deskodetzen ditu, Surround soinuak onartzen duen tokian surround gisa. mpvk beti deskodetzen du. Ez da erabiltzen Gau modua edo Bolumenaren berdinketa aktibatuta daudenean.</string>
-    <string name="settings_ffmpeg_audio">FFmpeg audioa ExoPlayer-entzat</string>
-    <string name="settings_ffmpeg_audio_description">Aktibatuta: ExoPlayer-ek gailuak deskodetzailerik ez duen soinua ere deskodetu dezake, adibidez DTS, TrueHD edo MP2. Gailuaren deskodetzaileek lehentasuna dute oraindik. Desaktibatuta: ExoPlayer-ek gailuaren deskodetzaileak soilik erabiltzen ditu. mpv-k beti FFmpeg bidez deskodetzen du. Aldatzean OwnTV berrabiarazten da.</string>
-    <string name="settings_line_ffmpeg_audio">Gailuak deskodetu ezin duen soinurako</string>
-    <string name="settings_ffmpeg_audio_restart_message">Audio-deskodetzailea OwnTV berrabiarazi ondoren aldatzen da.</string>
     <string name="settings_night_mode">Gau modua</string>
     <string name="settings_night_mode_description">Eszena ozenak jaisten ditu eta elkarrizketa isilak igotzen, bolumen baxuan ikusteko.</string>
     <string name="settings_volume_leveling">Bolumenaren berdinketa</string>
@@ -348,7 +322,6 @@
     <string name="settings_catchup_unavailable">Ez dago berrikusteko kanalik erreprodukzio-zerrenda honetan</string>
     <string name="settings_device">Gailua</string>
     <string name="settings_playback_error_log">Errore-egunkaria</string>
-    <string name="settings_playback_speed">Erreprodukzio-abiadura</string>
     <string name="settings_player_zoom">Erreproduzigailuaren zooma</string>
     <string name="settings_app_group">Aplikazioa</string>
     <string name="settings_app_startup">Aplikazioaren abioa</string>
@@ -425,7 +398,6 @@
     <string name="settings_vp_cat_picture">Irudia</string>
     <string name="settings_vp_cat_frame_rate">Fotograma-maiztasuna</string>
     <string name="settings_vp_cat_frame_rate_summary">Egokitu pantaila bideoari</string>
-    <string name="settings_vp_cat_streaming">Streaminga</string>
     <string name="settings_vp_cat_live_tuning">Zuzeneko doikuntza</string>
     <string name="settings_vp_cat_multiview">Multiview eta mini erreproduzigailua</string>
     <string name="settings_vp_cat_multiview_summary_mobile">Hainbat zuzeneko kanal aldi berean</string>
@@ -519,12 +491,6 @@
     <string name="settings_hardware_decoding_description">Erabili telebistaren hardware-deskodetzailea. Desaktibatu jario batzuk eten-etenka badabiltza edo artefaktuak erakusten badituzte.</string>
     <string name="settings_software_decode_above_1080p">Software bidezko deskodetzea 1080p gainetik</string>
     <string name="settings_software_decode_above_1080p_description">4K eta 1080p gaineko beste bideo batzuk software bidez erreproduzitzen ditu telebistaren hardware-deskodetzailea desaktibatuta dagoenean edo huts egiten duenean. Prozesadore azkarra behar du: telebista gehienetan eten-etenka dabil.</string>
-    <string name="settings_movies_series_player">Filmen eta Telesailen erreproduzigailua</string>
-    <string name="settings_live_tv_player">Zuzeneko telebistaren erreproduzigailua</string>
-    <string name="settings_engine_order"><xliff:g id="first">%1$s</xliff:g>, gero <xliff:g id="second">%2$s</xliff:g></string>
-    <string name="settings_engine_only"><xliff:g id="engine">%1$s</xliff:g> soilik</string>
-    <string name="settings_engine_default"><xliff:g id="option">%1$s</xliff:g> (Lehenetsia)</string>
-    <string name="settings_reset_player_choices">Berrezarri gordetako erreproduzigailu-aukerak</string>
     <string name="settings_external_player">Kanpoko erreproduzigailua</string>
     <string name="settings_default_zoom">Zoom lehenetsia</string>
     <string name="settings_default_zoom_description">Erreprodukzioa hasten denean aplikatzen den formatua/zooma.</string>
@@ -544,15 +510,6 @@
     <string name="settings_reset_saved_audio_delay_confirm_description">Kanal, film eta atal guztiak goiko audio-sinkronizaziora itzultzen dira. Gordetako zoom- eta bolumen-ezarpenak mantentzen dira. Banakako bat berriro ezar dezakezu edonoiz erreproduzigailutik.</string>
     <string name="settings_seek_step">Bilaketa-urratsa</string>
     <string name="settings_seek_step_description">Film edo atal batean atzeratzeak eta aurreratzeak zenbat egiten duen salto.</string>
-    <string name="settings_vod_buffer">Filmen bufferra</string>
-    <string name="settings_vod_buffer_description">Filmak, atalak eta berrikustea zenbat aurrera kargatzen diren. Automatikoak gailu honi egokitzen zaiona erabiltzen du. Buffer luzeago batek konexio txarra hobeto jasaten du; gailu honen memoriak mugak jartzen jarraitzen du, beraz bitrate altuko film batek aukeratutakoa baino gutxiago gorde dezake.</string>
-    <string name="settings_vod_network_timeout">Sare-denbora-muga</string>
-    <string name="settings_vod_network_timeout_description">Filmek, atalek eta berrikusteak zerbitzari isil baten zain zenbat egoten diren konexioa galdutzat jo aurretik. Automatikoak erreproduzigailu bakoitzaren itxaronaldia mantentzen du: 60 segundo mpv-n, 20 ExoPlayerren.</string>
-    <string name="settings_vod_reconnects">Birkonexio-saiakerak</string>
-    <string name="settings_vod_reconnects_description">Konexioa galtzen duen film edo atal bat gelditu zen tokian zenbat aldiz berrireki behar den errore bat erakutsi aurretik. Minutu bateko erreprodukzio egonkorrak saiakerak berreskuratzen ditu.</string>
-    <string name="settings_vod_network_auto">Automatikoa</string>
-    <string name="settings_live_rewind_step">Zuzeneko atzeratze-urratsa</string>
-    <string name="settings_live_rewind_step_description">Zuzeneko kanal batean atzeratzeak eta aurreratzeak zenbat mugitzen duen: bere berrikusteko artxiboan, edo Pausatu eta atzeratu zuzeneko telebista aukerak gordetako kopian.</string>
     <string name="settings_resume_playback">Jarraitu erreprodukzioa</string>
     <string name="settings_resume_playback_description">Zer egin film edo atal batek gordetako posizioa duenean.</string>
     <string name="settings_subtitle_appearance">Azpitituluen itxura</string>
@@ -564,11 +521,9 @@
     <string name="settings_preferred_audio_language_description">Audio-pista hau erreproduzitzen du jarioak daukanean. \"Jatorrizko hizkuntza\"k filmak eta telesailak egin ziren hizkuntzan erreproduzitzen ditu.</string>
     <string name="settings_open_subtitles">OpenSubtitles</string>
     <string name="settings_open_subtitles_connected">Konektatuta</string>
-    <string name="settings_open_subtitles_reset_in"><xliff:g id="hours">%1$d</xliff:g>h <xliff:g id="minutes">%2$d</xliff:g>m barru</string>
     <string name="settings_open_subtitles_description">Hasi saioa azpitituluak bilatzeko eta deskargatzeko, eta deskargatutako azpitituluak kudeatzeko. Profilaka; opensubtitles.com kontu doakoa behar da.</string>
     <string name="settings_preferred_audio_language">Audio-hizkuntza hobetsia</string>
     <string name="settings_audio_sync">Audio-sinkronizazioa</string>
-    <string name="settings_audio_sync_description">Aurreratu edo atzeratu audioa bideoarekin bat etor dadin. Bi erreproduzigailuekin funtzionatzen du (mpv eta ExoPlayer).</string>
     <string name="settings_output_audio_delay">Irteera honen atzerapena</string>
     <string name="settings_output_audio_delay_description">«Audio-sinkronizazioa» ezarpenari gehitzen zaio eta irteera bakoitzerako bereiz gordetzen da: HDMI, HDMI ARC bidezko soinu-barra, Bluetooth, bozgorailu integratuak, entzungailuak. Doitu irteera horretatik entzuten ari zarela.</string>
     <string name="settings_audio_output_speaker">Bozgorailu integratuak</string>
@@ -579,8 +534,6 @@
     <string name="settings_line_sub_lang">Aktibatu azpitituluak hizkuntza honetan</string>
     <string name="settings_line_sub_style">Tamaina, kolorea, kokalekua, atzealdea</string>
     <string name="settings_title_fonts">Letra-tipoak &amp; testu-tamaina</string>
-    <string name="settings_title_saved_live_choices">Gordetako zuzeneko telebistaren erreproduzigailu-aukerak</string>
-    <string name="settings_title_saved_choices">Gordetako erreproduzigailu-aukerak</string>
     <string name="settings_title_tunneled">Tunel bidezko erreprodukzioa</string>
     <string name="settings_title_saved_zoom">Gordetako zooma</string>
     <string name="settings_title_saved_volume">Gordetako bolumena</string>
@@ -589,21 +542,15 @@
     <string name="settings_line_live_preview">Erreproduzitu fokuan dagoen kanala</string>
     <string name="settings_line_timeshift">Berrikusterik gabeko kanalak, ikusten dituzun bitartean gordeta</string>
     <string name="settings_line_timeshift_window">Zenbat atzera egin dezakezun</string>
-    <string name="settings_line_left_right">Kontrolak ezkutatuta daudela</string>
     <string name="settings_line_latency">Zuzenekotik zenbat gertu erreproduzitu</string>
     <string name="settings_line_preroll">Kanal bat hasi aurretik bildutako bideoa</string>
     <string name="settings_line_tune_timeout">Utzi saiatzeari eta esan</string>
     <string name="settings_line_seek_step">Zenbat salto egiten duten atzeratzeak eta aurreratzeak film batean</string>
-    <string name="settings_line_rewind_step">Zenbat salto egiten duten zuzeneko kanal batean</string>
     <string name="settings_line_resume">Film batek gordetako posizioa duenean</string>
     <string name="settings_line_autoplay">Eta hurrengo denboraldira</string>
     <string name="settings_line_tiles">Lauki bakoitza beste jario bat da</string>
     <string name="settings_line_mini">Tamaina eta kokalekua</string>
     <string name="settings_line_pip">Jarraitu ikusten leiho txiki batean</string>
-    <string name="settings_line_rec_reserve">Ez grabatu inoiz konexio guztietan</string>
-    <string name="settings_line_rec_watching">Ez bigarren jario bat</string>
-    <string name="settings_line_rec_pre_roll">Programa hasi aurretik</string>
-    <string name="settings_line_rec_post_roll">Luzatzen diren programetarako</string>
     <string name="settings_line_measured_stats">Zuzeneko fps, bitrate eta galdutako fotogramak</string>
     <string name="settings_line_logging">Trazu osoa akats-txostenetarako</string>
     <string name="settings_help_profiles">Ikusle bakoitzak bere gogokoak, ikusitakoen historia, jarraitzeko puntuak eta Hasierako errenkadak mantentzen ditu. Haurren moduak baimentzen dituzun kategoriak soilik erakusten ditu; PIN batek besteek profila ireki ez dezaten eragozten du.</string>
@@ -615,8 +562,6 @@
     <string name="settings_live_latency_bitrate_note">Bitrate oso altuko kanal batean — batez ere 4K — baliteke bufferrak eskatu baino denbora gutxiago gordetzea, memorian aldi berean gorde daitekeen bideo-kopurua mugatuta dagoelako.</string>
     <string name="settings_channel_numbers">Kanal-zenbakiak</string>
     <string name="settings_channel_numbers_description">Erakutsi zure hornitzailearen kanal-zenbakia izenaren ondoan Zuzeneko telebistaren zerrendan, kanal-zerrendaren gainjartzean eta erreproduzigailuan — eta idatzi zenbaki bat urrutiko agintean pantaila osoko erreprodukzioan kanal horretara zuzenean saltatzeko (Ados-ek berehala sintonizatzen du, Atzera-k bertan behera uzten du). Desaktibatuta, zenbaki guztiak ezkutatzen dira eta zenbaki-teklak ez dira kontuan hartzen; ez da ezer galtzen, eta berriro aktibatzeak berrezartzen ditu.</string>
-    <string name="settings_live_left_right_rewinds">Ezkerrak eta eskuinak zuzeneko telebista atzeratzen dute</string>
-    <string name="settings_live_left_right_rewinds_description">Kontrolak ezkutatuta daudela, Ezkerrak eta Eskuinak atzeratzen eta aurreratzen dute atzera daitezkeen kanaletan (berrikustea, edo Pausatu eta atzeratu zuzeneko telebistak gordeta), kanal-zerrenda eta historia ireki beharrean.</string>
     <string name="settings_timeshift">Pausatu eta atzeratu zuzeneko telebista</string>
     <string name="settings_timeshift_description">Berrikusterik gabeko kanalak gailu honetan gordetzen dira pantaila osoan ikusten dituzun bitartean, pausatu eta atzeratu ahal izateko. Etengabe idazten du biltegiratzean; gutxienez 1 GB libre geratzen da beti.</string>
     <string name="settings_timeshift_window">Atzeratzearen luzera</string>
@@ -643,37 +588,18 @@
     <string name="settings_custom_live_buffer">Zuzeneko buffer pertsonalizatua</string>
     <string name="settings_live_buffer_seconds"><xliff:g id="seconds">%1$d</xliff:g>s</string>
     <string name="settings_audio_delay"><xliff:g id="delay">%1$d</xliff:g> ms</string>
-    <string name="settings_external_player_description">Aukeratu zein ataletan irekitzen den kanpoko aplikazio batean.</string>
     <string name="settings_audio_delay_value"><xliff:g id="delay">%1$d</xliff:g> ms</string>
-    <string name="settings_movies_player_description">mpv-k (gomendatua) formatu-euskarri zabalena du — DTS/TrueHD audioa, fitxategi bereziak. ExoPlayerrek mpv-k ezin dituen jario batzuk erreproduzitzen ditu telebista batzuetan, baina ezin du DTS/TrueHD audiorik deskodetu. Aukera konbinatuek beste erreproduzigailua automatikoki saiatzen dute lehenengoak huts egiten duenean; erreproduzigailu bakarreko aukerek ez dute inoiz egiten, eta horrek pantaila beltzeko segundo batzuk aurrezten ditu bigarren erreproduzigailuak zure telebistan inoiz funtzionatzen ez badu.</string>
-    <string name="settings_movies_player_description_mobile">mpv-k (gomendatua) formatu-euskarri zabalena du — DTS/TrueHD audioa, fitxategi bereziak. ExoPlayerrek mpv-k ezin dituen jario batzuk erreproduzitzen ditu gailu batzuetan, baina ezin du DTS/TrueHD audiorik deskodetu. Aukera konbinatuek beste erreproduzigailua automatikoki saiatzen dute lehenengoak huts egiten duenean; erreproduzigailu bakarreko aukerek ez dute inoiz egiten, eta horrek pantaila beltzeko segundo batzuk aurrezten ditu bigarren erreproduzigailuak zure gailuan inoiz funtzionatzen ez badu.</string>
-    <string name="settings_live_player_description">ExoPlayerrek (gomendatua) kanalak askoz azkarrago irekitzen ditu eta zuzeneko azpitituluak dituen bakarra da. mpv-k ExoPlayerrek ezin dituen kanalak erreproduzitzen ditu, audio bereziko batzuk barne. Aukera konbinatuek beste erreproduzigailua automatikoki saiatzen dute lehenengoak huts egiten duenean; erreproduzigailu bakarreko aukerek ez dute inoiz egiten, eta horrek pantaila beltzeko segundo batzuk aurrezten ditu bigarren erreproduzigailuak zure telebistan inoiz funtzionatzen ez badu. Erreproduzigailuan eskuz aldatzen duzun kanal batek zure aukera mantentzen du, nolanahi ere.</string>
-    <string name="settings_reset_player_choices_description">Film edo atal bakar bat mpv eta ExoPlayer artean aldatzeak aukera hori gordetzen du hurrengo aldirako. Berrezartzeak dena goiko ezarpena berriro jarraitzera behartzen du. Zuzeneko kanalen gordetako aukerak mantentzen dira.</string>
     <string name="settings_reset_player_choices_none">Ez dago ezer gordeta</string>
     <plurals name="settings_reset_player_choices_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> gordeta</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> gordeta</item>
     </plurals>
-    <string name="settings_reset_player_choices_confirm">Berrezarri gordetako erreproduzigailu-aukerak?</string>
-    <string name="settings_reset_player_choices_confirm_description">Film eta atal guztiak “Filmen eta Telesailen erreproduzigailua” ezarpenera itzultzen dira. Banakako bat berriro alda dezakezu edonoiz erreproduzigailutik.</string>
-    <string name="settings_reset_live_player_choices">Berrezarri gordetako zuzeneko telebistaren erreproduzigailu-aukerak</string>
-    <string name="settings_reset_live_player_choices_description">Kanal bat ExoPlayer eta mpv artean aldatzeak aukera hori gordetzen du kanalarentzat. Berrezartzeak kanal guztiak “Zuzeneko telebistaren erreproduzigailua” ezarpena berriro jarraitzera behartzen ditu. Filmen eta atalen gordetako aukerak mantentzen dira.</string>
-    <string name="settings_reset_live_player_choices_confirm">Berrezarri gordetako zuzeneko telebistaren erreproduzigailu-aukerak?</string>
-    <string name="settings_reset_live_player_choices_confirm_description">Kanal guztiak “Zuzeneko telebistaren erreproduzigailua” ezarpenera itzultzen dira. Banakako bat berriro alda dezakezu edonoiz erreproduzigailutik.</string>
     <string name="settings_external_player_row_description">Ireki jarioak kanpoko aplikazio batean (VLC, MX Player) barneko erreproduzigailuaren ordez, atalka aukeratuta. Baliagarria aplikazio honek deskodetu ezin dituen jarioetarako, edo beste erreproduzigailu bat nahiago baduzu. Jarraitzeko posizioa eta aurrekoa/hurrengoa ez daude erabilgarri kanpoko erreprodukzioan; User-Agent pertsonalizatua edo referer behar duten jarioak baliteke ez erreproduzitzea.</string>
     <string name="settings_resume_always">Jarraitu beti</string>
     <string name="settings_resume_ask">Galdetu jarraitzeko</string>
     <string name="settings_resume_never">Ez jarraitu inoiz</string>
-    <string name="settings_delete_subtitles">Ezabatu azpitituluak</string>
-    <string name="settings_delete_all">Ezabatu guztiak</string>
     <string name="settings_movies">Filmak</string>
     <string name="settings_series">Telesailak</string>
-    <string name="settings_no_downloaded_subtitles">Ez dago deskargatutako <xliff:g id="section">%1$s</xliff:g> azpitidulurik.</string>
-    <string name="settings_delete_subtitle">Ezabatu azpititulua</string>
-    <string name="settings_delete_subtitle_message">Ezabatu <xliff:g id="name">%1$s</xliff:g> azpititulua “<xliff:g id="title">%2$s</xliff:g>” izenburuarentzat? Geroago berriro deskargatu daiteke.</string>
-    <string name="settings_delete_all_subtitles">Ezabatu azpititulu guztiak</string>
-    <string name="settings_delete_all_movies">Ezabatu film guztiak</string>
-    <string name="settings_delete_all_series">Ezabatu telesail guztiak</string>
     <string name="settings_section_count"><xliff:g id="section">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g>)</string>
     <string name="settings_sync_guide_question">Telebista-gida orain sinkronizatu?</string>
     <string name="settings_sync_guide_description">Deskargatu “<xliff:g id="source">%1$s</xliff:g>” iturburuaren programa-gida (EPG). Geroago ere egin dezakezu Ezarpenak → Iturburuak eta gida → EPG iturburuak atalean.</string>
@@ -699,10 +625,6 @@
     <string name="settings_surface_transparency"><xliff:g id="percent">%1$d</xliff:g>%%</string>
     <string name="settings_catchup_timezone_automatic">Automatikoa</string>
     <string name="settings_catchup_timezone_device">Gailua</string>
-    <string name="settings_catchup_player_ask">Galdetu beti</string>
-    <string name="settings_catchup_player_internal">OwnTV erreproduzigailua</string>
-    <string name="settings_catchup_player_external">Kanpoko erreproduzigailua</string>
-    <string name="settings_download_folder_title">Aukeratu deskarga-karpeta</string>
     <string name="settings_pick_background_title">Aukeratu atzealdeko irudi bat</string>
     <string name="settings_theme_dialog">Gaia</string>
     <string name="settings_app_startup_dialog">Aplikazioaren abioa</string>
@@ -724,7 +646,6 @@
     <string name="settings_browsing_last_item_description">Kategoria bakoitzak bere korritze-posizioa mantentzen du goian hasi beharrean. Zuzeneko telebistak fokuan egon zen azken kanala ere leheneratzen du.</string>
     <string name="settings_browsing_live_categories">Zuzeneko telebistaren kategoriak</string>
     <string name="settings_browsing_live_categories_description">Zuzeneko telebistan, gidan, erreproduzigailuan eta Multiview-n erakusten dira. Kanal guztiak desaktibatuta badago, zuzeneko telebista zure lehen kategorian irekitzen da, edo Gogokoetan kategoriarik ez baduzu.</string>
-    <string name="settings_catchup_player">Erreproduzitu berrikustea hemen</string>
     <string name="settings_customize_title">Pertsonalizatu kategoriak eta elementuak</string>
     <string name="settings_customize_pin_locked">Pantaila hau PINez blokeatuta dago.</string>
     <string name="settings_customize_wrong_pin">PIN okerra — saiatu berriro</string>
@@ -751,8 +672,6 @@
     <string name="settings_customize_behavior_hide">Ezkutatu</string>
     <string name="settings_customize_behavior_show">Erakutsi</string>
     <string name="settings_customize_hidden_channels">Ezkutatutako kanalak</string>
-    <string name="settings_customize_hidden_movies">Ezkutatutako filmak</string>
-    <string name="settings_customize_hidden_series">Ezkutatutako telesailak</string>
     <string name="settings_customize_unhide_description">Erakutsi elementu bat zerrendetara itzultzeko.</string>
     <string name="settings_customize_categories">Kategoriak</string>
     <string name="settings_customize_empty">Ez dago kategoriarik atal honetan oraindik — gehitu iturburu bat lehenik.</string>
@@ -1071,8 +990,6 @@
     <string name="settings_customize_delete_category">Ezabatu “<xliff:g id="name">%1$s</xliff:g>”?</string>
     <string name="settings_customize_delete_category_description">Kategoria konbinatua kentzen da. Bere elementuak jatorrizko kategorietan geratzen dira.</string>
     <string name="settings_customize_channels_description">Kategoria honetako kanalak — aldatu izena, berrantolatu, ezkutatu edo erakutsi.</string>
-    <string name="settings_customize_movies_description">Kategoria honetako filmak — berrantolatu, ezkutatu edo erakutsi.</string>
-    <string name="settings_customize_series_description">Kategoria honetako telesailak — berrantolatu, ezkutatu edo erakutsi.</string>
     <string name="settings_customize_hide_show_items">Ezkutatu edo erakutsi elementuak</string>
     <plurals name="settings_customize_selected_items">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> elementu hautatuta.</item>
@@ -1084,7 +1001,6 @@
     </plurals>
     <string name="settings_customize_rename_item_hint">Profil honetarako soilik. Utzi hutsik “<xliff:g id="name">%1$s</xliff:g>” berrezartzeko.</string>
     <string name="settings_customize_item_was">lehen “<xliff:g id="name">%1$s</xliff:g>” zen</string>
-    <string name="settings_customize_rename_items">✎ Aldatu elementuen izena</string>
     <string name="settings_customize_move_to">Mugitu hona…</string>
     <string name="settings_customize_back">← Atzera</string>
     <string name="settings_move_category_title">Mugitu kategoriara</string>
@@ -1100,7 +1016,6 @@
     <string name="settings_dns_server_hint">8.8.8.8 edo https://dns.google/dns-query</string>
     <string name="settings_dns_test">Probatu DNSa</string>
     <string name="settings_dns_explanation">DNS pertsonalizatuak ISPren mailako domeinu-blokeoak saihesten edo geo-desblokeoa ahalbidetzen lagun dezake SmartDNS zerbitzuen bidez. DNS-over-HTTPS (DoH) gomendatzen da — zure bilaketak enkriptatzen ditu.</string>
-    <string name="settings_dns_limitations">Ezarpen honek OkHttp oinarritutako trafikoari soilik eragiten dio (erreprodukzio-zerrenden sinkronizazioa, EPG, API deiak, irudiak, ExoPlayer jarioak). mpv-k sistemaren ebazlea erabiltzen du eta ez du eraginik jasotzen.</string>
     <string name="settings_dns_resolved">Proba gainditu da ✓ (<xliff:g id="millis">%1$d</xliff:g> ms)</string>
     <string name="settings_dns_enter_server">Idatzi DNS zerbitzari baten ostalaria edo DoH URL bat.</string>
     <string name="settings_dns_not_reachable">DNS zerbitzaria ez dago eskuragarri.</string>
@@ -1142,14 +1057,10 @@
     <string name="settings_live_tune_timeout_description">Zuzeneko kanal batek ordu honetarako irudirik erakutsi ez badu, OwnTVk saiatzeari uzten dio eta jakinarazten dizu, pantaila beltza utzi beharrean bere erreproduzigailu guztiak probatzen dituen bitartean. Inoiz ez saiatzen jarraitzen du, eta horrek minutu bat baino gehiago iraun dezake zure hornitzaileak kendu duen kanal batean. Hornitzaileak eskatutako itxaronaldiak ez dira kontatzen.</string>
     <string name="settings_live_preroll_per_playlist">Aurrebufferra erreprodukzio-zerrendaka</string>
     <string name="settings_live_preroll_per_playlist_description">Gainidatzi goiko ezarpena erreprodukzio-zerrenda baterako, zure beste erreprodukzio-zerrendak azkar mantenduz.</string>
-    <string name="settings_live_engine_per_playlist">Zuzeneko telebistaren erreproduzigailua erreprodukzio-zerrendaka</string>
-    <string name="settings_live_engine_per_playlist_description">Gainidatzi goiko ezarpena erreprodukzio-zerrenda baterako, bere kanalak erreproduzigailu batek bakarrik ondo kudeatzen dituen hornitzaile baterako.</string>
     <string name="settings_live_latency_per_playlist">Zuzeneko latentzia erreprodukzio-zerrendaka</string>
     <string name="settings_live_latency_per_playlist_description">Gainidatzi goiko ezarpena erreprodukzio-zerrenda baterako, besteek baino buffer sakonagoa edo azalagoa behar duen hornitzaile baterako.</string>
     <string name="settings_catchup_timezone_per_playlist">Berrikusteko ordu-zona erreprodukzio-zerrendaka</string>
     <string name="settings_catchup_timezone_per_playlist_description">Gainidatzi goiko ordu-zona erreprodukzio-zerrenda baterako, bere artxiboa beste erloju batean dabilen hornitzaile baterako.</string>
-    <string name="settings_vod_engine_per_playlist">Filmen eta Telesailen erreproduzigailua erreprodukzio-zerrendaka</string>
-    <string name="settings_vod_engine_per_playlist_description">Gainidatzi goiko ezarpena erreprodukzio-zerrenda baterako, bere filmak eta atalak erreproduzigailu batek bakarrik ondo kudeatzen dituen hornitzaile baterako.</string>
     <string name="settings_live_tune_timeout_per_playlist">Utzi honen ondoren, erreprodukzio-zerrendaka</string>
     <string name="settings_live_tune_timeout_per_playlist_description">Gainidatzi goiko ezarpena erreprodukzio-zerrenda baterako, bere kanalak hasteko motelak edo maiz hilda daudenak dituen hornitzaile baterako.</string>
     <plurals name="settings_live_preroll_overrides">
@@ -1235,8 +1146,6 @@
     <string name="settings_data_saver">Datu-aurrezlea</string>
     <string name="settings_data_saver_description">Ez egin streaming datu mugikorrekin</string>
     <string name="settings_gesture_sensitivity">Keinuen sentikortasuna</string>
-    <string name="settings_downloads_wifi_only">Deskargatu Wi-Fi bidez soilik</string>
-    <string name="settings_downloads_wifi_only_description">Itxaron Wi-Fi sarera datu mugikorrak erabili beharrean</string>
     <string name="settings_mini_player_style_description">Erreprodukzioak arakatzen zaren bitartean nola jarraitzen zaituen</string>
     <string name="settings_mini_player_style_floating">Leiho flotatzailea</string>
     <string name="settings_mini_player_style_docked">Barra ainguratua</string>
@@ -1340,7 +1249,6 @@
     <string name="more_group_your_things">Zure gauzak</string>
     <string name="more_group_keep_safe">Mantendu seguru</string>
     <string name="more_profile_switch">Aldatu</string>
-    <string name="more_fav_movies_series">Filmak &amp; Telesailak</string>
     <string name="more_fav_empty_title">Oraindik ez dago gogokorik</string>
     <string name="more_fav_empty_body">Eutsi Ados kanal, film edo saio batean eta aukeratu Gehitu gogokoetara.</string>
     <string name="settings_backup_location">Kokalekua</string>
@@ -1464,7 +1372,6 @@
     <string name="settings_line_remote_shortcuts">Esleitu urrutiko aginteko botoi libreak</string>
     <string name="settings_line_customize">Ezkutatu eta erakutsi, aldatu izena eta berrantolatu</string>
     <string name="settings_line_metadata">Posterrak, sinopsiak, aktoreak eta balorazioak Filmetarako eta Telesailetarako</string>
-    <string name="settings_line_open_subtitles">Bilatu eta deskargatu azpitituluak</string>
     <string name="settings_line_app_icon">Abiarazlearen ikonoa</string>
     <string name="settings_line_brand_accent">Logotipoaren play triangelua zure azentu-koloreaz</string>
     <string name="settings_line_check_updates">Lortu azken bertsioa GitHubetik</string>
@@ -1527,10 +1434,6 @@
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> ainguratuta</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> ainguratuta</item>
     </plurals>
-    <plurals name="more_downloads_running_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> martxan</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> martxan</item>
-    </plurals>
     <string name="more_fav_empty_body_mobile">Eduki sakatuta kate, film edo serie bat eta aukeratu “Gehitu gogokoetara”.</string>
     <string name="more_history_empty">Oraindik ez da ezer ikusi</string>
     <string name="more_backup_never_title">Inoiz ez da babeskopiarik egin</string>
@@ -1547,7 +1450,6 @@
     <string name="settings_line_vod_view_mobile">Kategoria bat nola irekitzen den</string>
     <string name="settings_guide_size_mobile">Gidaren tamaina</string>
     <string name="settings_line_guide_size_mobile">Saretak aldi berean zenbat denbora erakusten duen</string>
-    <string name="settings_line_download_folder_mobile">Filmak, atalak eta grabazioak nora doazen</string>
     <string name="settings_browsing_value_both">Biak</string>
     <plurals name="settings_home_rows_count">
         <item quantity="one">Errenkada <xliff:g id="count">%1$d</xliff:g></item>
@@ -1557,7 +1459,6 @@
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> ezkutuan</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> ezkutuan</item>
     </plurals>
-    <string name="settings_catchup_timezone_label">Ordu-zona</string>
     <string name="settings_help_add_from_phone_mobile">Ireki helbidea edo eskaneatu kodea Wi-Fi bereko edozein gailuren arakatzailean —ordenagailua, tableta edo telebista—, bete han zure erreprodukzio-zerrenda eta bidali hona. Telefonoan URL bat idaztea baino askoz azkarragoa.</string>
     <string name="settings_line_add_type_here_mobile">Xtream, M3U edo Stalker</string>
     <string name="setup_local_file_hint_mobile">.m3u edo .m3u8 telefono honetan</string>
@@ -1600,10 +1501,6 @@
     <plurals name="settings_epg_line_programmes">
         <item quantity="one">Saio <xliff:g id="count">%1$s</xliff:g></item>
         <item quantity="other"><xliff:g id="count">%1$s</xliff:g> saio</item>
-    </plurals>
-    <plurals name="settings_epg_line_catchup">
-        <item quantity="one">atzera ikusi <xliff:g id="count">%1$s</xliff:g> katetan</item>
-        <item quantity="other">atzera ikusi <xliff:g id="count">%1$s</xliff:g> katetan</item>
     </plurals>
     <string name="settings_line_bg_picture_none_mobile">Aukeratu irudi bat telefono honetatik</string>
     <string name="settings_bg_picture_from_phone"><xliff:g id="file" example="sunset.jpg">%1$s</xliff:g> · telefono honetatik</string>
@@ -1655,7 +1552,6 @@
     <string name="settings_help_auto_start_boot">OwnTV bere kabuz irekitzen du telebista abiarazi ondoren, Aplikazioaren abioa ezarpenean aukeratutako pantailan. Android-ek aplikazio bati bere kabuz irekitzen uzten dio beste aplikazioen gainean bistara badaiteke soilik; beraz, hau aktibatzean baimen horren pantaila irekitzen da. Telebista batzuek ez dute eskaintzen, eta haietan abiarazte automatikoak ezin du funtzionatu.</string>
     <string name="settings_help_auto_start_wake">OwnTV irekitzen du telebista lo-egoeratik esnatzen den bakoitzean, beste aplikazio baterako esnatu baduzu ere. Aplikazioaren abioak kanal bat irekitzen badu, esnatze bakoitzak jario hori abiarazten du. Aktibatuta dagoen bitartean, OwnTV-k atzeko planoko zerbitzu txiki bat mantentzen du jakinarazpen isil batekin. Piztean abiaraztea bezala, beste aplikazioen gainean bistaratzeko baimena behar du.</string>
     <string name="settings_help_dns">Zure hornitzailearen helbideak zuk aukeratutako DNS zerbitzari batekin bilatzen ditu zure sarearen berberaren ordez — baliagarria zure sareak blokeatu edo birbideratzen dituenean.</string>
-    <string name="settings_help_live_engine">ExoPlayerrek kanalak askoz azkarrago irekitzen ditu eta zuzeneko azpitituluak dituen bakarra da. mpv-k ExoPlayerrek ezin dituen kanalak erreproduzitzen ditu, audio bereziko batzuk barne. Aukera konbinatuek beste erreproduzigailua saiatzen dute lehenengoak huts egiten duenean.</string>
     <string name="settings_help_hw">Telebistaren hardware-deskodetzailea erabiltzen du: 4K leuna eta bero gutxiago. Desaktibatu soilik jario batzuk eten-etenka badabiltza edo blokeak erakusten badituzte; orduan software bidezko deskodetzaileak egiten du lana.</string>
     <string name="settings_help_volume">Kanal, film eta atal guztiak zein bolumenetan hasten diren. 100%% gainetik jario isilak anplifikatzen dira. Erreproduzigailuan aldatzen duzun bolumena izenburu horretarako gordetzen da berrezarri arte.</string>
     <string name="settings_help_channel_numbers">Zure hornitzailearen kanal-zenbakia izenaren ondoan erakusten du Zuzeneko telebistaren zerrendan, kanal-zerrendaren gainjartzean eta erreproduzigailuan, eta pantaila osoan urrutiko agintean zenbaki bat idazten uzten du kanal horretara saltatzeko.</string>
@@ -1711,7 +1607,6 @@
     <string name="settings_clock_color_accent">Azentua</string>
     <string name="settings_clock_color_help">Ados-ek kolore-hautatzailea irekitzen du (aurrezarpenak, paleta edo hex kodea), Azentu-koloreak erabiltzen duen bera. Aurrebista mugitzen zarenean jarraitzen du.</string>
     <string name="settings_key_pick_color">Aukeratu kolorea</string>
-    <string name="settings_line_trending_layout">Joeren errenkada nola marrazten den</string>
     <string name="settings_home_shown">Erakusten da</string>
     <string name="settings_home_hide_row">Ezkutatu errenkada hau</string>
     <string name="settings_home_show_row">Erakutsi errenkada hau</string>
@@ -1723,21 +1618,9 @@
     <string name="settings_line_metadata_source">Filmen &amp; Telesailen xehetasunak nondik datozen</string>
     <string name="settings_line_metadata_language">TMDBren sinopsiak, generoak eta izenburuak</string>
     <string name="settings_line_metadata_advanced">Zure gako propioa edo auto-ostatatutako Worker bat</string>
-    <string name="settings_line_os_advanced">Zure API gako propioa edo Worker bat</string>
-    <string name="settings_line_os_filter">Aukeratutako hizkuntza soilik</string>
-    <string name="settings_line_os_search_language">Bilaketa-emaitzetan erakusten da</string>
-    <string name="settings_subtitle_delete_help">Ezabatzeak lekua askatzen du; erreproduzigailutik berriro deskarga dezakezu.</string>
     <plurals name="settings_home_row_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> errenkada</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> errenkada</item>
-    </plurals>
-    <plurals name="settings_subtitles_downloaded_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> deskargatuta</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> deskargatuta</item>
-    </plurals>
-    <plurals name="settings_subtitle_file_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> fitxategi</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> fitxategi</item>
     </plurals>
     <string name="settings_line_add_from_phone">Bete formularioa beste gailu bateko nabigatzailean</string>
     <string name="settings_add_type_here">Idatzi hemen</string>

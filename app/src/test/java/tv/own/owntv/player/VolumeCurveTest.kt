@@ -1,21 +1,16 @@
 package tv.own.owntv.player
 
 import kotlin.math.log10
-import kotlin.math.pow
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * One HUD volume number, one loudness, whichever engine plays. mpv's 150 % used to be +10.6 dB and
- * ExoPlayer's +3.5 dB, and the audio-focus duck (a quarter of the HUD number) muted mpv outright.
+ * One HUD volume number, one loudness. The curve the engine applies is exactly the one the HUD
+ * number promises: linear amplitude up to 100 %, a dB ramp above it.
  */
 class VolumeCurveTest {
 
     private fun db(amplitude: Double) = 20 * log10(amplitude)
-
-    /** What mpv actually plays for a `volume` property value: `(volume/100)³`. */
-    private fun mpvGain(mpvVolume: Double) = (mpvVolume / 100).pow(3)
 
     @Test
     fun `up to 100 percent the number is linear amplitude`() {
@@ -31,24 +26,11 @@ class VolumeCurveTest {
     }
 
     @Test
-    fun `mpv plays the same loudness ExoPlayer does`() {
-        for (p in listOf(10, 25, 50, 80, 100, 130, 150)) {
-            val exo = VolumeCurve.amplitude(p)
-            assertEquals("at $p %", exo, mpvGain(VolumeCurve.mpvVolume(p)), 1e-9)
-        }
-    }
-
-    @Test
     fun `ExoPlayer's boost adds exactly the dB above unity`() {
         assertEquals(0, VolumeCurve.boostMillibels(100))
         assertEquals(0, VolumeCurve.boostMillibels(60))
         assertEquals(600, VolumeCurve.boostMillibels(130))
         assertEquals(db(VolumeCurve.amplitude(130)) * 100, VolumeCurve.boostMillibels(130).toDouble(), 1.0)
-    }
-
-    @Test
-    fun `mpv never needs more than its volume-max`() {
-        assertTrue(VolumeCurve.mpvVolume(150) <= 150.0)
     }
 
     @Test

@@ -1,7 +1,7 @@
 package tv.own.owntv.player
 
 /**
- * Shared resolution classifier for both playback engines (ExoPlayer live preview and mpv), so a
+ * Shared resolution classifier for the live engines (preview, Multiview pool, hero), so a
  * channel never reports one quality on one engine and another on the other.
  *
  * Provider streams are frequently cinemascope or otherwise letterbox-cropped (3840×1600, 1920×800,
@@ -9,7 +9,7 @@ package tv.own.owntv.player
  * feed as "720p". Width survives a vertical crop, so we derive the 16:9-equivalent height from the
  * width and classify on whichever of the two implies the higher class.
  *
- * When width is unknown (some mpv property updates report height first) we fall back to height
+ * When width is unknown (some decoder callbacks report height first) we fall back to height
  * alone rather than dropping the label entirely — a slightly conservative label beats no label.
  *
  * Anything below 480p is reported as its true height ("360p"), never rounded up to a standard.

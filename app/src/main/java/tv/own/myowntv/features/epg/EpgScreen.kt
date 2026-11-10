@@ -27,7 +27,6 @@ import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -41,7 +40,6 @@ import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
 import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
@@ -50,7 +48,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.focusGroup
@@ -116,8 +113,6 @@ import tv.own.myowntv.R
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.live.LiveKey
-import tv.own.owntv.core.model.RecordingStatus
-import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.myowntv.features.live.LiveCategories
 import tv.own.myowntv.features.live.LiveViewModel
 import tv.own.myowntv.features.live.OkAction
@@ -149,7 +144,6 @@ private fun epgMessageText(message: EpgMessage): String = when (message) {
 /** The one line an auto-match outcome reads as — beside the Guide's button, and in the shell's toast off it. */
 @Composable
 internal fun epgMatchSummaryText(summary: EpgMatchSummary): String = when (summary) {
-    EpgMatchSummary.CatchupUnavailable -> stringResource(R.string.content_epg_catchup_unavailable)
     EpgMatchSummary.MatchedNoProgrammes -> stringResource(R.string.content_epg_matched_no_programmes)
     EpgMatchSummary.AddPlaylist -> stringResource(R.string.content_epg_add_playlist_first)
     EpgMatchSummary.NoData -> stringResource(R.string.content_epg_no_match_data)
@@ -172,9 +166,6 @@ private fun programmeAt(progs: List<EpgProgrammeEntity>?, time: Long): EpgProgra
 
 /** Across a gap the cursor moves by half an hour, rather than leaping hours to the next programme. */
 private const val GAP_STEP_MS = 30L * 60 * 1000
-
-/** How long a catch-up row stays on screen before its past days are asked for. */
-private const val ARCHIVE_ROW_VISIBLE_MS = 600L
 
 /** Cursor passed to rows that are not focused, so a cursor move does not recompose them. */
 internal const val NO_CURSOR = -1L
@@ -227,8 +218,8 @@ private fun cursorStep(progs: List<EpgProgrammeEntity>, cursor: Long, dir: Int, 
  * the ruler with the now-line; 8 slim rows of channel labels and programme cells.
  *
  * Each row's programmes are one focus target with a time cursor (◀ ▶ move it programme by programme,
- * ▲ ▼ step rows at the same time), so a week of guide stays one node per row. OK watches — the channel,
- * or a programme that has been on from the archive; holding OK or ☰ opens the programme menu.
+ * ▲ ▼ step rows at the same time), so a week of guide stays one node per row. OK watches the
+ * channel; holding OK or ☰ opens the programme menu.
  *
  * With [liveMode] this is Live TV's Guide view: the category is Live TV's own, the title says
  * Live TV, and List view goes back to the channel list.
@@ -242,12 +233,9 @@ fun EpgScreen(
     restoreFocus: Boolean = false,
     onRestored: () -> Unit = {},
     /** Required: every live tune in the app goes through the one shared path in LiveViewModel, so a
-     *  channel gets the same Prefer HLS handling, ExoPlayer→mpv ladder, per-channel engine pin and
+     *  channel gets the same Prefer HLS handling, fallback ladder, learned stream quirks and
      *  external-player routing however the user reached it. */
     onPlayChannel: (channel: ChannelEntity, channels: List<ChannelEntity>) -> Unit,
-    /** "Watch from start" on a catch-up programme. Required for the same reason, and additionally so the
-     *  archive is tracked as catch-up playback (which decides what engine toggle the player HUD offers). */
-    onPlayCatchup: (channel: ChannelEntity, programme: EpgProgrammeEntity) -> Unit,
     /** False while the full-screen or mini player owns the video surface. */
     previewEnabled: Boolean = true,
     liveMode: Boolean = false,
@@ -272,8 +260,6 @@ fun EpgScreen(
     val sortGuide by vm.sortGuide.collectAsStateWithLifecycle()
     val categoryFilter by vm.categoryFilter.collectAsStateWithLifecycle()
     val guideWidthShares by vm.guideWidthShares.collectAsStateWithLifecycle()
-    val catchupPlayer by vm.catchupPlayer.collectAsStateWithLifecycle()
-    val recordingRows by vm.recordingRows.collectAsStateWithLifecycle()
     val reminderRows by vm.reminderRows.collectAsStateWithLifecycle()
     val leadMinutes by vm.reminderLeadMinutes.collectAsStateWithLifecycle()
     val railItems = liveVm.railItems.collectAsStateWithLifecycle().value.let { all -> remember(all) { all.filterNot { it.sealed } } }
@@ -434,8 +420,6 @@ fun EpgScreen(
     var menuFor by remember { mutableStateOf<Pair<ChannelEntity, EpgProgrammeEntity>?>(null) }
     var detailsFor by remember { mutableStateOf<Pair<ChannelEntity, EpgProgrammeEntity>?>(null) }
     var channelMenuFor by remember { mutableStateOf<ChannelEntity?>(null) }
-    var recordMenuFor by remember { mutableStateOf<Pair<ChannelEntity, EpgProgrammeEntity>?>(null) }
-    var askPlayerFor by remember { mutableStateOf<Pair<ChannelEntity, EpgProgrammeEntity>?>(null) }
     var matchingChannel by remember { mutableStateOf<ChannelEntity?>(null) }
     var offsetChannel by remember { mutableStateOf<ChannelEntity?>(null) }
     var orderOpen by remember { mutableStateOf(false) }
@@ -447,7 +431,7 @@ fun EpgScreen(
     var searchHadFocus by remember { mutableStateOf(false) }
     // Where focus goes back to when an overlay closes: the control or button that opened it.
     var returnTo by remember { mutableStateOf<(() -> Unit)?>(null) }
-    val anyOverlay = menuFor != null || detailsFor != null || channelMenuFor != null || recordMenuFor != null || askPlayerFor != null || matchingChannel != null ||
+    val anyOverlay = menuFor != null || detailsFor != null || channelMenuFor != null || matchingChannel != null ||
         offsetChannel != null || orderOpen || dayOpen || review.isNotEmpty()
     var hadOverlay by remember { mutableStateOf(false) }
     LaunchedEffect(anyOverlay) {
@@ -466,25 +450,14 @@ fun EpgScreen(
 
     val channelsNow = state.channels
     val watch: (ChannelEntity) -> Unit = { ch -> vm.noteChannelTuned(ch); onPlayChannel(ch, channelsNow) }
-    val playFromStart: (ChannelEntity, EpgProgrammeEntity) -> Unit = { ch, p ->
-        when (catchupPlayer) {
-            SettingsRepository.CatchupPlayer.ASK -> askPlayerFor = ch to p
-            SettingsRepository.CatchupPlayer.INTERNAL -> { vm.noteChannelTuned(ch); onPlayCatchup(ch, p) }
-            SettingsRepository.CatchupPlayer.EXTERNAL -> { vm.noteChannelTuned(ch); vm.playCatchupExternal(ch, p) }
-        }
-    }
-    // OK on a programme: watch — the archive for one that has been on and can be replayed, else the channel.
-    val onOk: (ChannelEntity, EpgProgrammeEntity?) -> Unit = { ch, p ->
-        val now = System.currentTimeMillis()
-        if (p != null && p.stopMs <= now && vm.canCatchup(ch, p, now)) playFromStart(ch, p) else watch(ch)
-    }
+    // OK on a programme: watch the channel live.
+    val onOk: (ChannelEntity, EpgProgrammeEntity?) -> Unit = { ch, _ -> watch(ch) }
 
-    /** What [p] on [ch] can do right now — the programme menu, Record ▾ and the buttons on top share it. */
+    /** What [p] on [ch] can do right now — the programme menu and the buttons on top share it. */
     @Composable
     fun actionsFor(ch: ChannelEntity, p: EpgProgrammeEntity): GuideProgrammeActions = guideProgrammeActions(
         vm, ch, p, liveNow,
         onWatch = { watch(ch) },
-        onPlayFromStart = { playFromStart(ch, p) },
         onPickEpg = { matchingChannel = ch },
         onEpgOffset = { offsetChannel = ch },
     )
@@ -501,10 +474,6 @@ fun EpgScreen(
         return rest?.takeIf { it.isNotEmpty() } ?: name
     }
     val remindersByChannel = remember(reminderRows) { reminderRows.groupBy({ it.channelId }, { it.startMs }).mapValues { it.value.toSet() } }
-    val recordingsByChannel = remember(recordingRows) {
-        recordingRows.filter { it.status != RecordingStatus.CANCELLED }
-            .groupBy({ it.channelId }, { it.programmeStartMs }).mapValues { it.value.toSet() }
-    }
 
     val dayTool = remember { FocusRequester() }
     val categoryTool = remember { FocusRequester() }
@@ -686,12 +655,6 @@ fun EpgScreen(
                         ) {
                             itemsIndexed(state.channels, key = { _, ch -> ch.id }) { index, channel ->
                                 val focus = guideRowFocusArgs(index, focusedRow, cursorTime, inCellMode, gridHasFocus)
-                                // A catch-up row that stays on screen asks for its past days; a row
-                                // flung past does not.
-                                if (channel.catchup) LaunchedEffect(channel.id) {
-                                    delay(ARCHIVE_ROW_VISIBLE_MS)
-                                    vm.requestArchiveGuide(channel)
-                                }
                                 GuideRow(
                                     vm = vm,
                                     channel = channel,
@@ -712,7 +675,6 @@ fun EpgScreen(
                                         inCellMode = true
                                         if (okPreviews(channel)) liveVm.onChannelFocused(channel)
                                     },
-                                    recordingStarts = recordingsByChannel[channel.id].orEmpty(),
                                     reminderStarts = remindersByChannel[channel.id].orEmpty(),
                                     onFocused = {
                                         focusedRow = index
@@ -822,16 +784,7 @@ fun EpgScreen(
             channel = ch,
             focusStartMs = p.startMs,
             onWatch = { watch(ch) },
-            onPlayFromStart = { prog -> playFromStart(ch, prog) },
             onDismiss = { detailsFor = null },
-        )
-    }
-    recordMenuFor?.let { (ch, p) -> GuideRecordMenu(title = p.title, actions = actionsFor(ch, p), onDismiss = { recordMenuFor = null }) }
-    askPlayerFor?.let { (ch, p) ->
-        GuideCatchupChooser(
-            onInternal = { vm.noteChannelTuned(ch); onPlayCatchup(ch, p) },
-            onExternal = { vm.noteChannelTuned(ch); vm.playCatchupExternal(ch, p) },
-            onDismiss = { askPlayerFor = null },
         )
     }
     if (orderOpen) {
@@ -935,7 +888,6 @@ private fun GuideRow(
     cursorTime: Long,
     cellMode: Boolean,
     onEnterCell: () -> Unit,
-    recordingStarts: Set<Long>,
     reminderStarts: Set<Long>,
     onFocused: () -> Unit,
     onCursor: (Long) -> Unit,
@@ -1002,15 +954,12 @@ private fun GuideRow(
                 .then(if (rowSelected) Modifier.stageFocusLook(tv.own.myowntv.ui.stage.StageFocus.FX, 14.mpx) else Modifier),
         ) {
             programmes?.let { progs ->
-                val catchupIds = remember(progs, channel, now) { progs.filter { vm.canCatchup(channel, it, now) }.mapTo(HashSet()) { it.id } }
                 ProgrammeStripCanvas(
                     programmes = progs,
                     windowStart = windowStart,
                     windowEnd = windowEnd,
                     now = now,
                     focusTime = if (focused && cellMode) cursorTime else null,
-                    catchupIds = catchupIds,
-                    recordingStarts = recordingStarts,
                     reminderStarts = reminderStarts,
                     scrollPx = scrollPx,
                 )

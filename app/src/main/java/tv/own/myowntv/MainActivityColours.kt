@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 // One launcher activity per icon colour, so each can carry its own icon, banner and launch-screen theme
 // (see the manifest and core's AppIconSwitcher). No code of their own: MainActivity is the app.

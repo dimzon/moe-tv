@@ -582,7 +582,7 @@ class XtreamClient(private val http: HttpClient) {
     // --- Stream URL builders ---
     // Live uses the raw MPEG-TS endpoint (.ts) — the universal Xtream live format. The .m3u8/HLS
     // wrapper isn't served by every panel (mpegts-only providers 404 on it, so channels won't load),
-    // whereas every panel serves .ts and mpv plays it natively.
+    // whereas every panel serves .ts.
     fun liveUrl(s: SourceEntity, streamId: String) = "${base(s)}/live/${credentials(s)}/$streamId.ts"
 
     /**

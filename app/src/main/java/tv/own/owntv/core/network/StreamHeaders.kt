@@ -63,18 +63,6 @@ object StreamHeaders {
             .takeIf { it.isNotEmpty() }
             ?.joinToString("\n")
 
-    /**
-     * mpv's `http-header-fields` format: a comma-separated list of `Key: Value`. mpv carries the
-     * User-Agent in its own `user-agent` property, so it is dropped here — see [userAgentOf].
-     */
-    fun toMpvHeaderFields(headers: Map<String, String>): String =
-        headers.entries
-            .filter { !it.key.equals("User-Agent", ignoreCase = true) }
-            // A comma inside a value would split the field list, so values carrying one are skipped
-            // rather than silently corrupting the neighbouring header.
-            .filter { !it.value.contains(',') }
-            .joinToString(",") { "${it.key}: ${it.value}" }
-
     /** The per-channel User-Agent, which overrides the per-source one when present. */
     fun userAgentOf(headers: Map<String, String>): String? =
         headers.entries.firstOrNull { it.key.equals("User-Agent", ignoreCase = true) }?.value?.takeIf { it.isNotBlank() }

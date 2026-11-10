@@ -27,7 +27,6 @@ import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.profile.*
-import tv.own.owntv.core.recording.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -41,7 +40,6 @@ import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
 import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
@@ -50,7 +48,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import android.util.Log
 import kotlinx.coroutines.CancellationException
@@ -70,8 +67,8 @@ import tv.own.owntv.core.live.LiveKey
  * The channel list the player zaps within — CH+/CH−, the D-pad, the in-player channel-list overlay —
  * and the bookkeeping a numeric direct tune needs to stay responsive while that list catches up.
  *
- * Split out of `LiveViewModel`, which was doing four jobs at once. The seam is the same shape as
- * [LiveTimeshift]'s: this class owns **state and sequencing**, the view model owns **queries**. Which
+ * Split out of `LiveViewModel`, which was doing several jobs at once. The seam: this class owns
+ * **state and sequencing**, the view model owns **queries**. Which
  * list is armed, which channel CH+ lands on, which rebuild is allowed to publish and when the
  * direct-tune anchor expires all live here; every database read and every hide/rename rule arrives as
  * a loader lambda, because those rules are shared with the browse lists and belong with them.
@@ -187,7 +184,7 @@ class LiveZapList(
         }
     }
 
-    /** Load a custom category or a built-in rail (Favorites / History / Catch-up / All), picked in the
+    /** Load a custom category or a built-in rail (Favorites / History / All), picked in the
      *  in-player category browser — same contract as [armForCategory]. Members come from many provider
      *  folders, so there is no single [categoryId]; built-in rails pass no [title] (their names are UI
      *  strings, chosen from [key]). */

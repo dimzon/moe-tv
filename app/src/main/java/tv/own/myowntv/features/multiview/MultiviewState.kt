@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -188,7 +187,7 @@ class MultiviewState(
     /**
      * Put [channel] in [tile], if that playlist has a connection to spare.
      *
-     * Tiles and recordings count against one budget, per playlist, and a tile
+     * Tiles count against one connection budget, per playlist, and a tile
      * that loses is told why instead of being left to fail into a spinner. Refilling a tile releases
      * what it held first, so swapping a channel never counts as two.
      */

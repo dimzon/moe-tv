@@ -9,8 +9,6 @@
     <string name="profiles_avatar_own_picture">Dit eget billede</string>
     <string name="profiles_kids">Børneprofil</string>
     <string name="profiles_kids_description">Forenklet, sikker browsing</string>
-    <string name="profiles_allow_downloads">Tillad downloads</string>
-    <string name="profiles_allow_downloads_description">Fra skjuler alle downloadknapper for denne profil</string>
     <string name="profiles_remove_pin">Fjern PIN-lås</string>
     <string name="profiles_no_pin">Denne profil åbnes uden en PIN</string>
     <string name="profiles_change_pin">Skift PIN (tomt felt = behold)</string>
@@ -39,13 +37,9 @@
     <string name="search_nothing_in_list">Der er ikke noget i <xliff:g id="list">%1$s</xliff:g> endnu.</string>
     <string name="search_clear">Ryd</string>
     <string name="search_jump_to">Gå til</string>
-    <string name="search_open_series">Åbn serie</string>
-    <string name="search_movie">Film</string>
-    <string name="search_series">Serie</string>
     <string name="search_channels">Kanaler</string>
     <string name="search_on_tv">Tv-programmer</string>
     <string name="search_go_to_channel">Gå til kanal</string>
-    <string name="search_go_to_movie">Gå til film</string>
     <string name="search_clear_recent">Ryd seneste søgninger</string>
     <string name="search_field_hint">Kanaler, film og serier</string>
     <string name="search_voice">Stemmesøgning</string>
@@ -68,11 +62,6 @@
     <string name="launcher_recent_live_description">Senest sete livekanaler</string>
     <string name="launcher_movie_type">Film</string>
     <string name="launcher_episode_number">Afsnit <xliff:g id="episode">%1$d</xliff:g></string>
-    <plurals name="home_library_loading">
-        <item quantity="one">Indlæser dit bibliotek · <xliff:g id="count">%1$s</xliff:g> titel indtil videre</item>
-        <item quantity="other">Indlæser dit bibliotek · <xliff:g id="count">%1$s</xliff:g> titler indtil videre</item>
-    </plurals>
-    <string name="home_library_loading_trending">Populært lige nu vises, efterhånden som dit bibliotek fyldes op.</string>
     <string name="home_no_preview">Intet at forhåndsvise endnu.</string>
     <string name="home_no_rows">Alle rækker på startskærmen er skjult.</string>
     <string name="home_enable_rows">Slå rækkerne til igen under Indstillinger → Startskærm.</string>
@@ -140,33 +129,8 @@
     <string name="home_row_trending_description">Viser kun 4–10 elementer, når populære TMDB-titler matcher film eller serier i din udbyders katalog.</string>
     <string name="home_trending_style">Layout for tendenser</string>
     <string name="home_trending_style_hero">Detaljeret kort</string>
-    <string name="home_trending_style_posters">Kun plakater</string>
-    <string name="home_trending_rank">#<xliff:g id="rank">%1$d</xliff:g> i Trending · <xliff:g id="section">%2$s</xliff:g></string>
-    <string name="home_trending_in_playlist">I DIN PLAYLISTE</string>
-    <string name="home_trending_style_full_bleed">Fuld bredde</string>
     <string name="home_duration_hours_minutes"><xliff:g id="hours">%1$d</xliff:g> t. <xliff:g id="minutes">%2$02d</xliff:g> min.</string>
     <string name="home_time_left"><xliff:g id="duration">%1$s</xliff:g> tilbage</string>
-    <string name="settings_trending_status_off">Populært lige nu er slået fra.</string>
-    <string name="settings_trending_status_building">Populært lige nu klargøres efter synkronisering med udbyderen.</string>
-    <string name="settings_trending_status_metadata_disabled">Populært lige nu kræver metadata fra TMDB. Vælg Kun TMDB eller Udbyder + TMDB.</string>
-    <string name="settings_trending_status_no_vod">Populært lige nu er skjult, fordi film eller serier ikke er aktiveret hos denne udbyder.</string>
-    <string name="settings_trending_status_no_matches">Populært lige nu er skjult, fordi ingen titler hos udbyderen matchede.</string>
-    <string name="settings_trending_status_failed">Populært lige nu kunne ikke opdateres. Prøv at synkronisere udbyderen igen.</string>
-    <string name="settings_trending_status_waiting">Fuldfør en synkronisering med udbyderen for at opbygge Populært lige nu.</string>
-    <plurals name="settings_trending_status_below_threshold">
-        <item quantity="one">Populært lige nu er skjult, fordi kun <xliff:g id="count">%1$d</xliff:g> titel hos udbyderen matchede. Der kræves mindst 4.</item>
-        <item quantity="other">Populært lige nu er skjult, fordi kun <xliff:g id="count">%1$d</xliff:g> titler hos udbyderen matchede. Der kræves mindst 4.</item>
-    </plurals>
-    <plurals name="settings_trending_status_showing">
-        <item quantity="one">Populært lige nu viser <xliff:g id="count">%1$d</xliff:g> matchende titel.</item>
-        <item quantity="other">Populært lige nu viser <xliff:g id="count">%1$d</xliff:g> matchende titler.</item>
-    </plurals>
-    <plurals name="settings_trending_status_showing_refresh_failed">
-        <item quantity="one">Populært lige nu viser <xliff:g id="count">%1$d</xliff:g> titel fra den seneste vellykkede opdatering.</item>
-        <item quantity="other">Populært lige nu viser <xliff:g id="count">%1$d</xliff:g> titler fra den seneste vellykkede opdatering.</item>
-    </plurals>
-    <string name="home_trending_movie">Film</string>
-    <string name="home_trending_series">Serie</string>
     <string name="home_trending_provider_match">Match hos udbyder</string>
     <string name="home_trending_why_label">DERFOR VISES DETTE ELEMENT</string>
     <string name="home_trending_reason_title">TMDB-placering nr. <xliff:g id="rank">%1$d</xliff:g> <xliff:g id="media_type">%2$s</xliff:g> + match hos udbyder</string>
@@ -174,18 +138,10 @@
     <string name="home_trending_reason_english">Ingen udbyderversion på <xliff:g id="language">%1$s</xliff:g> matchede, så den engelske version hos udbyderen blev valgt.</string>
     <string name="home_trending_reason_untagged">Ingen sprogmærkat for <xliff:g id="language">%1$s</xliff:g> eller engelsk matchede, så versionen hos udbyderen uden sprogmærkat blev valgt.</string>
     <string name="home_trending_reason_other">Den nærmeste afspillelige version hos udbyderen blev valgt, efter at versioner på det foretrukne sprog og engelsk ikke var tilgængelige.</string>
-    <plurals name="home_trending_seasons">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> sæson</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> sæsoner</item>
-    </plurals>
     <string name="home_trending_play">Afspil</string>
-    <string name="home_trending_open_episodes">Åbn afsnit</string>
-    <string name="home_trending_trailer">Trailer</string>
     <string name="home_trending_more_details">Flere oplysninger</string>
-    <string name="home_trending_all_versions">Alle versioner</string>
     <string name="home_trending_why_menu">Hvorfor denne titel er her</string>
     <string name="home_trending_pause">Sæt på pause</string>
-    <string name="home_trending_unavailable">Denne version er ikke længere tilgængelig</string>
     <string name="recording_notification_title">Optager</string>
     <string name="auto_start_notification_channel">Start automatisk ved opvågning</string>
     <string name="auto_start_notification_text">OwnTV åbner, når tv’et vågner</string>
@@ -196,38 +152,11 @@
     <string name="recording_failed_unavailable">Kanalen kunne ikke afspilles</string>
     <string name="recording_failed_channel_gone">Kanalen findes ikke længere på din playliste</string>
     <string name="recording_failed_unknown">Der blev ikke optaget</string>
-    <string name="recording_title">Optagelser</string>
-    <string name="recording_empty">Intet optaget endnu. Tryk Optag på et program i tv-guiden, eller hold en kanal nede for at optage den eller planlægge et tidspunkt.</string>
-    <string name="recording_group_now">Optager nu</string>
-    <string name="recording_group_scheduled">Planlagt</string>
-    <string name="recording_group_completed">Optaget</string>
-    <string name="recording_group_failed">Mislykkedes</string>
-    <string name="recording_group_missed">Gik glip af</string>
     <string name="recording_record">Optag</string>
-    <string name="recording_stop">Stop optagelsen</string>
-    <string name="recording_delete_message">Fjerner optagelsen og dens fil fra denne enhed. Det kan ikke fortrydes.</string>
-    <string name="recording_record_series">Optag alle visninger</string>
-    <string name="recording_stop_series">Stop med at optage alle visninger</string>
-    <string name="recording_from_archive">Optag fra arkivet</string>
     <string name="recording_schedule">Planlæg optagelse…</string>
-    <string name="recording_schedule_hint">Vælg dag, start og slut. Der optages, selv om kanalen ikke har en tv-guide.</string>
-    <string name="recording_schedule_start">Start</string>
-    <string name="recording_schedule_end">Slut</string>
-    <string name="recording_schedule_next_day">næste dag</string>
-    <string name="recording_schedule_past">Det tidspunkt er allerede passeret</string>
-    <string name="recording_scheduled_for">Optager <xliff:g id="time">%1$s</xliff:g></string>
-    <string name="recording_badge">REC</string>
     <string name="recording_pill_line">Optager <xliff:g id="title">%1$s</xliff:g></string>
     <string name="recording_pill_line_locked">Optager fra en låst kategori</string>
-    <string name="recording_clash_with">Overlapper med <xliff:g id="programme">%1$s</xliff:g></string>
     <string name="recording_settings_group">Optagelse</string>
-    <string name="settings_recording_reserve">Hold én stream fri til at se på</string>
-    <string name="settings_recording_reserve_description">Optagelser lader én af din udbyders forbindelser være fri, så der altid er én at se på. Slå fra for at optage på alle forbindelser.</string>
-    <string name="settings_recording_pre_roll">Start tidligere</string>
-    <string name="settings_recording_pre_roll_description">Begynd så lang tid før det angivne starttidspunkt, så en guide der går lidt forud stadig når begyndelsen.</string>
-    <string name="settings_recording_post_roll">Fortsæt efter slutningen</string>
-    <string name="settings_recording_post_roll_description">Fortsæt så lang tid efter det angivne sluttidspunkt, så et program der trækker ud ikke bliver klippet af.</string>
-    <string name="settings_recording_timers_inexact">Denne enhed tillader ikke OwnTV at sætte præcise alarmer, så en optagelse kan starte et par minutter for sent. Optagelser starter tidligere for at opveje det.</string>
     <plurals name="recording_minutes">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> minut</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> minutter</item>
@@ -235,22 +164,6 @@
     <string name="recording_failed_encrypted">Denne kanal er krypteret og kan ikke optages</string>
     <string name="recording_failed_drm">Denne kanal er DRM-beskyttet, så den kan ses, men ikke optages. Beskyttelsen kommer fra din udbyder, ikke fra OwnTV.</string>
     <string name="recording_failed_metered">Ikke optaget på mobildata</string>
-    <string name="recording_card_empty_title">Intet optaget endnu</string>
-    <string name="recording_card_body">Vælg et program i tv-guiden og vælg Optag, eller hold en kanal nede og planlæg et tidspunkt. Det havner her, også mens du ser noget andet.</string>
-    <string name="recording_open_guide">Åbn tv-guide</string>
-    <plurals name="recording_card_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> optagelse</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> optagelser</item>
-    </plurals>
-    <string name="settings_recording_mobile_data">Optag på mobildata</string>
-    <string name="settings_record_watching">Optag det, jeg ser</string>
-    <string name="settings_record_watching_description">Sætter en optageknap i afspilleren, som gemmer den kanal, du ser. Den henter kanalen selv, så den bruger en af din udbyders forbindelser imens, og den optager videre, når du skifter kanal eller forlader afspilleren.</string>
-    <string name="settings_record_watching_warning_title">Kun én forbindelse</string>
-    <string name="settings_record_watching_warning_description">Optagelsen henter kanalen en gang til og bruger derfor endnu en af din udbyders forbindelser. På en konto med kun én afvises optagelsen, mens du ser med. Når den først er i gang, kører den selv — skift kanal, forlad afspilleren, og den fortsætter, til programmet slutter, eller du stopper den under Optagelser.</string>
-    <string name="settings_record_watching_keep_off">Lad være slået fra</string>
-    <string name="settings_record_watching_turn_on">Slå til</string>
-    <string name="player_recording_conflict">Din udbyder tillader kun én stream ad gangen, og optagelsen bruger den.</string>
-    <string name="player_keep_watching_stop_recording">Bliv ved med at se (stopper optagelsen)</string>
     <string name="sports_channel_goal_alerts">Måladvarsler</string>
     <string name="sports_channel_live_match">Live-kamp</string>
     <string name="sports_channel_match_reminders">Kamppåmindelser</string>

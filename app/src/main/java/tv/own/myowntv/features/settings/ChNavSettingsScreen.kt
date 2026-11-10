@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import android.view.KeyEvent as AndroidKeyEvent
 import androidx.activity.compose.BackHandler
@@ -266,7 +265,15 @@ fun ChNavSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             onDismiss = { dialog = ChNavDialog.NONE },
         )
         ChNavDialog.ACTION -> pendingBinding?.let { binding ->
-            val actionOptions = RemoteShortcutAction.entries.map { it.name to remoteActionLabel(it) }
+            // Movies/Series/Downloads actions still exist in the core enum (wave 2 prunes it) but the
+            // screens and their dispatch are gone, so they are not offered here. A stored binding to
+            // one of them still labels its row below until the user rebinds or resets it.
+            val liveActions = RemoteShortcutAction.entries.filter {
+                it != RemoteShortcutAction.OPEN_MOVIES &&
+                    it != RemoteShortcutAction.OPEN_SERIES &&
+                    it != RemoteShortcutAction.OPEN_DOWNLOADS
+            }
+            val actionOptions = liveActions.map { it.name to remoteActionLabel(it) }
             PickerDialog(
                 title = stringResource(R.string.settings_remote_shortcuts_choose_action),
                 options = if (editingExisting) listOf(String() to stringResource(R.string.common_delete)) + actionOptions else actionOptions,
@@ -274,7 +281,7 @@ fun ChNavSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 searchable = true,
                 leadingIcons = buildMap {
                     if (editingExisting) put(String(), MyOwnTVIcon.CLOSE)
-                    RemoteShortcutAction.entries.forEach { put(it.name, remoteActionIcon(it)) }
+                    liveActions.forEach { put(it.name, remoteActionIcon(it)) }
                 },
                 onSelect = { value ->
                     if (value.isEmpty()) vm.removeRemoteShortcutBinding(binding.keyCode, binding.press)

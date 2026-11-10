@@ -12,15 +12,14 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import tv.own.owntv.player.ExoAudioGate.Verdict
 
-/** Which audio ExoPlayer can play: the film hand-off gate, the "no playable audio" check, the sinks. */
+/** Which audio ExoPlayer can play: the live engine's "no playable audio" check and the sinks. */
 class ExoAudioGateTest {
 
     private fun verdict(
         codec: String,
         device: Set<String> = emptySet(),
-        ffmpeg: Set<String> = emptySet(),
         passthrough: Set<String> = emptySet(),
-    ) = ExoAudioGate.verdict(codec, { it in device }, { it in ffmpeg }, { it in passthrough })
+    ) = ExoAudioGate.verdict(codec, { it in device }, { it in passthrough })
 
     @Test
     fun `codecs every device decodes pass at once`() {
@@ -30,10 +29,9 @@ class ExoAudioGateTest {
     }
 
     @Test
-    fun `DTS passes on a device decoder, then FFmpeg, then a receiver - in that order`() {
+    fun `DTS passes on a device decoder, then on a receiver that takes it - in that order`() {
         val dts = MimeTypes.AUDIO_DTS
-        assertEquals(Verdict.DEVICE_DECODER, verdict("dts", device = setOf(dts), ffmpeg = setOf(dts)))
-        assertEquals(Verdict.FFMPEG, verdict("dts", ffmpeg = setOf(dts), passthrough = setOf(dts)))
+        assertEquals(Verdict.DEVICE_DECODER, verdict("dts", device = setOf(dts), passthrough = setOf(dts)))
         assertEquals(Verdict.PASSTHROUGH, verdict("dts", passthrough = setOf(dts)))
         assertEquals(Verdict.UNSUPPORTED, verdict("dts"))
         assertFalse(verdict("dts").safe)
@@ -42,7 +40,7 @@ class ExoAudioGateTest {
     @Test
     fun `MP2 is no longer assumed - it needs a decoder like DTS`() {
         assertEquals(Verdict.UNSUPPORTED, verdict("mp2"))
-        assertEquals(Verdict.FFMPEG, verdict("mp2", ffmpeg = setOf(MimeTypes.AUDIO_MPEG_L2)))
+        assertEquals(Verdict.DEVICE_DECODER, verdict("mp2", device = setOf(MimeTypes.AUDIO_MPEG_L2)))
     }
 
     @Test
@@ -62,17 +60,10 @@ class ExoAudioGateTest {
     }
 
     @Test
-    fun `with FFmpeg audio on, audio beyond the decoder's advertised limits still counts as playable`() {
-        fun playable(tracks: Tracks) = ExoAudioGate.anyPlayableAudio(tracks, exceedingCounts = true)
-        assertTrue(playable(Tracks(listOf(audioGroup(C.FORMAT_EXCEEDS_CAPABILITIES)))))
-        assertTrue(playable(Tracks(listOf(audioGroup(C.FORMAT_UNSUPPORTED_SUBTYPE, C.FORMAT_HANDLED)))))
-        assertFalse(playable(Tracks(listOf(audioGroup(C.FORMAT_UNSUPPORTED_SUBTYPE)))))
-        assertFalse(playable(Tracks.EMPTY))
-    }
-
-    @Test
-    fun `with FFmpeg audio off, only audio within the decoder's limits counts, as before FFmpeg audio`() {
-        fun playable(tracks: Tracks) = ExoAudioGate.anyPlayableAudio(tracks, exceedingCounts = false)
+    fun `only audio within the device decoder's limits counts as playable`() {
+        // Nothing in the app can software-decode what exceeds the advertised limits: a track that
+        // only *seems* supported would play silent.
+        fun playable(tracks: Tracks) = ExoAudioGate.anyPlayableAudio(tracks)
         assertFalse(playable(Tracks(listOf(audioGroup(C.FORMAT_EXCEEDS_CAPABILITIES)))))
         assertTrue(playable(Tracks(listOf(audioGroup(C.FORMAT_EXCEEDS_CAPABILITIES, C.FORMAT_HANDLED)))))
         assertFalse(playable(Tracks(listOf(audioGroup(C.FORMAT_UNSUPPORTED_SUBTYPE)))))
@@ -80,22 +71,13 @@ class ExoAudioGateTest {
     }
 
     @Test
-    fun `with FFmpeg audio off, FFmpeg never decodes and never counts`() {
-        // This process never loaded the setting, which is the same as "off".
-        assertFalse(FfmpegAudio.switchedOn)
-        assertFalse(FfmpegAudio.available)
-        assertFalse(FfmpegAudio.supports(MimeTypes.AUDIO_DTS))
-        assertFalse(FfmpegAudio.takes(MimeTypes.AUDIO_MPEG_L2))
-    }
-
-    @Test
-    fun `passthrough off - whatever the app can decode is decoded, PCM never`() {
-        fun mustDecode(mime: String, device: Boolean = false, ffmpeg: Boolean = false) =
-            DecodedOnlyAudioSink.mustDecode(mime, { device }, { ffmpeg })
+    fun `passthrough off - whatever the device can decode is decoded, PCM never`() {
+        fun mustDecode(mime: String, device: Boolean = false) =
+            DecodedOnlyAudioSink.mustDecode(mime, { device })
         assertTrue(mustDecode(MimeTypes.AUDIO_AC3, device = true))
-        assertTrue(mustDecode(MimeTypes.AUDIO_DTS, ffmpeg = true))
+        assertTrue(mustDecode(MimeTypes.AUDIO_DTS, device = true))
         assertFalse(mustDecode(MimeTypes.AUDIO_DTS))
-        assertFalse(mustDecode(MimeTypes.AUDIO_RAW, device = true, ffmpeg = true))
+        assertFalse(mustDecode(MimeTypes.AUDIO_RAW, device = true))
     }
 
     @Test
@@ -127,24 +109,5 @@ class ExoAudioGateTest {
         assertEquals(0f, share(4, 3).first)
         // Mono reaches both sides.
         assertTrue(share(1, 0).first > 0f && share(1, 0).second > 0f)
-    }
-
-    private fun ffmpegTakes(mime: String, device: Set<String> = emptySet(), ffmpeg: Set<String> = emptySet()) =
-        FfmpegAudio.takes(mime, { it in device }, { it in ffmpeg })
-
-    @Test
-    fun `FFmpeg never takes a format the device has a decoder for`() {
-        // Media3 hands a track to the renderer rating it best, so an FFmpeg "handled" would out-rank a
-        // device decoder that only "exceeds capabilities" — the chip must keep what it can decode.
-        for (mime in listOf(MimeTypes.AUDIO_AAC, MimeTypes.AUDIO_AC3, MimeTypes.AUDIO_E_AC3, MimeTypes.AUDIO_MPEG_L2)) {
-            assertFalse(mime, ffmpegTakes(mime, device = setOf(mime), ffmpeg = setOf(mime)))
-        }
-    }
-
-    @Test
-    fun `FFmpeg takes what the chip cannot decode, and only what it can itself`() {
-        assertTrue(ffmpegTakes(MimeTypes.AUDIO_MPEG_L2, ffmpeg = setOf(MimeTypes.AUDIO_MPEG_L2)))
-        assertTrue(ffmpegTakes(MimeTypes.AUDIO_DTS, device = setOf(MimeTypes.AUDIO_AAC), ffmpeg = setOf(MimeTypes.AUDIO_DTS)))
-        assertFalse(ffmpegTakes(MimeTypes.AUDIO_TRUEHD))
     }
 }

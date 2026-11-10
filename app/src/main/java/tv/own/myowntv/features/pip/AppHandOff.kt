@@ -50,10 +50,9 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 /**
- * A screen of another app that OwnTV itself opens: an external player, the YouTube trailer, a system
+ * A screen of another app that OwnTV itself opens: an external player for a live channel, a system
  * permission screen. Leaving the app that way is not the user leaving it, so it must not open the
  * picture-in-picture window (the stream would play twice, once in the window and once in the external
  * player, and Back would land on the launcher instead of OwnTV).

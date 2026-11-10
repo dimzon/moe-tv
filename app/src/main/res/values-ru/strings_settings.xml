@@ -2,8 +2,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="settings_sort_playlist">Плейлист</string>
     <string name="settings_sort_alpha">А–Я</string>
-    <string name="settings_sort_rating">Рейтинг</string>
-    <string name="settings_sort_date_added">Дата добавления</string>
     <string name="settings_mini_player">Мини-плеер</string>
     <string name="settings_mini_player_description">Небольшой плавающий плеер, который появляется, когда вы закрепляете канал в режиме PiP во время просмотра каталога. Измените эти параметры здесь или прямо во время просмотра с помощью кнопок изменения размера и перемещения на самом мини-плеере.</string>
     <string name="settings_size">Размер</string>
@@ -15,9 +13,7 @@
     <string name="settings_live_keep_watching">Каналы прямого эфира в ряду «Продолжить просмотр»</string>
     <string name="settings_live_keep_watching_description">Показывать недавно просмотренные каналы прямого эфира в главном ряду.</string>
     <string name="settings_movies_keep_watching">Фильмы в ряду «Продолжить просмотр»</string>
-    <string name="settings_movies_keep_watching_description">Показывать в главном ряду карточки фильмов, просмотр которых можно продолжить.</string>
     <string name="settings_series_keep_watching">Сериалы в ряду «Продолжить просмотр»</string>
-    <string name="settings_series_keep_watching_description">Показывать в главном ряду карточки серий, просмотр которых можно продолжить.</string>
     <string name="settings_hero_preview">Воспроизводить видео в главном ряду</string>
     <string name="settings_hero_preview_description">Видео выделенного элемента запускается через мгновение. Отключите, чтобы экономить энергию и память при просмотре главного экрана.</string>
     <string name="settings_android_tv_home">Главный экран Android TV</string>
@@ -205,7 +201,6 @@
     <string name="settings_home_root">Главный экран</string>
     <string name="settings_home_root_description">Выбор, изменение порядка и фильтрация рядов на главном экране</string>
     <string name="settings_metadata_root_description">Постеры, описания, актёрский состав и рейтинги фильмов и сериалов</string>
-    <string name="settings_download_folder">Папка загрузок</string>
     <string name="settings_backup_restore">Резервная копия и восстановление</string>
     <string name="settings_clear_history">Очистить историю просмотров</string>
     <string name="settings_appearance_group">Внешний вид</string>
@@ -249,11 +244,6 @@
     <string name="settings_surround_sound">Объёмный звук</string>
     <string name="settings_surround_description_mobile">Декодировать Dolby/DTS в объёмный звук (5.1/7.1) для настоящего ресивера 5.1/7.1, подключённого к этому устройству. Оставьте ВЫКЛ. для встроенного динамика, наушников или стереофонического саундбара — многоканальный звук может отставать от видео. Если синхронизация сбивается, скорректируйте её в меню плеера «Звук → Синхронизация аудио и видео».</string>
     <string name="settings_audio_passthrough">Прямая передача Dolby и DTS</string>
-    <string name="settings_audio_passthrough_description">Вкл.: Dolby и DTS передаются без декодирования на телевизор, саундбар или ресивер, если он сообщает, что может их воспроизвести (ExoPlayer). Выкл.: приложение декодирует их само, по-прежнему в объёмном звуке, где это позволяет «Объёмный звук». mpv всегда декодирует. Не используется, пока работает «Ночной режим» или «Выравнивание громкости».</string>
-    <string name="settings_ffmpeg_audio">Звук через FFmpeg в ExoPlayer</string>
-    <string name="settings_ffmpeg_audio_description">Вкл.: ExoPlayer может декодировать и звук, для которого на устройстве нет декодера, например DTS, TrueHD или MP2. Собственные декодеры устройства по-прежнему имеют приоритет. Выкл.: ExoPlayer использует только декодеры устройства. mpv всегда декодирует через FFmpeg. При изменении OwnTV перезапустится.</string>
-    <string name="settings_line_ffmpeg_audio">Для звука, который устройство не может декодировать</string>
-    <string name="settings_ffmpeg_audio_restart_message">Аудиодекодер сменится после перезапуска OwnTV.</string>
     <string name="settings_night_mode">Ночной режим</string>
     <string name="settings_night_mode_description">Приглушает громкие сцены и усиливает тихие диалоги — для просмотра на малой громкости.</string>
     <string name="settings_volume_leveling">Выравнивание громкости</string>
@@ -277,7 +267,6 @@
     <string name="settings_catchup_unavailable">В этом плейлисте нет каналов с архивом</string>
     <string name="settings_device">Устройство</string>
     <string name="settings_playback_error_log">Журнал ошибок</string>
-    <string name="settings_playback_speed">Скорость воспроизведения</string>
     <string name="settings_player_zoom">Масштаб плеера</string>
     <string name="settings_app_group">Приложение</string>
     <string name="settings_app_startup">Запуск приложения</string>
@@ -354,7 +343,6 @@
     <string name="settings_vp_cat_picture">Изображение</string>
     <string name="settings_vp_cat_frame_rate">Частота кадров</string>
     <string name="settings_vp_cat_frame_rate_summary">Подстроить экран под видео</string>
-    <string name="settings_vp_cat_streaming">Потоковая передача</string>
     <string name="settings_vp_cat_live_tuning">Настройка эфира</string>
     <string name="settings_vp_cat_multiview">Мультиэкран и мини-плеер</string>
     <string name="settings_vp_cat_multiview_summary_mobile">Несколько каналов в эфире одновременно</string>
@@ -448,12 +436,6 @@
     <string name="settings_hardware_decoding_description">Использовать аппаратный декодер телевизора. Отключите, если некоторые потоки воспроизводятся с рывками или артефактами.</string>
     <string name="settings_software_decode_above_1080p">Программное декодирование выше 1080p</string>
     <string name="settings_software_decode_above_1080p_description">Воспроизводит 4K и другое видео выше 1080p программно, когда аппаратный декодер телевизора отключён или не справляется. Нужен быстрый процессор: на большинстве телевизоров видео идёт рывками.</string>
-    <string name="settings_movies_series_player">Плеер фильмов и сериалов</string>
-    <string name="settings_live_tv_player">Плеер прямого эфира</string>
-    <string name="settings_engine_order"><xliff:g id="first">%1$s</xliff:g>, затем <xliff:g id="second">%2$s</xliff:g></string>
-    <string name="settings_engine_only">Только <xliff:g id="engine">%1$s</xliff:g></string>
-    <string name="settings_engine_default"><xliff:g id="option">%1$s</xliff:g> (по умолчанию)</string>
-    <string name="settings_reset_player_choices">Сбросить сохранённый выбор плеера</string>
     <string name="settings_external_player">Внешний плеер</string>
     <string name="settings_default_zoom">Масштаб по умолчанию</string>
     <string name="settings_default_zoom_description">Соотношение сторон и масштаб, применяемые при запуске воспроизведения.</string>
@@ -473,15 +455,6 @@
     <string name="settings_reset_saved_audio_delay_confirm_description">Каждый канал, фильм и серия вернутся к синхронизации звука выше. Сохранённые масштаб и громкость останутся. Отдельное значение всегда можно задать заново из плеера.</string>
     <string name="settings_seek_step">Шаг перемотки</string>
     <string name="settings_seek_step_description">На сколько перематывают назад и вперёд в фильме или серии.</string>
-    <string name="settings_vod_buffer">Буфер фильмов</string>
-    <string name="settings_vod_buffer_description">Насколько заранее загружаются фильмы, эпизоды и архив. «Авто» выбирает подходящее для этого устройства. Длинный буфер лучше переживает плохое соединение; предел по-прежнему задаёт память устройства, поэтому фильм с высоким битрейтом может уместить меньше выбранного.</string>
-    <string name="settings_vod_network_timeout">Тайм-аут сети</string>
-    <string name="settings_vod_network_timeout_description">Сколько фильмы, эпизоды и архив ждут молчащий сервер, прежде чем соединение считается потерянным. «Авто» оставляет собственное ожидание каждого плеера: 60 секунд в mpv, 20 в ExoPlayer.</string>
-    <string name="settings_vod_reconnects">Попытки переподключения</string>
-    <string name="settings_vod_reconnects_description">Сколько раз фильм или эпизод, потерявший соединение, открывается заново с места остановки, прежде чем появится ошибка. Минута стабильного воспроизведения возвращает попытки.</string>
-    <string name="settings_vod_network_auto">Авто</string>
-    <string name="settings_live_rewind_step">Шаг перемотки эфира</string>
-    <string name="settings_live_rewind_step_description">На сколько перематывают назад и вперёд на канале в эфире: в его архиве или в копии, сохранённой функцией «Пауза и перемотка эфира».</string>
     <string name="settings_resume_playback">Продолжить воспроизведение</string>
     <string name="settings_resume_playback_description">Что делать, если для фильма или серии сохранена позиция.</string>
     <string name="settings_subtitle_appearance">Внешний вид субтитров</string>
@@ -493,24 +466,13 @@
     <string name="settings_preferred_audio_language_description">Воспроизводит эту звуковую дорожку, если она есть в потоке. «Язык оригинала» воспроизводит фильмы и сериалы на языке, на котором они сняты.</string>
     <string name="settings_open_subtitles">OpenSubtitles</string>
     <string name="settings_open_subtitles_connected">Подключено</string>
-    <string name="settings_open_subtitles_reset_in">Через <xliff:g id="hours">%1$d</xliff:g> ч <xliff:g id="minutes">%2$d</xliff:g> мин</string>
     <string name="settings_open_subtitles_description">Войдите в аккаунт, чтобы искать, загружать и удалять загруженные субтитры. Настройка задаётся отдельно для каждого профиля; требуется бесплатный аккаунт opensubtitles.com.</string>
-    <string name="settings_open_subtitles_advanced">Дополнительные параметры</string>
-    <string name="settings_open_subtitles_advanced_description">Используйте свой ключ API приложения или собственный OpenSubtitles Worker.</string>
     <string name="settings_open_subtitles_setup_title">Настройка OpenSubtitles</string>
-    <string name="settings_open_subtitles_setup_description">Войдите в свою учётную запись OpenSubtitles.</string>
-    <string name="settings_open_subtitles_setup_remote">Удалённо</string>
-    <string name="settings_open_subtitles_setup_remote_description">Введите свои данные в браузере на другом устройстве в той же сети Wi-Fi — телефоне, компьютере или другом телевизоре.</string>
-    <string name="settings_open_subtitles_setup_local">Ввести здесь</string>
-    <string name="settings_open_subtitles_setup_local_description">Введите данные на этом телевизоре с помощью пульта.</string>
     <string name="settings_open_subtitles_api_key">Ключ API приложения OpenSubtitles</string>
     <string name="settings_worker_server_url">URL-адрес Worker / сервера</string>
     <string name="settings_shared">Общий</string>
-    <string name="settings_open_subtitles_access_priority">Оставьте оба поля пустыми, чтобы использовать общий Worker OwnTV. Свой URL-адрес Worker имеет приоритет над прямым ключом API. Сеансы учётной записи остаются отдельными для каждого профиля.</string>
-    <string name="settings_remove_custom_access">Удалить свой доступ</string>
     <string name="settings_preferred_audio_language">Предпочитаемый язык звука</string>
     <string name="settings_audio_sync">Синхронизация звука</string>
-    <string name="settings_audio_sync_description">Сдвигайте звук вперёд или назад, чтобы синхронизировать его с видео. Работает в обоих плеерах (mpv и ExoPlayer).</string>
     <string name="settings_output_audio_delay">Задержка для этого выхода</string>
     <string name="settings_output_audio_delay_description">Добавляется к настройке «Синхронизация звука» и хранится отдельно для каждого выхода: HDMI, саундбар через HDMI ARC, Bluetooth, встроенные динамики, наушники. Настраивайте её, слушая через нужный выход.</string>
     <string name="settings_audio_output_speaker">Встроенные динамики</string>
@@ -520,8 +482,6 @@
     <string name="settings_live_latency_bitrate_note">На канале с очень высоким битрейтом — особенно в 4K — буфер может вместить меньше времени, чем вы задали, поскольку объём видео, который можно держать в памяти одновременно, ограничен.</string>
     <string name="settings_channel_numbers">Номера каналов</string>
     <string name="settings_channel_numbers_description">Показывать назначенный поставщиком номер канала рядом с его названием в списке прямого эфира, оверлее списка каналов и плеере, а также позволить вводить номер с пульта ДУ во время полноэкранного воспроизведения для мгновенного перехода к каналу (OK сразу включает канал, «Назад» отменяет ввод). Если настройка отключена, все номера скрываются, а цифровые кнопки игнорируются; данные не теряются, и после повторного включения номера снова появятся.</string>
-    <string name="settings_live_left_right_rewinds">Влево и вправо перематывают эфир</string>
-    <string name="settings_live_left_right_rewinds_description">Когда элементы управления скрыты, влево и вправо перематывают назад и вперёд на каналах, которые можно перематывать (архив или копия функции «Пауза и перемотка эфира»), вместо того чтобы открывать список каналов и историю.</string>
     <string name="settings_timeshift">Пауза и перемотка эфира</string>
     <string name="settings_timeshift_description">Каналы без архива сохраняются на этом устройстве, пока вы смотрите их на весь экран, поэтому их можно поставить на паузу и перемотать. Постоянно записывает в память; не менее 1 ГБ всегда остаётся свободным.</string>
     <string name="settings_timeshift_window">Глубина перемотки</string>
@@ -548,12 +508,7 @@
     <string name="settings_custom_live_buffer">Пользовательский буфер прямого эфира</string>
     <string name="settings_live_buffer_seconds"><xliff:g id="seconds">%1$d</xliff:g> с</string>
     <string name="settings_audio_delay"><xliff:g id="delay">%1$d</xliff:g> мс</string>
-    <string name="settings_external_player_description">Выберите разделы, которые будут открываться во внешнем приложении.</string>
     <string name="settings_audio_delay_value"><xliff:g id="delay">%1$d</xliff:g> мс</string>
-    <string name="settings_movies_player_description">mpv (рекомендуется) поддерживает больше всего форматов — звук DTS/TrueHD, необычные файлы. На некоторых телевизорах ExoPlayer воспроизводит потоки, которые не даются mpv, но он не декодирует звук DTS/TrueHD. Комбинированные варианты автоматически пробуют второй плеер, когда первый не справился; варианты с одним плеером не делают этого никогда, что экономит несколько секунд чёрного экрана, если второй плеер на вашем телевизоре всё равно не работает.</string>
-    <string name="settings_movies_player_description_mobile">mpv (рекомендуется) поддерживает больше всего форматов — звук DTS/TrueHD, необычные файлы. На некоторых устройствах ExoPlayer воспроизводит потоки, которые не даются mpv, но он не декодирует звук DTS/TrueHD. Комбинированные варианты автоматически пробуют второй плеер, когда первый не справился; варианты с одним плеером не делают этого никогда, что экономит несколько секунд чёрного экрана, если второй плеер на вашем устройстве всё равно не работает.</string>
-    <string name="settings_live_player_description">ExoPlayer (рекомендуется) открывает каналы намного быстрее и единственный поддерживает субтитры в прямом эфире. mpv воспроизводит каналы, которые не даются ExoPlayer, в том числе некоторые с необычным звуком. Комбинированные варианты автоматически пробуют второй плеер, когда первый не справился; варианты с одним плеером не делают этого никогда, что экономит несколько секунд чёрного экрана, если второй плеер на вашем телевизоре всё равно не работает. На канале, переключённом вручную в плеере, ваш выбор сохраняется в любом случае.</string>
-    <string name="settings_reset_player_choices_description">Если переключить отдельный фильм или серию между mpv и ExoPlayer прямо в плеере, этот выбор сохраняется на следующий раз. Сброс возвращает всё к настройке выше. Сохранённый выбор для каналов прямого эфира остаётся.</string>
     <string name="settings_reset_player_choices_none">Ничего не сохранено</string>
     <plurals name="settings_reset_player_choices_count">
         <item quantity="one">Сохранено: <xliff:g id="count">%1$d</xliff:g></item>
@@ -561,26 +516,12 @@
         <item quantity="many">Сохранено: <xliff:g id="count">%1$d</xliff:g></item>
         <item quantity="other">Сохранено: <xliff:g id="count">%1$d</xliff:g></item>
     </plurals>
-    <string name="settings_reset_player_choices_confirm">Сбросить сохранённый выбор плеера?</string>
-    <string name="settings_reset_player_choices_confirm_description">Все фильмы и серии снова следуют настройке «Плеер фильмов и сериалов». Отдельный элемент всегда можно переключить заново прямо в плеере.</string>
-    <string name="settings_reset_live_player_choices">Сбросить сохранённый выбор плеера прямого эфира</string>
-    <string name="settings_reset_live_player_choices_description">Если переключить канал между ExoPlayer и mpv прямо в плеере, этот выбор сохраняется для канала. Сброс возвращает все каналы к настройке «Плеер прямого эфира». Сохранённый выбор для фильмов и серий остаётся.</string>
-    <string name="settings_reset_live_player_choices_confirm">Сбросить сохранённый выбор плеера прямого эфира?</string>
-    <string name="settings_reset_live_player_choices_confirm_description">Все каналы снова следуют настройке «Плеер прямого эфира». Отдельный канал всегда можно переключить заново прямо в плеере.</string>
     <string name="settings_external_player_row_description">Открывать потоки во внешнем приложении (VLC, MX Player), а не во встроенном плеере; выбор задаётся отдельно для каждого раздела. Полезно для потоков, которые это приложение не может декодировать, или если вы предпочитаете другой плеер. При воспроизведении во внешнем плеере продолжение с места остановки и переход к предыдущему или следующему недоступны; потоки, для которых требуется особый User-Agent или источник перехода, могут не воспроизводиться.</string>
     <string name="settings_resume_always">Всегда продолжать</string>
     <string name="settings_resume_ask">Спрашивать о продолжении</string>
     <string name="settings_resume_never">Никогда не продолжать</string>
-    <string name="settings_delete_subtitles">Удаление субтитров</string>
-    <string name="settings_delete_all">Удалить все</string>
     <string name="settings_movies">Фильмы</string>
     <string name="settings_series">Сериалы</string>
-    <string name="settings_no_downloaded_subtitles">Нет загруженных субтитров для раздела «<xliff:g id="section">%1$s</xliff:g>».</string>
-    <string name="settings_delete_subtitle">Удалить субтитры</string>
-    <string name="settings_delete_subtitle_message">Удалить субтитры «<xliff:g id="name">%1$s</xliff:g>» для «<xliff:g id="title">%2$s</xliff:g>»? Позже их можно будет загрузить снова.</string>
-    <string name="settings_delete_all_subtitles">Удалить все субтитры</string>
-    <string name="settings_delete_all_movies">Удалить все субтитры к фильмам</string>
-    <string name="settings_delete_all_series">Удалить все субтитры к сериалам</string>
     <string name="settings_section_count"><xliff:g id="section">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g>)</string>
     <string name="settings_sync_guide_question">Синхронизировать программу передач сейчас?</string>
     <string name="settings_sync_guide_description">Загрузить программу передач (EPG) для «<xliff:g id="source">%1$s</xliff:g>». Это также можно сделать позже в разделе «Настройки» → «Источники и телепрограмма» → «Источники EPG».</string>
@@ -606,10 +547,6 @@
     <string name="settings_surface_transparency"><xliff:g id="percent">%1$d</xliff:g>%%</string>
     <string name="settings_catchup_timezone_automatic">Автоматически</string>
     <string name="settings_catchup_timezone_device">Устройство</string>
-    <string name="settings_catchup_player_ask">Всегда спрашивать</string>
-    <string name="settings_catchup_player_internal">Плеер OwnTV</string>
-    <string name="settings_catchup_player_external">Внешний плеер</string>
-    <string name="settings_download_folder_title">Выберите папку для загрузок</string>
     <string name="settings_pick_background_title">Выберите фоновое изображение</string>
     <string name="settings_theme_dialog">Тема</string>
     <string name="settings_app_startup_dialog">Запуск приложения</string>
@@ -631,7 +568,6 @@
     <string name="settings_browsing_last_item_description">В каждой категории сохраняется собственная позиция прокрутки, поэтому она не открывается с самого начала. В прямом эфире также восстанавливается последний канал в фокусе.</string>
     <string name="settings_browsing_live_categories">Категории прямого эфира</string>
     <string name="settings_browsing_live_categories_description">Показываются в прямом эфире, программе передач, плеере и мультиэкране. Если «Все каналы» выключены, прямой эфир открывается на первой категории, а если категорий нет — на «Избранном».</string>
-    <string name="settings_catchup_player">Воспроизводить архив через</string>
     <string name="settings_customize_title">Настройка категорий и элементов</string>
     <string name="settings_customize_pin_locked">Этот экран заблокирован с помощью PIN.</string>
     <string name="settings_customize_wrong_pin">Неверный PIN — попробуйте снова</string>
@@ -658,8 +594,6 @@
     <string name="settings_customize_behavior_hide">Скрывать</string>
     <string name="settings_customize_behavior_show">Показывать</string>
     <string name="settings_customize_hidden_channels">Скрытые каналы</string>
-    <string name="settings_customize_hidden_movies">Скрытые фильмы</string>
-    <string name="settings_customize_hidden_series">Скрытые сериалы</string>
     <string name="settings_customize_unhide_description">Покажите элемент, чтобы вернуть его в списки.</string>
     <string name="settings_customize_categories">Категории</string>
     <string name="settings_customize_empty">В этом разделе пока нет категорий — сначала добавьте источник.</string>
@@ -1004,8 +938,6 @@
     <string name="settings_customize_delete_category">Удалить «<xliff:g id="name">%1$s</xliff:g>»?</string>
     <string name="settings_customize_delete_category_description">Объединённая категория будет удалена. Её элементы останутся в исходных категориях.</string>
     <string name="settings_customize_channels_description">Каналы в этой категории — переименовывайте, меняйте порядок, скрывайте или показывайте.</string>
-    <string name="settings_customize_movies_description">Фильмы в этой категории — меняйте порядок, скрывайте или показывайте.</string>
-    <string name="settings_customize_series_description">Сериалы в этой категории — меняйте порядок, скрывайте или показывайте.</string>
     <string name="settings_customize_hide_show_items">Скрытие или отображение элементов</string>
     <plurals name="settings_customize_selected_items">
         <item quantity="one">Выбран <xliff:g id="count">%1$d</xliff:g> элемент.</item>
@@ -1021,7 +953,6 @@
     </plurals>
     <string name="settings_customize_rename_item_hint">Только для этого профиля. Оставьте поле пустым, чтобы восстановить «<xliff:g id="name">%1$s</xliff:g>».</string>
     <string name="settings_customize_item_was">было «<xliff:g id="name">%1$s</xliff:g>»</string>
-    <string name="settings_customize_rename_items">✎ Переименовать элементы</string>
     <string name="settings_customize_move_to">Переместить в…</string>
     <string name="settings_customize_back">← Назад</string>
     <string name="settings_move_category_title">Переместить в категорию</string>
@@ -1037,7 +968,6 @@
     <string name="settings_dns_server_hint">8.8.8.8 или https://dns.google/dns-query</string>
     <string name="settings_dns_test">Проверить DNS</string>
     <string name="settings_dns_explanation">Пользовательский DNS может помочь обойти блокировку доменов на уровне интернет-провайдера или разблокировать контент по географическому признаку с помощью сервисов SmartDNS. Рекомендуется DNS-over-HTTPS (DoH) — он шифрует ваши запросы.</string>
-    <string name="settings_dns_limitations">Эта настройка влияет только на трафик на основе OkHttp (синхронизация плейлистов, EPG, вызовы API, изображения, потоки ExoPlayer). mpv использует системный резолвер, поэтому настройка на него не влияет.</string>
     <string name="settings_dns_resolved">Разрешено ✓ (<xliff:g id="millis">%1$d</xliff:g> мс)</string>
     <string name="settings_dns_enter_server">Введите адрес DNS-сервера или URL-адрес DoH.</string>
     <string name="settings_dns_not_reachable">DNS-сервер недоступен.</string>
@@ -1079,14 +1009,10 @@
     <string name="settings_live_tune_timeout_description">Если за это время на прямом канале не появилось изображение, OwnTV прекращает попытки и сообщает вам об этом, вместо того чтобы держать чёрный экран, перебирая все свои плееры. «Никогда» продолжает попытки, а на канале, удалённом провайдером, это может занять заметно больше минуты. Ожидание, о котором просит сам провайдер, не учитывается.</string>
     <string name="settings_live_preroll_per_playlist">Предварительная буферизация для плейлиста</string>
     <string name="settings_live_preroll_per_playlist_description">Переопределяет указанную выше настройку для одного плейлиста, сохраняя быстрый запуск остальных плейлистов.</string>
-    <string name="settings_live_engine_per_playlist">Плеер прямого эфира для плейлиста</string>
-    <string name="settings_live_engine_per_playlist_description">Переопределяет указанную выше настройку для одного плейлиста — для провайдера, каналы которого хорошо воспроизводит только один из плееров.</string>
     <string name="settings_live_latency_per_playlist">Задержка прямого эфира для плейлиста</string>
     <string name="settings_live_latency_per_playlist_description">Переопределяет указанную выше настройку для одного плейлиста — для провайдера, которому нужен больший или меньший буфер, чем остальным.</string>
     <string name="settings_catchup_timezone_per_playlist">Часовой пояс архива для плейлиста</string>
     <string name="settings_catchup_timezone_per_playlist_description">Заменяет часовой пояс выше для одного плейлиста — для провайдера, чей архив идёт по другим часам.</string>
-    <string name="settings_vod_engine_per_playlist">Плеер фильмов и сериалов для плейлиста</string>
-    <string name="settings_vod_engine_per_playlist_description">Заменяет настройку выше для одного плейлиста — для провайдера, чьи фильмы и серии хорошо воспроизводит только один из плееров.</string>
     <string name="settings_live_tune_timeout_per_playlist">Прекращать попытки через, для плейлиста</string>
     <string name="settings_live_tune_timeout_per_playlist_description">Заменяет настройку выше для одного плейлиста — для провайдера, чьи каналы долго запускаются или часто не работают.</string>
     <plurals name="settings_live_preroll_overrides">
@@ -1217,8 +1143,6 @@
     <string name="settings_data_saver">Экономия трафика</string>
     <string name="settings_data_saver_description">Не воспроизводить через мобильный интернет</string>
     <string name="settings_gesture_sensitivity">Чувствительность жестов</string>
-    <string name="settings_downloads_wifi_only">Загружать только по Wi-Fi</string>
-    <string name="settings_downloads_wifi_only_description">Дождаться Wi-Fi вместо мобильного интернета</string>
     <string name="settings_mini_player_style_description">Как воспроизведение следует за вами при просмотре списков</string>
     <string name="settings_mini_player_style_floating">Плавающее окно</string>
     <string name="settings_mini_player_style_docked">Закреплённая панель</string>
@@ -1322,7 +1246,6 @@
     <string name="more_group_your_things">Ваше</string>
     <string name="more_group_keep_safe">Сохранность</string>
     <string name="more_profile_switch">Сменить</string>
-    <string name="more_fav_movies_series">Фильмы и сериалы</string>
     <string name="more_fav_empty_title">Избранного пока нет</string>
     <string name="more_fav_empty_body">Удерживайте OK на канале, фильме или сериале и выберите «Добавить в избранное».</string>
     <string name="more_fav_empty_body_mobile">Нажмите и удерживайте канал, фильм или сериал и выберите «Добавить в избранное».</string>
@@ -1390,12 +1313,6 @@
         <item quantity="few">Закреплено: <xliff:g id="count">%1$d</xliff:g></item>
         <item quantity="many">Закреплено: <xliff:g id="count">%1$d</xliff:g></item>
         <item quantity="other">Закреплено: <xliff:g id="count">%1$d</xliff:g></item>
-    </plurals>
-    <plurals name="more_downloads_running_count">
-        <item quantity="one">Загружается: <xliff:g id="count">%1$d</xliff:g></item>
-        <item quantity="few">Загружается: <xliff:g id="count">%1$d</xliff:g></item>
-        <item quantity="many">Загружается: <xliff:g id="count">%1$d</xliff:g></item>
-        <item quantity="other">Загружается: <xliff:g id="count">%1$d</xliff:g></item>
     </plurals>
     <string name="settings_backup_location">Расположение</string>
     <string name="settings_multiview">Мультиэкран</string>
@@ -1520,7 +1437,6 @@
     <string name="settings_line_remote_shortcuts">Назначить свободные кнопки пульта</string>
     <string name="settings_line_customize">Скрыть и показать, переименовать и упорядочить</string>
     <string name="settings_line_metadata">Постеры, сюжеты, актёры и рейтинги фильмов и сериалов</string>
-    <string name="settings_line_open_subtitles">Поиск и загрузка субтитров</string>
     <string name="settings_line_app_icon">Значок на главном экране</string>
     <string name="settings_line_brand_accent">Треугольник воспроизведения в логотипе — в вашем цвете акцента</string>
     <string name="settings_line_check_updates">Получить последнюю версию с GitHub</string>
@@ -1533,14 +1449,7 @@
     <string name="settings_line_quick_channel_numbers">Наберите номер на пульте, чтобы переключить</string>
     <string name="settings_line_prefer_sdr">SDR, если в потоке есть оба</string>
     <string name="settings_line_quick_autoplay">Следующая серия запускается сама</string>
-    <string name="settings_line_live_engine">Какой плеер открывает каналы и запасной</string>
-    <string name="settings_line_saved_live_choices">Каналы, переключённые вручную</string>
-    <string name="settings_line_vod_engine">Какой плеер открывает фильмы и серии</string>
-    <string name="settings_line_saved_choices">Фильмы и серии, переключённые вручную</string>
     <string name="settings_line_external">VLC, MX Player… для каждого раздела</string>
-    <string name="settings_line_vod_buffer">Насколько вперёд загружаются фильмы</string>
-    <string name="settings_line_vod_timeout">Ожидание молчащего сервера</string>
-    <string name="settings_line_vod_reconnects">Открыть заново с места остановки</string>
     <string name="settings_line_hw">Использовать декодер телевизора</string>
     <string name="settings_line_max_quality">Наивысшее качество, если вариантов несколько</string>
     <string name="settings_line_tunneled">Экспериментально · прямой эфир в ExoPlayer</string>
@@ -1560,8 +1469,6 @@
     <string name="settings_line_sub_lang">Включать субтитры на этом языке</string>
     <string name="settings_line_sub_style">Размер, цвет, положение, фон</string>
     <string name="settings_title_fonts">Шрифты и размер текста</string>
-    <string name="settings_title_saved_live_choices">Сохранённый выбор плеера для эфира</string>
-    <string name="settings_title_saved_choices">Сохранённый выбор плеера</string>
     <string name="settings_title_tunneled">Туннельное воспроизведение</string>
     <string name="settings_title_saved_zoom">Сохранённый масштаб</string>
     <string name="settings_title_saved_volume">Сохранённая громкость</string>
@@ -1570,21 +1477,15 @@
     <string name="settings_line_live_preview">Воспроизводить выбранный канал</string>
     <string name="settings_line_timeshift">Каналы без архива сохраняются во время просмотра</string>
     <string name="settings_line_timeshift_window">Насколько можно отмотать назад</string>
-    <string name="settings_line_left_right">Когда панель управления скрыта</string>
     <string name="settings_line_latency">Насколько близко к эфиру играть</string>
     <string name="settings_line_preroll">Видео, набираемое до старта канала</string>
     <string name="settings_line_tune_timeout">Прекратить попытки и сообщить</string>
     <string name="settings_line_seek_step">Шаг перемотки назад и вперёд в фильме</string>
-    <string name="settings_line_rewind_step">Шаг перемотки на канале в эфире</string>
     <string name="settings_line_resume">Если у фильма есть сохранённая позиция</string>
     <string name="settings_line_autoplay">И дальше в следующий сезон</string>
     <string name="settings_line_tiles">Каждая плитка — отдельный поток</string>
     <string name="settings_line_mini">Размер и положение</string>
     <string name="settings_line_pip">Смотреть дальше в маленьком окне</string>
-    <string name="settings_line_rec_reserve">Не записывать на всех подключениях</string>
-    <string name="settings_line_rec_watching">Без второго потока</string>
-    <string name="settings_line_rec_pre_roll">До начала передачи</string>
-    <string name="settings_line_rec_post_roll">Для передач, которые затягиваются</string>
     <string name="settings_line_measured_stats">Текущие FPS, битрейт и пропуски кадров</string>
     <string name="settings_line_logging">Полный журнал для отчётов об ошибках</string>
     <string name="settings_help_profiles">У каждого зрителя свои избранное, история, места продолжения и строки на главной. Детский режим показывает только разрешённые категории; PIN-код не даёт другим открыть профиль.</string>
@@ -1613,7 +1514,6 @@
     <string name="settings_help_auto_start_boot">Открывает OwnTV сам по себе после загрузки телевизора — на экране, выбранном в настройке Запуск приложения. Android разрешает приложению открываться самому, только если ему можно показываться поверх других приложений, поэтому при включении открывается экран этого разрешения. На некоторых телевизорах его нет, и там автозапуск работать не может.</string>
     <string name="settings_help_auto_start_wake">Открывает OwnTV каждый раз, когда телевизор выходит из спящего режима, даже если его разбудили ради другого приложения. Если Запуск приложения открывает канал, каждое пробуждение запускает этот поток. Пока параметр включён, OwnTV держит небольшую фоновую службу с беззвучным уведомлением. Как и автозапуску при включении, ему нужно разрешение на показ поверх других приложений.</string>
     <string name="settings_help_dns">Ищет адреса провайдера через выбранный вами DNS-сервер вместо сервера вашей сети — полезно, если сеть их блокирует или перенаправляет.</string>
-    <string name="settings_help_live_engine">ExoPlayer открывает каналы намного быстрее и единственный поддерживает субтитры в эфире. mpv воспроизводит каналы, с которыми ExoPlayer не справляется, в том числе с необычным звуком. Комбинированные варианты пробуют второй плеер, если первый не смог.</string>
     <string name="settings_help_hw">Использует аппаратный декодер телевизора: плавное 4K и меньше нагрева. Выключайте, только если некоторые потоки дёргаются или рассыпаются на блоки; тогда работу берёт программный декодер.</string>
     <string name="settings_help_volume">Громкость, с которой начинается каждый канал, фильм и серия. Выше 100 %% тихие потоки усиливаются. Громкость, изменённая в плеере, сохраняется для этого видео, пока вы её не сбросите.</string>
     <string name="settings_help_channel_numbers">Показывает номер канала от провайдера рядом с названием в списке эфира, накладке со списком каналов и в плеере, а в полноэкранном режиме позволяет набрать номер на пульте и перейти на канал.</string>
@@ -1675,7 +1575,6 @@
     <string name="settings_clock_color_accent">Акцент</string>
     <string name="settings_clock_color_help">OK открывает выбор цвета (готовые цвета, палитра или hex-код), тот же, что для акцентного цвета. Предпросмотр меняется вместе с выбором.</string>
     <string name="settings_key_pick_color">Выбрать цвет</string>
-    <string name="settings_line_trending_layout">Как выглядит строка трендов</string>
     <string name="settings_home_shown">Показана</string>
     <string name="settings_home_hide_row">Скрыть эту строку</string>
     <string name="settings_home_show_row">Показать эту строку</string>
@@ -1687,27 +1586,11 @@
     <string name="settings_line_metadata_source">Откуда берутся сведения о фильмах и сериалах</string>
     <string name="settings_line_metadata_language">Сюжеты, жанры и названия из TMDB</string>
     <string name="settings_line_metadata_advanced">Свой ключ или собственный Worker</string>
-    <string name="settings_line_os_advanced">Свой API-ключ или Worker</string>
-    <string name="settings_line_os_filter">Только выбранный язык</string>
-    <string name="settings_line_os_search_language">Показывается в результатах поиска</string>
-    <string name="settings_subtitle_delete_help">Удаление освобождает место; скачать снова можно из плеера.</string>
     <plurals name="settings_home_row_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> строка</item>
         <item quantity="few"><xliff:g id="count">%1$d</xliff:g> строки</item>
         <item quantity="many"><xliff:g id="count">%1$d</xliff:g> строк</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> строк</item>
-    </plurals>
-    <plurals name="settings_subtitles_downloaded_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> загружен</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> загружено</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> загружено</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> загружено</item>
-    </plurals>
-    <plurals name="settings_subtitle_file_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> файл</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> файла</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> файлов</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> файлов</item>
     </plurals>
     <string name="settings_line_add_from_phone">Заполните форму в браузере на другом устройстве</string>
     <string name="settings_add_type_here">Ввести здесь</string>
@@ -1784,7 +1667,6 @@
     <string name="settings_line_vod_view_mobile">Как открывается категория</string>
     <string name="settings_guide_size_mobile">Размер Программы передач</string>
     <string name="settings_line_guide_size_mobile">Сколько времени сетка показывает за раз</string>
-    <string name="settings_line_download_folder_mobile">Куда сохраняются фильмы, серии и записи</string>
     <string name="settings_browsing_value_both">Оба</string>
     <plurals name="settings_home_rows_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> ряд</item>
@@ -1798,7 +1680,6 @@
         <item quantity="many"><xliff:g id="count">%1$d</xliff:g> скрыто</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> скрыто</item>
     </plurals>
-    <string name="settings_catchup_timezone_label">Часовой пояс</string>
     <string name="settings_help_add_from_phone_mobile">Откройте адрес или отсканируйте код в браузере любого устройства в той же сети Wi-Fi — компьютера, планшета или телевизора, — заполните там плейлист и отправьте его сюда. Гораздо быстрее, чем вводить URL на телефоне.</string>
     <string name="settings_line_add_type_here_mobile">Xtream, M3U или Stalker</string>
     <string name="setup_local_file_hint_mobile">.m3u или .m3u8 на этом телефоне</string>
@@ -1847,11 +1728,5 @@
         <item quantity="few"><xliff:g id="count">%1$s</xliff:g> передачи</item>
         <item quantity="many"><xliff:g id="count">%1$s</xliff:g> передач</item>
         <item quantity="other"><xliff:g id="count">%1$s</xliff:g> передач</item>
-    </plurals>
-    <plurals name="settings_epg_line_catchup">
-        <item quantity="one">архив на <xliff:g id="count">%1$s</xliff:g></item>
-        <item quantity="few">архив на <xliff:g id="count">%1$s</xliff:g></item>
-        <item quantity="many">архив на <xliff:g id="count">%1$s</xliff:g></item>
-        <item quantity="other">архив на <xliff:g id="count">%1$s</xliff:g></item>
     </plurals>
 </resources>

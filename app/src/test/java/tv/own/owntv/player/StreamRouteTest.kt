@@ -11,8 +11,9 @@ import tv.own.owntv.core.player.ManifestType
  * all even though `media3-exoplayer-dash` was already on the classpath. A channel published at
  * `https://host/live/mpd/173` — extensionless, redirecting to an `.mpd` only once requested — was
  * therefore handed to the progressive extractor, which sniffed an XML manifest and failed with
- * `ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED` before the first frame. With DRM in play the engine is
- * pinned to ExoPlayer (mpv has no CDM), so there was no fallback rung left and the channel died.
+ * `ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED` before the first frame. With DRM in play only a Media3
+ * source with a DRM configuration can open the channel at all, so a route that could not carry one
+ * left no fallback and the channel died.
  *
  * The precedence order is the substance here, not the individual answers: it decides which piece of
  * evidence wins when two disagree, and getting it wrong is invisible until a specific panel breaks.

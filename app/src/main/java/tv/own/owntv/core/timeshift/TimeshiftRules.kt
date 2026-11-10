@@ -55,10 +55,10 @@ object TimeshiftRules {
         return drop
     }
 
-    /** Reconnects in a row before a live buffer gives up — the same budget mpv's live reconnect has. */
+    /** Reconnects in a row before a live buffer gives up — the budget the live reconnect has always used. */
     const val MAX_RECONNECTS = 5
 
-    /** Unbroken downloading that earns the reconnect budget back (the live engines' own 60 s rule). */
+    /** Unbroken downloading that earns the reconnect budget back (the live player's own 60 s rule). */
     const val HEALTHY_MS = 60_000L
 
     fun reconnectDelayMs(attempt: Int): Long = (1_000L shl (attempt - 1).coerceIn(0, 3))
@@ -66,7 +66,7 @@ object TimeshiftRules {
     /**
      * The device has no network (the provider's name cannot be looked up, or there is no route), as
      * opposed to a provider that drops the stream. Such a failure does not spend the reconnect budget:
-     * the buffer waits the outage out, as the live engines do, instead of giving the channel up.
+     * the buffer waits the outage out, as the live player does, instead of giving the channel up.
      */
     fun isOffline(error: Throwable): Boolean = generateSequence(error) { it.cause }.take(8).any {
         it is java.net.UnknownHostException || it is java.net.NoRouteToHostException ||

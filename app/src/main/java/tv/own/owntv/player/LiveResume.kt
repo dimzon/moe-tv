@@ -6,8 +6,8 @@ package tv.own.owntv.player
  * A paused live engine keeps whatever it had buffered, and the panel's stream has moved on: resuming it
  * played minutes-old pictures, or froze on data the server had long dropped. A short pause still resumes
  * where it was. The saved copy ([tv.own.owntv.core.timeshift.TimeshiftServer]) is the one live stream
- * that is *meant* to be paused and continued, so it never jumps; a catch-up or a rewind into the archive
- * is not live content at all and never reaches this.
+ * that is *meant* to be paused and continued, so it never jumps. Every other pause on a live channel
+ * is this case.
  */
 internal object LiveResume {
     const val LIVE_EDGE_AFTER_PAUSE_MS = 60_000L

@@ -21,7 +21,7 @@ import tv.own.owntv.core.network.HttpClient
 /**
  * ExoPlayer engine for the Home screen hero preview.
  *
- * It is intentionally small: muted only, VOD start-position support, no HUD integration, and a single surface.
+ * It is intentionally small: muted only, no HUD integration, and a single surface.
  * The Home screen keeps it alive while the hero is focused so the preview starts quickly and can be
  * reused across hero items without rebuilding the player each time.
  */
@@ -30,7 +30,7 @@ class HeroPreviewEngine(
     private val context: Context,
     private val streamingHttp: tv.own.owntv.core.network.StreamingHttpClient,
     settings: tv.own.owntv.core.settings.SettingsRepository? = null,
-    /** True while another engine (mpv) already holds a stream — used for the one-session guard. */
+    /** True while the Live preview engine already holds a stream — used for the one-session guard. */
     private val streamInUse: () -> Boolean = { false },
 ) {
     /** Mirrors Settings → Picture → Hardware decoding, like every other engine. Read at [build]
@@ -135,7 +135,7 @@ class HeroPreviewEngine(
         }
         val headers = tv.own.owntv.core.network.StreamHeaders.decode(httpHeaders)
         // An item's own User-Agent is more specific than the source-wide one, so it wins — same rule as
-        // the live and VOD engines.
+        // the live engine.
         val effectiveUa = tv.own.owntv.core.network.StreamHeaders.userAgentOf(headers)
             ?: userAgent?.takeIf { it.isNotBlank() }
             ?: HttpClient.DEFAULT_USER_AGENT
@@ -211,7 +211,7 @@ class HeroPreviewEngine(
             .build()
         return ExoPlayer.Builder(context)
             // Shares the decode-path config of the real engines ([ownTVRenderers]) instead of a stock
-            // factory: the hero preview draws the same UHD-HEVC trailers the player does, on the same
+            // factory: the hero preview draws the same UHD-HEVC channels the player does, on the same
             // VPU. forceStereo is belt-and-braces — the audio track is disabled below, so no sink is
             // built at all, but nothing here may ever claim the HDMI passthrough output.
             // softwareFirst follows the same setting the other engines read: a user who turned hardware
@@ -239,7 +239,7 @@ class HeroPreviewEngine(
         private const val TAG = "HeroPreviewEngine"
 
         /** No first frame within this window → give up and leave the poster showing. Armed at load;
-         *  shared with [ExoSubtitleEngine]'s budget — see [NoFrameWatchdog] for the reasoning. */
+         *  see [NoFrameWatchdog] for why the budget is 12 s. */
         private const val NO_FRAME_TIMEOUT_MS = 12_000L
     }
 }

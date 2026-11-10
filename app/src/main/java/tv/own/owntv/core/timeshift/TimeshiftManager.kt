@@ -299,7 +299,7 @@ class TimeshiftManager(
 
     private companion object {
         const val TAG = "Timeshift"
-        /** No player reading this long = nobody is watching; a handover between engines takes ≈1 s. */
+        /** No player reading this long = nobody is watching; a preview-to-fullscreen handover leaves a gap of ≈1 s. */
         const val IDLE_PARK_MS = 4_000L
         const val FIRST_PIECE_SLICE_MS = 250L
     }

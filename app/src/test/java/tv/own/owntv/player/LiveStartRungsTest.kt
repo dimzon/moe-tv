@@ -65,7 +65,7 @@ class LiveStartRungsTest {
     }
 
     @Test
-    fun `the rebuilds leave most of the default give-up budget for the other engine`() {
+    fun `the rebuilds leave most of the default give-up budget`() {
         // An attempt fails about two seconds in (codec start plus the first sample), so the three waits
         // and four attempts must stay inside half of the budget.
         val waits = (0..2).sumOf { LiveStartRungs.decoderRebuildDelayMs(it)!! }

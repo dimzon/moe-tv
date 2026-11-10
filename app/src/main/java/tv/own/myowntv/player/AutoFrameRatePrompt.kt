@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -72,10 +71,10 @@ private const val SETTLE_MS = 8_000L
 /**
  * The one-time "your TV is at 60 Hz and this stream is 25 fps" suggestion.
  *
- * On mpv's direct `vo=mediacodec_embed` path the app does not control scan-out timing — frames go to the
- * decoder's surface and the display presents them on its own cadence. 25 fps on a fixed 60 Hz output
- * therefore becomes an uneven 2:3 pulldown (visible judder) while 50 fps maps cleanly. That is a known
- * limitation of the direct path, not something OwnTV can smooth over, and **Auto frame rate is the only
+ * When the decoder draws straight to the SurfaceView the app does not control scan-out timing — frames
+ * go to the decoder's surface and the display presents them on its own cadence. 25 fps on a fixed 60 Hz
+ * output therefore becomes an uneven 2:3 pulldown (visible judder) while 50 fps maps cleanly. That is a
+ * property of the hardware path, not something OwnTV can smooth over, and **Auto frame rate is the only
  * cure** — which ships off by default, so the affected user has no way to know it exists.
  *
  * Deliberately conservative, because an unsolicited dialog over a playing video is intrusive:

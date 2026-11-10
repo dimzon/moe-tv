@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 /** Convert an HSV triple (h 0..360, s/v 0..1) into an uppercase "#RRGGBB" string. */
 fun hsvToHex(h: Float, s: Float, v: Float): String {

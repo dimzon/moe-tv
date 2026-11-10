@@ -50,9 +50,7 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
-import tv.own.owntv.player.PlaybackEngine
 import android.app.Activity
 import android.content.Context
 import android.os.Build
@@ -61,19 +59,10 @@ import android.view.Display
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import android.hardware.display.DisplayManager
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.dropWhile
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withTimeoutOrNull
 import tv.own.owntv.core.ui.findActivity
-import kotlin.coroutines.resume
 import kotlin.math.abs
 
 /**
@@ -83,8 +72,8 @@ import kotlin.math.abs
  * Two independent mechanisms exist on Android and OwnTV uses both:
  *
  * 1. `Surface.setFrameRate()` (API 30+) — a *hint* attached to the video surface. Cheap and seamless,
- *    but it does nothing at all on Android 10 and below. See [MpvVideoSurface] and ExoPlayer's
- *    `setVideoChangeFrameRateStrategy`.
+ *    but it does nothing at all on Android 10 and below. Media3 applies its own version of this on the
+ *    surface [ExoPreviewSurface] hands over (see `setVideoChangeFrameRateStrategy`).
  * 2. `WindowManager.LayoutParams.preferredDisplayModeId` (API 23+) — an explicit request for one of the
  *    display's advertised modes. This is what actually works on older TV boxes, notably Fire OS 7
  *    (API 28) where mechanism 1 is unavailable. That's the case in the report this was written for
@@ -92,8 +81,8 @@ import kotlin.math.abs
  *
  * This controller implements mechanism 2. It is deliberately **window-level**, not surface-level:
  * `preferredDisplayModeId` is an attribute of the Activity's window, so it cannot live inside
- * [MpvVideoSurface] / `ExoPreviewSurface`. Both engines route through here, which also means VOD/mpv
- * gets working AFR on Fire OS 7 for the first time (previously mechanism 1 only → a silent no-op).
+ * [ExoPreviewSurface]. The live engine routes through here, which is what makes AFR work at all on
+ * Fire OS 7 (API 28), where mechanism 1 alone is a silent no-op.
  *
  * Mode selection keeps the CURRENT resolution and only varies the refresh rate — never switch a 4K
  * output down to 1080p just to hit a rate. A mode is a match when its refresh rate is an integer
@@ -176,7 +165,7 @@ object FrameRateController {
         runCatching {
             // The pending reset is cancelled only once a mode is actually going to be requested. Cancelling
             // up front killed the restore-to-default even when nothing matched this item's frame rate — so
-            // leaving a 24p film for something the panel has no mode for kept the display at 24Hz.
+            // leaving a 24p channel for something the panel has no mode for kept the display at 24Hz.
             val choice = pickMode(activity, fps, videoSize?.takeIf { matchResolution })
             // No match keeps nothing from the last item: a 50p channel after a 30p one on a 60/30 Hz
             // panel would otherwise stay at 30 Hz and lose every other frame.
@@ -201,7 +190,6 @@ object FrameRateController {
                 val target = choice.mode
                 Log.i(TAG, "AFR: video ${fps}fps -> display mode ${target.modeId} (${target.physicalWidth}x${target.physicalHeight} ${target.refreshRate}Hz, seamless=${choice.seamless})")
             }
-            onModeSwitched?.invoke(choice?.seamless ?: false)
         }.onFailure { Log.w(TAG, "AFR apply failed: ${it.message}") }
     }
 
@@ -216,16 +204,9 @@ object FrameRateController {
     }
 
     /**
-     * Told each time a mode change is actually pushed to the window, with whether the panel can make it
-     * without re-syncing HDMI. The full-screen film surface listens, to hold the film through the black
-     * gap; nothing else does, so live TV is never paused by it.
-     */
-    var onModeSwitched: ((seamless: Boolean) -> Unit)? = null
-
-    /**
      * The resolution the display was on before this playback's first switch — the ceiling resolution
-     * matching never goes above, and what the next film is judged against once the panel has been moved
-     * to 1080p. Captured while the window still asks for the system default; cleared on release.
+     * matching never goes above, and what the next stream is judged against once the panel has been
+     * moved to 1080p. Captured while the window still asks for the system default; cleared on release.
      */
     private var baseWidth = 0
     private var baseHeight = 0
@@ -285,10 +266,11 @@ object FrameRateController {
      *  3. The closest rate within that multiple.
      *
      * The resolution is the **base** one — where the display was before this playback moved it — so a
-     * 4K output is never switched down to 1080p just to hit a rate. The one exception is [video], passed
-     * only when the user turned on resolution matching for a film: the smallest mode that holds the
-     * whole picture, never above the base, is tried first, and the base resolution is the fallback when
-     * it has no matching rate. A seamless-only system never gets a resolution change: none is seamless.
+     * 4K output is never switched down to 1080p just to hit a rate. The one exception is [video], the
+     * optional resolution-match request: the smallest mode that holds the whole picture, never above
+     * the base, is tried first, and the base resolution is the fallback when it has no matching rate.
+     * No live caller passes it — on live TV a resolution change would black the screen on every zap
+     * between SD and HD — and a seamless-only system never gets a resolution change: none is seamless.
      */
     internal fun chooseMode(
         modes: List<ModeSpec>,
@@ -378,8 +360,8 @@ object FrameRateController {
      * Hand the display back to the system default (mode id 0) — called when playback stops.
      *
      * Deferred by [RESET_DELAY_MS] and cancelled by any [apply] in the meantime. The video surface is
-     * disposed and remounted on ordinary events (the mpv<->ExoPlayer engine swap, the Realtek fresh-
-     * Surface reset, dock/expand), and releasing the mode on each of those would make the TV re-handshake
+     * disposed and remounted on ordinary events (the Realtek fresh-Surface reset, dock/expand), and
+     * releasing the mode on each of those would make the TV re-handshake
      * HDMI twice for no reason — a visible black flash on many panels. A real stop still releases, just
      * a moment later.
      */
@@ -448,96 +430,34 @@ object FrameRateController {
         }
 }
 
+
 /**
  * Applies [FrameRateController] for as long as this composable is in the tree, following [fps] as the
- * player reports it, and releases the display mode on dispose. Mount it from the full-screen video
- * surfaces only — a mini/preview window must not reconfigure the whole display.
+ * engine reports it, and releases the display mode on dispose. Mount it from the full-screen video
+ * surface only — a mini/preview window must not reconfigure the whole display.
  *
- * [film] is a FILM on the full-screen surface — the only case the two resolution extras apply to. On live TV a
- * resolution switch would black the screen on every zap between an SD and an HD channel, and a pause
- * would put the viewer behind the broadcast for nothing. [videoSize] feeds resolution matching;
- * [holdSecs] > 0 holds the film paused through a switch the panel cannot make seamlessly.
+ * The live path asks for a rate match only, never a resolution match: on live TV a resolution switch
+ * would black the screen on every zap between an SD and an HD channel, and a pause would put the
+ * viewer behind the broadcast for nothing.
  */
 @Composable
 fun AutoFrameRateEffect(
     fps: Float?,
     enabled: Boolean,
-    film: PlaybackEngine? = null,
-    videoSize: Pair<Int, Int>? = null,
-    matchResolution: Boolean = false,
-    holdSecs: Int = 0,
 ) {
     val activity = LocalContext.current.findActivity()
     // Apply on every fps change, but keep the release in its OWN effect keyed only on the activity —
     // keying the disposal on fps too would reset the display to default and re-request on each fps
     // update, i.e. an extra HDMI mode flip per change.
-    val sizeForMatch = videoSize.takeIf { film != null && matchResolution }
-    LaunchedEffect(activity, enabled, fps, sizeForMatch) {
+    LaunchedEffect(activity, enabled, fps) {
         if (activity == null) return@LaunchedEffect
         if (enabled) {
-            FrameRateController.apply(activity, fps ?: 0f, sizeForMatch, matchResolution = sizeForMatch != null)
+            FrameRateController.apply(activity, fps ?: 0f)
         } else {
             FrameRateController.reset(activity)
         }
     }
     DisposableEffect(activity) {
         onDispose { if (activity != null) FrameRateController.reset(activity) }
-    }
-    val scope = rememberCoroutineScope()
-    DisposableEffect(activity, film, enabled, holdSecs) {
-        var hold: Job? = null
-        val listener: ((Boolean) -> Unit)? = if (activity != null && film != null && enabled && holdSecs > 0) {
-            { seamless ->
-                // Only a real re-sync blacks the panel; only a playing film has an opening to lose.
-                if (!seamless && film.isPlaying.value) {
-                    hold?.cancel()
-                    hold = scope.launch { holdThroughSwitch(activity, film, holdSecs) }
-                }
-            }
-        } else {
-            null
-        }
-        if (listener != null) FrameRateController.onModeSwitched = listener
-        onDispose {
-            // The slot is shared by every surface; only the one that filled it may empty it.
-            if (listener != null && FrameRateController.onModeSwitched === listener) FrameRateController.onModeSwitched = null
-            hold?.cancel()
-        }
-    }
-}
-
-/** How long the hold waits for the display to report the new mode before counting from the request. */
-private const val DISPLAY_CHANGE_WAIT_MS = 5_000L
-
-/**
- * Pause [film], wait for the display to finish changing mode, then [holdSecs] more, and resume — unless
- * the user pressed play or pause in the meantime, in which case playback is left exactly as they set it.
- * Leaving the player cancels the hold with the surface, and nothing is resumed.
- */
-private suspend fun holdThroughSwitch(activity: Activity, film: PlaybackEngine, holdSecs: Int) = coroutineScope {
-    if (!film.isPlaying.value) return@coroutineScope
-    film.togglePlayPause()
-    // Our own pause turns isPlaying false first; a true after that is the user resuming by hand.
-    var userResumed = false
-    val watch = launch { film.isPlaying.dropWhile { it }.first { it }; userResumed = true }
-    awaitDisplayChange(activity, DISPLAY_CHANGE_WAIT_MS)
-    delay(holdSecs * 1_000L)
-    watch.cancel()
-    if (!userResumed && !film.isPlaying.value) film.togglePlayPause()
-}
-
-/** Suspends until the display this activity is on reports a change, or [timeoutMs] passes. */
-private suspend fun awaitDisplayChange(activity: Activity, timeoutMs: Long) {
-    val manager = activity.getSystemService(DisplayManager::class.java) ?: return
-    withTimeoutOrNull(timeoutMs) {
-        suspendCancellableCoroutine { cont ->
-            val listener = object : DisplayManager.DisplayListener {
-                override fun onDisplayChanged(displayId: Int) { if (cont.isActive) cont.resume(Unit) }
-                override fun onDisplayAdded(displayId: Int) = Unit
-                override fun onDisplayRemoved(displayId: Int) = Unit
-            }
-            manager.registerDisplayListener(listener, android.os.Handler(android.os.Looper.getMainLooper()))
-            cont.invokeOnCancellation { manager.unregisterDisplayListener(listener) }
-        }
     }
 }

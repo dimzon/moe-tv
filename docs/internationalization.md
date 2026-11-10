@@ -873,7 +873,7 @@ values/strings_features.xml   profiles, home rows, search, updates, recovery and
 values/donottranslate.xml     brand + protocol constants, translatable="false"
 ```
 
-Key convention: `<area>_<screen>_<element>[_<variant>]`, snake_case: `settings_network_proxy_invalid_port`, `player_error_both_engines_failed`. Shared strings use `common_`.
+Key convention: `<area>_<screen>_<element>[_<variant>]`, snake_case: `settings_network_proxy_invalid_port`, `player_error_lost_connection`. Shared strings use `common_`.
 
 ### 0d. Guardrails (built now so Phase 1 is a ratchet, not a hope)
 

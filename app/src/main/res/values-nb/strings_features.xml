@@ -9,8 +9,6 @@
     <string name="profiles_avatar_own_picture">Ditt eget bilde</string>
     <string name="profiles_kids">Barneprofil</string>
     <string name="profiles_kids_description">Forenklet, trygg navigering</string>
-    <string name="profiles_allow_downloads">Tillat nedlastinger</string>
-    <string name="profiles_allow_downloads_description">Av skjuler alle nedlastingsknapper for denne profilen</string>
     <string name="profiles_remove_pin">Fjern PIN-lås</string>
     <string name="profiles_no_pin">Denne profilen åpnes uten PIN</string>
     <string name="profiles_change_pin">Endre PIN (tomt felt = behold)</string>
@@ -39,13 +37,9 @@
     <string name="search_nothing_in_list">Ingenting i <xliff:g id="list">%1$s</xliff:g> ennå.</string>
     <string name="search_clear">Tøm</string>
     <string name="search_jump_to">Gå til</string>
-    <string name="search_open_series">Åpne serier</string>
-    <string name="search_movie">Film</string>
-    <string name="search_series">Serier</string>
     <string name="search_channels">Kanaler</string>
     <string name="search_on_tv">TV-programmer</string>
     <string name="search_go_to_channel">Gå til kanal</string>
-    <string name="search_go_to_movie">Gå til film</string>
     <string name="search_clear_recent">Tøm nylige søk</string>
     <string name="search_field_hint">Kanaler, filmer og serier</string>
     <string name="search_voice">Talesøk</string>
@@ -68,11 +62,6 @@
     <string name="launcher_recent_live_description">Direktekanaler du nylig har sett på</string>
     <string name="launcher_movie_type">Film</string>
     <string name="launcher_episode_number">Episode <xliff:g id="episode">%1$d</xliff:g></string>
-    <plurals name="home_library_loading">
-        <item quantity="one">Laster inn biblioteket · <xliff:g id="count">%1$s</xliff:g> tittel så langt</item>
-        <item quantity="other">Laster inn biblioteket · <xliff:g id="count">%1$s</xliff:g> titler så langt</item>
-    </plurals>
-    <string name="home_library_loading_trending">Populært nå vises etter hvert som biblioteket fylles.</string>
     <string name="home_no_preview">Ingenting å forhåndsvise ennå.</string>
     <string name="home_no_rows">Alle radene på startskjermen er skjult.</string>
     <string name="home_enable_rows">Slå på radene igjen under Innstillinger → Startskjerm.</string>
@@ -140,33 +129,8 @@
     <string name="home_row_trending_description">Viser bare 4–10 elementer når populære TMDB-titler samsvarer med filmer eller serier i leverandørkatalogen.</string>
     <string name="home_trending_style">Oppsett for trender</string>
     <string name="home_trending_style_hero">Detaljert kort</string>
-    <string name="home_trending_style_posters">Kun plakater</string>
-    <string name="home_trending_rank">#<xliff:g id="rank">%1$d</xliff:g> i Populært nå · <xliff:g id="section">%2$s</xliff:g></string>
-    <string name="home_trending_in_playlist">I SPILLELISTEN DIN</string>
-    <string name="home_trending_style_full_bleed">Full bredde</string>
     <string name="home_duration_hours_minutes"><xliff:g id="hours">%1$d</xliff:g> t <xliff:g id="minutes">%2$02d</xliff:g> min</string>
     <string name="home_time_left"><xliff:g id="duration">%1$s</xliff:g> igjen</string>
-    <string name="settings_trending_status_off">Populært nå er slått av.</string>
-    <string name="settings_trending_status_building">Populært nå klargjøres etter synkronisering av leverandøren.</string>
-    <string name="settings_trending_status_metadata_disabled">Populært nå krever metadata fra TMDB. Velg Bare TMDB eller Leverandør + TMDB.</string>
-    <string name="settings_trending_status_no_vod">Populært nå er skjult fordi filmer eller serier ikke er aktivert for denne leverandøren.</string>
-    <string name="settings_trending_status_no_matches">Populært nå er skjult fordi ingen titler fra leverandøren ga treff.</string>
-    <string name="settings_trending_status_failed">Populært nå kunne ikke oppdateres. Prøv å synkronisere leverandøren på nytt.</string>
-    <string name="settings_trending_status_waiting">Fullfør en synkronisering av leverandøren for å bygge Populært nå.</string>
-    <plurals name="settings_trending_status_below_threshold">
-        <item quantity="one">Populært nå er skjult fordi bare <xliff:g id="count">%1$d</xliff:g> tittel fra leverandøren ga treff. Minst 4 kreves.</item>
-        <item quantity="other">Populært nå er skjult fordi bare <xliff:g id="count">%1$d</xliff:g> titler fra leverandøren ga treff. Minst 4 kreves.</item>
-    </plurals>
-    <plurals name="settings_trending_status_showing">
-        <item quantity="one">Populært nå viser <xliff:g id="count">%1$d</xliff:g> tittel med treff.</item>
-        <item quantity="other">Populært nå viser <xliff:g id="count">%1$d</xliff:g> titler med treff.</item>
-    </plurals>
-    <plurals name="settings_trending_status_showing_refresh_failed">
-        <item quantity="one">Populært nå viser <xliff:g id="count">%1$d</xliff:g> tittel fra den siste vellykkede oppdateringen.</item>
-        <item quantity="other">Populært nå viser <xliff:g id="count">%1$d</xliff:g> titler fra den siste vellykkede oppdateringen.</item>
-    </plurals>
-    <string name="home_trending_movie">Film</string>
-    <string name="home_trending_series">Serier</string>
     <string name="home_trending_provider_match">Leverandørtreff</string>
     <string name="home_trending_why_label">HVORFOR DETTE ELEMENTET VISES</string>
     <string name="home_trending_reason_title">TMDB-plassering #<xliff:g id="rank">%1$d</xliff:g> <xliff:g id="media_type">%2$s</xliff:g> + leverandørtreff</string>
@@ -174,18 +138,10 @@
     <string name="home_trending_reason_english">Ingen leverandørversjon på <xliff:g id="language">%1$s</xliff:g> ga treff, så den engelske leverandøroppføringen ble valgt.</string>
     <string name="home_trending_reason_untagged">Ingen språkkode for <xliff:g id="language">%1$s</xliff:g> eller engelsk ga treff, så leverandøroppføringen uten språkkode ble valgt.</string>
     <string name="home_trending_reason_other">Den nærmeste spillbare leverandørversjonen ble valgt fordi oppføringer på det foretrukne språket og engelsk ikke var tilgjengelige.</string>
-    <plurals name="home_trending_seasons">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> sesong</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> sesonger</item>
-    </plurals>
     <string name="home_trending_play">Spill av</string>
-    <string name="home_trending_open_episodes">Åpne episoder</string>
-    <string name="home_trending_trailer">Trailer</string>
     <string name="home_trending_more_details">Flere detaljer</string>
-    <string name="home_trending_all_versions">Alle versjoner</string>
     <string name="home_trending_why_menu">Hvorfor denne tittelen er her</string>
     <string name="home_trending_pause">Pause</string>
-    <string name="home_trending_unavailable">Denne versjonen er ikke lenger tilgjengelig</string>
     <string name="recording_notification_title">Tar opp</string>
     <string name="auto_start_notification_channel">Start automatisk ved oppvåkning</string>
     <string name="auto_start_notification_text">OwnTV åpnes når TV-en våkner</string>
@@ -196,38 +152,11 @@
     <string name="recording_failed_unavailable">Kanalen ville ikke spille</string>
     <string name="recording_failed_channel_gone">Kanalen finnes ikke lenger i spillelisten</string>
     <string name="recording_failed_unknown">Det ble ikke tatt opp</string>
-    <string name="recording_title">Opptak</string>
-    <string name="recording_empty">Ingenting tatt opp ennå. Trykk Ta opp på et program i TV-guiden, eller hold inne en kanal for å ta den opp eller planlegge et tidspunkt.</string>
-    <string name="recording_group_now">Tar opp nå</string>
-    <string name="recording_group_scheduled">Planlagt</string>
-    <string name="recording_group_completed">Tatt opp</string>
-    <string name="recording_group_failed">Mislyktes</string>
-    <string name="recording_group_missed">Gikk glipp av</string>
     <string name="recording_record">Ta opp</string>
-    <string name="recording_stop">Stopp opptaket</string>
-    <string name="recording_delete_message">Fjerner opptaket og filen fra denne enheten. Dette kan ikke angres.</string>
-    <string name="recording_record_series">Ta opp alle visninger</string>
-    <string name="recording_stop_series">Slutt å ta opp alle visninger</string>
-    <string name="recording_from_archive">Ta opp fra arkivet</string>
     <string name="recording_schedule">Planlegg opptak…</string>
-    <string name="recording_schedule_hint">Velg dag, start og slutt. Det tas opp selv om kanalen ikke har TV-guide.</string>
-    <string name="recording_schedule_start">Start</string>
-    <string name="recording_schedule_end">Slutt</string>
-    <string name="recording_schedule_next_day">neste dag</string>
-    <string name="recording_schedule_past">Det tidspunktet har allerede passert</string>
-    <string name="recording_scheduled_for">Tar opp <xliff:g id="time">%1$s</xliff:g></string>
-    <string name="recording_badge">REC</string>
     <string name="recording_pill_line">Tar opp <xliff:g id="title">%1$s</xliff:g></string>
     <string name="recording_pill_line_locked">Tar opp fra en låst kategori</string>
-    <string name="recording_clash_with">Kolliderer med <xliff:g id="programme">%1$s</xliff:g></string>
     <string name="recording_settings_group">Opptak</string>
-    <string name="settings_recording_reserve">Hold én strøm ledig til å se på</string>
-    <string name="settings_recording_reserve_description">Opptak lar én av leverandørens tilkoblinger stå ledig, slik at det alltid finnes én å se på. Slå av for å ta opp på alle.</string>
-    <string name="settings_recording_pre_roll">Start tidligere</string>
-    <string name="settings_recording_pre_roll_description">Begynn så lenge før det oppgitte starttidspunktet, slik at en guide som går litt foran likevel får med begynnelsen.</string>
-    <string name="settings_recording_post_roll">Fortsett etter slutten</string>
-    <string name="settings_recording_post_roll_description">Fortsett så lenge etter det oppgitte sluttidspunktet, slik at et program som drar ut ikke blir kuttet.</string>
-    <string name="settings_recording_timers_inexact">Denne enheten lar ikke OwnTV sette nøyaktige alarmer, så et opptak kan starte noen minutter for sent. Opptak starter tidligere for å veie opp for det.</string>
     <plurals name="recording_minutes">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> minutt</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> minutter</item>
@@ -235,22 +164,6 @@
     <string name="recording_failed_encrypted">Denne kanalen er kryptert og kan ikke tas opp</string>
     <string name="recording_failed_drm">Denne kanalen er DRM-beskyttet, så den kan ses, men ikke tas opp. Beskyttelsen kommer fra leverandøren din, ikke fra OwnTV.</string>
     <string name="recording_failed_metered">Ikke tatt opp på mobildata</string>
-    <string name="recording_card_empty_title">Ingenting tatt opp ennå</string>
-    <string name="recording_card_body">Velg et program i TV-guiden og velg Ta opp, eller hold inne en kanal og planlegg et tidspunkt. Det havner her, også mens du ser på noe annet.</string>
-    <string name="recording_open_guide">Åpne TV-guide</string>
-    <plurals name="recording_card_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> opptak</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> opptak</item>
-    </plurals>
-    <string name="settings_recording_mobile_data">Ta opp på mobildata</string>
-    <string name="settings_record_watching">Ta opp det jeg ser på</string>
-    <string name="settings_record_watching_description">Legger en opptaksknapp i spilleren som lagrer kanalen du ser på. Den henter kanalen selv, så den bruker en av leverandørens tilkoblinger mens den går, og fortsetter å ta opp når du bytter kanal eller forlater spilleren.</string>
-    <string name="settings_record_watching_warning_title">Bare én tilkobling</string>
-    <string name="settings_record_watching_warning_description">Opptaket henter kanalen en gang til og bruker dermed enda en av leverandørens tilkoblinger. På en konto som bare tillater én, avvises opptaket mens du ser på. Når det først er i gang, går det av seg selv — bytt kanal, forlat spilleren, og det fortsetter til programmet er slutt eller du stopper det under Opptak.</string>
-    <string name="settings_record_watching_keep_off">La stå av</string>
-    <string name="settings_record_watching_turn_on">Slå på</string>
-    <string name="player_recording_conflict">Leverandøren din tillater bare én strøm om gangen, og opptaket bruker den.</string>
-    <string name="player_keep_watching_stop_recording">Fortsett å se (stopper opptaket)</string>
     <string name="sports_channel_goal_alerts">Målvarsler</string>
     <string name="sports_channel_live_match">Direkte kamp</string>
     <string name="sports_channel_match_reminders">Kamppåminnelser</string>

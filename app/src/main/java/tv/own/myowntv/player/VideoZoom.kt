@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -67,11 +66,11 @@ import androidx.compose.ui.unit.dp
 import tv.own.owntv.player.ZoomMode
 
 /**
- * Zoom/aspect sizing shared by both video surfaces: [MpvVideoSurface] (mpv / VOD / Live-on-mpv) and
- * [ExoPreviewSurface] (ExoPlayer live preview + promoted full-screen). The video engine always fills its
- * surface edge-to-edge, so zoom / letterbox / crop is done entirely by **sizing the surface view itself**
- * inside a clipped black box (the approach ExoPlayer/YouTube use). Identical math for both engines ⇒
- * identical zoom behavior whether a Live channel plays on ExoPlayer or mpv.
+ * Zoom/aspect sizing for the one video surface, [ExoPreviewSurface] (ExoPlayer live preview +
+ * promoted full-screen). The video engine always fills its surface edge-to-edge, so zoom / letterbox /
+ * crop is done entirely by **sizing the surface view itself** inside a clipped black box (the approach
+ * ExoPlayer/YouTube use). Every Live channel therefore scales by the same math in the pane, the docked
+ * mini-player and full screen.
  *
  * Must be called inside a [androidx.compose.foundation.layout.BoxWithConstraints] scope so the caller can
  * pass the incoming [maxWidth]/[maxHeight] (the on-screen container).

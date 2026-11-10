@@ -52,7 +52,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -83,8 +82,6 @@ import kotlinx.coroutines.sync.withLock
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.ContentOrderDao
 import tv.own.owntv.core.database.dao.CustomCategoryDao
-import tv.own.owntv.core.database.dao.MovieDao
-import tv.own.owntv.core.database.dao.SeriesDao
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.customize.BulkRenameSession
@@ -110,14 +107,13 @@ data class CustomizeItemRow(
 
 /**
  * Drives the category-items screen (reached from Customize by pressing OK on a category name).
- * Paged over the category's items, with hide/show, rename (Live only), and reorder support.
+ * Paged over the category's channels, with hide/show, rename and reorder support. Channels only:
+ * the movie and series catalogues are gone with VOD.
  */
 class CustomizeItemsViewModel(
     private val settings: SettingsRepository,
     private val sourceDao: SourceDao,
     private val channelDao: ChannelDao,
-    private val movieDao: MovieDao,
-    private val seriesDao: SeriesDao,
     private val contentOrderDao: ContentOrderDao,
     private val customCategoryDao: CustomCategoryDao,
     private val customize: CustomizationStore,
@@ -196,7 +192,7 @@ class CustomizeItemsViewModel(
                 .flow
                 .map { pagingData ->
                     pagingData.map { entity ->
-                        mapToRow(entity, ci.mediaType, cust)
+                        mapToRow(entity, cust)
                     }
                 }
         }
@@ -253,31 +249,17 @@ class CustomizeItemsViewModel(
     private val moveMutex = Mutex()
 
     /** Snapshot of the whole category in current display order: (itemId, stable key) pairs.
-     *  Null when the category can't be snapshotted (EPISODE or no profile). Custom categories
-     *  snapshot the membership join (same rail-order query as the browse screens). */
+     *  Null when there is no profile. Custom categories snapshot the membership join (same rail-order
+     *  query as the browse screens). Channels only. */
     private suspend fun orderedSnapshot(ci: CatInfo): List<Pair<Long, String>>? {
         val pid = ctx.value.profileId
         if (pid < 0) return null
         if (ci.isCustom) {
-            return when (ci.mediaType) {
-                MediaType.LIVE -> customCategoryDao.snapshotChannels(pid, ci.contextKey, ci.sourceIds, false, SNAPSHOT_LIMIT)
-                    .map { it.id to CustomizeKeys.channel(it) }
-                MediaType.MOVIE -> customCategoryDao.snapshotMovies(pid, ci.contextKey, ci.sourceIds, false, SNAPSHOT_LIMIT)
-                    .map { it.id to CustomizeKeys.movie(it) }
-                MediaType.SERIES -> customCategoryDao.snapshotSeries(pid, ci.contextKey, ci.sourceIds, false, SNAPSHOT_LIMIT)
-                    .map { it.id to CustomizeKeys.series(it) }
-                MediaType.EPISODE -> null
-            }
-        }
-        return when (ci.mediaType) {
-            MediaType.LIVE -> channelDao.snapshotByCategoryManual(ci.categoryId!!, pid, ci.contextKey, false, SNAPSHOT_LIMIT)
+            return customCategoryDao.snapshotChannels(pid, ci.contextKey, ci.sourceIds, false, SNAPSHOT_LIMIT)
                 .map { it.id to CustomizeKeys.channel(it) }
-            MediaType.MOVIE -> movieDao.snapshotByCategoryManual(ci.categoryId!!, pid, ci.contextKey, false, SNAPSHOT_LIMIT)
-                .map { it.id to CustomizeKeys.movie(it) }
-            MediaType.SERIES -> seriesDao.snapshotByCategoryManual(ci.categoryId!!, pid, ci.contextKey, false, SNAPSHOT_LIMIT)
-                .map { it.id to CustomizeKeys.series(it) }
-            MediaType.EPISODE -> null
         }
+        return channelDao.snapshotByCategoryManual(ci.categoryId!!, pid, ci.contextKey, false, SNAPSHOT_LIMIT)
+            .map { it.id to CustomizeKeys.channel(it) }
     }
 
     /** Saves a move for this context: the moved items keep their place (the Move commit point). */
@@ -340,73 +322,30 @@ class CustomizeItemsViewModel(
         const val SNAPSHOT_LIMIT = 5000
     }
 
-    /** Returns the right Room PagingSource for this media type, with or without manual-order join.
+    /** Returns the Room PagingSource for this channel category, with or without manual-order join.
      *  Custom categories always take the membership join — it LEFT JOINs content_order itself,
-     *  so [ordered] doesn't matter there. */
-    private fun pagingSource(categoryId: Long?, info: CatInfo, ordered: Boolean): PagingSource<Int, *> {
+     *  so [ordered] doesn't matter there. Channels only. */
+    private fun pagingSource(categoryId: Long?, info: CatInfo, ordered: Boolean): PagingSource<Int, *> =
         if (info.isCustom) {
-            return when (info.mediaType) {
-                MediaType.LIVE -> customCategoryDao.pagingChannels(ctx.value.profileId, info.contextKey, info.sourceIds, alpha = false)
-                MediaType.MOVIE -> customCategoryDao.pagingMovies(ctx.value.profileId, info.contextKey, info.sourceIds, alpha = false)
-                MediaType.SERIES -> customCategoryDao.pagingSeries(ctx.value.profileId, info.contextKey, info.sourceIds, alpha = false)
-                MediaType.EPISODE -> error("EPISODE not applicable to category items")
-            }
+            customCategoryDao.pagingChannels(ctx.value.profileId, info.contextKey, info.sourceIds, alpha = false)
+        } else if (ordered) {
+            channelDao.pagingByCategoryManual(categoryId!!, ctx.value.profileId, info.contextKey, alpha = false)
+        } else {
+            channelDao.pagingByCategory(categoryId!!)
         }
-        return when (info.mediaType) {
-            MediaType.LIVE -> if (ordered) {
-                channelDao.pagingByCategoryManual(categoryId!!, ctx.value.profileId, info.contextKey, alpha = false)
-            } else {
-                channelDao.pagingByCategory(categoryId!!)
-            }
-            MediaType.MOVIE -> if (ordered) {
-                movieDao.pagingByCategoryManual(categoryId!!, ctx.value.profileId, info.contextKey, alpha = false)
-            } else {
-                movieDao.pagingByCategory(categoryId!!)
-            }
-            MediaType.SERIES -> if (ordered) {
-                seriesDao.pagingByCategoryManual(categoryId!!, ctx.value.profileId, info.contextKey, alpha = false)
-            } else {
-                seriesDao.pagingByCategory(categoryId!!)
-            }
-            MediaType.EPISODE -> error("EPISODE not applicable to category items")
-        }
-    }
 
-    /** Maps one entity (any media type) to [CustomizeItemRow] with customizations applied. */
+    /** Maps one channel entity to [CustomizeItemRow] with customizations applied. */
     private fun mapToRow(
         entity: Any,
-        mediaType: MediaType,
         cust: tv.own.owntv.core.customize.SectionCustomizations,
     ): CustomizeItemRow {
-        val name: String
-        val itemId: Long
-        val key: String
-        when (mediaType) {
-            MediaType.LIVE -> {
-                val ch = entity as tv.own.owntv.core.database.entity.ChannelEntity
-                name = ch.name
-                itemId = ch.id
-                key = CustomizeKeys.channel(ch)
-            }
-            MediaType.MOVIE -> {
-                val m = entity as tv.own.owntv.core.database.entity.MovieEntity
-                name = m.name
-                itemId = m.id
-                key = CustomizeKeys.movie(m)
-            }
-            MediaType.SERIES -> {
-                val s = entity as tv.own.owntv.core.database.entity.SeriesEntity
-                name = s.name
-                itemId = s.id
-                key = CustomizeKeys.series(s)
-            }
-            MediaType.EPISODE -> error("EPISODE not applicable")
-        }
+        val ch = entity as tv.own.owntv.core.database.entity.ChannelEntity
+        val key = CustomizeKeys.channel(ch)
         return CustomizeItemRow(
             key = key,
-            itemId = itemId,
-            originalName = name,
-            displayName = cust.itemNames[key] ?: name,
+            itemId = ch.id,
+            originalName = ch.name,
+            displayName = cust.itemNames[key] ?: ch.name,
             hidden = key in cust.hiddenItems,
             renamed = key in cust.itemNames,
         )
@@ -421,7 +360,7 @@ class CustomizeItemsViewModel(
         }
     }
 
-    /** Rename an item (Live TV channels only — Movies/Series use bulk rename). */
+    /** Rename an item (a Live TV channel). */
     fun renameItem(row: CustomizeItemRow, name: String?) {
         val ci = _catInfo.value ?: return
         viewModelScope.launch {
@@ -466,42 +405,6 @@ class CustomizeItemsViewModel(
         val byKey = loadedRows.value.associateBy { it.key }
         bulk.start(keys.mapNotNull { byKey[it]?.let { row -> row.key to row.originalName } })
         return keys
-    }
-
-    /**
-     * Bulk-renames the WHOLE category — the ✎ Rename items / ✨ Auto cleanup pills (Movies/Series).
-     * Snapshots every provider name in the category (manual-order aware, same DAO path as moves) and
-     * opens the flow; with [autocleanup] the preset rules are applied straight away.
-     */
-    fun bulkRenameAll(autocleanup: Boolean) {
-        val ci = _catInfo.value ?: return
-        val pid = ctx.value.profileId
-        if (pid < 0) return
-        viewModelScope.launch {
-            val entries: List<Pair<String, String>> = when {
-                ci.isCustom -> when (ci.mediaType) {
-                    MediaType.LIVE -> customCategoryDao.snapshotChannels(pid, ci.contextKey, ci.sourceIds, false, SNAPSHOT_LIMIT)
-                        .map { CustomizeKeys.channel(it) to it.name }
-                    MediaType.MOVIE -> customCategoryDao.snapshotMovies(pid, ci.contextKey, ci.sourceIds, false, SNAPSHOT_LIMIT)
-                        .map { CustomizeKeys.movie(it) to it.name }
-                    MediaType.SERIES -> customCategoryDao.snapshotSeries(pid, ci.contextKey, ci.sourceIds, false, SNAPSHOT_LIMIT)
-                        .map { CustomizeKeys.series(it) to it.name }
-                    MediaType.EPISODE -> return@launch
-                }
-                else -> when (ci.mediaType) {
-                    MediaType.LIVE -> channelDao.snapshotByCategoryManual(ci.categoryId!!, pid, ci.contextKey, false, SNAPSHOT_LIMIT)
-                        .map { CustomizeKeys.channel(it) to it.name }
-                    MediaType.MOVIE -> movieDao.snapshotByCategoryManual(ci.categoryId!!, pid, ci.contextKey, false, SNAPSHOT_LIMIT)
-                        .map { CustomizeKeys.movie(it) to it.name }
-                    MediaType.SERIES -> seriesDao.snapshotByCategoryManual(ci.categoryId!!, pid, ci.contextKey, false, SNAPSHOT_LIMIT)
-                        .map { CustomizeKeys.series(it) to it.name }
-                    MediaType.EPISODE -> return@launch
-                }
-            }
-            if (entries.isEmpty()) return@launch
-            bulk.start(entries)
-            if (autocleanup) bulk.autoCleanup()
-        }
     }
 
     // --- Move to… ---

@@ -12,20 +12,18 @@ import java.io.File
 import tv.own.owntv.core.i18n.AppLocale
 import tv.own.owntv.core.i18n.LocaleStore
 
-// Hands a stream URL (or a downloaded file path) to an external video player (VLC, MX Player, etc.)
-// via ACTION_VIEW. When it fires, the in-app player is bypassed entirely (the fullscreen player
-// never opens, because OwnTVPlayer is never told to play).
+// Hands a live channel's stream URL to an external video player (VLC, MX Player, etc.) via
+// ACTION_VIEW — the HUD menu's "open externally" choice. When it fires, the in-app player is bypassed
+// entirely (the fullscreen player never opens, because nothing is handed to the live engine).
 //
-// Network URLs (http/https/rtsp/rtmp/udp/mms) are handed over verbatim. Local download paths are
-// shared through the app FileProvider with a read permission grant.
+// Network URLs (http/https/rtsp/rtmp/udp/mms) are handed over verbatim. Local file paths (a content
+// URI or a plain file) are shared through the app FileProvider or passed through with a read
+// permission grant.
 //
 // A source's User-Agent and any per-channel request headers are passed as intent extras. ACTION_VIEW
 // has no standard slot for these, but VLC and MX Player both read the de-facto keys used below, so a
 // stream behind a UA check or per-channel auth headers now has a chance of playing instead of a
 // guaranteed 403. Players that ignore the extras are unaffected — they see the same intent as before.
-//
-// A film's resume point goes along as "position" (ms) — MX Player reads it as an int, VLC as a long
-// with an int fallback, so the int form serves both.
 //
 // Limitations: extras are best-effort (an unknown player may still ignore them); where the user
 // stopped is not read back (that needs an Activity result), and there is no prev/next queue.
@@ -40,8 +38,6 @@ class ExternalPlayerLauncher(private val context: Context) {
         subtitle: String? = null,
         userAgent: String? = null,
         httpHeaders: String? = null,
-        /** Where to start, in ms — the item's saved resume point; 0 plays from the beginning. */
-        startPositionMs: Long = 0L,
     ): Boolean {
         val uri = uriFor(url)
         if (uri == null) {
@@ -50,9 +46,8 @@ class ExternalPlayerLauncher(private val context: Context) {
         }
         // Try the precise MIME first, then widen. VLC and MX Player advertise `video/*` but NOT every
         // specific type: a live channel ending `.ts` (video/mp2t) or `.m3u8` (application/x-mpegURL)
-        // matched no activity at all and reported "no external player installed", even though the same
-        // players happily took a movie's video/mp4. Falling back to `video/*`, and finally to the URI
-        // with no type at all, gets live streams to the same players without touching the movie path.
+        // matched no activity at all and reported "no external player installed". Falling back to
+        // `video/*`, and finally to the URI with no type at all, gets live streams to those players.
         for (mime in mimeCandidates(url)) {
             val intent = Intent(Intent.ACTION_VIEW)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -60,7 +55,6 @@ class ExternalPlayerLauncher(private val context: Context) {
             applyHeaders(intent, url, userAgent, httpHeaders)
             // VLC and MX Player show this as the name of what is playing, instead of the URL.
             (if (title != null && subtitle != null) "$title · $subtitle" else title)?.let { intent.putExtra("title", it) }
-            if (startPositionMs > 0) intent.putExtra("position", startPositionMs.coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
 
             if (context.packageManager.queryIntentActivities(intent, 0).isEmpty()) continue
             // The intent itself, never Intent.createChooser: only the system's own "Open with" window
@@ -97,7 +91,7 @@ class ExternalPlayerLauncher(private val context: Context) {
         userAgent?.takeIf { it.isNotBlank() }?.let { headers["User-Agent"] = it }
         // Per-channel headers win over the source UA: a playlist that sets its own User-Agent set it
         // for this specific stream, which is the more specific instruction (same order the in-app
-        // engines apply them in).
+        // player applies them in).
         headers.putAll(StreamHeaders.decode(httpHeaders))
         if (headers.isEmpty()) return
 
@@ -113,11 +107,11 @@ class ExternalPlayerLauncher(private val context: Context) {
     private fun uriFor(url: String): Uri? {
         val scheme = url.toUri().scheme?.lowercase()
         if (scheme in NETWORK_SCHEMES) return url.toUri()
-        // A download or recording saved into a folder the user picked is already a shareable URI —
-        // it needs no FileProvider, and wrapping it in one is impossible anyway. It is passed
-        // through with the read grant the intent already carries. Whether the other app is allowed
-        // to open it is then between it and the provider; before this, a document simply fell
-        // through to File(), did not exist, and the external player silently refused to start.
+        // A file saved into a folder the user picked is already a shareable URI — it needs no
+        // FileProvider, and wrapping it in one is impossible anyway. It is passed through with the
+        // read grant the intent already carries. Whether the other app is allowed to open it is then
+        // between it and the provider; before this, a document simply fell through to File(), did
+        // not exist, and the external player silently refused to start.
         if (scheme == CONTENT_SCHEME) return url.toUri()
         val file = File(url)
         if (!file.exists()) return null

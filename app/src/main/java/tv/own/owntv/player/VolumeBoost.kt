@@ -7,8 +7,8 @@ import androidx.media3.common.C
  *
  * ExoPlayer's own `volume` is a 0–1 linear gain, so it cannot amplify past unity, and a gain
  * audio-processor broke the audio sink. 100–150% therefore rides on the platform LoudnessEnhancer, at
- * the same gain mpv gives the same number ([VolumeCurve]), so a quiet stream is lifted equally whichever engine owns it
- * instead of stopping dead at 100% the moment playback lands on ExoPlayer.
+ * the same gain for the same number ([VolumeCurve]), so a quiet stream is lifted equally whichever
+ * live engine owns it instead of stopping dead at 100%.
  *
  * The effect is bound to one audio session id, so [apply] re-attaches after a player rebuild and
  * releases outright at or below 100%: a normal stream never carries an audio effect it doesn't need.

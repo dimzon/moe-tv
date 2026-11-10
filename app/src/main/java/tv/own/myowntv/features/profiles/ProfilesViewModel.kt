@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -85,13 +84,6 @@ class ProfilesViewModel(
 
     /** A protected profile's profile PIN or Settings PIN. */
     suspend fun verifyProtected(profile: ProfileEntity, pin: String) = protection.verify(profile, pin)
-
-    /** Whether [profileId] may download (Settings › Profile › the profile › Allow downloads). */
-    fun downloadsAllowed(profileId: Long): kotlinx.coroutines.flow.Flow<Boolean> = settings.downloadsAllowed(profileId)
-
-    fun setDownloadsAllowed(profileId: Long, allowed: Boolean) {
-        viewModelScope.launch { settings.setDownloadsAllowed(profileId, allowed) }
-    }
 
     // Eagerly on purpose: MainActivity's splash gate blocks the first frame on this list, so the
     // query has to start when the ViewModel is built, not on first collection inside composition.

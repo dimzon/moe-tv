@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -74,7 +73,6 @@ internal fun MediaSpec.displayText(): String {
                 add(
                     when (it.value.lowercase()) {
                         "exoplayer" -> stringResource(R.string.settings_player_exoplayer)
-                        "mpv" -> stringResource(R.string.settings_player_mpv)
                         else -> it.value
                     },
                 )

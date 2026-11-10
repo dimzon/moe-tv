@@ -7,16 +7,16 @@ import org.junit.Test
 /**
  * The Format row's vocabulary.
  *
- * The point of this file is the *agreement* tests at the bottom: the same film must read the same
- * word whether mpv or ExoPlayer is decoding it. Before this, mpv reported FFmpeg's raw demuxer name
- * (`MOV,MP4,M4A,3GP,3G2,MJ2`) and ExoPlayer VOD reported nothing at all.
+ * The same container arrives described three ways — a comma-joined demuxer name, a MIME type, a path
+ * extension — and every shape must map onto one label, because a label is what someone reads back to
+ * us in a bug report.
  */
 class StreamFormatLabelsTest {
 
-    // ---- mpv's side: FFmpeg demuxer names, as `file-format` reports them ----
+    // ---- raw container names, as providers and demuxers report them ----
 
     @Test
-    fun `mpv demuxer names map onto the shared labels`() {
+    fun `comma-joined container names map onto the shared labels`() {
         assertEquals("MP4", StreamFormatLabels.ofContainerName("mov,mp4,m4a,3gp,3g2,mj2"))
         assertEquals("MKV", StreamFormatLabels.ofContainerName("matroska,webm"))
         assertEquals("HLS", StreamFormatLabels.ofContainerName("hls"))
@@ -24,7 +24,7 @@ class StreamFormatLabelsTest {
         assertEquals("DASH", StreamFormatLabels.ofContainerName("dash"))
     }
 
-    /** mpv keeps its raw name for anything we do not know — true, if ugly, beats a missing row. */
+    /** Null rather than a guess — a caller that knows a better fallback can keep the raw name. */
     @Test
     fun `an unknown container is not claimed`() {
         assertNull(StreamFormatLabels.ofContainerName("avi"))
@@ -119,25 +119,21 @@ class StreamFormatLabelsTest {
 
     // ---- the agreement this whole file exists for ----
 
-    /**
-     * The same MP4 film, as each engine sees it. mpv reads FFmpeg's `file-format`; ExoPlayer reads
-     * the container Media3 resolved. If these two ever disagree, a user's bug report says one thing
-     * and the other engine's overlay says another.
-     */
+    /** The same container, described two ways, must read as one label. */
     @Test
-    fun `mpv and ExoPlayer agree on an MP4 film`() {
-        val mpv = StreamFormatLabels.ofContainerName("mov,mp4,m4a,3gp,3g2,mj2")
-        val exo = StreamFormatLabels.resolve("video/mp4", null, "/vod/film.mp4")
-        assertEquals("MP4", mpv)
-        assertEquals(mpv, exo)
+    fun `a demuxer name and a resolved MIME type agree`() {
+        val raw = StreamFormatLabels.ofContainerName("mov,mp4,m4a,3gp,3g2,mj2")
+        val mime = StreamFormatLabels.resolve("video/mp4", null, "/vod/film.mp4")
+        assertEquals("MP4", raw)
+        assertEquals(raw, mime)
     }
 
     @Test
-    fun `mpv and ExoPlayer agree on an MKV film`() {
-        val mpv = StreamFormatLabels.ofContainerName("matroska,webm")
-        val exo = StreamFormatLabels.resolve("video/x-matroska", null, "/vod/film.mkv")
-        assertEquals("MKV", mpv)
-        assertEquals(mpv, exo)
+    fun `a demuxer name and an extension agree`() {
+        val raw = StreamFormatLabels.ofContainerName("matroska,webm")
+        val ext = StreamFormatLabels.ofFileExtension("mkv")
+        assertEquals("MKV", raw)
+        assertEquals(raw, ext)
     }
 
     /** And the live routes, which had their own labels first, must use these same strings. */

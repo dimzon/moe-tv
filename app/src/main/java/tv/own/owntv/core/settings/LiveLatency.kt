@@ -2,12 +2,10 @@ package tv.own.owntv.core.settings
 
 /**
  * How close to the live edge to play Live TV, trading latency against stability. Applied on the next
- * channel open (live streams only — VOD is unaffected):
- *  - ExoPlayer live → its load control's buffer targets, and for HLS a `MediaItem.LiveConfiguration`
- *    target offset (the main HLS latency lever);
- *  - mpv live → `demuxer-readahead-secs` and `cache-secs`, set alike.
+ * channel open (live streams only): the player's load control sets the buffer targets, and for HLS a
+ * `MediaItem.LiveConfiguration` target offset — the main HLS latency lever.
  *
- * [BALANCED] is the default and applies no override — the engines keep their existing behaviour, so
+ * [BALANCED] is the default and applies no override — the player keeps its existing behaviour, so
  * it can never regress a stream that already works.
  */
 enum class LiveLatency {
@@ -119,8 +117,8 @@ object LiveBuffer {
      * `LivePreviewEngine`'s re-buffer-flap detector is the backstop for that (it drops the pre-roll for
      * that stream), because no sane heap budget holds 10 s of a 4K channel.
      *
-     * [lowSpec] caps the scaling at 2× instead of 3×: on a 2 GB TV the live buffer's 48 MB stacks
-     * with mpv's 48 MiB cache while an engine handoff overlaps the two.
+     * [lowSpec] caps the scaling at 2× instead of 3×: on a 2 GB TV a 3× buffer would push the player
+     * heap against the rest of the app's budget.
      */
     fun targetBufferBytes(bufferSecs: Int?, prerollSecs: Int, defaultBytes: Int, lowSpec: Boolean = false): Int {
         val depthSecs = maxOf(bufferSecs ?: BALANCED_SECS, prerollSecs.coerceAtLeast(0))

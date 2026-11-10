@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -267,7 +266,6 @@ fun AddSourceScreen(
     // the provider's connections straight back instead of leaving them held.
     var measureJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
     val connectionLimits: tv.own.owntv.core.live.ConnectionLimits = koinInject()
-    val player: tv.own.owntv.player.OwnTVPlayer = koinInject()
     val livePreview: tv.own.owntv.player.LivePreviewEngine = koinInject()
     val enginePool: tv.own.owntv.player.LiveEnginePool = koinInject()
 
@@ -328,7 +326,6 @@ fun AddSourceScreen(
         val label = name.ifBlank { source.url }
         measureJob?.cancel()
         measureJob = scope.launch {
-            runCatching { player.stop() }
             runCatching { livePreview.stop() }
             runCatching { enginePool.releaseAll() }
             sourceTest = SourceTestUi.Measuring(label, tv.own.owntv.core.live.ProbeProgress(1, 1, tv.own.owntv.core.live.MAX_PROBE_STREAMS))

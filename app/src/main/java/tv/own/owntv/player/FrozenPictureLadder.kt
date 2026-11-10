@@ -6,15 +6,15 @@ package tv.own.owntv.player
  * A reconnect keeps the same codec and surface, so a decoder that has silently stopped handing frames to
  * its surface stops again: measured on a Google TV Streamer (`c2.mtk.avc.decoder`), every reconnect
  * rendered exactly three frames and froze. The second freeze on one tune therefore gets a new player and
- * a new surface, and a third hands the channel to the other engine.
+ * a new surface, and a third fails the load so the tune ladder can try the channel's other format.
  */
 internal object FrozenPictureLadder {
-    enum class Rung { RECONNECT, FRESH_DECODER, OTHER_ENGINE }
+    enum class Rung { RECONNECT, FRESH_DECODER, HAND_TO_LADDER }
 
     /** [hits] counts this tune's freezes, the current one included. */
     fun rungFor(hits: Int): Rung = when {
         hits <= 1 -> Rung.RECONNECT
         hits == 2 -> Rung.FRESH_DECODER
-        else -> Rung.OTHER_ENGINE
+        else -> Rung.HAND_TO_LADDER
     }
 }

@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.hudShade
 import tv.own.myowntv.ui.theme.hudInk
@@ -89,16 +88,16 @@ import tv.own.owntv.player.displayText
 
 /**
  * Non-interactive technical readout for the current stream (codec, resolution, HDR, bitrate, decoder, audio,
- * buffer, source). Reads [PlaybackEngine.streamInfo] live — re-polled once a second so bitrate/buffer update
- * — and works on whichever engine is playing (mpv or ExoPlayer). Toggled from the player's info button.
+ * buffer, source). Reads [PlaybackEngine.streamInfo] live — re-polled once a second so bitrate/buffer update.
+ * Toggled from the player's info button.
  */
 @Composable
 fun StreamInfoOverlay(player: PlaybackEngine, modifier: Modifier = Modifier) {
-    // Starts empty and is filled by the effect below: the mpv read now happens on the player's own
-    // executor, so there is nothing to read synchronously during composition.
+    // Starts empty and is filled by the effect below: the read goes through the engine's own
+    // machinery, so there is nothing to gather synchronously during composition.
     var rows by remember { mutableStateOf(emptyList<StreamInfoRow>()) }
-    // Re-read on the player's shared cosmetic beat rather than a timer of its own, so having the overlay
-    // up alongside the position readout costs one wake-up rather than two (see [PlayerHeartbeat]).
+    // Re-read on the player's shared cosmetic beat rather than a timer of its own, so having the
+    // overlay up costs one wake-up rather than two (see [PlayerHeartbeat]).
     LaunchedEffect(player) {
         PlayerHeartbeat.beat.collect { rows = player.streamInfo() }
     }

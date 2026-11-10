@@ -572,8 +572,12 @@ class OwnTVDatabaseMigrationTest {
             assertIndexExists(sqlite, "index_playback_quirks_sourceId")
             assertIndexExists(sqlite, "index_playback_prefs_sourceId")
             listOf("sourceId", "audioLang", "subtitleLang").forEach { assertColumnExists(sqlite, "playback_prefs", it) }
-            listOf("catchupTimezone", "catchupOffsetMin", "vodEnginePreference", "liveTuneTimeoutSecs", "httpReferer")
+            listOf("catchupTimezone", "catchupOffsetMin", "liveTuneTimeoutSecs", "httpReferer")
                 .forEach { assertColumnExists(sqlite, "sources", it) }
+            // …and `vodEnginePreference` arrived at v44 but left again at v56 — the VOD engine
+            // choice is gone with the second player, so at the end of the chain it must NOT exist.
+            assertColumnMissing(sqlite, "sources", "vodEnginePreference")
+            assertColumnMissing(sqlite, "playback_quirks", "enginePin")
 
             // The user's row came through whole, with the new columns at their "unknown" values.
             assertCount(sqlite, "playback_prefs", 1)
@@ -589,8 +593,8 @@ class OwnTVDatabaseMigrationTest {
 
             assertCount(sqlite, "playback_quirks", 0)
             sqlite.execSQL(
-                "INSERT INTO playback_quirks (contentKey, sourceId, mediaType, enginePin, audioOnly, audioDelayMs, updatedAt) " +
-                    "VALUES ('10:LIVE:bbc-one', 10, 'LIVE', 'MPV', NULL, 250, 6)",
+                "INSERT INTO playback_quirks (contentKey, sourceId, mediaType, audioOnly, audioDelayMs, updatedAt) " +
+                    "VALUES ('10:LIVE:bbc-one', 10, 'LIVE', NULL, 250, 6)",
             )
             assertCount(sqlite, "playback_quirks", 1)
         } finally {
@@ -630,6 +634,11 @@ class OwnTVDatabaseMigrationTest {
         }
     }
 
+    /**
+     * v45 → v46 dropped `softwareDecode`; the chain now continues to v56, which drops the engine pin
+     * with the second player. The row itself and everything the live engine still remembers — the
+     * sound-only mark and the delay — must come through both hops.
+     */
     @Test
     fun migrateVersion45To46_dropsSoftwareDecode_keepingQuirkRows() {
         context.deleteDatabase(DB_NAME)
@@ -649,11 +658,61 @@ class OwnTVDatabaseMigrationTest {
         try {
             val sqlite = openForAssertions(db)
             assertEquals(0L, countRows(sqlite, "SELECT COUNT(*) FROM pragma_table_info('playback_quirks') WHERE name = 'softwareDecode'"))
+            assertColumnMissing(sqlite, "playback_quirks", "enginePin")
             assertIndexExists(sqlite, "index_playback_quirks_sourceId")
-            // The pin, the sound-only mark and the delay came through untouched.
-            sqlite.prepare("SELECT enginePin, audioOnly, audioDelayMs FROM playback_quirks WHERE contentKey = '10:LIVE:bbc-one'").use {
+            // The sound-only mark and the delay came through untouched.
+            sqlite.prepare("SELECT audioOnly, audioDelayMs FROM playback_quirks WHERE contentKey = '10:LIVE:bbc-one'").use {
                 assertTrue(it.step())
-                assertEquals("MPV", it.getText(0))
+                assertEquals(1L, it.getLong(0))
+                assertEquals(250L, it.getLong(1))
+            }
+        } finally {
+            db.close()
+        }
+    }
+
+    /**
+     * v55 → v56: the second playback engine leaves the schema — `playback_quirks.enginePin` and
+     * `sources.vodEnginePreference` are dropped, every other column (and the live engine's own
+     * per-playlist override) comes through untouched. The seed names the pin values explicitly so a
+     * dropped column also proves the ROW survived the ALTER.
+     */
+    @Test
+    fun migrateVersion55To56_dropsEnginePinAndVodEnginePreference() {
+        context.deleteDatabase(DB_NAME)
+        val db55 = context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null)
+        try {
+            executeSchemaQueries(db55, "tv.own.owntv.core.database.OwnTVDatabase/55.json")
+            db55.execSQL(
+                "INSERT INTO sources (id, name, type, url, username, password, syncLive, syncMovies, syncSeries, importPortalEpg, " +
+                    "hlsSupported, preferHls, livePrerollSecs, liveLatencyCustomSecs, liveEnginePreference, vodEnginePreference, " +
+                    "maxConnections, maxConnectionsProbedAt, createdAt, cleanChannelNames, ignoreConnectionLimit, isPaid) " +
+                    "VALUES (10, 'Playlist', '${SourceType.XTREAM.name}', 'https://example.test', 'user', 'pass', 1, 1, 1, 0, 0, " +
+                    "0, -1, -1, 'EXO_FIRST', 'MPV_ONLY', 1, 0, 2, 0, 0, 0)",
+            )
+            db55.execSQL(
+                "INSERT INTO playback_quirks (contentKey, sourceId, mediaType, enginePin, audioOnly, audioDelayMs, updatedAt) " +
+                    "VALUES ('10:LIVE:bbc-one', 10, 'LIVE', 'MPV', 1, 250, 6)",
+            )
+            db55.version = 55
+        } finally {
+            db55.close()
+        }
+
+        val db = openWithAllMigrations()
+        try {
+            val sqlite = openForAssertions(db)
+            assertColumnMissing(sqlite, "playback_quirks", "enginePin")
+            assertColumnMissing(sqlite, "sources", "vodEnginePreference")
+            // What the single engine still uses came through: the live override, the sound-only mark,
+            // the delay — and the quirk row itself.
+            assertColumnExists(sqlite, "sources", "liveEnginePreference")
+            assertColumnExists(sqlite, "playback_quirks", "audioDelayMs")
+            assertIndexExists(sqlite, "index_playback_quirks_sourceId")
+            assertCount(sqlite, "playback_quirks", 1)
+            sqlite.prepare("SELECT liveEnginePreference, audioOnly, audioDelayMs FROM sources s, playback_quirks q WHERE s.id = 10").use {
+                assertTrue(it.step())
+                assertEquals("EXO_FIRST", it.getText(0))
                 assertEquals(1L, it.getLong(1))
                 assertEquals(250L, it.getLong(2))
             }
@@ -1091,6 +1150,18 @@ class OwnTVDatabaseMigrationTest {
     private fun assertColumnExists(db: SQLiteConnection, table: String, column: String) {
         assertEquals(
             1L,
+            countRows(
+                db,
+                "SELECT COUNT(*) FROM pragma_table_info('$table') WHERE name = ?",
+                arrayOf<Any?>(column),
+            ),
+        )
+    }
+
+    private fun assertColumnMissing(db: SQLiteConnection, table: String, column: String) {
+        assertEquals(
+            "$table.$column should have been dropped",
+            0L,
             countRows(
                 db,
                 "SELECT COUNT(*) FROM pragma_table_info('$table') WHERE name = ?",

@@ -2,7 +2,6 @@ package tv.own.owntv.core.settings
 
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.network.StreamHeaders
-import tv.own.owntv.core.player.EnginePreference
 import java.util.SimpleTimeZone
 import java.util.TimeZone
 
@@ -29,10 +28,6 @@ object SourceOverrides {
     /** The zone the Xtream panel reported for itself at the last sync (v49), or null when unknown. */
     fun panelTimeZoneOf(source: SourceEntity?): TimeZone? =
         source?.serverTimeZone?.let { TimeZone.getTimeZone(it) }
-
-    /** [source]'s own Movies & Series engine, or null when it follows the global one. */
-    fun vodEngineOf(source: SourceEntity?): EnginePreference? =
-        source?.vodEnginePreference?.let { runCatching { EnginePreference.valueOf(it) }.getOrNull() }
 
     /** [source]'s own "Give up after" in seconds (0 = never), or null when it follows the global one. */
     fun liveTuneTimeoutSecsOf(source: SourceEntity?): Int? =

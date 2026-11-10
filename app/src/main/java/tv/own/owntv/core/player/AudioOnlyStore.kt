@@ -16,10 +16,10 @@ private val Context.audioOnlyStore: DataStore<Preferences> by preferencesDataSto
 
 /**
  * Channels the user last watched with the picture switched off, so a radio station opens without a
- * video decoder next time and a television channel does not. Self-learning in exactly the same way as
- * [ForceMpvStore]: the user turns the picture off once, and that one channel remembers.
+ * video decoder next time and a television channel does not. Self-learning like every per-item store:
+ * the user turns the picture off once, and that one channel remembers.
  *
- * Keyed by [enginePinKey] — sourceId + media type + provider remoteId — because channel rows are
+ * Keyed by [contentKey] — sourceId + media type + provider remoteId — because channel rows are
  * REPLACE-upserted on every playlist sync, so a Room id or a stream URL would be forgotten on the next
  * refresh (and a Stalker URL is a single-use token that is never the same twice).
  *
@@ -51,17 +51,17 @@ class AudioOnlyStore(
     }
 
     /** Was this item last watched without a picture? */
-    suspend fun isAudioOnly(pinKey: String): Boolean {
+    suspend fun isAudioOnly(contentKey: String): Boolean {
         copy.ensure()
-        return dao.get(pinKey)?.audioOnly == true
+        return dao.get(contentKey)?.audioOnly == true
     }
 
     /** Record — or clear — the sound-only choice for one item. */
-    suspend fun set(pinKey: String, audioOnly: Boolean) {
+    suspend fun set(contentKey: String, audioOnly: Boolean) {
         copy.ensure()
-        write(pinKey, audioOnly)
+        write(contentKey, audioOnly)
     }
 
-    private suspend fun write(pinKey: String, audioOnly: Boolean) =
-        dao.setAudioOnly(pinKey, sourceIdOfPinKey(pinKey), mediaTypeOfPinKey(pinKey) ?: "LIVE", audioOnly)
+    private suspend fun write(contentKey: String, audioOnly: Boolean) =
+        dao.setAudioOnly(contentKey, sourceIdOfContentKey(contentKey), mediaTypeOfContentKey(contentKey) ?: "LIVE", audioOnly)
 }

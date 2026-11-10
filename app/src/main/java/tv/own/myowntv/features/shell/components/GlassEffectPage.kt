@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.stageTone
 import tv.own.myowntv.ui.theme.LocalStagePalette
@@ -104,7 +103,6 @@ import tv.own.myowntv.features.settings.SettingValue
 import tv.own.myowntv.features.settings.StageFullPage
 import tv.own.myowntv.features.settings.StageSettingRow
 import tv.own.myowntv.features.settings.StageSettingsHeading
-import tv.own.myowntv.features.settings.backdropOf
 import tv.own.myowntv.features.settings.dotSeparator
 import tv.own.myowntv.ui.components.BackgroundPicture
 import tv.own.myowntv.ui.components.MyOwnTVIcon
@@ -325,7 +323,6 @@ private fun GlassBackgroundPreview() {
     val home: HomeViewModel = koinViewModel()
     val state by home.uiState.collectAsStateWithLifecycle()
     val channels = remember(state.recentLive, state.favoriteLive) { (state.recentLive + state.favoriteLive).distinctBy { it.id }.take(8) }
-    val still = state.trendingItems.firstOrNull()
     val background = LocalBackground.current
     val blurred = LocalBlurredBackdrop.current
     val a = stageAccent
@@ -354,7 +351,7 @@ private fun GlassBackgroundPreview() {
                     verticalArrangement = Arrangement.spacedBy(22.mpx),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    listOf(MyOwnTVIcon.SEARCH, MyOwnTVIcon.HOME, MyOwnTVIcon.LIVE_TV, MyOwnTVIcon.EPG, MyOwnTVIcon.MOVIES, MyOwnTVIcon.SERIES, MyOwnTVIcon.DOWNLOADS).forEachIndexed { i, icon ->
+                    listOf(MyOwnTVIcon.SEARCH, MyOwnTVIcon.HOME, MyOwnTVIcon.LIVE_TV, MyOwnTVIcon.EPG).forEachIndexed { i, icon ->
                         MyOwnTVIcon(icon, if (i == 2) a.accent else StageColors.Muted, Modifier.size(26.mpx))
                     }
                 }
@@ -390,7 +387,8 @@ private fun GlassBackgroundPreview() {
                         .clip(RoundedCornerShape(28.mpx))
                         .background(Color.Black),
                 ) {
-                    if (still != null) AsyncImage(model = backdropOf(still), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                    // The live screen in the preview: the player never runs here, so the stage reads as
+                    // a dark TV panel — what a live-only home shows before a channel opens.
                 }
             }
         }

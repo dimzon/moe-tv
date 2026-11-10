@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import android.app.Application
 import android.content.Context
@@ -79,7 +78,6 @@ import tv.own.owntv.core.di.databaseModule
 import tv.own.owntv.core.di.dataModule
 import tv.own.myowntv.di.appModule
 import tv.own.myowntv.di.playerModule
-import tv.own.myowntv.ui.theme.subtitleFontResource
 
 class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Configuration.Provider {
 
@@ -166,8 +164,6 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
         // repository instead of relying on core to guess it, the same as the phone app does. A
         // default that happens to be right for one app is a trap for every other one.
         tv.own.owntv.core.CoreBuildInfo.releaseRepo = "ahXN00/OwnTV"
-        // Fixed for this process before any player exists: the setting applies only after a restart.
-        tv.own.owntv.core.player.FfmpegAudioSetting.load(this)
         // First thing after the context exists: a crash from here on leaves a trace on disk that the
         // user can export from Settings, instead of being lost with the process.
         tv.own.owntv.core.util.CrashRecorder.diagnostics = { tv.own.owntv.player.LiveDiagnosticsLog.snapshot() }
@@ -175,9 +171,6 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
         // Core learns a panel's session limit while syncing; the engine is what acts on it. Registered
         // before Koin so the very first source flow already reaches the player (see LiveSessionLimit).
         tv.own.owntv.core.player.LiveSessionLimit.report = tv.own.owntv.player.LiveStreamQuirks::rememberSessionLimit
-        // Four of the five subtitle faces are this app's own res/font files, so the engine asks us for
-        // the id rather than owning the assets (see SubtitleFontAssets).
-        tv.own.owntv.player.SubtitleFontAssets.resourceOf = { it.subtitleFontResource }
         startKoin {
             androidLogger(if (BuildConfig.DEBUG) Level.ERROR else Level.NONE)
             androidContext(this@MyOwnTVApp)
@@ -298,7 +291,7 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
             runCatching { SingletonImageLoader.get(this).memoryCache?.clear() }
         }
         // The engines judge the level themselves: UI_HIDDEN (every Home press) is not pressure for them,
-        // and used to leave mpv on a trimmed cache for the rest of the session.
+        // and used to leave an engine on a trimmed cache for the rest of the session.
         runCatching { GlobalContext.getOrNull()?.getOrNull<tv.own.owntv.player.PlaybackEngines>()?.onTrimMemory(level) }
     }
 }

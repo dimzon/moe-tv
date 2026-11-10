@@ -15,9 +15,6 @@
     <string name="player_mini_bottom_center">Uprostřed dole</string>
     <string name="player_mini_bottom_right">Vpravo dole</string>
     <string name="player_channel_label">KANÁL</string>
-    <string name="player_at_live_edge">● V aktuálním bodě živého vysílání</string>
-    <string name="player_behind_live">● <xliff:g id="offset">%1$s</xliff:g> za živým vysíláním</string>
-    <string name="player_live_offset">−<xliff:g id="offset">%1$s</xliff:g></string>
     <string name="player_go_live">Přejít živě</string>
     <string name="player_timeshift_resume_title">Pokračovat tam, kde jste skončili?</string>
     <string name="player_timeshift_resume_message">Tento kanál se během vaší nepřítomnosti ukládal.</string>
@@ -26,7 +23,6 @@
     <string name="player_sources_none">Jiná verze tohoto kanálu nebyla nalezena.</string>
     <string name="player_next_channel_in_list">Další kanál</string>
     <string name="player_previous_channel_in_list">Předchozí kanál v seznamu</string>
-    <string name="player_live_scrub_at"><xliff:g id="time">%1$s</xliff:g> · <xliff:g id="programme">%2$s</xliff:g></string>
     <string name="player_tool_volume">Hlasitost</string>
     <string name="player_tool_brightness">Jas</string>
     <string name="player_skip_back">Přeskočit zpět</string>
@@ -51,11 +47,6 @@
     <string name="player_raw_error">chyba: <xliff:g id="error">%1$s</xliff:g></string>
     <string name="player_audio_track">Zvuková stopa</string>
     <string name="player_subtitles">Titulky</string>
-    <string name="player_subtitle_timing">Časování titulků</string>
-    <string name="player_add_subtitles">PŘIDAT TITULKY</string>
-    <string name="player_adjust">UPRAVIT</string>
-    <string name="player_search_subtitles">Vyhledat na OpenSubtitles</string>
-    <string name="player_select_local_subtitle">Vybrat místní soubor s titulky</string>
     <string name="player_no_tracks">Nejsou dostupné žádné stopy.</string>
     <string name="player_image_track"><xliff:g id="label">%1$s</xliff:g> · obrazové</string>
     <string name="player_av_sync">Synchronizace A/V</string>
@@ -66,51 +57,27 @@
     <string name="player_delay_zero">0 ms</string>
     <string name="player_delay_positive">+<xliff:g id="ms">%1$d</xliff:g> ms</string>
     <string name="player_delay_negative"><xliff:g id="ms">%1$d</xliff:g> ms</string>
-    <string name="player_speed_normal">1.0x (normální)</string>
-    <string name="player_speed_normal_short">1.0x</string>
-    <string name="player_speed"><xliff:g id="speed">%1$s</xliff:g>x</string>
-    <string name="player_next_episode">Další epizoda za <xliff:g id="seconds">%1$d</xliff:g> s</string>
-    <string name="player_play_now">Přehrát nyní</string>
     <string name="player_volume">Hlasitost</string>
     <string name="player_unmute">Zapnout zvuk</string>
     <string name="player_mute">Ztlumit</string>
     <string name="player_percent"><xliff:g id="value">%1$d</xliff:g>%%</string>
     <string name="player_duration_minutes"><xliff:g id="minutes">%1$d</xliff:g> min</string>
     <string name="player_season_number">Řada <xliff:g id="season">%1$d</xliff:g></string>
-    <string name="player_episode_number">Epizoda <xliff:g id="episode">%1$d</xliff:g></string>
-    <string name="player_episode_context_title"><xliff:g id="title">%1$s</xliff:g> · S<xliff:g id="season">%2$d</xliff:g>E<xliff:g id="episode">%3$d</xliff:g></string>
     <string name="player_channel_number">#<xliff:g id="number">%1$s</xliff:g></string>
     <string name="player_live">ŽIVĚ</string>
-    <string name="player_subtitle_delay_zero">0.0 s</string>
-    <string name="player_subtitle_delay_positive">+<xliff:g id="seconds">%1$.1f</xliff:g> s</string>
-    <string name="player_subtitle_delay_negative">−<xliff:g id="seconds">%1$.1f</xliff:g> s</string>
-    <string name="player_time_progress"><xliff:g id="position">%1$s</xliff:g> / <xliff:g id="duration">%2$s</xliff:g></string>
-    <string name="player_time_remaining">−<xliff:g id="time">%1$s</xliff:g></string>
-    <string name="player_switch_exo">Přepnuto na ExoPlayer</string>
-    <string name="player_switch_mpv">Přepnuto na mpv</string>
-    <string name="player_smoothness_hint">Tento kanál zahazuje snímky. Přepnutí přehrávače na mpv může zajistit plynulejší přehrávání.</string>
-    <string name="player_error_image_subtitle_audio">Obrazové titulky nejsou pro zvukový formát tohoto videa dostupné.</string>
-    <string name="player_error_both_engines_exo_first">Přehrávání selhalo v obou přehrávacích jádrech (nejprve ExoPlayer, poté mpv). Soubor může být poškozený nebo používat formát, který tento televizor nedokáže přehrát.</string>
-    <string name="player_error_both_engines_mpv_first">Přehrávání selhalo v obou přehrávacích jádrech (mpv a ExoPlayer). Soubor může být poškozený nebo používat formát, který tento televizor nedokáže přehrát. (<xliff:g id="error">%1$s</xliff:g>)</string>
     <string name="player_error_stream_link">Z portálu se nepodařilo získat odkaz na stream. Zkontrolujte připojení a zkuste to znovu.</string>
     <string name="player_error_not_streaming">Toto video nemá formát vhodný pro streamování. Požádejte poskytovatele, aby ho znovu zakódoval s rychlým spuštěním, nebo ho nejprve stáhněte.</string>
     <string name="player_error_lost_connection">Připojení k tomuto kanálu bylo ztraceno.</string>
     <string name="player_error_channel">Tento kanál se nepodařilo přehrát.</string>
     <string name="player_error_exo_decode">ExoPlayer na tomto zařízení nedokáže dekódovat formát videa (<xliff:g id="error">%1$s</xliff:g>).</string>
     <string name="player_error_exo_play">ExoPlayer nedokázal tento stream přehrát (<xliff:g id="error">%1$s</xliff:g>).</string>
-    <string name="player_error_image_format">Obrazové titulky nejsou pro formát tohoto souboru dostupné.</string>
-    <string name="player_error_image_show">Obrazové titulky pro tento soubor se nepodařilo zobrazit.</string>
     <string name="player_external_could_not_open">Tento stream se nepodařilo otevřít.</string>
     <string name="player_external_not_found">Nebyl nalezen žádný externí přehrávač — nainstalujte VLC nebo MX Player.</string>
     <string name="player_error_audio_no_video">Zvuk se přehrává, ale video se na tomto zařízení nepodařilo vykreslit.</string>
-    <string name="player_error_file_corrupt">Soubor tohoto videa je poškozený nebo má nesprávnou strukturu a nelze ho přehrát.</string>
-    <string name="player_error_multiple_videos">Několik videí se nepodařilo přehrát. Zdroj může být nedostupný nebo jsou soubory poškozené.</string>
     <string name="player_error_decoder_busy">Videodekodér tohoto televizoru je zaneprázdněný. Zkuste to za chvíli znovu.</string>
     <string name="player_error_no_internet">Není k dispozici připojení k internetu. Zkontrolujte síť a zkuste to znovu.</string>
     <string name="player_error_stream_unavailable">Tento stream se nepodařilo přehrát. Zdroj může být bez připojení nebo používat nepodporovaný formát. <xliff:g id="hint">%1$s</xliff:g></string>
     <string name="player_error_account_in_use">Tento účet už přehrává na jiném zařízení nebo v jiné aplikaci. Zastavte přehrávání tam a stiskněte Zkusit znovu.</string>
-    <string name="player_error_mpv_open_decode">mpv nedokázal tento soubor otevřít nebo dekódovat.</string>
-    <string name="player_error_mpv_stream_never_started">Stream se v mpv nespustil ani po několika pokusech.</string>
     <string name="player_error_fairplay">Tento stream je chráněn technologií Apple FairPlay, kterou zařízení s Androidem nedokážou přehrát. Seznam je určen pro zařízení Apple.</string>
     <string name="player_error_surround">Tento zvukový výstup nepodporuje prostorový zvuk — přepnuto na stereo.</string>
     <string name="player_error_hardware_fallback">Formát tohoto streamu se na tomto televizoru nepodařilo hardwarově dekódovat, proto se přešlo na softwarové dekódování — to však nedokáže plynule zpracovat <xliff:g id="resolution">%1$s</xliff:g> bez přetížení televizoru. Televizor přesto může jiný obsah v rozlišení 4K přehrávat bez problémů; příčinou je formát tohoto konkrétního streamu.</string>
@@ -142,18 +109,10 @@
     <string name="player_stream_hdr10_pq">HDR10 (PQ)</string>
     <string name="player_stream_hlg">HLG</string>
     <string name="player_stream_sdr">SDR</string>
-    <string name="player_stream_interlacing">Prokládání</string>
-    <string name="player_stream_progressive">Žádné (progresivní)</string>
-    <string name="player_stream_deinterlaced_by_player">Prokládané · odstraněno přehrávačem</string>
-    <string name="player_stream_deinterlaced_by_device">Prokládané · odstraněno zařízením</string>
-    <string name="player_stream_not_deinterlaced">Prokládané · neodstraněno</string>
     <string name="player_stream_bitrate">Datový tok</string>
     <string name="player_stream_decoder">Dekodér</string>
     <string name="player_stream_audio">Zvuk</string>
     <string name="player_stream_buffer">Mezipaměť</string>
-    <string name="player_stream_engine_exo_preferred">ExoPlayer (upřednostňovaný)</string>
-    <string name="player_stream_engine_exo_fallback">ExoPlayer (náhradní po selhání mpv)</string>
-    <string name="player_stream_engine_exo_image_subtitle">ExoPlayer (předání obrazových titulků)</string>
     <string name="player_stream_fps"><xliff:g id="fps">%1$.2f</xliff:g> fps</string>
     <string name="player_stream_bit_depth"><xliff:g id="bits">%1$d</xliff:g> bitů</string>
     <string name="player_stream_mbps"><xliff:g id="value">%1$s</xliff:g> Mbps</string>
@@ -185,29 +144,10 @@
     <string name="player_subtitles_edit_search">Upravit vyhledávání</string>
     <string name="player_subtitles_title_label">Název</string>
     <string name="player_subtitles_delete_title">Odstranit titulky OpenSub</string>
-    <string name="player_subtitles_sign_in">Přihlásit se</string>
-    <string name="player_subtitles_sign_out">Odhlásit se</string>
-    <string name="player_subtitles_account">Účet</string>
     <string name="player_subtitles_username">Uživatelské jméno</string>
     <string name="player_subtitles_password">Heslo</string>
     <string name="player_subtitles_stay_signed_in">Zůstat přihlášen</string>
-    <string name="player_subtitles_sign_in_title">Přihlášení k OpenSubtitles</string>
-    <string name="player_subtitles_connect_description">Připojte účet OpenSubtitles tohoto profilu.</string>
-    <string name="player_subtitles_contacting">Navazování spojení s OpenSubtitles…</string>
-    <string name="player_subtitles_api_notice">Tento produkt používá rozhraní API OpenSubtitles, ale není službou OpenSubtitles podporován ani certifikován.</string>
-    <string name="player_subtitles_delete_description">Odstraňte titulky, které jste stáhli k filmům a seriálům.</string>
-    <string name="player_subtitles_delete_login_message">Odstraní z tohoto zařízení přihlášení tohoto profilu k OpenSubtitles. Již stažené titulky zůstanou dostupné i bez připojení.</string>
     <string name="player_subtitles_delete_action">Odstranit titulky</string>
-    <string name="player_subtitles_downloads">Stahování</string>
-    <string name="player_subtitles_vip">VIP</string>
-    <string name="player_subtitles_refresh">Obnovit</string>
-    <string name="player_subtitles_sign_in_to_use">Použijte svůj účet na opensubtitles.com. Jeho vytvoření je bezplatné.</string>
-    <plurals name="player_subtitles_remaining">
-        <item quantity="one">Dnes zbývá <xliff:g id="remaining">%1$d</xliff:g> stažení z <xliff:g id="total">%2$d</xliff:g></item>
-        <item quantity="few">Dnes zbývají <xliff:g id="remaining">%1$d</xliff:g> stažení z <xliff:g id="total">%2$d</xliff:g></item>
-        <item quantity="many">Dnes zbývá <xliff:g id="remaining">%1$d</xliff:g> stažení z <xliff:g id="total">%2$d</xliff:g></item>
-        <item quantity="other">Dnes zbývá <xliff:g id="remaining">%1$d</xliff:g> stažení z <xliff:g id="total">%2$d</xliff:g></item>
-    </plurals>
     <plurals name="player_subtitles_remaining_short">
         <item quantity="one">Dnes zbývá <xliff:g id="remaining">%1$d</xliff:g> stažení</item>
         <item quantity="few">Dnes zbývají <xliff:g id="remaining">%1$d</xliff:g> stažení</item>
@@ -226,7 +166,6 @@
         <item quantity="many">Dnes zbývá <xliff:g id="remaining">%1$d</xliff:g> stažení</item>
         <item quantity="other">Dnes zbývá <xliff:g id="remaining">%1$d</xliff:g> stažení</item>
     </plurals>
-    <string name="player_subtitles_session">Platnost relace připojení vyprší. Vypnutím se bude ukládat pouze dočasná relace.</string>
     <string name="player_subtitles_free_description_full">OpenSubtitles je bezplatná otevřená komunitní služba pro titulky. Přihlaste se pomocí vlastního účtu na opensubtitles.com; jeho vytvoření je bezplatné. Toto nastavení platí pouze pro aktuální profil.</string>
     <string name="player_subtitles_session_expired">Platnost vaší relace OpenSubtitles vypršela. Chcete-li dál vyhledávat a stahovat titulky, znovu se přihlaste v nabídce Nastavení → Přehrávač videa → Titulky → OpenSubtitles.</string>
     <string name="player_subtitles_account_needed">Je vyžadován účet OpenSubtitles\n\nChcete-li vyhledávat a stahovat titulky, přihlaste se v nabídce Nastavení → Přehrávač videa → Titulky → OpenSubtitles. OpenSubtitles je bezplatná otevřená komunitní služba — bezplatný účet si může kdokoli vytvořit na opensubtitles.com.</string>
@@ -239,32 +178,12 @@
     <string name="player_subtitles_trusted">Důvěryhodné</string>
     <string name="player_subtitles_sdh">SDH</string>
     <string name="player_subtitles_ai">AI</string>
-    <plurals name="player_subtitles_download_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> stažení</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> stažení</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> stažení</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> stažení</item>
-    </plurals>
-    <string name="player_subtitles_tags_separator">" · "</string>
-    <string name="player_subtitles_search">Vyhledat</string>
     <string name="player_subtitles_connected_as">Připojeno jako</string>
-    <string name="player_subtitles_connected_user">Přihlášen jako <xliff:g id="username">%1$s</xliff:g></string>
-    <string name="player_subtitles_resets">Obnovení</string>
-    <string name="player_subtitles_free_account">Bezplatný</string>
-    <string name="player_subtitles_enter_credentials">Zadejte své uživatelské jméno a heslo pro OpenSubtitles.</string>
-    <string name="player_subtitles_invalid_credentials">OpenSubtitles se pomocí těchto údajů účtu nepodařilo přihlásit.</string>
-    <string name="player_subtitles_sign_in_network_error">Ke službě OpenSubtitles se nepodařilo připojit. Zkontrolujte připojení k internetu a zkuste to znovu.</string>
-    <string name="player_subtitles_sign_in_server_error">OpenSubtitles požadavek odmítl (chyba <xliff:g id="code">%1$d</xliff:g>). Vaše internetové připojení funguje – zkuste to znovu později a při hlášení problému uveďte toto číslo.</string>
-    <string name="player_subtitles_refresh_network_error">Relaci OpenSubtitles se nepodařilo obnovit. Zkontrolujte připojení k internetu.</string>
     <string name="player_subtitles_no_matches_all_languages">Nebyly nalezeny žádné odpovídající titulky. Zkuste upravit hledaný název.</string>
     <string name="player_subtitles_no_matches_chosen_language">V zvoleném jazyce nebyly nalezeny žádné odpovídající titulky.</string>
     <string name="player_subtitles_search_language">Jazyk vyhledávání</string>
-    <string name="player_reason_software_fallback">Přepnuto na softwarové dekódování</string>
-    <string name="player_reason_copy_mode_fallback">Přepnuto na dekódování v režimu copy</string>
-    <string name="player_reason_archive_software_fallback">Archiv zpětného zhlédnutí byl znovu otevřen se softwarovým dekódováním</string>
     <string name="player_reason_stereo_fallback">Přepnuto na stereo zvuk</string>
     <string name="player_reason_one_session_provider">Poskytovatel umožňuje pouze jedno připojení najednou</string>
-    <string name="player_reason_mpv_handoff">Tento kanál byl předán mpv</string>
     <string name="player_reason_stream_report">Diagnostika streamu</string>
     <string name="player_stream_audio_output">Zvukový výstup</string>
     <string name="player_stream_live_buffer">Buffer živého vysílání</string>
@@ -281,9 +200,6 @@
     <string name="player_error_hardware_format">Video hardware této televize nedokáže dekódovat <xliff:g id="resolution">%1$s</xliff:g> <xliff:g id="codec">%2$s</xliff:g>. Soubor je v pořádku, ale televize tento formát v tomto rozlišení nedokáže přehrát.</string>
     <string name="player_report_saved">Diagnostika streamu byla uložena do protokolu přehrávání</string>
     <string name="player_subtitles_filter_title">Filtrovat podle jazyka</string>
-    <string name="player_subtitles_filter_description">Vypnuto zobrazí všechny jazyky, které OpenSubtitles pro daný titul nabízí, takže si můžete vybrat z celého seznamu. Zapnuto zobrazí pouze vámi zvolený jazyk.</string>
-    <string name="player_subtitles_search_language_description">Ve výsledcích vyhledávání se zobrazí pouze titulky v tomto jazyce. Ve výsledcích můžete stále stisknout „Všechny jazyky“, abyste viděli vše pro jedno vyhledávání.</string>
-    <string name="player_subtitles_language_not_set">Nenastaveno</string>
     <string name="player_frame_rate_prompt_title">U tohoto kanálu se může obraz trhat</string>
     <string name="player_frame_rate_prompt_description">Vysílání běží rychlostí <xliff:g id="fps">%1$d</xliff:g> fps, zatímco vaše televize pracuje na <xliff:g id="current_hz">%2$d</xliff:g> Hz, a proto nemůže tyto snímky zobrazovat rovnoměrně – pohyb vypadá mírně trhaně.\n\nAutomatické přepínání snímkové frekvence přepne televizi na <xliff:g id="target_hz">%3$d</xliff:g> Hz, dokud se díváte, a poté ji vrátí zpět. U některých televizí se při změně frekvence obraz na chvíli zčerná; můžete to znovu vypnout v Nastavení → Obraz → Snímková frekvence.</string>
     <string name="player_frame_rate_turn_on">Zapnout</string>
@@ -295,8 +211,6 @@
     <string name="player_error_data_saver">Spořič dat je zapnutý, takže přehrávání přes mobilní data je vypnuté. Připoj se k Wi-Fi nebo spořič dat v nastavení vypni.</string>
     <string name="player_sleep_timer">Časovač vypnutí</string>
     <string name="player_sleep_timer_end_of_programme">Konec pořadu</string>
-    <string name="player_sleep_timer_end_of_movie">Konec filmu</string>
-    <string name="player_sleep_timer_end_of_episode">Konec epizody</string>
     <string name="player_sleep_timer_remaining">Zastaví se za <xliff:g id="time">%1$s</xliff:g></string>
     <string name="player_sleep_timer_screen_off">Vypnout také obrazovku</string>
     <string name="player_sleep_timer_screen_off_explanation">Používá se jen k vypnutí obrazovky po skončení časovače, nikdy jindy.</string>

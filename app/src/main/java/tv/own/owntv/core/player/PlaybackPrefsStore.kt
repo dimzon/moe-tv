@@ -7,13 +7,12 @@ import tv.own.owntv.core.settings.SettingsRepository
 
 /**
  * Remembers the zoom/aspect mode, the volume and the A/V-sync offset the user last chose for one
- * specific item, so a film that needs 130% volume, a 4:3 channel the user prefers cropped, or a
+ * specific channel, so a stream that needs 130% volume, a 4:3 channel the user prefers cropped, or a
  * channel whose audio runs 200 ms early, comes back that way next time.
  *
- * Keyed exactly like the engine pins ([VodEngineStore], [ForceMpvStore]) — [enginePinKey] when the
- * row carries a provider id, the stream URL when it doesn't — which is why a re-sync doesn't lose
- * these: the same item computes the same key again. Scoped to the active profile, so the kids
- * profile's choices never reach the main one.
+ * Keyed by [contentKey] when the row carries a provider id, the stream URL when it doesn't — which is
+ * why a re-sync doesn't lose these: the same item computes the same key again. Scoped to the active
+ * profile, so the kids profile's choices never reach the main one.
  *
  * Nothing is stored until the user actually changes something in the player. A missing row, or a
  * null column in an existing one, means "follow the global default in Settings".
@@ -39,8 +38,8 @@ class PlaybackPrefsStore(
                 moved.forEach { row ->
                     quirks.setAudioDelay(
                         row.contentKey,
-                        sourceIdOfPinKey(row.contentKey),
-                        mediaTypeOfPinKey(row.contentKey) ?: "LIVE",
+                        sourceIdOfContentKey(row.contentKey),
+                        mediaTypeOfContentKey(row.contentKey) ?: "LIVE",
                         row.audioDelayMs,
                     )
                 }
@@ -82,14 +81,13 @@ class PlaybackPrefsStore(
     suspend fun rememberAudioDelay(contentKey: String, audioDelayMs: Int?) {
         runCatching {
             copy.ensure()
-            quirks.setAudioDelay(contentKey, sourceIdOfPinKey(contentKey), mediaTypeOfPinKey(contentKey) ?: "LIVE", audioDelayMs)
+            quirks.setAudioDelay(contentKey, sourceIdOfContentKey(contentKey), mediaTypeOfContentKey(contentKey) ?: "LIVE", audioDelayMs)
         }
     }
 
     /**
-     * The track languages this profile last picked for [trackKey] (a channel, a film, or a whole
-     * series), as (audio, subtitle); either may be null. Subtitle may be
-     * [SUBTITLES_OFF].
+     * The track languages this profile last picked for [trackKey] (a channel), as (audio, subtitle);
+     * either may be null. Subtitle may be [SUBTITLES_OFF].
      */
     suspend fun tracksFor(trackKey: String): Pair<String?, String?>? = runCatching {
         dao.get(settings.activeProfileId.first(), trackKey)

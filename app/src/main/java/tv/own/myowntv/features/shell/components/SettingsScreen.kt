@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import tv.own.myowntv.ui.theme.StageColors
 import tv.own.myowntv.features.settings.SettingValue
@@ -158,7 +157,7 @@ import tv.own.myowntv.ui.theme.primary
 
 internal enum class TileTone { PRIMARY, SECONDARY, TERTIARY }
 
-private enum class SettingsTab { ROOT, LANGUAGE, SOURCES, EPG, BACKUP, LOCAL_SYNC, CUSTOMIZE, HOME, NETWORK, DNS, METADATA, OPEN_SUBTITLES, WEATHER, CH_NAV, PANEL_WIDTH, GUIDE_WIDTH, GLASS_EFFECT, CONTENT_MENUS, FONTS, BROWSING, SUBTITLE_STYLE, SPORTS }
+private enum class SettingsTab { ROOT, LANGUAGE, SOURCES, EPG, BACKUP, LOCAL_SYNC, CUSTOMIZE, HOME, NETWORK, DNS, METADATA, WEATHER, CH_NAV, PANEL_WIDTH, GUIDE_WIDTH, GLASS_EFFECT, CONTENT_MENUS, FONTS, BROWSING, SUBTITLE_STYLE, SPORTS }
 
 @Composable
 private fun epgShiftLabel(minutes: Int): String {
@@ -351,7 +350,6 @@ fun SettingsScreen(
     val epgOffset by settingsVm.epgOffsetMinutes.collectAsStateWithLifecycle()
     val guideDays by settingsVm.guideDaysToKeep.collectAsStateWithLifecycle()
     val catchupChannels by settingsVm.catchupChannelCount.collectAsStateWithLifecycle()
-    val catchupPlayer by settingsVm.catchupPlayer.collectAsStateWithLifecycle()
     val playlistSources by settingsVm.sources.collectAsStateWithLifecycle()
     val catchupOverrides = playlistSources.count { it.catchupTimezone != null }
     val accent by settingsVm.accent.collectAsStateWithLifecycle()
@@ -467,7 +465,6 @@ fun SettingsScreen(
         SettingsTab.NETWORK -> { tv.own.myowntv.features.settings.NetworkSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
         SettingsTab.DNS -> { tv.own.myowntv.features.settings.DnsSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
         SettingsTab.METADATA -> { tv.own.myowntv.features.settings.MetadataSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
-        SettingsTab.OPEN_SUBTITLES -> { tv.own.myowntv.features.settings.OpenSubtitlesAccountScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
         SettingsTab.WEATHER -> { tv.own.myowntv.features.settings.WeatherSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
         SettingsTab.CH_NAV -> { tv.own.myowntv.features.settings.ChNavSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
         SettingsTab.CONTENT_MENUS -> { tv.own.myowntv.features.settings.ContentMenuSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
@@ -762,12 +759,6 @@ fun SettingsScreen(
             title = stringResource(R.string.settings_metadata), desc = stringResource(R.string.settings_metadata_root_description),
             focus = rowFocus.getValue(SettingsTab.METADATA),
             onClick = { open(SettingsTab.METADATA) },
-        ),
-        RootRow(
-            tabRowKey(SettingsTab.OPEN_SUBTITLES), TileTone.PRIMARY, MyOwnTVIcon.SUBTITLE,
-            title = stringResource(R.string.settings_open_subtitles), desc = stringResource(R.string.settings_open_subtitles_description),
-            focus = rowFocus.getValue(SettingsTab.OPEN_SUBTITLES),
-            onClick = { open(SettingsTab.OPEN_SUBTITLES) },
         ),
         RootGroup("group_player", stringResource(R.string.settings_vp_cat_player), MyOwnTVIcon.PLAY, ""),
         RootGroup("group_picture", stringResource(R.string.settings_vp_cat_picture), MyOwnTVIcon.VIDEO, ""),
@@ -1097,7 +1088,6 @@ fun SettingsScreen(
                 chipTone = if (catchupOverrides > 0) TileTone.PRIMARY else TileTone.SECONDARY) { saveScroll(); dialogReturn = searchFieldFocus; showCatchupSources = true } else null,
             // Four screens that had no entry at all, so nothing on them could be found by name.
             SettingsSearchEntry(stringResource(R.string.settings_group_watching_recording), stringResource(R.string.recording_settings_group), stringResource(R.string.settings_search_keywords_recording), MyOwnTVIcon.LIVE_TV, TileTone.TERTIARY) { searchQuery = ""; searchMode = false; selectedGroup = SettingsGroup.WATCHING.ordinal },
-            SettingsSearchEntry(stringResource(R.string.settings_group_content_metadata), stringResource(R.string.settings_open_subtitles), stringResource(R.string.settings_search_keywords_subtitle_appearance), MyOwnTVIcon.SUBTITLE, TileTone.PRIMARY) { open(SettingsTab.OPEN_SUBTITLES) },
             SettingsSearchEntry(stringResource(R.string.settings_group_appearance), stringResource(R.string.settings_glass_bg_title), stringResource(R.string.settings_search_keywords_glass), MyOwnTVIcon.SPARKLE, TileTone.PRIMARY,
                 chip = glassBackgroundSummary(settingsVm.backgroundConfig.collectAsStateWithLifecycle().value, glassConfig), chipTone = if (glassOn) TileTone.PRIMARY else TileTone.SECONDARY) { open(SettingsTab.GLASS_EFFECT) },
             SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_content_menus_title), stringResource(R.string.settings_search_keywords_customize), MyOwnTVIcon.MENU, TileTone.PRIMARY) { open(SettingsTab.CONTENT_MENUS) },
@@ -1127,8 +1117,8 @@ fun SettingsScreen(
             "vp_surround", "vp_autoplay", "vp_sub_style", "vp_live_latency", "vp_preroll", "vp_logging",
         )
         // …and every OTHER player-group row, taken straight from the catalogue those groups already draw
-        // from. Twenty-four settings had no entry of any kind — Multiview, the engine pickers, the seek
-        // and volume steps, the language preferences, the per-playlist overrides — so searching for them
+        // from. Twenty-four settings had no entry of any kind — Multiview, the volume steps,
+        // the language preferences, the per-playlist overrides — so searching for them
         // by name found nothing, on a screen whose own header offers to search "every setting". Deriving
         // them means a row added there is searchable the day it exists, instead of the day someone
         // remembers to type it out here a second time.
@@ -1164,8 +1154,6 @@ fun SettingsScreen(
             titles.map { SettingsSearchEntry(group, stringResource(it), stringResource(keywords), icon, TileTone.TERTIARY, onClick = onClick) }
         val subStyleRef = tv.own.myowntv.features.settings.VIDEO_QUICK_ROWS.first { it.key == "vp_sub_style" }
         val screenRowEntries =
-            rowsOf(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_watching_recording), stringResource(R.string.recording_settings_group)),
-                tv.own.myowntv.features.settings.RECORDING_SEARCH_ROWS, R.string.settings_search_keywords_recording, MyOwnTVIcon.LIVE_TV) { searchQuery = ""; searchMode = false; selectedGroup = SettingsGroup.WATCHING.ordinal } +
             rowsOf(stringResource(R.string.settings_breadcrumb, tv.own.myowntv.features.settings.videoRowPath("vp_sub_style"), stringResource(R.string.settings_subtitle_appearance)),
                 tv.own.myowntv.features.settings.SUBTITLE_APPEARANCE_SEARCH_ROWS, R.string.settings_search_keywords_subtitle_appearance, MyOwnTVIcon.SUBTITLE, jumpTo(subStyleRef)) +
             rowsOf(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_app), stringResource(R.string.settings_group_network)), stringResource(R.string.common_proxy)),
@@ -1173,10 +1161,7 @@ fun SettingsScreen(
             rowsOf(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_app), stringResource(R.string.settings_group_network)), stringResource(R.string.settings_dns)),
                 tv.own.myowntv.features.settings.DNS_SEARCH_ROWS, R.string.settings_search_keywords_dns, MyOwnTVIcon.DNS) { open(SettingsTab.DNS) } +
             rowsOf(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_layout), stringResource(R.string.settings_remote_shortcuts)),
-                tv.own.myowntv.features.settings.PLAYER_BUTTONS_SEARCH_ROWS, R.string.settings_search_keywords_ch, MyOwnTVIcon.CH_NAV) { open(SettingsTab.CH_NAV) } +
-            // The Catch-up popup's second row; its first (the time zone) is the Catch-up entry above.
-            rowsOf(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_sources), stringResource(R.string.settings_catchup)),
-                listOf(R.string.settings_catchup_player), R.string.settings_search_keywords_catchup, MyOwnTVIcon.CATCHUP) { saveScroll(); dialogReturn = searchFieldFocus; showCatchupTime = true }
+                tv.own.myowntv.features.settings.PLAYER_BUTTONS_SEARCH_ROWS, R.string.settings_search_keywords_ch, MyOwnTVIcon.CH_NAV) { open(SettingsTab.CH_NAV) }
         // A setting is found by its own name only: "play" lists every setting with "play" in its name.
         val needle = searchQuery.trim().lowercase()
         (entries + videoEntries + screenRowEntries)
@@ -1244,7 +1229,6 @@ fun SettingsScreen(
                         openMiniPlayer = openMiniPlayer,
                         focusRowKey = videoRowKey,
                     )
-                    if (group == SettingsGroup.WATCHING) tv.own.myowntv.features.settings.RecordingSettingsRows(pageScroll)
                 }
                 group == SettingsGroup.PROFILE -> tv.own.myowntv.features.settings.ProfileSettingsRows()
                 // Only Quick can be empty, and only because the user emptied it.
@@ -1314,7 +1298,7 @@ fun SettingsScreen(
     if (showUpdate) {
         UpdateDialog(onDismiss = { showUpdate = false }, checkOnOpen = true)
     }
-    if (showCatchupTime) CatchupTimeHost(settingsVm, catchupTz, catchupOffset, catchupPlayer) { showCatchupTime = false }
+    if (showCatchupTime) CatchupTimeHost(settingsVm, catchupTz, catchupOffset) { showCatchupTime = false }
     if (showCatchupSources) {
         CatchupSourcesHost(playlistSources, catchupSource, onPick = { picked ->
             catchupSource = picked
@@ -1933,13 +1917,12 @@ private fun FocusHighlightDialog(
 }
 
 
-/** The global catch-up time and player dialog, moved out of [SettingsScreen] unchanged (its body is at the JVM method limit). */
+/** The global catch-up time dialog, moved out of [SettingsScreen] unchanged (its body is at the JVM method limit). */
 @Composable
 private fun CatchupTimeHost(
     settingsVm: SettingsViewModel,
     mode: SettingsRepository.CatchupTimezone,
     offsetMinutes: Int,
-    player: SettingsRepository.CatchupPlayer,
     onDismiss: () -> Unit,
 ) {
     CatchupTimeDialog(
@@ -1949,8 +1932,6 @@ private fun CatchupTimeHost(
             offsetStep = settingsVm.catchupOffsetStepMinutes,
             onSetMode = settingsVm::setCatchupTimezone,
             onAdjustOffset = settingsVm::adjustCatchupOffset,
-            player = player,
-            onSetPlayer = settingsVm::setCatchupPlayer,
             onDismiss = onDismiss,
         )
 }
@@ -2018,7 +1999,6 @@ internal const val TELEGRAM_LINK = "t.me/owntvplayer"
  */
 @Composable
 internal fun String.playbackDisplayName(): String = when (trim().lowercase(java.util.Locale.ROOT)) {
-    "mpv" -> stringResource(R.string.settings_player_mpv)
     "exoplayer", "exo" -> stringResource(R.string.settings_player_exoplayer)
     else -> this
 }
@@ -2298,6 +2278,12 @@ private fun catchupOverrideLabel(source: tv.own.owntv.core.database.entity.Sourc
         else -> stringResource(R.string.settings_device)
     }
 
+/** When a guide feed last synced: "Today 14:05" style, built from the Guide's own day labels. */
+@Composable
+private fun epgFeedWhen(atMs: Long): String =
+    tv.own.myowntv.features.epg.guideDayLabel(tv.own.myowntv.features.epg.localMidnight(atMs)) + " " +
+        tv.own.myowntv.ui.format.rememberBestDateFormatter("jm")(atMs)
+
 /** "UTC", "UTC+05:00", "UTC-03:30" — labels a UTC offset (in minutes) for catch-up. */
 private fun utcOffsetLabel(minutes: Int): String {
     if (minutes == 0) return "UTC"
@@ -2315,8 +2301,6 @@ private fun CatchupTimeDialog(
     onAdjustOffset: (Int) -> Unit,
     /** One −/+ press, in minutes (a quarter hour). */
     offsetStep: Int,
-    player: SettingsRepository.CatchupPlayer,
-    onSetPlayer: (SettingsRepository.CatchupPlayer) -> Unit,
     onDismiss: () -> Unit,
 ) {
     // Three simple values: in the page's panel, a Stage popup elsewhere.
@@ -2359,25 +2343,6 @@ private fun CatchupTimeDialog(
                     }
                 }
             }
-            // Which player takes an archive programme — "Ask" puts the choice on "Watch from start" itself.
-            Text(
-                stringResource(R.string.settings_catchup_player).uppercase(),
-                style = tv.own.myowntv.ui.theme.stageText(14, 800, androidx.compose.ui.unit.TextUnit(0.12f, androidx.compose.ui.unit.TextUnitType.Em)),
-                color = tv.own.myowntv.ui.theme.StageColors.Dim,
-                modifier = Modifier.padding(start = 8.mpx, top = 18.mpx, bottom = 4.mpx),
-            )
-            val players = SettingsRepository.CatchupPlayer.entries
-            tv.own.myowntv.ui.stage.StageMenuChoice(
-                options = players.map {
-                    when (it) {
-                        SettingsRepository.CatchupPlayer.ASK -> stringResource(R.string.settings_catchup_player_ask)
-                        SettingsRepository.CatchupPlayer.INTERNAL -> stringResource(R.string.settings_catchup_player_internal)
-                        SettingsRepository.CatchupPlayer.EXTERNAL -> stringResource(R.string.settings_catchup_player_external)
-                    }
-                },
-                selected = players.indexOf(player),
-                onSelect = { onSetPlayer(players[it]) },
-            )
             Row(Modifier.fillMaxWidth().padding(top = 16.mpx), horizontalArrangement = Arrangement.End) {
                 tv.own.myowntv.ui.stage.StageButton(stringResource(R.string.settings_done), onClick = onDismiss, height = 52.mpx, textSize = 18, tinted = true)
             }
@@ -2488,9 +2453,6 @@ private fun subScreenSearchEntries(open: (SettingsTab) -> Unit): List<SettingsSe
         SettingsSearchEntry(stringResource(R.string.settings_group_appearance), stringResource(R.string.settings_custom_location), stringResource(R.string.settings_search_keywords_weather), MyOwnTVIcon.WEATHER, TileTone.SECONDARY) { open(SettingsTab.WEATHER) },
         SettingsSearchEntry(stringResource(R.string.settings_group_content_metadata), stringResource(R.string.settings_metadata_source), stringResource(R.string.settings_search_keywords_metadata), MyOwnTVIcon.IMAGE, TileTone.SECONDARY) { open(SettingsTab.METADATA) },
         SettingsSearchEntry(stringResource(R.string.settings_group_content_metadata), stringResource(R.string.settings_metadata_language), stringResource(R.string.settings_search_keywords_metadata), MyOwnTVIcon.IMAGE, TileTone.SECONDARY) { open(SettingsTab.METADATA) },
-        SettingsSearchEntry(stringResource(R.string.settings_group_content_metadata), stringResource(R.string.player_subtitles_search_language), stringResource(R.string.settings_search_keywords_subtitle_appearance), MyOwnTVIcon.SUBTITLE, TileTone.SECONDARY) { open(SettingsTab.OPEN_SUBTITLES) },
-        SettingsSearchEntry(stringResource(R.string.settings_group_content_metadata), stringResource(R.string.player_subtitles_filter_title), stringResource(R.string.settings_search_keywords_subtitle_appearance), MyOwnTVIcon.SUBTITLE, TileTone.SECONDARY) { open(SettingsTab.OPEN_SUBTITLES) },
-        SettingsSearchEntry(stringResource(R.string.settings_group_content_metadata), stringResource(R.string.player_subtitles_stay_signed_in), stringResource(R.string.settings_search_keywords_subtitle_appearance), MyOwnTVIcon.SUBTITLE, TileTone.SECONDARY) { open(SettingsTab.OPEN_SUBTITLES) },
 )
 
 /** The list key of the row that opens [tab], so a Back from that sub-screen can find its index. */
@@ -2748,7 +2710,7 @@ private fun stageRowExtras(
     ) + serviceRowExtras(vm)
 }
 
-/** EPG Sources, Metadata, OpenSubtitles, Proxy and DNS: what each is set to, and the details in the panel. */
+/** EPG Sources, Metadata, Proxy and DNS: what each is set to, and the details in the panel. */
 @Composable
 private fun serviceRowExtras(vm: SettingsViewModel): Map<String, RowExtra> {
     val epgVm: tv.own.myowntv.features.settings.EpgSourcesViewModel = org.koin.androidx.compose.koinViewModel()
@@ -2757,8 +2719,6 @@ private fun serviceRowExtras(vm: SettingsViewModel): Map<String, RowExtra> {
     val tier by vm.metadataTier.collectAsStateWithLifecycle()
     val budget by vm.metadataBudgetStatus.collectAsStateWithLifecycle()
     LaunchedEffect(tier) { if (tier == tv.own.owntv.core.metadata.MetadataConfig.Tier.DEFAULT_WORKER) vm.refreshMetadataBudget() }
-    val osVm: tv.own.myowntv.features.settings.OpenSubtitlesViewModel = org.koin.androidx.compose.koinViewModel()
-    val os by osVm.state.collectAsStateWithLifecycle()
     val proxy by vm.proxyConfig.collectAsStateWithLifecycle()
     val dns by vm.dnsConfig.collectAsStateWithLifecycle()
     val on = stringResource(R.string.common_on)
@@ -2768,7 +2728,6 @@ private fun serviceRowExtras(vm: SettingsViewModel): Map<String, RowExtra> {
         Text(label, style = small, color = tv.own.myowntv.ui.theme.StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
         Text(value, style = small, color = tv.own.myowntv.ui.theme.StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
-    val signedIn = os as? tv.own.myowntv.features.settings.OpenSubtitlesViewModel.UiState.SignedIn
     val dnsHost = dns.dohUrl.ifBlank { dns.host }.removePrefix("https://").substringBefore('/')
     return mapOf(
         "tab_EPG" to RowExtra(
@@ -2781,7 +2740,7 @@ private fun serviceRowExtras(vm: SettingsViewModel): Map<String, RowExtra> {
                             Text(f.name, style = tv.own.myowntv.ui.theme.stageText(18, 700), color = tv.own.myowntv.ui.theme.StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                             f.lastSyncAt?.let {
                                 Text(
-                                    stringResource(R.string.settings_synced_at, tv.own.myowntv.features.downloads.recordingWhen(it)),
+                                    stringResource(R.string.settings_synced_at, epgFeedWhen(it)),
                                     style = tv.own.myowntv.ui.theme.stageText(15, 500), color = tv.own.myowntv.ui.theme.StageColors.Muted,
                                     maxLines = 1, overflow = TextOverflow.Ellipsis,
                                 )
@@ -2808,19 +2767,6 @@ private fun serviceRowExtras(vm: SettingsViewModel): Map<String, RowExtra> {
                     // The shared service has a daily allowance; an own key or self-host has none to show.
                     if (tier == tv.own.owntv.core.metadata.MetadataConfig.Tier.DEFAULT_WORKER && b != null) {
                         line(stringResource(R.string.settings_allowance_day), pluralStringResource(R.plurals.settings_allowance_value, b.remainingDay, b.remainingDay, b.limitDay))
-                    }
-                }
-            },
-        ),
-        "tab_OPEN_SUBTITLES" to RowExtra(
-            SettingValue.Opens(stringResource(if (signedIn != null) R.string.settings_open_subtitles_connected else R.string.settings_signed_out)),
-            extra = {
-                signedIn?.session?.let { s ->
-                    Column(Modifier.padding(top = 8.mpx)) {
-                        line(stringResource(R.string.player_subtitles_connected_as), s.username)
-                        s.remainingDownloads?.let { r ->
-                            line(stringResource(R.string.player_subtitles_downloads), pluralStringResource(R.plurals.player_subtitles_remaining_short, r, r))
-                        }
                     }
                 }
             },

@@ -41,8 +41,6 @@ import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
 import tv.own.owntv.core.sync.work.*
 import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.timeshift.*
-import tv.own.owntv.core.trending.*
 import tv.own.owntv.core.tv.*
 import tv.own.owntv.core.ui.*
 import tv.own.owntv.core.ui.stage.*
@@ -50,7 +48,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -91,14 +88,6 @@ class SettingsSearchRowsTest {
         assertTrue("no rows found in $file — has it changed shape?", drawn.isNotEmpty())
         assertEquals("$file rows missing from $list", emptySet<String>(), drawn - listed(source, list))
     }
-
-    @Test
-    fun `recording rows are searchable`() =
-        check(
-            "RecordingSettingsScreen.kt", "RECORDING_SEARCH_ROWS",
-            // The group's heading and the "record while watching" warning dialog are not rows.
-            notRows = setOf("recording_settings_group", "settings_record_watching_warning_title"),
-        )
 
     @Test
     fun `player button rows are searchable`() = check("PlayerButtonsSettingsScreen.kt", "PLAYER_BUTTONS_SEARCH_ROWS")

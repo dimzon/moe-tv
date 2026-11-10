@@ -17,26 +17,8 @@ plugins {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        // A libmpv built on this PC (OwnTV_libmpv's buildscripts/wsl_build.sh), only while
-        // the build command carries -Powntv.libmpvLocalRepo=<folder> (never a file) — core's :player-core then asks
-        // for version "local". Core's settings carry the same lines.
-        providers.gradleProperty("owntv.libmpvLocalRepo").orNull?.let { dir ->
-            maven {
-                name = "LocalLibmpv"
-                url = uri(file(dir))
-                content { includeVersion("tv.own.owntv", "libmpv", "local") }
-            }
-        }
         google()
         mavenCentral()
-        // OwnTV's own Maven repository — public, no login: tv.own.owntv:core and :player-core
-        // (built from https://github.com/ahXN00/OwnTV_Core) and tv.own.owntv:libmpv, the mpv engine
-        // (https://github.com/ahXN00/OwnTV_libmpv). Served from OwnTV_Core's gh-pages branch.
-        maven {
-            name = "OwnTV"
-            url = uri("https://ahxn00.github.io/OwnTV_Core/maven")
-            content { includeGroup("tv.own.owntv") }
-        }
     }
 }
 

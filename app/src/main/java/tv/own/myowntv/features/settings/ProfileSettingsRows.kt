@@ -50,7 +50,6 @@ import tv.own.owntv.core.update.*
 import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
-import tv.own.owntv.player.ffmpeg.*
 
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Arrangement
@@ -188,7 +187,6 @@ internal fun ProfileSettingsRows() {
         )
     }
     editing?.let { p ->
-        val allowDownloads by remember(p.id) { vm.downloadsAllowed(p.id) }.collectAsStateWithLifecycle(null)
         ProfileEditorDialog(
             initial = p,
             onConfirm = { name, avatarId, isKids, pin, _ -> vm.edit(p, name, avatarId, isKids, pin); editing = null },
@@ -199,8 +197,6 @@ internal fun ProfileSettingsRows() {
             customPath = profiles.firstOrNull { it.id == p.id }?.avatarPath.orEmpty(),
             onPickPicture = { file -> vm.setPicture(p.id, file) },
             onClearPicture = { vm.clearPicture(p.id) },
-            allowDownloads = allowDownloads,
-            onAllowDownloads = { vm.setDownloadsAllowed(p.id, it) },
         )
     }
     pinFirst?.let { (p, open) ->
