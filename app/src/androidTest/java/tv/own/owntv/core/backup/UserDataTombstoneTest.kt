@@ -1,5 +1,6 @@
 package tv.own.owntv.core.backup
 
+import android.content.Context
 import tv.own.owntv.core.database.ownTVTestDatabase
 import androidx.datastore.preferences.core.edit
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -18,8 +19,10 @@ import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
+import tv.own.owntv.core.i18n.LocaleStore
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.model.SourceType
+import tv.own.owntv.core.settings.SettingsRepository
 
 /**
  * The merge rule local sync stands on: a deletion is a fact with a time on it, and the newer of the
@@ -58,12 +61,19 @@ class UserDataTombstoneTest {
             tombstoneDao = db.tombstoneDao(),
             db = db,
         )
+        // A real SettingsRepository on the test context: its sync matrix reads the DataStore defaults
+        // (favorites/order/reminders give=true, history give=false), which is what these cases need.
+        val settings = SettingsRepository(
+            context,
+            LocaleStore(context.getSharedPreferences("ut_locale", Context.MODE_PRIVATE), context),
+        )
         writer = UserDataWriter(
             db = db,
             favoriteDao = db.favoriteDao(),
             historyDao = db.historyDao(),
             customCategoryDao = db.customCategoryDao(),
             userData = resolver,
+            settings = settings,
         )
         sourceId = db.sourceDao().insert(
             SourceEntity(name = "RuTube", type = SourceType.RUTUBE, url = "https://rutube.test"),

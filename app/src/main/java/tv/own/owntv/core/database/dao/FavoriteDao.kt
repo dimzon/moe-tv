@@ -14,6 +14,15 @@ interface FavoriteDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun add(favorite: FavoriteEntity)
 
+    /**
+     * The per-row LWW apply for favorites (phase ③): [add] inserts when the row is absent, and this
+     * moves `addedAt` — the row's LWW stamp — forward **only when the incoming copy is newer**, so an
+     * older copy arriving after a newer local re-favorite never takes the row back. Runs inside the
+     * resolver's transaction.
+     */
+    @Query("UPDATE favorites SET addedAt = :at WHERE mediaType = :type AND itemId = :itemId AND addedAt < :at")
+    suspend fun bumpIfNewer(type: MediaType, itemId: Long, at: Long)
+
     @Query("DELETE FROM favorites WHERE mediaType = :type AND itemId = :itemId")
     suspend fun remove(type: MediaType, itemId: Long)
 

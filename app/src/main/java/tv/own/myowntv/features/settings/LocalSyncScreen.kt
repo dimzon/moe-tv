@@ -52,6 +52,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -156,6 +157,8 @@ fun LocalSyncScreen(
     // A request from a paired device to sync here automatically. It arrives only while this
     // device is hosting, and it is answered right here — the far side is waiting on it.
     val autoSyncRequests by vm.autoSyncRequests.collectAsStateWithLifecycle()
+    // The 4×2 sync matrix: what this TV gives and reads, per category. Device-local ticks.
+    val matrix by vm.syncMatrix.collectAsStateWithLifecycle()
 
     val ownFocus = remember { FocusRequester() }
     val firstFocus = entry ?: ownFocus
@@ -225,6 +228,10 @@ fun LocalSyncScreen(
             onClick = { autoSyncVm.setListenAlways(!listenAlways) },
             modifier = Modifier.padding(top = 20.mpx).fillMaxWidth(),
         ) { StageSwitch(on = listenAlways) }
+        // The 4×2 matrix (phase ③): per category, whether this TV gives its rows and whether it
+        // reads the others'. These ticks drive every sync — manual and automatic — so they live on
+        // this one screen, not on a per-device row.
+        SyncMatrixBlock(matrix = matrix, onToggle = vm::setSyncMatrix)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(20.mpx)) {
             Column(Modifier.weight(1f)) {
                 if (paired.isNotEmpty()) {
@@ -278,7 +285,6 @@ fun LocalSyncScreen(
             is LocalSyncViewModel.Step.FindDevice -> StepPopup(vm::cancel) { FindDeviceBlock(vm) }
             is LocalSyncViewModel.Step.EnterPin -> StepPopup(vm::cancel) { PinBlock(vm) }
             is LocalSyncViewModel.Step.ChooseDirection -> StepPopup(vm::cancel) { DirectionBlock(vm, step) }
-            is LocalSyncViewModel.Step.ChooseSections -> StepPopup(vm::cancel) { SectionsBlock(vm, step) }
             is LocalSyncViewModel.Step.Confirm -> StepPopup(vm::cancel) { ConfirmBlock(vm, step) }
             is LocalSyncViewModel.Step.Result -> StepPopup(vm::cancel) { ResultBlock(vm, step) }
         }
@@ -424,7 +430,6 @@ fun SetupLocalSyncScreen(onRestored: () -> Unit, onBack: () -> Unit, modifier: M
             is LocalSyncViewModel.Step.EnterPin -> PinBlock(vm)
             // Answered above; drawing anything for it would flash a list the user never chose from.
             is LocalSyncViewModel.Step.ChooseDirection -> Unit
-            is LocalSyncViewModel.Step.ChooseSections -> SectionsBlock(vm, step)
             is LocalSyncViewModel.Step.Confirm -> ConfirmBlock(vm, step)
             // Not [ResultBlock]: its Done returns to the device list, and here the only thing left to
             // do is finish onboarding.
@@ -730,42 +735,6 @@ private fun DirectionBlock(vm: LocalSyncViewModel, step: LocalSyncViewModel.Step
     }
 }
 
-/** The list of parts a sync can carry, ticked with OK. */
-@Composable
-private fun SectionsBlock(vm: LocalSyncViewModel, step: LocalSyncViewModel.Step.ChooseSections) {
-    var sections by remember { mutableStateOf(BackupManager.Section.entries.toSet()) }
-    Column(verticalArrangement = Arrangement.spacedBy(4.mpx)) {
-        Text(
-            stringResource(
-                when (step.direction) {
-                    SyncDirection.SEND -> R.string.local_sync_what_to_send
-                    SyncDirection.RECEIVE -> R.string.local_sync_what_to_receive
-                    SyncDirection.MERGE -> R.string.local_sync_what_to_merge
-                },
-            ),
-            style = stageText(38, 800),
-            color = StageColors.Text,
-        )
-        Text(stringResource(R.string.local_sync_sections_hint), style = stageText(18, 400), color = StageColors.Muted)
-        Spacer(Modifier.height(14.mpx))
-        BackupManager.Section.entries.forEach { section ->
-            OnOffOption(
-                title = stringResource(section.labelRes()),
-                subtitle = null,
-                on = section in sections,
-                onClick = { sections = if (section in sections) sections - section else sections + section },
-            )
-        }
-        Row(Modifier.fillMaxWidth().padding(top = 22.mpx), horizontalArrangement = Arrangement.spacedBy(14.mpx, Alignment.End)) {
-            tv.own.myowntv.ui.stage.StagePopupButton(stringResource(R.string.common_cancel), onClick = vm::cancel, primary = false)
-            tv.own.myowntv.ui.stage.StagePopupButton(
-                stringResource(R.string.settings_backup_continue),
-                onClick = { if (sections.isNotEmpty()) vm.start(sections) },
-            )
-        }
-    }
-}
-
 /** The dry run. Nothing has been written while this is on screen. */
 @Composable
 private fun ConfirmBlock(vm: LocalSyncViewModel, step: LocalSyncViewModel.Step.Confirm) {
@@ -783,6 +752,7 @@ private fun ConfirmBlock(vm: LocalSyncViewModel, step: LocalSyncViewModel.Step.C
             Change(R.string.local_sync_change_favorites, preview.newFavorites)
             Change(R.string.local_sync_change_history, preview.newHistory)
             Change(R.string.local_sync_change_reorder, preview.newReorder)
+            Change(R.string.local_sync_change_reminders, preview.newReminders)
             Change(R.string.local_sync_change_settings, preview.changedSettings)
             Change(R.string.local_sync_change_deletions, preview.deletions)
             if (preview.hasCustomizations) {
@@ -847,6 +817,79 @@ private fun OnOffOption(title: String, subtitle: String?, on: Boolean, onClick: 
     )
 }
 
+/**
+ * The 4×2 sync matrix (phase ③): one row per category, two tappable cells — give and read. Each cell
+ * is a D-pad-focusable On/Off; toggling one rewrites the whole matrix through [onToggle], which
+ * persists it to this device's DataStore. The ticks drive every sync, manual and automatic.
+ */
+@Composable
+private fun SyncMatrixBlock(matrix: SyncMatrix, onToggle: (SyncMatrix) -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(top = 30.mpx), verticalArrangement = Arrangement.spacedBy(2.mpx)) {
+        Text(stringResource(R.string.sync_matrix_title), style = stageText(13, 800, 0.13.em), color = StageColors.Dim, modifier = Modifier.padding(bottom = 4.mpx))
+        Text(stringResource(R.string.sync_matrix_hint), style = stageText(17, 400), color = StageColors.Muted, modifier = Modifier.padding(bottom = 10.mpx))
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.weight(1f))
+            MatrixHeaderCell(stringResource(R.string.sync_matrix_give))
+            Spacer(Modifier.width(12.mpx))
+            MatrixHeaderCell(stringResource(R.string.sync_matrix_read))
+        }
+        MatrixCategoryRow(
+            stringResource(R.string.sync_category_favorites), matrix.giveFavorites, matrix.readFavorites,
+            { onToggle(matrix.copy(giveFavorites = !matrix.giveFavorites)) },
+            { onToggle(matrix.copy(readFavorites = !matrix.readFavorites)) },
+        )
+        MatrixCategoryRow(
+            stringResource(R.string.sync_category_order), matrix.giveOrder, matrix.readOrder,
+            { onToggle(matrix.copy(giveOrder = !matrix.giveOrder)) },
+            { onToggle(matrix.copy(readOrder = !matrix.readOrder)) },
+        )
+        MatrixCategoryRow(
+            stringResource(R.string.sync_category_history), matrix.giveHistory, matrix.readHistory,
+            { onToggle(matrix.copy(giveHistory = !matrix.giveHistory)) },
+            { onToggle(matrix.copy(readHistory = !matrix.readHistory)) },
+        )
+        MatrixCategoryRow(
+            stringResource(R.string.sync_category_reminders), matrix.giveReminders, matrix.readReminders,
+            { onToggle(matrix.copy(giveReminders = !matrix.giveReminders)) },
+            { onToggle(matrix.copy(readReminders = !matrix.readReminders)) },
+        )
+    }
+}
+
+@Composable
+private fun MatrixHeaderCell(label: String) {
+    Text(label, style = stageText(12, 700, 0.06.em), color = StageColors.Dim, modifier = Modifier.width(88.mpx), textAlign = TextAlign.Center, maxLines = 1)
+}
+
+@Composable
+private fun MatrixCategoryRow(title: String, give: Boolean, read: Boolean, onGive: () -> Unit, onRead: () -> Unit) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 6.mpx), verticalAlignment = Alignment.CenterVertically) {
+        Text(title, style = stageText(20, 500), color = StageColors.Text, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        MatrixCell(on = give, onClick = onGive)
+        Spacer(Modifier.width(12.mpx))
+        MatrixCell(on = read, onClick = onRead)
+    }
+}
+
+/** One focusable On/Off cell of the matrix: a rounded tile whose fill and label say the state. */
+@Composable
+private fun MatrixCell(on: Boolean, onClick: () -> Unit) {
+    Box(
+        Modifier.width(88.mpx).height(48.mpx)
+            .clip(RoundedCornerShape(10.mpx))
+            .background(if (on) stageAccent.accent.copy(alpha = 0.18f) else StageColors.ControlFill)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            stringResource(if (on) R.string.common_on else R.string.common_off),
+            style = stageText(15, 700),
+            color = if (on) stageAccent.accent else StageColors.Muted,
+            maxLines = 1,
+        )
+    }
+}
+
 /** One counted change; a nought is left out rather than listed as nothing. */
 @Composable
 private fun Change(labelRes: Int, count: Int) {
@@ -865,13 +908,12 @@ internal fun SyncFailure.messageRes(): Int = when (this) {
     SyncFailure.Unknown -> R.string.local_sync_error_unknown
 }
 
-/** The words the backup sections are named by, everywhere in the app. */
+/** The words the sync categories are named by, everywhere in the app. */
 internal fun BackupManager.Section.labelRes(): Int = when (this) {
-    BackupManager.Section.CUSTOMIZE -> R.string.settings_backup_section_customize
     BackupManager.Section.FAVORITES -> R.string.settings_backup_section_favorites
     BackupManager.Section.HISTORY -> R.string.settings_backup_section_history
     BackupManager.Section.MANUAL_REORDER -> R.string.settings_backup_section_reorder
-    BackupManager.Section.SETTINGS -> R.string.settings_backup_section_settings
+    BackupManager.Section.REMINDERS -> R.string.settings_backup_section_reminders
 }
 
 /** `192.168.1.5:8089` or a whole URL both carry a port; a bare address means the usual one. */

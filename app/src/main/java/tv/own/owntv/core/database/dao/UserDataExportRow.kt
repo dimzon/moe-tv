@@ -9,4 +9,6 @@ data class UserDataExportRow(
     val remoteId: String?,
     val name: String?,
     val at: Long,
+    /** Only watch-history rows carry it ([HistoryDao.exportRowsForSource]); the payload's `dev`. */
+    val deviceId: String? = null,
 )

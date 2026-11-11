@@ -37,6 +37,11 @@ class SettingsBackupCoverageTest {
         "last_live_category",
         // Secrets: sealed into the encrypted section, or never written in plain text.
         "proxy_pass",
+        // The 4×2 sync matrix (phase ③): each TV's own give/read ticks, device-local by design and
+        // never part of any payload — a household where every device synced its own settings would
+        // defeat the point of choosing per device.
+        "sync_give_favorites", "sync_read_favorites", "sync_give_order", "sync_read_order",
+        "sync_give_history", "sync_read_history", "sync_give_reminders", "sync_read_reminders",
     )
 
     private fun allKeys(): List<Preferences.Key<*>> =

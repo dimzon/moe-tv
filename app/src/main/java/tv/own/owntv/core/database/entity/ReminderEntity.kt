@@ -10,8 +10,10 @@ import androidx.room.PrimaryKey
  *
  * `channelId` is a local id that goes stale on a re-sync, so `channelName` and `epgChannelId`
  * travel with it to keep the row readable and re-matchable. A row lives for hours or days and is
- * deleted once its programme has ended or the user dismisses the prompt, so it takes no part in
- * local sync or backup.
+ * deleted once its programme has ended or the user dismisses the prompt. Since the sync-matrix
+ * redesign it travels between the household's devices as the `prog` kind (identity
+ * (epgChannelId, startMs), LWW per row on [updatedAt]); it is still never in a backup's
+ * per-item/per-source machinery.
  */
 @Entity(
     tableName = "programme_reminders",
@@ -33,6 +35,14 @@ data class ReminderEntity(
     /** How long before [startMs] the prompt comes up; 0 = at the start. */
     val leadMinutes: Int,
     val createdAt: Long,
+    /**
+     * LWW stamp (epoch ms) for the per-row last-write-wins merge (phase ③): stamped on every
+     * create/edit ([tv.own.owntv.core.reminder.ReminderManager]) and compared on a sync apply —
+     * only an incoming reminder **newer** than the local one replaces it. Sync identity is
+     * (epgChannelId, startMs); `channelId` is local and remapped through `epgChannelId` on apply.
+     * 0 = a row that predates the column.
+     */
+    @androidx.room.ColumnInfo(defaultValue = "0") val updatedAt: Long = 0,
 ) {
     val remindAtMs: Long get() = startMs - leadMinutes * 60_000L
 }

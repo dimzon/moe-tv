@@ -21,9 +21,11 @@ import tv.own.owntv.core.database.dao.UserDataExportRow
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.database.entity.CustomCategoryMemberEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
+import tv.own.owntv.core.database.entity.ReminderEntity
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
 import tv.own.owntv.core.database.transaction
 import tv.own.owntv.core.model.MediaType
+import tv.own.owntv.core.settings.SyncMatrix
 
 /**
  * Records that could not be attached yet, kept on disk so they outlive the process and heal on a later
@@ -40,11 +42,22 @@ internal val PENDING_KEY = stringPreferencesKey("entries")
 
 /**
  * Backs up and restores the user data that lives on volatile content ids: favorites, watch
- * history, and manual positions (the app has a single user — profiles are gone). Content rows are
- * clear-then-insert on every sync, so ids can't be exported directly — instead each record is
- * exported with a stable identity (sourceId + provider remoteId, falling back to the name) and
- * re-resolved against the content tables AFTER the post-restore sync repopulates them. Unresolvable
- * records stay pending and are retried after every sync, so they heal as content appears.
+ * history, manual positions and programme reminders (the app has a single user — profiles are
+ * gone). Content rows are clear-then-insert on every sync, so ids can't be exported directly —
+ * instead each record is exported with a stable identity (sourceId + provider remoteId, falling
+ * back to the name) and re-resolved against the content tables AFTER the post-restore sync
+ * repopulates them. Unresolvable records stay pending and are retried after every sync, so they
+ * heal as content appears.
+ *
+ * The payload carries exactly the four sync-matrix categories (phase ③): `fav`, `his`, `order`,
+ * `prog` — see [SyncMatrix.KINDS]. Custom-category membership (`member`) is no longer part of it,
+ * but the **intra-device** re-sync snapshot ([exportForSource] → [relinkAfterSync]) still carries
+ * and heals it, because the custom-categories feature keeps living locally.
+ *
+ * Every apply is per-row last-write-wins: a record only changes a row when the record's timestamp
+ * is **newer** than the row's ([FavoriteEntity.addedAt] / [WatchHistoryEntity.watchedAt] /
+ * [ContentOrderEntity.updatedAt] / [ReminderEntity.updatedAt]), so fresh local edits are never
+ * overwritten by older copies from the household.
  */
 class UserDataResolver(
     private val context: Context,
@@ -56,6 +69,8 @@ class UserDataResolver(
     private val tombstoneDao: TombstoneDao,
     private val db: tv.own.owntv.core.database.OwnTVDatabase,
 ) {
+
+    private fun reminderDao() = db.reminderDao()
 
     // --- deletions (v36) -------------------------------------------------------------------------
     //
@@ -71,8 +86,11 @@ class UserDataResolver(
      *
      * [record] is a record as [describe] builds it (or as a sync payload carries it, already remapped
      * to this device's source ids). Everything identifying is copied; the bookkeeping fields
-     * (`kind`/`at`/`oid`/`pos`/`dur`) are not, because they say when and by whom, not what.
+     * (`kind`/`at`/`oid`/`pos`/`dur`/`dev`) are not, because they say when and by whom, not what.
      * Old files and payloads may also carry a per-profile `p`; profiles are gone and it is ignored.
+     *
+     * Reminders identify by (epgChannelId, startMs) — see [ReminderEntity] — so those two fields
+     * ride at the end in a fixed order; every producer of this string spells them the same way.
      */
     fun canonicalIdentity(record: JSONObject): String = JSONObject().apply {
         put("t", record.optString("t"))
@@ -86,6 +104,8 @@ class UserDataResolver(
         // Membership is per custom category: removing a film from one list is not removing it from
         // another, so the category has to be part of what was deleted.
         record.optStringOrNull("ctx")?.let { put("ctx", it) }
+        if (record.has("startMs")) put("startMs", record.optLong("startMs"))
+        record.optStringOrNull("epg")?.let { put("epg", it) }
     }.toString()
 
     /** The stable content key of a live row, or null when its content row is already gone. */
@@ -109,6 +129,24 @@ class UserDataResolver(
         val record = describe(type, itemId) ?: return
         contextKey?.let { record.put("ctx", it) }
         tombstoneDao.record(kind, canonicalIdentity(record), at)
+    }
+
+    /**
+     * Records that one reminder was dismissed, so the deletion survives a sync. A reminder's sync
+     * identity is (epgChannelId, startMs) — see [ReminderEntity] — and a row without a guide id has
+     * no identity, so its dismissal records nothing: the deletion stays local. Call before the row
+     * is deleted.
+     */
+    suspend fun recordReminderDeletion(
+        epgChannelId: String,
+        startMs: Long,
+        at: Long = System.currentTimeMillis(),
+    ) {
+        tombstoneDao.record(
+            SyncMatrix.KIND_REMINDERS,
+            canonicalIdentity(JSONObject().put("epg", epgChannelId).put("startMs", startMs)),
+            at,
+        )
     }
 
     /** Trims the tombstone table to [MAX_TOMBSTONES]. Called once after a bulk deletion, not per row. */
@@ -141,6 +179,9 @@ class UserDataResolver(
      * device deleted it survives. The tombstone is then recorded here too — both so a third device
      * hears about it, and so the same deletion cannot be undone by an older copy of the row arriving
      * later in the very same payload.
+     *
+     * Only [TOMBSTONE_KINDS] apply; a payload's `his`/`member` markers (older builds wrote them) are
+     * ignored — history and custom-category deletions stopped travelling with the sync matrix.
      */
     suspend fun applyTombstones(entries: JSONArray?): Int {
         if (entries == null || entries.length() == 0) return 0
@@ -167,85 +208,122 @@ class UserDataResolver(
         // Recorded first: the row may not even exist here (nothing to delete), but a third device
         // still has to learn that it was deleted, and an older copy of it may arrive later.
         tombstoneDao.record(kind, canonicalIdentity(e), at)
-        val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
-        val itemId = locate(type, e) ?: return false
-        val deleted = when (kind) {
-            "fav" -> favoriteDao.removeIfOlderThan(type, itemId, at)
-            "his" -> historyDao.removeIfOlderThan(type, itemId, at)
-            // Memberships carry no timestamp of their own — the row is a position in a list, not an
-            // event — so the deletion simply wins. Re-adding the item locally afterwards writes a
-            // fresh row, and the stale tombstone only ever suppresses records older than itself.
-            "member" -> {
-                customCategoryDao.deleteItem(type, e.optString("ctx"), itemId)
-                1
+        return when (kind) {
+            SyncMatrix.KIND_FAVORITES -> {
+                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
+                val itemId = locate(type, e) ?: return false
+                favoriteDao.removeIfOlderThan(type, itemId, at) > 0
             }
-            else -> 0
+            SyncMatrix.KIND_ORDER -> {
+                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
+                val itemId = locate(type, e) ?: return false
+                val ctx = e.optStringOrNull("ctx") ?: return false
+                contentOrderDao.removeIfOlderThan(type, ctx, itemId, at) > 0
+            }
+            SyncMatrix.KIND_REMINDERS -> {
+                val epg = e.optStringOrNull("epg") ?: return false
+                reminderDao().removeIfOlderThan(epg, e.optLong("startMs", 0), at) > 0
+            }
+            else -> false
         }
-        return deleted > 0
     }
 
-    /** Exports the chosen kinds ("fav" / "his" / "order" / "member") as stable-key records for the backup file. */
-    suspend fun exportAll(kinds: Set<String> = setOf("fav", "his", "order", "member")): JSONArray {
+    /**
+     * Exports the chosen kinds as stable-key records for the backup file / sync payload. The
+     * default is exactly the four categories the payload carries ([SyncMatrix.KINDS]); the
+     * intra-device re-sync snapshot goes through [exportForSource], which adds `member`.
+     */
+    suspend fun exportAll(kinds: Set<String> = SyncMatrix.KINDS): JSONArray {
         val out = JSONArray()
-        if ("fav" in kinds) favoriteDao.getAllOnce().forEach { f ->
-            describe(f.mediaType, f.itemId)?.let { out.put(it.put("kind", "fav").put("at", f.addedAt)) }
+        if (SyncMatrix.KIND_FAVORITES in kinds) favoriteDao.getAllOnce().forEach { f ->
+            describe(f.mediaType, f.itemId)?.let { out.put(it.put("kind", SyncMatrix.KIND_FAVORITES).put("at", f.addedAt)) }
         }
-        if ("his" in kinds) historyDao.getAllOnce().forEach { h ->
-            describe(h.mediaType, h.itemId)?.let { out.put(it.put("kind", "his").put("at", h.watchedAt)) }
+        if (SyncMatrix.KIND_HISTORY in kinds) historyDao.getAllOnce().forEach { h ->
+            describe(h.mediaType, h.itemId)?.let {
+                out.put(
+                    it.put("kind", SyncMatrix.KIND_HISTORY).put("at", h.watchedAt)
+                        // Which device watched it — the "recently in this household" rail's attribution.
+                        .putOpt("dev", h.deviceId?.takeIf { d -> d.isNotBlank() }),
+                )
+            }
         }
-        if ("order" in kinds) contentOrderDao.getAllOnce().forEach { o ->
+        if (SyncMatrix.KIND_ORDER in kinds) contentOrderDao.getAllOnce().forEach { o ->
             describe(o.mediaType, o.itemId)?.let {
-                out.put(it.put("kind", "order").put("ctx", o.contextKey).put("pos", o.position))
+                // `at` is the row's LWW stamp ([ContentOrderEntity.updatedAt]) — the merge on the far
+                // side only takes a position that is newer than its own.
+                out.put(it.put("kind", SyncMatrix.KIND_ORDER).put("ctx", o.contextKey).put("pos", o.position).put("at", o.updatedAt))
             }
         }
-        if ("member" in kinds) customCategoryDao.getAllOnce().forEach { m ->
-            describe(m.mediaType, m.itemId)?.let {
-                out.put(it.put("kind", "member").put("ctx", m.contextKey).put("pos", m.position))
-            }
-        }
+        if (SyncMatrix.KIND_REMINDERS in kinds) exportReminders(out)
         return out
+    }
+
+    /**
+     * Reminders as `prog` records. Identity is (epgChannelId, startMs); `channelId` is device-local
+     * and never travels — the far side remaps through `epgChannelId` on apply, and a row without a
+     * guide id has no identity and stays local.
+     */
+    private suspend fun exportReminders(out: JSONArray) {
+        reminderDao().all().forEach { r ->
+            val epg = r.epgChannelId?.takeIf { it.isNotBlank() } ?: return@forEach
+            out.put(
+                JSONObject()
+                    .put("kind", SyncMatrix.KIND_REMINDERS)
+                    .put("epg", epg)
+                    .put("startMs", r.startMs)
+                    .put("stopMs", r.stopMs)
+                    .put("title", r.title)
+                    // Reference only, not identity: the far side shows its own channel row's name.
+                    .put("name", r.channelName)
+                    .put("lead", r.leadMinutes)
+                    .put("at", r.updatedAt),
+            )
+        }
     }
 
     /**
      * Exports only the rows attached to [sourceId], so a single-source re-sync starts promptly.
      *
-     * "order" is in the default set: manual Move positions orphan on a resync exactly like
-     * favorites do — content is clear-then-insert, so every itemId in `content_order` goes stale —
-     * and leaving them out of the snapshot silently threw away the user's hand-arranged folders.
+     * This is the **intra-device** snapshot (capture before a re-sync, relink after — [relinkAfterSync]),
+     * not the sync payload: it keeps `member` so the locally-alive custom categories survive the
+     * clear-then-insert of a content refresh exactly like favorites and positions do.
      */
-    suspend fun exportForSource(sourceId: Long, kinds: Set<String> = setOf("fav", "his", "order", "member")): JSONArray {
+    suspend fun exportForSource(sourceId: Long, kinds: Set<String> = SNAPSHOT_KINDS): JSONArray {
         val out = JSONArray()
-        if ("fav" in kinds) favoriteDao.exportRowsForSource(sourceId).forEach { row -> row.toJson("fav")?.let { out.put(it) } }
-        if ("his" in kinds) historyDao.exportRowsForSource(sourceId).forEach { row -> row.toJson("his")?.let { out.put(it) } }
-        if ("order" in kinds) contentOrderDao.exportRowsForSource(sourceId).forEach { row -> row.toJson()?.let { out.put(it) } }
-        if ("member" in kinds) customCategoryDao.exportRowsForSource(sourceId).forEach { row -> row.toJson()?.let { out.put(it) } }
+        if (SyncMatrix.KIND_FAVORITES in kinds) favoriteDao.exportRowsForSource(sourceId).forEach { row -> row.toJson(SyncMatrix.KIND_FAVORITES)?.let { out.put(it) } }
+        if (SyncMatrix.KIND_HISTORY in kinds) historyDao.exportRowsForSource(sourceId).forEach { row -> row.toJson(SyncMatrix.KIND_HISTORY)?.let { out.put(it) } }
+        if (SyncMatrix.KIND_ORDER in kinds) contentOrderDao.exportRowsForSource(sourceId).forEach { row -> row.toJson()?.let { out.put(it) } }
+        if (MEMBER_KIND in kinds) customCategoryDao.exportRowsForSource(sourceId).forEach { row -> row.toJson()?.let { out.put(it) } }
         return out
     }
 
     private fun ContentOrderExportRow.toJson(): JSONObject? {
         val itemName = name ?: return null
         return JSONObject().put("t", mediaType.name).put("src", sourceId).putOpt("rid", remoteId).put("name", itemName)
-            .put("kind", "order").put("ctx", contextKey).put("pos", position)
+            .put("kind", SyncMatrix.KIND_ORDER).put("ctx", contextKey).put("pos", position)
+            .put("at", updatedAt)
             .put("oid", itemId)
     }
 
     private fun CustomCategoryMemberExportRow.toJson(): JSONObject? {
         val itemName = name ?: return null
         return JSONObject().put("t", mediaType.name).put("src", sourceId).putOpt("rid", remoteId).put("name", itemName)
-            .put("kind", "member").put("ctx", contextKey).put("pos", position)
+            .put("kind", MEMBER_KIND).put("ctx", contextKey).put("pos", position)
             .put("oid", itemId)
     }
 
     private fun UserDataExportRow.toJson(kind: String): JSONObject? {
         val itemName = name ?: return null
         return JSONObject().put("t", mediaType.name).put("src", sourceId).putOpt("rid", remoteId).put("name", itemName)
-            .put("kind", kind).put("at", at).put("oid", itemId)
+            .put("kind", kind).put("at", at)
+            .putOpt("dev", deviceId?.takeIf { it.isNotBlank() })
+            .put("oid", itemId)
     }
 
     /**
      * Heals favorites/history/resume across a source re-sync. Content rows are clear-then-insert, so
      * their ids change every refresh and the user-data rows (keyed on the old ids) orphan — the count
-     * badge still showed them, but the join returned nothing. Capture [exportAll] BEFORE the sync (ids
+     * badge still showed them, but the join returned nothing. Capture [exportForSource] BEFORE the sync (ids
      * still valid → stable keys), then call this AFTER it: re-resolve each record to the new ids, and
      * (only when [purge] is true) drop the now-orphaned rows so counts and lists agree. Keep anything
      * still unresolvable (e.g. not-yet-loaded episodes) pending for a later sync / show-open.
@@ -390,21 +468,37 @@ class UserDataResolver(
      * Would this incoming record add something this device does not have? The dry run's question,
      * answered without writing anything.
      *
-     * A record whose content has not been downloaded here yet counts as new: it will be held pending
-     * and attach itself when the catalogue arrives, which is a change the user should be told about.
-     * A record a local deletion already outranks does not, because applying it would do nothing.
+     * "Add" is per-row LWW, exactly like the apply: a record whose content has not been downloaded
+     * here yet counts as new (it will be held pending and attach itself when the catalogue arrives),
+     * and so does one that is **newer** than the row already here — applying it would actually
+     * change something. A record a local deletion already outranks does not, because applying it
+     * would do nothing.
      */
     suspend fun wouldAdd(kind: String, e: JSONObject): Boolean {
         val at = e.optLong("at", 0)
         if (tombstoneDao.deletedAt(kind, canonicalIdentity(e))?.let { it >= at } == true) return false
-        val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
-        val itemId = locate(type, e) ?: return true
-        val ctx = e.optString("ctx")
         return when (kind) {
-            "fav" -> !favoriteDao.exists(type, itemId)
-            "his" -> !historyDao.exists(type, itemId)
-            "order" -> !contentOrderDao.exists(type, ctx, itemId)
-            "member" -> !customCategoryDao.exists(type, ctx, itemId)
+            SyncMatrix.KIND_FAVORITES -> {
+                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
+                val itemId = locate(type, e) ?: return true
+                favoriteDao.addedAt(type, itemId)?.let { it >= at } != true
+            }
+            SyncMatrix.KIND_HISTORY -> {
+                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
+                val itemId = locate(type, e) ?: return true
+                historyDao.watchedAt(type, itemId)?.let { it >= at } != true
+            }
+            SyncMatrix.KIND_ORDER -> {
+                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
+                val ctx = e.optStringOrNull("ctx") ?: return false
+                val itemId = locate(type, e) ?: return true
+                contentOrderDao.updatedAt(type, ctx, itemId)?.let { it >= at } != true
+            }
+            SyncMatrix.KIND_REMINDERS -> {
+                val epg = e.optStringOrNull("epg") ?: return false
+                val existing = reminderDao().getByEpgAndStart(epg, e.optLong("startMs", 0)) ?: return true
+                existing.updatedAt < at
+            }
             else -> false
         }
     }
@@ -413,13 +507,23 @@ class UserDataResolver(
     suspend fun wouldRemove(e: JSONObject): Boolean {
         val kind = e.optString("kind")
         if (kind !in TOMBSTONE_KINDS) return false
-        val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
-        val itemId = locate(type, e) ?: return false
         val at = e.optLong("at", 0)
         return when (kind) {
-            "fav" -> favoriteDao.exists(type, itemId) && favoriteDao.addedAt(type, itemId).let { it != null && it <= at }
-            "his" -> historyDao.watchedAt(type, itemId).let { it != null && it <= at }
-            "member" -> customCategoryDao.exists(type, e.optString("ctx"), itemId)
+            SyncMatrix.KIND_FAVORITES -> {
+                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
+                val itemId = locate(type, e) ?: return false
+                favoriteDao.addedAt(type, itemId).let { it != null && it <= at }
+            }
+            SyncMatrix.KIND_ORDER -> {
+                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
+                val itemId = locate(type, e) ?: return false
+                val ctx = e.optStringOrNull("ctx") ?: return false
+                contentOrderDao.updatedAt(type, ctx, itemId).let { it != null && it <= at }
+            }
+            SyncMatrix.KIND_REMINDERS -> {
+                val epg = e.optStringOrNull("epg") ?: return false
+                reminderDao().getByEpgAndStart(epg, e.optLong("startMs", 0))?.let { it.updatedAt <= at } == true
+            }
             else -> false
         }
     }
@@ -450,13 +554,20 @@ class UserDataResolver(
     }
 
     private suspend fun resolveAndInsert(e: JSONObject, tombstonesPresent: Boolean): Resolution {
+        val kind = runCatching { e.getString("kind") }.getOrNull() ?: return Resolution.HANDLED
+        // Reminders key on the guide id, not on a content row: they resolve without a `t`/itemId.
+        if (kind == SyncMatrix.KIND_REMINDERS) return resolveAndInsertReminder(e, tombstonesPresent)
         val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull()
             ?: return Resolution.HANDLED // drop garbage
         // A VOD record (movie/series/episode) has no content rows any more: it is dropped for good,
         // never held pending — pending would retry it after every sync for ever.
         val itemId: Long = locate(type, e)
             ?: return if (type == MediaType.LIVE) Resolution.PENDING else Resolution.HANDLED
+        return applyRecord(e, type, itemId, tombstonesPresent)
+    }
 
+    /** One record with its content row resolved: tombstone gate, then the per-kind LWW apply. */
+    private suspend fun applyRecord(e: JSONObject, type: MediaType, itemId: Long, tombstonesPresent: Boolean): Resolution {
         // The record's own profile (`p`) is no longer read: the app has one user, and old files or
         // payloads that still carry the field are applied as that one user's data.
         val at = e.optLong("at", System.currentTimeMillis())
@@ -471,23 +582,86 @@ class UserDataResolver(
         }
         return runCatching {
             when (e.getString("kind")) {
-                "fav" -> favoriteDao.add(FavoriteEntity(mediaType = type, itemId = itemId, addedAt = at))
+                SyncMatrix.KIND_FAVORITES -> {
+                    favoriteDao.add(FavoriteEntity(mediaType = type, itemId = itemId, addedAt = at))
+                    // Per-row LWW: the incoming copy takes the row only when it is actually newer
+                    // than the one here; an older arriving copy changes nothing.
+                    favoriteDao.bumpIfNewer(type, itemId, at)
+                }
                 // Newest wins, both of them. An incoming record is a fact with a time on it exactly
                 // like a deletion is, and the later fact is the true one — so these insert when the
                 // row is absent and then move it forward only if the incoming copy is actually newer.
                 // A plain REPLACE would let the other device's older state win purely by arriving
                 // second, which is the difference between a merge and a coin toss.
-                "his" -> {
-                    historyDao.insertIfAbsent(WatchHistoryEntity(mediaType = type, itemId = itemId, watchedAt = at))
-                    historyDao.bumpIfNewer(type, itemId, at)
+                SyncMatrix.KIND_HISTORY -> {
+                    historyDao.insertIfAbsent(
+                        WatchHistoryEntity(
+                            mediaType = type, itemId = itemId, watchedAt = at,
+                            // Which device watched it, carried as-is from the payload (`dev`).
+                            deviceId = e.optStringOrNull("dev"),
+                        ),
+                    )
+                    historyDao.bumpIfNewer(type, itemId, at, e.optStringOrNull("dev"))
                 }
-                "order" -> contentOrderDao.insertAll(
-                    listOf(ContentOrderEntity(mediaType = type, contextKey = e.getString("ctx"), itemId = itemId, position = e.getInt("pos"))),
-                )
-                "member" -> customCategoryDao.insertAll(
+                SyncMatrix.KIND_ORDER -> {
+                    val ctx = e.optStringOrNull("ctx") ?: return@runCatching Resolution.HANDLED
+                    val pos = e.getInt("pos")
+                    // A record that predates `updatedAt` (old containers' order rows carried no
+                    // timestamp) inserts when the row is absent but never takes one this device
+                    // already has — its stamp is 0, so [bumpIfNewer] can never fire for it.
+                    val rowAt = if (e.has("at")) at else 0L
+                    contentOrderDao.insertIfAbsent(
+                        ContentOrderEntity(mediaType = type, contextKey = ctx, itemId = itemId, position = pos, updatedAt = rowAt),
+                    )
+                    contentOrderDao.bumpIfNewer(type, ctx, itemId, pos, rowAt)
+                }
+                // Custom-category membership is not part of the sync payload any more; this branch
+                // serves only the intra-device re-sync snapshot ([exportForSource] → [relinkAfterSync]).
+                MEMBER_KIND -> customCategoryDao.insertAll(
                     listOf(CustomCategoryMemberEntity(mediaType = type, contextKey = e.getString("ctx"), itemId = itemId, position = e.getInt("pos"))),
                 )
             }
+            Resolution.HANDLED
+        }.getOrDefault(Resolution.PENDING)
+    }
+
+    /**
+     * Applies one `prog` record, per-row LWW on [ReminderEntity.updatedAt]: absent → insert, local
+     * older → replace, local same-or-newer → keep. The identity is (epgChannelId, startMs);
+     * `channelId` is remapped through the guide id, and a record whose channel this device does not
+     * have is skipped for good — it can never resolve here, so it must not sit pending for ever.
+     */
+    private suspend fun resolveAndInsertReminder(e: JSONObject, tombstonesPresent: Boolean): Resolution {
+        val at = e.optLong("at", System.currentTimeMillis())
+        // The same deletion-loses rule as every other kind: an older record behind a newer local
+        // dismissal must not resurrect the reminder (see [applyRecord]).
+        if (tombstonesPresent &&
+            tombstoneDao.deletedAt(e.optString("kind"), canonicalIdentity(e))?.let { it >= at } == true
+        ) {
+            return Resolution.REFUSED
+        }
+        val epg = e.optStringOrNull("epg") ?: return Resolution.HANDLED
+        val startMs = e.optLong("startMs", 0)
+        val dao = db.reminderDao()
+        val existing = dao.getByEpgAndStart(epg, startMs)
+        if (existing != null && existing.updatedAt >= at) return Resolution.HANDLED
+        val channel = channelDao.findByEpgChannelId(epg) ?: return Resolution.HANDLED
+        return runCatching {
+            dao.upsert(
+                ReminderEntity(
+                    channelId = channel.id,
+                    channelName = e.optStringOrNull("name") ?: channel.name,
+                    epgChannelId = epg,
+                    title = e.optStringOrNull("title") ?: channel.name,
+                    startMs = startMs,
+                    stopMs = if (e.has("stopMs")) e.optLong("stopMs") else startMs,
+                    // ReminderSchedule.DEFAULT_LEAD_MINUTES spelled locally so core/backup does not
+                    // import core/reminder for one constant.
+                    leadMinutes = e.optInt("lead", DEFAULT_REMINDER_LEAD_MINUTES),
+                    createdAt = existing?.createdAt ?: at,
+                    updatedAt = at,
+                ),
+            )
             Resolution.HANDLED
         }.getOrDefault(Resolution.PENDING)
     }
@@ -499,9 +673,23 @@ class UserDataResolver(
         /** Records per write transaction in [resolveAllChunked]. */
         private const val RESOLVE_CHUNK = 500
 
-        /** Deletions that travel in a sync payload. Reorder positions are not among them: a position
-         *  is overwritten by the newer one, never "missing", so it needs no marker. */
-        val TOMBSTONE_KINDS = setOf("fav", "his", "member")
+        /** Fallback lead for a `prog` record that carries none — ReminderSchedule's "5 min before". */
+        private const val DEFAULT_REMINDER_LEAD_MINUTES = 5
+
+        /**
+         * Deletions that travel in a sync payload: fav/order/prog. History deletions do not travel
+         * (its rows merge by `watchedAt` and the deletion kind was retired with the sync matrix),
+         * and custom-category membership left the payload entirely. Reorder positions are not
+         * among them: a position is overwritten by the newer one, never "missing", so it needs no
+         * marker — the `order` kind exists for the folder-clears of future writers.
+         */
+        val TOMBSTONE_KINDS = setOf(SyncMatrix.KIND_FAVORITES, SyncMatrix.KIND_ORDER, SyncMatrix.KIND_REMINDERS)
+
+        /** The legacy kind string for custom-category membership rows (intra-device snapshot only). */
+        const val MEMBER_KIND = "member"
+
+        /** The intra-device re-sync snapshot's kinds: the payload's four plus [MEMBER_KIND]. */
+        val SNAPSHOT_KINDS = SyncMatrix.KINDS + MEMBER_KIND
 
         /** Newest deletions kept. "Clear watch history" writes one per row, and a deletion is only
          *  useful until every device has seen it. */

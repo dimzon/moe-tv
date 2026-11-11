@@ -7,7 +7,10 @@ import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import tv.own.owntv.core.database.entity.ReminderEntity
 
-/** Programme reminders. Not synced, not backed up — see [ReminderEntity]. */
+/**
+ * Programme reminders. The sync payload carries them as the `prog` kind (identity
+ * (epgChannelId, startMs), per-row LWW on [ReminderEntity.updatedAt]) — see [ReminderEntity].
+ */
 @Dao
 interface ReminderDao {
 
@@ -19,6 +22,26 @@ interface ReminderDao {
 
     @Query("SELECT * FROM programme_reminders WHERE id = :id")
     suspend fun getById(id: Long): ReminderEntity?
+
+    /**
+     * The sync-identity lookup: one reminder per programme per epg channel. `channelId` is local
+     * and goes stale on a re-sync, so the payload (and the merge) key on `epgChannelId` instead.
+     */
+    @Query(
+        "SELECT * FROM programme_reminders WHERE epgChannelId = :epgChannelId AND startMs = :startMs LIMIT 1",
+    )
+    suspend fun getByEpgAndStart(epgChannelId: String, startMs: Long): ReminderEntity?
+
+    /**
+     * Deletes the reminder only when it is older than [at] — the merge rule for an incoming
+     * deletion (`prog` tombstone). A reminder re-set locally after the other device dismissed it is
+     * newer and survives. Returns the number of rows removed.
+     */
+    @Query(
+        "DELETE FROM programme_reminders WHERE epgChannelId = :epgChannelId AND startMs = :startMs " +
+            "AND updatedAt <= :at",
+    )
+    suspend fun removeIfOlderThan(epgChannelId: String, startMs: Long, at: Long): Int
 
     /** Soonest first — the guide marks these with a bell. */
     @Query("SELECT * FROM programme_reminders ORDER BY startMs ASC")

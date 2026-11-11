@@ -62,9 +62,21 @@
 1	app/src/main/java/tv/own/myowntv/ui/components/TvImeMetrics.kt	requested
 2	app/src/main/java/tv/own/myowntv/ui/theme/MyOwnTVColors.kt	\0
 1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	$mapped:${contextKey.substringAfter(':')}
-1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	Restore done items=$count invalidLocale=$invalidLocale
-1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	encrypted=${crypto != null} key=${key != null}
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	Restore done items=$count
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	kind
 1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	movedFrom
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	sections
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	tombstones
+5	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	at
+4	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	dev
+8	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	epg
+2	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	kind
+2	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	lead
+2	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	name
+9	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	startMs
+3	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	stopMs
+4	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	t
+2	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	title
 1	app/src/main/java/tv/own/owntv/core/companion/CompanionHtml.kt	:root{ color-scheme: dark; --bg:#040E0B; --panel:#12191700; --card:#1B211F; --card-2:#252B29; --line:#3F4945; --text:#DEE4E1; --muted:#BFC9C4; --accent:#8CEE2B; --accent-ink:#123A06; --danger:#FFB4AB; } @font-face{ font-family:'Lora'; font-style:normal; font-weight:400 700; src:url('/lora.ttf') format('truetype'); font-display:swap; } *{box-sizing:border-box} body{ margin:0; color:var(--text); font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; background: radial-gradient(1200px 520px at 12% -12%, rgba(140,238,43,0.10) 0%, transparent 60%), radial-gradient(900px 460px at 100% 0%, rgba(140,238,43,0.06) 0%, transparent 62%), var(--bg); min-height:100vh; } h1,h2,.brand{font-family:'Lora',Georgia,'Noto Sans',system-ui,sans-serif; font-weight:700; letter-spacing:.2px} main{max-width:760px; margin:0 auto; padding:28px 20px 56px} .brandrow{display:flex; align-items:center; gap:12px; margin-bottom:22px} .dot{width:34px; height:34px; border-radius:10px; background:#52DBC8; display:grid; place-items:center; color:#003730} .dot svg{width:18px; height:18px} .brand{font-size:20px; color:var(--text)} .card{background:var(--card); border:1px solid var(--line); border-radius:20px; padding:26px 22px; box-shadow:0 24px 60px rgba(0,0,0,.45)} h1{margin:0 0 8px; font-size:24px} p{line-height:1.55; color:var(--muted); margin:0 0 16px} form{display:grid; gap:14px} label{display:grid; gap:6px; font-size:14px; color:var(--text)} input,select{border:1px solid var(--line); border-radius:12px; padding:13px 14px; background:#0C1311; color:var(--text); font-size:16px; width:100%} input:focus,select:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(140,238,43,.20)} button.go{border:0; border-radius:12px; padding:15px 16px; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:16px; cursor:pointer; margin-top:4px} .pin{font-family:'Lora',Georgia,'Noto Sans',system-ui,sans-serif; font-size:34px; letter-spacing:12px; text-align:center; padding:16px; caret-color:var(--accent)} .err{color:var(--danger); font-size:14px; margin:0 0 12px} .hint{font-size:13px; color:var(--muted); margin-top:6px} a{color:var(--accent)}
 1	app/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	${CustomizeKeys.CUSTOM_PREFIX}${UUID.randomUUID()}
 1	app/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	cust_${type.name}
@@ -82,10 +94,12 @@
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	^$wrapped(?![\\p{L}\\p{N}])
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	^(?:\\|?[A-Za-z]{2,4}\\s*\\||\\[[A-Za-z]{2,4}]|\\([A-Za-z]{2,4}\\))
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	{2,}
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	AND LOWER(TRIM(epgChannelId)) = LOWER(TRIM(:epgChannelId)) LIMIT 1
 4	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	LEFT JOIN content_order o ON o.itemId = c.id AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY LOWER(c.name) ASC, c.id ASC
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY f.addedAt DESC
 2	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY h.watchedAt DESC LIMIT :limit
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE epgChannelId IS NOT NULL AND epgChannelId != ''
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM favorites f INNER JOIN channels c ON c.id = f.itemId
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM watch_history h INNER JOIN channels c ON c.id = h.itemId
 3	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.sourceId IN (:sourceIds)
@@ -97,17 +111,24 @@
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE h.mediaType = 'LIVE' AND c.sourceId IN (:sourceIds)
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE h.mediaType = 'LIVE' AND c.sourceId IN (:sourceIds) AND (c.categoryId IS NULL OR c.categoryId NOT IN (:excluded))
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	AND itemId NOT IN (SELECT id FROM channels)
+1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	AND updatedAt <= :at
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	DELETE FROM content_order
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	DELETE FROM content_order WHERE mediaType = :type AND contextKey = :contextKey
+1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	DELETE FROM content_order WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	DELETE FROM content_order WHERE mediaType = :type AND itemId IN (:itemIds)
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	JOIN channels c ON o.mediaType = 'LIVE' AND o.itemId = c.id
+1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	LIMIT 1
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	SELECT DISTINCT contextKey FROM content_order WHERE mediaType = :type
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	SELECT EXISTS(SELECT 1 FROM content_order WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId)
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	SELECT itemId FROM content_order WHERE mediaType = :type AND contextKey = :contextKey
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	SELECT o.mediaType AS mediaType, o.itemId AS itemId,
+1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	SELECT updatedAt FROM content_order WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId
+1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	UPDATE content_order SET position = :position, updatedAt = :updatedAt
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	WHERE c.sourceId = :sourceId
+1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId AND updatedAt < :updatedAt
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	c.sourceId AS sourceId, c.remoteId AS remoteId, c.name AS name
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	mediaType = 'LIVE' AND itemId NOT IN (SELECT id FROM channels)
+1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	o.contextKey AS contextKey, o.position AS position, o.updatedAt AS updatedAt,
 1	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	AND (c.categoryId IS NULL OR c.categoryId NOT IN (:excluded))
 1	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	AND (categoryId IS NULL OR categoryId NOT IN (:excluded)))
 2	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	AND c.sourceId IN (:sourceIds)
@@ -154,6 +175,7 @@
 1	app/src/main/java/tv/own/owntv/core/database/dao/FavoriteDao.kt	SELECT addedAt FROM favorites WHERE mediaType = :type AND itemId = :itemId
 1	app/src/main/java/tv/own/owntv/core/database/dao/FavoriteDao.kt	SELECT f.mediaType AS mediaType, f.itemId AS itemId,
 1	app/src/main/java/tv/own/owntv/core/database/dao/FavoriteDao.kt	SELECT itemId FROM favorites WHERE mediaType = :type
+1	app/src/main/java/tv/own/owntv/core/database/dao/FavoriteDao.kt	UPDATE favorites SET addedAt = :at WHERE mediaType = :type AND itemId = :itemId AND addedAt < :at
 1	app/src/main/java/tv/own/owntv/core/database/dao/FavoriteDao.kt	WHERE c.sourceId = :sourceId
 1	app/src/main/java/tv/own/owntv/core/database/dao/FavoriteDao.kt	c.sourceId AS sourceId, c.remoteId AS remoteId, c.name AS name,
 1	app/src/main/java/tv/own/owntv/core/database/dao/FavoriteDao.kt	f.addedAt AS at
@@ -173,15 +195,19 @@
 1	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	SELECT EXISTS(SELECT 1 FROM watch_history WHERE mediaType = :type AND itemId = :itemId)
 1	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	SELECT h.mediaType AS mediaType, h.itemId AS itemId,
 1	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	SELECT watchedAt FROM watch_history WHERE mediaType = :type AND itemId = :itemId
+1	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	UPDATE watch_history SET watchedAt = :at, deviceId = :deviceId
 1	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	WHERE c.sourceId = :sourceId
 1	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	WHERE mediaType = :type AND itemId = :itemId AND watchedAt < :at
 1	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	c.sourceId AS sourceId, c.remoteId AS remoteId, c.name AS name,
-1	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	h.watchedAt AS at
+1	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	h.watchedAt AS at, h.deviceId AS deviceId
 1	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	mediaType != 'LIVE' OR itemId NOT IN (SELECT id FROM channels))
 1	app/src/main/java/tv/own/owntv/core/database/dao/PlaybackPrefsDao.kt	DELETE FROM playback_prefs WHERE zoomMode IS NULL AND volumeBoost IS NULL AND audioDelayMs IS NULL
 1	app/src/main/java/tv/own/owntv/core/database/dao/PlaybackPrefsDao.kt	SELECT * FROM playback_prefs WHERE contentKey = :contentKey LIMIT 1
 1	app/src/main/java/tv/own/owntv/core/database/dao/PlaybackPrefsDao.kt	UPDATE playback_prefs SET audioDelayMs = NULL
 1	app/src/main/java/tv/own/owntv/core/database/dao/PlaybackQuirkDao.kt	DELETE FROM playback_quirks WHERE audioOnly IS NULL AND audioDelayMs IS NULL
+1	app/src/main/java/tv/own/owntv/core/database/dao/ReminderDao.kt	AND updatedAt <= :at
+1	app/src/main/java/tv/own/owntv/core/database/dao/ReminderDao.kt	DELETE FROM programme_reminders WHERE epgChannelId = :epgChannelId AND startMs = :startMs
+1	app/src/main/java/tv/own/owntv/core/database/dao/ReminderDao.kt	SELECT * FROM programme_reminders WHERE epgChannelId = :epgChannelId AND startMs = :startMs LIMIT 1
 1	app/src/main/java/tv/own/owntv/core/database/dao/SourceDao.kt	UPDATE sources SET liveLatencyMode = :mode, liveLatencyCustomSecs = :customSecs WHERE id = :id
 1	app/src/main/java/tv/own/owntv/core/database/dao/TombstoneDao.kt	DELETE FROM user_data_tombstones
 1	app/src/main/java/tv/own/owntv/core/database/dao/TombstoneDao.kt	INSERT INTO user_data_tombstones (kind, identity, deletedAt) VALUES (:kind, :identity, :deletedAt)
@@ -191,9 +217,11 @@
 1	app/src/main/java/tv/own/owntv/core/database/dao/TvProviderProgramDao.kt	DELETE FROM tv_provider_programs WHERE surface = :surface AND mediaType = :mediaType AND groupId = :groupId
 1	app/src/main/java/tv/own/owntv/core/database/dao/TvProviderProgramDao.kt	SELECT * FROM tv_provider_programs ORDER BY surface ASC, lastPublishedAt DESC
 2	app/src/main/java/tv/own/owntv/core/database/dao/TvProviderProgramDao.kt	SELECT * FROM tv_provider_programs WHERE surface = :surface
+1	app/src/main/java/tv/own/owntv/core/database/entity/ReminderEntity.kt	0
 2	app/src/main/java/tv/own/owntv/core/database/entity/SourceEntities.kt	0
 1	app/src/main/java/tv/own/owntv/core/database/entity/SourceEntities.kt	sources
 1	app/src/main/java/tv/own/owntv/core/database/entity/SourceEntities.kt	type
+1	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	0
 2	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	contextKey
 1	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	custom_category_members
 1	app/src/main/java/tv/own/owntv/core/live/ChannelFacets.kt	\0
@@ -302,6 +330,14 @@
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_color
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_position
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_style_enabled
+1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sync_give_favorites
+1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sync_give_history
+1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sync_give_order
+1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sync_give_reminders
+1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sync_read_favorites
+1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sync_read_history
+1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sync_read_order
+1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sync_read_reminders
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	\0
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	#
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	bottom_center
@@ -311,6 +347,10 @@
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	top_center
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	top_left
 1	app/src/main/java/tv/own/owntv/core/settings/SubtitleStyle.kt	top_right
+1	app/src/main/java/tv/own/owntv/core/settings/SyncMatrix.kt	fav
+1	app/src/main/java/tv/own/owntv/core/settings/SyncMatrix.kt	his
+1	app/src/main/java/tv/own/owntv/core/settings/SyncMatrix.kt	order
+1	app/src/main/java/tv/own/owntv/core/settings/SyncMatrix.kt	prog
 1	app/src/main/java/tv/own/owntv/core/stalker/StreamUrlResolver.kt	\0
 1	app/src/main/java/tv/own/owntv/core/stalker/StreamUrlResolver.kt	($it)
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	alias
@@ -348,6 +388,12 @@
 1	app/src/main/java/tv/own/owntv/core/sync/SyncManager.kt	RuTube provider not wired
 1	app/src/main/java/tv/own/owntv/core/sync/SyncManager.kt	RuTube sync requested without a RutubeApi
 1	app/src/main/java/tv/own/owntv/core/sync/SyncManager.kt	live
+2	app/src/main/java/tv/own/owntv/core/sync/local/DeviceIdentity.kt	\0
+1	app/src/main/java/tv/own/owntv/core/sync/local/DeviceIdentity.kt	${Build.MANUFACTURER} ${Build.MODEL}
+1	app/src/main/java/tv/own/owntv/core/sync/local/DeviceIdentity.kt	%02x
+1	app/src/main/java/tv/own/owntv/core/sync/local/DeviceIdentity.kt	SHA-256
+2	app/src/main/java/tv/own/owntv/core/sync/local/DeviceIdentity.kt	id
+2	app/src/main/java/tv/own/owntv/core/sync/local/DeviceIdentity.kt	name
 1	app/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	EPG sync failed sourceId=${source.id} reason=$reason message=$rawMessage
 1	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})
 1	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	--- live diagnostics leading up to the crash ---

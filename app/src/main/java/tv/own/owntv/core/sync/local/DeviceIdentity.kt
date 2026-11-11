@@ -1,4 +1,4 @@
-package tv.own.owntv.core.backup
+package tv.own.owntv.core.sync.local
 
 import android.content.Context
 import android.os.Build

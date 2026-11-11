@@ -1,6 +1,7 @@
 package tv.own.owntv.core.backup
 
 import org.json.JSONObject
+import tv.own.owntv.core.sync.local.DeviceIdentity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals

@@ -937,7 +937,6 @@
 1	json	app/src/main/java/tv/own/owntv/core/backup/BackupCrypto.kt	kdf
 2	json	app/src/main/java/tv/own/owntv/core/backup/BackupCrypto.kt	salt
 1	json	app/src/main/java/tv/own/owntv/core/backup/BackupCrypto.kt	scheme
-1	empty	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	\0
 1	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	$mapped:${k.substringAfter(':')}
 1	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	$mapped:${key.substringAfter(':')}
 1	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	${file.name} · ${sections.joinToString(", ") { it.name }}
@@ -949,73 +948,40 @@
 1	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	.tmp
 1	log	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	Backup unreadable: ${primary.exceptionOrNull()?.javaClass?.simpleName}
 1	log	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	BackupManager
-2	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	LIVE
 1	log	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	Restore start file=${file.name} sections=${sections.joinToString(",") { it.name }}
-1	log	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	Wallpaper restore failed: ${it.message}
-2	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	a
-2	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	al
-1	file-path	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	background_${System.currentTimeMillis()}.$ext
 1	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	backup_finalize_failed
 1	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	backup_invalid
-3	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	crypto
-4	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	ctx
-1	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	cust_
-4	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	customizations
-5	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	d
-4	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	device
-3	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	fav
-3	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	his
+1	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	crypto
+1	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	ctx
+2	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	device
 1	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	json
-4	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	k
 5	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	kind
-3	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	member
-4	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	order
 1	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	own
 1	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	owntv-backup.json
 1	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	owntv-backup.own
-2	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	playbackPrefs
-2	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	playbackQuirks
-1	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	png
-4	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	proxy_pass_enc
 1	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	sections
-6	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	settings
-3	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	sl
-2	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	src
-2	technical	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	t
 3	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	tombstones
 4	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	userData
-3	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	v
 3	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	version
-1	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	wallpaper
-2	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	z
-2	empty	app/src/main/java/tv/own/owntv/core/backup/DeviceIdentity.kt	\0
-1	technical	app/src/main/java/tv/own/owntv/core/backup/DeviceIdentity.kt	${Build.MANUFACTURER} ${Build.MODEL}
-1	technical	app/src/main/java/tv/own/owntv/core/backup/DeviceIdentity.kt	%02x
-1	technical	app/src/main/java/tv/own/owntv/core/backup/DeviceIdentity.kt	SHA-256
-2	json	app/src/main/java/tv/own/owntv/core/backup/DeviceIdentity.kt	id
-2	json	app/src/main/java/tv/own/owntv/core/backup/DeviceIdentity.kt	name
 8	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	at
-12	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	ctx
+11	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	ctx
 1	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	entries
 3	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	ep
-12	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	fav
-12	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	his
+1	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	fav
+1	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	his
 13	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	kind
-13	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	member
+3	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	member
 7	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	name
 5	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	oid
-10	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	order
+2	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	order
 1	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	owntv_pending_userdata
-6	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	pos
+5	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	pos
 7	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	rid
 3	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	season
 2	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	sname
 7	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	src
 2	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	srid
 11	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	t
-1	json	app/src/main/java/tv/own/owntv/core/backup/UserDataWriter.kt	fav
-2	json	app/src/main/java/tv/own/owntv/core/backup/UserDataWriter.kt	his
-1	json	app/src/main/java/tv/own/owntv/core/backup/UserDataWriter.kt	member
 1	empty	app/src/main/java/tv/own/owntv/core/brand/AppIcon.kt	\0
 1	technical	app/src/main/java/tv/own/owntv/core/brand/AppIcon.kt	Board
 1	technical	app/src/main/java/tv/own/owntv/core/brand/AppIcon.kt	Cobalt
@@ -1336,7 +1302,6 @@
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	DELETE FROM content_order WHERE contextKey != :keep
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	FROM content_order o
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	SELECT * FROM content_order
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	o.contextKey AS contextKey, o.position AS position,
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	ORDER BY m.position, c.sortOrder, c.name
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	SELECT COUNT(*) FROM custom_category_members m
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	SELECT c.* FROM channels c
@@ -1385,7 +1350,6 @@
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/FavoriteDao.kt	SELECT * FROM favorites
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	FROM watch_history h
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	SELECT * FROM watch_history
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	UPDATE watch_history SET watchedAt = :at
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/PlaybackPrefsDao.kt	AND audioLang IS NULL AND subtitleLang IS NULL
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/PlaybackPrefsDao.kt	DELETE FROM playback_prefs WHERE sourceId = :sourceId
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/PlaybackPrefsDao.kt	SELECT * FROM playback_prefs
@@ -1469,7 +1433,6 @@
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	watch_history
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	watchedAt
 2	technical	app/src/main/java/tv/own/owntv/core/di/DataModule.kt	User-Agent
-1	file-path	app/src/main/java/tv/own/owntv/core/di/DataModule.kt	backgrounds
 2	technical	app/src/main/java/tv/own/owntv/core/di/DataModule.kt	rutube
 2	technical	app/src/main/java/tv/own/owntv/core/di/DataModule.kt	rutubeOkHttp
 3	empty	app/src/main/java/tv/own/owntv/core/di/DatabaseModule.kt	\0
@@ -2342,7 +2305,6 @@
 1	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncClient.kt	items
 1	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncClient.kt	name
 1	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncClient.kt	reason
-1	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncClient.kt	sections
 1	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncClient.kt	{"type":"turned-off"}
 1	log	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncRunner.kt	LocalAutoSync
 1	log	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncRunner.kt	auto-sync ($reason): ${due.size} due
@@ -2375,7 +2337,6 @@
 1	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncServer.kt	ok
 1	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncServer.kt	port
 5	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncServer.kt	reason
-1	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncServer.kt	sections
 1	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncServer.kt	too-large
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncStore.kt	$AGREEMENT_PREFIX$id
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncStore.kt	$NOTICE_PREFIX$id
@@ -2388,8 +2349,6 @@
 2	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncStore.kt	lastSuccessAt
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncStore.kt	notice:
 1	technical	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncStore.kt	owntv_local_auto_sync
-2	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncStore.kt	sections
-2	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncStore.kt	theirSections
 2	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncStore.kt	timing
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/local/LocalAutoSyncStore.kt	turned_off:
 1	protocol	app/src/main/java/tv/own/owntv/core/sync/local/LocalSyncClient.kt	/backup
@@ -2443,7 +2402,6 @@
 1	protocol	app/src/main/java/tv/own/owntv/core/sync/local/LocalSyncManager.kt	name
 2	file-path	app/src/main/java/tv/own/owntv/core/sync/local/LocalSyncManager.kt	outgoing
 1	protocol	app/src/main/java/tv/own/owntv/core/sync/local/LocalSyncManager.kt	payload
-4	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalSyncManager.kt	sections
 1	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalSyncManager.kt	session
 2	json	app/src/main/java/tv/own/owntv/core/sync/local/LocalSyncManager.kt	timing
 1	empty	app/src/main/java/tv/own/owntv/core/sync/local/PairedDeviceStore.kt	\0

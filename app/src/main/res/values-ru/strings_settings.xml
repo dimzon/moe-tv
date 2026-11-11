@@ -828,6 +828,7 @@
     <string name="settings_backup_section_resume">Позиции продолжения просмотра</string>
     <string name="settings_backup_section_resume_desc">Места остановки в фильмах и сериях</string>
     <string name="settings_backup_section_reorder">Ручное изменение порядка</string>
+    <string name="settings_backup_section_reminders">Напоминания</string>
     <string name="settings_backup_section_reorder_desc">Заданный вами с помощью перемещения вверх и вниз порядок каналов, фильмов и сериалов</string>
     <string name="settings_backup_section_settings">Настройки приложения</string>
     <string name="settings_backup_section_settings_desc">Настройки темы, акцентного цвета, плеера и компоновки</string>
@@ -1201,6 +1202,15 @@
     <string name="local_sync_change_deletions">Элементы к удалению: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_change_customize">Ваши настройки оформления тоже переносятся</string>
     <string name="local_sync_apply">Применить</string>
+    <string name="sync_matrix_title">Синхронизация между телевизорами</string>
+    <string name="sync_matrix_hint">Выберите, что этот телевизор отдаёт и что принимает. Свежие локальные изменения не перезаписываются более старыми с других устройств.</string>
+    <string name="sync_matrix_give">Отдавать</string>
+    <string name="sync_matrix_read">Читать</string>
+    <string name="sync_category_favorites">Закладки</string>
+    <string name="sync_category_order">Порядок каналов</string>
+    <string name="sync_category_history">История</string>
+    <string name="sync_category_reminders">Напоминания</string>
+    <string name="local_sync_change_reminders">Новые напоминания: %1$d</string>
     <string name="local_sync_done">Синхронизация завершена</string>
     <string name="local_sync_received_items">Полученные элементы: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_sent">Ваши данные отправлены</string>

@@ -73,11 +73,11 @@ class LocalAutoSyncRunner(
             val incoming = transfer.incomingFile()
             try {
                 client.export(at.address, at.port, selfId, device.secret, incoming)
-                received = transfer.importFrom(agreement, incoming, device.secret)
+                received = transfer.importFrom(incoming, device.secret)
             } finally {
                 incoming.delete()
             }
-            val outgoing = transfer.exportFor(agreement, device.secret)
+            val outgoing = transfer.exportFor(device.secret)
             try {
                 client.import(at.address, at.port, selfId, device.secret, outgoing)
             } finally {
@@ -124,7 +124,6 @@ class LocalAutoSyncRunner(
         val hello = client.hello(address, port, selfId, device.secret)
         if (hello.deviceId != device.id) null
         else {
-            store.saveTheirSections(device.id, hello.sections)
             Reached(address, port)
         }
     } catch (e: IOException) {

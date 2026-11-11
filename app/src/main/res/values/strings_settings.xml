@@ -1649,6 +1649,7 @@
     <string name="settings_backup_section_resume_desc">Where you stopped in movies &amp; episodes</string>
     <!-- Translators: Backup content section: Manual reorder. -->
     <string name="settings_backup_section_reorder">Manual reorder</string>
+    <string name="settings_backup_section_reminders">Reminders</string>
     <!-- Translators: Description of the Manual reorder backup section. -->
     <string name="settings_backup_section_reorder_desc">Your Move up/down positions for channels, movies and series</string>
     <!-- Translators: Backup content section: App settings. -->
@@ -2193,6 +2194,15 @@
     <string name="local_sync_change_customize">Your customizations come across too</string>
     <!-- Translators: Button that applies the sync after the user has seen what will change. -->
     <string name="local_sync_apply">Apply</string>
+    <string name="sync_matrix_title">Sync between your TVs</string>
+    <string name="sync_matrix_hint">Pick what this TV shares and what it adopts. Fresh local changes are never overwritten by older ones from another device.</string>
+    <string name="sync_matrix_give">Give</string>
+    <string name="sync_matrix_read">Read</string>
+    <string name="sync_category_favorites">Favorites</string>
+    <string name="sync_category_order">Channel order</string>
+    <string name="sync_category_history">History</string>
+    <string name="sync_category_reminders">Reminders</string>
+    <string name="local_sync_change_reminders">New reminders: %1$d</string>
     <!-- Translators: Title of the sheet shown when a sync has finished. -->
     <string name="local_sync_done">Sync finished</string>
     <!-- Translators: Result line: how many items arrived. %1$d is a number. -->

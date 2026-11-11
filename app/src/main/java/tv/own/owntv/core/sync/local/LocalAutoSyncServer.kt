@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
-import org.json.JSONArray
 import org.json.JSONObject
 import tv.own.owntv.core.companion.CompanionHttpProtocol
 
@@ -188,11 +187,10 @@ class LocalAutoSyncServer(
                 JSONObject()
                     .put("device", paired.selfId())
                     .put("name", deviceName())
-                    .put("port", AUTO_SYNC_PORT)
-                    .put("sections", JSONArray(agreement!!.sections.map { it.name })),
+                    .put("port", AUTO_SYNC_PORT),
             )
             Route.EXPORT -> withLock(socket, device.id) {
-                val file = transfer.exportFor(agreement!!, device.secret)
+                val file = transfer.exportFor(device.secret)
                 try {
                     sendBytes(socket, 200, "application/octet-stream", file.readBytes())
                 } finally {
@@ -203,7 +201,7 @@ class LocalAutoSyncServer(
                 val file = transfer.incomingFile()
                 try {
                     file.writeBytes(body)
-                    val items = transfer.importFrom(agreement!!, file, device.secret)
+                    val items = transfer.importFrom(file, device.secret)
                     // The other device completes its pass with this: it counts as one here too.
                     store.recordAttempt(device.id, clock(), success = true)
                     send(socket, 200, JSONObject().put("items", items))

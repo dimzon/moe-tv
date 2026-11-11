@@ -12,9 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import org.json.JSONArray
 import org.json.JSONObject
-import tv.own.owntv.core.backup.BackupManager
 
 private val Context.localAutoSyncStore: DataStore<Preferences> by preferencesDataStore(name = "owntv_local_auto_sync")
 
@@ -43,32 +41,20 @@ class LocalAutoSyncStore internal constructor(
     suspend fun get(deviceId: String): AutoSyncAgreement? = current()[deviceId]
 
     /**
-     * Writes the terms of [deviceId]'s agreement — what this side syncs, how often, and the other
-     * side's sections as it last said them. The record of past tries is kept.
+     * Writes the terms of [deviceId]'s agreement — how often it runs. Since phase ③ the agreement
+     * carries no section set: what travels is this device's own sync matrix. The record of past tries
+     * is kept.
      */
     suspend fun saveTerms(
         deviceId: String,
-        sections: Set<BackupManager.Section>,
         timing: LocalAutoSyncTiming,
-        theirSections: Set<BackupManager.Section>? = null,
     ) {
         store.edit { prefs ->
             val before = prefs[agreementKey(deviceId)]?.let(::decode) ?: AutoSyncAgreement(deviceId)
-            prefs[agreementKey(deviceId)] = encode(
-                before.copy(
-                    sections = sections,
-                    timing = timing,
-                    theirSections = theirSections ?: before.theirSections,
-                ),
-            )
+            prefs[agreementKey(deviceId)] = encode(before.copy(timing = timing))
             prefs.remove(turnedOffKey(deviceId))
             prefs.remove(noticeKey(deviceId))
         }
-    }
-
-    /** The other side's sections, as its last answer said them. */
-    suspend fun saveTheirSections(deviceId: String, sections: Set<BackupManager.Section>) {
-        update(deviceId) { it.copy(theirSections = sections) }
     }
 
     /** One try with [deviceId]: only a success moves the last success; a failure counts toward the backoff. */
@@ -154,30 +140,23 @@ class LocalAutoSyncStore internal constructor(
 
         fun encode(a: AutoSyncAgreement): String = JSONObject()
             .put("device", a.deviceId)
-            .put("sections", JSONArray(a.sections.map { it.name }))
             .put("timing", a.timing.name)
-            .put("theirSections", JSONArray(a.theirSections.map { it.name }))
             .put("lastAttemptAt", a.lastAttemptAt)
             .put("lastSuccessAt", a.lastSuccessAt)
             .put("failures", a.failures)
             .toString()
 
-        /** A record back; a field this build does not know reads as its default rather than dropping the agreement. */
+        /** A record back; a field this build does not know (an old "sections"/"theirSections" left
+         *  by a pre-phase-③ build) is simply ignored rather than dropping the agreement. */
         fun decode(raw: String): AutoSyncAgreement? = runCatching {
             val o = JSONObject(raw)
             AutoSyncAgreement(
                 deviceId = o.getString("device"),
-                sections = sections(o.optJSONArray("sections")) ?: AutoSyncAgreement.DEFAULT_SECTIONS,
                 timing = LocalAutoSyncTiming.parse(o.optString("timing")),
-                theirSections = sections(o.optJSONArray("theirSections")).orEmpty(),
                 lastAttemptAt = o.optLong("lastAttemptAt"),
                 lastSuccessAt = o.optLong("lastSuccessAt"),
                 failures = o.optInt("failures"),
             )
         }.getOrNull()
-
-        fun sections(a: JSONArray?): Set<BackupManager.Section>? = a?.let {
-            (0 until it.length()).mapNotNullTo(HashSet()) { i -> BackupManager.Section.entries.firstOrNull { s -> s.name == it.optString(i) } }
-        }
     }
 }

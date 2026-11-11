@@ -61,8 +61,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.R
-import tv.own.owntv.core.backup.BackupManager
-import tv.own.owntv.core.sync.local.AutoSyncAgreement
 import tv.own.owntv.core.sync.local.LocalAutoSyncTiming
 import tv.own.owntv.core.sync.local.PairedDevice
 import tv.own.myowntv.ui.components.restoreAfterDialogClose
@@ -78,12 +76,13 @@ import tv.own.myowntv.ui.theme.mpx
 import tv.own.myowntv.ui.theme.stageText
 
 /**
- * One paired device's auto-sync: the switch, what this device lets travel, and how often.
+ * One paired device's auto-sync: the switch and how often.
  *
- * Turning the switch on asks the other device (its Local sync page open), whose screen shows the
- * question; this side's terms are written only on its yes, with the choices below as they are then —
- * so they can be set first. Turning it off is local and immediate, and the other device is told.
- * Once on, the choices are a draft until Save.
+ * Since phase ③ the agreement carries no section set — what travels is this device's own sync matrix,
+ * ticked on the main sync screen. So this sheet is only the on/off and the schedule. Turning it on
+ * asks the other device (its Local sync page open), whose screen shows the question; this side's
+ * terms are written only on its yes. Turning it off is local and immediate, and the other device is
+ * told. Once on, the schedule is a draft until Save.
  */
 @Composable
 fun LocalAutoSyncSheet(device: PairedDevice, onDismiss: () -> Unit) {
@@ -93,12 +92,9 @@ fun LocalAutoSyncSheet(device: PairedDevice, onDismiss: () -> Unit) {
     val agreement = agreements[device.id]
     val enabled = agreement != null
     var timing by remember(device.id) { mutableStateOf<LocalAutoSyncTiming?>(null) }
-    var sections by remember(device.id) { mutableStateOf<Set<BackupManager.Section>?>(null) }
     val asking = enableState is LocalAutoSyncViewModel.EnableState.Asking
 
     val chosenTiming = timing ?: agreement?.timing ?: LocalAutoSyncTiming.DEFAULT
-    val chosenSections = sections ?: agreement?.sections ?: AutoSyncAgreement.DEFAULT_SECTIONS
-    val choicesValid = chosenSections.isNotEmpty()
 
     val panel = remember { FocusRequester() }
     LaunchedEffect(Unit) { restoreAfterDialogClose(panel) }
@@ -117,10 +113,10 @@ fun LocalAutoSyncSheet(device: PairedDevice, onDismiss: () -> Unit) {
             StagePopupButton(
                 stringResource(R.string.common_save),
                 onClick = {
-                    vm.save(device.id, chosenSections, chosenTiming)
+                    vm.save(device.id, chosenTiming)
                     onDismiss()
                 },
-                enabled = enabled && !asking && choicesValid,
+                enabled = enabled && !asking,
             )
         },
     ) {
@@ -133,37 +129,15 @@ fun LocalAutoSyncSheet(device: PairedDevice, onDismiss: () -> Unit) {
                     else -> stringResource(R.string.local_auto_sync_enable_hint)
                 },
                 onClick = {
-                    if (enabled) vm.disable(device.id) else vm.enable(device, chosenSections, chosenTiming)
+                    if (enabled) vm.disable(device.id) else vm.enable(device, chosenTiming)
                 },
-                enabled = !asking && (enabled || choicesValid),
+                enabled = !asking,
                 leading = { focused -> StagePopupCheck(enabled, focused) },
             )
             when (val state = enableState) {
                 is LocalAutoSyncViewModel.EnableState.Declined -> StatusText(stringResource(R.string.local_auto_sync_declined, state.deviceName), danger = true)
                 is LocalAutoSyncViewModel.EnableState.Failed -> StatusText(stringResource(state.reason.messageRes()), danger = true)
                 else -> Unit
-            }
-            // The two devices trade the sections chosen here; the app has one viewer, so
-            // an agreement pairs the two devices outright.
-            agreement?.theirSections?.takeIf { it.isNotEmpty() }?.let { theirs ->
-                StatusText(
-                    stringResource(
-                        R.string.local_auto_sync_their_sections,
-                        device.name,
-                        BackupManager.Section.entries.filter { it in theirs }.map { stringResource(it.labelRes()) }
-                            .joinToString(stringResource(R.string.content_epg_bits_separator)),
-                    ),
-                )
-            }
-            StagePopupDivider()
-            StagePopupLabel(stringResource(R.string.local_auto_sync_what_to_sync).uppercase(locale))
-            BackupManager.Section.entries.forEach { section ->
-                StagePopupOption(
-                    title = stringResource(section.labelRes()),
-                    onClick = { sections = if (section in chosenSections) chosenSections - section else chosenSections + section },
-                    enabled = !asking,
-                    leading = { focused -> StagePopupCheck(section in chosenSections, focused) },
-                )
             }
             StagePopupDivider()
             StagePopupLabel(stringResource(R.string.local_auto_sync_when).uppercase(locale))

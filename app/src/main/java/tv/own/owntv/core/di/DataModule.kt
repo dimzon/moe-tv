@@ -132,6 +132,7 @@ val dataModule = module {
             discovery = get(),
             autoSync = get(),
             autoServer = get(),
+            settings = get(),
         )
     }
     // Automatic sync with paired devices: its agreements, the paired-only listener on its own port,
@@ -140,7 +141,7 @@ val dataModule = module {
     single { tv.own.owntv.core.sync.local.LocalAutoSyncStore(androidContext(), get()) }
     single { tv.own.owntv.core.sync.local.AutoSyncLocks() }
     single { tv.own.owntv.core.sync.local.LocalAutoSyncClient() }
-    single { tv.own.owntv.core.sync.local.AutoSyncTransfer(get()) { androidContext().cacheDir } }
+    single { tv.own.owntv.core.sync.local.AutoSyncTransfer(get(), get()) { androidContext().cacheDir } }
     single {
         tv.own.owntv.core.sync.local.LocalAutoSyncServer(
             store = get(),
@@ -174,9 +175,10 @@ val dataModule = module {
     // context, channelDao, favoriteDao, historyDao, contentOrderDao, customCategoryDao,
     // tombstoneDao, db
     single { UserDataResolver(androidContext(), get(), get(), get(), get(), get(), get(), get()) }
-    // The one place a user deletion is written: it records the tombstone local sync needs and does
-    // the delete in the same transaction. db, favoriteDao, historyDao, customCategoryDao, userData
-    single { tv.own.owntv.core.backup.UserDataWriter(get(), get(), get(), get(), get()) }
+    // The one place a user deletion is written: it records the tombstone local sync needs (gated by
+    // the sync matrix's "give" flags) and does the delete in the same transaction.
+    // db, favoriteDao, historyDao, customCategoryDao, userData, settings
+    single { tv.own.owntv.core.backup.UserDataWriter(get(), get(), get(), get(), get(), get()) }
     // sourceDao, syncManager, userDataResolver, channelDao, categoryDao, playbackQuirkDao, playbackPrefsDao
     single { SourceRepository(get(), get(), get(), get(), get(), playbackQuirkDao = get(), playbackPrefsDao = get()) }
     // settings, sourceRepository, channelDao
@@ -220,13 +222,12 @@ val dataModule = module {
     // re-arms, whether or not BOOT_COMPLETED arrived.
     single { tv.own.owntv.core.reminder.ReminderScheduler(androidContext(), get()) }
     single(createdAtStart = true) { tv.own.owntv.core.reminder.ReminderManager(get(), get()) }
-    // sourceDao, settings, customizationStore, userDataResolver,
-    // db, backgroundsDir (the folder ingestBackgroundImage writes to — the .own container carries the
-    // wallpaper). Sources are not backed up any more: the one RuTube row is recreated on demand.
+    // settings, userDataResolver — the four-section backup container (favorites / history / manual
+    // reorder / reminders). The customizations, the settings block and the wallpaper left the
+    // payload with the sync matrix; sources are not backed up: the one RuTube row is recreated on demand.
     single {
         BackupManager(
-            get(), get(), get(), get(), get(),
-            java.io.File(androidContext().filesDir, "backgrounds"),
+            get(), get(),
         )
     }
     // context, okHttpClient, settings — in-app updates from GitHub Releases

@@ -7,7 +7,6 @@ import java.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import tv.own.owntv.core.backup.BackupManager
 
 /** The other device refused, with [code] and the reason it gave (see [AutoSyncRefusal]). */
 class AutoSyncHttpException(val code: Int, val reason: String?) : Exception("HTTP $code $reason")
@@ -19,12 +18,13 @@ class AutoSyncHttpException(val code: Int, val reason: String?) : Exception("HTT
  */
 class LocalAutoSyncClient(private val clock: () -> Long = System::currentTimeMillis) {
 
-    /** Who answered at that address, and what it lets travel. */
-    data class Hello(val deviceId: String, val name: String, val sections: Set<BackupManager.Section>)
+    /** Who answered at that address. Since phase ③ a hello carries no section set — what travels is
+     *  each device's own sync matrix, applied on its own side of the pass. */
+    data class Hello(val deviceId: String, val name: String)
 
     suspend fun hello(address: String, port: Int, selfId: String, secret: String): Hello = withContext(Dispatchers.IO) {
         val json = JSONObject(request("GET", address, port, PATH_HELLO, selfId, secret, ByteArray(0), HELLO_TIMEOUT_MS).toString(Charsets.UTF_8))
-        Hello(json.optString("device"), json.optString("name"), LocalAutoSyncStore.sections(json.optJSONArray("sections")).orEmpty())
+        Hello(json.optString("device"), json.optString("name"))
     }
 
     /** The other device's export, sealed with the pairing secret, written to [into]. */

@@ -12,7 +12,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import tv.own.owntv.core.backup.BackupManager.Section
 
 /** The agreement store on a real DataStore: round-trip, paired-only, attempts, turn-offs and notices. */
 @RunWith(AndroidJUnit4::class)
@@ -36,19 +35,19 @@ class LocalAutoSyncStoreTest {
     }
 
     @Test
-    fun termsRoundTripAndKeepTheirRecord() = runBlocking {
-        store.saveTerms(device.id, setOf(Section.HISTORY), LocalAutoSyncTiming.HOURS_24, setOf(Section.FAVORITES))
+    fun termsRoundTripAndKeepTheAttempts() = runBlocking {
+        store.saveTerms(device.id, LocalAutoSyncTiming.HOURS_24)
         store.recordAttempt(device.id, at = 50, success = true)
-        store.saveTerms(device.id, setOf(Section.MANUAL_REORDER), LocalAutoSyncTiming.IMMEDIATELY)
+        store.saveTerms(device.id, LocalAutoSyncTiming.IMMEDIATELY)
         val a = store.get(device.id)!!
-        assertEquals(setOf(Section.MANUAL_REORDER), a.sections)
-        assertEquals(setOf(Section.FAVORITES), a.theirSections)
+        assertEquals(LocalAutoSyncTiming.IMMEDIATELY, a.timing)
+        // Re-saving the terms keeps the record of past tries: the timing changes, the history does not.
         assertEquals(50L, a.lastSuccessAt)
     }
 
     @Test
     fun aFailureMovesOnlyTheAttempt() = runBlocking {
-        store.saveTerms(device.id, AutoSyncAgreement.DEFAULT_SECTIONS, LocalAutoSyncTiming.HOURS_6)
+        store.saveTerms(device.id, LocalAutoSyncTiming.HOURS_6)
         store.recordAttempt(device.id, at = 10, success = true)
         store.recordAttempt(device.id, at = 20, success = false)
         val a = store.get(device.id)!!
@@ -59,13 +58,13 @@ class LocalAutoSyncStoreTest {
 
     @Test
     fun turningOffQueuesANoticeAndTheirTurnOffIsShown() = runBlocking {
-        store.saveTerms(device.id, AutoSyncAgreement.DEFAULT_SECTIONS, LocalAutoSyncTiming.HOURS_6)
+        store.saveTerms(device.id, LocalAutoSyncTiming.HOURS_6)
         store.remove(device.id, tellThem = true)
         assertNull(store.get(device.id))
         assertTrue(device.id in store.pendingNotices())
         store.noticeDelivered(device.id)
         assertFalse(device.id in store.pendingNotices())
-        store.saveTerms(device.id, AutoSyncAgreement.DEFAULT_SECTIONS, LocalAutoSyncTiming.HOURS_6)
+        store.saveTerms(device.id, LocalAutoSyncTiming.HOURS_6)
         store.turnedOffByThem(device.id, at = 99)
         assertNull(store.get(device.id))
         assertEquals(99L, store.turnedOffByThem.first()[device.id])
@@ -73,7 +72,7 @@ class LocalAutoSyncStoreTest {
 
     @Test
     fun anUnpairedDeviceHasNoAgreement() = runBlocking {
-        store.saveTerms(device.id, AutoSyncAgreement.DEFAULT_SECTIONS, LocalAutoSyncTiming.HOURS_6)
+        store.saveTerms(device.id, LocalAutoSyncTiming.HOURS_6)
         paired.remove(device.id)
         assertNull(store.get(device.id))
     }

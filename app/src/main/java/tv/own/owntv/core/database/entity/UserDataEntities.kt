@@ -36,6 +36,14 @@ data class WatchHistoryEntity(
     val mediaType: MediaType,
     val itemId: Long,
     val watchedAt: Long = System.currentTimeMillis(),
+    /**
+     * The device that wrote the row ([tv.own.owntv.core.sync.local.DeviceIdentity].id hash) — the
+     * foundation of the cross-device "recently watched in this household" rail: after a sync merges
+     * another device's rows in, the rail can attribute and tune them. Nullable on rows written
+     * before the column existed, or where the id could not be read; the sync payload carries it
+     * verbatim (`dev`), and an apply writes it as it came.
+     */
+    val deviceId: String? = null,
 )
 
 @Entity(
@@ -53,6 +61,14 @@ data class ContentOrderEntity(
     val contextKey: String,
     val itemId: Long,
     val position: Int,
+    /**
+     * LWW stamp (epoch ms) for the per-row last-write-wins merge: every local Move refreshes it
+     * ([tv.own.owntv.core.database.dao.ContentOrderDao.replaceContext]), and the sync apply only
+     * replaces a row whose incoming copy is **newer** ([tv.own.owntv.core.database.dao.ContentOrderDao.bumpIfNewer]).
+     * 0 = a row that predates the column (or an old container's timestamp-less order record) —
+     * such a row is inserted when absent but never wins against a stamped one.
+     */
+    @androidx.room.ColumnInfo(defaultValue = "0") val updatedAt: Long = 0,
 ) {
     companion object {
         /** Sentinel [contextKey] for the per-section Favorites list. */
@@ -193,7 +209,11 @@ data class CustomCategoryMemberEntity(
 )
 data class UserDataTombstoneEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    /** Which list the row was deleted from: `fav`, `his`, `prog` or `member` — UserDataResolver's kinds. */
+    /**
+     * Which list the row was deleted from: `fav`, `order` or `prog` — the kinds whose deletions
+     * travel in the sync payload (see [tv.own.owntv.core.backup.UserDataResolver.TOMBSTONE_KINDS]).
+     * Rows of the retired `his`/`member` kinds simply stop being written and age out of the prune.
+     */
     val kind: String,
     /** Canonical stable content key JSON; see [tv.own.owntv.core.backup.UserDataResolver.canonicalIdentity]. */
     val identity: String,

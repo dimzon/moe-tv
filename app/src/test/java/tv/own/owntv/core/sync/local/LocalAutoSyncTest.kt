@@ -8,7 +8,8 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import tv.own.owntv.core.backup.BackupManager.Section
+import tv.own.owntv.core.backup.BackupManager
+import tv.own.owntv.core.settings.SyncMatrix
 import tv.own.owntv.core.sync.local.LocalAutoSyncAuth.Verdict
 import tv.own.owntv.core.sync.local.LocalAutoSyncServer.Route
 
@@ -122,22 +123,28 @@ class AutoSyncAgreementTest {
     }
 
     @Test
-    fun `settings are off by default, favorites on`() {
-        assertFalse(Section.SETTINGS in AutoSyncAgreement.DEFAULT_SECTIONS)
-        assertTrue(Section.FAVORITES in AutoSyncAgreement.DEFAULT_SECTIONS)
+    fun `history is private by default, favorites give and read`() {
+        assertFalse(SyncMatrix.DEFAULTS.giveHistory)
+        assertTrue(SyncMatrix.DEFAULTS.readHistory)
+        assertTrue(SyncMatrix.DEFAULTS.giveFavorites)
+        assertTrue(SyncMatrix.DEFAULTS.readFavorites)
     }
 
     @Test
-    fun `each side lets in only its own sections, and only what the file carries`() {
-        val mine = setOf(Section.FAVORITES, Section.HISTORY)
-        val file = setOf(Section.FAVORITES, Section.SETTINGS)
-        assertEquals(setOf(Section.FAVORITES), AutoSyncAgreement.allowedIn(mine, file))
-        assertEquals(emptySet<Section>(), AutoSyncAgreement.allowedIn(emptySet(), file))
+    fun `the matrix maps to the sections a pass exports and applies`() {
+        val give = SyncMatrix.DEFAULTS.giveSections()
+        // History is off by default, so it never leaves; the other three do.
+        assertFalse(BackupManager.Section.HISTORY in give)
+        assertTrue(BackupManager.Section.FAVORITES in give)
+        assertTrue(BackupManager.Section.MANUAL_REORDER in give)
+        assertTrue(BackupManager.Section.REMINDERS in give)
+        val read = SyncMatrix.DEFAULTS.readSections()
+        assertTrue(BackupManager.Section.HISTORY in read)
     }
 
     @Test
     fun `an agreement survives its own encoding and an unknown timing reads as the default`() {
-        val agreement = AutoSyncAgreement("d", setOf(Section.HISTORY), LocalAutoSyncTiming.DAYS_7, setOf(Section.FAVORITES), 5, 4, 1)
+        val agreement = AutoSyncAgreement("d", LocalAutoSyncTiming.DAYS_7, 5, 4, 1)
         assertEquals(agreement, LocalAutoSyncStore.decode(LocalAutoSyncStore.encode(agreement)))
         val odd = LocalAutoSyncStore.encode(agreement).replace("DAYS_7", "FORTNIGHTLY")
         assertEquals(LocalAutoSyncTiming.DEFAULT, LocalAutoSyncStore.decode(odd)!!.timing)

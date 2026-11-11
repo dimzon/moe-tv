@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
 import tv.own.owntv.core.model.MediaType
@@ -11,9 +12,20 @@ import tv.own.owntv.core.model.MediaType
 /** Write side of watch history; the recently-watched content rows live in the content DAOs (joins). */
 @Dao
 interface HistoryDao {
-    /** One row per (type, item); REPLACE bumps `watchedAt` via the unique index. */
+
+    /**
+     * The local write of "you watched this" (the tuner's debounced record lands here). Stamps the
+     * writing device on the way in — [WatchHistoryEntity.deviceId] is what the cross-device
+     * "recently watched" rail attributes rows with — and keeps [WatchHistoryEntity.watchedAt] as the
+     * per-row LWW stamp. One row per (type, item); REPLACE bumps `watchedAt` via the unique index.
+     */
+    @Transaction
+    suspend fun record(entry: WatchHistoryEntity) {
+        insert(entry.copy(deviceId = entry.deviceId ?: HistoryDeviceStamp.deviceId()))
+    }
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun record(entry: WatchHistoryEntity)
+    suspend fun insert(entry: WatchHistoryEntity)
 
     /**
      * The merge write, and deliberately not [record]: a row that arrives from another device must
@@ -25,12 +37,15 @@ interface HistoryDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIfAbsent(entry: WatchHistoryEntity)
 
-    /** Moves `watchedAt` forward, never back. The `<` is the whole rule. */
+    /**
+     * Moves `watchedAt` forward, never back, adopting the incoming row's [deviceId] when it does —
+     * the latest watch happened on that device, whatever was here before. The `<` is the whole rule.
+     */
     @Query(
-        "UPDATE watch_history SET watchedAt = :at " +
+        "UPDATE watch_history SET watchedAt = :at, deviceId = :deviceId " +
             "WHERE mediaType = :type AND itemId = :itemId AND watchedAt < :at",
     )
-    suspend fun bumpIfNewer(type: MediaType, itemId: Long, at: Long)
+    suspend fun bumpIfNewer(type: MediaType, itemId: Long, at: Long, deviceId: String?)
 
     @Query("DELETE FROM watch_history WHERE mediaType = :type AND itemId = :itemId")
     suspend fun remove(type: MediaType, itemId: Long)
@@ -85,7 +100,7 @@ interface HistoryDao {
     @Query(
         "SELECT h.mediaType AS mediaType, h.itemId AS itemId, " +
             "c.sourceId AS sourceId, c.remoteId AS remoteId, c.name AS name, " +
-            "h.watchedAt AS at " +
+            "h.watchedAt AS at, h.deviceId AS deviceId " +
             "FROM watch_history h " +
             "JOIN channels c ON h.mediaType = 'LIVE' AND h.itemId = c.id " +
             "WHERE c.sourceId = :sourceId",
@@ -103,4 +118,29 @@ interface HistoryDao {
     /** Drops history rows orphaned by a re-sync (see FavoriteDao.purgeOrphans). */
     @Query("DELETE FROM watch_history WHERE mediaType != 'LIVE' OR itemId NOT IN (SELECT id FROM channels)")
     suspend fun purgeOrphans()
+}
+
+/**
+ * The device id new watch-history rows are stamped with ([HistoryDao.record]). Read once per
+ * process through the application context registered with Koin — the DAO layer has no Context of
+ * its own, and [tv.own.owntv.core.sync.local.DeviceIdentity.of] needs one to read `ANDROID_ID`.
+ *
+ * Rows written before Koin is up (or in tests without it) keep `deviceId = null`, which the payload
+ * and the merge treat as "this device, id unknown" — never as a different device.
+ */
+internal object HistoryDeviceStamp {
+    @Volatile
+    private var cached: String? = null
+
+    /** The id hash, or null while it cannot be read. A successful read is cached for the process. */
+    fun deviceId(): String? {
+        cached?.let { return it }
+        val id = runCatching {
+            val context = org.koin.core.context.GlobalContext.getOrNull()?.getOrNull<android.content.Context>()
+                ?: return null
+            tv.own.owntv.core.sync.local.DeviceIdentity.of(context).id.takeIf { it.isNotBlank() }
+        }.getOrNull()
+        if (id != null) cached = id
+        return id
+    }
 }

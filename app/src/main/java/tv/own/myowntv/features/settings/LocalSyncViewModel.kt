@@ -55,6 +55,8 @@ import kotlinx.coroutines.launch
 import tv.own.owntv.core.backup.BackupManager
 import tv.own.owntv.core.companion.CompanionController
 import tv.own.owntv.core.companion.CompanionServerState
+import tv.own.owntv.core.settings.SettingsRepository
+import tv.own.owntv.core.settings.SyncMatrix
 import tv.own.owntv.core.sync.local.DiscoveredDevice
 import tv.own.owntv.core.sync.local.LocalSyncManager
 import tv.own.owntv.core.sync.local.PairedDevice
@@ -73,11 +75,24 @@ import tv.own.owntv.core.sync.local.SyncFailure
  */
 class LocalSyncViewModel(
     private val sync: LocalSyncManager,
+    private val settings: SettingsRepository,
 ) : ViewModel() {
 
 
     val paired: StateFlow<List<PairedDevice>> = sync.pairedDevices
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), emptyList())
+
+    /**
+     * The 4×2 sync matrix (phase ③): what this device gives and reads, per category. The ticks are
+     * local to this device and drive every sync — manual and automatic — so they live here, on the
+     * main sync screen, not on a per-device row.
+     */
+    val syncMatrix: StateFlow<SyncMatrix> = settings.syncMatrix
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), SyncMatrix.DEFAULTS)
+
+    fun setSyncMatrix(matrix: SyncMatrix) {
+        viewModelScope.launch { settings.setSyncMatrix(matrix) }
+    }
 
     val hosting: StateFlow<CompanionServerState> = sync.hostState
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), CompanionServerState.Idle)
@@ -113,13 +128,11 @@ class LocalSyncViewModel(
         data object FindDevice : Step
         data class EnterPin(val address: String, val port: Int) : Step
         data class ChooseDirection(val device: PairedDevice) : Step
-        data class ChooseSections(val device: PairedDevice, val direction: SyncDirection) : Step
         data class Confirm(
             val device: PairedDevice?,
             val direction: SyncDirection,
             val file: File,
             val preview: BackupManager.Preview,
-            val sections: Set<BackupManager.Section>,
             /** The key that opens [file]. Worked out by core, never typed by anyone. */
             val password: String?,
         ) : Step
@@ -146,7 +159,6 @@ class LocalSyncViewModel(
                     direction = SyncDirection.RECEIVE,
                     file = payload.file,
                     preview = payload.preview,
-                    sections = BackupManager.Section.entries.toSet(),
                     password = payload.password,
                 )
             }
@@ -217,24 +229,21 @@ class LocalSyncViewModel(
         step = Step.ChooseDirection(device)
     }
 
+    /**
+     * Picks the direction and runs it. Since phase ③ there is no per-operation section choice: what
+     * leaves and what lands is the device's own sync matrix, applied inside [LocalSyncManager].
+     */
     fun chooseDirection(direction: SyncDirection) {
         val device = (step as? Step.ChooseDirection)?.device ?: return
-        step = Step.ChooseSections(device, direction)
-    }
-
-    fun start(sections: Set<BackupManager.Section>) {
-        val current = step as? Step.ChooseSections ?: return
         busy = true
         viewModelScope.launch {
-            when (current.direction) {
-                SyncDirection.SEND -> sync.send(current.device, sections)
+            when (direction) {
+                SyncDirection.SEND -> sync.send(device)
                     .onSuccess { step = Step.Result(received = null, sent = true) }
                     .onFailure { error = reason() }
-                SyncDirection.RECEIVE, SyncDirection.MERGE -> sync.fetch(current.device, sections)
+                SyncDirection.RECEIVE, SyncDirection.MERGE -> sync.fetch(device)
                     .onSuccess { payload ->
-                        step = Step.Confirm(
-                            current.device, current.direction, payload.file, payload.preview, sections, payload.password,
-                        )
+                        step = Step.Confirm(device, direction, payload.file, payload.preview, payload.password)
                     }
                     .onFailure { error = reason() }
             }
@@ -247,10 +256,10 @@ class LocalSyncViewModel(
         val current = step as? Step.Confirm ?: return
         busy = true
         viewModelScope.launch {
-            sync.apply(current.file, current.sections, current.password, deviceSettings)
+            sync.apply(current.file, current.password, deviceSettings)
                 .onSuccess { summary ->
                     val sent = current.device != null && current.direction == SyncDirection.MERGE &&
-                        sync.send(current.device, current.sections).isSuccess
+                        sync.send(current.device).isSuccess
                     step = Step.Result(received = summary, sent = sent)
                 }
                 .onFailure { error = reason() }

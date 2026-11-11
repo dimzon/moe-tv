@@ -1,23 +1,20 @@
 package tv.own.owntv.core.sync.local
 
-import tv.own.owntv.core.backup.BackupManager
-
 /**
  * This device's agreement to sync by itself with one paired device: one per device, on each side.
  *
- * Each side keeps — and enforces — its own [sections]: what this device sends out and what it lets in.
- * [theirSections] is the other side's answer as it last said it, for the row to show; it changes
- * nothing here. The app has one user, so an agreement pairs the two DEVICES outright: their data is
- * merged into this device's single viewer, whatever the other device is called.
+ * Since the sync-matrix redesign (phase ③) an agreement carries **no section set**: what travels is
+ * decided by this device's own [tv.own.owntv.core.settings.SyncMatrix] ticks, applied on both the
+ * export and the apply side of every pass. The agreement is now purely the *when* — the timing and
+ * the attempt bookkeeping. The app has one user, so an agreement pairs the two DEVICES outright:
+ * their data is merged into this device's single viewer, whatever the other device is called.
  *
  * [lastSuccessAt] moves only when a pass completed; a failed or unreachable try moves [lastAttemptAt]
  * and [failures] only, so the next try backs off without pretending anything was synced.
  */
 data class AutoSyncAgreement(
     val deviceId: String,
-    val sections: Set<BackupManager.Section> = DEFAULT_SECTIONS,
     val timing: LocalAutoSyncTiming = LocalAutoSyncTiming.DEFAULT,
-    val theirSections: Set<BackupManager.Section> = emptySet(),
     val lastAttemptAt: Long = 0,
     val lastSuccessAt: Long = 0,
     val failures: Int = 0,
@@ -42,14 +39,6 @@ data class AutoSyncAgreement(
         else copy(lastAttemptAt = at, failures = failures + 1)
 
     companion object {
-        /** On by default: the viewer's own things. Playlists (with logins) and Settings are ticked by hand. */
-        val DEFAULT_SECTIONS: Set<BackupManager.Section> = setOf(
-            BackupManager.Section.FAVORITES,
-            BackupManager.Section.HISTORY,
-            BackupManager.Section.CUSTOMIZE,
-            BackupManager.Section.MANUAL_REORDER,
-        )
-
         private const val BACKOFF_STEP_MS = 15 * 60_000L
         private const val BACKOFF_CAP_MS = 24 * 3600_000L
 
@@ -59,9 +48,5 @@ data class AutoSyncAgreement(
             val ceiling = if (gapMs > 0) minOf(gapMs, BACKOFF_CAP_MS) else BACKOFF_CAP_MS
             return minOf(doubled, ceiling).coerceAtLeast(BACKOFF_STEP_MS)
         }
-
-        /** What one side lets in from a file: its own sections, and only those the file carries. */
-        fun allowedIn(mine: Set<BackupManager.Section>, inFile: Set<BackupManager.Section>): Set<BackupManager.Section> =
-            mine intersect inFile
     }
 }

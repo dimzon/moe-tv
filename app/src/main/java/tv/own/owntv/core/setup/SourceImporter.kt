@@ -195,7 +195,11 @@ class SourceImporter(
     suspend fun importBackup(
         file: File,
         sections: Set<BackupManager.Section> = BackupManager.Section.entries.toSet(),
-        /** Also take another device's hardware settings — see [BackupManager.import]. */
+        /**
+         * Vestigial: the settings block (with the hardware settings of another device) left the
+         * backup payload with the sync matrix — user data is all a restore carries now. The
+         * parameter stays so the wizard's call shape holds.
+         */
         deviceSettings: Boolean = false,
     ): Boolean {
         _state.value = ImportState.Running
@@ -233,7 +237,7 @@ class SourceImporter(
         deviceSettings: Boolean,
     ): Boolean =
         backup.import(
-            file, sections, backupPassword = password, deviceSettings = deviceSettings,
+            file, sections, backupPassword = password,
         ).fold(
             onSuccess = { summary ->
                 // A restore brings back favorites/history, not the catalogue, and favourites and

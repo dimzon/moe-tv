@@ -19,6 +19,40 @@ interface ContentOrderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(rows: List<ContentOrderEntity>)
 
+    /**
+     * The merge write for the sync apply (phase ③), and deliberately not [insertAll]: REPLACE would
+     * let the other device's **older** copy of a Move win purely by arriving second. Paired with
+     * [bumpIfNewer] — insert when absent, then take the incoming position only if its [ContentOrderEntity.updatedAt]
+     * is actually newer.
+     */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIfAbsent(row: ContentOrderEntity)
+
+    /** Applies the incoming order row's position+stamp only when it is newer. The `<` is the whole rule. */
+    @Query(
+        "UPDATE content_order SET position = :position, updatedAt = :updatedAt " +
+            "WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId AND updatedAt < :updatedAt",
+    )
+    suspend fun bumpIfNewer(type: MediaType, contextKey: String, itemId: Long, position: Int, updatedAt: Long)
+
+    /**
+     * Deletes the row only when it is older than [at] — the merge rule for an incoming **deletion**
+     * of an order row. A row the user re-moved locally after the other device deleted it is newer
+     * and survives. Returns the number of rows removed, so the sync summary can count it.
+     */
+    @Query(
+        "DELETE FROM content_order WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId " +
+            "AND updatedAt <= :at",
+    )
+    suspend fun removeIfOlderThan(type: MediaType, contextKey: String, itemId: Long, at: Long): Int
+
+    /** The row's LWW stamp, or null when absent — the dry run compares it against an incoming copy. */
+    @Query(
+        "SELECT updatedAt FROM content_order WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId " +
+            "LIMIT 1",
+    )
+    suspend fun updatedAt(type: MediaType, contextKey: String, itemId: Long): Long?
+
     @Query("DELETE FROM content_order WHERE mediaType = :type AND contextKey = :contextKey")
     suspend fun clearContext(type: MediaType, contextKey: String)
 
@@ -32,11 +66,20 @@ interface ContentOrderDao {
     @Query("SELECT DISTINCT contextKey FROM content_order WHERE mediaType = :type")
     fun observeContextKeys(type: MediaType): Flow<List<String>>
 
-    /** Replaces a context's entire order in one transaction (commit point of a Move). */
+    /**
+     * Replaces a context's entire order in one transaction (commit point of a Move), stamping every
+     * written row with the current time: [ContentOrderEntity.updatedAt] is the per-row LWW stamp the
+     * sync merge compares, and a Move is the newest fact about that list. Callers that build rows
+     * themselves (e.g. the favorites Move in the counts screen) are stamped here too, so every
+     * write path through the DAO carries a fresh stamp.
+     */
     @Transaction
     suspend fun replaceContext(type: MediaType, contextKey: String, rows: List<ContentOrderEntity>) {
         clearContext(type, contextKey)
-        if (rows.isNotEmpty()) insertAll(rows)
+        if (rows.isNotEmpty()) {
+            val now = System.currentTimeMillis()
+            insertAll(rows.map { if (it.updatedAt == 0L) it.copy(updatedAt = now) else it })
+        }
     }
 
     /**
@@ -79,7 +122,7 @@ interface ContentOrderDao {
      */
     @Query(
         "SELECT o.mediaType AS mediaType, o.itemId AS itemId, " +
-            "o.contextKey AS contextKey, o.position AS position, " +
+            "o.contextKey AS contextKey, o.position AS position, o.updatedAt AS updatedAt, " +
             "c.sourceId AS sourceId, c.remoteId AS remoteId, c.name AS name " +
             "FROM content_order o " +
             "JOIN channels c ON o.mediaType = 'LIVE' AND o.itemId = c.id " +

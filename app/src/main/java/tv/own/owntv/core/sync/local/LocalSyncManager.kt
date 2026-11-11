@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -20,6 +21,7 @@ import tv.own.owntv.core.CoreBuildInfo
 import tv.own.owntv.core.backup.BackupManager
 import tv.own.owntv.core.companion.CompanionController
 import tv.own.owntv.core.companion.CompanionLink
+import tv.own.owntv.core.settings.SettingsRepository
 
 /** Which way the data goes. Always the user's explicit choice — never inferred. */
 enum class SyncDirection {
@@ -93,6 +95,7 @@ class LocalSyncManager(
     private val discovery: LocalSyncDiscovery,
     private val autoSync: LocalAutoSyncStore,
     private val autoServer: LocalAutoSyncServer,
+    private val settings: SettingsRepository,
 ) {
     private val appContext = context.applicationContext
 
@@ -158,7 +161,6 @@ class LocalSyncManager(
      */
     suspend fun startHosting(
         port: Int = CompanionLink.DEFAULT_PORT,
-        sections: Set<BackupManager.Section> = BackupManager.Section.entries.toSet(),
     ): Result<Unit> = withContext(Dispatchers.IO) {
         val folder = File(cacheDir(), "outgoing").apply {
             mkdirs()
@@ -168,8 +170,8 @@ class LocalSyncManager(
         // for why it stays a local until the container it opens has actually been written.
         val password = PairedDeviceStore.newSecret()
         selfId = paired.selfId()
-        // Everything this device holds that the user ticked; the other device merges it into its own.
-        val exported = backups.export(folder, sections, password, recordAsBackup = false)
+        // The categories this device's matrix gives; the other device merges them into its own.
+        val exported = backups.export(folder, settings.syncMatrix.first().giveSections(), password, recordAsBackup = false)
             .getOrElse { return@withContext Result.failure(it) }
         // Read once, here, rather than per request: the server asks for these while answering, and a
         // device unpaired mid-session simply stops working on the next session, which is soon enough.
@@ -243,16 +245,14 @@ class LocalSyncManager(
      */
     private suspend fun askForAutoSync(deviceId: String, request: JSONObject): JSONObject {
         val name = paired.current().firstOrNull { it.id == deviceId }?.name ?: UNKNOWN_DEVICE_NAME
-        val theirSections = LocalAutoSyncStore.sections(request.optJSONArray("sections")).orEmpty()
         val timing = LocalAutoSyncTiming.parse(request.optString("timing"))
-        val accepted = companion.askAutoSync(deviceId, name, theirSections)
+        val accepted = companion.askAutoSync(deviceId, name)
         val answer = JSONObject().put("accepted", accepted)
         if (!accepted) return answer
-        val mine = autoSync.get(deviceId)?.sections ?: AutoSyncAgreement.DEFAULT_SECTIONS
-        autoSync.saveTerms(deviceId, mine, timing, theirSections)
-        return answer
-            .put("sections", org.json.JSONArray(mine.map { it.name }))
-            .put("autoPort", AUTO_SYNC_PORT)
+        // Since phase ③ the agreement carries only the timing — what travels is each device's own
+        // sync matrix, applied on its own side of the pass, so there is nothing to exchange here.
+        autoSync.saveTerms(deviceId, timing)
+        return answer.put("autoPort", AUTO_SYNC_PORT)
     }
 
     /**
@@ -329,7 +329,6 @@ class LocalSyncManager(
      */
     suspend fun fetch(
         device: PairedDevice,
-        sections: Set<BackupManager.Section> = BackupManager.Section.entries.toSet(),
     ): Result<SyncPayload> =
         withContext(Dispatchers.IO) {
             _progress.value = SyncProgress.Connecting
@@ -342,9 +341,10 @@ class LocalSyncManager(
             _progress.value = SyncProgress.Transferring
             client.fetch(device.address, device.port, device.secret, target)
                 .mapCatching { file ->
-                    // The user's chosen sections, not all of them: a summary that counts favorites
-                    // the user just unticked promises a change that the apply will not make.
-                    val preview = backups.previewImport(file, sections, password).getOrThrow()
+                    // Only the categories this device reads: a summary that counted favorites the
+                    // matrix just unticked would promise a change the apply will not make.
+                    val read = settings.syncMatrix.first().readSections()
+                    val preview = backups.previewImport(file, read, password).getOrThrow()
                     paired.touch(device.id, device.address, device.port)
                     _progress.value = SyncProgress.Idle
                     SyncPayload(file, preview, password)
@@ -361,8 +361,8 @@ class LocalSyncManager(
      */
     suspend fun previewIncoming(
         file: File,
-        sections: Set<BackupManager.Section> = BackupManager.Section.entries.toSet(),
     ): Result<SyncPayload> = withContext(Dispatchers.IO) {
+        val sections = settings.syncMatrix.first().readSections()
         // Secrets first and `null` only as the last resort, deliberately. A container this device can
         // unseal must be opened sealed: [BackupManager] will read an encrypted file without its
         // passphrase and simply leave every secret field blank, so trying `null` first would "succeed"
@@ -385,12 +385,12 @@ class LocalSyncManager(
      */
     suspend fun apply(
         file: File,
-        sections: Set<BackupManager.Section>,
         password: String? = null,
         /** The user ticked the other device's hardware settings on the confirm step. */
         deviceSettings: Boolean = false,
     ): Result<BackupManager.ImportSummary> {
         _progress.value = SyncProgress.Applying
+        val sections = settings.syncMatrix.first().readSections()
         return backups.import(file, sections, password, BackupManager.ImportMode.MERGE, deviceSettings)
             .onSuccess { _progress.value = SyncProgress.Done(received = it, sent = false) }
             .onFailure { _progress.value = SyncProgress.Failed(failureFor(it)) }
@@ -405,8 +405,8 @@ class LocalSyncManager(
      */
     suspend fun send(
         device: PairedDevice,
-        sections: Set<BackupManager.Section>,
     ): Result<Unit> = withContext(Dispatchers.IO) {
+        val sections = settings.syncMatrix.first().giveSections()
         // Sealed with the secret the pairing already established, which is the one key the far side
         // is certain to have. Nothing is asked of the user, and the playlist logins travel.
         val password = device.secret
@@ -437,24 +437,20 @@ class LocalSyncManager(
      */
     suspend fun enableAutoSync(
         device: PairedDevice,
-        sections: Set<BackupManager.Section>,
         timing: LocalAutoSyncTiming,
     ): AutoSyncEnableResult {
-        val request = JSONObject()
-            .put("sections", org.json.JSONArray(sections.map { it.name }))
-            .put("timing", timing.name)
+        val request = JSONObject().put("timing", timing.name)
         val answer = client.requestAutoSync(device.address, device.port, device.secret, request)
             .getOrElse { return AutoSyncEnableResult.Failed(failureFor(it)) }
         if (!answer.optBoolean("accepted", false)) return AutoSyncEnableResult.Declined
-        val theirs = LocalAutoSyncStore.sections(answer.optJSONArray("sections")).orEmpty()
-        autoSync.saveTerms(device.id, sections, timing, theirs)
+        autoSync.saveTerms(device.id, timing)
         paired.updateAddress(device.id, device.address, answer.optInt("autoPort", AUTO_SYNC_PORT))
         return AutoSyncEnableResult.Enabled
     }
 
-    /** Changes this side's terms with [deviceId]: what it syncs and how often. */
-    suspend fun updateAutoSync(deviceId: String, sections: Set<BackupManager.Section>, timing: LocalAutoSyncTiming) {
-        autoSync.saveTerms(deviceId, sections, timing)
+    /** Changes this side's terms with [deviceId]: how often it syncs. */
+    suspend fun updateAutoSync(deviceId: String, timing: LocalAutoSyncTiming) {
+        autoSync.saveTerms(deviceId, timing)
     }
 
     /**

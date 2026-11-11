@@ -98,13 +98,14 @@ class LocalAutoSyncViewModel(
     val enableState: StateFlow<EnableState> = _enableState.asStateFlow()
     private var enableJob: Job? = null
 
-    /** Asks [device] (its Local sync page open) to agree; this side's terms are saved only on yes. */
-    fun enable(device: PairedDevice, sections: Set<BackupManager.Section>, timing: LocalAutoSyncTiming) {
+    /** Asks [device] (its Local sync page open) to agree; this side's terms are saved only on yes.
+     *  Since phase ③ an agreement carries no sections — what travels is the device's own sync matrix. */
+    fun enable(device: PairedDevice, timing: LocalAutoSyncTiming) {
         if (_enableState.value is EnableState.Asking) return
         enableJob?.cancel()
         enableJob = viewModelScope.launch {
             _enableState.value = EnableState.Asking(device.name)
-            _enableState.value = when (val result = sync.enableAutoSync(device, sections, timing)) {
+            _enableState.value = when (val result = sync.enableAutoSync(device, timing)) {
                 AutoSyncEnableResult.Enabled -> EnableState.Idle
                 AutoSyncEnableResult.Declined -> EnableState.Declined(device.name)
                 is AutoSyncEnableResult.Failed -> EnableState.Failed(result.reason)
@@ -118,8 +119,8 @@ class LocalAutoSyncViewModel(
         _enableState.value = EnableState.Idle
     }
 
-    fun save(deviceId: String, sections: Set<BackupManager.Section>, timing: LocalAutoSyncTiming) {
-        viewModelScope.launch { sync.updateAutoSync(deviceId, sections, timing) }
+    fun save(deviceId: String, timing: LocalAutoSyncTiming) {
+        viewModelScope.launch { sync.updateAutoSync(deviceId, timing) }
     }
 
     fun disable(deviceId: String) {

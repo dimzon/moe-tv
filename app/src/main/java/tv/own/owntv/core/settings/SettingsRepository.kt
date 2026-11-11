@@ -325,6 +325,16 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val STARTUP_CHANNEL = stringPreferencesKey("startup_channel")
         val HOME_CONFIG = stringPreferencesKey("home_config")
         val HIDE_NEW_CATEGORIES = booleanPreferencesKey("hide_new_categories")
+        // The 4×2 sync matrix (phase ③): per category, whether this device gives its rows and
+        // whether it reads the others'. Local DataStore only — these ticks are never synced.
+        val SYNC_GIVE_FAVORITES = booleanPreferencesKey("sync_give_favorites")
+        val SYNC_READ_FAVORITES = booleanPreferencesKey("sync_read_favorites")
+        val SYNC_GIVE_ORDER = booleanPreferencesKey("sync_give_order")
+        val SYNC_READ_ORDER = booleanPreferencesKey("sync_read_order")
+        val SYNC_GIVE_HISTORY = booleanPreferencesKey("sync_give_history")
+        val SYNC_READ_HISTORY = booleanPreferencesKey("sync_read_history")
+        val SYNC_GIVE_REMINDERS = booleanPreferencesKey("sync_give_reminders")
+        val SYNC_READ_REMINDERS = booleanPreferencesKey("sync_read_reminders")
         val REFRESH_SOURCE_IDS = stringSetPreferencesKey("refresh_source_ids")
         // Per-source auto-refresh selections (JSON maps: { "<sourceId>": "<EnumName>" }). Replace the
         // binary refresh-on-startup set with Off/Startup + staleness thresholds. Migration-safe: the legacy
@@ -2514,8 +2524,50 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         }
     }
 
-    /** This device, as a backup records it (see [tv.own.owntv.core.backup.DeviceIdentity]). */
-    fun deviceIdentity(): tv.own.owntv.core.backup.DeviceIdentity = tv.own.owntv.core.backup.DeviceIdentity.of(context)
+    /**
+     * The 4×2 sync matrix (phase ③): what this device gives to and reads from the other household
+     * TVs. Defaults from [SyncMatrix.DEFAULTS] — history is private by default (give=false,
+     * read=true), everything else gives and reads. The ticks live in the local DataStore only and
+     * are deliberately NOT part of the sync payload.
+     */
+    val syncMatrix: Flow<SyncMatrix> = prefsFlow {
+        SyncMatrix(
+            giveFavorites = it[Keys.SYNC_GIVE_FAVORITES] ?: true,
+            readFavorites = it[Keys.SYNC_READ_FAVORITES] ?: true,
+            giveOrder = it[Keys.SYNC_GIVE_ORDER] ?: true,
+            readOrder = it[Keys.SYNC_READ_ORDER] ?: true,
+            giveHistory = it[Keys.SYNC_GIVE_HISTORY] ?: false,
+            readHistory = it[Keys.SYNC_READ_HISTORY] ?: true,
+            giveReminders = it[Keys.SYNC_GIVE_REMINDERS] ?: true,
+            readReminders = it[Keys.SYNC_READ_REMINDERS] ?: true,
+        )
+    }
+
+    suspend fun setSyncGiveFavorites(v: Boolean) { context.dataStore.edit { it[Keys.SYNC_GIVE_FAVORITES] = v } }
+    suspend fun setSyncReadFavorites(v: Boolean) { context.dataStore.edit { it[Keys.SYNC_READ_FAVORITES] = v } }
+    suspend fun setSyncGiveOrder(v: Boolean) { context.dataStore.edit { it[Keys.SYNC_GIVE_ORDER] = v } }
+    suspend fun setSyncReadOrder(v: Boolean) { context.dataStore.edit { it[Keys.SYNC_READ_ORDER] = v } }
+    suspend fun setSyncGiveHistory(v: Boolean) { context.dataStore.edit { it[Keys.SYNC_GIVE_HISTORY] = v } }
+    suspend fun setSyncReadHistory(v: Boolean) { context.dataStore.edit { it[Keys.SYNC_READ_HISTORY] = v } }
+    suspend fun setSyncGiveReminders(v: Boolean) { context.dataStore.edit { it[Keys.SYNC_GIVE_REMINDERS] = v } }
+    suspend fun setSyncReadReminders(v: Boolean) { context.dataStore.edit { it[Keys.SYNC_READ_REMINDERS] = v } }
+
+    /** One setter for the whole matrix, for the settings screen that edits all eight at once. */
+    suspend fun setSyncMatrix(matrix: SyncMatrix) {
+        context.dataStore.edit {
+            it[Keys.SYNC_GIVE_FAVORITES] = matrix.giveFavorites
+            it[Keys.SYNC_READ_FAVORITES] = matrix.readFavorites
+            it[Keys.SYNC_GIVE_ORDER] = matrix.giveOrder
+            it[Keys.SYNC_READ_ORDER] = matrix.readOrder
+            it[Keys.SYNC_GIVE_HISTORY] = matrix.giveHistory
+            it[Keys.SYNC_READ_HISTORY] = matrix.readHistory
+            it[Keys.SYNC_GIVE_REMINDERS] = matrix.giveReminders
+            it[Keys.SYNC_READ_REMINDERS] = matrix.readReminders
+        }
+    }
+
+    /** This device, as a backup records it (see [tv.own.owntv.core.sync.local.DeviceIdentity]). */
+    fun deviceIdentity(): tv.own.owntv.core.sync.local.DeviceIdentity = tv.own.owntv.core.sync.local.DeviceIdentity.of(context)
 
     /**
      * The settings that describe this device's hardware rather than the user's taste: whether hardware

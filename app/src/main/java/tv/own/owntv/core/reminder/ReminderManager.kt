@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import tv.own.owntv.core.backup.UserDataResolver
 import tv.own.owntv.core.database.dao.ReminderDao
 import tv.own.owntv.core.database.entity.ReminderEntity
 
@@ -21,6 +22,12 @@ import tv.own.owntv.core.database.entity.ReminderEntity
 class ReminderManager(
     private val reminderDao: ReminderDao,
     private val scheduler: ReminderScheduler,
+    /**
+     * Sync plumbing, injected so a dismissed reminder records a `prog` tombstone and does not come
+     * back from the household on the next merge. Optional only so the class works where sync is not
+     * wired (tests); DI passes it.
+     */
+    private val userData: UserDataResolver? = null,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
@@ -58,14 +65,29 @@ class ReminderManager(
         val reminder = ReminderEntity(
             channelId = channelId, channelName = channelName, epgChannelId = epgChannelId,
             title = title, startMs = startMs, stopMs = stopMs, leadMinutes = leadMinutes, createdAt = now,
+            // Per-row LWW stamp: a sync apply only replaces this row with an incoming reminder that is newer.
+            updatedAt = now,
         )
         val id = reminderDao.upsert(reminder)
         ReminderSchedule.wakeAtFor(reminder, now)?.let { scheduler.arm(id, it) }
         return true
     }
 
-    /** Cancel a reminder, or answer its prompt (Watch or Dismiss both end it). */
+    /**
+     * Cancel a reminder, or answer its prompt (Watch or Dismiss both end it).
+     *
+     * When sync is wired, the dismissal is recorded as a `prog` tombstone (identity
+     * (epgChannelId, startMs)) BEFORE the row goes, so the other devices hear about the deletion
+     * and the merge does not put the reminder straight back. Without an epg id the row has no sync
+     * identity and the deletion stays local.
+     */
     suspend fun dismiss(id: Long) {
+        val reminder = reminderDao.getById(id)
+        if (reminder != null) {
+            reminder.epgChannelId?.takeIf { it.isNotBlank() }?.let { epg ->
+                userData?.recordReminderDeletion(epg, reminder.startMs, at = clock())
+            }
+        }
         scheduler.cancel(id)
         reminderDao.delete(id)
     }
