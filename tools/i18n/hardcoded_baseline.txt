@@ -224,6 +224,8 @@
 1	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	0
 2	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	contextKey
 1	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	custom_category_members
+1	app/src/main/java/tv/own/owntv/core/launcher/LauncherDeepLink.kt	moetv://open/live
+1	app/src/main/java/tv/own/owntv/core/launcher/LauncherDeepLink.kt	moetv://play/live
 1	app/src/main/java/tv/own/owntv/core/live/ChannelFacets.kt	\0
 1	app/src/main/java/tv/own/owntv/core/live/ChannelFacets.kt	(?i)[|\\[({]\\s*($LANGUAGE_CODES)\\s*[|\\])}]
 1	app/src/main/java/tv/own/owntv/core/live/ChannelFacets.kt	(?i)\\b(?:4K|UHD|2160P|3840P)\\b
@@ -309,6 +311,7 @@
 1	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	https://dns.quad9.net/dns-query
 1	app/src/main/java/tv/own/owntv/core/network/HttpClient.kt	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36
 1	app/src/main/java/tv/own/owntv/core/player/ContentKey.kt	$sourceId:$mediaType:$it
+1	app/src/main/java/tv/own/owntv/core/reminder/ReminderScheduler.kt	moetv://reminder/$id
 1	app/src/main/java/tv/own/owntv/core/settings/CustomizePinSettings.kt	customizePinHash
 1	app/src/main/java/tv/own/owntv/core/settings/CustomizePinSettings.kt	settingsLockMenus
 1	app/src/main/java/tv/own/owntv/core/settings/CustomizePinSettings.kt	settingsPinHash

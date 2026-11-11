@@ -27,7 +27,7 @@
     <string name="settings_static">Rögzített</string>
     <string name="settings_dynamic">Dinamikus</string>
     <string name="settings_use_proxy">Proxy használata</string>
-    <string name="settings_proxy_description">Az OwnTV teljes forgalmát és lejátszását HTTP-proxyn keresztül küldi.</string>
+    <string name="settings_proxy_description">Az МОЁ ТВ teljes forgalmát és lejátszását HTTP-proxyn keresztül küldi.</string>
     <string name="settings_host">Kiszolgáló</string>
     <string name="settings_proxy_host_hint">proxy.example.com</string>
     <string name="settings_port">Port</string>
@@ -134,7 +134,7 @@
         <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g> maradt</item>
     </plurals>
     <string name="settings_metadata_active_source">Aktív forrás</string>
-    <string name="settings_metadata_shared_worker_description">OwnTV Worker · nincs teendő</string>
+    <string name="settings_metadata_shared_worker_description">МОЁ ТВ Worker · nincs teendő</string>
     <string name="settings_metadata_connection">Kapcsolat</string>
     <string name="settings_metadata_remote_advanced">Speciális TMDB-beállítások</string>
     <string name="settings_metadata_remote_advanced_description">Használd a saját TMDB API-kulcsodat vagy saját üzemeltetésű Workeredet a közös alapértelmezett helyett.</string>
@@ -145,8 +145,8 @@
     <string name="settings_metadata_key_label">Kulcs</string>
     <string name="settings_metadata_server_label">Kiszolgáló</string>
     <string name="settings_metadata_clear_advanced_title">Ne használjuk tovább a saját kulcsodat?</string>
-    <string name="settings_metadata_clear_advanced_message">A TMDB API-kulcsod és a saját üzemeltetésű kiszolgálód címe törlődik erről az eszközről, és az OwnTV visszatér a beépített közös szolgáltatáshoz és annak napi keretéhez.</string>
-    <string name="settings_metadata_fair_share">A beépített szolgáltatáson mindenki osztozik, aki OwnTV-t használ. Ha bármelyik perces, órás vagy napi keret elfogy, a TMDB-részletek szünetelnek, amíg az adott időszak vissza nem áll; a lejátszási lista adatai továbbra is működnek. A saját kulcsod vagy Workered megszünteti ezt a korlátot.</string>
+    <string name="settings_metadata_clear_advanced_message">A TMDB API-kulcsod és a saját üzemeltetésű kiszolgálód címe törlődik erről az eszközről, és az МОЁ ТВ visszatér a beépített közös szolgáltatáshoz és annak napi keretéhez.</string>
+    <string name="settings_metadata_fair_share">A beépített szolgáltatáson mindenki osztozik, aki МОЁ ТВ-t használ. Ha bármelyik perces, órás vagy napi keret elfogy, a TMDB-részletek szünetelnek, amíg az adott időszak vissza nem áll; a lejátszási lista adatai továbbra is működnek. A saját kulcsod vagy Workered megszünteti ezt a korlátot.</string>
     <string name="settings_metadata_limit_reached">A napi metaadat-kereted elfogyott — add meg a saját TMDB-kulcsodat a Beállítások → Metaadatok alatt a korlát megszüntetéséhez.</string>
     <string name="settings_metadata_language">Metaadatok nyelve</string>
     <string name="settings_metadata_language_description">A TMDB-ből érkező tartalomleírások, műfajok és címek nyelve. Amit a TMDB nem fordított le, angolul marad. A részletek nyelvenként gyorsítótárazódnak, így a visszaváltás azonnali.</string>
@@ -278,8 +278,8 @@
     <string name="settings_auto_frame_rate_warning_suffix">Ezen a TV-n nem ajánlott: Android 12 alatt a frekvencia nem váltható zökkenőmentesen.</string>
     <string name="settings_auto_frame_rate_warning_title">Ezen a TV-n nem ajánlott</string>
     <string name="settings_auto_frame_rate_warning_title_mobile">Ezen az eszközön nem ajánlott</string>
-    <string name="settings_auto_frame_rate_warning_description">Ezen az eszközön Android <xliff:g id="android_version">%1$s</xliff:g> fut. Android 12 alatt a TV nem tudja megmondani az OwnTV-nek, mely frissítési frekvenciákra tud zökkenőmentesen váltani, ezért a frekvenciaváltás egy-két másodpercre elsötétítheti a képet — néha egy műsor alatt többször is.\n\nAzt javasoljuk, hagyd itt kikapcsolva az automatikus képkockasebességet. Ha a TV-d tisztán vált, kapcsold be, és próbáld ki: bármikor visszaállíthatod.</string>
-    <string name="settings_auto_frame_rate_warning_description_mobile">Ezen az eszközön Android <xliff:g id="android_version">%1$s</xliff:g> fut. Android 12 alatt az eszköz nem tudja megmondani az OwnTV-nek, mely frissítési frekvenciákra tud zökkenőmentesen váltani, ezért a frekvenciaváltás egy-két másodpercre elsötétítheti a képet — néha egy műsor alatt többször is.\n\nAzt javasoljuk, hagyd itt kikapcsolva az automatikus képkockasebességet. Ha a kijelződ tisztán vált, kapcsold be, és próbáld ki: bármikor visszaállíthatod.</string>
+    <string name="settings_auto_frame_rate_warning_description">Ezen az eszközön Android <xliff:g id="android_version">%1$s</xliff:g> fut. Android 12 alatt a TV nem tudja megmondani az МОЁ ТВ-nek, mely frissítési frekvenciákra tud zökkenőmentesen váltani, ezért a frekvenciaváltás egy-két másodpercre elsötétítheti a képet — néha egy műsor alatt többször is.\n\nAzt javasoljuk, hagyd itt kikapcsolva az automatikus képkockasebességet. Ha a TV-d tisztán vált, kapcsold be, és próbáld ki: bármikor visszaállíthatod.</string>
+    <string name="settings_auto_frame_rate_warning_description_mobile">Ezen az eszközön Android <xliff:g id="android_version">%1$s</xliff:g> fut. Android 12 alatt az eszköz nem tudja megmondani az МОЁ ТВ-nek, mely frissítési frekvenciákra tud zökkenőmentesen váltani, ezért a frekvenciaváltás egy-két másodpercre elsötétítheti a képet — néha egy műsor alatt többször is.\n\nAzt javasoljuk, hagyd itt kikapcsolva az automatikus képkockasebességet. Ha a kijelződ tisztán vált, kapcsold be, és próbáld ki: bármikor visszaállíthatod.</string>
     <string name="settings_auto_frame_rate_keep_off">Maradjon ki</string>
     <string name="settings_auto_frame_rate_turn_on_anyway">Mégis bekapcsolom</string>
     <string name="settings_surround_sound">Térhatású hang</string>
@@ -309,15 +309,15 @@
     <string name="settings_player_zoom">Lejátszó nagyítása</string>
     <string name="settings_app_group">Alkalmazás</string>
     <string name="settings_app_startup">Alkalmazás indulása</string>
-    <string name="settings_app_startup_description">Mit nyit meg az OwnTV induláskor</string>
+    <string name="settings_app_startup_description">Mit nyit meg az МОЁ ТВ induláskor</string>
     <string name="settings_check_updates">Frissítések keresése</string>
     <string name="settings_check_updates_description">Szerezd meg a legújabb verziót a GitHub Releases oldalról</string>
     <string name="settings_update_startup">Frissítés keresése induláskor</string>
     <string name="settings_update_startup_description">Új verzió keresése az alkalmazás megnyitásakor</string>
     <string name="settings_auto_start_boot">Automatikus indítás bekapcsoláskor</string>
-    <string name="settings_auto_start_boot_description">Az OwnTV megnyitása a tévé bekapcsolásakor</string>
+    <string name="settings_auto_start_boot_description">Az МОЁ ТВ megnyitása a tévé bekapcsolásakor</string>
     <string name="settings_auto_start_wake">Automatikus indítás ébredéskor</string>
-    <string name="settings_auto_start_wake_description">Az OwnTV megnyitása, amikor a tévé felébred alvó módból</string>
+    <string name="settings_auto_start_wake_description">Az МОЁ ТВ megnyitása, amikor a tévé felébred alvó módból</string>
     <string name="settings_auto_start_needs_overlay">Szükséges: „Megjelenítés más alkalmazások felett”</string>
     <string name="settings_about">Névjegy</string>
     <string name="settings_live_latency">Élő késleltetés</string>
@@ -566,7 +566,7 @@
     <string name="settings_guide_synced">A műsorújság szinkronizálva</string>
     <string name="settings_guide_sync_failed">A műsorújság szinkronizálása nem sikerült</string>
     <string name="settings_restore_remote_title">Visszaállítás másik eszközről</string>
-    <string name="settings_restore_remote_description">Bármelyik böngészős eszközön ugyanazon a Wi-Fin – telefonon, számítógépen vagy egy másik tévén – olvasd be a QR-kódot (vagy nyisd meg az URL-t), add meg ezt a PIN-t, válaszd ki az OwnTV mentésfájlodat, és küldd el. Azt, hogy mit állíts vissza, itt választod ki.</string>
+    <string name="settings_restore_remote_description">Bármelyik böngészős eszközön ugyanazon a Wi-Fin – telefonon, számítógépen vagy egy másik tévén – olvasd be a QR-kódot (vagy nyisd meg az URL-t), add meg ezt a PIN-t, válaszd ki az МОЁ ТВ mentésfájlodat, és küldd el. Azt, hogy mit állíts vissza, itt választod ki.</string>
     <string name="settings_try_again">Próbáld újra</string>
     <string name="settings_new_pin">Kezdés elölről új PIN-kóddal</string>
     <string name="settings_download_remote_title">Letöltés másik eszközre</string>
@@ -716,9 +716,9 @@
     <string name="settings_sources_ignore_limit">Kapcsolatkorlát figyelmen kívül hagyása</string>
     <string name="settings_sources_ignore_limit_on">A kapcsolatkorlát figyelmen kívül marad: a Többnézet és a felvételek több streamet nyithatnak, mint amennyit ez a lejátszási lista jelez. Ha a szolgáltató elutasít egy streamet, azt továbbra is jelezzük.</string>
     <string name="settings_sources_probe_title">Teszteli ezt a lejátszási listát?</string>
-    <string name="settings_sources_probe_warning">Sok szolgáltató soha nem árulja el, hány csatornát nézhet egyszerre, ezért az OwnTV úgy deríti ki, hogy megnyit néhányat, és megnézi, melyik marad életben. Minden, ami most szól, le fog állni, és ez akár két percig is eltarthat.</string>
+    <string name="settings_sources_probe_warning">Sok szolgáltató soha nem árulja el, hány csatornát nézhet egyszerre, ezért az МОЁ ТВ úgy deríti ki, hogy megnyit néhányat, és megnézi, melyik marad életben. Minden, ami most szól, le fog állni, és ez akár két percig is eltarthat.</string>
     <string name="settings_sources_probe_running">Annak ellenőrzése, hány csatornát enged ez a szolgáltató… (<xliff:g id="current">%1$d</xliff:g>/<xliff:g id="total">%2$d</xliff:g>)</string>
-    <string name="settings_sources_probe_unknown">Az OwnTV nem tudta megállapítani, hány csatornát enged ez a szolgáltató.</string>
+    <string name="settings_sources_probe_unknown">Az МОЁ ТВ nem tudta megállapítani, hány csatornát enged ez a szolgáltató.</string>
     <string name="settings_sources_probe_skip">Kihagyás</string>
     <string name="settings_sources_auto_refresh">⟳ <xliff:g id="mode">%1$s</xliff:g></string>
     <string name="settings_sources_default">ALAPÉRTELMEZETT</string>
@@ -964,7 +964,7 @@
     <string name="settings_move_category_keep">Maradjon a(z) „<xliff:g id="name">%1$s</xliff:g>” kategóriában is</string>
     <string name="settings_move_category_action">Áthelyezés</string>
     <string name="settings_dns_description">Egyéni DNS-kiszolgáló használata a domainek feloldásához</string>
-    <string name="settings_dns_toggle_description">Az OwnTV összes domainfeloldása egyéni DNS-kiszolgálón keresztül történjen.</string>
+    <string name="settings_dns_toggle_description">Az МОЁ ТВ összes domainfeloldása egyéni DNS-kiszolgálón keresztül történjen.</string>
     <string name="settings_dns_use_custom">Egyéni DNS használata</string>
     <string name="settings_dns_server_missing">Az egyéni DNS be van kapcsolva, de nincs beállítva kiszolgáló. Adj meg egy kiszolgálócímet és válaszd a Mentést, vagy kapcsold ki ezt.</string>
     <string name="settings_dns_server">DNS-kiszolgáló</string>
@@ -1009,7 +1009,7 @@
     <string name="settings_live_preroll">Élő adatfolyamok előpufferelése</string>
     <string name="settings_live_preroll_description">Ennyi videót gyűjtsön össze, mielőtt egy élő csatorna elindul, és minden akadozás után újra. Ez videómennyiség, nem visszaszámlálás. A Ki tartja a lehető leggyorsabb indulást, és a legtöbb szolgáltatóhoz ez a helyes. Csak akkor emeld, ha a lejátszás ténylegesen akadozik: sok szolgáltató csak néhány másodperccel az élő adás előtt tesz közzé, és ha többet kérsz, mint amennyit küldenek, az ronthat az akadozáson.</string>
     <string name="settings_live_tune_timeout">Csatorna feladása ennyi után</string>
-    <string name="settings_live_tune_timeout_description">Ha egy élő csatorna eddig sem mutatott képet, az OwnTV abbahagyja a próbálkozást és szól, ahelyett hogy fekete képernyőt hagyna, miközben végigmegy az összes lejátszóján. A Soha tovább próbálkozik, ami jóval egy percnél is tovább tarthat egy olyan csatornánál, amit a szolgáltatód eltávolított. A szolgáltatód által kért várakozások nem számítanak bele.</string>
+    <string name="settings_live_tune_timeout_description">Ha egy élő csatorna eddig sem mutatott képet, az МОЁ ТВ abbahagyja a próbálkozást és szól, ahelyett hogy fekete képernyőt hagyna, miközben végigmegy az összes lejátszóján. A Soha tovább próbálkozik, ami jóval egy percnél is tovább tarthat egy olyan csatornánál, amit a szolgáltatód eltávolított. A szolgáltatód által kért várakozások nem számítanak bele.</string>
     <string name="settings_live_preroll_per_playlist">Előpufferelés lejátszási listánként</string>
     <string name="settings_live_preroll_per_playlist_description">A fenti beállítás felülírása egyetlen lejátszási listára, hogy a többi gyors maradjon.</string>
     <string name="settings_live_latency_per_playlist">Élő késleltetés lejátszási listánként</string>
@@ -1027,7 +1027,7 @@
     <string name="settings_surround_auto_description_mobile">Automatikus — próbálja meg a Dolby/DTS térhangzást, és váltson vissza automatikusan sztereóra, ha a hangszóró, a fejhallgató vagy a csatlakoztatott vevő nem játssza le. Ajánlott.</string>
     <string name="settings_surround_stereo_description">Csak sztereó — mindig az alkalmazásban dekódoljon, és sima 2.0 hangot küldjön. Ezt használd TV-hangszórón vagy sztereó hangprojektoron, illetve ha a hang lemarad a képhez képest.</string>
     <string name="settings_surround_stereo_description_mobile">Csak sztereó — mindig az alkalmazásban dekódoljon, és sima 2.0 hangot küldjön. Ezt használd a beépített hangszóróhoz, fejhallgatóhoz vagy sztereó hangprojektorhoz, illetve ha a hang lemarad a képhez képest.</string>
-    <string name="settings_surround_forced_description">Térhangzás — Dolby/DTS küldése valódi 5.1/7.1 erősítőnek. Ha elnémul vagy akadozik, az OwnTV akkor is sztereóra vált, és szól róla.</string>
+    <string name="settings_surround_forced_description">Térhangzás — Dolby/DTS küldése valódi 5.1/7.1 erősítőnek. Ha elnémul vagy akadozik, az МОЁ ТВ akkor is sztereóra vált, és szól róla.</string>
     <string name="settings_panel_width">Panelszélesség beállítása</string>
     <string name="settings_panel_width_description">A kategória-, lista- és előnézeti panelek átméretezése az Élő TV-ben, a Filmekben és a Sorozatokban.</string>
     <string name="settings_vod_layout">Filmek és Sorozatok elrendezése</string>
@@ -1077,11 +1077,11 @@
     <string name="settings_panel_width_disable_preview_description">Az élő előnézeti videó jelenleg be van kapcsolva. Az Előnézeti panel elrejtése kikapcsolja a videót, és nem lehet újra bekapcsolni, amíg nem adsz az Előnézeti panelnek szélességet a Panelszélesség beállításánál.</string>
     <string name="settings_live_preview_panel_hidden_title">Az élő előnézeti videó nem érhető el</string>
     <string name="settings_live_preview_panel_hidden_description">Az Élő TV előnézeti panelje rejtve van. Adj neki 0%% feletti szélességet a Panelszélesség beállításánál, mielőtt bekapcsolod az előnézeti videót.</string>
-    <string name="settings_language_help_translate">Segíts lefordítani az OwnTV-t a nyelvedre</string>
-    <string name="settings_language_contribution_description">Olvasd be a QR-kódot vagy nyisd meg a hivatkozást, hogy bármelyik elérhető nyelvet válaszd, és mind a hat OwnTV-fordítási komponenshez hozzájárulj.</string>
+    <string name="settings_language_help_translate">Segíts lefordítani az МОЁ ТВ-t a nyelvedre</string>
+    <string name="settings_language_contribution_description">Olvasd be a QR-kódot vagy nyisd meg a hivatkozást, hogy bármelyik elérhető nyelvet válaszd, és mind a hat МОЁ ТВ-fordítási komponenshez hozzájárulj.</string>
     <string name="settings_language_request_workflow">Olyan nyelvet szeretnél hozzáadni, ami nem szerepel a listán? Először nyiss egy nyelvkérelmet. Egy karbantartó regisztrálja, és előkészíti az alapfordítási fájlokat; amint megjelenik a Hosted Weblate-en, elkezdhetsz hozzájárulni.</string>
     <string name="settings_language_request_new">Új nyelv kérése</string>
-    <string name="settings_language_contribution_qr_description">QR-kód az OwnTV-fordítási projekt áttekintéséhez</string>
+    <string name="settings_language_contribution_qr_description">QR-kód az МОЁ ТВ-fordítási projekt áttekintéséhez</string>
     <string name="settings_language_contribution_qr_failed">A QR-kódot nem sikerült létrehozni. Használd helyette az alább látható hivatkozást.</string>
     <string name="settings_language_contribution_copy">Hivatkozás másolása</string>
     <string name="settings_language_contribution_copied">Hivatkozás másolva</string>
@@ -1163,7 +1163,7 @@
     <string name="local_sync_received_items">Fogadott elemek: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_sent">Az adatai elküldve</string>
     <string name="local_sync_failed">A szinkronizálás sikertelen</string>
-    <string name="local_sync_error_unreachable">Ez az eszköz nem érhető el. Nyissa meg rajta az OwnTV → Továbbiak → Helyi szinkronizálás menüpontot, és kapcsolja be a Szinkronizálási módot. Mindkét eszköznek ugyanazon a Wi-Fi-n kell lennie.</string>
+    <string name="local_sync_error_unreachable">Ez az eszköz nem érhető el. Nyissa meg rajta az МОЁ ТВ → Továbbiak → Helyi szinkronizálás menüpontot, és kapcsolja be a Szinkronizálási módot. Mindkét eszköznek ugyanazon a Wi-Fi-n kell lennie.</string>
     <string name="local_sync_error_unauthorized">A másik eszköz elutasította. Lehet, hogy a PIN hibás, vagy elfelejtette ezt az eszközt.</string>
     <string name="local_sync_error_bad_payload">A beérkezett adatokat nem sikerült beolvasni. Ha jelszót használt, ellenőrizze, hogy mindkét eszközön ugyanaz-e.</string>
     <string name="local_sync_error_unknown">Valami hiba történt. Próbálja újra.</string>
@@ -1181,7 +1181,7 @@
     <string name="local_auto_sync_waiting">Várakozás, hogy <xliff:g id="device">%1$s</xliff:g> engedélyezze…</string>
     <string name="local_auto_sync_declined"><xliff:g id="device">%1$s</xliff:g> nem engedélyezte az automatikus szinkronizálást.</string>
     <string name="local_auto_sync_accept_title">Engedélyezed az automatikus szinkronizálást?</string>
-    <string name="local_auto_sync_accept_body"><xliff:g id="device">%1$s</xliff:g> magától szeretne szinkronizálni ezzel az eszközzel, amikor az OwnTV mindkettőn nyitva van. Csak az jön be, amit ezen az eszközön engedélyezel, és bármelyikük kikapcsolhatja.</string>
+    <string name="local_auto_sync_accept_body"><xliff:g id="device">%1$s</xliff:g> magától szeretne szinkronizálni ezzel az eszközzel, amikor az МОЁ ТВ mindkettőn nyitva van. Csak az jön be, amit ezen az eszközön engedélyezel, és bármelyikük kikapcsolhatja.</string>
     <string name="local_auto_sync_accept">Engedélyezés</string>
     <string name="local_auto_sync_decline">Elutasítás</string>
     <string name="local_auto_sync_what_to_sync">Mit szinkronizál ez az eszköz</string>
@@ -1197,7 +1197,7 @@
     <string name="local_auto_sync_turned_off">Az automatikus szinkronizálás kikapcsolva itt: <xliff:g id="device">%1$s</xliff:g></string>
     <string name="local_auto_sync_unreachable"><xliff:g id="device">%1$s</xliff:g> nem érhető el, később újra próbálja</string>
     <string name="local_auto_sync_listen">Automatikus szinkronizálás figyelése</string>
-    <string name="local_auto_sync_listen_description">Be: a párosított eszközök szinkronizálhatnak ezzel, amikor az OwnTV itt nyitva van. Ki: csak bekapcsolt szinkronizálási módban.</string>
+    <string name="local_auto_sync_listen_description">Be: a párosított eszközök szinkronizálhatnak ezzel, amikor az МОЁ ТВ itt nyitva van. Ki: csak bekapcsolt szinkronizálási módban.</string>
     <string name="local_auto_sync_listening">Figyel</string>
     <string name="more_pane_last_backup">Legutóbbi mentés</string>
     <string name="more_pane_encrypted">Titkosítva</string>
@@ -1272,8 +1272,8 @@
     <string name="settings_multiview_keep_two">Maradjon 2</string>
     <string name="settings_multiview_use_anyway">Mégis ennyi legyen</string>
     <string name="settings_app_icon">Alkalmazásikon</string>
-    <string name="settings_app_icon_summary">Az OwnTV ikonjának és logójának színe</string>
-    <string name="settings_app_icon_sheet_mobile">Így jelenik meg az OwnTV a kezdőképernyődön. Az alkalmazás egyszer újraindul.</string>
+    <string name="settings_app_icon_summary">Az МОЁ ТВ ikonjának és logójának színe</string>
+    <string name="settings_app_icon_sheet_mobile">Így jelenik meg az МОЁ ТВ a kezdőképernyődön. Az alkalmazás egyszer újraindul.</string>
     <string name="settings_brand_accent">Kiemelőszínű logó</string>
     <string name="app_icon_petrol">Petrolkék</string>
     <string name="app_icon_sunflower">Napraforgó</string>
@@ -1284,8 +1284,8 @@
     <string name="app_icon_olive">Olívazöld</string>
     <string name="app_icon_olive_cream">Olívazöld krémen</string>
     <string name="app_icon_pixel">Pixel</string>
-    <string name="app_icon_restart_title">Újraindítja az OwnTV-t?</string>
-    <string name="app_icon_restart_message">Új ikont és logót választott. Az OwnTV újraindítása után lépnek életbe.</string>
+    <string name="app_icon_restart_title">Újraindítja az МОЁ ТВ-t?</string>
+    <string name="app_icon_restart_message">Új ikont és logót választott. Az МОЁ ТВ újraindítása után lépnek életbe.</string>
     <string name="app_icon_restart_now">Újraindítás most</string>
     <string name="settings_navigation">Navigáció</string>
     <string name="settings_navigation_description">Hogyan viselkedjen a bal oldali menü</string>
@@ -1439,10 +1439,10 @@
     <string name="settings_help_epg_sources">Adjon hozzá XMLTV-műsorforrást a hivatkozásával, frissítse vagy távolítsa el. A források töltik meg a tévéműsort és az élő tévé műsorsorait.</string>
     <string name="settings_help_guide_days">Hány nap műsorát tárolja előre a műsorújság. Kevesebb nap gyorsabb frissítést és kisebb adatbázist jelent.</string>
     <string name="settings_help_catchup_timezone">A visszanézés a szolgáltató archívumából játssza le a műsorokat. Az Automatikus a szolgáltató által jelzett időzónát használja, ha pedig az nem jelez semmit, a tévé saját óráját; ha a visszanézés így is rossz időben indul, válasszon rögzített UTC-eltolást. Itt választhatja ki azt is, melyik lejátszót használja.</string>
-    <string name="settings_help_theme">Az OwnTV sötét témára készült. A Rendszer a tévé saját beállítását követi, ha van ilyen; a Világos világos szobába való.</string>
+    <string name="settings_help_theme">Az МОЁ ТВ sötét témára készült. A Rendszer a tévé saját beállítását követi, ha van ilyen; a Világos világos szobába való.</string>
     <string name="settings_help_accent">Mindenhol színezi a gombokat, a kijelölés fényét, a folyamatjelzőket és a kiemeléseket. Válasszon előre beállított színt, vagy nyomja meg az OK gombot a palettához és bármilyen hexakódhoz.</string>
     <string name="settings_help_focus">A kijelölt elem körüli keret. Válassza ki a színét és vastagságát, hogy a kanapéról is könnyen követhető legyen.</string>
-    <string name="settings_help_fonts">Az OwnTV-ben mindenhol használt betűtípus és a szöveg mérete. Az ablakok is ugyanezt a betűtípust használják.</string>
+    <string name="settings_help_fonts">Az МОЁ ТВ-ben mindenhol használt betűtípus és a szöveg mérete. Az ablakok is ugyanezt a betűtípust használják.</string>
     <string name="settings_help_popup_size">Egészében nagyobbra vagy kisebbre veszi az ablakokat, menüket és párbeszédablakokat. Akkor hasznos, ha zsúfoltnak tűnnek, vagy túl sokat takarnak a képernyőből.</string>
     <string name="settings_help_zoom">Mindent átméretez a képernyőn. A nagyobb messziről jobban olvasható, a kisebben több fér el. 85%% alatt a kevés memóriájú tévéboxok kifuthatnak a memóriából.</string>
     <string name="settings_help_animations">Bekapcsolva a panelek, menük és a kijelölés finoman mozognak. Kikapcsolva minden változás azonnali.</string>
@@ -1452,13 +1452,13 @@
     <string name="settings_help_vod_layout">A Filmes nézet a kijelölt cím képét plakátrács mögött mutatja. A Külön egymás mellett mutatja a kategóriákat, címeket és részleteket.</string>
     <string name="settings_help_home">Válassza ki, mely sorokat mutassa a kezdőlap és milyen sorrendben, és hogyan nézzen ki a Most felkapott sor.</string>
     <string name="settings_help_customize">Rejtse el a soha nem nézett kategóriákat és elemeket, adjon saját nevet a kategóriáknak, és rendezze őket a saját sorrendjébe. Az elrejtett dolgok innen visszahozhatók, sosem vesznek el.</string>
-    <string name="settings_help_app_icon">Az OwnTV ikonja a tévé kezdőképernyőjén. Az indítónak eltarthat egy pillanatig, mire megjeleníti a változást.</string>
-    <string name="settings_help_brand_accent">Az OwnTV logó a menüben, a Névjegyben és a beállításban a kiemelőszínedben mutatja a lejátszás-háromszöget. A kezdőképernyő ikonja megtartja a saját színeit.</string>
-    <string name="settings_help_startup">Amit az OwnTV induláskor mutat: a kezdőlap, a legutóbb nézett csatorna, a kedvencek vagy egy választott csatorna.</string>
-    <string name="settings_help_check_updates">Most megkeresi a GitHubon az OwnTV újabb verzióját, és felajánlja a telepítését. A lejátszási listák, kedvencek és beállítások változatlanok maradnak.</string>
-    <string name="settings_help_update_startup">Az OwnTV minden indításakor új verziót keres, és szól, ha van. Kérdezés nélkül semmi sem települ.</string>
-    <string name="settings_help_auto_start_boot">Magától megnyitja az OwnTV-t, amint a tévé elindult, az Alkalmazás indulása beállításban választott képernyőn. Az Android csak akkor engedi, hogy egy alkalmazás magától megnyíljon, ha megjelenhet más alkalmazások felett, ezért bekapcsoláskor megnyílik ennek az engedélynek a képernyője. Egyes tévék nem kínálják, és ott az automatikus indítás nem működhet.</string>
-    <string name="settings_help_auto_start_wake">Megnyitja az OwnTV-t minden alkalommal, amikor a tévé felébred alvó módból, akkor is, ha egy másik alkalmazás miatt ébresztetted fel. Ha az Alkalmazás indulása egy csatornát nyit meg, minden ébredés elindítja azt az adást. Amíg ez be van kapcsolva, az OwnTV egy kis háttérszolgáltatást futtat néma értesítéssel. Ahogy a bekapcsoláskori indításnak, ennek is engedély kell a más alkalmazások feletti megjelenítéshez.</string>
+    <string name="settings_help_app_icon">Az МОЁ ТВ ikonja a tévé kezdőképernyőjén. Az indítónak eltarthat egy pillanatig, mire megjeleníti a változást.</string>
+    <string name="settings_help_brand_accent">Az МОЁ ТВ logó a menüben, a Névjegyben és a beállításban a kiemelőszínedben mutatja a lejátszás-háromszöget. A kezdőképernyő ikonja megtartja a saját színeit.</string>
+    <string name="settings_help_startup">Amit az МОЁ ТВ induláskor mutat: a kezdőlap, a legutóbb nézett csatorna, a kedvencek vagy egy választott csatorna.</string>
+    <string name="settings_help_check_updates">Most megkeresi a GitHubon az МОЁ ТВ újabb verzióját, és felajánlja a telepítését. A lejátszási listák, kedvencek és beállítások változatlanok maradnak.</string>
+    <string name="settings_help_update_startup">Az МОЁ ТВ minden indításakor új verziót keres, és szól, ha van. Kérdezés nélkül semmi sem települ.</string>
+    <string name="settings_help_auto_start_boot">Magától megnyitja az МОЁ ТВ-t, amint a tévé elindult, az Alkalmazás indulása beállításban választott képernyőn. Az Android csak akkor engedi, hogy egy alkalmazás magától megnyíljon, ha megjelenhet más alkalmazások felett, ezért bekapcsoláskor megnyílik ennek az engedélynek a képernyője. Egyes tévék nem kínálják, és ott az automatikus indítás nem működhet.</string>
+    <string name="settings_help_auto_start_wake">Megnyitja az МОЁ ТВ-t minden alkalommal, amikor a tévé felébred alvó módból, akkor is, ha egy másik alkalmazás miatt ébresztetted fel. Ha az Alkalmazás indulása egy csatornát nyit meg, minden ébredés elindítja azt az adást. Amíg ez be van kapcsolva, az МОЁ ТВ egy kis háttérszolgáltatást futtat néma értesítéssel. Ahogy a bekapcsoláskori indításnak, ennek is engedély kell a más alkalmazások feletti megjelenítéshez.</string>
     <string name="settings_help_dns">A szolgáltató címeit a választott DNS-kiszolgálóval keresi fel a hálózat saját kiszolgálója helyett — hasznos, ha a hálózat letiltja vagy átirányítja őket.</string>
     <string name="settings_help_hw">A tévé hardveres dekóderét használja: akadásmentes 4K és kevesebb hő. Csak akkor kapcsolja ki, ha egyes adások akadoznak vagy kockásodnak; ekkor a szoftveres dekóder végzi a munkát.</string>
     <string name="settings_help_volume">A hangerő, amellyel minden csatorna, film és rész indul. 100%% fölött a halk adások felerősödnek. A lejátszóban módosított hangerő az adott címnél megmarad, amíg vissza nem állítja.</string>
@@ -1472,7 +1472,7 @@
     <string name="settings_help_timeshift_window">Mennyit tud visszamenni az Élő tévé szüneteltetése és visszatekerése visszanézés nélküli csatornán. A hosszabb több tartalmat tárol a készüléken.</string>
     <string name="settings_help_resume">A Kérdezzen felajánlja a Folytatást vagy az Elölről kezdést, ha a filmnek vagy résznek van mentett pozíciója. A Mindig folytassa ott folytatja, ahol abbahagyta; a Soha ne folytassa az elejéről indít.</string>
     <string name="settings_help_mini">A kis lejátszó, amely böngészés közben egy sarokban tovább viszi a csatornát. Válassza ki a méretét és a sarkot.</string>
-    <string name="settings_help_pip">Nyomd meg a Kezdőlap gombot, vagy nyiss meg egy másik alkalmazást, miközben egy videó teljes képernyőn vagy a mini lejátszóban fut, és egy kis ablakban folytatódik a tévé többi része fölött. Nyisd meg újra az OwnTV-t, hogy visszakerüljön teljes képernyőre; zárd be az ablakot a lejátszás leállításához. A Többnézet az OwnTV-ben marad.</string>
+    <string name="settings_help_pip">Nyomd meg a Kezdőlap gombot, vagy nyiss meg egy másik alkalmazást, miközben egy videó teljes képernyőn vagy a mini lejátszóban fut, és egy kis ablakban folytatódik a tévé többi része fölött. Nyisd meg újra az МОЁ ТВ-t, hogy visszakerüljön teljes képernyőre; zárd be az ablakot a lejátszás leállításához. A Többnézet az МОЁ ТВ-ben marad.</string>
     <string name="settings_key_palette">Paletta</string>
     <string name="settings_live_preview_note">A változások itt látszanak, még mielőtt elhagyná a sort.</string>
     <string name="settings_synced_at">Szinkronizálva: <xliff:g id="when">%1$s</xliff:g></string>
@@ -1483,8 +1483,8 @@
     <string name="settings_profile_add">Profil hozzáadása</string>
     <string name="settings_profile_add_line">Néző saját kedvencekkel, előzményekkel és beállításokkal</string>
     <plurals name="settings_help_language">
-        <item quantity="one">Az OwnTV összes menüjének és üzenetének nyelve. <xliff:g id="count">%1$d</xliff:g> nyelv; amíg nem választ, a tévé saját nyelvét követi.</item>
-        <item quantity="other">Az OwnTV összes menüjének és üzenetének nyelve. <xliff:g id="count">%1$d</xliff:g> nyelv; amíg nem választ, a tévé saját nyelvét követi.</item>
+        <item quantity="one">Az МОЁ ТВ összes menüjének és üzenetének nyelve. <xliff:g id="count">%1$d</xliff:g> nyelv; amíg nem választ, a tévé saját nyelvét követi.</item>
+        <item quantity="other">Az МОЁ ТВ összes menüjének és üzenetének nyelve. <xliff:g id="count">%1$d</xliff:g> nyelv; amíg nem választ, a tévé saját nyelvét követi.</item>
     </plurals>
     <plurals name="settings_profile_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> profil</item>
@@ -1520,8 +1520,8 @@
     <string name="settings_home_show_row">Sor megjelenítése</string>
     <string name="settings_home_move_row">Áthelyezés (▲ ▼, majd OK)</string>
     <string name="settings_line_remote_shortcuts_on">Kikapcsolva a hozzárendelések megmaradnak</string>
-    <string name="settings_language_system_help">Az OwnTV a tévé nyelvét használja (most: <xliff:g id="language">%1$s</xliff:g>). Válassz lent egy nyelvet, ha csak az OwnTV-ben szeretnéd használni.</string>
-    <string name="settings_language_pick_help"><xliff:g id="language">%1$s</xliff:g> használata az OwnTV-ben, a tévé nyelvétől függetlenül.</string>
+    <string name="settings_language_system_help">Az МОЁ ТВ a tévé nyelvét használja (most: <xliff:g id="language">%1$s</xliff:g>). Válassz lent egy nyelvet, ha csak az МОЁ ТВ-ben szeretnéd használni.</string>
+    <string name="settings_language_pick_help"><xliff:g id="language">%1$s</xliff:g> használata az МОЁ ТВ-ben, a tévé nyelvétől függetlenül.</string>
     <string name="settings_key_use">Használat</string>
     <string name="settings_line_metadata_source">Honnan származnak a filmek és sorozatok adatai</string>
     <string name="settings_line_metadata_language">Cselekmények, műfajok és címek a TMDB-ből</string>
@@ -1560,7 +1560,7 @@
     <string name="settings_line_glass_bg">Háttér, képhatás, üveg</string>
     <string name="settings_bg_background">Háttér</string>
     <string name="settings_line_bg_background">Ami minden képernyő mögött van</string>
-    <string name="settings_help_bg_background">A Stage az OwnTV saját lágy színeit mutatja. A Kép a saját képedet mutatja minden képernyő mögött. Az Egyszerű sima sötét kitöltés.</string>
+    <string name="settings_help_bg_background">A Stage az МОЁ ТВ saját lágy színeit mutatja. A Kép a saját képedet mutatja minden képernyő mögött. Az Egyszerű sima sötét kitöltés.</string>
     <string name="settings_bg_stage">Stage</string>
     <string name="settings_bg_picture">Kép</string>
     <string name="settings_bg_plain">Egyszerű</string>

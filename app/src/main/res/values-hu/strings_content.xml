@@ -26,7 +26,7 @@
     <string name="content_genre_scifi">Sci-fi</string>
     <string name="content_genre_series">Sorozatok</string>
     <string name="content_genre_sport">Sport</string>
-    <string name="content_exit_owntv">Kilépsz az OwnTV-ből?</string>
+    <string name="content_exit_owntv">Kilépsz az МОЁ ТВ-ből?</string>
     <string name="content_exit_confirmation">Biztosan bezárod az alkalmazást?</string>
     <string name="content_restore_incomplete_title">Egy visszaállítás nem fejeződött be</string>
     <string name="content_restore_incomplete_message">Az alkalmazás bezárult, miközben a(z) <xliff:g id="description">%1$s</xliff:g> visszaállítása folyt, ezért egy része hiányozhat. Semmi nem törlődött — futtasd le ugyanazt a visszaállítást újra a Beállítások → Biztonsági mentés és visszaállítás menüben a hiányzó rész pótlásához.</string>
@@ -138,7 +138,7 @@
     <string name="content_storage_choose_folder">Másik mappa választása…</string>
     <string name="content_storage_chosen_folder">Kiválasztott mappa</string>
     <string name="content_storage_folder_lost">Ez a mappa már nem érhető el. Válassza ki újra, vagy válasszon másikat.</string>
-    <string name="content_storage_folder_fallback">A letöltési mappa most nem érhető el, ezért a letöltések az OwnTV saját mappájába kerülnek, amíg vissza nem tér.</string>
+    <string name="content_storage_folder_fallback">A letöltési mappa most nem érhető el, ezért a letöltések az МОЁ ТВ saját mappájába kerülnek, amíg vissza nem tér.</string>
     <string name="content_downloads_reason_account_busy">A fiók foglalt: egy másik adatfolyam használja a kapcsolatot</string>
     <string name="content_downloads_reason_refused">A szerver elutasította a hivatkozást</string>
     <string name="content_downloads_reason_not_found">A szerveren már nincs meg ez a fájl</string>

@@ -26,7 +26,7 @@
     <string name="content_genre_scifi">Bilim Kurgu</string>
     <string name="content_genre_series">Diziler</string>
     <string name="content_genre_sport">Spor</string>
-    <string name="content_exit_owntv">OwnTV\'den çıkılsın mı?</string>
+    <string name="content_exit_owntv">МОЁ ТВ\'den çıkılsın mı?</string>
     <string name="content_exit_confirmation">Uygulamayı kapatmak istediğinizden emin misiniz?</string>
     <string name="content_restore_incomplete_title">Bir geri yükleme tamamlanmadı</string>
     <string name="content_restore_incomplete_message">Uygulama <xliff:g id="description">%1$s</xliff:g> geri yüklenirken kapandı, bu nedenle bazı veriler eksik olabilir. Hiçbir şey silinmedi — kalanları tamamlamak için Ayarlar → Yedekleme ve Geri Yükleme bölümünden aynı geri yüklemeyi yeniden çalıştırın.</string>
@@ -138,7 +138,7 @@
     <string name="content_storage_choose_folder">Başka bir klasör seç…</string>
     <string name="content_storage_chosen_folder">Seçilen klasör</string>
     <string name="content_storage_folder_lost">Bu klasör artık kullanılamıyor. Yeniden seçin ya da başka bir klasör seçin.</string>
-    <string name="content_storage_folder_fallback">İndirme klasörünüz şu anda kullanılamıyor; geri gelene kadar indirmeler OwnTV\'nin kendi klasörüne kaydediliyor.</string>
+    <string name="content_storage_folder_fallback">İndirme klasörünüz şu anda kullanılamıyor; geri gelene kadar indirmeler МОЁ ТВ\'nin kendi klasörüne kaydediliyor.</string>
     <string name="content_downloads_reason_account_busy">Hesap meşgul: bağlantıyı başka bir akış kullanıyor</string>
     <string name="content_downloads_reason_refused">Sunucu bağlantıyı reddetti</string>
     <string name="content_downloads_reason_not_found">Sunucuda artık bu dosya yok</string>

@@ -138,8 +138,8 @@
     <string name="update_not_enough_space">لا توجد مساحة تخزين كافية للتحديث. أفرِغ نحو <xliff:g id="size">%1$s</xliff:g> ثم أعد المحاولة.</string>
     <string name="update_damaged_download">لم يكتمل تنزيل التحديث. تحقّق من اتصالك ثم أعد المحاولة.</string>
     <string name="update_install_rejected">رفض مثبّت النظام التحديث: <xliff:g id="reason">%1$s</xliff:g></string>
-    <string name="update_ready">OwnTV v<xliff:g id="available">%1$s</xliff:g> جاهز (لديك v<xliff:g id="current">%2$s</xliff:g>).</string>
-    <string name="recovery_title">تعذّر على OwnTV فتح قاعدة بياناته</string>
+    <string name="update_ready">МОЁ ТВ v<xliff:g id="available">%1$s</xliff:g> جاهز (لديك v<xliff:g id="current">%2$s</xliff:g>).</string>
+    <string name="recovery_title">تعذّر على МОЁ ТВ فتح قاعدة بياناته</string>
     <string name="recovery_data_safe_full">لم تُحذف ملفاتك الشخصية أو قوائم التشغيل أو المفضّلة أو سجل المشاهدة — فهذا إخفاق في ترقية قاعدة البيانات، وما تزال البيانات على هذا الجهاز.\n\nيرجى الإبلاغ عن ذلك حتى يمكن إصلاحه، وإرفاق الرسالة أدناه.</string>
     <string name="recovery_retry">إعادة المحاولة</string>
     <string name="recovery_backup_hint">إذا كان لديك ملف نسخة احتياطية، فيمكنك إعادة ضبط التطبيق ثم الاستعادة منه بعد ذلك. تؤدي إعادة الضبط إلى حذف كل ما هو مخزّن على هذا الجهاز.</string>
@@ -164,7 +164,7 @@
     <string name="home_trending_pause">إيقاف مؤقت</string>
     <string name="recording_notification_title">جارٍ التسجيل</string>
     <string name="auto_start_notification_channel">التشغيل التلقائي عند الاستيقاظ</string>
-    <string name="auto_start_notification_text">يُفتح OwnTV عندما يستيقظ التلفزيون</string>
+    <string name="auto_start_notification_text">يُفتح МОЁ ТВ عندما يستيقظ التلفزيون</string>
     <string name="recording_failed_no_space">توقّف: لا توجد مساحة كافية</string>
     <string name="recording_failed_no_connection">لا يوجد اتصال متاح من مزوّدك</string>
     <string name="recording_failed_clash">كان تسجيل آخر يستخدم الاتصال</string>
@@ -186,7 +186,7 @@
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> دقيقة</item>
     </plurals>
     <string name="recording_failed_encrypted">هذه القناة مشفّرة ولا يمكن تسجيلها</string>
-    <string name="recording_failed_drm">هذه القناة محمية بنظام DRM، لذا يمكن مشاهدتها لكن لا يمكن تسجيلها. الحماية من مزوّد الخدمة لديك، وليست من OwnTV.</string>
+    <string name="recording_failed_drm">هذه القناة محمية بنظام DRM، لذا يمكن مشاهدتها لكن لا يمكن تسجيلها. الحماية من مزوّد الخدمة لديك، وليست من МОЁ ТВ.</string>
     <string name="recording_failed_metered">لم يُسجَّل عبر بيانات الهاتف</string>
     <string name="sports_channel_goal_alerts">تنبيهات الأهداف</string>
     <string name="sports_channel_live_match">مباراة مباشرة</string>
@@ -460,7 +460,7 @@
     <string name="sports_live_refresh_description">فقط أثناء عرض شاشة رياضية أو نتيجة</string>
     <string name="sports_about">حول بيانات الرياضة</string>
     <string name="sports_about_summary">النتائج: ESPN · القنوات: قائمتك ودليلك</string>
-    <string name="sports_alerts_when_closed">التنبيهات عند إغلاق OwnTV</string>
+    <string name="sports_alerts_when_closed">التنبيهات عند إغلاق МОЁ ТВ</string>
     <string name="sports_alerts_when_closed_description">يطلب إذن الإشعارات مرة واحدة</string>
     <string name="sports_alert_me_about">نبّهني بشأن</string>
     <string name="sports_kind_goals">الأهداف والويكيت</string>
@@ -471,7 +471,7 @@
     <string name="sports_live_card">بطاقة النتيجة المباشرة</string>
     <string name="sports_live_card_offer">عرض بطاقة النتيجة المباشرة</string>
     <string name="sports_live_card_description">يتحدّث كل 30 ث حتى نهاية المباراة؛ تبدؤه من صفحة مباراة</string>
-    <string name="sports_alerts_footnote">عند إغلاق OwnTV تصل التنبيهات عادةً خلال دقيقة. إذا بقي الهاتف ساكنًا وشاشته مطفأة مدة طويلة، فقد يؤخرها Android حتى نحو 15 دقيقة. بطاقة النتيجة المباشرة لا تتأخر.</string>
+    <string name="sports_alerts_footnote">عند إغلاق МОЁ ТВ تصل التنبيهات عادةً خلال دقيقة. إذا بقي الهاتف ساكنًا وشاشته مطفأة مدة طويلة، فقد يؤخرها Android حتى نحو 15 دقيقة. بطاقة النتيجة المباشرة لا تتأخر.</string>
     <string name="sports_search_teams">ابحث عن فرق ولاعبين ودوريات</string>
     <string name="sports_suggested">مقترحات مما تشاهده</string>
     <plurals name="sports_watched_matches">
@@ -484,7 +484,7 @@
     </plurals>
     <string name="sports_league_label">دوري</string>
     <string name="sports_no_playlist_title">أضف قائمة تشغيل لمشاهدة المباريات</string>
-    <string name="sports_no_playlist_body">النتائج والجداول والتنبيهات تعمل دونها. ومع قائمة تشغيل يجد OwnTV كل قناة تعرض هذه المباراة.</string>
+    <string name="sports_no_playlist_body">النتائج والجداول والتنبيهات تعمل دونها. ومع قائمة تشغيل يجد МОЁ ТВ كل قناة تعرض هذه المباراة.</string>
     <string name="sports_add_playlist">إضافة قائمة تشغيل</string>
     <string name="sports_home_row">رياضة مباشرة</string>
     <string name="sports_home_row_description">المباريات المتابَعة عندما تكون إحداها مباشرة أو على وشك البدء</string>
@@ -494,7 +494,7 @@
     <string name="sports_sport_buttons">أزرار الرياضات</string>
     <string name="sports_sport_buttons_mine">رياضاتي</string>
     <string name="sports_sport_buttons_all">كل الرياضات</string>
-    <string name="sports_sport_buttons_description">رياضاتي: ما اخترته فقط. كل الرياضات: كل دوري يعرفه OwnTV، ويستغرق تحميله وقتًا أطول.</string>
+    <string name="sports_sport_buttons_description">رياضاتي: ما اخترته فقط. كل الرياضات: كل دوري يعرفه МОЁ ТВ، ويستغرق تحميله وقتًا أطول.</string>
     <string name="sports_auto_rebuild">إعادة البناء التلقائية</string>
     <string name="sports_auto_rebuild_description">عدد مرات جلب النتائج وتفاصيل المباريات والجداول من جديد تلقائيًا</string>
     <plurals name="sports_auto_rebuild_hours">

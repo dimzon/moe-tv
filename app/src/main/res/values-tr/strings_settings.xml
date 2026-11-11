@@ -27,7 +27,7 @@
     <string name="settings_static">Statik</string>
     <string name="settings_dynamic">Dinamik</string>
     <string name="settings_use_proxy">Proxy kullan</string>
-    <string name="settings_proxy_description">Tüm OwnTV trafiğini ve oynatmayı bir HTTP proxy üzerinden gönderin.</string>
+    <string name="settings_proxy_description">Tüm МОЁ ТВ trafiğini ve oynatmayı bir HTTP proxy üzerinden gönderin.</string>
     <string name="settings_host">Sunucu</string>
     <string name="settings_proxy_host_hint">proxy.example.com</string>
     <string name="settings_port">Bağlantı noktası</string>
@@ -134,15 +134,15 @@
         <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g> kaldı</item>
     </plurals>
     <string name="settings_metadata_active_source">Etkin kaynak</string>
-    <string name="settings_metadata_shared_worker_description">OwnTV Worker · kurulum gerekmez</string>
+    <string name="settings_metadata_shared_worker_description">МОЁ ТВ Worker · kurulum gerekmez</string>
     <string name="settings_metadata_connection">Bağlantı</string>
     <string name="settings_metadata_remote_advanced">Gelişmiş TMDB bilgilerini alın</string>
     <string name="settings_metadata_remote_advanced_description">Paylaşılan varsayılan hizmet yerine kendi TMDB API anahtarınızı ya da kendi barındırdığınız Worker’ı kullanın.</string>
     <string name="settings_metadata_key_label">Anahtar</string>
     <string name="settings_metadata_server_label">Sunucu</string>
     <string name="settings_metadata_clear_advanced_title">Kendi anahtarınızı kullanmayı bırakmak istiyor musunuz?</string>
-    <string name="settings_metadata_clear_advanced_message">TMDB API anahtarınız ve kendi sunucu adresiniz bu cihazdan silinecek ve OwnTV, günlük payı olan yerleşik paylaşılan hizmete geri dönecek.</string>
-    <string name="settings_metadata_fair_share">Yerleşik meta veri hizmeti OwnTV kullanan herkes tarafından paylaşılır; bu nedenle her cihaz her gün kendi payını alır. Payınızı tüketirseniz posterler ve açıklamalar yenilenene kadar duraklar — kendi oynatma listenizdeki bilgiler normal şekilde çalışmaya devam eder. Kendi TMDB API anahtarınızı veya sunucunuzu eklemek bu sınırı kaldırır: ücretsizdir ve kişisel bir anahtarın neredeyse hiç sınırı yoktur.</string>
+    <string name="settings_metadata_clear_advanced_message">TMDB API anahtarınız ve kendi sunucu adresiniz bu cihazdan silinecek ve МОЁ ТВ, günlük payı olan yerleşik paylaşılan hizmete geri dönecek.</string>
+    <string name="settings_metadata_fair_share">Yerleşik meta veri hizmeti МОЁ ТВ kullanan herkes tarafından paylaşılır; bu nedenle her cihaz her gün kendi payını alır. Payınızı tüketirseniz posterler ve açıklamalar yenilenene kadar duraklar — kendi oynatma listenizdeki bilgiler normal şekilde çalışmaya devam eder. Kendi TMDB API anahtarınızı veya sunucunuzu eklemek bu sınırı kaldırır: ücretsizdir ve kişisel bir anahtarın neredeyse hiç sınırı yoktur.</string>
     <string name="settings_metadata_limit_reached">Günlük meta veri payınız tükendi — bu sınırı kaldırmak için Ayarlar → Meta Veri bölümünden kendi TMDB anahtarınızı ekleyin.</string>
     <string name="settings_metadata_language">Meta veri dili</string>
     <string name="settings_metadata_language_description">TMDB’den gelen konu, tür ve başlıkların dili. TMDB’nin çevirmediği alanlar İngilizce kalır. Ayrıntılar dile göre önbelleğe alınır, bu yüzden geri dönmek anlıktır.</string>
@@ -266,15 +266,15 @@
     <string name="settings_player_zoom">Oynatıcı Yakınlaştırması</string>
     <string name="settings_app_group">Uygulama</string>
     <string name="settings_app_startup">Uygulama başlangıcı</string>
-    <string name="settings_app_startup_description">OwnTV başlatıldığında açılacak bölüm</string>
+    <string name="settings_app_startup_description">МОЁ ТВ başlatıldığında açılacak bölüm</string>
     <string name="settings_check_updates">Güncellemeleri denetle</string>
     <string name="settings_check_updates_description">En son sürümü GitHub Releases üzerinden alın</string>
     <string name="settings_update_startup">Başlangıçta güncellemeleri denetle</string>
     <string name="settings_update_startup_description">Uygulama açıldığında yeni sürüm olup olmadığını denetleyin</string>
     <string name="settings_auto_start_boot">Açılışta otomatik başlat</string>
-    <string name="settings_auto_start_boot_description">TV açıldığında OwnTV’yi aç</string>
+    <string name="settings_auto_start_boot_description">TV açıldığında МОЁ ТВ’yi aç</string>
     <string name="settings_auto_start_wake">Uyanınca otomatik başlat</string>
-    <string name="settings_auto_start_wake_description">TV uyku modundan çıktığında OwnTV’yi aç</string>
+    <string name="settings_auto_start_wake_description">TV uyku modundan çıktığında МОЁ ТВ’yi aç</string>
     <string name="settings_auto_start_needs_overlay">“Diğer uygulamaların üzerinde göster” gerekli</string>
     <string name="settings_about">Hakkında</string>
     <string name="settings_live_latency">Canlı yayın gecikmesi</string>
@@ -527,7 +527,7 @@
     <string name="settings_guide_synced">Program rehberi eşitlendi</string>
     <string name="settings_guide_sync_failed">Program rehberi eşitlenemedi</string>
     <string name="settings_restore_remote_title">Başka bir cihazdan geri yükle</string>
-    <string name="settings_restore_remote_description">Aynı Wi-Fi’daki tarayıcılı herhangi bir cihazda — telefon, bilgisayar veya başka bir TV — QR kodunu tarayın (veya URL’yi açın), bu PIN’i girin, OwnTV yedek dosyanızı seçip gönderin. Neyin geri yükleneceğini sonra burada seçersiniz.</string>
+    <string name="settings_restore_remote_description">Aynı Wi-Fi’daki tarayıcılı herhangi bir cihazda — telefon, bilgisayar veya başka bir TV — QR kodunu tarayın (veya URL’yi açın), bu PIN’i girin, МОЁ ТВ yedek dosyanızı seçip gönderin. Neyin geri yükleneceğini sonra burada seçersiniz.</string>
     <string name="settings_try_again">Tekrar dene</string>
     <string name="settings_new_pin">Yeni bir PIN ile yeniden başlat</string>
     <string name="settings_download_remote_title">Başka bir cihaza indir</string>
@@ -677,9 +677,9 @@
     <string name="settings_sources_ignore_limit">Bağlantı sınırını yok say</string>
     <string name="settings_sources_ignore_limit_on">Bağlantı sınırı yok sayılıyor: Çoklu görünüm ve kayıtlar bu oynatma listesinin bildirdiğinden fazla yayın açabilir. Sağlayıcının reddettiği bir yayın bunu yine bildirir.</string>
     <string name="settings_sources_probe_title">Bu oynatma listesi test edilsin mi?</string>
-    <string name="settings_sources_probe_warning">Birçok sağlayıcı aynı anda kaç kanal izleyebileceğinizi hiç belirtmez; bu yüzden OwnTV birkaç kanal açıp hangilerinin devam ettiğine bakarak bunu kendisi bulur. Şu anda oynatılan her şey duracak ve bu işlem iki dakikaya kadar sürebilir.</string>
+    <string name="settings_sources_probe_warning">Birçok sağlayıcı aynı anda kaç kanal izleyebileceğinizi hiç belirtmez; bu yüzden МОЁ ТВ birkaç kanal açıp hangilerinin devam ettiğine bakarak bunu kendisi bulur. Şu anda oynatılan her şey duracak ve bu işlem iki dakikaya kadar sürebilir.</string>
     <string name="settings_sources_probe_running">Bu sağlayıcının kaç kanala izin verdiği kontrol ediliyor… (<xliff:g id="current">%1$d</xliff:g>/<xliff:g id="total">%2$d</xliff:g>)</string>
-    <string name="settings_sources_probe_unknown">OwnTV bu sağlayıcının kaç kanala izin verdiğini belirleyemedi.</string>
+    <string name="settings_sources_probe_unknown">МОЁ ТВ bu sağlayıcının kaç kanala izin verdiğini belirleyemedi.</string>
     <string name="settings_sources_probe_skip">Atla</string>
     <string name="settings_sources_auto_refresh">⟳ <xliff:g id="mode">%1$s</xliff:g></string>
     <string name="settings_sources_default">VARSAYILAN</string>
@@ -925,7 +925,7 @@
     <string name="settings_move_category_keep">“<xliff:g id="name">%1$s</xliff:g>” kategorisinde de tut</string>
     <string name="settings_move_category_action">Taşı</string>
     <string name="settings_dns_description">Alan adı sorguları için özel bir DNS sunucusu kullanın</string>
-    <string name="settings_dns_toggle_description">Tüm OwnTV alan adı sorguları özel bir DNS sunucusu üzerinden çözümlenir.</string>
+    <string name="settings_dns_toggle_description">Tüm МОЁ ТВ alan adı sorguları özel bir DNS sunucusu üzerinden çözümlenir.</string>
     <string name="settings_dns_use_custom">Özel DNS kullan</string>
     <string name="settings_dns_server_missing">Özel DNS etkin ancak hiçbir sunucu yapılandırılmadı. Bir sunucu adresi girip Kaydet’i seçin veya bu seçeneği kapatın.</string>
     <string name="settings_dns_server">DNS sunucusu</string>
@@ -970,7 +970,7 @@
     <string name="settings_live_preroll">Canlı yayınları ön arabelleğe al</string>
     <string name="settings_live_preroll_description">Bir canlı kanal oynamaya başlamadan önce ve bir takılma sonrasında bu kadar video biriktirilir. Bu bir video miktarıdır, geri sayım değil. Kapalı, mümkün olan en hızlı başlangıcı sağlar.</string>
     <string name="settings_live_tune_timeout">Bir kanaldan şu süre sonra vazgeç</string>
-    <string name="settings_live_tune_timeout_description">Bir canlı kanal bu süre içinde görüntü vermediyse, OwnTV tüm oynatıcılarını tek tek denerken siyah ekran bırakmak yerine denemeyi bırakır ve size söyler. “Asla” denemeyi sürdürür; sağlayıcınızın kaldırdığı bir kanalda bu bir dakikayı rahatça aşabilir. Sağlayıcınızın istediği bekleme süreleri sayılmaz.</string>
+    <string name="settings_live_tune_timeout_description">Bir canlı kanal bu süre içinde görüntü vermediyse, МОЁ ТВ tüm oynatıcılarını tek tek denerken siyah ekran bırakmak yerine denemeyi bırakır ve size söyler. “Asla” denemeyi sürdürür; sağlayıcınızın kaldırdığı bir kanalda bu bir dakikayı rahatça aşabilir. Sağlayıcınızın istediği bekleme süreleri sayılmaz.</string>
     <string name="settings_live_preroll_per_playlist">Yayın listesi başına ön arabellek</string>
     <string name="settings_live_preroll_per_playlist_description">Üstteki ayarı bir yayın listesi için geçersiz kılarken diğer yayın listelerinizin hızlı kalmasını sağlar.</string>
     <string name="settings_live_latency_per_playlist">Yayın listesi başına canlı yayın gecikmesi</string>
@@ -988,7 +988,7 @@
     <string name="settings_surround_auto_description_mobile">Otomatik — Dolby/DTS surround\'u dener; hoparlör, kulaklık ya da bağlı alıcı çalamazsa otomatik olarak stereoya geri döner. Önerilir.</string>
     <string name="settings_surround_stereo_description">Yalnızca stereo — her zaman uygulamada kod çözün ve düz 2.0 ses gönderin. Bunu TV hoparlörlerinde veya stereo soundbar\'da, ya da ses görüntünün gerisinde kalıyorsa kullanın.</string>
     <string name="settings_surround_stereo_description_mobile">Yalnızca stereo — her zaman uygulamada kod çözün ve düz 2.0 ses gönderin. Bunu dahili hoparlör, kulaklık veya stereo soundbar için, ya da ses görüntünün gerisinde kalıyorsa kullanın.</string>
-    <string name="settings_surround_forced_description">Surround — Dolby/DTS\'yi gerçek bir 5.1/7.1 alıcıya gönderin. Ses kesilirse veya takılırsa OwnTV yine de stereoya geri döner ve size bildirir.</string>
+    <string name="settings_surround_forced_description">Surround — Dolby/DTS\'yi gerçek bir 5.1/7.1 alıcıya gönderin. Ses kesilirse veya takılırsa МОЁ ТВ yine de stereoya geri döner ve size bildirir.</string>
     <string name="settings_panel_width">Panel genişliği ayarı</string>
     <string name="settings_panel_width_description">Canlı TV, Filmler ve Diziler bölümlerindeki kategori, liste ve önizleme panellerini yeniden boyutlandırın.</string>
     <string name="settings_vod_layout">Filmler ve Diziler düzeni</string>
@@ -1028,9 +1028,9 @@
     <string name="settings_panel_width_preview_panel"><xliff:g id="label">%1$s</xliff:g> paneli</string>
     <string name="settings_panel_width_total">Toplam boyut</string>
     <string name="settings_panel_width_invalid_total">Toplam boyut <xliff:g id="total">%1$d</xliff:g>%%. %%100 olması gerekiyor — lütfen ayarlayın.</string>
-    <string name="settings_language_help_translate">OwnTV\'yi kendi dilinize çevirmeye yardım edin</string>
-    <string name="settings_language_contribution_description">QR kodu okutun veya bağlantıyı açın; dilediğiniz dili seçin ve OwnTV çevirisinin altı bileşeninin tamamına katkıda bulunun.</string>
-    <string name="settings_language_contribution_qr_description">OwnTV çeviri projesi genel bakışı için QR kodu</string>
+    <string name="settings_language_help_translate">МОЁ ТВ\'yi kendi dilinize çevirmeye yardım edin</string>
+    <string name="settings_language_contribution_description">QR kodu okutun veya bağlantıyı açın; dilediğiniz dili seçin ve МОЁ ТВ çevirisinin altı bileşeninin tamamına katkıda bulunun.</string>
+    <string name="settings_language_contribution_qr_description">МОЁ ТВ çeviri projesi genel bakışı için QR kodu</string>
     <string name="settings_language_contribution_qr_failed">QR kod oluşturulamadı. Bunun yerine aşağıda gösterilen bağlantıyı kullanın.</string>
     <string name="settings_language_contribution_copy">Bağlantıyı kopyala</string>
     <string name="settings_language_contribution_copied">Bağlantı kopyalandı</string>
@@ -1039,8 +1039,8 @@
     <string name="settings_auto_frame_rate_warning_suffix">Bu TV\'de önerilmez: Android 12 altında hız sorunsuz değiştirilemez.</string>
     <string name="settings_auto_frame_rate_warning_title">Bu TV\'de önerilmez</string>
     <string name="settings_auto_frame_rate_warning_title_mobile">Bu cihazda önerilmez</string>
-    <string name="settings_auto_frame_rate_warning_description">Bu cihaz Android <xliff:g id="android_version">%1$s</xliff:g> sürümüyle çalışıyor. Android 12\'den önceki sürümlerde TV, OwnTV\'ye hangi yenileme hızlarına sorunsuz geçebileceğini bildiremez; bu yüzden hızı değiştirmek ekranın bir iki saniyeliğine kararmasına neden olabilir — bazen bir program sırasında birden fazla kez.\n\nBurada otomatik yenileme hızını kapalı bırakmanızı öneririz. TV\'niz sorunsuz geçiş yapıyorsa açıp deneyin: istediğiniz zaman geri değiştirebilirsiniz.</string>
-    <string name="settings_auto_frame_rate_warning_description_mobile">Bu cihaz Android <xliff:g id="android_version">%1$s</xliff:g> sürümüyle çalışıyor. Android 12\'den önceki sürümlerde cihaz, OwnTV\'ye hangi yenileme hızlarına sorunsuz geçebileceğini bildiremez; bu yüzden hızı değiştirmek ekranın bir iki saniyeliğine kararmasına neden olabilir — bazen bir program sırasında birden fazla kez.\n\nBurada otomatik yenileme hızını kapalı bırakmanızı öneririz. Ekranınız sorunsuz geçiş yapıyorsa açıp deneyin: istediğiniz zaman geri değiştirebilirsiniz.</string>
+    <string name="settings_auto_frame_rate_warning_description">Bu cihaz Android <xliff:g id="android_version">%1$s</xliff:g> sürümüyle çalışıyor. Android 12\'den önceki sürümlerde TV, МОЁ ТВ\'ye hangi yenileme hızlarına sorunsuz geçebileceğini bildiremez; bu yüzden hızı değiştirmek ekranın bir iki saniyeliğine kararmasına neden olabilir — bazen bir program sırasında birden fazla kez.\n\nBurada otomatik yenileme hızını kapalı bırakmanızı öneririz. TV\'niz sorunsuz geçiş yapıyorsa açıp deneyin: istediğiniz zaman geri değiştirebilirsiniz.</string>
+    <string name="settings_auto_frame_rate_warning_description_mobile">Bu cihaz Android <xliff:g id="android_version">%1$s</xliff:g> sürümüyle çalışıyor. Android 12\'den önceki sürümlerde cihaz, МОЁ ТВ\'ye hangi yenileme hızlarına sorunsuz geçebileceğini bildiremez; bu yüzden hızı değiştirmek ekranın bir iki saniyeliğine kararmasına neden olabilir — bazen bir program sırasında birden fazla kez.\n\nBurada otomatik yenileme hızını kapalı bırakmanızı öneririz. Ekranınız sorunsuz geçiş yapıyorsa açıp deneyin: istediğiniz zaman geri değiştirebilirsiniz.</string>
     <string name="settings_auto_frame_rate_keep_off">Kapalı bırak</string>
     <string name="settings_auto_frame_rate_turn_on_anyway">Yine de aç</string>
     <string name="settings_language_request_workflow">Listede olmayan bir dil mi eklemek istiyorsunuz? Önce bir dil talebi açın. Bir proje yöneticisi dili kaydeder ve temel çeviri dosyalarını hazırlar; Hosted Weblate üzerinde göründüğünde katkıda bulunmaya başlayabilirsiniz.</string>
@@ -1163,7 +1163,7 @@
     <string name="local_sync_received_items">Alınan öğeler: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_sent">Verileriniz gönderildi</string>
     <string name="local_sync_failed">Eşitleme başarısız oldu</string>
-    <string name="local_sync_error_unreachable">Bu cihaza ulaşılamadı. O cihazda OwnTV → Daha fazla → Yerel eşitleme yolunu açıp Eşitleme modunu açın. Her iki cihaz da aynı Wi-Fi ağında olmalıdır.</string>
+    <string name="local_sync_error_unreachable">Bu cihaza ulaşılamadı. O cihazda МОЁ ТВ → Daha fazla → Yerel eşitleme yolunu açıp Eşitleme modunu açın. Her iki cihaz da aynı Wi-Fi ağında olmalıdır.</string>
     <string name="local_sync_error_unauthorized">Diğer cihaz reddetti. PIN yanlış olabilir ya da bu cihazı unutmuş olabilir.</string>
     <string name="local_sync_error_bad_payload">Gelen veri okunamadı. Parola kullandıysanız her iki cihazda da aynı olduğunu kontrol edin.</string>
     <string name="local_sync_error_unknown">Bir şeyler ters gitti. Tekrar deneyin.</string>
@@ -1181,7 +1181,7 @@
     <string name="local_auto_sync_waiting"><xliff:g id="device">%1$s</xliff:g> izin vermesi bekleniyor…</string>
     <string name="local_auto_sync_declined"><xliff:g id="device">%1$s</xliff:g> otomatik eşitlemeye izin vermedi.</string>
     <string name="local_auto_sync_accept_title">Otomatik eşitlemeye izin verilsin mi?</string>
-    <string name="local_auto_sync_accept_body"><xliff:g id="device">%1$s</xliff:g>, OwnTV her ikisinde de açıkken bu cihazla kendiliğinden eşitlemek istiyor. Yalnızca bu cihazda izin verdikleriniz gelir ve iki cihazdan biri onu kapatabilir.</string>
+    <string name="local_auto_sync_accept_body"><xliff:g id="device">%1$s</xliff:g>, МОЁ ТВ her ikisinde de açıkken bu cihazla kendiliğinden eşitlemek istiyor. Yalnızca bu cihazda izin verdikleriniz gelir ve iki cihazdan biri onu kapatabilir.</string>
     <string name="local_auto_sync_accept">İzin ver</string>
     <string name="local_auto_sync_decline">İzin verme</string>
     <string name="local_auto_sync_what_to_sync">Bu cihazın eşitledikleri</string>
@@ -1197,7 +1197,7 @@
     <string name="local_auto_sync_turned_off"><xliff:g id="device">%1$s</xliff:g> üzerinde otomatik eşitleme kapatıldı</string>
     <string name="local_auto_sync_unreachable"><xliff:g id="device">%1$s</xliff:g> cihazına ulaşılamadı, yeniden denenecek</string>
     <string name="local_auto_sync_listen">Otomatik eşitlemeyi dinlemeye devam et</string>
-    <string name="local_auto_sync_listen_description">Açık: eşleştirilmiş cihazlar, OwnTV burada açıkken bununla eşitleme yapabilir. Kapalı: yalnızca eşitleme modu açıkken.</string>
+    <string name="local_auto_sync_listen_description">Açık: eşleştirilmiş cihazlar, МОЁ ТВ burada açıkken bununla eşitleme yapabilir. Kapalı: yalnızca eşitleme modu açıkken.</string>
     <string name="local_auto_sync_listening">Dinliyor</string>
     <string name="more_pane_last_backup">Son yedek</string>
     <string name="more_pane_encrypted">Şifreli</string>
@@ -1272,8 +1272,8 @@
     <string name="settings_multiview_keep_two">2 kalsın</string>
     <string name="settings_multiview_use_anyway">Yine de kullan</string>
     <string name="settings_app_icon">Uygulama simgesi</string>
-    <string name="settings_app_icon_summary">OwnTV simgesinin ve logosunun rengi</string>
-    <string name="settings_app_icon_sheet_mobile">OwnTV’nin ana ekranınızda nasıl göründüğü. Uygulama bir kez yeniden başlar.</string>
+    <string name="settings_app_icon_summary">МОЁ ТВ simgesinin ve logosunun rengi</string>
+    <string name="settings_app_icon_sheet_mobile">МОЁ ТВ’nin ana ekranınızda nasıl göründüğü. Uygulama bir kez yeniden başlar.</string>
     <string name="settings_brand_accent">Vurgu renginde logo</string>
     <string name="app_icon_petrol">Petrol Mavisi</string>
     <string name="app_icon_sunflower">Ayçiçeği</string>
@@ -1284,8 +1284,8 @@
     <string name="app_icon_olive">Zeytin Yeşili</string>
     <string name="app_icon_olive_cream">Krem Üzerine Zeytin Yeşili</string>
     <string name="app_icon_pixel">Pixel</string>
-    <string name="app_icon_restart_title">OwnTV yeniden başlatılsın mı?</string>
-    <string name="app_icon_restart_message">Yeni bir simge ve logo seçtiniz. OwnTV yeniden başlatıldığında geçerli olur.</string>
+    <string name="app_icon_restart_title">МОЁ ТВ yeniden başlatılsın mı?</string>
+    <string name="app_icon_restart_message">Yeni bir simge ve logo seçtiniz. МОЁ ТВ yeniden başlatıldığında geçerli olur.</string>
     <string name="app_icon_restart_now">Şimdi yeniden başlat</string>
     <string name="settings_navigation">Gezinme</string>
     <string name="settings_navigation_description">Soldaki menünün nasıl davranacağı</string>
@@ -1439,10 +1439,10 @@
     <string name="settings_help_epg_sources">Bir XMLTV rehber kaynağını bağlantısıyla ekleyin, yenileyin veya kaldırın. Kaynaklar TV Rehberi’ni ve Canlı TV’deki program satırlarını doldurur.</string>
     <string name="settings_help_guide_days">Rehberin ileriye dönük kaç günlük programı sakladığı. Daha az gün, daha hızlı yenileme ve daha küçük veritabanı demektir.</string>
     <string name="settings_help_catchup_timezone">Geriye dönük izleme, programları sağlayıcınızın arşivinden oynatır. Otomatik, sağlayıcınızın bildirdiği saat dilimini, bildirmiyorsa TV’nin kendi saatini kullanır; yine de yanlış saatte başlıyorsa sabit bir UTC farkı seçin. Hangi oynatıcının kullanılacağını da burada seçersiniz.</string>
-    <string name="settings_help_theme">OwnTV koyu tema için tasarlandı. Sistem, varsa TV’nin kendi ayarını izler; açık tema aydınlık bir oda için uygundur.</string>
+    <string name="settings_help_theme">МОЁ ТВ koyu tema için tasarlandı. Sistem, varsa TV’nin kendi ayarını izler; açık tema aydınlık bir oda için uygundur.</string>
     <string name="settings_help_accent">Düğmeleri, odak parıltısını, ilerleme çubuklarını ve vurguları her yerde renklendirir. Hazır bir renk seçin veya palet ve istediğiniz onaltılık kod için OK’ye basın.</string>
     <string name="settings_help_focus">Odaktaki öğenin çevresindeki halka. Kanepeden kolayca izlenebilmesi için rengini ve kalınlığını seçin.</string>
-    <string name="settings_help_fonts">OwnTV’nin her yerinde kullanılan yazı tipi ve metin boyutu. Açılır pencereler de aynı yazı tipini kullanır.</string>
+    <string name="settings_help_fonts">МОЁ ТВ’nin her yerinde kullanılan yazı tipi ve metin boyutu. Açılır pencereler de aynı yazı tipini kullanır.</string>
     <string name="settings_help_popup_size">Açılır pencereleri, menüleri ve iletişim kutularını bir bütün olarak büyütür veya küçültür. Sıkışık göründüklerinde ya da ekranın çok fazlasını kapladıklarında kullanın.</string>
     <string name="settings_help_zoom">Ekrandaki her şeyi ölçekler. Büyük boyut uzaktan daha kolay okunur, küçük boyut daha fazlasını sığdırır. %%85’in altında az belleğe sahip TV kutularında bellek tükenebilir.</string>
     <string name="settings_help_animations">Açıkken paneller, menüler ve odak akıcı biçimde hareket eder. Kapalıyken her değişiklik anında olur.</string>
@@ -1452,13 +1452,13 @@
     <string name="settings_help_vod_layout">Sinematik, odaktaki başlığın görselini afiş ızgarasının arkasında gösterir. Ayrı, kategorileri, başlıkları ve ayrıntıları yan yana gösterir.</string>
     <string name="settings_help_home">Ana sayfanın hangi satırları hangi sırayla göstereceğini ve Şu an trend satırının nasıl görüneceğini seçin.</string>
     <string name="settings_help_customize">Hiç izlemediğiniz kategorileri ve öğeleri gizleyin, kategorilere kendi adlarınızı verin ve kendi sıranıza koyun. Gizlenenler buradan geri gelir, asla kaybolmaz.</string>
-    <string name="settings_help_app_icon">TV’nizin ana ekranındaki OwnTV simgesi. Başlatıcının değişikliği göstermesi biraz sürebilir.</string>
-    <string name="settings_help_brand_accent">Menüdeki, Hakkında bölümündeki ve kurulumdaki OwnTV logosu oynat üçgenini vurgu renginizde gösterir. Ana ekrandaki simge kendi renklerini korur.</string>
-    <string name="settings_help_startup">OwnTV başlarken ne gösterecek: Ana sayfa, en son izlediğiniz kanal, favorileriniz veya seçtiğiniz bir kanal.</string>
-    <string name="settings_help_check_updates">GitHub’da şimdi daha yeni bir OwnTV arar ve yüklemeyi önerir. Oynatma listeleriniz, favorileriniz ve ayarlarınız olduğu gibi kalır.</string>
-    <string name="settings_help_update_startup">OwnTV her başladığında yeni bir sürüm arar ve varsa size bildirir. Sormadan hiçbir şey yüklenmez.</string>
-    <string name="settings_help_auto_start_boot">TV açıldıktan sonra OwnTV’yi Uygulama başlangıcı ayarında seçilen ekranda kendiliğinden açar. Android bir uygulamanın kendiliğinden açılmasına yalnızca diğer uygulamaların üzerinde gösterilebiliyorsa izin verir; bu yüzden bunu açtığınızda o iznin ekranı açılır. Bazı TV’ler bu izni sunmaz ve orada otomatik başlatma çalışamaz.</string>
-    <string name="settings_help_auto_start_wake">TV uyku modundan her çıktığında OwnTV’yi açar; TV’yi başka bir uygulama için uyandırdığınızda da. Uygulama başlangıcı bir kanal açıyorsa her uyanış o yayını başlatır. Bu açıkken OwnTV, sessiz bir bildirimle küçük bir arka plan hizmeti çalıştırır. Açılışta otomatik başlatma gibi, diğer uygulamaların üzerinde gösterme izni gerekir.</string>
+    <string name="settings_help_app_icon">TV’nizin ana ekranındaki МОЁ ТВ simgesi. Başlatıcının değişikliği göstermesi biraz sürebilir.</string>
+    <string name="settings_help_brand_accent">Menüdeki, Hakkında bölümündeki ve kurulumdaki МОЁ ТВ logosu oynat üçgenini vurgu renginizde gösterir. Ana ekrandaki simge kendi renklerini korur.</string>
+    <string name="settings_help_startup">МОЁ ТВ başlarken ne gösterecek: Ana sayfa, en son izlediğiniz kanal, favorileriniz veya seçtiğiniz bir kanal.</string>
+    <string name="settings_help_check_updates">GitHub’da şimdi daha yeni bir МОЁ ТВ arar ve yüklemeyi önerir. Oynatma listeleriniz, favorileriniz ve ayarlarınız olduğu gibi kalır.</string>
+    <string name="settings_help_update_startup">МОЁ ТВ her başladığında yeni bir sürüm arar ve varsa size bildirir. Sormadan hiçbir şey yüklenmez.</string>
+    <string name="settings_help_auto_start_boot">TV açıldıktan sonra МОЁ ТВ’yi Uygulama başlangıcı ayarında seçilen ekranda kendiliğinden açar. Android bir uygulamanın kendiliğinden açılmasına yalnızca diğer uygulamaların üzerinde gösterilebiliyorsa izin verir; bu yüzden bunu açtığınızda o iznin ekranı açılır. Bazı TV’ler bu izni sunmaz ve orada otomatik başlatma çalışamaz.</string>
+    <string name="settings_help_auto_start_wake">TV uyku modundan her çıktığında МОЁ ТВ’yi açar; TV’yi başka bir uygulama için uyandırdığınızda da. Uygulama başlangıcı bir kanal açıyorsa her uyanış o yayını başlatır. Bu açıkken МОЁ ТВ, sessiz bir bildirimle küçük bir arka plan hizmeti çalıştırır. Açılışta otomatik başlatma gibi, diğer uygulamaların üzerinde gösterme izni gerekir.</string>
     <string name="settings_help_dns">Sağlayıcınızın adreslerini ağınızın kendi DNS’i yerine seçtiğiniz bir DNS sunucusuyla çözer; ağınız bunları engellediğinde veya yönlendirdiğinde işe yarar.</string>
     <string name="settings_help_hw">TV’nin donanım kod çözücüsünü kullanır: akıcı 4K ve daha az ısı. Yalnızca bazı yayınlar takılır veya bloklar gösterirse kapatın; o zaman işi yazılım kod çözücüsü yapar.</string>
     <string name="settings_help_volume">Her kanalın, filmin ve bölümün başladığı ses düzeyi. %%100’ün üzerinde sessiz yayınlar yükseltilir. Oynatıcıda değiştirdiğiniz ses düzeyi, sıfırlayana kadar o başlık için saklanır.</string>
@@ -1472,7 +1472,7 @@
     <string name="settings_help_timeshift_window">Canlı TV’yi duraklat ve geri sar özelliğinin geriye dönük izlemesi olmayan bir kanalda ne kadar geri gidebileceği. Daha uzun süre, kanalın daha fazlasını cihaz depolamasında tutar.</string>
     <string name="settings_help_resume">Sor seçeneği, film veya bölümün kaydedilmiş konumu varsa Devam et ya da Baştan başlat sunar. Her zaman devam et kaldığınız yerden sürdürür; Asla devam etme baştan başlatır.</string>
     <string name="settings_help_mini">Gezinirken bir köşede kanalı oynatmaya devam eden küçük oynatıcı. Boyutunu ve köşesini seçin.</string>
-    <string name="settings_help_pip">Bir video tam ekranda veya mini oynatıcıda oynarken Ana Ekran’a basın ya da başka bir uygulama açın; video, TV’nin geri kalanının üzerinde küçük bir pencerede oynamaya devam eder. Tam ekrana döndürmek için OwnTV’yi yeniden açın; oynatmayı durdurmak için pencereyi kapatın. Çoklu görünüm OwnTV’de kalır.</string>
+    <string name="settings_help_pip">Bir video tam ekranda veya mini oynatıcıda oynarken Ana Ekran’a basın ya da başka bir uygulama açın; video, TV’nin geri kalanının üzerinde küçük bir pencerede oynamaya devam eder. Tam ekrana döndürmek için МОЁ ТВ’yi yeniden açın; oynatmayı durdurmak için pencereyi kapatın. Çoklu görünüm МОЁ ТВ’de kalır.</string>
     <string name="settings_key_palette">Palet</string>
     <string name="settings_live_preview_note">Değişiklikler, satırdan ayrılmadan önce siz ilerlerken burada görünür.</string>
     <string name="settings_synced_at"><xliff:g id="when">%1$s</xliff:g> eşitlendi</string>
@@ -1483,8 +1483,8 @@
     <string name="settings_profile_add">Profil ekle</string>
     <string name="settings_profile_add_line">Kendi favorileri, geçmişi ve ayarları olan bir izleyici</string>
     <plurals name="settings_help_language">
-        <item quantity="one">OwnTV’deki tüm menülerin ve iletilerin dili. <xliff:g id="count">%1$d</xliff:g> dil; siz seçene kadar TV’nin kendi dilini izler.</item>
-        <item quantity="other">OwnTV’deki tüm menülerin ve iletilerin dili. <xliff:g id="count">%1$d</xliff:g> dil; siz seçene kadar TV’nin kendi dilini izler.</item>
+        <item quantity="one">МОЁ ТВ’deki tüm menülerin ve iletilerin dili. <xliff:g id="count">%1$d</xliff:g> dil; siz seçene kadar TV’nin kendi dilini izler.</item>
+        <item quantity="other">МОЁ ТВ’deki tüm menülerin ve iletilerin dili. <xliff:g id="count">%1$d</xliff:g> dil; siz seçene kadar TV’nin kendi dilini izler.</item>
     </plurals>
     <plurals name="settings_profile_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> profil</item>
@@ -1520,8 +1520,8 @@
     <string name="settings_home_show_row">Bu satırı göster</string>
     <string name="settings_home_move_row">Taşı (▲ ▼, sonra OK)</string>
     <string name="settings_line_remote_shortcuts_on">Kapalıyken atamalarınız korunur</string>
-    <string name="settings_language_system_help">OwnTV televizyonun dilini kullanır (şu an <xliff:g id="language">%1$s</xliff:g>). Yalnızca OwnTV’de kullanmak için aşağıdan bir dil seçin.</string>
-    <string name="settings_language_pick_help">Televizyonun dili ne olursa olsun OwnTV’de <xliff:g id="language">%1$s</xliff:g> kullan.</string>
+    <string name="settings_language_system_help">МОЁ ТВ televizyonun dilini kullanır (şu an <xliff:g id="language">%1$s</xliff:g>). Yalnızca МОЁ ТВ’de kullanmak için aşağıdan bir dil seçin.</string>
+    <string name="settings_language_pick_help">Televizyonun dili ne olursa olsun МОЁ ТВ’de <xliff:g id="language">%1$s</xliff:g> kullan.</string>
     <string name="settings_key_use">Kullan</string>
     <string name="settings_line_metadata_source">Film ve dizi ayrıntılarının nereden geldiği</string>
     <string name="settings_line_metadata_language">TMDB’den konular, türler ve başlıklar</string>
@@ -1560,7 +1560,7 @@
     <string name="settings_line_glass_bg">Arka plan, resim görünümü, cam</string>
     <string name="settings_bg_background">Arka plan</string>
     <string name="settings_line_bg_background">Her ekranın arkasında ne olduğu</string>
-    <string name="settings_help_bg_background">Stage, OwnTV’nin kendi yumuşak renklerini gösterir. Resim, kendi resminizi her ekranın arkasında gösterir. Düz, koyu ve düz bir dolgudur.</string>
+    <string name="settings_help_bg_background">Stage, МОЁ ТВ’nin kendi yumuşak renklerini gösterir. Resim, kendi resminizi her ekranın arkasında gösterir. Düz, koyu ve düz bir dolgudur.</string>
     <string name="settings_bg_stage">Stage</string>
     <string name="settings_bg_picture">Resim</string>
     <string name="settings_bg_plain">Düz</string>

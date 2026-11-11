@@ -113,8 +113,8 @@
     <string name="update_not_enough_space">更新用の空き容量が足りません。約 <xliff:g id="size">%1$s</xliff:g> を空けてからもう一度お試しください。</string>
     <string name="update_damaged_download">更新のダウンロードが完了しませんでした。接続を確認してもう一度お試しください。</string>
     <string name="update_install_rejected">システムインストーラーが更新を拒否しました: <xliff:g id="reason">%1$s</xliff:g></string>
-    <string name="update_ready">OwnTV v<xliff:g id="available">%1$s</xliff:g>のインストール準備ができました（現在のバージョン：v<xliff:g id="current">%2$s</xliff:g>）。</string>
-    <string name="recovery_title">OwnTVはデータベースを開けませんでした</string>
+    <string name="update_ready">МОЁ ТВ v<xliff:g id="available">%1$s</xliff:g>のインストール準備ができました（現在のバージョン：v<xliff:g id="current">%2$s</xliff:g>）。</string>
+    <string name="recovery_title">МОЁ ТВはデータベースを開けませんでした</string>
     <string name="recovery_data_safe_full">プロフィール、プレイリスト、お気に入り、視聴履歴は削除されていません — これはデータベースのアップグレード失敗によるもので、データはこのデバイスに残っています。\n\n修正できるよう、この問題を報告し、以下のメッセージを添えてください。</string>
     <string name="recovery_retry">再試行</string>
     <string name="recovery_backup_hint">バックアップファイルがある場合は、アプリをリセットしてから復元できます。リセットすると、このデバイスに保存されているすべてのデータが削除されます。</string>
@@ -139,7 +139,7 @@
     <string name="home_trending_pause">一時停止</string>
     <string name="recording_notification_title">録画中</string>
     <string name="auto_start_notification_channel">スリープ解除時に自動で開く</string>
-    <string name="auto_start_notification_text">テレビが復帰すると OwnTV が開きます</string>
+    <string name="auto_start_notification_text">テレビが復帰すると МОЁ ТВ が開きます</string>
     <string name="recording_failed_no_space">停止しました: 空き容量がありません</string>
     <string name="recording_failed_no_connection">プロバイダーに空き接続がありません</string>
     <string name="recording_failed_clash">別の録画が接続を使用していました</string>
@@ -156,7 +156,7 @@
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> 分</item>
     </plurals>
     <string name="recording_failed_encrypted">このチャンネルは暗号化されており録画できません</string>
-    <string name="recording_failed_drm">このチャンネルはDRMで保護されているため、視聴はできますが録画はできません。この保護はプロバイダーによるもので、OwnTVによるものではありません。</string>
+    <string name="recording_failed_drm">このチャンネルはDRMで保護されているため、視聴はできますが録画はできません。この保護はプロバイダーによるもので、МОЁ ТВによるものではありません。</string>
     <string name="recording_failed_metered">モバイルデータでは録画しませんでした</string>
     <string name="sports_channel_goal_alerts">ゴール通知</string>
     <string name="sports_channel_live_match">ライブ試合</string>
@@ -385,7 +385,7 @@
     <string name="sports_live_refresh_description">スポーツ画面やスコアの表示中のみ</string>
     <string name="sports_about">スポーツデータについて</string>
     <string name="sports_about_summary">スコア：ESPN · チャンネル：あなたのプレイリストと番組表</string>
-    <string name="sports_alerts_when_closed">OwnTV を閉じているときも通知</string>
+    <string name="sports_alerts_when_closed">МОЁ ТВ を閉じているときも通知</string>
     <string name="sports_alerts_when_closed_description">通知の許可を一度だけ求めます</string>
     <string name="sports_alert_me_about">通知する内容</string>
     <string name="sports_kind_goals">ゴールとウィケット</string>
@@ -396,7 +396,7 @@
     <string name="sports_live_card">ライブスコアカード</string>
     <string name="sports_live_card_offer">ライブスコアカードを提案</string>
     <string name="sports_live_card_description">試合終了まで 30 秒ごとに更新。試合ページから開始</string>
-    <string name="sports_alerts_footnote">OwnTV を閉じていても、通知は通常 1 分以内に届きます。画面を消したまま長時間置いていると、Android が最大 15 分ほど遅らせることがあります。ライブスコアカードは遅れません。</string>
+    <string name="sports_alerts_footnote">МОЁ ТВ を閉じていても、通知は通常 1 分以内に届きます。画面を消したまま長時間置いていると、Android が最大 15 分ほど遅らせることがあります。ライブスコアカードは遅れません。</string>
     <string name="sports_search_teams">チーム、選手、リーグを検索</string>
     <string name="sports_suggested">視聴内容からのおすすめ</string>
     <plurals name="sports_watched_matches">
@@ -404,7 +404,7 @@
     </plurals>
     <string name="sports_league_label">リーグ</string>
     <string name="sports_no_playlist_title">試合を見るにはプレイリストを追加</string>
-    <string name="sports_no_playlist_body">スコア、順位表、通知はプレイリストなしでも使えます。追加すると、OwnTV がこの試合を放送するチャンネルをすべて見つけます。</string>
+    <string name="sports_no_playlist_body">スコア、順位表、通知はプレイリストなしでも使えます。追加すると、МОЁ ТВ がこの試合を放送するチャンネルをすべて見つけます。</string>
     <string name="sports_add_playlist">プレイリストを追加</string>
     <string name="sports_home_row">ライブスポーツ</string>
     <string name="sports_home_row_description">フォロー中の試合（ライブ中または開始間近のとき）</string>
@@ -414,7 +414,7 @@
     <string name="sports_sport_buttons">競技ボタン</string>
     <string name="sports_sport_buttons_mine">自分の競技</string>
     <string name="sports_sport_buttons_all">すべての競技</string>
-    <string name="sports_sport_buttons_description">自分の競技：選んだものだけ。すべての競技：OwnTV が知るすべてのリーグ（読み込みに時間がかかります）。</string>
+    <string name="sports_sport_buttons_description">自分の競技：選んだものだけ。すべての競技：МОЁ ТВ が知るすべてのリーグ（読み込みに時間がかかります）。</string>
     <string name="sports_auto_rebuild">自動再作成</string>
     <string name="sports_auto_rebuild_description">スコア、試合の詳細、順位表を自動で取得し直す頻度</string>
     <plurals name="sports_auto_rebuild_hours">

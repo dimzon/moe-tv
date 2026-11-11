@@ -8,7 +8,7 @@ sealed interface LauncherDeepLink {
     fun toUri(): Uri
 
     data object OpenLiveSection : LauncherDeepLink {
-        override fun toUri(): Uri = Uri.parse("owntv://open/live")
+        override fun toUri(): Uri = Uri.parse("moetv://open/live")
     }
 
     data class Live(
@@ -17,7 +17,7 @@ sealed interface LauncherDeepLink {
         val name: String? = null,
         val itemId: Long? = null,
     ) : LauncherDeepLink {
-        override fun toUri(): Uri = Uri.parse("owntv://play/live").buildUpon()
+        override fun toUri(): Uri = Uri.parse("moetv://play/live").buildUpon()
             .appendOptionalQueryParameter("sourceId", sourceId?.toString())
             .appendOptionalQueryParameter("remoteId", remoteId)
             .appendOptionalQueryParameter("name", name)

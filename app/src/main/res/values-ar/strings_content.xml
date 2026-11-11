@@ -34,7 +34,7 @@
     <string name="content_genre_scifi">خيال علمي</string>
     <string name="content_genre_series">مسلسلات</string>
     <string name="content_genre_sport">رياضة</string>
-    <string name="content_exit_owntv">هل تريد الخروج من OwnTV؟</string>
+    <string name="content_exit_owntv">هل تريد الخروج من МОЁ ТВ؟</string>
     <string name="content_exit_confirmation">هل أنت متأكد من رغبتك في إغلاق التطبيق؟</string>
     <string name="content_restore_incomplete_title">لم تكتمل عملية الاستعادة</string>
     <string name="content_restore_incomplete_message">أُغلق التطبيق أثناء استعادة <xliff:g id="description">%1$s</xliff:g>، لذا قد يكون بعض المحتوى مفقودًا. لم يُحذف شيء — نفّذ عملية الاستعادة نفسها مجددًا من الإعدادات ← النسخ الاحتياطي والاستعادة لإكمال الباقي.</string>
@@ -162,7 +162,7 @@
     <string name="content_storage_choose_folder">اختيار مجلد آخر…</string>
     <string name="content_storage_chosen_folder">المجلد المختار</string>
     <string name="content_storage_folder_lost">لم يعد هذا المجلد متاحًا. اخترهُ مرة أخرى، أو اختر مجلدًا آخر.</string>
-    <string name="content_storage_folder_fallback">مجلد التنزيلات غير متاح الآن، لذا تُحفظ التنزيلات في مجلد OwnTV الخاص حتى يعود.</string>
+    <string name="content_storage_folder_fallback">مجلد التنزيلات غير متاح الآن، لذا تُحفظ التنزيلات في مجلد МОЁ ТВ الخاص حتى يعود.</string>
     <string name="content_downloads_reason_account_busy">الحساب مشغول: بث آخر يستخدم الاتصال</string>
     <string name="content_downloads_reason_refused">رفض الخادم الرابط</string>
     <string name="content_downloads_reason_not_found">لم يعد هذا الملف متوفرًا على الخادم</string>

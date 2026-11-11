@@ -26,7 +26,7 @@
     <string name="content_genre_scifi">Zientzia fikzioa</string>
     <string name="content_genre_series">Telesailak</string>
     <string name="content_genre_sport">Kirola</string>
-    <string name="content_exit_owntv">OwnTV itxi?</string>
+    <string name="content_exit_owntv">МОЁ ТВ itxi?</string>
     <string name="content_exit_confirmation">Ziur aplikazioa itxi nahi duzula?</string>
     <string name="content_restore_incomplete_title">Leheneratze batek ez du amaitu</string>
     <string name="content_restore_incomplete_message">Aplikazioa itxi egin da <xliff:g id="description">%1$s</xliff:g> leheneratzen ari zela, beraz baliteke zati bat falta izatea. Ez da ezer ezabatu — exekutatu berriro leheneratze bera Ezarpenak → Babeskopia eta leheneratzea atalean, gainerakoa osatzeko.</string>
@@ -118,7 +118,7 @@
     <string name="content_storage_choose_folder">Aukeratu beste karpeta bat…</string>
     <string name="content_storage_chosen_folder">Aukeratutako karpeta</string>
     <string name="content_storage_folder_lost">Karpeta hori ez dago eskuragarri jada. Aukeratu berriro, edo hautatu beste bat.</string>
-    <string name="content_storage_folder_fallback">Zure deskarga-karpeta ez dago eskuragarri oraintxe, beraz deskargak OwnTVren karpeta propioan gordetzen ari dira berriro eskuragarri egon arte.</string>
+    <string name="content_storage_folder_fallback">Zure deskarga-karpeta ez dago eskuragarri oraintxe, beraz deskargak МОЁ ТВren karpeta propioan gordetzen ari dira berriro eskuragarri egon arte.</string>
     <string name="content_epg_create_profile">Sortu profil bat gida ikusteko.</string>
     <string name="content_epg_filter_hides_all">Kanal guztiak ezkutatuta daude uneko iragazkiaren ondorioz. Aldatu ordenatzea gida ikusteko.</string>
     <string name="content_epg_add_playlist">Gehitu erreprodukzio-zerrenda bat gida ikusteko.</string>

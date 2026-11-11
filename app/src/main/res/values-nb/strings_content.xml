@@ -26,7 +26,7 @@
     <string name="content_genre_scifi">Science fiction</string>
     <string name="content_genre_series">Serier</string>
     <string name="content_genre_sport">Sport</string>
-    <string name="content_exit_owntv">Avslutt OwnTV?</string>
+    <string name="content_exit_owntv">Avslutt МОЁ ТВ?</string>
     <string name="content_exit_confirmation">Er du sikker på at du vil lukke appen?</string>
     <string name="content_restore_incomplete_title">En gjenoppretting ble ikke fullført</string>
     <string name="content_restore_incomplete_message">Appen ble lukket under gjenopprettingen av <xliff:g id="description">%1$s</xliff:g>, så noe av dette kan mangle. Ingenting ble slettet — kjør den samme gjenopprettingen på nytt fra Innstillinger → Sikkerhetskopi og gjenoppretting for å hente inn resten.</string>
@@ -138,7 +138,7 @@
     <string name="content_storage_choose_folder">Velg en annen mappe…</string>
     <string name="content_storage_chosen_folder">Valgt mappe</string>
     <string name="content_storage_folder_lost">Den mappen er ikke lenger tilgjengelig. Velg den på nytt, eller velg en annen.</string>
-    <string name="content_storage_folder_fallback">Nedlastingsmappen er ikke tilgjengelig akkurat nå, så nedlastinger lagres i OwnTVs egen mappe til den er tilbake.</string>
+    <string name="content_storage_folder_fallback">Nedlastingsmappen er ikke tilgjengelig akkurat nå, så nedlastinger lagres i МОЁ ТВs egen mappe til den er tilbake.</string>
     <string name="content_downloads_reason_account_busy">Kontoen er opptatt: en annen strøm bruker tilkoblingen</string>
     <string name="content_downloads_reason_refused">Serveren avviste lenken</string>
     <string name="content_downloads_reason_not_found">Serveren har ikke lenger denne filen</string>

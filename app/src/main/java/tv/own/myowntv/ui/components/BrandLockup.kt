@@ -142,12 +142,12 @@ private val PixelSide = Color(CorePixelMark.SIDE)
 private val PixelPower = Color(CorePixelMark.POWER)
 
 /**
- * The wordmark: lowercase "own" in cream, "tv" in [tv] (the accent), drawn from
- * core's two vectors at [width]; its height follows the 988 × 182 drawing.
+ * The wordmark: "МОЁ" in cream, "ТВ" in [tv] (the accent), drawn from the two PNG layers
+ * (white glyphs, tinted here) at [width]; its height follows the 880 × 245 drawing.
  */
 @Composable
 fun Wordmark(width: Dp, modifier: Modifier = Modifier, tv: Color = stageAccent.accent, own: Color = WordmarkCream) {
-    Box(modifier.width(width).height(width * 182f / 988f)) {
+    Box(modifier.width(width).height(width * 245f / 880f)) {
         Image(painterResource(R.drawable.owntv_wordmark_own), null, Modifier.fillMaxSize(), colorFilter = ColorFilter.tint(own))
         Image(painterResource(R.drawable.owntv_wordmark_tv), null, Modifier.fillMaxSize(), colorFilter = ColorFilter.tint(tv))
     }

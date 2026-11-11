@@ -30,7 +30,7 @@
     <string name="content_genre_scifi">Science fiction</string>
     <string name="content_genre_series">Seriale</string>
     <string name="content_genre_sport">Sport</string>
-    <string name="content_exit_owntv">Wyjść z OwnTV?</string>
+    <string name="content_exit_owntv">Wyjść z МОЁ ТВ?</string>
     <string name="content_exit_confirmation">Czy na pewno chcesz zamknąć aplikację?</string>
     <string name="content_restore_incomplete_title">Przywracanie nie zostało ukończone</string>
     <string name="content_restore_incomplete_message">Aplikacja została zamknięta podczas przywracania <xliff:g id="description">%1$s</xliff:g>, dlatego części danych może brakować. Niczego nie usunięto — uruchom ponownie to samo przywracanie w obszarze Ustawienia → Kopia zapasowa i przywracanie, aby uzupełnić pozostałe dane.</string>
@@ -150,7 +150,7 @@
     <string name="content_storage_choose_folder">Wybierz inny folder…</string>
     <string name="content_storage_chosen_folder">Wybrany folder</string>
     <string name="content_storage_folder_lost">Ten folder nie jest już dostępny. Wybierz go ponownie lub wskaż inny.</string>
-    <string name="content_storage_folder_fallback">Folder pobierania jest teraz niedostępny, więc pobrane pliki są zapisywane we własnym folderze OwnTV, dopóki nie wróci.</string>
+    <string name="content_storage_folder_fallback">Folder pobierania jest teraz niedostępny, więc pobrane pliki są zapisywane we własnym folderze МОЁ ТВ, dopóki nie wróci.</string>
     <string name="content_downloads_reason_account_busy">Konto zajęte: połączenia używa inny strumień</string>
     <string name="content_downloads_reason_refused">Serwer odrzucił link</string>
     <string name="content_downloads_reason_not_found">Serwer nie ma już tego pliku</string>

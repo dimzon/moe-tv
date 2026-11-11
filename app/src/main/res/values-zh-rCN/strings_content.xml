@@ -24,7 +24,7 @@
     <string name="content_genre_scifi">科幻</string>
     <string name="content_genre_series">剧集</string>
     <string name="content_genre_sport">体育</string>
-    <string name="content_exit_owntv">退出 OwnTV？</string>
+    <string name="content_exit_owntv">退出 МОЁ ТВ？</string>
     <string name="content_exit_confirmation">确定要关闭此应用吗？</string>
     <string name="content_restore_incomplete_title">恢复未完成</string>
     <string name="content_restore_incomplete_message">应用在恢复 <xliff:g id="description">%1$s</xliff:g> 时关闭，因此部分内容可能缺失。没有删除任何内容——请前往设置 → 备份与恢复，再次执行相同的恢复操作以补全其余内容。</string>
@@ -132,7 +132,7 @@
     <string name="content_storage_choose_folder">选择其他文件夹…</string>
     <string name="content_storage_chosen_folder">所选文件夹</string>
     <string name="content_storage_folder_lost">该文件夹已不可用。请重新选择该文件夹，或选择其他文件夹。</string>
-    <string name="content_storage_folder_fallback">下载文件夹当前不可用，因此在它恢复之前，下载内容会保存到 OwnTV 自己的文件夹。</string>
+    <string name="content_storage_folder_fallback">下载文件夹当前不可用，因此在它恢复之前，下载内容会保存到 МОЁ ТВ 自己的文件夹。</string>
     <string name="content_downloads_reason_account_busy">账户繁忙：另一个串流正在使用该连接</string>
     <string name="content_downloads_reason_refused">服务器拒绝了该链接</string>
     <string name="content_downloads_reason_not_found">服务器上已没有此文件</string>

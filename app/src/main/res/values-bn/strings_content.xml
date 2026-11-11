@@ -26,7 +26,7 @@
     <string name="content_genre_scifi">বৈজ্ঞানিক কল্পকাহিনি</string>
     <string name="content_genre_series">সিরিজ</string>
     <string name="content_genre_sport">খেলাধুলা</string>
-    <string name="content_exit_owntv">OwnTV থেকে বের হবেন?</string>
+    <string name="content_exit_owntv">МОЁ ТВ থেকে বের হবেন?</string>
     <string name="content_exit_confirmation">আপনি কি অ্যাপটি বন্ধ করার বিষয়ে নিশ্চিত?</string>
     <string name="content_restore_incomplete_title">একটি পুনরুদ্ধার শেষ হয়নি</string>
     <string name="content_restore_incomplete_message"><xliff:g id="description">%1$s</xliff:g> পুনরুদ্ধারের সময় অ্যাপটি বন্ধ হয়ে গিয়েছিল, তাই এর কিছু অংশ অনুপস্থিত থাকতে পারে। কিছুই মুছে ফেলা হয়নি — বাকি অংশ পূরণ করতে সেটিংস → ব্যাকআপ ও পুনরুদ্ধার থেকে একই পুনরুদ্ধার আবার চালান।</string>
@@ -138,7 +138,7 @@
     <string name="content_storage_choose_folder">অন্য ফোল্ডার বেছে নিন…</string>
     <string name="content_storage_chosen_folder">বেছে নেওয়া ফোল্ডার</string>
     <string name="content_storage_folder_lost">সেই ফোল্ডারটি আর পাওয়া যাচ্ছে না। এটি আবার বেছে নিন, বা অন্য একটি বেছে নিন।</string>
-    <string name="content_storage_folder_fallback">আপনার ডাউনলোড ফোল্ডার এখন উপলব্ধ নেই, তাই সেটি ফিরে না আসা পর্যন্ত ডাউনলোডগুলো OwnTV-এর নিজস্ব ফোল্ডারে সংরক্ষিত হচ্ছে।</string>
+    <string name="content_storage_folder_fallback">আপনার ডাউনলোড ফোল্ডার এখন উপলব্ধ নেই, তাই সেটি ফিরে না আসা পর্যন্ত ডাউনলোডগুলো МОЁ ТВ-এর নিজস্ব ফোল্ডারে সংরক্ষিত হচ্ছে।</string>
     <string name="content_downloads_reason_account_busy">অ্যাকাউন্ট ব্যস্ত: অন্য একটি স্ট্রিম সংযোগটি ব্যবহার করছে</string>
     <string name="content_downloads_reason_refused">সার্ভার লিংকটি প্রত্যাখ্যান করেছে</string>
     <string name="content_downloads_reason_not_found">সার্ভারে এই ফাইলটি আর নেই</string>

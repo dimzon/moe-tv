@@ -28,7 +28,7 @@
     <string name="content_genre_scifi">Fantascienza</string>
     <string name="content_genre_series">Serie</string>
     <string name="content_genre_sport">Sport</string>
-    <string name="content_exit_owntv">Uscire da OwnTV?</string>
+    <string name="content_exit_owntv">Uscire da МОЁ ТВ?</string>
     <string name="content_exit_confirmation">Vuoi davvero chiudere l\'app?</string>
     <string name="content_restore_incomplete_title">Un ripristino non è stato completato</string>
     <string name="content_restore_incomplete_message">L\'app si è chiusa durante il ripristino di <xliff:g id="description">%1$s</xliff:g>, quindi alcuni dati potrebbero mancare. Non è stato eliminato nulla — esegui di nuovo lo stesso ripristino da Impostazioni → Backup e ripristino per completare il resto.</string>
@@ -144,7 +144,7 @@
     <string name="content_storage_choose_folder">Scegli un’altra cartella…</string>
     <string name="content_storage_chosen_folder">Cartella scelta</string>
     <string name="content_storage_folder_lost">Quella cartella non è più disponibile. Scegliela di nuovo o selezionane un’altra.</string>
-    <string name="content_storage_folder_fallback">La cartella dei download non è disponibile al momento, quindi i download vengono salvati nella cartella di OwnTV finché non torna disponibile.</string>
+    <string name="content_storage_folder_fallback">La cartella dei download non è disponibile al momento, quindi i download vengono salvati nella cartella di МОЁ ТВ finché non torna disponibile.</string>
     <string name="content_downloads_reason_account_busy">Account occupato: un altro flusso sta usando la connessione</string>
     <string name="content_downloads_reason_refused">Il server ha rifiutato il link</string>
     <string name="content_downloads_reason_not_found">Il server non ha più questo file</string>

@@ -128,8 +128,8 @@
     <string name="update_not_enough_space">Pro aktualizaci není dost volného místa. Uvolněte přibližně <xliff:g id="size">%1$s</xliff:g> a zkuste to znovu.</string>
     <string name="update_damaged_download">Aktualizace se nestáhla celá. Zkontrolujte připojení a zkuste to znovu.</string>
     <string name="update_install_rejected">Instalátor systému aktualizaci odmítl: <xliff:g id="reason">%1$s</xliff:g></string>
-    <string name="update_ready">OwnTV v<xliff:g id="available">%1$s</xliff:g> je připravena (máte v<xliff:g id="current">%2$s</xliff:g>).</string>
-    <string name="recovery_title">OwnTV nemohla otevřít svou databázi</string>
+    <string name="update_ready">МОЁ ТВ v<xliff:g id="available">%1$s</xliff:g> je připravena (máte v<xliff:g id="current">%2$s</xliff:g>).</string>
+    <string name="recovery_title">МОЁ ТВ nemohla otevřít svou databázi</string>
     <string name="recovery_data_safe_full">Vaše profily, playlisty, oblíbené položky ani historie NEBYLY odstraněny — jde o selhání upgradu databáze a data jsou stále v tomto zařízení.\n\nNahlaste prosím tuto chybu, aby ji bylo možné opravit, a přiložte níže uvedenou zprávu.</string>
     <string name="recovery_retry">Zkusit znovu</string>
     <string name="recovery_backup_hint">Pokud máte soubor zálohy, můžete vymazat data aplikace a poté zálohu obnovit. Vymazáním dat se odstraní vše uložené v tomto zařízení.</string>
@@ -154,7 +154,7 @@
     <string name="home_trending_pause">Pozastavit</string>
     <string name="recording_notification_title">Nahrávání</string>
     <string name="auto_start_notification_channel">Automaticky spustit po probuzení</string>
-    <string name="auto_start_notification_text">OwnTV se otevře, když se televize probudí</string>
+    <string name="auto_start_notification_text">МОЁ ТВ se otevře, když se televize probudí</string>
     <string name="recording_failed_no_space">Zastaveno: nedostatek místa</string>
     <string name="recording_failed_no_connection">Poskytovatel nemá volné připojení</string>
     <string name="recording_failed_clash">Připojení používalo jiné nahrávání</string>
@@ -174,7 +174,7 @@
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> minut</item>
     </plurals>
     <string name="recording_failed_encrypted">Tento kanál je šifrovaný a nelze jej nahrát</string>
-    <string name="recording_failed_drm">Tento kanál je chráněný technologií DRM, takže jej lze sledovat, ale ne nahrávat. Ochranu uplatňuje váš poskytovatel, nikoli OwnTV.</string>
+    <string name="recording_failed_drm">Tento kanál je chráněný technologií DRM, takže jej lze sledovat, ale ne nahrávat. Ochranu uplatňuje váš poskytovatel, nikoli МОЁ ТВ.</string>
     <string name="recording_failed_metered">Nenahráno přes mobilní data</string>
     <string name="sports_channel_goal_alerts">Upozornění na góly</string>
     <string name="sports_channel_live_match">Živý zápas</string>
@@ -430,7 +430,7 @@
     <string name="sports_live_refresh_description">Jen když je zobrazena sportovní obrazovka nebo výsledek</string>
     <string name="sports_about">O sportovních datech</string>
     <string name="sports_about_summary">Výsledky: ESPN · kanály: váš playlist a program</string>
-    <string name="sports_alerts_when_closed">Upozornění při zavřeném OwnTV</string>
+    <string name="sports_alerts_when_closed">Upozornění při zavřeném МОЁ ТВ</string>
     <string name="sports_alerts_when_closed_description">Jednou požádá o oprávnění k oznámením</string>
     <string name="sports_alert_me_about">Upozornit na</string>
     <string name="sports_kind_goals">Góly a wickety</string>
@@ -441,7 +441,7 @@
     <string name="sports_live_card">Karta s živým výsledkem</string>
     <string name="sports_live_card_offer">Nabízet kartu s živým výsledkem</string>
     <string name="sports_live_card_description">Obnovuje se každých 30 s do konce; spustíte ho ze zápasu</string>
-    <string name="sports_alerts_footnote">Při zavřeném OwnTV dorazí upozornění obvykle do minuty. Pokud telefon dlouho leží se zhasnutou obrazovkou, Android je může zdržet až asi o 15 minut. Karta s živým výsledkem se nezdržuje.</string>
+    <string name="sports_alerts_footnote">Při zavřeném МОЁ ТВ dorazí upozornění obvykle do minuty. Pokud telefon dlouho leží se zhasnutou obrazovkou, Android je může zdržet až asi o 15 minut. Karta s živým výsledkem se nezdržuje.</string>
     <string name="sports_search_teams">Hledat týmy, hráče, soutěže</string>
     <string name="sports_suggested">Návrhy podle toho, co sledujete</string>
     <plurals name="sports_watched_matches">
@@ -452,7 +452,7 @@
     </plurals>
     <string name="sports_league_label">Soutěž</string>
     <string name="sports_no_playlist_title">Přidejte playlist a sledujte zápasy</string>
-    <string name="sports_no_playlist_body">Výsledky, tabulky a upozornění fungují i bez něj. S playlistem OwnTV najde každý kanál, který zápas vysílá.</string>
+    <string name="sports_no_playlist_body">Výsledky, tabulky a upozornění fungují i bez něj. S playlistem МОЁ ТВ najde každý kanál, který zápas vysílá.</string>
     <string name="sports_add_playlist">Přidat playlist</string>
     <string name="sports_home_row">Sport živě</string>
     <string name="sports_home_row_description">Sledované zápasy, když se nějaký hraje nebo brzy začne</string>
@@ -462,7 +462,7 @@
     <string name="sports_sport_buttons">Tlačítka sportů</string>
     <string name="sports_sport_buttons_mine">Moje sporty</string>
     <string name="sports_sport_buttons_all">Všechny sporty</string>
-    <string name="sports_sport_buttons_description">Moje sporty: jen to, co jste vybrali. Všechny sporty: každá soutěž, kterou OwnTV zná, načítání trvá déle.</string>
+    <string name="sports_sport_buttons_description">Moje sporty: jen to, co jste vybrali. Všechny sporty: každá soutěž, kterou МОЁ ТВ zná, načítání trvá déle.</string>
     <string name="sports_auto_rebuild">Automatické obnovení</string>
     <string name="sports_auto_rebuild_description">Jak často se výsledky, podrobnosti zápasů a tabulky samy znovu načtou</string>
     <plurals name="sports_auto_rebuild_hours">

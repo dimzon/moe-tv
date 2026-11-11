@@ -27,7 +27,7 @@
     <string name="settings_static">സ്ഥിരം</string>
     <string name="settings_dynamic">ചലനാത്മകം</string>
     <string name="settings_use_proxy">പ്രോക്സി ഉപയോഗിക്കുക</string>
-    <string name="settings_proxy_description">OwnTV-യുടെ എല്ലാ ട്രാഫിക്കും പ്ലേബാക്കും ഒരു HTTP പ്രോക്സിയിലൂടെ അയയ്ക്കുക.</string>
+    <string name="settings_proxy_description">МОЁ ТВ-യുടെ എല്ലാ ട്രാഫിക്കും പ്ലേബാക്കും ഒരു HTTP പ്രോക്സിയിലൂടെ അയയ്ക്കുക.</string>
     <string name="settings_host">ഹോസ്റ്റ്</string>
     <string name="settings_proxy_host_hint">proxy.example.com</string>
     <string name="settings_port">പോർട്ട്</string>
@@ -134,15 +134,15 @@
         <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g> ശേഷിക്കുന്നു</item>
     </plurals>
     <string name="settings_metadata_active_source">സജീവ ഉറവിടം</string>
-    <string name="settings_metadata_shared_worker_description">OwnTV Worker · സജ്ജീകരണം വേണ്ട</string>
+    <string name="settings_metadata_shared_worker_description">МОЁ ТВ Worker · സജ്ജീകരണം വേണ്ട</string>
     <string name="settings_metadata_connection">കണക്ഷൻ</string>
     <string name="settings_metadata_remote_advanced">വിപുലമായ TMDB വിവരങ്ങൾ നേടുക</string>
     <string name="settings_metadata_remote_advanced_description">പങ്കിട്ട ഡിഫോൾട്ടിനു പകരം നിങ്ങളുടെ സ്വന്തം TMDB API കീ അല്ലെങ്കിൽ സ്വയം ഹോസ്റ്റ് ചെയ്ത Worker ഉപയോഗിക്കുക.</string>
     <string name="settings_metadata_key_label">കീ</string>
     <string name="settings_metadata_server_label">സെർവർ</string>
     <string name="settings_metadata_clear_advanced_title">സ്വന്തം കീ ഉപയോഗിക്കുന്നത് നിർത്തണോ?</string>
-    <string name="settings_metadata_clear_advanced_message">നിങ്ങളുടെ TMDB API കീയും സെർവർ വിലാസവും ഈ ഉപകരണത്തിൽ നിന്ന് ഇല്ലാതാക്കും, കൂടാതെ OwnTV ദൈനംദിന വിഹിതമുള്ള അന്തർനിർമ്മിത പങ്കിട്ട സേവനത്തിലേക്ക് മടങ്ങും.</string>
-    <string name="settings_metadata_fair_share">അന്തർനിർമ്മിത മെറ്റാഡാറ്റ സേവനം OwnTV ഉപയോഗിക്കുന്ന എല്ലാവരും പങ്കിടുന്നു, അതിനാൽ ഓരോ ഉപകരണത്തിനും ഓരോ ദിവസവും സ്വന്തം വിഹിതം ലഭിക്കും. വിഹിതം തീർന്നാൽ പോസ്റ്ററുകളും വിവരണങ്ങളും അത് വീണ്ടും നിറയുന്നതുവരെ താൽക്കാലികമായി നിർത്തും — നിങ്ങളുടെ പ്ലേലിസ്റ്റിലെ വിവരങ്ങൾ പതിവുപോലെ പ്രവർത്തിക്കും. സ്വന്തം TMDB API കീയോ സെർവറോ ചേർത്താൽ ഈ പരിധി ഇല്ലാതാകും: അത് സൗജന്യമാണ്, വ്യക്തിഗത കീയ്ക്ക് പ്രായോഗികമായി പരിധിയില്ല.</string>
+    <string name="settings_metadata_clear_advanced_message">നിങ്ങളുടെ TMDB API കീയും സെർവർ വിലാസവും ഈ ഉപകരണത്തിൽ നിന്ന് ഇല്ലാതാക്കും, കൂടാതെ МОЁ ТВ ദൈനംദിന വിഹിതമുള്ള അന്തർനിർമ്മിത പങ്കിട്ട സേവനത്തിലേക്ക് മടങ്ങും.</string>
+    <string name="settings_metadata_fair_share">അന്തർനിർമ്മിത മെറ്റാഡാറ്റ സേവനം МОЁ ТВ ഉപയോഗിക്കുന്ന എല്ലാവരും പങ്കിടുന്നു, അതിനാൽ ഓരോ ഉപകരണത്തിനും ഓരോ ദിവസവും സ്വന്തം വിഹിതം ലഭിക്കും. വിഹിതം തീർന്നാൽ പോസ്റ്ററുകളും വിവരണങ്ങളും അത് വീണ്ടും നിറയുന്നതുവരെ താൽക്കാലികമായി നിർത്തും — നിങ്ങളുടെ പ്ലേലിസ്റ്റിലെ വിവരങ്ങൾ പതിവുപോലെ പ്രവർത്തിക്കും. സ്വന്തം TMDB API കീയോ സെർവറോ ചേർത്താൽ ഈ പരിധി ഇല്ലാതാകും: അത് സൗജന്യമാണ്, വ്യക്തിഗത കീയ്ക്ക് പ്രായോഗികമായി പരിധിയില്ല.</string>
     <string name="settings_metadata_limit_reached">ഇന്നത്തെ മെറ്റാഡാറ്റ വിഹിതം തീർന്നു — ഈ പരിധി നീക്കാൻ ക്രമീകരണങ്ങൾ → മെറ്റാഡാറ്റയിൽ സ്വന്തം TMDB കീ ചേർക്കുക.</string>
     <string name="settings_metadata_language">മെറ്റാഡാറ്റ ഭാഷ</string>
     <string name="settings_metadata_language_description">TMDB-യിൽ നിന്നുള്ള കഥാസാരം, വിഭാഗം, ശീർഷകം എന്നിവയുടെ ഭാഷ. TMDB വിവർത്തനം ചെയ്യാത്ത ഫീൽഡുകൾ ഇംഗ്ലീഷിൽ തുടരും. വിശദാംശങ്ങൾ ഓരോ ഭാഷയ്ക്കും വെവ്വേറെ കാഷ് ചെയ്യുന്നു, അതിനാൽ തിരികെ മാറുന്നത് തൽക്ഷണമാണ്.</string>
@@ -266,15 +266,15 @@
     <string name="settings_player_zoom">പ്ലെയർ സൂം</string>
     <string name="settings_app_group">ആപ്പ്</string>
     <string name="settings_app_startup">ആപ്പ് ആരംഭിക്കൽ</string>
-    <string name="settings_app_startup_description">OwnTV ആരംഭിക്കുമ്പോൾ തുറക്കേണ്ടത്</string>
+    <string name="settings_app_startup_description">МОЁ ТВ ആരംഭിക്കുമ്പോൾ തുറക്കേണ്ടത്</string>
     <string name="settings_check_updates">അപ്‌ഡേറ്റുകൾക്കായി പരിശോധിക്കുക</string>
     <string name="settings_check_updates_description">GitHub Releases-ൽ നിന്ന് ഏറ്റവും പുതിയ പതിപ്പ് നേടുക</string>
     <string name="settings_update_startup">ആരംഭിക്കുമ്പോൾ അപ്‌ഡേറ്റുകൾ പരിശോധിക്കുക</string>
     <string name="settings_update_startup_description">ആപ്പ് തുറക്കുമ്പോൾ പുതിയ പതിപ്പിനായി പരിശോധിക്കുക</string>
     <string name="settings_auto_start_boot">ഓണാകുമ്പോൾ സ്വയം തുറക്കുക</string>
-    <string name="settings_auto_start_boot_description">ടിവി ഓണാകുമ്പോൾ OwnTV തുറക്കുക</string>
+    <string name="settings_auto_start_boot_description">ടിവി ഓണാകുമ്പോൾ МОЁ ТВ തുറക്കുക</string>
     <string name="settings_auto_start_wake">ഉണരുമ്പോൾ സ്വയം തുറക്കുക</string>
-    <string name="settings_auto_start_wake_description">ടിവി സ്ലീപ്പിൽ നിന്ന് ഉണരുമ്പോൾ OwnTV തുറക്കുക</string>
+    <string name="settings_auto_start_wake_description">ടിവി സ്ലീപ്പിൽ നിന്ന് ഉണരുമ്പോൾ МОЁ ТВ തുറക്കുക</string>
     <string name="settings_auto_start_needs_overlay">“മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കുക” ആവശ്യമാണ്</string>
     <string name="settings_about">ആപ്പിനെക്കുറിച്ച്</string>
     <string name="settings_live_latency">തത്സമയ കാലതാമസം</string>
@@ -527,7 +527,7 @@
     <string name="settings_guide_synced">ടിവി ഗൈഡ് സമന്വയിപ്പിച്ചു</string>
     <string name="settings_guide_sync_failed">ടിവി ഗൈഡ് സമന്വയിപ്പിക്കൽ പരാജയപ്പെട്ടു</string>
     <string name="settings_restore_remote_title">മറ്റൊരു ഉപകരണത്തിൽ നിന്ന് പുനഃസ്ഥാപിക്കുക</string>
-    <string name="settings_restore_remote_description">അതേ വൈ-ഫൈയിൽ ബ്രൗസറുള്ള ഏത് ഉപകരണത്തിലും — ഫോൺ, കമ്പ്യൂട്ടർ അല്ലെങ്കിൽ മറ്റൊരു ടിവി — QR സ്കാൻ ചെയ്യുക (അല്ലെങ്കിൽ URL തുറക്കുക), ഈ PIN നൽകി, നിങ്ങളുടെ OwnTV ബാക്കപ്പ് ഫയൽ തിരഞ്ഞെടുത്ത് അയയ്ക്കുക. എന്ത് പുനഃസ്ഥാപിക്കണമെന്ന് പിന്നീട് ഇവിടെ തിരഞ്ഞെടുക്കാം.</string>
+    <string name="settings_restore_remote_description">അതേ വൈ-ഫൈയിൽ ബ്രൗസറുള്ള ഏത് ഉപകരണത്തിലും — ഫോൺ, കമ്പ്യൂട്ടർ അല്ലെങ്കിൽ മറ്റൊരു ടിവി — QR സ്കാൻ ചെയ്യുക (അല്ലെങ്കിൽ URL തുറക്കുക), ഈ PIN നൽകി, നിങ്ങളുടെ МОЁ ТВ ബാക്കപ്പ് ഫയൽ തിരഞ്ഞെടുത്ത് അയയ്ക്കുക. എന്ത് പുനഃസ്ഥാപിക്കണമെന്ന് പിന്നീട് ഇവിടെ തിരഞ്ഞെടുക്കാം.</string>
     <string name="settings_try_again">വീണ്ടും ശ്രമിക്കുക</string>
     <string name="settings_new_pin">പുതിയ PIN ഉപയോഗിച്ച് വീണ്ടും ആരംഭിക്കുക</string>
     <string name="settings_download_remote_title">മറ്റൊരു ഉപകരണത്തിൽ ഡൗൺലോഡ് ചെയ്യുക</string>
@@ -677,9 +677,9 @@
     <string name="settings_sources_ignore_limit">കണക്ഷൻ പരിധി അവഗണിക്കുക</string>
     <string name="settings_sources_ignore_limit_on">കണക്ഷൻ പരിധി അവഗണിക്കുന്നു: ഈ പ്ലേലിസ്റ്റ് പറയുന്നതിലും കൂടുതൽ സ്ട്രീമുകൾ മൾട്ടിവ്യൂവും റെക്കോർഡിംഗുകളും തുറന്നേക്കാം. ദാതാവ് ഒരു സ്ട്രീം നിരസിച്ചാൽ അത് മുമ്പത്തെപ്പോലെ അറിയിക്കും.</string>
     <string name="settings_sources_probe_title">ഈ പ്ലേലിസ്റ്റ് പരിശോധിക്കണോ?</string>
-    <string name="settings_sources_probe_warning">ഒരേസമയം എത്ര ചാനലുകൾ കാണാമെന്ന് പല ദാതാക്കളും ഒരിക്കലും പറയാറില്ല. അതിനാൽ കുറച്ച് ചാനലുകൾ തുറന്ന് ഏതൊക്കെ തുടരുന്നു എന്ന് നോക്കിയാണ് OwnTV ഇത് കണ്ടെത്തുന്നത്. ഇപ്പോൾ പ്ലേ ചെയ്യുന്നതെല്ലാം നിലയ്ക്കും, ഇതിന് രണ്ട് മിനിറ്റ് വരെ എടുത്തേക്കാം.</string>
+    <string name="settings_sources_probe_warning">ഒരേസമയം എത്ര ചാനലുകൾ കാണാമെന്ന് പല ദാതാക്കളും ഒരിക്കലും പറയാറില്ല. അതിനാൽ കുറച്ച് ചാനലുകൾ തുറന്ന് ഏതൊക്കെ തുടരുന്നു എന്ന് നോക്കിയാണ് МОЁ ТВ ഇത് കണ്ടെത്തുന്നത്. ഇപ്പോൾ പ്ലേ ചെയ്യുന്നതെല്ലാം നിലയ്ക്കും, ഇതിന് രണ്ട് മിനിറ്റ് വരെ എടുത്തേക്കാം.</string>
     <string name="settings_sources_probe_running">ഈ ദാതാവ് എത്ര ചാനലുകൾ അനുവദിക്കുന്നു എന്ന് പരിശോധിക്കുന്നു… (<xliff:g id="total">%2$d</xliff:g>-ൽ <xliff:g id="current">%1$d</xliff:g>)</string>
-    <string name="settings_sources_probe_unknown">ഈ ദാതാവ് എത്ര ചാനലുകൾ അനുവദിക്കുന്നു എന്ന് OwnTV-യ്ക്ക് കണ്ടെത്താനായില്ല.</string>
+    <string name="settings_sources_probe_unknown">ഈ ദാതാവ് എത്ര ചാനലുകൾ അനുവദിക്കുന്നു എന്ന് МОЁ ТВ-യ്ക്ക് കണ്ടെത്താനായില്ല.</string>
     <string name="settings_sources_probe_skip">ഒഴിവാക്കുക</string>
     <string name="settings_sources_auto_refresh">⟳ <xliff:g id="mode">%1$s</xliff:g></string>
     <string name="settings_sources_default">ഡിഫോൾട്ട്</string>
@@ -925,7 +925,7 @@
     <string name="settings_move_category_keep">“<xliff:g id="name">%1$s</xliff:g>” എന്ന വിഭാഗത്തിലും നിലനിർത്തുക</string>
     <string name="settings_move_category_action">മാറ്റുക</string>
     <string name="settings_dns_description">ഡൊമെയ്ൻ ലുക്കപ്പുകൾക്കായി ഇഷ്ടാനുസൃത DNS സെർവർ ഉപയോഗിക്കുക</string>
-    <string name="settings_dns_toggle_description">എല്ലാ OwnTV ഡൊമെയ്ൻ ലുക്കപ്പുകളും ഒരു ഇഷ്ടാനുസൃത DNS സെർവർ വഴി പരിഹരിക്കുക.</string>
+    <string name="settings_dns_toggle_description">എല്ലാ МОЁ ТВ ഡൊമെയ്ൻ ലുക്കപ്പുകളും ഒരു ഇഷ്ടാനുസൃത DNS സെർവർ വഴി പരിഹരിക്കുക.</string>
     <string name="settings_dns_use_custom">ഇഷ്ടാനുസൃത DNS ഉപയോഗിക്കുക</string>
     <string name="settings_dns_server_missing">ഇഷ്ടാനുസൃത DNS പ്രവർത്തനക്ഷമമാണ്, പക്ഷേ സെർവർ സജ്ജീകരിച്ചിട്ടില്ല. ഒരു സെർവർ വിലാസം നൽകി സംരക്ഷിക്കുക എന്നത് തിരഞ്ഞെടുക്കുക, അല്ലെങ്കിൽ ഇത് ഓഫാക്കുക.</string>
     <string name="settings_dns_server">DNS സെർവർ</string>
@@ -970,7 +970,7 @@
     <string name="settings_live_preroll">ലൈവ് സ്ട്രീമുകൾ പ്രീ-ബഫർ ചെയ്യുക</string>
     <string name="settings_live_preroll_description">ഒരു ലൈവ് ചാനൽ പ്ലേ ചെയ്യാൻ തുടങ്ങുന്നതിന് മുമ്പ് ഇത്രയും വീഡിയോ ബഫർ ചെയ്യുക, സ്റ്റട്ടറിന് ശേഷവും വീണ്ടും. ഇത് വീഡിയോയുടെ അളവാണ്, കൗണ്ട്ഡൗൺ അല്ല. ഓഫ് ആണെങ്കിൽ ഏറ്റവും വേഗത്തിൽ പ്ലേ ആരംഭിക്കും.</string>
     <string name="settings_live_tune_timeout">ചാനൽ ഉപേക്ഷിക്കാനുള്ള സമയം</string>
-    <string name="settings_live_tune_timeout_description">ഈ സമയത്തിനുള്ളിൽ ഒരു ലൈവ് ചാനലിൽ ചിത്രം വന്നില്ലെങ്കിൽ, തന്റെ എല്ലാ പ്ലേയറുകളും ഓരോന്നായി പരീക്ഷിച്ച് കറുത്ത സ്ക്രീൻ കാണിച്ചുനിൽക്കുന്നതിനു പകരം OwnTV ശ്രമം നിർത്തി നിങ്ങളോട് പറയും. “ഒരിക്കലും വേണ്ട” എന്നത് ശ്രമം തുടരും; നിങ്ങളുടെ ദാതാവ് നീക്കം ചെയ്ത ചാനലിൽ അതിന് ഒരു മിനിറ്റിലേറെ എടുക്കാം. ദാതാവ് തന്നെ ആവശ്യപ്പെടുന്ന കാത്തിരിപ്പ് ഇതിൽ കണക്കാക്കില്ല.</string>
+    <string name="settings_live_tune_timeout_description">ഈ സമയത്തിനുള്ളിൽ ഒരു ലൈവ് ചാനലിൽ ചിത്രം വന്നില്ലെങ്കിൽ, തന്റെ എല്ലാ പ്ലേയറുകളും ഓരോന്നായി പരീക്ഷിച്ച് കറുത്ത സ്ക്രീൻ കാണിച്ചുനിൽക്കുന്നതിനു പകരം МОЁ ТВ ശ്രമം നിർത്തി നിങ്ങളോട് പറയും. “ഒരിക്കലും വേണ്ട” എന്നത് ശ്രമം തുടരും; നിങ്ങളുടെ ദാതാവ് നീക്കം ചെയ്ത ചാനലിൽ അതിന് ഒരു മിനിറ്റിലേറെ എടുക്കാം. ദാതാവ് തന്നെ ആവശ്യപ്പെടുന്ന കാത്തിരിപ്പ് ഇതിൽ കണക്കാക്കില്ല.</string>
     <string name="settings_live_preroll_per_playlist">ഓരോ പ്ലേലിസ്റ്റിനും പ്രീ-ബഫർ</string>
     <string name="settings_live_preroll_per_playlist_description">മുകളിലെ ക്രമീകരണം ഒരു പ്ലേലിസ്റ്റിനായി ഓവർറൈഡ് ചെയ്യുക, മറ്റ് പ്ലേലിസ്റ്റുകൾ വേഗത്തിൽ തന്നെ നിലനിർത്തുക.</string>
     <string name="settings_live_latency_per_playlist">ഓരോ പ്ലേലിസ്റ്റിനും തത്സമയ കാലതാമസം</string>
@@ -988,7 +988,7 @@
     <string name="settings_surround_auto_description_mobile">ഓട്ടോ — ഡോൾബി/DTS സറൗണ്ട് പരീക്ഷിക്കുക, സ്പീക്കറോ ഹെഡ്‌ഫോണുകളോ ബന്ധിപ്പിച്ച റിസീവറോ അത് പ്ലേ ചെയ്യുന്നില്ലെങ്കിൽ ഓട്ടോമാറ്റിക്കായി സ്റ്റീരിയോയിലേക്ക് തിരികെ മാറുക. ശുപാർശ ചെയ്യുന്നു.</string>
     <string name="settings_surround_stereo_description">സ്റ്റീരിയോ മാത്രം — എപ്പോഴും ആപ്പിനുള്ളിൽ ഡീകോഡ് ചെയ്ത് സാധാരണ 2.0 ശബ്ദം അയയ്ക്കുക. ടിവി സ്പീക്കറുകളിലോ സ്റ്റീരിയോ സൗണ്ട്ബാറിലോ, അല്ലെങ്കിൽ ഓഡിയോ ചിത്രത്തിന് പിന്നിൽ വൈകുന്നുവെങ്കിൽ ഇത് ഉപയോഗിക്കുക.</string>
     <string name="settings_surround_stereo_description_mobile">സ്റ്റീരിയോ മാത്രം — എപ്പോഴും ആപ്പിനുള്ളിൽ ഡീകോഡ് ചെയ്ത് സാധാരണ 2.0 ശബ്ദം അയയ്ക്കുക. ബിൽറ്റ്-ഇൻ സ്പീക്കറിലോ ഹെഡ്‌ഫോണുകളിലോ സ്റ്റീരിയോ സൗണ്ട്ബാറിലോ, അല്ലെങ്കിൽ ഓഡിയോ ചിത്രത്തിന് പിന്നിൽ വൈകുന്നുവെങ്കിൽ ഇത് ഉപയോഗിക്കുക.</string>
-    <string name="settings_surround_forced_description">സറൗണ്ട് — ഡോൾബി/DTS ഒരു യഥാർത്ഥ 5.1/7.1 റിസീവറിലേക്ക് അയയ്ക്കുക. അത് നിശ്ശബ്ദമാകുകയോ സ്റ്റട്ടർ ചെയ്യുകയോ ചെയ്താൽ, OwnTV ഇപ്പോഴും സ്റ്റീരിയോയിലേക്ക് മടങ്ങുകയും നിങ്ങളെ അറിയിക്കുകയും ചെയ്യും.</string>
+    <string name="settings_surround_forced_description">സറൗണ്ട് — ഡോൾബി/DTS ഒരു യഥാർത്ഥ 5.1/7.1 റിസീവറിലേക്ക് അയയ്ക്കുക. അത് നിശ്ശബ്ദമാകുകയോ സ്റ്റട്ടർ ചെയ്യുകയോ ചെയ്താൽ, МОЁ ТВ ഇപ്പോഴും സ്റ്റീരിയോയിലേക്ക് മടങ്ങുകയും നിങ്ങളെ അറിയിക്കുകയും ചെയ്യും.</string>
     <string name="settings_panel_width">പാനൽ വീതി ക്രമീകരണം</string>
     <string name="settings_panel_width_description">ലൈവ് ടിവി, സിനിമകൾ &amp; സീരീസുകൾ എന്നിവയിലെ വിഭാഗം, പട്ടിക, പ്രിവ്യൂ പാനലുകളുടെ വലിപ്പം മാറ്റുക.</string>
     <string name="settings_vod_layout">സിനിമകളുടെയും സീരീസുകളുടെയും വിന്യാസം</string>
@@ -1028,9 +1028,9 @@
     <string name="settings_panel_width_preview_panel"><xliff:g id="label">%1$s</xliff:g> പാനൽ</string>
     <string name="settings_panel_width_total">ആകെ വലിപ്പം</string>
     <string name="settings_panel_width_invalid_total">ആകെ വലിപ്പം <xliff:g id="total">%1$d</xliff:g>%% ആണ്. അത് 100%% ആകണം — ദയവായി ക്രമീകരിക്കുക.</string>
-    <string name="settings_language_help_translate">OwnTV നിങ്ങളുടെ ഭാഷയിലേക്ക് വിവർത്തനം ചെയ്യാൻ സഹായിക്കുക</string>
-    <string name="settings_language_contribution_description">QR കോഡ് സ്കാൻ ചെയ്യുക അല്ലെങ്കിൽ ലിങ്ക് തുറന്ന് ലഭ്യമായ ഏത് ഭാഷയും തിരഞ്ഞെടുത്ത് OwnTV-യുടെ ആറ് വിവർത്തന ഘടകങ്ങളിലും സംഭാവന നൽകുക.</string>
-    <string name="settings_language_contribution_qr_description">OwnTV വിവർത്തന പ്രോജക്റ്റ് അവലോകനത്തിനുള്ള QR കോഡ്</string>
+    <string name="settings_language_help_translate">МОЁ ТВ നിങ്ങളുടെ ഭാഷയിലേക്ക് വിവർത്തനം ചെയ്യാൻ സഹായിക്കുക</string>
+    <string name="settings_language_contribution_description">QR കോഡ് സ്കാൻ ചെയ്യുക അല്ലെങ്കിൽ ലിങ്ക് തുറന്ന് ലഭ്യമായ ഏത് ഭാഷയും തിരഞ്ഞെടുത്ത് МОЁ ТВ-യുടെ ആറ് വിവർത്തന ഘടകങ്ങളിലും സംഭാവന നൽകുക.</string>
+    <string name="settings_language_contribution_qr_description">МОЁ ТВ വിവർത്തന പ്രോജക്റ്റ് അവലോകനത്തിനുള്ള QR കോഡ്</string>
     <string name="settings_language_contribution_qr_failed">QR കോഡ് സൃഷ്ടിക്കാൻ കഴിഞ്ഞില്ല. പകരം താഴെ കാണിച്ചിരിക്കുന്ന ലിങ്ക് ഉപയോഗിക്കുക.</string>
     <string name="settings_language_contribution_copy">ലിങ്ക് പകർത്തുക</string>
     <string name="settings_language_contribution_copied">ലിങ്ക് പകർത്തി</string>
@@ -1039,8 +1039,8 @@
     <string name="settings_auto_frame_rate_warning_suffix">ഈ ടിവിയിൽ ശുപാർശ ചെയ്യുന്നില്ല: Android 12-ന് താഴെ ഫ്രെയിം റേറ്റ് സുഗമമായി മാറ്റാനാകില്ല.</string>
     <string name="settings_auto_frame_rate_warning_title">ഈ ടിവിയിൽ ശുപാർശ ചെയ്യുന്നില്ല</string>
     <string name="settings_auto_frame_rate_warning_title_mobile">ഈ ഉപകരണത്തിൽ ശുപാർശ ചെയ്യുന്നില്ല</string>
-    <string name="settings_auto_frame_rate_warning_description">ഈ ഉപകരണം Android <xliff:g id="android_version">%1$s</xliff:g> ആണ് പ്രവർത്തിപ്പിക്കുന്നത്. Android 12-ന് താഴെ, ഏത് റിഫ്രഷ് റേറ്റുകളിലേക്ക് സുഗമമായി മാറാനാകുമെന്ന് ടിവിക്ക് OwnTV-യോട് പറയാൻ കഴിയില്ല. അതിനാൽ ഫ്രെയിം റേറ്റ് മാറ്റുമ്പോൾ സ്ക്രീൻ ഒരു സെക്കൻഡോ രണ്ടോ ഇരുണ്ടുപോയേക്കാം — ചിലപ്പോൾ ഒരു പ്രോഗ്രാമിനിടെ ഒന്നിലധികം തവണ.\n\nഓട്ടോ ഫ്രെയിം റേറ്റ് ഇവിടെ ഓഫ് ആക്കി വയ്ക്കാൻ ഞങ്ങൾ ശുപാർശ ചെയ്യുന്നു. നിങ്ങളുടെ ടിവി വൃത്തിയായി മാറുന്നുണ്ടെങ്കിൽ, അത് ഓൺ ചെയ്ത് നോക്കൂ: എപ്പോൾ വേണമെങ്കിലും നിങ്ങൾക്ക് തിരികെ മാറ്റാം.</string>
-    <string name="settings_auto_frame_rate_warning_description_mobile">ഈ ഉപകരണം Android <xliff:g id="android_version">%1$s</xliff:g> ആണ് പ്രവർത്തിപ്പിക്കുന്നത്. Android 12-ന് താഴെ, ഏത് റിഫ്രഷ് റേറ്റുകളിലേക്ക് സുഗമമായി മാറാനാകുമെന്ന് ഉപകരണത്തിന് OwnTV-യോട് പറയാൻ കഴിയില്ല. അതിനാൽ ഫ്രെയിം റേറ്റ് മാറ്റുമ്പോൾ സ്ക്രീൻ ഒരു സെക്കൻഡോ രണ്ടോ ഇരുണ്ടുപോയേക്കാം — ചിലപ്പോൾ ഒരു പ്രോഗ്രാമിനിടെ ഒന്നിലധികം തവണ.\n\nഓട്ടോ ഫ്രെയിം റേറ്റ് ഇവിടെ ഓഫ് ആക്കി വയ്ക്കാൻ ഞങ്ങൾ ശുപാർശ ചെയ്യുന്നു. നിങ്ങളുടെ സ്ക്രീൻ വൃത്തിയായി മാറുന്നുണ്ടെങ്കിൽ, അത് ഓൺ ചെയ്ത് നോക്കൂ: എപ്പോൾ വേണമെങ്കിലും നിങ്ങൾക്ക് തിരികെ മാറ്റാം.</string>
+    <string name="settings_auto_frame_rate_warning_description">ഈ ഉപകരണം Android <xliff:g id="android_version">%1$s</xliff:g> ആണ് പ്രവർത്തിപ്പിക്കുന്നത്. Android 12-ന് താഴെ, ഏത് റിഫ്രഷ് റേറ്റുകളിലേക്ക് സുഗമമായി മാറാനാകുമെന്ന് ടിവിക്ക് МОЁ ТВ-യോട് പറയാൻ കഴിയില്ല. അതിനാൽ ഫ്രെയിം റേറ്റ് മാറ്റുമ്പോൾ സ്ക്രീൻ ഒരു സെക്കൻഡോ രണ്ടോ ഇരുണ്ടുപോയേക്കാം — ചിലപ്പോൾ ഒരു പ്രോഗ്രാമിനിടെ ഒന്നിലധികം തവണ.\n\nഓട്ടോ ഫ്രെയിം റേറ്റ് ഇവിടെ ഓഫ് ആക്കി വയ്ക്കാൻ ഞങ്ങൾ ശുപാർശ ചെയ്യുന്നു. നിങ്ങളുടെ ടിവി വൃത്തിയായി മാറുന്നുണ്ടെങ്കിൽ, അത് ഓൺ ചെയ്ത് നോക്കൂ: എപ്പോൾ വേണമെങ്കിലും നിങ്ങൾക്ക് തിരികെ മാറ്റാം.</string>
+    <string name="settings_auto_frame_rate_warning_description_mobile">ഈ ഉപകരണം Android <xliff:g id="android_version">%1$s</xliff:g> ആണ് പ്രവർത്തിപ്പിക്കുന്നത്. Android 12-ന് താഴെ, ഏത് റിഫ്രഷ് റേറ്റുകളിലേക്ക് സുഗമമായി മാറാനാകുമെന്ന് ഉപകരണത്തിന് МОЁ ТВ-യോട് പറയാൻ കഴിയില്ല. അതിനാൽ ഫ്രെയിം റേറ്റ് മാറ്റുമ്പോൾ സ്ക്രീൻ ഒരു സെക്കൻഡോ രണ്ടോ ഇരുണ്ടുപോയേക്കാം — ചിലപ്പോൾ ഒരു പ്രോഗ്രാമിനിടെ ഒന്നിലധികം തവണ.\n\nഓട്ടോ ഫ്രെയിം റേറ്റ് ഇവിടെ ഓഫ് ആക്കി വയ്ക്കാൻ ഞങ്ങൾ ശുപാർശ ചെയ്യുന്നു. നിങ്ങളുടെ സ്ക്രീൻ വൃത്തിയായി മാറുന്നുണ്ടെങ്കിൽ, അത് ഓൺ ചെയ്ത് നോക്കൂ: എപ്പോൾ വേണമെങ്കിലും നിങ്ങൾക്ക് തിരികെ മാറ്റാം.</string>
     <string name="settings_auto_frame_rate_keep_off">ഓഫ് ആക്കി വയ്ക്കുക</string>
     <string name="settings_auto_frame_rate_turn_on_anyway">എന്തായാലും ഓൺ ചെയ്യുക</string>
     <string name="settings_language_request_workflow">ലിസ്റ്റ് ചെയ്തിട്ടില്ലാത്ത ഒരു ഭാഷ ചേർക്കണോ? ആദ്യം ഒരു ഭാഷാ അഭ്യർത്ഥന തുറക്കുക. ഒരു മെയിന്റെയ്നർ അത് രജിസ്റ്റർ ചെയ്ത് അടിസ്ഥാന വിവർത്തന ഫയലുകൾ തയ്യാറാക്കും; അത് Hosted Weblate-ൽ ദൃശ്യമായിക്കഴിഞ്ഞാൽ, നിങ്ങൾക്ക് സംഭാവന ചെയ്യാൻ തുടങ്ങാം.</string>
@@ -1163,7 +1163,7 @@
     <string name="local_sync_received_items">ലഭിച്ച ഇനങ്ങൾ: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_sent">നിങ്ങളുടെ ഡാറ്റ അയച്ചു</string>
     <string name="local_sync_failed">സമന്വയം പരാജയപ്പെട്ടു</string>
-    <string name="local_sync_error_unreachable">ഈ ഉപകരണത്തിലേക്ക് എത്താനായില്ല. അതിൽ OwnTV → കൂടുതൽ → ലോക്കൽ സമന്വയം തുറന്ന് സമന്വയ മോഡ് ഓണാക്കുക. രണ്ട് ഉപകരണങ്ങളും ഒരേ വൈ-ഫൈയിൽ ആയിരിക്കണം.</string>
+    <string name="local_sync_error_unreachable">ഈ ഉപകരണത്തിലേക്ക് എത്താനായില്ല. അതിൽ МОЁ ТВ → കൂടുതൽ → ലോക്കൽ സമന്വയം തുറന്ന് സമന്വയ മോഡ് ഓണാക്കുക. രണ്ട് ഉപകരണങ്ങളും ഒരേ വൈ-ഫൈയിൽ ആയിരിക്കണം.</string>
     <string name="local_sync_error_unauthorized">മറ്റേ ഉപകരണം നിരസിച്ചു. പിൻ തെറ്റായിരിക്കാം, അല്ലെങ്കിൽ അത് ഈ ഉപകരണം മറന്നിരിക്കാം.</string>
     <string name="local_sync_error_bad_payload">വന്നത് വായിക്കാൻ കഴിഞ്ഞില്ല. പാസ്‌വേഡ് ഉപയോഗിച്ചെങ്കിൽ, രണ്ട് ഉപകരണങ്ങളിലും ഒന്നുതന്നെയാണോ എന്ന് പരിശോധിക്കുക.</string>
     <string name="local_sync_error_unknown">എന്തോ കുഴപ്പം സംഭവിച്ചു. വീണ്ടും ശ്രമിക്കുക.</string>
@@ -1181,7 +1181,7 @@
     <string name="local_auto_sync_waiting"><xliff:g id="device">%1$s</xliff:g> അനുവദിക്കുന്നതിനായി കാത്തിരിക്കുന്നു…</string>
     <string name="local_auto_sync_declined"><xliff:g id="device">%1$s</xliff:g> ഓട്ടോ-സമന്വയം അനുവദിച്ചില്ല.</string>
     <string name="local_auto_sync_accept_title">ഓട്ടോ-സമന്വയം അനുവദിക്കണോ?</string>
-    <string name="local_auto_sync_accept_body">രണ്ടിലും OwnTV തുറന്നിരിക്കുമ്പോഴെല്ലാം <xliff:g id="device">%1$s</xliff:g> ഈ ഉപകരണവുമായി സ്വയം സമന്വയിപ്പിക്കാൻ ആഗ്രഹിക്കുന്നു. ഈ ഉപകരണത്തിൽ നിങ്ങൾ അനുവദിക്കുന്നത് മാത്രമേ വരൂ, ഏതെങ്കിലും ഉപകരണത്തിന് ഇത് ഓഫ് ചെയ്യാം.</string>
+    <string name="local_auto_sync_accept_body">രണ്ടിലും МОЁ ТВ തുറന്നിരിക്കുമ്പോഴെല്ലാം <xliff:g id="device">%1$s</xliff:g> ഈ ഉപകരണവുമായി സ്വയം സമന്വയിപ്പിക്കാൻ ആഗ്രഹിക്കുന്നു. ഈ ഉപകരണത്തിൽ നിങ്ങൾ അനുവദിക്കുന്നത് മാത്രമേ വരൂ, ഏതെങ്കിലും ഉപകരണത്തിന് ഇത് ഓഫ് ചെയ്യാം.</string>
     <string name="local_auto_sync_accept">അനുവദിക്കുക</string>
     <string name="local_auto_sync_decline">അനുവദിക്കരുത്</string>
     <string name="local_auto_sync_what_to_sync">ഈ ഉപകരണം എന്ത് സമന്വയിപ്പിക്കുന്നു</string>
@@ -1197,7 +1197,7 @@
     <string name="local_auto_sync_turned_off"><xliff:g id="device">%1$s</xliff:g>-ൽ ഓട്ടോ-സമന്വയം ഓഫ് ചെയ്തു</string>
     <string name="local_auto_sync_unreachable"><xliff:g id="device">%1$s</xliff:g>-ൽ എത്താനായില്ല, വീണ്ടും ശ്രമിക്കും</string>
     <string name="local_auto_sync_listen">ഓട്ടോ-സമന്വയത്തിനായി കേട്ടുകൊണ്ടിരിക്കുക</string>
-    <string name="local_auto_sync_listen_description">ഓൺ: ഇവിടെ OwnTV തുറന്നിരിക്കുമ്പോഴെല്ലാം ജോടിയാക്കിയ ഉപകരണങ്ങൾക്ക് ഇതുമായി സമന്വയിപ്പിക്കാം. ഓഫ്: സമന്വയ മോഡ് ഓണായിരിക്കുമ്പോൾ മാത്രം.</string>
+    <string name="local_auto_sync_listen_description">ഓൺ: ഇവിടെ МОЁ ТВ തുറന്നിരിക്കുമ്പോഴെല്ലാം ജോടിയാക്കിയ ഉപകരണങ്ങൾക്ക് ഇതുമായി സമന്വയിപ്പിക്കാം. ഓഫ്: സമന്വയ മോഡ് ഓണായിരിക്കുമ്പോൾ മാത്രം.</string>
     <string name="local_auto_sync_listening">കേൾക്കുന്നു</string>
     <string name="more_pane_last_backup">അവസാന ബാക്കപ്പ്</string>
     <string name="more_pane_encrypted">എൻക്രിപ്റ്റ് ചെയ്തു</string>
@@ -1272,8 +1272,8 @@
     <string name="settings_multiview_keep_two">2 തന്നെ മതി</string>
     <string name="settings_multiview_use_anyway">എന്നാലും ഉപയോഗിക്കുക</string>
     <string name="settings_app_icon">ആപ്പ് ഐക്കൺ</string>
-    <string name="settings_app_icon_summary">OwnTV ഐക്കണിന്റെയും ലോഗോയുടെയും നിറം</string>
-    <string name="settings_app_icon_sheet_mobile">നിങ്ങളുടെ ഹോം സ്ക്രീനിൽ OwnTV എങ്ങനെ കാണപ്പെടുന്നു. ആപ്പ് ഒരിക്കൽ റീസ്റ്റാർട്ട് ചെയ്യും.</string>
+    <string name="settings_app_icon_summary">МОЁ ТВ ഐക്കണിന്റെയും ലോഗോയുടെയും നിറം</string>
+    <string name="settings_app_icon_sheet_mobile">നിങ്ങളുടെ ഹോം സ്ക്രീനിൽ МОЁ ТВ എങ്ങനെ കാണപ്പെടുന്നു. ആപ്പ് ഒരിക്കൽ റീസ്റ്റാർട്ട് ചെയ്യും.</string>
     <string name="settings_brand_accent">ആക്സന്റ് നിറത്തിലുള്ള ലോഗോ</string>
     <string name="app_icon_petrol">പെട്രോൾ</string>
     <string name="app_icon_sunflower">സൂര്യകാന്തി</string>
@@ -1284,8 +1284,8 @@
     <string name="app_icon_olive">ഒലിവ്</string>
     <string name="app_icon_olive_cream">ക്രീമിൽ ഒലിവ്</string>
     <string name="app_icon_pixel">Pixel</string>
-    <string name="app_icon_restart_title">OwnTV റീസ്റ്റാർട്ട് ചെയ്യണോ?</string>
-    <string name="app_icon_restart_message">നിങ്ങൾ പുതിയ ഐക്കണും ലോഗോയും തിരഞ്ഞെടുത്തു. OwnTV റീസ്റ്റാർട്ട് ചെയ്ത ശേഷം ഇവ പ്രാബല്യത്തിൽ വരും.</string>
+    <string name="app_icon_restart_title">МОЁ ТВ റീസ്റ്റാർട്ട് ചെയ്യണോ?</string>
+    <string name="app_icon_restart_message">നിങ്ങൾ പുതിയ ഐക്കണും ലോഗോയും തിരഞ്ഞെടുത്തു. МОЁ ТВ റീസ്റ്റാർട്ട് ചെയ്ത ശേഷം ഇവ പ്രാബല്യത്തിൽ വരും.</string>
     <string name="app_icon_restart_now">ഇപ്പോൾ റീസ്റ്റാർട്ട് ചെയ്യുക</string>
     <string name="settings_navigation">നാവിഗേഷൻ</string>
     <string name="settings_navigation_description">ഇടതുവശത്തെ മെനു എങ്ങനെ പ്രവർത്തിക്കണം</string>
@@ -1439,10 +1439,10 @@
     <string name="settings_help_epg_sources">ലിങ്ക് വഴി XMLTV ഗൈഡ് ഫീഡ് ചേർക്കുക, പുതുക്കുക, അല്ലെങ്കിൽ നീക്കം ചെയ്യുക. ഫീഡുകൾ ടിവി ഗൈഡും ലൈവ് ടിവിയിലെ പരിപാടി വരികളും നിറയ്ക്കും.</string>
     <string name="settings_help_guide_days">ഗൈഡ് എത്ര ദിവസത്തെ പരിപാടികൾ മുന്നോട്ട് സൂക്ഷിക്കണം. ദിവസങ്ങൾ കുറച്ചാൽ ഗൈഡ് വേഗം പുതുക്കും, ഡാറ്റാബേസ് ചെറുതാകും.</string>
     <string name="settings_help_catchup_timezone">ക്യാച്ച്-അപ്പ് നിങ്ങളുടെ ദാതാവിന്റെ ആർക്കൈവിൽ നിന്ന് പരിപാടികൾ പ്ലേ ചെയ്യുന്നു. സ്വയം എന്ന ഓപ്ഷൻ ദാതാവ് അറിയിക്കുന്ന സമയമേഖല ഉപയോഗിക്കുന്നു, അറിയിക്കുന്നില്ലെങ്കിൽ ടിവിയുടെ സ്വന്തം സമയം; എന്നിട്ടും ക്യാച്ച്-അപ്പ് തെറ്റായ സമയത്ത് തുടങ്ങുന്നുവെങ്കിൽ ഒരു സ്ഥിര UTC ഓഫ്സെറ്റ് തിരഞ്ഞെടുക്കുക. ക്യാച്ച്-അപ്പ് ഏത് പ്ലെയർ ഉപയോഗിക്കണമെന്നും ഇവിടെ തിരഞ്ഞെടുക്കാം.</string>
-    <string name="settings_help_theme">OwnTV ഡാർക്കിനായി രൂപകൽപ്പന ചെയ്തതാണ്. സിസ്റ്റം ടിവിയുടെ സ്വന്തം ക്രമീകരണം ഉണ്ടെങ്കിൽ പിന്തുടരും; ലൈറ്റ് വെളിച്ചമുള്ള മുറിക്ക് യോജിക്കും.</string>
+    <string name="settings_help_theme">МОЁ ТВ ഡാർക്കിനായി രൂപകൽപ്പന ചെയ്തതാണ്. സിസ്റ്റം ടിവിയുടെ സ്വന്തം ക്രമീകരണം ഉണ്ടെങ്കിൽ പിന്തുടരും; ലൈറ്റ് വെളിച്ചമുള്ള മുറിക്ക് യോജിക്കും.</string>
     <string name="settings_help_accent">എല്ലായിടത്തും ബട്ടണുകൾ, ഫോക്കസ് തിളക്കം, പുരോഗതി ബാറുകൾ, ഹൈലൈറ്റുകൾ എന്നിവയ്ക്ക് നിറം നൽകുന്നു. ഒരു പ്രീസെറ്റ് തിരഞ്ഞെടുക്കുക, അല്ലെങ്കിൽ പാലറ്റിനും ഏത് ഹെക്സ് കോഡിനും OK അമർത്തുക.</string>
     <string name="settings_help_focus">ഫോക്കസ് ഉള്ളതിന് ചുറ്റും വരയ്ക്കുന്ന വളയം. സോഫയിൽ നിന്ന് എളുപ്പം കാണാൻ നിറവും കനവും തിരഞ്ഞെടുക്കുക.</string>
-    <string name="settings_help_fonts">OwnTV-യിൽ മുഴുവൻ ഉപയോഗിക്കുന്ന ഫോണ്ടും എഴുത്തിന്റെ വലുപ്പവും. പോപ്പപ്പുകളും ഇതേ ഫോണ്ട് ഉപയോഗിക്കും.</string>
+    <string name="settings_help_fonts">МОЁ ТВ-യിൽ മുഴുവൻ ഉപയോഗിക്കുന്ന ഫോണ്ടും എഴുത്തിന്റെ വലുപ്പവും. പോപ്പപ്പുകളും ഇതേ ഫോണ്ട് ഉപയോഗിക്കും.</string>
     <string name="settings_help_popup_size">പോപ്പപ്പുകൾ, മെനുകൾ, ഡയലോഗുകൾ എന്നിവ മൊത്തത്തിൽ വലുതോ ചെറുതോ ആക്കുന്നു. പോപ്പപ്പുകൾ ഇടുങ്ങിയതായോ സ്ക്രീൻ അധികം മറയ്ക്കുന്നതായോ തോന്നുമ്പോൾ ഉപയോഗിക്കുക.</string>
     <string name="settings_help_zoom">സ്ക്രീനിലെ എല്ലാത്തിന്റെയും വലുപ്പം മാറ്റുന്നു. വലുത് ദൂരെനിന്ന് വായിക്കാൻ എളുപ്പമാണ്; ചെറുത് കൂടുതൽ കാണിക്കും. 85%%-ൽ താഴെ മെമ്മറി കുറഞ്ഞ ടിവി ബോക്സുകളിൽ മെമ്മറി തീരാം.</string>
     <string name="settings_help_animations">ഓണായിരിക്കുമ്പോൾ ഷീറ്റുകളും മെനുകളും ഫോക്കസും സുഗമമായി നീങ്ങും. ഓഫാക്കിയാൽ എല്ലാ മാറ്റവും ഉടനടി സംഭവിക്കും.</string>
@@ -1452,13 +1452,13 @@
     <string name="settings_help_vod_layout">സിനിമാറ്റിക് ഫോക്കസ് ചെയ്ത ശീർഷകത്തിന്റെ ചിത്രം പോസ്റ്ററുകളുടെ ഗ്രിഡിന് പിന്നിൽ കാണിക്കും. വേറിട്ടത് വിഭാഗങ്ങളും ശീർഷകങ്ങളും വിശദാംശങ്ങളും അടുത്തടുത്ത് കാണിക്കും.</string>
     <string name="settings_help_home">ഹോം ഏത് നിരകൾ ഏത് ക്രമത്തിൽ കാണിക്കണമെന്നും ഇപ്പോൾ ട്രെൻഡിംഗ് നിര എങ്ങനെ കാണണമെന്നും തിരഞ്ഞെടുക്കുക.</string>
     <string name="settings_help_customize">നിങ്ങൾ ഒരിക്കലും കാണാത്ത വിഭാഗങ്ങളും ഇനങ്ങളും മറയ്ക്കുക, വിഭാഗങ്ങൾക്ക് സ്വന്തം പേരുകൾ നൽകുക, നിങ്ങളുടെ ക്രമത്തിൽ വയ്ക്കുക. മറച്ചവ ഇവിടെ നിന്ന് തിരികെ വരും, ഒരിക്കലും നഷ്ടമാകില്ല.</string>
-    <string name="settings_help_app_icon">ടിവിയുടെ ഹോം സ്ക്രീനിലെ OwnTV ഐക്കൺ. മാറ്റം കാണിക്കാൻ ലോഞ്ചറിന് അൽപസമയം എടുത്തേക്കാം.</string>
-    <string name="settings_help_brand_accent">മെനു, About, സജ്ജീകരണം എന്നിവിടങ്ങളിലെ OwnTV ലോഗോ പ്ലേ ത്രികോണം നിങ്ങളുടെ ആക്സന്റ് നിറത്തിൽ കാണിക്കും. ഹോം സ്ക്രീനിലെ ഐക്കൺ സ്വന്തം നിറങ്ങൾ നിലനിർത്തും.</string>
-    <string name="settings_help_startup">OwnTV തുടങ്ങുമ്പോൾ എന്ത് കാണിക്കണം: ഹോം, അവസാനം കണ്ട ചാനൽ, നിങ്ങളുടെ പ്രിയപ്പെട്ടവ, അല്ലെങ്കിൽ നിങ്ങൾ തിരഞ്ഞെടുക്കുന്ന ചാനൽ.</string>
-    <string name="settings_help_check_updates">ഇപ്പോൾ തന്നെ GitHub-ൽ പുതിയ OwnTV തിരഞ്ഞ് ഇൻസ്റ്റാൾ ചെയ്യാൻ നിർദ്ദേശിക്കും. നിങ്ങളുടെ പ്ലേലിസ്റ്റുകളും പ്രിയപ്പെട്ടവയും ക്രമീകരണങ്ങളും അതേപടി തുടരും.</string>
-    <string name="settings_help_update_startup">OwnTV തുടങ്ങുമ്പോഴെല്ലാം പുതിയ പതിപ്പ് തിരഞ്ഞ്, ഉണ്ടെങ്കിൽ അറിയിക്കും. ചോദിക്കാതെ ഒന്നും ഇൻസ്റ്റാൾ ചെയ്യില്ല.</string>
-    <string name="settings_help_auto_start_boot">ടിവി ആരംഭിച്ചുകഴിഞ്ഞാൽ, ആപ്പ് ആരംഭിക്കൽ ക്രമീകരണത്തിൽ തിരഞ്ഞെടുത്ത സ്ക്രീനിൽ OwnTV സ്വയം തുറക്കുന്നു. മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കാൻ അനുമതിയുള്ള ആപ്പിനെ മാത്രമേ Android സ്വയം തുറക്കാൻ അനുവദിക്കൂ, അതിനാൽ ഇത് ഓണാക്കുമ്പോൾ ആ അനുമതിയുടെ സ്ക്രീൻ തുറക്കും. ചില ടിവികളിൽ ഈ അനുമതിയില്ല, അവിടെ സ്വയം തുറക്കൽ പ്രവർത്തിക്കില്ല.</string>
-    <string name="settings_help_auto_start_wake">ടിവി സ്ലീപ്പിൽ നിന്ന് ഉണരുമ്പോഴെല്ലാം OwnTV തുറക്കുന്നു, മറ്റൊരു ആപ്പിനായി ഉണർത്തിയാലും. ആപ്പ് ആരംഭിക്കൽ ഒരു ചാനൽ തുറക്കുന്നതാണെങ്കിൽ, ഓരോ ഉണരലും ആ സ്ട്രീം ആരംഭിക്കും. ഇത് ഓണായിരിക്കുമ്പോൾ, ശബ്ദമില്ലാത്ത ഒരു അറിയിപ്പോടെ OwnTV ഒരു ചെറിയ പശ്ചാത്തല സേവനം നിലനിർത്തുന്നു. ഓണാകുമ്പോൾ സ്വയം തുറക്കുന്നതുപോലെ, ഇതിനും മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കാനുള്ള അനുമതി വേണം.</string>
+    <string name="settings_help_app_icon">ടിവിയുടെ ഹോം സ്ക്രീനിലെ МОЁ ТВ ഐക്കൺ. മാറ്റം കാണിക്കാൻ ലോഞ്ചറിന് അൽപസമയം എടുത്തേക്കാം.</string>
+    <string name="settings_help_brand_accent">മെനു, About, സജ്ജീകരണം എന്നിവിടങ്ങളിലെ МОЁ ТВ ലോഗോ പ്ലേ ത്രികോണം നിങ്ങളുടെ ആക്സന്റ് നിറത്തിൽ കാണിക്കും. ഹോം സ്ക്രീനിലെ ഐക്കൺ സ്വന്തം നിറങ്ങൾ നിലനിർത്തും.</string>
+    <string name="settings_help_startup">МОЁ ТВ തുടങ്ങുമ്പോൾ എന്ത് കാണിക്കണം: ഹോം, അവസാനം കണ്ട ചാനൽ, നിങ്ങളുടെ പ്രിയപ്പെട്ടവ, അല്ലെങ്കിൽ നിങ്ങൾ തിരഞ്ഞെടുക്കുന്ന ചാനൽ.</string>
+    <string name="settings_help_check_updates">ഇപ്പോൾ തന്നെ GitHub-ൽ പുതിയ МОЁ ТВ തിരഞ്ഞ് ഇൻസ്റ്റാൾ ചെയ്യാൻ നിർദ്ദേശിക്കും. നിങ്ങളുടെ പ്ലേലിസ്റ്റുകളും പ്രിയപ്പെട്ടവയും ക്രമീകരണങ്ങളും അതേപടി തുടരും.</string>
+    <string name="settings_help_update_startup">МОЁ ТВ തുടങ്ങുമ്പോഴെല്ലാം പുതിയ പതിപ്പ് തിരഞ്ഞ്, ഉണ്ടെങ്കിൽ അറിയിക്കും. ചോദിക്കാതെ ഒന്നും ഇൻസ്റ്റാൾ ചെയ്യില്ല.</string>
+    <string name="settings_help_auto_start_boot">ടിവി ആരംഭിച്ചുകഴിഞ്ഞാൽ, ആപ്പ് ആരംഭിക്കൽ ക്രമീകരണത്തിൽ തിരഞ്ഞെടുത്ത സ്ക്രീനിൽ МОЁ ТВ സ്വയം തുറക്കുന്നു. മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കാൻ അനുമതിയുള്ള ആപ്പിനെ മാത്രമേ Android സ്വയം തുറക്കാൻ അനുവദിക്കൂ, അതിനാൽ ഇത് ഓണാക്കുമ്പോൾ ആ അനുമതിയുടെ സ്ക്രീൻ തുറക്കും. ചില ടിവികളിൽ ഈ അനുമതിയില്ല, അവിടെ സ്വയം തുറക്കൽ പ്രവർത്തിക്കില്ല.</string>
+    <string name="settings_help_auto_start_wake">ടിവി സ്ലീപ്പിൽ നിന്ന് ഉണരുമ്പോഴെല്ലാം МОЁ ТВ തുറക്കുന്നു, മറ്റൊരു ആപ്പിനായി ഉണർത്തിയാലും. ആപ്പ് ആരംഭിക്കൽ ഒരു ചാനൽ തുറക്കുന്നതാണെങ്കിൽ, ഓരോ ഉണരലും ആ സ്ട്രീം ആരംഭിക്കും. ഇത് ഓണായിരിക്കുമ്പോൾ, ശബ്ദമില്ലാത്ത ഒരു അറിയിപ്പോടെ МОЁ ТВ ഒരു ചെറിയ പശ്ചാത്തല സേവനം നിലനിർത്തുന്നു. ഓണാകുമ്പോൾ സ്വയം തുറക്കുന്നതുപോലെ, ഇതിനും മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കാനുള്ള അനുമതി വേണം.</string>
     <string name="settings_help_dns">നിങ്ങളുടെ നെറ്റ്‌വർക്കിന്റെ സ്വന്തം DNS-ന് പകരം നിങ്ങൾ തിരഞ്ഞെടുക്കുന്ന DNS സെർവർ ഉപയോഗിച്ച് ദാതാവിന്റെ വിലാസങ്ങൾ കണ്ടെത്തുന്നു — നെറ്റ്‌വർക്ക് അവ തടയുകയോ തിരിച്ചുവിടുകയോ ചെയ്യുമ്പോൾ ഉപകാരപ്പെടും.</string>
     <string name="settings_help_hw">ടിവിയുടെ ഹാർഡ്‌വെയർ ഡീകോഡർ ഉപയോഗിക്കുന്നു: സുഗമമായ 4K, കുറഞ്ഞ ചൂട്. ചില സ്ട്രീമുകൾ ഇടറുകയോ ബ്ലോക്കുകൾ കാണിക്കുകയോ ചെയ്താൽ മാത്രം ഓഫാക്കുക; അപ്പോൾ സോഫ്റ്റ്‌വെയർ ഡീകോഡർ ജോലി ചെയ്യും.</string>
     <string name="settings_help_volume">ഓരോ ചാനലും സിനിമയും എപ്പിസോഡും തുടങ്ങുന്ന ശബ്ദനില. 100%%-ന് മുകളിൽ ശബ്ദം കുറഞ്ഞ സ്ട്രീമുകൾ കൂട്ടും. പ്ലെയറിൽ മാറ്റുന്ന ശബ്ദം നിങ്ങൾ റീസെറ്റ് ചെയ്യുന്നതുവരെ ആ ശീർഷകത്തിന് സൂക്ഷിക്കും.</string>
@@ -1472,7 +1472,7 @@
     <string name="settings_help_timeshift_window">ക്യാച്ച്-അപ്പ് ഇല്ലാത്ത ചാനലിൽ ലൈവ് ടിവി നിർത്തലും പിന്നോട്ടാക്കലും എത്ര പിന്നോട്ട് പോകാം. കൂടുതലാണെങ്കിൽ ചാനലിന്റെ കൂടുതൽ ഭാഗം ഈ ഉപകരണത്തിന്റെ സ്റ്റോറേജിൽ സൂക്ഷിക്കും.</string>
     <string name="settings_help_resume">സിനിമയ്ക്കോ എപ്പിസോഡിനോ സേവ് ചെയ്ത സ്ഥാനമുണ്ടെങ്കിൽ \'ചോദിക്കുക\' തുടരാനോ ആദ്യം മുതൽ തുടങ്ങാനോ അവസരം നൽകും. \'എപ്പോഴും തുടരുക\' നിർത്തിയിടത്ത് നിന്ന് തുടരും; \'ഒരിക്കലും തുടരരുത്\' ആദ്യം മുതൽ തുടങ്ങും.</string>
     <string name="settings_help_mini">ബ്രൗസ് ചെയ്യുമ്പോൾ ഒരു മൂലയിൽ ചാനൽ തുടരുന്ന ചെറിയ പ്ലെയർ. അതിന്റെ വലുപ്പവും മൂലയും തിരഞ്ഞെടുക്കുക.</string>
-    <string name="settings_help_pip">ഫുൾ സ്ക്രീനിലോ മിനി പ്ലെയറിലോ വീഡിയോ പ്ലേ ചെയ്യുമ്പോൾ ഹോം അമർത്തുകയോ മറ്റൊരു ആപ്പ് തുറക്കുകയോ ചെയ്താൽ, ടിവിയുടെ ബാക്കി ഭാഗത്തിന് മുകളിൽ ഒരു ചെറിയ വിൻഡോയിൽ അത് പ്ലേ ചെയ്യുന്നത് തുടരും. ഫുൾ സ്ക്രീനിലേക്ക് തിരികെ കൊണ്ടുവരാൻ OwnTV വീണ്ടും തുറക്കുക; പ്ലേബാക്ക് നിർത്താൻ വിൻഡോ അടയ്ക്കുക. മൾട്ടിവ്യൂ OwnTV-യിൽ മാത്രം.</string>
+    <string name="settings_help_pip">ഫുൾ സ്ക്രീനിലോ മിനി പ്ലെയറിലോ വീഡിയോ പ്ലേ ചെയ്യുമ്പോൾ ഹോം അമർത്തുകയോ മറ്റൊരു ആപ്പ് തുറക്കുകയോ ചെയ്താൽ, ടിവിയുടെ ബാക്കി ഭാഗത്തിന് മുകളിൽ ഒരു ചെറിയ വിൻഡോയിൽ അത് പ്ലേ ചെയ്യുന്നത് തുടരും. ഫുൾ സ്ക്രീനിലേക്ക് തിരികെ കൊണ്ടുവരാൻ МОЁ ТВ വീണ്ടും തുറക്കുക; പ്ലേബാക്ക് നിർത്താൻ വിൻഡോ അടയ്ക്കുക. മൾട്ടിവ്യൂ МОЁ ТВ-യിൽ മാത്രം.</string>
     <string name="settings_key_palette">പാലറ്റ്</string>
     <string name="settings_live_preview_note">നിര വിടും മുമ്പേ, നീങ്ങുമ്പോൾ തന്നെ മാറ്റങ്ങൾ ഇവിടെ കാണാം.</string>
     <string name="settings_synced_at"><xliff:g id="when">%1$s</xliff:g> സിങ്ക് ചെയ്തു</string>
@@ -1483,8 +1483,8 @@
     <string name="settings_profile_add">ഒരു പ്രൊഫൈൽ ചേർക്കുക</string>
     <string name="settings_profile_add_line">സ്വന്തം പ്രിയപ്പെട്ടവയും ചരിത്രവും ക്രമീകരണങ്ങളുമുള്ള ഒരു കാഴ്ചക്കാരൻ</string>
     <plurals name="settings_help_language">
-        <item quantity="one">OwnTV-യിലെ എല്ലാ മെനുകളുടെയും സന്ദേശങ്ങളുടെയും ഭാഷ. <xliff:g id="count">%1$d</xliff:g> ഭാഷകൾ; നിങ്ങൾ ഒന്ന് തിരഞ്ഞെടുക്കും വരെ ടിവിയുടെ സ്വന്തം ഭാഷ പിന്തുടരും.</item>
-        <item quantity="other">OwnTV-യിലെ എല്ലാ മെനുകളുടെയും സന്ദേശങ്ങളുടെയും ഭാഷ. <xliff:g id="count">%1$d</xliff:g> ഭാഷകൾ; നിങ്ങൾ ഒന്ന് തിരഞ്ഞെടുക്കും വരെ ടിവിയുടെ സ്വന്തം ഭാഷ പിന്തുടരും.</item>
+        <item quantity="one">МОЁ ТВ-യിലെ എല്ലാ മെനുകളുടെയും സന്ദേശങ്ങളുടെയും ഭാഷ. <xliff:g id="count">%1$d</xliff:g> ഭാഷകൾ; നിങ്ങൾ ഒന്ന് തിരഞ്ഞെടുക്കും വരെ ടിവിയുടെ സ്വന്തം ഭാഷ പിന്തുടരും.</item>
+        <item quantity="other">МОЁ ТВ-യിലെ എല്ലാ മെനുകളുടെയും സന്ദേശങ്ങളുടെയും ഭാഷ. <xliff:g id="count">%1$d</xliff:g> ഭാഷകൾ; നിങ്ങൾ ഒന്ന് തിരഞ്ഞെടുക്കും വരെ ടിവിയുടെ സ്വന്തം ഭാഷ പിന്തുടരും.</item>
     </plurals>
     <plurals name="settings_profile_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> പ്രൊഫൈൽ</item>
@@ -1520,8 +1520,8 @@
     <string name="settings_home_show_row">ഈ നിര കാണിക്കുക</string>
     <string name="settings_home_move_row">നീക്കുക (▲ ▼, പിന്നെ OK)</string>
     <string name="settings_line_remote_shortcuts_on">ഓഫാക്കിയാലും നിയമനങ്ങൾ നിലനിൽക്കും</string>
-    <string name="settings_language_system_help">OwnTV ടിവിയുടെ ഭാഷ പിന്തുടരുന്നു (ഇപ്പോൾ <xliff:g id="language">%1$s</xliff:g>). OwnTV-യിൽ മാത്രം ഉപയോഗിക്കാൻ താഴെ ഒരു ഭാഷ തിരഞ്ഞെടുക്കുക.</string>
-    <string name="settings_language_pick_help">ടിവിയുടെ ഭാഷ എന്തായാലും OwnTV-യിൽ <xliff:g id="language">%1$s</xliff:g> ഉപയോഗിക്കുക.</string>
+    <string name="settings_language_system_help">МОЁ ТВ ടിവിയുടെ ഭാഷ പിന്തുടരുന്നു (ഇപ്പോൾ <xliff:g id="language">%1$s</xliff:g>). МОЁ ТВ-യിൽ മാത്രം ഉപയോഗിക്കാൻ താഴെ ഒരു ഭാഷ തിരഞ്ഞെടുക്കുക.</string>
+    <string name="settings_language_pick_help">ടിവിയുടെ ഭാഷ എന്തായാലും МОЁ ТВ-യിൽ <xliff:g id="language">%1$s</xliff:g> ഉപയോഗിക്കുക.</string>
     <string name="settings_key_use">ഉപയോഗിക്കുക</string>
     <string name="settings_line_metadata_source">സിനിമകളുടെയും സീരീസുകളുടെയും വിവരങ്ങൾ എവിടെനിന്ന്</string>
     <string name="settings_line_metadata_language">TMDB-യിൽ നിന്നുള്ള കഥ, വിഭാഗങ്ങൾ, പേരുകൾ</string>
@@ -1560,7 +1560,7 @@
     <string name="settings_line_glass_bg">പശ്ചാത്തലം, ചിത്രത്തിന്റെ രൂപം, ഗ്ലാസ്</string>
     <string name="settings_bg_background">പശ്ചാത്തലം</string>
     <string name="settings_line_bg_background">ഓരോ സ്ക്രീനിനും പിന്നിൽ എന്താണ്</string>
-    <string name="settings_help_bg_background">Stage OwnTV-യുടെ സ്വന്തം മൃദുവായ നിറങ്ങൾ കാണിക്കുന്നു. ചിത്രം ഓരോ സ്ക്രീനിനും പിന്നിൽ നിങ്ങളുടെ ചിത്രം കാണിക്കുന്നു. സാധാരണം ഒരു പരന്ന ഇരുണ്ട നിറമാണ്.</string>
+    <string name="settings_help_bg_background">Stage МОЁ ТВ-യുടെ സ്വന്തം മൃദുവായ നിറങ്ങൾ കാണിക്കുന്നു. ചിത്രം ഓരോ സ്ക്രീനിനും പിന്നിൽ നിങ്ങളുടെ ചിത്രം കാണിക്കുന്നു. സാധാരണം ഒരു പരന്ന ഇരുണ്ട നിറമാണ്.</string>
     <string name="settings_bg_stage">Stage</string>
     <string name="settings_bg_picture">ചിത്രം</string>
     <string name="settings_bg_plain">സാധാരണം</string>

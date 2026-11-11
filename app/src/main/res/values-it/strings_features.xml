@@ -123,8 +123,8 @@
     <string name="update_not_enough_space">Spazio di archiviazione insufficiente per l’aggiornamento. Libera circa <xliff:g id="size">%1$s</xliff:g> e riprova.</string>
     <string name="update_damaged_download">L’aggiornamento non è stato scaricato completamente. Controlla la connessione e riprova.</string>
     <string name="update_install_rejected">Il programma di installazione del sistema ha rifiutato l’aggiornamento: <xliff:g id="reason">%1$s</xliff:g></string>
-    <string name="update_ready">OwnTV v<xliff:g id="available">%1$s</xliff:g> è pronto (hai la v<xliff:g id="current">%2$s</xliff:g>).</string>
-    <string name="recovery_title">OwnTV non ha potuto aprire il proprio database</string>
+    <string name="update_ready">МОЁ ТВ v<xliff:g id="available">%1$s</xliff:g> è pronto (hai la v<xliff:g id="current">%2$s</xliff:g>).</string>
+    <string name="recovery_title">МОЁ ТВ non ha potuto aprire il proprio database</string>
     <string name="recovery_data_safe_full">I tuoi profili, le playlist, i preferiti e la cronologia NON sono stati eliminati — si è verificato un errore durante l\'aggiornamento del database e i dati sono ancora presenti su questo dispositivo.\n\nSegnala il problema affinché possa essere risolto e includi il messaggio seguente.</string>
     <string name="recovery_retry">Riprova</string>
     <string name="recovery_backup_hint">Se disponi di un file di backup, puoi reimpostare l\'app e ripristinarlo in seguito. La reimpostazione elimina tutto ciò che è memorizzato su questo dispositivo.</string>
@@ -149,7 +149,7 @@
     <string name="home_trending_pause">Pausa</string>
     <string name="recording_notification_title">Registrazione in corso</string>
     <string name="auto_start_notification_channel">Avvio automatico al risveglio</string>
-    <string name="auto_start_notification_text">OwnTV si apre quando la TV si risveglia</string>
+    <string name="auto_start_notification_text">МОЁ ТВ si apre quando la TV si risveglia</string>
     <string name="recording_failed_no_space">Interrotta: spazio esaurito</string>
     <string name="recording_failed_no_connection">Nessuna connessione libera dal tuo provider</string>
     <string name="recording_failed_clash">Un’altra registrazione stava usando la connessione</string>
@@ -168,7 +168,7 @@
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> minuti</item>
     </plurals>
     <string name="recording_failed_encrypted">Questo canale è criptato e non può essere registrato</string>
-    <string name="recording_failed_drm">Questo canale è protetto da DRM, quindi può essere guardato ma non registrato. La protezione è del tuo provider, non di OwnTV.</string>
+    <string name="recording_failed_drm">Questo canale è protetto da DRM, quindi può essere guardato ma non registrato. La protezione è del tuo provider, non di МОЁ ТВ.</string>
     <string name="recording_failed_metered">Non registrato con i dati mobili</string>
     <string name="sports_channel_goal_alerts">Avvisi gol</string>
     <string name="sports_channel_live_match">Partita in diretta</string>
@@ -415,7 +415,7 @@
     <string name="sports_live_refresh_description">Solo mentre è visibile una schermata sport o un risultato</string>
     <string name="sports_about">Informazioni sui dati sportivi</string>
     <string name="sports_about_summary">Risultati: ESPN · canali: la tua playlist e la tua guida</string>
-    <string name="sports_alerts_when_closed">Avvisi con OwnTV chiuso</string>
+    <string name="sports_alerts_when_closed">Avvisi con МОЁ ТВ chiuso</string>
     <string name="sports_alerts_when_closed_description">Chiede una volta il permesso per le notifiche</string>
     <string name="sports_alert_me_about">Avvisami per</string>
     <string name="sports_kind_goals">Gol e wicket</string>
@@ -426,7 +426,7 @@
     <string name="sports_live_card">Scheda risultato in diretta</string>
     <string name="sports_live_card_offer">Offri una scheda risultato in diretta</string>
     <string name="sports_live_card_description">Si aggiorna ogni 30 s fino alla fine; la avvii da una partita</string>
-    <string name="sports_alerts_footnote">Con OwnTV chiuso, gli avvisi arrivano di solito entro un minuto. Se il telefono resta a lungo fermo con lo schermo spento, Android può trattenerli fino a circa 15 minuti. La scheda risultato in diretta non viene trattenuta.</string>
+    <string name="sports_alerts_footnote">Con МОЁ ТВ chiuso, gli avvisi arrivano di solito entro un minuto. Se il telefono resta a lungo fermo con lo schermo spento, Android può trattenerli fino a circa 15 minuti. La scheda risultato in diretta non viene trattenuta.</string>
     <string name="sports_search_teams">Cerca squadre, giocatori, campionati</string>
     <string name="sports_suggested">Suggerimenti da ciò che guardi</string>
     <plurals name="sports_watched_matches">
@@ -436,7 +436,7 @@
     </plurals>
     <string name="sports_league_label">Campionato</string>
     <string name="sports_no_playlist_title">Aggiungi una playlist per guardare le partite</string>
-    <string name="sports_no_playlist_body">Risultati, classifiche e avvisi funzionano anche senza. Con una playlist, OwnTV trova ogni canale che trasmette questa partita.</string>
+    <string name="sports_no_playlist_body">Risultati, classifiche e avvisi funzionano anche senza. Con una playlist, МОЁ ТВ trova ogni canale che trasmette questa partita.</string>
     <string name="sports_add_playlist">Aggiungi playlist</string>
     <string name="sports_home_row">Sport in diretta</string>
     <string name="sports_home_row_description">Partite seguite, quando una è in diretta o sta per iniziare</string>
@@ -446,7 +446,7 @@
     <string name="sports_sport_buttons">Pulsanti sport</string>
     <string name="sports_sport_buttons_mine">I miei sport</string>
     <string name="sports_sport_buttons_all">Tutti gli sport</string>
-    <string name="sports_sport_buttons_description">I miei sport: solo quelli che hai scelto. Tutti gli sport: ogni campionato che OwnTV conosce, con un caricamento più lungo.</string>
+    <string name="sports_sport_buttons_description">I miei sport: solo quelli che hai scelto. Tutti gli sport: ogni campionato che МОЁ ТВ conosce, con un caricamento più lungo.</string>
     <string name="sports_auto_rebuild">Ricostruzione automatica</string>
     <string name="sports_auto_rebuild_description">Ogni quanto risultati, dettagli delle partite e classifiche vengono riscaricati in automatico</string>
     <plurals name="sports_auto_rebuild_hours">

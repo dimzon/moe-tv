@@ -27,7 +27,7 @@
     <string name="settings_static">Statique</string>
     <string name="settings_dynamic">Dynamique</string>
     <string name="settings_use_proxy">Utiliser un proxy</string>
-    <string name="settings_proxy_description">Faire transiter tout le trafic et toute la lecture d’OwnTV par un proxy HTTP.</string>
+    <string name="settings_proxy_description">Faire transiter tout le trafic et toute la lecture d’МОЁ ТВ par un proxy HTTP.</string>
     <string name="settings_host">Hôte</string>
     <string name="settings_proxy_host_hint">proxy.example.com</string>
     <string name="settings_port">Port</string>
@@ -135,15 +135,15 @@
         <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g> restants</item>
     </plurals>
     <string name="settings_metadata_active_source">Source active</string>
-    <string name="settings_metadata_shared_worker_description">OwnTV Worker · aucune configuration</string>
+    <string name="settings_metadata_shared_worker_description">МОЁ ТВ Worker · aucune configuration</string>
     <string name="settings_metadata_connection">Connexion</string>
     <string name="settings_metadata_remote_advanced">Obtenir les infos TMDB avancées</string>
     <string name="settings_metadata_remote_advanced_description">Utilisez votre propre clé d’API TMDB ou un Worker auto-hébergé au lieu du service partagé par défaut.</string>
     <string name="settings_metadata_key_label">Clé</string>
     <string name="settings_metadata_server_label">Serveur</string>
     <string name="settings_metadata_clear_advanced_title">Ne plus utiliser votre clé ?</string>
-    <string name="settings_metadata_clear_advanced_message">Votre clé API TMDB et l’adresse de votre serveur seront supprimées de cet appareil, et OwnTV reviendra au service partagé intégré avec sa part quotidienne.</string>
-    <string name="settings_metadata_fair_share">Le service de métadonnées intégré est partagé par tous les utilisateurs d’OwnTV : chaque appareil dispose donc chaque jour de sa propre part. Si vous épuisez la vôtre, les affiches et les descriptions sont suspendues jusqu’à son renouvellement — les informations de votre propre playlist continuent de fonctionner normalement. Ajouter votre propre clé API TMDB ou votre serveur supprime cette limite : c’est gratuit, et une clé personnelle n’a pratiquement aucune limite.</string>
+    <string name="settings_metadata_clear_advanced_message">Votre clé API TMDB et l’adresse de votre serveur seront supprimées de cet appareil, et МОЁ ТВ reviendra au service partagé intégré avec sa part quotidienne.</string>
+    <string name="settings_metadata_fair_share">Le service de métadonnées intégré est partagé par tous les utilisateurs d’МОЁ ТВ : chaque appareil dispose donc chaque jour de sa propre part. Si vous épuisez la vôtre, les affiches et les descriptions sont suspendues jusqu’à son renouvellement — les informations de votre propre playlist continuent de fonctionner normalement. Ajouter votre propre clé API TMDB ou votre serveur supprime cette limite : c’est gratuit, et une clé personnelle n’a pratiquement aucune limite.</string>
     <string name="settings_metadata_limit_reached">Part quotidienne de métadonnées épuisée — ajoutez votre propre clé TMDB dans Paramètres → Métadonnées pour supprimer cette limite.</string>
     <string name="settings_metadata_language">Langue des métadonnées</string>
     <string name="settings_metadata_language_description">Langue des synopsis, genres et titres provenant de TMDB. Les champs que TMDB n’a pas traduits restent en anglais. Les détails sont mis en cache par langue, le retour en arrière est donc immédiat.</string>
@@ -268,15 +268,15 @@
     <string name="settings_player_zoom">Zoom du lecteur</string>
     <string name="settings_app_group">Application</string>
     <string name="settings_app_startup">Démarrage de l’application</string>
-    <string name="settings_app_startup_description">Écran qu’OwnTV ouvre au démarrage</string>
+    <string name="settings_app_startup_description">Écran qu’МОЁ ТВ ouvre au démarrage</string>
     <string name="settings_check_updates">Rechercher des mises à jour</string>
     <string name="settings_check_updates_description">Obtenir la dernière version depuis GitHub Releases</string>
     <string name="settings_update_startup">Rechercher des mises à jour au démarrage</string>
     <string name="settings_update_startup_description">Rechercher une nouvelle version à l’ouverture de l’application</string>
     <string name="settings_auto_start_boot">Démarrage auto à l’allumage</string>
-    <string name="settings_auto_start_boot_description">Ouvrir OwnTV quand le téléviseur s’allume</string>
+    <string name="settings_auto_start_boot_description">Ouvrir МОЁ ТВ quand le téléviseur s’allume</string>
     <string name="settings_auto_start_wake">Démarrage auto au réveil</string>
-    <string name="settings_auto_start_wake_description">Ouvrir OwnTV quand le téléviseur sort de veille</string>
+    <string name="settings_auto_start_wake_description">Ouvrir МОЁ ТВ quand le téléviseur sort de veille</string>
     <string name="settings_auto_start_needs_overlay">Nécessite « Superposer aux autres applis »</string>
     <string name="settings_about">À propos</string>
     <string name="settings_live_latency">Latence du direct</string>
@@ -530,7 +530,7 @@
     <string name="settings_guide_synced">Guide des programmes synchronisé</string>
     <string name="settings_guide_sync_failed">Échec de la synchronisation du guide des programmes</string>
     <string name="settings_restore_remote_title">Restaurer depuis un autre appareil</string>
-    <string name="settings_restore_remote_description">Sur n’importe quel appareil doté d’un navigateur sur le même Wi-Fi — téléphone, ordinateur ou autre téléviseur —, scannez le QR (ou ouvrez l’URL), saisissez ce PIN, choisissez votre fichier de sauvegarde OwnTV et envoyez-le. Vous choisissez ensuite ici ce qu’il faut restaurer.</string>
+    <string name="settings_restore_remote_description">Sur n’importe quel appareil doté d’un navigateur sur le même Wi-Fi — téléphone, ordinateur ou autre téléviseur —, scannez le QR (ou ouvrez l’URL), saisissez ce PIN, choisissez votre fichier de sauvegarde МОЁ ТВ et envoyez-le. Vous choisissez ensuite ici ce qu’il faut restaurer.</string>
     <string name="settings_try_again">Réessayer</string>
     <string name="settings_new_pin">Recommencer avec un nouveau PIN</string>
     <string name="settings_download_remote_title">Télécharger sur un autre appareil</string>
@@ -682,9 +682,9 @@
     <string name="settings_sources_ignore_limit">Ignorer la limite de connexions</string>
     <string name="settings_sources_ignore_limit_on">Limite de connexions ignorée : Multivue et les enregistrements peuvent ouvrir plus de flux que cette playlist n’en annonce. Un flux refusé par le fournisseur le signale toujours.</string>
     <string name="settings_sources_probe_title">Tester cette liste ?</string>
-    <string name="settings_sources_probe_warning">Beaucoup de fournisseurs n’indiquent jamais combien de chaînes vous pouvez regarder en même temps ; OwnTV le découvre donc en en ouvrant quelques-unes et en observant lesquelles tiennent. Tout ce qui est en cours de lecture s’arrêtera, et cela peut prendre jusqu’à deux minutes.</string>
+    <string name="settings_sources_probe_warning">Beaucoup de fournisseurs n’indiquent jamais combien de chaînes vous pouvez regarder en même temps ; МОЁ ТВ le découvre donc en en ouvrant quelques-unes et en observant lesquelles tiennent. Tout ce qui est en cours de lecture s’arrêtera, et cela peut prendre jusqu’à deux minutes.</string>
     <string name="settings_sources_probe_running">Recherche du nombre de chaînes autorisées par ce fournisseur… (<xliff:g id="current">%1$d</xliff:g> sur <xliff:g id="total">%2$d</xliff:g>)</string>
-    <string name="settings_sources_probe_unknown">OwnTV n’a pas pu déterminer combien de chaînes ce fournisseur autorise.</string>
+    <string name="settings_sources_probe_unknown">МОЁ ТВ n’a pas pu déterminer combien de chaînes ce fournisseur autorise.</string>
     <string name="settings_sources_probe_skip">Ignorer</string>
     <string name="settings_sources_auto_refresh">⟳ <xliff:g id="mode">%1$s</xliff:g></string>
     <string name="settings_sources_default">PAR DÉFAUT</string>
@@ -943,7 +943,7 @@
     <string name="settings_move_category_keep">Conserver aussi dans « <xliff:g id="name">%1$s</xliff:g> »</string>
     <string name="settings_move_category_action">Déplacer</string>
     <string name="settings_dns_description">Utiliser un serveur DNS personnalisé pour la résolution des noms de domaine</string>
-    <string name="settings_dns_toggle_description">Résoudre tous les noms de domaine consultés par OwnTV au moyen d’un serveur DNS personnalisé.</string>
+    <string name="settings_dns_toggle_description">Résoudre tous les noms de domaine consultés par МОЁ ТВ au moyen d’un serveur DNS personnalisé.</string>
     <string name="settings_dns_use_custom">Utiliser un DNS personnalisé</string>
     <string name="settings_dns_server_missing">Le DNS personnalisé est activé, mais aucun serveur n’est configuré. Saisissez une adresse de serveur et sélectionnez Enregistrer, ou désactivez cette option.</string>
     <string name="settings_dns_server">Serveur DNS</string>
@@ -988,7 +988,7 @@
     <string name="settings_live_preroll">Précharger les flux en direct</string>
     <string name="settings_live_preroll_description">Mettez de côté cette quantité de vidéo avant qu\'une chaîne en direct ne commence à jouer, puis à nouveau après une saccade. Il s\'agit d\'une quantité de vidéo, pas d\'un compte à rebours. Désactivé garantit le démarrage le plus rapide possible.</string>
     <string name="settings_live_tune_timeout">Abandonner une chaîne après</string>
-    <string name="settings_live_tune_timeout_description">Si une chaîne en direct n\'a affiché aucune image passé ce délai, OwnTV arrête d\'essayer et vous le dit, au lieu de laisser un écran noir pendant qu\'il passe en revue tous ses lecteurs. « Jamais » continue d\'essayer, ce qui peut prendre bien plus d\'une minute sur une chaîne que votre fournisseur a supprimée. Les attentes demandées par votre fournisseur ne sont pas comptées.</string>
+    <string name="settings_live_tune_timeout_description">Si une chaîne en direct n\'a affiché aucune image passé ce délai, МОЁ ТВ arrête d\'essayer et vous le dit, au lieu de laisser un écran noir pendant qu\'il passe en revue tous ses lecteurs. « Jamais » continue d\'essayer, ce qui peut prendre bien plus d\'une minute sur une chaîne que votre fournisseur a supprimée. Les attentes demandées par votre fournisseur ne sont pas comptées.</string>
     <string name="settings_live_preroll_per_playlist">Préchargement par liste de lecture</string>
     <string name="settings_live_preroll_per_playlist_description">Remplacez le paramètre ci-dessus pour une liste de lecture tout en gardant vos autres listes de lecture rapides.</string>
     <string name="settings_live_latency_per_playlist">Latence du direct par liste de lecture</string>
@@ -1007,7 +1007,7 @@
     <string name="settings_surround_auto_description_mobile">Auto — essayez le son surround Dolby/DTS et revenez automatiquement à la stéréo si le haut-parleur, le casque ou le récepteur connecté ne le restitue pas. Recommandé.</string>
     <string name="settings_surround_stereo_description">Stéréo uniquement — toujours décoder dans l\'application et envoyer un simple son 2.0. Utilisez ceci avec les haut-parleurs du téléviseur ou une barre de son stéréo, ou si l\'audio est en retard sur l\'image.</string>
     <string name="settings_surround_stereo_description_mobile">Stéréo uniquement — toujours décoder dans l\'application et envoyer un simple son 2.0. Utilisez ceci avec le haut-parleur intégré, un casque ou une barre de son stéréo, ou si l\'audio est en retard sur l\'image.</string>
-    <string name="settings_surround_forced_description">Surround — envoyer le Dolby/DTS vers un véritable récepteur 5.1/7.1. Si le son coupe ou saccade, OwnTV revient quand même à la stéréo et vous le signale.</string>
+    <string name="settings_surround_forced_description">Surround — envoyer le Dolby/DTS vers un véritable récepteur 5.1/7.1. Si le son coupe ou saccade, МОЁ ТВ revient quand même à la stéréo et vous le signale.</string>
     <string name="settings_panel_width">Ajustement de la largeur des panneaux</string>
     <string name="settings_panel_width_description">Redimensionnez les panneaux de catégorie, de liste et d\'aperçu dans TV en direct, Films et Séries.</string>
     <string name="settings_vod_layout">Disposition des Films et Séries</string>
@@ -1047,9 +1047,9 @@
     <string name="settings_panel_width_preview_panel"><xliff:g id="label">%1$s</xliff:g> panneau</string>
     <string name="settings_panel_width_total">Taille totale</string>
     <string name="settings_panel_width_invalid_total">La taille totale est de <xliff:g id="total">%1$d</xliff:g> %%. Elle doit être égale à 100 %% — veuillez l\'ajuster.</string>
-    <string name="settings_language_help_translate">Aidez à traduire OwnTV dans votre langue</string>
-    <string name="settings_language_contribution_description">Scannez le code QR ou ouvrez le lien pour choisir n\'importe quelle langue disponible et contribuer dans les six composants de traduction d\'OwnTV.</string>
-    <string name="settings_language_contribution_qr_description">Code QR de la vue d\'ensemble du projet de traduction d\'OwnTV</string>
+    <string name="settings_language_help_translate">Aidez à traduire МОЁ ТВ dans votre langue</string>
+    <string name="settings_language_contribution_description">Scannez le code QR ou ouvrez le lien pour choisir n\'importe quelle langue disponible et contribuer dans les six composants de traduction d\'МОЁ ТВ.</string>
+    <string name="settings_language_contribution_qr_description">Code QR de la vue d\'ensemble du projet de traduction d\'МОЁ ТВ</string>
     <string name="settings_language_contribution_qr_failed">Le code QR n\'a pas pu être généré. Utilisez plutôt le lien affiché ci-dessous.</string>
     <string name="settings_language_contribution_copy">Copier le lien</string>
     <string name="settings_language_contribution_copied">Lien copié</string>
@@ -1058,8 +1058,8 @@
     <string name="settings_auto_frame_rate_warning_suffix">Déconseillé sur ce téléviseur : avant Android 12, la fréquence ne peut pas être modifiée en douceur.</string>
     <string name="settings_auto_frame_rate_warning_title">Déconseillé sur ce téléviseur</string>
     <string name="settings_auto_frame_rate_warning_title_mobile">Déconseillé sur cet appareil</string>
-    <string name="settings_auto_frame_rate_warning_description">Cet appareil fonctionne sous Android <xliff:g id="android_version">%1$s</xliff:g>. Avant Android 12, le téléviseur ne peut pas indiquer à OwnTV les fréquences de rafraîchissement vers lesquelles il peut basculer en douceur ; changer la fréquence peut donc faire passer l\'écran au noir pendant une seconde ou deux — parfois plus d\'une fois au cours d\'un programme.\n\nNous vous recommandons de laisser la fréquence d\'images automatique désactivée ici. Si votre téléviseur bascule proprement, activez-la et voyez : vous pouvez la désactiver à nouveau à tout moment.</string>
-    <string name="settings_auto_frame_rate_warning_description_mobile">Cet appareil fonctionne sous Android <xliff:g id="android_version">%1$s</xliff:g>. Avant Android 12, l\'appareil ne peut pas indiquer à OwnTV les fréquences de rafraîchissement vers lesquelles il peut basculer en douceur ; changer la fréquence peut donc faire passer l\'écran au noir pendant une seconde ou deux — parfois plus d\'une fois au cours d\'un programme.\n\nNous vous recommandons de laisser la fréquence d\'images automatique désactivée ici. Si votre écran bascule proprement, activez-la et voyez : vous pouvez la désactiver à nouveau à tout moment.</string>
+    <string name="settings_auto_frame_rate_warning_description">Cet appareil fonctionne sous Android <xliff:g id="android_version">%1$s</xliff:g>. Avant Android 12, le téléviseur ne peut pas indiquer à МОЁ ТВ les fréquences de rafraîchissement vers lesquelles il peut basculer en douceur ; changer la fréquence peut donc faire passer l\'écran au noir pendant une seconde ou deux — parfois plus d\'une fois au cours d\'un programme.\n\nNous vous recommandons de laisser la fréquence d\'images automatique désactivée ici. Si votre téléviseur bascule proprement, activez-la et voyez : vous pouvez la désactiver à nouveau à tout moment.</string>
+    <string name="settings_auto_frame_rate_warning_description_mobile">Cet appareil fonctionne sous Android <xliff:g id="android_version">%1$s</xliff:g>. Avant Android 12, l\'appareil ne peut pas indiquer à МОЁ ТВ les fréquences de rafraîchissement vers lesquelles il peut basculer en douceur ; changer la fréquence peut donc faire passer l\'écran au noir pendant une seconde ou deux — parfois plus d\'une fois au cours d\'un programme.\n\nNous vous recommandons de laisser la fréquence d\'images automatique désactivée ici. Si votre écran bascule proprement, activez-la et voyez : vous pouvez la désactiver à nouveau à tout moment.</string>
     <string name="settings_auto_frame_rate_keep_off">Ne pas activer</string>
     <string name="settings_auto_frame_rate_turn_on_anyway">Activer quand même</string>
     <string name="settings_language_request_workflow">Vous voulez ajouter une langue qui n\'est pas listée ? Faites d\'abord une demande de langue. Un mainteneur l\'enregistrera et préparera les fichiers de traduction de base ; une fois qu\'elle apparaîtra sur Hosted Weblate, vous pourrez commencer à contribuer.</string>
@@ -1184,7 +1184,7 @@
     <string name="local_sync_received_items">Éléments reçus: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_sent">Vos données ont été envoyées</string>
     <string name="local_sync_failed">Échec de la synchronisation</string>
-    <string name="local_sync_error_unreachable">Impossible de joindre cet appareil. Sur celui-ci, ouvrez OwnTV → Plus → Synchronisation locale et activez le mode synchronisation. Les deux appareils doivent être sur le même Wi-Fi.</string>
+    <string name="local_sync_error_unreachable">Impossible de joindre cet appareil. Sur celui-ci, ouvrez МОЁ ТВ → Plus → Synchronisation locale et activez le mode synchronisation. Les deux appareils doivent être sur le même Wi-Fi.</string>
     <string name="local_sync_error_unauthorized">L\'autre appareil a refusé. Le code PIN est peut-être erroné, ou il a oublié cet appareil.</string>
     <string name="local_sync_error_bad_payload">Impossible de lire ce qui est arrivé. Si vous avez utilisé un mot de passe, vérifiez qu\'il est identique sur les deux appareils.</string>
     <string name="local_sync_error_unknown">Une erreur s\'est produite. Réessayez.</string>
@@ -1202,7 +1202,7 @@
     <string name="local_auto_sync_waiting">En attente de l’autorisation de <xliff:g id="device">%1$s</xliff:g>…</string>
     <string name="local_auto_sync_declined"><xliff:g id="device">%1$s</xliff:g> n’a pas autorisé la synchro auto.</string>
     <string name="local_auto_sync_accept_title">Autoriser la synchro auto ?</string>
-    <string name="local_auto_sync_accept_body"><xliff:g id="device">%1$s</xliff:g> veut se synchroniser tout seul avec cet appareil chaque fois qu’OwnTV est ouvert sur les deux. Seul ce que vous autorisez sur cet appareil y entre, et chacun des deux peut l’arrêter.</string>
+    <string name="local_auto_sync_accept_body"><xliff:g id="device">%1$s</xliff:g> veut se synchroniser tout seul avec cet appareil chaque fois qu’МОЁ ТВ est ouvert sur les deux. Seul ce que vous autorisez sur cet appareil y entre, et chacun des deux peut l’arrêter.</string>
     <string name="local_auto_sync_accept">Autoriser</string>
     <string name="local_auto_sync_decline">Ne pas autoriser</string>
     <string name="local_auto_sync_what_to_sync">Ce que cet appareil synchronise</string>
@@ -1218,7 +1218,7 @@
     <string name="local_auto_sync_turned_off">Synchro auto désactivée sur <xliff:g id="device">%1$s</xliff:g></string>
     <string name="local_auto_sync_unreachable"><xliff:g id="device">%1$s</xliff:g> injoignable, nouvel essai plus tard</string>
     <string name="local_auto_sync_listen">Garder la synchro auto à l’écoute</string>
-    <string name="local_auto_sync_listen_description">Activé : les appareils appairés peuvent se synchroniser avec celui-ci dès qu’OwnTV y est ouvert. Désactivé : seulement quand le mode synchronisation est activé.</string>
+    <string name="local_auto_sync_listen_description">Activé : les appareils appairés peuvent se synchroniser avec celui-ci dès qu’МОЁ ТВ y est ouvert. Désactivé : seulement quand le mode synchronisation est activé.</string>
     <string name="local_auto_sync_listening">À l’écoute</string>
     <string name="more_pane_last_backup">Dernière sauvegarde</string>
     <string name="more_pane_encrypted">Chiffrée</string>
@@ -1298,8 +1298,8 @@
     <string name="settings_multiview_keep_two">Garder 2</string>
     <string name="settings_multiview_use_anyway">Utiliser quand même</string>
     <string name="settings_app_icon">Icône de l\'application</string>
-    <string name="settings_app_icon_summary">Couleur de l\'icône et du logo OwnTV</string>
-    <string name="settings_app_icon_sheet_mobile">L’apparence d’OwnTV sur votre écran d’accueil. L’app redémarre une fois.</string>
+    <string name="settings_app_icon_summary">Couleur de l\'icône et du logo МОЁ ТВ</string>
+    <string name="settings_app_icon_sheet_mobile">L’apparence d’МОЁ ТВ sur votre écran d’accueil. L’app redémarre une fois.</string>
     <string name="settings_brand_accent">Logo couleur d’accent</string>
     <string name="app_icon_petrol">Pétrole</string>
     <string name="app_icon_sunflower">Tournesol</string>
@@ -1310,8 +1310,8 @@
     <string name="app_icon_olive">Olive</string>
     <string name="app_icon_olive_cream">Olive sur crème</string>
     <string name="app_icon_pixel">Pixel</string>
-    <string name="app_icon_restart_title">Redémarrer OwnTV ?</string>
-    <string name="app_icon_restart_message">Vous avez choisi une nouvelle icône et un nouveau logo. Ils s\'appliqueront après le redémarrage d\'OwnTV.</string>
+    <string name="app_icon_restart_title">Redémarrer МОЁ ТВ ?</string>
+    <string name="app_icon_restart_message">Vous avez choisi une nouvelle icône et un nouveau logo. Ils s\'appliqueront après le redémarrage d\'МОЁ ТВ.</string>
     <string name="app_icon_restart_now">Redémarrer maintenant</string>
     <string name="settings_navigation">Navigation</string>
     <string name="settings_navigation_description">Comportement du menu de gauche</string>
@@ -1466,10 +1466,10 @@
     <string name="settings_help_epg_sources">Ajoutez un flux de guide XMLTV par son lien, actualisez-le ou supprimez-le. Les flux remplissent le guide TV et les lignes de programme de TV en direct.</string>
     <string name="settings_help_guide_days">Combien de jours de programmes le guide conserve à l’avance. Moins de jours rendent les mises à jour plus rapides et la base de données plus petite.</string>
     <string name="settings_help_catchup_timezone">Le replay lit les programmes de l’archive de votre fournisseur. Automatique utilise le fuseau horaire indiqué par votre fournisseur, ou l’horloge du téléviseur s’il n’en indique aucun ; choisissez un décalage UTC fixe si le replay démarre encore au mauvais moment. C’est aussi ici que vous choisissez le lecteur du replay.</string>
-    <string name="settings_help_theme">OwnTV est conçu pour le thème sombre. Système suit le réglage du téléviseur s’il en a un ; Clair convient à une pièce lumineuse.</string>
+    <string name="settings_help_theme">МОЁ ТВ est conçu pour le thème sombre. Système suit le réglage du téléviseur s’il en a un ; Clair convient à une pièce lumineuse.</string>
     <string name="settings_help_accent">Teinte les boutons, le halo du focus, les barres de progression et les surbrillances partout. Choisissez une présélection, ou appuyez sur OK pour la palette et n’importe quel code hexadécimal.</string>
     <string name="settings_help_focus">L’anneau autour de l’élément sélectionné. Choisissez sa couleur et son épaisseur pour bien le suivre depuis le canapé.</string>
-    <string name="settings_help_fonts">La police utilisée dans tout OwnTV et la taille du texte. Les fenêtres utilisent la même police.</string>
+    <string name="settings_help_fonts">La police utilisée dans tout МОЁ ТВ et la taille du texte. Les fenêtres utilisent la même police.</string>
     <string name="settings_help_popup_size">Agrandit ou réduit les fenêtres, menus et dialogues dans leur ensemble. Utile quand ils semblent à l’étroit ou couvrent trop l’écran.</string>
     <string name="settings_help_zoom">Met tout l’écran à l’échelle. Plus grand se lit mieux de loin ; plus petit affiche davantage. Sous 85 %%, les boîtiers à faible mémoire peuvent en manquer.</string>
     <string name="settings_help_animations">Activées, les volets, menus et le focus bougent en douceur. Désactivées, chaque changement est instantané.</string>
@@ -1479,13 +1479,13 @@
     <string name="settings_help_vod_layout">Cinéma affiche l’image du titre sélectionné derrière une grille d’affiches. Séparé montre catégories, titres et détails côte à côte.</string>
     <string name="settings_help_home">Choisissez les rangées affichées sur l’accueil, leur ordre et l’apparence de la rangée Tendances du moment.</string>
     <string name="settings_help_customize">Masquez les catégories et éléments que vous ne regardez jamais, donnez vos propres noms aux catégories et classez-les à votre façon. Ce qui est masqué revient ici, jamais perdu.</string>
-    <string name="settings_help_app_icon">L’icône d’OwnTV sur l’écran d’accueil du téléviseur. Le lanceur peut mettre un instant à afficher le changement.</string>
-    <string name="settings_help_brand_accent">Le logo OwnTV du menu, de « À propos » et de la configuration affiche son triangle de lecture dans votre couleur d’accent. L’icône de l’écran d’accueil garde ses propres couleurs.</string>
-    <string name="settings_help_startup">Ce qu’OwnTV affiche au démarrage : l’accueil, la dernière chaîne regardée, vos favoris ou une chaîne de votre choix.</string>
-    <string name="settings_help_check_updates">Cherche maintenant sur GitHub une version plus récente d’OwnTV et propose de l’installer. Vos playlists, favoris et réglages restent tels quels.</string>
-    <string name="settings_help_update_startup">Cherche une nouvelle version à chaque démarrage d’OwnTV et vous prévient s’il y en a une. Rien n’est installé sans votre accord.</string>
-    <string name="settings_help_auto_start_boot">Ouvre OwnTV tout seul une fois le téléviseur démarré, sur l’écran choisi dans Démarrage de l’application. Android ne laisse une application s’ouvrir seule que si elle peut se superposer aux autres applis ; activer cette option ouvre donc l’écran de cette autorisation. Certains téléviseurs ne la proposent pas, et le démarrage auto ne peut alors pas y fonctionner.</string>
-    <string name="settings_help_auto_start_wake">Ouvre OwnTV à chaque sortie de veille du téléviseur, même si vous l’avez réveillé pour une autre appli. Si Démarrage de l’application ouvre une chaîne, chaque réveil lance ce flux. Tant que l’option est active, OwnTV garde un petit service en arrière-plan avec une notification silencieuse. Comme le démarrage auto à l’allumage, il faut l’autorisation de se superposer aux autres applis.</string>
+    <string name="settings_help_app_icon">L’icône d’МОЁ ТВ sur l’écran d’accueil du téléviseur. Le lanceur peut mettre un instant à afficher le changement.</string>
+    <string name="settings_help_brand_accent">Le logo МОЁ ТВ du menu, de « À propos » et de la configuration affiche son triangle de lecture dans votre couleur d’accent. L’icône de l’écran d’accueil garde ses propres couleurs.</string>
+    <string name="settings_help_startup">Ce qu’МОЁ ТВ affiche au démarrage : l’accueil, la dernière chaîne regardée, vos favoris ou une chaîne de votre choix.</string>
+    <string name="settings_help_check_updates">Cherche maintenant sur GitHub une version plus récente d’МОЁ ТВ et propose de l’installer. Vos playlists, favoris et réglages restent tels quels.</string>
+    <string name="settings_help_update_startup">Cherche une nouvelle version à chaque démarrage d’МОЁ ТВ et vous prévient s’il y en a une. Rien n’est installé sans votre accord.</string>
+    <string name="settings_help_auto_start_boot">Ouvre МОЁ ТВ tout seul une fois le téléviseur démarré, sur l’écran choisi dans Démarrage de l’application. Android ne laisse une application s’ouvrir seule que si elle peut se superposer aux autres applis ; activer cette option ouvre donc l’écran de cette autorisation. Certains téléviseurs ne la proposent pas, et le démarrage auto ne peut alors pas y fonctionner.</string>
+    <string name="settings_help_auto_start_wake">Ouvre МОЁ ТВ à chaque sortie de veille du téléviseur, même si vous l’avez réveillé pour une autre appli. Si Démarrage de l’application ouvre une chaîne, chaque réveil lance ce flux. Tant que l’option est active, МОЁ ТВ garde un petit service en arrière-plan avec une notification silencieuse. Comme le démarrage auto à l’allumage, il faut l’autorisation de se superposer aux autres applis.</string>
     <string name="settings_help_dns">Résout les adresses de votre fournisseur avec un serveur DNS de votre choix au lieu de celui de votre réseau — utile quand votre réseau les bloque ou les redirige.</string>
     <string name="settings_help_hw">Utilise le décodeur matériel du téléviseur : 4K fluide et moins de chaleur. Désactivez-le seulement si des flux saccadent ou affichent des blocs ; le décodeur logiciel prend alors le relais.</string>
     <string name="settings_help_volume">Le volume de départ de chaque chaîne, film et épisode. Au-delà de 100 %%, les flux faibles sont amplifiés. Un volume changé dans le lecteur est conservé pour ce titre jusqu’à sa réinitialisation.</string>
@@ -1499,7 +1499,7 @@
     <string name="settings_help_timeshift_window">Jusqu’où Mettre en pause et revenir en arrière peut remonter sur une chaîne sans replay. Plus long garde davantage de la chaîne dans le stockage de l’appareil.</string>
     <string name="settings_help_resume">Demander propose Reprendre ou Recommencer quand un film ou un épisode a une position enregistrée. Toujours reprendre continue où vous vous êtes arrêté ; Ne jamais reprendre recommence au début.</string>
     <string name="settings_help_mini">Le petit lecteur qui garde une chaîne dans un coin pendant que vous naviguez. Choisissez sa taille et son coin.</string>
-    <string name="settings_help_pip">Appuyez sur Accueil ou ouvrez une autre app pendant qu’une vidéo est lue en plein écran ou dans le mini-lecteur : elle continue dans une petite fenêtre par-dessus le reste du téléviseur. Rouvrez OwnTV pour la retrouver en plein écran ; fermez la fenêtre pour arrêter la lecture. Multivue reste dans OwnTV.</string>
+    <string name="settings_help_pip">Appuyez sur Accueil ou ouvrez une autre app pendant qu’une vidéo est lue en plein écran ou dans le mini-lecteur : elle continue dans une petite fenêtre par-dessus le reste du téléviseur. Rouvrez МОЁ ТВ pour la retrouver en plein écran ; fermez la fenêtre pour arrêter la lecture. Multivue reste dans МОЁ ТВ.</string>
     <string name="settings_key_palette">Palette</string>
     <string name="settings_live_preview_note">Les changements s’affichent ici au fil de vos déplacements, avant de quitter la ligne.</string>
     <string name="settings_synced_at">Synchronisée <xliff:g id="when">%1$s</xliff:g></string>
@@ -1510,9 +1510,9 @@
     <string name="settings_profile_add">Ajouter un profil</string>
     <string name="settings_profile_add_line">Un spectateur avec ses propres favoris, historique et réglages</string>
     <plurals name="settings_help_language">
-        <item quantity="one">La langue de tous les menus et messages d’OwnTV. <xliff:g id="count">%1$d</xliff:g> langue ; suit la langue du téléviseur tant que vous n’en choisissez pas.</item>
-        <item quantity="many">La langue de tous les menus et messages d’OwnTV. <xliff:g id="count">%1$d</xliff:g> langues ; suit la langue du téléviseur tant que vous n’en choisissez pas.</item>
-        <item quantity="other">La langue de tous les menus et messages d’OwnTV. <xliff:g id="count">%1$d</xliff:g> langues ; suit la langue du téléviseur tant que vous n’en choisissez pas.</item>
+        <item quantity="one">La langue de tous les menus et messages d’МОЁ ТВ. <xliff:g id="count">%1$d</xliff:g> langue ; suit la langue du téléviseur tant que vous n’en choisissez pas.</item>
+        <item quantity="many">La langue de tous les menus et messages d’МОЁ ТВ. <xliff:g id="count">%1$d</xliff:g> langues ; suit la langue du téléviseur tant que vous n’en choisissez pas.</item>
+        <item quantity="other">La langue de tous les menus et messages d’МОЁ ТВ. <xliff:g id="count">%1$d</xliff:g> langues ; suit la langue du téléviseur tant que vous n’en choisissez pas.</item>
     </plurals>
     <plurals name="settings_profile_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> profil</item>
@@ -1550,8 +1550,8 @@
     <string name="settings_home_show_row">Afficher cette rangée</string>
     <string name="settings_home_move_row">Déplacer (▲ ▼, puis OK)</string>
     <string name="settings_line_remote_shortcuts_on">Désactivé conserve vos attributions</string>
-    <string name="settings_language_system_help">OwnTV suit la langue du téléviseur (actuellement <xliff:g id="language">%1$s</xliff:g>). Choisissez-en une ci-dessous pour l’utiliser uniquement dans OwnTV.</string>
-    <string name="settings_language_pick_help">Utiliser <xliff:g id="language">%1$s</xliff:g> dans OwnTV, quelle que soit la langue du téléviseur.</string>
+    <string name="settings_language_system_help">МОЁ ТВ suit la langue du téléviseur (actuellement <xliff:g id="language">%1$s</xliff:g>). Choisissez-en une ci-dessous pour l’utiliser uniquement dans МОЁ ТВ.</string>
+    <string name="settings_language_pick_help">Utiliser <xliff:g id="language">%1$s</xliff:g> dans МОЁ ТВ, quelle que soit la langue du téléviseur.</string>
     <string name="settings_key_use">Utiliser</string>
     <string name="settings_line_metadata_source">D’où viennent les détails des films et séries</string>
     <string name="settings_line_metadata_language">Résumés, genres et titres de TMDB</string>
@@ -1591,7 +1591,7 @@
     <string name="settings_line_glass_bg">Arrière-plan, rendu de l’image, verre</string>
     <string name="settings_bg_background">Arrière-plan</string>
     <string name="settings_line_bg_background">Ce qui se trouve derrière chaque écran</string>
-    <string name="settings_help_bg_background">Stage affiche les couleurs douces d’OwnTV. Image affiche une image à vous derrière chaque écran. Uni est un fond sombre et plat.</string>
+    <string name="settings_help_bg_background">Stage affiche les couleurs douces d’МОЁ ТВ. Image affiche une image à vous derrière chaque écran. Uni est un fond sombre et plat.</string>
     <string name="settings_bg_stage">Stage</string>
     <string name="settings_bg_picture">Image</string>
     <string name="settings_bg_plain">Uni</string>

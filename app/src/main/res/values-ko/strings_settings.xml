@@ -27,7 +27,7 @@
     <string name="settings_static">고정</string>
     <string name="settings_dynamic">동적</string>
     <string name="settings_use_proxy">프록시 사용</string>
-    <string name="settings_proxy_description">모든 OwnTV 트래픽과 재생 데이터를 HTTP 프록시를 통해 전송합니다.</string>
+    <string name="settings_proxy_description">모든 МОЁ ТВ 트래픽과 재생 데이터를 HTTP 프록시를 통해 전송합니다.</string>
     <string name="settings_host">호스트</string>
     <string name="settings_proxy_host_hint">proxy.example.com</string>
     <string name="settings_port">포트</string>
@@ -133,15 +133,15 @@
         <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g> 남음</item>
     </plurals>
     <string name="settings_metadata_active_source">사용 중인 소스</string>
-    <string name="settings_metadata_shared_worker_description">OwnTV Worker · 설정 불필요</string>
+    <string name="settings_metadata_shared_worker_description">МОЁ ТВ Worker · 설정 불필요</string>
     <string name="settings_metadata_connection">연결</string>
     <string name="settings_metadata_remote_advanced">고급 TMDB 정보 가져오기</string>
     <string name="settings_metadata_remote_advanced_description">공용 기본 서비스 대신 직접 발급받은 TMDB API 키나 자체 호스팅한 Worker를 사용합니다.</string>
     <string name="settings_metadata_key_label">키</string>
     <string name="settings_metadata_server_label">서버</string>
     <string name="settings_metadata_clear_advanced_title">개인 키 사용을 중지할까요?</string>
-    <string name="settings_metadata_clear_advanced_message">TMDB API 키와 개인 서버 주소가 이 기기에서 삭제되고, OwnTV는 하루 사용량이 있는 내장 공유 서비스로 돌아갑니다.</string>
-    <string name="settings_metadata_fair_share">내장 메타데이터 서비스는 OwnTV를 사용하는 모든 사용자가 함께 쓰기 때문에 기기마다 하루 사용량이 정해져 있습니다. 사용량을 모두 쓰면 포스터와 설명은 충전될 때까지 일시 중지됩니다. 재생목록 자체의 정보는 평소대로 표시됩니다. 개인 TMDB API 키나 서버를 추가하면 이 제한이 사라집니다. 무료이며 개인 키에는 사실상 제한이 없습니다.</string>
+    <string name="settings_metadata_clear_advanced_message">TMDB API 키와 개인 서버 주소가 이 기기에서 삭제되고, МОЁ ТВ는 하루 사용량이 있는 내장 공유 서비스로 돌아갑니다.</string>
+    <string name="settings_metadata_fair_share">내장 메타데이터 서비스는 МОЁ ТВ를 사용하는 모든 사용자가 함께 쓰기 때문에 기기마다 하루 사용량이 정해져 있습니다. 사용량을 모두 쓰면 포스터와 설명은 충전될 때까지 일시 중지됩니다. 재생목록 자체의 정보는 평소대로 표시됩니다. 개인 TMDB API 키나 서버를 추가하면 이 제한이 사라집니다. 무료이며 개인 키에는 사실상 제한이 없습니다.</string>
     <string name="settings_metadata_limit_reached">오늘의 메타데이터 사용량을 모두 사용했습니다. 설정 → 메타데이터에서 개인 TMDB 키를 추가하면 이 제한이 사라집니다.</string>
     <string name="settings_metadata_language">메타데이터 언어</string>
     <string name="settings_metadata_language_description">TMDB에서 가져오는 줄거리, 장르, 제목의 언어입니다. TMDB가 번역하지 않은 항목은 영어로 표시됩니다. 세부 정보는 언어별로 캐시되므로 되돌리면 바로 표시됩니다.</string>
@@ -264,15 +264,15 @@
     <string name="settings_player_zoom">플레이어 확대/축소</string>
     <string name="settings_app_group">앱</string>
     <string name="settings_app_startup">앱 시작 화면</string>
-    <string name="settings_app_startup_description">OwnTV를 시작할 때 열리는 화면</string>
+    <string name="settings_app_startup_description">МОЁ ТВ를 시작할 때 열리는 화면</string>
     <string name="settings_check_updates">업데이트 확인</string>
     <string name="settings_check_updates_description">GitHub Releases에서 최신 버전을 가져옵니다</string>
     <string name="settings_update_startup">시작할 때 업데이트 확인</string>
     <string name="settings_update_startup_description">앱을 열 때 새 버전이 있는지 확인합니다</string>
     <string name="settings_auto_start_boot">켜질 때 자동 시작</string>
-    <string name="settings_auto_start_boot_description">TV가 켜지면 OwnTV 열기</string>
+    <string name="settings_auto_start_boot_description">TV가 켜지면 МОЁ ТВ 열기</string>
     <string name="settings_auto_start_wake">절전 해제 시 자동 시작</string>
-    <string name="settings_auto_start_wake_description">TV가 절전 모드에서 깨어나면 OwnTV 열기</string>
+    <string name="settings_auto_start_wake_description">TV가 절전 모드에서 깨어나면 МОЁ ТВ 열기</string>
     <string name="settings_auto_start_needs_overlay">“다른 앱 위에 표시” 권한 필요</string>
     <string name="settings_about">정보</string>
     <string name="settings_live_latency">실시간 지연 시간</string>
@@ -524,7 +524,7 @@
     <string name="settings_guide_synced">TV 편성표가 동기화됨</string>
     <string name="settings_guide_sync_failed">TV 편성표 동기화 실패</string>
     <string name="settings_restore_remote_title">다른 기기에서 복원</string>
-    <string name="settings_restore_remote_description">같은 Wi-Fi에 있는 브라우저가 있는 아무 기기(휴대폰, 컴퓨터 또는 다른 TV)에서 QR을 스캔(또는 URL 열기)하고 이 PIN을 입력한 뒤 OwnTV 백업 파일을 골라 보내세요. 복원할 항목은 여기서 선택합니다.</string>
+    <string name="settings_restore_remote_description">같은 Wi-Fi에 있는 브라우저가 있는 아무 기기(휴대폰, 컴퓨터 또는 다른 TV)에서 QR을 스캔(또는 URL 열기)하고 이 PIN을 입력한 뒤 МОЁ ТВ 백업 파일을 골라 보내세요. 복원할 항목은 여기서 선택합니다.</string>
     <string name="settings_try_again">다시 시도</string>
     <string name="settings_new_pin">새 PIN으로 다시 시작</string>
     <string name="settings_download_remote_title">다른 기기에서 다운로드</string>
@@ -672,9 +672,9 @@
     <string name="settings_sources_ignore_limit">연결 수 제한 무시</string>
     <string name="settings_sources_ignore_limit_on">연결 수 제한을 무시하는 중: 멀티뷰와 녹화가 이 재생 목록에 표시된 것보다 많은 스트림을 열 수 있습니다. 제공업체가 거부한 스트림은 이전처럼 알려 드립니다.</string>
     <string name="settings_sources_probe_title">이 재생목록을 테스트할까요?</string>
-    <string name="settings_sources_probe_warning">동시에 시청할 수 있는 채널 수를 알려 주지 않는 공급자가 많습니다. 그래서 OwnTV는 몇 개를 직접 열어 어느 것이 유지되는지 확인합니다. 지금 재생 중인 항목은 모두 멈추며, 최대 2분이 걸릴 수 있습니다.</string>
+    <string name="settings_sources_probe_warning">동시에 시청할 수 있는 채널 수를 알려 주지 않는 공급자가 많습니다. 그래서 МОЁ ТВ는 몇 개를 직접 열어 어느 것이 유지되는지 확인합니다. 지금 재생 중인 항목은 모두 멈추며, 최대 2분이 걸릴 수 있습니다.</string>
     <string name="settings_sources_probe_running">이 공급자가 허용하는 채널 수를 확인하는 중…(<xliff:g id="current">%1$d</xliff:g>/<xliff:g id="total">%2$d</xliff:g>)</string>
-    <string name="settings_sources_probe_unknown">이 공급자가 허용하는 채널 수를 OwnTV가 알아내지 못했습니다.</string>
+    <string name="settings_sources_probe_unknown">이 공급자가 허용하는 채널 수를 МОЁ ТВ가 알아내지 못했습니다.</string>
     <string name="settings_sources_probe_skip">건너뛰기</string>
     <string name="settings_sources_auto_refresh">⟳ <xliff:g id="mode">%1$s</xliff:g></string>
     <string name="settings_sources_default">기본값</string>
@@ -907,7 +907,7 @@
     <string name="settings_move_category_keep">“<xliff:g id="name">%1$s</xliff:g>”에도 유지</string>
     <string name="settings_move_category_action">이동</string>
     <string name="settings_dns_description">도메인 조회에 사용자 지정 DNS 서버 사용</string>
-    <string name="settings_dns_toggle_description">모든 OwnTV 도메인 조회에 사용자 지정 DNS 서버를 사용합니다.</string>
+    <string name="settings_dns_toggle_description">모든 МОЁ ТВ 도메인 조회에 사용자 지정 DNS 서버를 사용합니다.</string>
     <string name="settings_dns_use_custom">사용자 지정 DNS 사용</string>
     <string name="settings_dns_server_missing">사용자 지정 DNS가 활성화되어 있지만 서버가 설정되지 않았습니다. 서버 주소를 입력하고 저장을 선택하거나 이 기능을 끄세요.</string>
     <string name="settings_dns_server">DNS 서버</string>
@@ -952,7 +952,7 @@
     <string name="settings_live_preroll">실시간 스트림 미리 버퍼링</string>
     <string name="settings_live_preroll_description">실시간 채널이 재생을 시작하기 전에 이만큼의 영상을 모으고, 끊긴 후에도 다시 모읍니다. 이는 영상 분량이지 카운트다운이 아닙니다. 끄면 가장 빨리 시작할 수 있습니다.</string>
     <string name="settings_live_tune_timeout">채널 시도를 포기할 시간</string>
-    <string name="settings_live_tune_timeout_description">이 시간까지 실시간 채널에 화면이 나오지 않으면, OwnTV가 가진 재생기를 하나씩 시도하며 검은 화면을 두는 대신 시도를 멈추고 알려 줍니다. ‘안 함’은 계속 시도하므로, 제공업체가 삭제한 채널에서는 1분을 훌쩍 넘길 수 있습니다. 제공업체가 요청한 대기 시간은 포함되지 않습니다.</string>
+    <string name="settings_live_tune_timeout_description">이 시간까지 실시간 채널에 화면이 나오지 않으면, МОЁ ТВ가 가진 재생기를 하나씩 시도하며 검은 화면을 두는 대신 시도를 멈추고 알려 줍니다. ‘안 함’은 계속 시도하므로, 제공업체가 삭제한 채널에서는 1분을 훌쩍 넘길 수 있습니다. 제공업체가 요청한 대기 시간은 포함되지 않습니다.</string>
     <string name="settings_live_preroll_per_playlist">재생목록별 미리 버퍼링</string>
     <string name="settings_live_preroll_per_playlist_description">한 재생목록에 대해서만 위 설정을 재정의하고, 다른 재생목록은 빠르게 유지합니다.</string>
     <string name="settings_live_latency_per_playlist">재생목록별 실시간 지연 시간</string>
@@ -969,7 +969,7 @@
     <string name="settings_surround_auto_description_mobile">자동 — Dolby/DTS 서라운드를 시도하고, 스피커, 헤드폰 또는 연결된 리시버가 재생하지 못하면 자동으로 스테레오로 전환합니다. 권장합니다.</string>
     <string name="settings_surround_stereo_description">스테레오만 — 항상 앱에서 디코딩하고 일반 2.0 사운드를 보냅니다. TV 스피커나 스테레오 사운드바에서 사용하거나, 오디오가 화면보다 늦어질 때 사용하세요.</string>
     <string name="settings_surround_stereo_description_mobile">스테레오만 — 항상 앱에서 디코딩하고 일반 2.0 사운드를 보냅니다. 내장 스피커, 헤드폰 또는 스테레오 사운드바에서 사용하거나, 오디오가 화면보다 늦어질 때 사용하세요.</string>
-    <string name="settings_surround_forced_description">서라운드 — Dolby/DTS를 실제 5.1/7.1 리시버로 보냅니다. 소리가 나지 않거나 끊기면 OwnTV가 그래도 스테레오로 전환하고 알려 줍니다.</string>
+    <string name="settings_surround_forced_description">서라운드 — Dolby/DTS를 실제 5.1/7.1 리시버로 보냅니다. 소리가 나지 않거나 끊기면 МОЁ ТВ가 그래도 스테레오로 전환하고 알려 줍니다.</string>
     <string name="settings_panel_width">패널 너비 조정</string>
     <string name="settings_panel_width_description">실시간 TV, 영화 및 시리즈에서 카테고리, 목록, 미리보기 패널의 크기를 조정합니다.</string>
     <string name="settings_vod_layout">영화 및 시리즈 레이아웃</string>
@@ -1009,9 +1009,9 @@
     <string name="settings_panel_width_preview_panel"><xliff:g id="label">%1$s</xliff:g> 패널</string>
     <string name="settings_panel_width_total">전체 크기</string>
     <string name="settings_panel_width_invalid_total">전체 크기가 <xliff:g id="total">%1$d</xliff:g>%%입니다. 100%%가 되어야 하므로 조정해 주세요.</string>
-    <string name="settings_language_help_translate">OwnTV를 여러분의 언어로 번역하는 데 도움을 주세요</string>
-    <string name="settings_language_contribution_description">QR 코드를 스캔하거나 링크를 열어 사용 가능한 언어를 선택하고 OwnTV 번역 구성 요소 6개 전체에 기여할 수 있습니다.</string>
-    <string name="settings_language_contribution_qr_description">OwnTV 번역 프로젝트 개요 QR 코드</string>
+    <string name="settings_language_help_translate">МОЁ ТВ를 여러분의 언어로 번역하는 데 도움을 주세요</string>
+    <string name="settings_language_contribution_description">QR 코드를 스캔하거나 링크를 열어 사용 가능한 언어를 선택하고 МОЁ ТВ 번역 구성 요소 6개 전체에 기여할 수 있습니다.</string>
+    <string name="settings_language_contribution_qr_description">МОЁ ТВ 번역 프로젝트 개요 QR 코드</string>
     <string name="settings_language_contribution_qr_failed">QR 코드를 생성할 수 없습니다. 대신 아래에 표시된 링크를 사용하세요.</string>
     <string name="settings_language_contribution_copy">링크 복사</string>
     <string name="settings_language_contribution_copied">링크가 복사되었습니다</string>
@@ -1020,8 +1020,8 @@
     <string name="settings_auto_frame_rate_warning_suffix">이 TV에서는 권장되지 않음: Android 12 미만에서는 프레임 레이트를 부드럽게 변경할 수 없습니다.</string>
     <string name="settings_auto_frame_rate_warning_title">이 TV에서는 권장되지 않음</string>
     <string name="settings_auto_frame_rate_warning_title_mobile">이 기기에서는 권장되지 않음</string>
-    <string name="settings_auto_frame_rate_warning_description">이 기기는 Android <xliff:g id="android_version">%1$s</xliff:g>을 실행 중입니다. Android 12 미만에서는 TV가 OwnTV에 매끄럽게 전환할 수 있는 주사율을 알려줄 수 없으므로, 프레임 레이트를 변경하면 화면이 1~2초간 꺼질 수 있습니다. 때로는 프로그램 중에 두 번 이상 꺼질 수도 있습니다.\n\n여기서는 자동 프레임 레이트를 끈 상태로 두는 것을 권장합니다. TV가 깔끔하게 전환된다면 켜서 확인해 보세요. 언제든 다시 끌 수 있습니다.</string>
-    <string name="settings_auto_frame_rate_warning_description_mobile">이 기기는 Android <xliff:g id="android_version">%1$s</xliff:g>을 실행 중입니다. Android 12 미만에서는 기기가 OwnTV에 매끄럽게 전환할 수 있는 주사율을 알려줄 수 없으므로, 프레임 레이트를 변경하면 화면이 1~2초간 꺼질 수 있습니다. 때로는 프로그램 중에 두 번 이상 꺼질 수도 있습니다.\n\n여기서는 자동 프레임 레이트를 끈 상태로 두는 것을 권장합니다. 화면이 깔끔하게 전환된다면 켜서 확인해 보세요. 언제든 다시 끌 수 있습니다.</string>
+    <string name="settings_auto_frame_rate_warning_description">이 기기는 Android <xliff:g id="android_version">%1$s</xliff:g>을 실행 중입니다. Android 12 미만에서는 TV가 МОЁ ТВ에 매끄럽게 전환할 수 있는 주사율을 알려줄 수 없으므로, 프레임 레이트를 변경하면 화면이 1~2초간 꺼질 수 있습니다. 때로는 프로그램 중에 두 번 이상 꺼질 수도 있습니다.\n\n여기서는 자동 프레임 레이트를 끈 상태로 두는 것을 권장합니다. TV가 깔끔하게 전환된다면 켜서 확인해 보세요. 언제든 다시 끌 수 있습니다.</string>
+    <string name="settings_auto_frame_rate_warning_description_mobile">이 기기는 Android <xliff:g id="android_version">%1$s</xliff:g>을 실행 중입니다. Android 12 미만에서는 기기가 МОЁ ТВ에 매끄럽게 전환할 수 있는 주사율을 알려줄 수 없으므로, 프레임 레이트를 변경하면 화면이 1~2초간 꺼질 수 있습니다. 때로는 프로그램 중에 두 번 이상 꺼질 수도 있습니다.\n\n여기서는 자동 프레임 레이트를 끈 상태로 두는 것을 권장합니다. 화면이 깔끔하게 전환된다면 켜서 확인해 보세요. 언제든 다시 끌 수 있습니다.</string>
     <string name="settings_auto_frame_rate_keep_off">끈 상태 유지</string>
     <string name="settings_auto_frame_rate_turn_on_anyway">그래도 켜기</string>
     <string name="settings_language_request_workflow">목록에 없는 언어를 추가하고 싶으신가요? 먼저 언어 요청을 제출하세요. 관리자가 해당 언어를 등록하고 기본 번역 파일을 준비합니다. Hosted Weblate에 표시되면 번역에 참여할 수 있습니다.</string>
@@ -1142,7 +1142,7 @@
     <string name="local_sync_received_items">받은 항목: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_sent">데이터를 보냈습니다</string>
     <string name="local_sync_failed">동기화 실패</string>
-    <string name="local_sync_error_unreachable">이 기기에 연결할 수 없습니다. 그 기기에서 OwnTV → 더보기 → 로컬 동기화를 열고 동기화 모드를 켜세요. 두 기기가 같은 Wi‑Fi에 있어야 합니다.</string>
+    <string name="local_sync_error_unreachable">이 기기에 연결할 수 없습니다. 그 기기에서 МОЁ ТВ → 더보기 → 로컬 동기화를 열고 동기화 모드를 켜세요. 두 기기가 같은 Wi‑Fi에 있어야 합니다.</string>
     <string name="local_sync_error_unauthorized">다른 기기가 거부했습니다. PIN이 틀렸거나 이 기기를 삭제했을 수 있습니다.</string>
     <string name="local_sync_error_bad_payload">받은 내용을 읽을 수 없습니다. 비밀번호를 사용했다면 두 기기에서 같은지 확인하세요.</string>
     <string name="local_sync_error_unknown">문제가 발생했습니다. 다시 시도하세요.</string>
@@ -1160,7 +1160,7 @@
     <string name="local_auto_sync_waiting"><xliff:g id="device">%1$s</xliff:g>의 허용을 기다리는 중…</string>
     <string name="local_auto_sync_declined"><xliff:g id="device">%1$s</xliff:g>가 자동 동기화를 허용하지 않았습니다.</string>
     <string name="local_auto_sync_accept_title">자동 동기화를 허용할까요?</string>
-    <string name="local_auto_sync_accept_body"><xliff:g id="device">%1$s</xliff:g>가 두 기기 모두 OwnTV가 열려 있을 때마다 이 기기와 알아서 동기화하려고 합니다. 이 기기에서 허용한 것만 들어오며, 어느 기기에서든 끌 수 있습니다.</string>
+    <string name="local_auto_sync_accept_body"><xliff:g id="device">%1$s</xliff:g>가 두 기기 모두 МОЁ ТВ가 열려 있을 때마다 이 기기와 알아서 동기화하려고 합니다. 이 기기에서 허용한 것만 들어오며, 어느 기기에서든 끌 수 있습니다.</string>
     <string name="local_auto_sync_accept">허용</string>
     <string name="local_auto_sync_decline">허용 안 함</string>
     <string name="local_auto_sync_what_to_sync">이 기기가 동기화하는 항목</string>
@@ -1176,7 +1176,7 @@
     <string name="local_auto_sync_turned_off"><xliff:g id="device">%1$s</xliff:g>에서 자동 동기화가 꺼졌습니다</string>
     <string name="local_auto_sync_unreachable"><xliff:g id="device">%1$s</xliff:g>에 연결할 수 없습니다. 다시 시도합니다</string>
     <string name="local_auto_sync_listen">자동 동기화 대기 유지</string>
-    <string name="local_auto_sync_listen_description">켜짐: 여기서 OwnTV가 열려 있으면 페어링된 기기가 이 기기와 동기화할 수 있습니다. 꺼짐: 동기화 모드가 켜져 있을 때만.</string>
+    <string name="local_auto_sync_listen_description">켜짐: 여기서 МОЁ ТВ가 열려 있으면 페어링된 기기가 이 기기와 동기화할 수 있습니다. 꺼짐: 동기화 모드가 켜져 있을 때만.</string>
     <string name="local_auto_sync_listening">대기 중</string>
     <string name="more_pane_last_backup">마지막 백업</string>
     <string name="more_pane_encrypted">암호화됨</string>
@@ -1246,8 +1246,8 @@
     <string name="settings_multiview_keep_two">2개 유지</string>
     <string name="settings_multiview_use_anyway">그래도 사용</string>
     <string name="settings_app_icon">앱 아이콘</string>
-    <string name="settings_app_icon_summary">OwnTV 아이콘 및 로고 색상</string>
-    <string name="settings_app_icon_sheet_mobile">홈 화면에서 OwnTV가 표시되는 모습. 앱이 한 번 다시 시작됩니다.</string>
+    <string name="settings_app_icon_summary">МОЁ ТВ 아이콘 및 로고 색상</string>
+    <string name="settings_app_icon_sheet_mobile">홈 화면에서 МОЁ ТВ가 표시되는 모습. 앱이 한 번 다시 시작됩니다.</string>
     <string name="settings_brand_accent">강조 색상 로고</string>
     <string name="app_icon_petrol">페트롤</string>
     <string name="app_icon_sunflower">해바라기</string>
@@ -1258,8 +1258,8 @@
     <string name="app_icon_olive">올리브</string>
     <string name="app_icon_olive_cream">크림 위 올리브</string>
     <string name="app_icon_pixel">Pixel</string>
-    <string name="app_icon_restart_title">OwnTV를 다시 시작할까요?</string>
-    <string name="app_icon_restart_message">새 아이콘과 로고를 선택했습니다. OwnTV를 다시 시작하면 적용됩니다.</string>
+    <string name="app_icon_restart_title">МОЁ ТВ를 다시 시작할까요?</string>
+    <string name="app_icon_restart_message">새 아이콘과 로고를 선택했습니다. МОЁ ТВ를 다시 시작하면 적용됩니다.</string>
     <string name="app_icon_restart_now">지금 다시 시작</string>
     <string name="settings_navigation">탐색</string>
     <string name="settings_navigation_description">왼쪽 메뉴의 동작 방식</string>
@@ -1412,10 +1412,10 @@
     <string name="settings_help_epg_sources">링크로 XMLTV 가이드 피드를 추가하고 새로 고치거나 삭제합니다. 피드는 TV 가이드와 실시간 TV의 프로그램 줄을 채웁니다.</string>
     <string name="settings_help_guide_days">가이드가 앞으로 며칠분의 프로그램을 보관할지 정합니다. 일수가 적을수록 가이드 새로 고침이 빠르고 데이터베이스가 작아집니다.</string>
     <string name="settings_help_catchup_timezone">다시보기는 제공자의 아카이브에서 프로그램을 재생합니다. 자동은 제공자가 알려 주는 시간대를 사용하고, 알려 주지 않으면 TV 자체 시계를 따릅니다. 그래도 다시보기가 잘못된 시간에 시작되면 고정 UTC 오프셋을 선택하세요. 다시보기에 쓸 플레이어도 여기서 고릅니다.</string>
-    <string name="settings_help_theme">OwnTV는 다크 테마에 맞춰 디자인되었습니다. 시스템은 TV 자체 설정이 있으면 그것을 따르고, 라이트는 밝은 방에 어울립니다.</string>
+    <string name="settings_help_theme">МОЁ ТВ는 다크 테마에 맞춰 디자인되었습니다. 시스템은 TV 자체 설정이 있으면 그것을 따르고, 라이트는 밝은 방에 어울립니다.</string>
     <string name="settings_help_accent">버튼, 포커스 빛, 진행 표시줄, 강조 표시에 모두 적용됩니다. 프리셋을 고르거나 OK를 눌러 팔레트와 원하는 16진수 코드를 지정하세요.</string>
     <string name="settings_help_focus">포커스된 항목을 둘러싼 테두리입니다. 소파에서도 잘 보이도록 색상과 두께를 고르세요.</string>
-    <string name="settings_help_fonts">OwnTV 전체에서 쓰는 글꼴과 글자 크기입니다. 팝업도 같은 글꼴을 씁니다.</string>
+    <string name="settings_help_fonts">МОЁ ТВ 전체에서 쓰는 글꼴과 글자 크기입니다. 팝업도 같은 글꼴을 씁니다.</string>
     <string name="settings_help_popup_size">팝업, 메뉴, 대화상자 전체를 크게 또는 작게 합니다. 팝업이 비좁거나 화면을 너무 많이 가릴 때 사용하세요.</string>
     <string name="settings_help_zoom">화면의 모든 것을 확대·축소합니다. 크게 하면 멀리서 읽기 쉽고, 작게 하면 더 많이 표시됩니다. 85%% 미만에서는 메모리가 적은 TV 박스의 메모리가 부족해질 수 있습니다.</string>
     <string name="settings_help_animations">켜면 시트, 메뉴, 포커스가 부드럽게 움직입니다. 끄면 모든 변화가 즉시 일어납니다.</string>
@@ -1425,13 +1425,13 @@
     <string name="settings_help_vod_layout">시네마는 선택한 작품의 이미지를 포스터 격자 뒤에 보여 줍니다. 분리형은 카테고리, 작품, 세부 정보를 나란히 보여 줍니다.</string>
     <string name="settings_help_home">홈에 어떤 행을 어떤 순서로 보여 줄지, 지금 인기 행이 어떻게 보일지 고릅니다.</string>
     <string name="settings_help_customize">보지 않는 카테고리와 항목을 숨기고, 카테고리에 원하는 이름을 붙여 원하는 순서로 정리하세요. 숨긴 것은 여기서 다시 꺼낼 수 있고 사라지지 않습니다.</string>
-    <string name="settings_help_app_icon">TV 홈 화면의 OwnTV 아이콘입니다. 런처에 반영되기까지 잠시 걸릴 수 있습니다.</string>
-    <string name="settings_help_brand_accent">메뉴, 정보, 설정의 OwnTV 로고가 재생 삼각형을 강조 색상으로 표시합니다. 홈 화면 아이콘은 원래 색상을 유지합니다.</string>
-    <string name="settings_help_startup">OwnTV를 시작할 때 보여 줄 화면: 홈, 마지막으로 본 채널, 즐겨찾기, 또는 직접 고른 채널.</string>
-    <string name="settings_help_check_updates">지금 GitHub에서 새 OwnTV를 찾아 설치를 제안합니다. 재생목록, 즐겨찾기, 설정은 그대로 유지됩니다.</string>
-    <string name="settings_help_update_startup">OwnTV가 시작될 때마다 새 버전을 찾고, 있으면 알려 줍니다. 묻지 않고 설치하지 않습니다.</string>
-    <string name="settings_help_auto_start_boot">TV가 시작되면 앱 시작 화면에서 고른 화면으로 OwnTV를 자동으로 엽니다. Android는 다른 앱 위에 표시할 수 있는 앱만 스스로 열리게 하므로, 이 옵션을 켜면 해당 권한 화면이 열립니다. 이 권한을 제공하지 않는 TV에서는 자동 시작이 작동하지 않습니다.</string>
-    <string name="settings_help_auto_start_wake">TV가 절전 모드에서 깨어날 때마다 OwnTV를 엽니다. 다른 앱을 쓰려고 깨운 경우에도 마찬가지입니다. 앱 시작 화면이 채널을 열도록 되어 있으면 깨어날 때마다 그 스트림이 시작됩니다. 켜져 있는 동안 OwnTV는 무음 알림과 함께 작은 백그라운드 서비스를 유지합니다. 켜질 때 자동 시작과 마찬가지로 다른 앱 위에 표시 권한이 필요합니다.</string>
+    <string name="settings_help_app_icon">TV 홈 화면의 МОЁ ТВ 아이콘입니다. 런처에 반영되기까지 잠시 걸릴 수 있습니다.</string>
+    <string name="settings_help_brand_accent">메뉴, 정보, 설정의 МОЁ ТВ 로고가 재생 삼각형을 강조 색상으로 표시합니다. 홈 화면 아이콘은 원래 색상을 유지합니다.</string>
+    <string name="settings_help_startup">МОЁ ТВ를 시작할 때 보여 줄 화면: 홈, 마지막으로 본 채널, 즐겨찾기, 또는 직접 고른 채널.</string>
+    <string name="settings_help_check_updates">지금 GitHub에서 새 МОЁ ТВ를 찾아 설치를 제안합니다. 재생목록, 즐겨찾기, 설정은 그대로 유지됩니다.</string>
+    <string name="settings_help_update_startup">МОЁ ТВ가 시작될 때마다 새 버전을 찾고, 있으면 알려 줍니다. 묻지 않고 설치하지 않습니다.</string>
+    <string name="settings_help_auto_start_boot">TV가 시작되면 앱 시작 화면에서 고른 화면으로 МОЁ ТВ를 자동으로 엽니다. Android는 다른 앱 위에 표시할 수 있는 앱만 스스로 열리게 하므로, 이 옵션을 켜면 해당 권한 화면이 열립니다. 이 권한을 제공하지 않는 TV에서는 자동 시작이 작동하지 않습니다.</string>
+    <string name="settings_help_auto_start_wake">TV가 절전 모드에서 깨어날 때마다 МОЁ ТВ를 엽니다. 다른 앱을 쓰려고 깨운 경우에도 마찬가지입니다. 앱 시작 화면이 채널을 열도록 되어 있으면 깨어날 때마다 그 스트림이 시작됩니다. 켜져 있는 동안 МОЁ ТВ는 무음 알림과 함께 작은 백그라운드 서비스를 유지합니다. 켜질 때 자동 시작과 마찬가지로 다른 앱 위에 표시 권한이 필요합니다.</string>
     <string name="settings_help_dns">네트워크 자체 DNS 대신 원하는 DNS 서버로 제공자의 주소를 조회합니다. 네트워크가 주소를 차단하거나 우회시킬 때 유용합니다.</string>
     <string name="settings_help_hw">TV의 하드웨어 디코더를 사용합니다. 4K가 부드럽고 발열이 줄어듭니다. 일부 스트림이 끊기거나 깨질 때만 끄세요. 그러면 소프트웨어 디코더가 처리합니다.</string>
     <string name="settings_help_volume">모든 채널, 영화, 에피소드가 시작할 때의 볼륨입니다. 100%%를 넘으면 작은 스트림을 증폭합니다. 플레이어에서 바꾼 볼륨은 재설정할 때까지 그 작품에 저장됩니다.</string>
@@ -1445,7 +1445,7 @@
     <string name="settings_help_timeshift_window">다시보기가 없는 채널에서 실시간 TV 일시정지 및 되감기가 얼마나 뒤로 갈 수 있는지 정합니다. 길수록 이 기기 저장공간에 더 많이 보관합니다.</string>
     <string name="settings_help_resume">이어 보기 묻기는 영화나 에피소드에 저장된 위치가 있으면 이어 보기와 처음부터를 제안합니다. 항상 이어 보기는 멈춘 곳부터, 이어 보지 않기는 처음부터 재생합니다.</string>
     <string name="settings_help_mini">둘러보는 동안 모서리에서 채널을 계속 재생하는 작은 플레이어입니다. 크기와 위치할 모서리를 고르세요.</string>
-    <string name="settings_help_pip">전체 화면이나 미니 플레이어에서 동영상이 재생되는 동안 홈을 누르거나 다른 앱을 열면, TV의 다른 화면 위 작은 창에서 계속 재생됩니다. OwnTV를 다시 열면 전체 화면으로 돌아오고, 창을 닫으면 재생이 멈춥니다. 멀티뷰는 OwnTV 안에서만 됩니다.</string>
+    <string name="settings_help_pip">전체 화면이나 미니 플레이어에서 동영상이 재생되는 동안 홈을 누르거나 다른 앱을 열면, TV의 다른 화면 위 작은 창에서 계속 재생됩니다. МОЁ ТВ를 다시 열면 전체 화면으로 돌아오고, 창을 닫으면 재생이 멈춥니다. 멀티뷰는 МОЁ ТВ 안에서만 됩니다.</string>
     <string name="settings_key_palette">팔레트</string>
     <string name="settings_live_preview_note">행을 벗어나기 전에도 변경 사항이 여기에 바로 보입니다.</string>
     <string name="settings_synced_at"><xliff:g id="when">%1$s</xliff:g> 동기화됨</string>
@@ -1456,7 +1456,7 @@
     <string name="settings_profile_add">프로필 추가</string>
     <string name="settings_profile_add_line">즐겨찾기, 기록, 설정을 따로 가진 시청자</string>
     <plurals name="settings_help_language">
-        <item quantity="other">OwnTV의 모든 메뉴와 메시지 언어입니다. <xliff:g id="count">%1$d</xliff:g>개 언어를 지원하며, 직접 고르기 전까지 TV 자체 언어를 따릅니다.</item>
+        <item quantity="other">МОЁ ТВ의 모든 메뉴와 메시지 언어입니다. <xliff:g id="count">%1$d</xliff:g>개 언어를 지원하며, 직접 고르기 전까지 TV 자체 언어를 따릅니다.</item>
     </plurals>
     <plurals name="settings_profile_count">
         <item quantity="other">프로필 <xliff:g id="count">%1$d</xliff:g>개</item>
@@ -1490,8 +1490,8 @@
     <string name="settings_home_show_row">이 행 표시</string>
     <string name="settings_home_move_row">이동(▲ ▼ 후 OK)</string>
     <string name="settings_line_remote_shortcuts_on">꺼도 지정은 유지됩니다</string>
-    <string name="settings_language_system_help">OwnTV는 TV 언어(현재 <xliff:g id="language">%1$s</xliff:g>)를 따릅니다. OwnTV에서만 쓸 언어를 아래에서 고르세요.</string>
-    <string name="settings_language_pick_help">TV 언어와 관계없이 OwnTV에서 <xliff:g id="language">%1$s</xliff:g> 사용</string>
+    <string name="settings_language_system_help">МОЁ ТВ는 TV 언어(현재 <xliff:g id="language">%1$s</xliff:g>)를 따릅니다. МОЁ ТВ에서만 쓸 언어를 아래에서 고르세요.</string>
+    <string name="settings_language_pick_help">TV 언어와 관계없이 МОЁ ТВ에서 <xliff:g id="language">%1$s</xliff:g> 사용</string>
     <string name="settings_key_use">사용</string>
     <string name="settings_line_metadata_source">영화 및 시리즈 정보의 출처</string>
     <string name="settings_line_metadata_language">TMDB의 줄거리, 장르, 제목</string>
@@ -1529,7 +1529,7 @@
     <string name="settings_line_glass_bg">배경, 사진 모습, 유리</string>
     <string name="settings_bg_background">배경</string>
     <string name="settings_line_bg_background">모든 화면 뒤에 있는 것</string>
-    <string name="settings_help_bg_background">Stage는 OwnTV의 부드러운 색을 보여 줍니다. 사진은 모든 화면 뒤에 내 사진을 보여 줍니다. 단색은 평평한 어두운 채우기입니다.</string>
+    <string name="settings_help_bg_background">Stage는 МОЁ ТВ의 부드러운 색을 보여 줍니다. 사진은 모든 화면 뒤에 내 사진을 보여 줍니다. 단색은 평평한 어두운 채우기입니다.</string>
     <string name="settings_bg_stage">Stage</string>
     <string name="settings_bg_picture">사진</string>
     <string name="settings_bg_plain">단색</string>

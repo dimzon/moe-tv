@@ -30,7 +30,7 @@
     <string name="content_genre_scifi">Sci-fi</string>
     <string name="content_genre_series">Seriály</string>
     <string name="content_genre_sport">Sport</string>
-    <string name="content_exit_owntv">Ukončit OwnTV?</string>
+    <string name="content_exit_owntv">Ukončit МОЁ ТВ?</string>
     <string name="content_exit_confirmation">Opravdu chcete aplikaci zavřít?</string>
     <string name="content_restore_incomplete_title">Obnovení nebylo dokončeno</string>
     <string name="content_restore_incomplete_message">Aplikace se během obnovování <xliff:g id="description">%1$s</xliff:g> zavřela, takže některé části mohou chybět. Nic nebylo smazáno — spusťte stejné obnovení znovu v Nastavení → Záloha a obnovení, aby se doplnil zbytek.</string>
@@ -150,7 +150,7 @@
     <string name="content_storage_choose_folder">Zvolit jinou složku…</string>
     <string name="content_storage_chosen_folder">Zvolená složka</string>
     <string name="content_storage_folder_lost">Tato složka už není dostupná. Zvolte ji znovu, nebo vyberte jinou.</string>
-    <string name="content_storage_folder_fallback">Složka pro stahování teď není dostupná, takže se stahování ukládá do vlastní složky OwnTV, dokud nebude zpět.</string>
+    <string name="content_storage_folder_fallback">Složka pro stahování teď není dostupná, takže se stahování ukládá do vlastní složky МОЁ ТВ, dokud nebude zpět.</string>
     <string name="content_downloads_reason_account_busy">Účet je obsazený: připojení používá jiný stream</string>
     <string name="content_downloads_reason_refused">Server odmítl odkaz</string>
     <string name="content_downloads_reason_not_found">Server už tento soubor nemá</string>

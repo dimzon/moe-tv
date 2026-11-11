@@ -27,7 +27,7 @@
     <string name="settings_static">靜態</string>
     <string name="settings_dynamic">動態</string>
     <string name="settings_use_proxy">使用代理伺服器</string>
-    <string name="settings_proxy_description">透過 HTTP 代理伺服器傳送所有 OwnTV 流量及播放內容。</string>
+    <string name="settings_proxy_description">透過 HTTP 代理伺服器傳送所有 МОЁ ТВ 流量及播放內容。</string>
     <string name="settings_host">主機</string>
     <string name="settings_proxy_host_hint">proxy.example.com</string>
     <string name="settings_port">連接埠</string>
@@ -133,15 +133,15 @@
         <item quantity="other">剩餘 <xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g></item>
     </plurals>
     <string name="settings_metadata_active_source">目前來源</string>
-    <string name="settings_metadata_shared_worker_description">OwnTV Worker · 無需設定</string>
+    <string name="settings_metadata_shared_worker_description">МОЁ ТВ Worker · 無需設定</string>
     <string name="settings_metadata_connection">連線</string>
     <string name="settings_metadata_remote_advanced">取得進階 TMDB 資訊</string>
     <string name="settings_metadata_remote_advanced_description">使用你自己的 TMDB API 金鑰或自建 Worker，而不是共用的預設服務。</string>
     <string name="settings_metadata_key_label">金鑰</string>
     <string name="settings_metadata_server_label">伺服器</string>
     <string name="settings_metadata_clear_advanced_title">不再使用你自己的金鑰？</string>
-    <string name="settings_metadata_clear_advanced_message">你的 TMDB API 金鑰與自有伺服器位址將從此裝置刪除，OwnTV 將回到帶有每日額度的內建共用服務。</string>
-    <string name="settings_metadata_fair_share">內建中繼資料服務由所有 OwnTV 使用者共用，因此每部裝置每天都有自己的額度。用完額度後，海報與簡介會暫停顯示，直到額度恢復；播放清單自帶的資訊不受影響。加入你自己的 TMDB API 金鑰或伺服器即可解除此限制：它是免費的，而且個人金鑰幾乎沒有限制。</string>
+    <string name="settings_metadata_clear_advanced_message">你的 TMDB API 金鑰與自有伺服器位址將從此裝置刪除，МОЁ ТВ 將回到帶有每日額度的內建共用服務。</string>
+    <string name="settings_metadata_fair_share">內建中繼資料服務由所有 МОЁ ТВ 使用者共用，因此每部裝置每天都有自己的額度。用完額度後，海報與簡介會暫停顯示，直到額度恢復；播放清單自帶的資訊不受影響。加入你自己的 TMDB API 金鑰或伺服器即可解除此限制：它是免費的，而且個人金鑰幾乎沒有限制。</string>
     <string name="settings_metadata_limit_reached">今日中繼資料額度已用完 — 在「設定 → 中繼資料」中加入你自己的 TMDB 金鑰即可解除此限制。</string>
     <string name="settings_metadata_language">中繼資料語言</string>
     <string name="settings_metadata_language_description">TMDB 提供的劇情、類型與標題的語言。TMDB 未翻譯的欄位會保持英文。詳細資料會依語言分別快取，因此切換回來是立即的。</string>
@@ -264,15 +264,15 @@
     <string name="settings_player_zoom">播放器縮放</string>
     <string name="settings_app_group">應用程式</string>
     <string name="settings_app_startup">應用程式啟動</string>
-    <string name="settings_app_startup_description">OwnTV 啟動時開啟的內容</string>
+    <string name="settings_app_startup_description">МОЁ ТВ 啟動時開啟的內容</string>
     <string name="settings_check_updates">檢查更新</string>
     <string name="settings_check_updates_description">從 GitHub Releases 取得最新版本</string>
     <string name="settings_update_startup">啟動時檢查更新</string>
     <string name="settings_update_startup_description">應用程式開啟時檢查是否有新版本</string>
     <string name="settings_auto_start_boot">開機時自動啟動</string>
-    <string name="settings_auto_start_boot_description">電視開機後開啟 OwnTV</string>
+    <string name="settings_auto_start_boot_description">電視開機後開啟 МОЁ ТВ</string>
     <string name="settings_auto_start_wake">喚醒時自動啟動</string>
-    <string name="settings_auto_start_wake_description">電視從待機喚醒後開啟 OwnTV</string>
+    <string name="settings_auto_start_wake_description">電視從待機喚醒後開啟 МОЁ ТВ</string>
     <string name="settings_auto_start_needs_overlay">需要「在其他應用程式上層顯示」</string>
     <string name="settings_about">關於</string>
     <string name="settings_live_latency">直播延遲</string>
@@ -524,7 +524,7 @@
     <string name="settings_guide_synced">電視節目表已同步</string>
     <string name="settings_guide_sync_failed">電視節目表同步失敗</string>
     <string name="settings_restore_remote_title">從其他裝置還原</string>
-    <string name="settings_restore_remote_description">在同一 Wi-Fi 下任何有瀏覽器的裝置（手機、電腦或另一台電視）上掃描 QR 碼（或開啟網址），輸入此 PIN，選擇你的 OwnTV 備份檔案並傳送。接著在這裡選擇要還原的內容。</string>
+    <string name="settings_restore_remote_description">在同一 Wi-Fi 下任何有瀏覽器的裝置（手機、電腦或另一台電視）上掃描 QR 碼（或開啟網址），輸入此 PIN，選擇你的 МОЁ ТВ 備份檔案並傳送。接著在這裡選擇要還原的內容。</string>
     <string name="settings_try_again">再試一次</string>
     <string name="settings_new_pin">使用新的 PIN 重新開始</string>
     <string name="settings_download_remote_title">在其他裝置上下載</string>
@@ -672,9 +672,9 @@
     <string name="settings_sources_ignore_limit">忽略連線數限制</string>
     <string name="settings_sources_ignore_limit_on">已忽略連線數限制：多畫面和錄影可能會開啟超過此播放清單所報告數量的串流。供應商拒絕的串流仍會照常提示。</string>
     <string name="settings_sources_probe_title">測試此播放清單？</string>
-    <string name="settings_sources_probe_warning">許多供應商從不說明你可以同時觀看多少個頻道，因此 OwnTV 會開啟幾個頻道，看看哪些能持續播放來判斷。目前正在播放的內容會停止，此過程最多需要兩分鐘。</string>
+    <string name="settings_sources_probe_warning">許多供應商從不說明你可以同時觀看多少個頻道，因此 МОЁ ТВ 會開啟幾個頻道，看看哪些能持續播放來判斷。目前正在播放的內容會停止，此過程最多需要兩分鐘。</string>
     <string name="settings_sources_probe_running">正在檢測此供應商允許的頻道數量…（<xliff:g id="current">%1$d</xliff:g>/<xliff:g id="total">%2$d</xliff:g>）</string>
-    <string name="settings_sources_probe_unknown">OwnTV 無法判斷此供應商允許多少個頻道。</string>
+    <string name="settings_sources_probe_unknown">МОЁ ТВ 無法判斷此供應商允許多少個頻道。</string>
     <string name="settings_sources_probe_skip">略過</string>
     <string name="settings_sources_auto_refresh">⟳ <xliff:g id="mode">%1$s</xliff:g></string>
     <string name="settings_sources_default">預設</string>
@@ -907,7 +907,7 @@
     <string name="settings_move_category_keep">也保留在「<xliff:g id="name">%1$s</xliff:g>」中</string>
     <string name="settings_move_category_action">移動</string>
     <string name="settings_dns_description">使用自訂 DNS 伺服器進行網域查詢</string>
-    <string name="settings_dns_toggle_description">透過自訂 DNS 伺服器解析 OwnTV 的所有網域查詢。</string>
+    <string name="settings_dns_toggle_description">透過自訂 DNS 伺服器解析 МОЁ ТВ 的所有網域查詢。</string>
     <string name="settings_dns_use_custom">使用自訂 DNS</string>
     <string name="settings_dns_server_missing">自訂 DNS 已啟用，但尚未設定伺服器。請輸入伺服器位址並選取「儲存」，或關閉此功能。</string>
     <string name="settings_dns_server">DNS 伺服器</string>
@@ -952,7 +952,7 @@
     <string name="settings_live_preroll">直播串流預先緩衝</string>
     <string name="settings_live_preroll_description">在直播頻道開始播放前先緩衝這個數量的影片，發生卡頓後也會再緩衝一次。這是影片量，不是倒數計時。關閉可保持最快的啟動速度。</string>
     <string name="settings_live_tune_timeout">放棄頻道的等待時間</string>
-    <string name="settings_live_tune_timeout_description">若直播頻道在此時間內仍未出現畫面，OwnTV 會停止嘗試並告知你，而不是一邊逐一試遍所有播放器、一邊留著黑畫面。選擇「永不」會一直嘗試，在供應商已下架的頻道上可能遠超過一分鐘。供應商自己要求的等待時間不計入其中。</string>
+    <string name="settings_live_tune_timeout_description">若直播頻道在此時間內仍未出現畫面，МОЁ ТВ 會停止嘗試並告知你，而不是一邊逐一試遍所有播放器、一邊留著黑畫面。選擇「永不」會一直嘗試，在供應商已下架的頻道上可能遠超過一分鐘。供應商自己要求的等待時間不計入其中。</string>
     <string name="settings_live_preroll_per_playlist">各播放清單的預先緩衝</string>
     <string name="settings_live_preroll_per_playlist_description">為某個播放清單覆寫上述設定，同時讓其他播放清單保持快速啟動。</string>
     <string name="settings_live_latency_per_playlist">依播放清單設定直播延遲</string>
@@ -969,7 +969,7 @@
     <string name="settings_surround_auto_description_mobile">自動 — 嘗試播放 Dolby/DTS 環繞音效，如果揚聲器、耳機或連接的接收器無法播放，就會自動切回立體聲。建議使用。</string>
     <string name="settings_surround_stereo_description">僅立體聲 — 一律在應用程式內解碼，並傳送純 2.0 音效。電視喇叭或立體聲 Soundbar 請使用此選項；若聲音比畫面慢，也請使用此選項。</string>
     <string name="settings_surround_stereo_description_mobile">僅立體聲 — 一律在應用程式內解碼，並傳送純 2.0 音效。內建揚聲器、耳機或立體聲 Soundbar 請使用此選項；若聲音比畫面慢，也請使用此選項。</string>
-    <string name="settings_surround_forced_description">環繞音效 — 將 Dolby/DTS 傳送至實體的 5.1/7.1 環繞擴大機。如果出現無聲或卡頓，OwnTV 仍會自動切回立體聲並通知你。</string>
+    <string name="settings_surround_forced_description">環繞音效 — 將 Dolby/DTS 傳送至實體的 5.1/7.1 環繞擴大機。如果出現無聲或卡頓，МОЁ ТВ 仍會自動切回立體聲並通知你。</string>
     <string name="settings_panel_width">面板寬度調整</string>
     <string name="settings_panel_width_description">在直播電視、電影與影集中調整分類、清單和預覽面板的大小。</string>
     <string name="settings_vod_layout">電影與影集版面</string>
@@ -1009,9 +1009,9 @@
     <string name="settings_panel_width_preview_panel"><xliff:g id="label">%1$s</xliff:g> 面板</string>
     <string name="settings_panel_width_total">總大小</string>
     <string name="settings_panel_width_invalid_total">總大小為 <xliff:g id="total">%1$d</xliff:g>%%。必須是 100%%，請調整。</string>
-    <string name="settings_language_help_translate">協助將 OwnTV 翻譯成你的語言</string>
-    <string name="settings_language_contribution_description">掃描 QR Code 或開啟連結，即可選擇任何可用語言，並在 OwnTV 全部六個翻譯元件中貢獻翻譯。</string>
-    <string name="settings_language_contribution_qr_description">OwnTV 翻譯專案總覽的 QR Code</string>
+    <string name="settings_language_help_translate">協助將 МОЁ ТВ 翻譯成你的語言</string>
+    <string name="settings_language_contribution_description">掃描 QR Code 或開啟連結，即可選擇任何可用語言，並在 МОЁ ТВ 全部六個翻譯元件中貢獻翻譯。</string>
+    <string name="settings_language_contribution_qr_description">МОЁ ТВ 翻譯專案總覽的 QR Code</string>
     <string name="settings_language_contribution_qr_failed">無法產生 QR Code。請改用下方顯示的連結。</string>
     <string name="settings_language_contribution_copy">複製連結</string>
     <string name="settings_language_contribution_copied">已複製連結</string>
@@ -1020,8 +1020,8 @@
     <string name="settings_auto_frame_rate_warning_suffix">不建議在此電視上使用：在 Android 12 以下，更新率無法平滑切換。</string>
     <string name="settings_auto_frame_rate_warning_title">不建議在此電視上使用</string>
     <string name="settings_auto_frame_rate_warning_title_mobile">不建議在此裝置上使用</string>
-    <string name="settings_auto_frame_rate_warning_description">此裝置執行的是 Android <xliff:g id="android_version">%1$s</xliff:g>。在 Android 12 以下，電視無法告知 OwnTV 它可以順暢切換到哪些更新率，因此切換更新率可能會讓畫面變黑一兩秒——有時在節目播放期間還會發生不只一次。\n\n我們建議在此保持自動更新率關閉。如果你的電視切換得很順暢，不妨開啟試試看：你隨時都可以改回來。</string>
-    <string name="settings_auto_frame_rate_warning_description_mobile">此裝置執行的是 Android <xliff:g id="android_version">%1$s</xliff:g>。在 Android 12 以下，裝置無法告知 OwnTV 它可以順暢切換到哪些更新率，因此切換更新率可能會讓畫面變黑一兩秒——有時在節目播放期間還會發生不只一次。\n\n我們建議在此保持自動更新率關閉。如果你的螢幕切換得很順暢，不妨開啟試試看：你隨時都可以改回來。</string>
+    <string name="settings_auto_frame_rate_warning_description">此裝置執行的是 Android <xliff:g id="android_version">%1$s</xliff:g>。在 Android 12 以下，電視無法告知 МОЁ ТВ 它可以順暢切換到哪些更新率，因此切換更新率可能會讓畫面變黑一兩秒——有時在節目播放期間還會發生不只一次。\n\n我們建議在此保持自動更新率關閉。如果你的電視切換得很順暢，不妨開啟試試看：你隨時都可以改回來。</string>
+    <string name="settings_auto_frame_rate_warning_description_mobile">此裝置執行的是 Android <xliff:g id="android_version">%1$s</xliff:g>。在 Android 12 以下，裝置無法告知 МОЁ ТВ 它可以順暢切換到哪些更新率，因此切換更新率可能會讓畫面變黑一兩秒——有時在節目播放期間還會發生不只一次。\n\n我們建議在此保持自動更新率關閉。如果你的螢幕切換得很順暢，不妨開啟試試看：你隨時都可以改回來。</string>
     <string name="settings_auto_frame_rate_keep_off">保持關閉</string>
     <string name="settings_auto_frame_rate_turn_on_anyway">仍要開啟</string>
     <string name="settings_language_request_workflow">想要新增未列出的語言嗎？請先提出語言請求。維護者會註冊該語言並準備基礎翻譯檔案；一旦它出現在 Hosted Weblate 上，你就可以開始貢獻。</string>
@@ -1142,7 +1142,7 @@
     <string name="local_sync_received_items">已接收的項目: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_sent">你的資料已傳送</string>
     <string name="local_sync_failed">同步失敗</string>
-    <string name="local_sync_error_unreachable">無法連線到該裝置。請在那部裝置上開啟 OwnTV → 更多 → 本機同步，並開啟同步模式。兩部裝置必須連線同一個 Wi-Fi。</string>
+    <string name="local_sync_error_unreachable">無法連線到該裝置。請在那部裝置上開啟 МОЁ ТВ → 更多 → 本機同步，並開啟同步模式。兩部裝置必須連線同一個 Wi-Fi。</string>
     <string name="local_sync_error_unauthorized">另一部裝置拒絕了連線。可能是 PIN 碼不對，或它已忘記本機。</string>
     <string name="local_sync_error_bad_payload">無法讀取收到的內容。如果使用了密碼，請確認兩部裝置上的密碼相同。</string>
     <string name="local_sync_error_unknown">發生問題，請再試一次。</string>
@@ -1160,7 +1160,7 @@
     <string name="local_auto_sync_waiting">正在等待 <xliff:g id="device">%1$s</xliff:g> 允許…</string>
     <string name="local_auto_sync_declined"><xliff:g id="device">%1$s</xliff:g> 未允許自動同步。</string>
     <string name="local_auto_sync_accept_title">允許自動同步？</string>
-    <string name="local_auto_sync_accept_body"><xliff:g id="device">%1$s</xliff:g> 希望在兩台裝置都開啟 OwnTV 時與此裝置自動同步。只有您在此裝置上允許的內容才會傳入，兩台裝置都可以關閉它。</string>
+    <string name="local_auto_sync_accept_body"><xliff:g id="device">%1$s</xliff:g> 希望在兩台裝置都開啟 МОЁ ТВ 時與此裝置自動同步。只有您在此裝置上允許的內容才會傳入，兩台裝置都可以關閉它。</string>
     <string name="local_auto_sync_accept">允許</string>
     <string name="local_auto_sync_decline">不允許</string>
     <string name="local_auto_sync_what_to_sync">此裝置同步的內容</string>
@@ -1176,7 +1176,7 @@
     <string name="local_auto_sync_turned_off"><xliff:g id="device">%1$s</xliff:g> 上的自動同步已關閉</string>
     <string name="local_auto_sync_unreachable">無法連線至 <xliff:g id="device">%1$s</xliff:g>，稍後將重試</string>
     <string name="local_auto_sync_listen">保持自動同步監聽</string>
-    <string name="local_auto_sync_listen_description">開啟：只要此處開啟了 OwnTV，已配對的裝置就能與它同步。關閉：僅在同步模式開啟時。</string>
+    <string name="local_auto_sync_listen_description">開啟：只要此處開啟了 МОЁ ТВ，已配對的裝置就能與它同步。關閉：僅在同步模式開啟時。</string>
     <string name="local_auto_sync_listening">正在監聽</string>
     <string name="more_pane_last_backup">上次備份</string>
     <string name="more_pane_encrypted">已加密</string>
@@ -1246,8 +1246,8 @@
     <string name="settings_multiview_keep_two">保持 2 個</string>
     <string name="settings_multiview_use_anyway">仍要使用</string>
     <string name="settings_app_icon">應用程式圖示</string>
-    <string name="settings_app_icon_summary">OwnTV 圖示和標誌的顏色</string>
-    <string name="settings_app_icon_sheet_mobile">OwnTV 在主畫面上的樣子。應用程式會重新啟動一次。</string>
+    <string name="settings_app_icon_summary">МОЁ ТВ 圖示和標誌的顏色</string>
+    <string name="settings_app_icon_sheet_mobile">МОЁ ТВ 在主畫面上的樣子。應用程式會重新啟動一次。</string>
     <string name="settings_brand_accent">強調色標誌</string>
     <string name="app_icon_petrol">石油藍</string>
     <string name="app_icon_sunflower">向日葵</string>
@@ -1258,8 +1258,8 @@
     <string name="app_icon_olive">橄欖綠</string>
     <string name="app_icon_olive_cream">奶油橄欖綠</string>
     <string name="app_icon_pixel">Pixel</string>
-    <string name="app_icon_restart_title">要重新啟動 OwnTV 嗎？</string>
-    <string name="app_icon_restart_message">你選擇了新的圖示和標誌，重新啟動 OwnTV 後生效。</string>
+    <string name="app_icon_restart_title">要重新啟動 МОЁ ТВ 嗎？</string>
+    <string name="app_icon_restart_message">你選擇了新的圖示和標誌，重新啟動 МОЁ ТВ 後生效。</string>
     <string name="app_icon_restart_now">立即重新啟動</string>
     <string name="settings_navigation">導覽</string>
     <string name="settings_navigation_description">左側選單的運作方式</string>
@@ -1412,10 +1412,10 @@
     <string name="settings_help_epg_sources">透過連結新增 XMLTV 節目指南來源，或重新整理、移除它。這些來源會填入節目指南和直播電視中的節目資訊。</string>
     <string name="settings_help_guide_days">節目指南預先儲存多少天的節目。天數越少，指南重新整理越快，資料庫也越小。</string>
     <string name="settings_help_catchup_timezone">回看會播放供應商存檔中的節目。自動模式會使用供應商回報的時區，若未回報則依電視本身的時鐘運作；如果回看開始時間仍然不對，請選擇固定的 UTC 偏移。回看使用哪個播放器也在這裡選擇。</string>
-    <string name="settings_help_theme">OwnTV 是為深色主題設計的。「系統」在電視有相應設定時跟隨電視；淺色適合明亮的房間。</string>
+    <string name="settings_help_theme">МОЁ ТВ 是為深色主題設計的。「系統」在電視有相應設定時跟隨電視；淺色適合明亮的房間。</string>
     <string name="settings_help_accent">為按鈕、焦點光暈、進度列和醒目提示統一上色。選擇一個預設，或按 OK 開啟調色盤並輸入任意十六進位代碼。</string>
     <string name="settings_help_focus">焦點項目周圍的外框。選擇它的顏色和粗細，讓你坐在沙發上也能看清楚。</string>
-    <string name="settings_help_fonts">OwnTV 全域使用的字型，以及文字顯示的大小。彈出視窗也使用同一字型。</string>
+    <string name="settings_help_fonts">МОЁ ТВ 全域使用的字型，以及文字顯示的大小。彈出視窗也使用同一字型。</string>
     <string name="settings_help_popup_size">整體放大或縮小彈出視窗、選單和對話框。彈出視窗顯得擁擠或遮住太多畫面時可以調整。</string>
     <string name="settings_help_zoom">縮放畫面上的所有內容。放大後遠處更易閱讀；縮小後能顯示更多。低於 85%% 時，記憶體較小的電視盒可能記憶體不足。</string>
     <string name="settings_help_animations">開啟時，面板、選單和焦點會平滑移動。關閉後所有變化都會立即完成。</string>
@@ -1425,13 +1425,13 @@
     <string name="settings_help_vod_layout">劇院式在海報格狀檢視後方顯示焦點作品的圖片。分欄則把分類、作品和詳細資訊並排顯示。</string>
     <string name="settings_help_home">選擇首頁顯示哪些列、依什麼順序，以及「熱門趨勢」列的樣式。</string>
     <string name="settings_help_customize">隱藏你從不看的分類和項目，為分類取自己的名稱並依你的順序排列。隱藏的內容可在這裡還原，不會遺失。</string>
-    <string name="settings_help_app_icon">電視主畫面上的 OwnTV 圖示。啟動器可能需要片刻才會顯示變更。</string>
-    <string name="settings_help_brand_accent">選單、關於和設定精靈中的 OwnTV 標誌會以你的強調色顯示播放三角形。主畫面上的圖示保持原有顏色。</string>
-    <string name="settings_help_startup">OwnTV 啟動時顯示的內容：首頁、上次觀看的頻道、你的收藏，或你指定的頻道。</string>
-    <string name="settings_help_check_updates">立即在 GitHub 上尋找較新的 OwnTV 並提示安裝。你的播放清單、收藏和設定都會保留。</string>
-    <string name="settings_help_update_startup">每次啟動 OwnTV 時尋找新版本，有新版本時會告訴你。未經詢問不會安裝任何內容。</string>
-    <string name="settings_help_auto_start_boot">電視啟動完成後自動開啟 OwnTV，並顯示應用程式啟動中選擇的畫面。Android 只允許可在其他應用程式上層顯示的應用程式自行開啟，因此開啟此選項會開啟該權限的設定畫面。部分電視沒有這項權限，在這些電視上無法自動啟動。</string>
-    <string name="settings_help_auto_start_wake">每次電視從待機喚醒時開啟 OwnTV，即使你是為了使用其他應用程式而喚醒電視。如果應用程式啟動設為開啟某個頻道，每次喚醒都會開始播放該串流。開啟期間，OwnTV 會保留一個帶有靜音通知的小型背景服務。與開機時自動啟動相同，它需要在其他應用程式上層顯示的權限。</string>
+    <string name="settings_help_app_icon">電視主畫面上的 МОЁ ТВ 圖示。啟動器可能需要片刻才會顯示變更。</string>
+    <string name="settings_help_brand_accent">選單、關於和設定精靈中的 МОЁ ТВ 標誌會以你的強調色顯示播放三角形。主畫面上的圖示保持原有顏色。</string>
+    <string name="settings_help_startup">МОЁ ТВ 啟動時顯示的內容：首頁、上次觀看的頻道、你的收藏，或你指定的頻道。</string>
+    <string name="settings_help_check_updates">立即在 GitHub 上尋找較新的 МОЁ ТВ 並提示安裝。你的播放清單、收藏和設定都會保留。</string>
+    <string name="settings_help_update_startup">每次啟動 МОЁ ТВ 時尋找新版本，有新版本時會告訴你。未經詢問不會安裝任何內容。</string>
+    <string name="settings_help_auto_start_boot">電視啟動完成後自動開啟 МОЁ ТВ，並顯示應用程式啟動中選擇的畫面。Android 只允許可在其他應用程式上層顯示的應用程式自行開啟，因此開啟此選項會開啟該權限的設定畫面。部分電視沒有這項權限，在這些電視上無法自動啟動。</string>
+    <string name="settings_help_auto_start_wake">每次電視從待機喚醒時開啟 МОЁ ТВ，即使你是為了使用其他應用程式而喚醒電視。如果應用程式啟動設為開啟某個頻道，每次喚醒都會開始播放該串流。開啟期間，МОЁ ТВ 會保留一個帶有靜音通知的小型背景服務。與開機時自動啟動相同，它需要在其他應用程式上層顯示的權限。</string>
     <string name="settings_help_dns">使用你選擇的 DNS 伺服器（而不是網路內建的）解析供應商的位址——當你的網路封鎖或重新導向這些位址時很有用。</string>
     <string name="settings_help_hw">使用電視的硬體解碼器：4K 流暢、發熱更少。只有在部分串流卡頓或出現馬賽克時才關閉，屆時由軟體解碼器處理。</string>
     <string name="settings_help_volume">每個頻道、電影和集數開始播放時的音量。超過 100%% 時會放大音量小的串流。你在播放器中調整的音量會為該作品保留，直到重設。</string>
@@ -1445,7 +1445,7 @@
     <string name="settings_help_timeshift_window">在沒有回看的頻道上，「暫停和倒轉直播電視」最多能倒轉多久。越長，此裝置儲存空間中保留的頻道內容越多。</string>
     <string name="settings_help_resume">「詢問是否繼續」會在電影或集數有已儲存位置時提供「繼續」或「從頭開始」。「一律繼續」從上次停止處播放；「永不繼續」從頭開始。</string>
     <string name="settings_help_mini">瀏覽時在角落繼續播放頻道的小播放器。可選擇大小和所在角落。</string>
-    <string name="settings_help_pip">影片以全螢幕或在迷你播放器中播放時，按首頁鍵或開啟其他應用程式，影片會在電視其他畫面上方的小視窗中繼續播放。再次開啟 OwnTV 即可回到全螢幕；關閉視窗即停止播放。多畫面只在 OwnTV 內使用。</string>
+    <string name="settings_help_pip">影片以全螢幕或在迷你播放器中播放時，按首頁鍵或開啟其他應用程式，影片會在電視其他畫面上方的小視窗中繼續播放。再次開啟 МОЁ ТВ 即可回到全螢幕；關閉視窗即停止播放。多畫面只在 МОЁ ТВ 內使用。</string>
     <string name="settings_key_palette">調色盤</string>
     <string name="settings_live_preview_note">移動時變更就會顯示在這裡，無需離開該列。</string>
     <string name="settings_synced_at"><xliff:g id="when">%1$s</xliff:g>同步</string>
@@ -1456,7 +1456,7 @@
     <string name="settings_profile_add">新增設定檔</string>
     <string name="settings_profile_add_line">擁有獨立收藏、記錄和設定的觀眾</string>
     <plurals name="settings_help_language">
-        <item quantity="other">OwnTV 所有選單和訊息使用的語言。支援 <xliff:g id="count">%1$d</xliff:g> 種語言；在你選擇之前跟隨電視本身的語言。</item>
+        <item quantity="other">МОЁ ТВ 所有選單和訊息使用的語言。支援 <xliff:g id="count">%1$d</xliff:g> 種語言；在你選擇之前跟隨電視本身的語言。</item>
     </plurals>
     <plurals name="settings_profile_count">
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> 個設定檔</item>
@@ -1490,8 +1490,8 @@
     <string name="settings_home_show_row">顯示此列</string>
     <string name="settings_home_move_row">移動（▲ ▼，然後按 OK）</string>
     <string name="settings_line_remote_shortcuts_on">關閉後保留按鍵指派</string>
-    <string name="settings_language_system_help">OwnTV 跟隨電視語言（目前為 <xliff:g id="language">%1$s</xliff:g>）。在下方選擇一種語言，只在 OwnTV 中使用。</string>
-    <string name="settings_language_pick_help">在 OwnTV 中使用 <xliff:g id="language">%1$s</xliff:g>，不受電視語言影響。</string>
+    <string name="settings_language_system_help">МОЁ ТВ 跟隨電視語言（目前為 <xliff:g id="language">%1$s</xliff:g>）。在下方選擇一種語言，只在 МОЁ ТВ 中使用。</string>
+    <string name="settings_language_pick_help">在 МОЁ ТВ 中使用 <xliff:g id="language">%1$s</xliff:g>，不受電視語言影響。</string>
     <string name="settings_key_use">使用</string>
     <string name="settings_line_metadata_source">電影與影集詳細資料的來源</string>
     <string name="settings_line_metadata_language">來自 TMDB 的劇情、類型與標題</string>
@@ -1529,7 +1529,7 @@
     <string name="settings_line_glass_bg">背景、圖片效果、玻璃</string>
     <string name="settings_bg_background">背景</string>
     <string name="settings_line_bg_background">每個畫面後方的內容</string>
-    <string name="settings_help_bg_background">Stage 顯示 OwnTV 自帶的柔和色彩。圖片會在每個畫面後方顯示你自己的圖片。純色是平整的深色填滿。</string>
+    <string name="settings_help_bg_background">Stage 顯示 МОЁ ТВ 自帶的柔和色彩。圖片會在每個畫面後方顯示你自己的圖片。純色是平整的深色填滿。</string>
     <string name="settings_bg_stage">Stage</string>
     <string name="settings_bg_picture">圖片</string>
     <string name="settings_bg_plain">純色</string>

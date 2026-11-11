@@ -61,22 +61,22 @@
     <string name="setup_display_size_title">Make it comfortable to read</string>
     <!-- Translators: Heading on the first-run disclaimer screen shown before the user can proceed. -->
     <string name="setup_before_you_start">Before you start</string>
-    <!-- Translators: Body text on the first-run disclaimer screen. "OwnTV", "RuTube" are brand/protocol names that must not be translated. -->
-    <string name="setup_disclaimer">OwnTV is a media player only. It includes no channels, playlists, or content of its own. Its single source is the built-in, legally accessible RuTube live catalogue, and you are responsible for using it lawfully.</string>
+    <!-- Translators: Body text on the first-run disclaimer screen. "МОЁ ТВ", "RuTube" are brand/protocol names that must not be translated. -->
+    <string name="setup_disclaimer">МОЁ ТВ is a media player only. It includes no channels, playlists, or content of its own. Its single source is the built-in, legally accessible RuTube live catalogue, and you are responsible for using it lawfully.</string>
     <!-- Translators: Button on the first-run disclaimer screen to acknowledge and proceed. -->
     <string name="setup_i_understand">I Understand</string>
     <!-- Translators: Heading on the setup-choice screen (first run only) where the user chooses between a new profile or restoring a backup. -->
-    <string name="setup_set_up_owntv">Set up OwnTV</string>
+    <string name="setup_set_up_owntv">Set up МОЁ ТВ</string>
     <!-- Translators: Description on the setup-choice screen. -->
-    <string name="setup_setup_choice_description">Start fresh with the built-in RuTube catalogue, or copy your data from another OwnTV device.</string>
+    <string name="setup_setup_choice_description">Start fresh with the built-in RuTube catalogue, or copy your data from another МОЁ ТВ device.</string>
     <!-- Translators: ChoiceCard title on the setup-choice screen for a fresh setup. -->
     <string name="setup_new_profile">Fresh start</string>
     <!-- Translators: Description text beneath the "New profile" choice card on the setup-choice screen. -->
     <string name="setup_create_profile_add_sources">Set up the built-in RuTube catalogue</string>
-    <!-- Translators: ChoiceCard title on the setup-choice screen for copying everything from another OwnTV device on the same Wi-Fi. -->
+    <!-- Translators: ChoiceCard title on the setup-choice screen for copying everything from another МОЁ ТВ device on the same Wi-Fi. -->
     <string name="setup_sync_device">From another device</string>
-    <!-- Translators: Description text beneath the "From another device" choice card. "OwnTV" is the app name and must not be translated. -->
-    <string name="setup_sync_device_description">Copy everything from your other OwnTV device over Wi-Fi</string>
+    <!-- Translators: Description text beneath the "From another device" choice card. "МОЁ ТВ" is the app name and must not be translated. -->
+    <string name="setup_sync_device_description">Copy everything from your other МОЁ ТВ device over Wi-Fi</string>
     <!-- Translators: ChoiceCard title for importing from a backup file. -->
     <string name="setup_import">Import</string>
     <!-- Translators: Primary button on the password-prompt screen to confirm restore with the entered password. -->
@@ -112,8 +112,8 @@
 
 
     <!-- Companion web UI is rendered outside Compose but still resolves through Android resources. -->
-    <!-- Translators: Page title in the companion browser tab for the PIN entry page. "OwnTV" is a brand name. -->
-    <string name="companion_pin_page_title">OwnTV \u2014 Enter PIN</string>
+    <!-- Translators: Page title in the companion browser tab for the PIN entry page. "МОЁ ТВ" is a brand name. -->
+    <string name="companion_pin_page_title">МОЁ ТВ \u2014 Enter PIN</string>
     <!-- Translators: Heading on the companion PIN entry page. -->
     <string name="companion_pin_heading">Enter the PIN</string>
     <!-- Translators: Description on the companion PIN entry page. -->
@@ -126,7 +126,7 @@
     <string name="companion_continue">Continue</string>
     <!-- Translators: Error text on the companion PIN entry page when the entered PIN does not match. -->
     <string name="companion_pin_mismatch">That PIN did not match \u2014 try again.</string>
-    <!-- Translators: Page title in the companion browser tab for the add-source page. "OwnTV" is a brand name. -->
+    <!-- Translators: Page title in the companion browser tab for the add-source page. "МОЁ ТВ" is a brand name. -->
     <string name="companion_service_config_empty">Enter an API key, a Worker URL, or both.</string>
     <string name="companion_service_config_invalid_key">That API key does not look valid.</string>
     <string name="companion_service_config_invalid_url">Enter a valid HTTPS Worker URL.</string>
@@ -138,7 +138,7 @@
     <string name="companion_open_subtitles_description">Sign in to OpenSubtitles for your TV. Add your own API details below only if you have them.</string>
     <string name="companion_service_config_sent">The connection details are now waiting on your TV. Review and save them there.</string>
     <string name="companion_service_config_again">Send different connection details</string>
-    <string name="companion_add_page_title">OwnTV \u2014 Add source</string>
+    <string name="companion_add_page_title">МОЁ ТВ \u2014 Add source</string>
     <!-- Translators: Heading on the companion add-source page. -->
     <string name="companion_add_heading">Add a source</string>
     <!-- Translators: Description on the companion add-source page. -->
@@ -151,16 +151,16 @@
     <string name="companion_sync_xtream_hint">What to sync \u2014 Now imports first, Later syncs in the background, Off is never fetched.</string>
     <!-- Translators: Tooltip/hint text on the companion add-source page explaining the Stalker sync scope defaults. -->
     <string name="companion_sync_stalker_hint">What to sync \u2014 Live defaults to Now; Movies/Series default to Later (Stalker VOD is slow).</string>
-    <!-- Translators: Page title in the companion browser tab after a source was sent successfully. "OwnTV" is a brand name. -->
-    <string name="companion_saved_page_title">OwnTV \u2014 Sent</string>
+    <!-- Translators: Page title in the companion browser tab after a source was sent successfully. "МОЁ ТВ" is a brand name. -->
+    <string name="companion_saved_page_title">МОЁ ТВ \u2014 Sent</string>
     <!-- Translators: Heading on the companion success page after sending a source. The checkmark is a visual indicator. -->
     <string name="companion_saved_heading">Sent to your TV \u2713</string>
     <!-- Translators: Body text on the companion success page when a source was sent. "name" is the source name entered by the user. -->
     <string name="companion_saved_source_body"><xliff:g id="name">%1$s</xliff:g> is now on the TV\'s Add source screen. Check the details there and press Start Import on the remote.</string>
     <!-- Translators: Button on the companion success page to send another source. -->
     <string name="companion_saved_send_another">Send another source</string>
-    <!-- Translators: Browser tab title of the companion page that edits one existing source. OwnTV is the app name. -->
-    <string name="companion_edit_page_title">OwnTV \u2014 Edit source</string>
+    <!-- Translators: Browser tab title of the companion page that edits one existing source. МОЁ ТВ is the app name. -->
+    <string name="companion_edit_page_title">МОЁ ТВ \u2014 Edit source</string>
     <!-- Translators: Heading on the companion edit page. "name" is the name of the source being edited. -->
     <string name="companion_edit_heading">Edit <xliff:g id="name">%1$s</xliff:g></string>
     <!-- Translators: Description on the companion edit page. Send to TV is the button on this page; Save is the button on the TV's edit screen. -->
@@ -179,12 +179,12 @@
     <string name="companion_saved_image_body">Your image is now the TV background.</string>
     <!-- Translators: Link text on the companion success page to send a different image. -->
     <string name="companion_saved_image_link">Send a different image</string>
-    <!-- Translators: Page title in the companion browser tab for the backup restore page. "OwnTV" is a brand name. -->
-    <string name="companion_backup_page_title">OwnTV \u2014 Restore backup</string>
+    <!-- Translators: Page title in the companion browser tab for the backup restore page. "МОЁ ТВ" is a brand name. -->
+    <string name="companion_backup_page_title">МОЁ ТВ \u2014 Restore backup</string>
     <!-- Translators: Heading on the companion backup restore page. -->
     <string name="companion_backup_heading">Restore a backup</string>
     <!-- Translators: Description on the companion backup restore page. -->
-    <string name="companion_backup_description">Choose an OwnTV backup file (.own, or an older .json) and press Send. It is transferred to the TV \u2014 pick up the remote and choose what to restore there.</string>
+    <string name="companion_backup_description">Choose an МОЁ ТВ backup file (.own, or an older .json) and press Send. It is transferred to the TV \u2014 pick up the remote and choose what to restore there.</string>
     <!-- Translators: Label for the backup file input on the companion backup restore page. -->
     <string name="companion_backup_file">Backup file</string>
     <!-- Translators: Error text on the companion backup restore page when no file has been selected. -->
@@ -201,8 +201,8 @@
     <string name="companion_could_not_reach">Could not reach the TV. Stay on the same Wi-Fi and try again.</string>
     <!-- Translators: Error text on the companion page when the selected file cannot be read. -->
     <string name="companion_could_not_read">Could not read that file.</string>
-    <!-- Translators: Page title in the companion browser tab for the background image upload page. "OwnTV" is a brand name. -->
-    <string name="companion_image_page_title">OwnTV \u2014 Background image</string>
+    <!-- Translators: Page title in the companion browser tab for the background image upload page. "МОЁ ТВ" is a brand name. -->
+    <string name="companion_image_page_title">МОЁ ТВ \u2014 Background image</string>
     <!-- Translators: Heading on the companion background image upload page. -->
     <string name="companion_image_heading">Send a background image</string>
     <!-- Translators: Description on the companion background image upload page. -->
@@ -213,12 +213,12 @@
     <string name="companion_choose_image">Please choose an image first.</string>
     <!-- Translators: Error text on the companion image upload page when the selected image exceeds 25 MB. -->
     <string name="companion_image_too_large">That image is too large (max 25 MB).</string>
-    <!-- Translators: Page title in the companion browser tab for the backup download page. "OwnTV" is a brand name. -->
-    <string name="companion_download_page_title">OwnTV \u2014 Download backup</string>
+    <!-- Translators: Page title in the companion browser tab for the backup download page. "МОЁ ТВ" is a brand name. -->
+    <string name="companion_download_page_title">МОЁ ТВ \u2014 Download backup</string>
     <!-- Translators: Heading on the companion backup download page. -->
     <string name="companion_download_heading">Download your backup</string>
     <!-- Translators: Description on the companion backup download page. -->
-    <string name="companion_download_description">Your TV has prepared an OwnTV backup file. Tap the button to save it to this device (owntv-backup.own). Keep it somewhere safe \u2014 you can restore from it later.</string>
+    <string name="companion_download_description">Your TV has prepared an МОЁ ТВ backup file. Tap the button to save it to this device (owntv-backup.own). Keep it somewhere safe \u2014 you can restore from it later.</string>
     <!-- Translators: Button label on the companion backup download page. -->
     <string name="companion_download_backup">Download backup</string>
     <!-- Translators: Generic HTTP 400 error text on the companion web page. -->
@@ -232,9 +232,9 @@
     <!-- Translators: Error returned to the other device when pairing for local sync could not be completed. -->
     <string name="companion_error_pair_failed">Could not pair with this device.</string>
     <!-- Translators: Title of the page shown if someone opens the local sync address in a web browser. -->
-    <string name="local_sync_browser_title">OwnTV local sync</string>
-    <!-- Translators: Body of the page shown if someone opens the local sync address in a web browser. Local sync talks to the OwnTV app on the other device, not to a browser. -->
-    <string name="local_sync_browser_body">This address is for the OwnTV app on your other device. Open Local sync there and pick this device from the list.</string>
+    <string name="local_sync_browser_title">МОЁ ТВ local sync</string>
+    <!-- Translators: Body of the page shown if someone opens the local sync address in a web browser. Local sync talks to the МОЁ ТВ app on the other device, not to a browser. -->
+    <string name="local_sync_browser_body">This address is for the МОЁ ТВ app on your other device. Open Local sync there and pick this device from the list.</string>
     <!-- Translators: Error text on the companion download page when no backup is available on the TV. -->
     <string name="companion_error_no_backup">No backup is available.</string>
     <!-- Translators: Error text on the companion download page when the backup file is too large to transfer. -->
@@ -259,8 +259,8 @@
     <!-- Translators: Key hint after Back in the setup wizard. -->
     <string name="setup_key_previous_step">Previous step</string>
     <!-- Translators: Title of the first setup step. -->
-    <string name="setup_welcome_title">Welcome to OwnTV</string>
-    <!-- Translators: Text under Welcome to OwnTV. -->
+    <string name="setup_welcome_title">Welcome to МОЁ ТВ</string>
+    <!-- Translators: Text under Welcome to МОЁ ТВ. -->
     <string name="setup_welcome_sub">Your own IPTV player. Choose a language to begin — you can change it later in Settings.</string>
     <!-- Translators: Text under the display size step's title. -->
     <string name="setup_display_sub">How big the interface and its text are on this TV. The row below changes as you go.</string>
@@ -269,7 +269,7 @@
     <!-- Translators: Line under Font size in setup. -->
     <string name="setup_line_font">Text only</string>
     <!-- Translators: Line under App icon in setup. -->
-    <string name="setup_line_app_icon">How OwnTV appears on the TV’s home screen</string>
+    <string name="setup_line_app_icon">How МОЁ ТВ appears on the TV’s home screen</string>
     <!-- Translators: Line under Searching the network in setup. -->
     <string name="setup_device_appear">Devices with Sync mode on appear here</string>
     <!-- Translators: Placeholder of the Address field when copying from another device. -->

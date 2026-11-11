@@ -24,7 +24,7 @@
     <string name="content_genre_scifi">SF</string>
     <string name="content_genre_series">シリーズ</string>
     <string name="content_genre_sport">スポーツ</string>
-    <string name="content_exit_owntv">OwnTVを終了しますか？</string>
+    <string name="content_exit_owntv">МОЁ ТВを終了しますか？</string>
     <string name="content_exit_confirmation">アプリを終了してもよろしいですか？</string>
     <string name="content_restore_incomplete_title">復元が完了しませんでした</string>
     <string name="content_restore_incomplete_message"><xliff:g id="description">%1$s</xliff:g>の復元中にアプリが終了したため、一部が復元されていない可能性があります。何も削除されていません — 残りを復元するには、設定 → バックアップと復元から同じ復元をもう一度実行してください。</string>
@@ -132,7 +132,7 @@
     <string name="content_storage_choose_folder">別のフォルダーを選択…</string>
     <string name="content_storage_chosen_folder">選択したフォルダー</string>
     <string name="content_storage_folder_lost">そのフォルダーは利用できなくなりました。もう一度選択するか、別のフォルダーを選んでください。</string>
-    <string name="content_storage_folder_fallback">ダウンロードフォルダーは現在利用できません。戻るまで、ダウンロードは OwnTV 専用のフォルダーに保存されます。</string>
+    <string name="content_storage_folder_fallback">ダウンロードフォルダーは現在利用できません。戻るまで、ダウンロードは МОЁ ТВ 専用のフォルダーに保存されます。</string>
     <string name="content_downloads_reason_account_busy">アカウント使用中：別のストリームが接続を使用しています</string>
     <string name="content_downloads_reason_refused">サーバーがリンクを拒否しました</string>
     <string name="content_downloads_reason_not_found">このファイルはサーバーにもうありません</string>

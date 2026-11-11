@@ -123,8 +123,8 @@
     <string name="update_not_enough_space">Espaço de armazenamento insuficiente para a atualização. Libere cerca de <xliff:g id="size">%1$s</xliff:g> e tente novamente.</string>
     <string name="update_damaged_download">A atualização não foi baixada por completo. Verifique sua conexão e tente novamente.</string>
     <string name="update_install_rejected">O instalador do sistema recusou a atualização: <xliff:g id="reason">%1$s</xliff:g></string>
-    <string name="update_ready">OwnTV v<xliff:g id="available">%1$s</xliff:g> está pronto (você tem a v<xliff:g id="current">%2$s</xliff:g>).</string>
-    <string name="recovery_title">OwnTV não conseguiu abrir seu banco de dados</string>
+    <string name="update_ready">МОЁ ТВ v<xliff:g id="available">%1$s</xliff:g> está pronto (você tem a v<xliff:g id="current">%2$s</xliff:g>).</string>
+    <string name="recovery_title">МОЁ ТВ não conseguiu abrir seu banco de dados</string>
     <string name="recovery_data_safe_full">Seus perfis, listas de reprodução, favoritos e histórico NÃO foram excluídos — isso é uma falha na atualização do banco de dados, e os dados ainda estão neste dispositivo.\n\nInforme esse problema para que ele possa ser corrigido e inclua a mensagem abaixo.</string>
     <string name="recovery_retry">Tentar novamente</string>
     <string name="recovery_backup_hint">Se você tiver um arquivo de cópia de segurança, poderá redefinir o aplicativo e restaurá-la depois. A redefinição exclui tudo o que está armazenado neste dispositivo.</string>
@@ -149,7 +149,7 @@
     <string name="home_trending_pause">Pausar</string>
     <string name="recording_notification_title">Gravando</string>
     <string name="auto_start_notification_channel">Iniciar ao despertar</string>
-    <string name="auto_start_notification_text">O OwnTV abre quando a TV desperta</string>
+    <string name="auto_start_notification_text">O МОЁ ТВ abre quando a TV desperta</string>
     <string name="recording_failed_no_space">Interrompido: sem espaço livre</string>
     <string name="recording_failed_no_connection">Nenhuma conexão livre do seu provedor</string>
     <string name="recording_failed_clash">Outra gravação estava usando a conexão</string>
@@ -168,7 +168,7 @@
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> minutos</item>
     </plurals>
     <string name="recording_failed_encrypted">Este canal é criptografado e não pode ser gravado</string>
-    <string name="recording_failed_drm">Este canal é protegido por DRM, então pode ser assistido, mas não gravado. A proteção vem do seu provedor, não do OwnTV.</string>
+    <string name="recording_failed_drm">Este canal é protegido por DRM, então pode ser assistido, mas não gravado. A proteção vem do seu provedor, não do МОЁ ТВ.</string>
     <string name="recording_failed_metered">Não gravado usando dados móveis</string>
     <string name="sports_channel_goal_alerts">Alertas de gol</string>
     <string name="sports_channel_live_match">Partida ao vivo</string>
@@ -415,7 +415,7 @@
     <string name="sports_live_refresh_description">Só enquanto uma tela de esportes ou um placar estiver à vista</string>
     <string name="sports_about">Sobre os dados de esportes</string>
     <string name="sports_about_summary">Placar: ESPN · canais: sua lista e seu guia</string>
-    <string name="sports_alerts_when_closed">Alertas com o OwnTV fechado</string>
+    <string name="sports_alerts_when_closed">Alertas com o МОЁ ТВ fechado</string>
     <string name="sports_alerts_when_closed_description">Pede permissão de notificação uma vez</string>
     <string name="sports_alert_me_about">Alertar sobre</string>
     <string name="sports_kind_goals">Gols e wickets</string>
@@ -426,7 +426,7 @@
     <string name="sports_live_card">Cartão de placar ao vivo</string>
     <string name="sports_live_card_offer">Oferecer cartão de placar ao vivo</string>
     <string name="sports_live_card_description">Atualiza a cada 30 s até o fim; você o inicia em uma partida</string>
-    <string name="sports_alerts_footnote">Com o OwnTV fechado, os alertas costumam chegar em até um minuto. Se o celular ficar parado com a tela desligada por muito tempo, o Android pode segurá-los por até cerca de 15 minutos. O cartão de placar ao vivo não é segurado.</string>
+    <string name="sports_alerts_footnote">Com o МОЁ ТВ fechado, os alertas costumam chegar em até um minuto. Se o celular ficar parado com a tela desligada por muito tempo, o Android pode segurá-los por até cerca de 15 minutos. O cartão de placar ao vivo não é segurado.</string>
     <string name="sports_search_teams">Buscar times, jogadores, ligas</string>
     <string name="sports_suggested">Sugestões do que você assiste</string>
     <plurals name="sports_watched_matches">
@@ -436,7 +436,7 @@
     </plurals>
     <string name="sports_league_label">Liga</string>
     <string name="sports_no_playlist_title">Adicione uma lista para assistir às partidas</string>
-    <string name="sports_no_playlist_body">Placar, tabelas e alertas funcionam sem ela. Com uma lista, o OwnTV encontra todos os canais que exibem esta partida.</string>
+    <string name="sports_no_playlist_body">Placar, tabelas e alertas funcionam sem ela. Com uma lista, o МОЁ ТВ encontra todos os canais que exibem esta partida.</string>
     <string name="sports_add_playlist">Adicionar lista</string>
     <string name="sports_home_row">Esportes ao vivo</string>
     <string name="sports_home_row_description">Partidas seguidas, enquanto uma está ao vivo ou prestes a começar</string>
@@ -446,7 +446,7 @@
     <string name="sports_sport_buttons">Botões de esportes</string>
     <string name="sports_sport_buttons_mine">Meus esportes</string>
     <string name="sports_sport_buttons_all">Todos os esportes</string>
-    <string name="sports_sport_buttons_description">Meus esportes: só o que você escolheu. Todos os esportes: todas as ligas que o OwnTV conhece, o que demora mais para carregar.</string>
+    <string name="sports_sport_buttons_description">Meus esportes: só o que você escolheu. Todos os esportes: todas as ligas que o МОЁ ТВ conhece, o que demora mais para carregar.</string>
     <string name="sports_auto_rebuild">Reconstrução automática</string>
     <string name="sports_auto_rebuild_description">Com que frequência placares, detalhes das partidas e tabelas são buscados de novo automaticamente</string>
     <plurals name="sports_auto_rebuild_hours">

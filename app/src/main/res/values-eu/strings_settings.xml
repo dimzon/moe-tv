@@ -27,7 +27,7 @@
     <string name="settings_static">Estatikoa</string>
     <string name="settings_dynamic">Dinamikoa</string>
     <string name="settings_use_proxy">Erabili proxya</string>
-    <string name="settings_proxy_description">Bidali OwnTVren trafiko eta erreprodukzio guztia HTTP proxy baten bidez.</string>
+    <string name="settings_proxy_description">Bidali МОЁ ТВren trafiko eta erreprodukzio guztia HTTP proxy baten bidez.</string>
     <string name="settings_host">Ostalaria</string>
     <string name="settings_proxy_host_hint">proxy.adibidea.eus</string>
     <string name="settings_port">Ataka</string>
@@ -134,7 +134,7 @@
         <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g> geratzen dira</item>
     </plurals>
     <string name="settings_metadata_active_source">Iturburu aktiboa</string>
-    <string name="settings_metadata_shared_worker_description">OwnTV Worker · konfiguraziorik gabe</string>
+    <string name="settings_metadata_shared_worker_description">МОЁ ТВ Worker · konfiguraziorik gabe</string>
     <string name="settings_metadata_connection">Konexioa</string>
     <string name="settings_metadata_remote_advanced">Lortu TMDB informazio aurreratua</string>
     <string name="settings_metadata_remote_advanced_description">Erabili zure TMDB API gakoa edo auto-ostatatutako Worker bat partekatutako lehenetsiaren ordez.</string>
@@ -145,8 +145,8 @@
     <string name="settings_metadata_key_label">Gakoa</string>
     <string name="settings_metadata_server_label">Zerbitzaria</string>
     <string name="settings_metadata_clear_advanced_title">Zure gakoa erabiltzeari utzi?</string>
-    <string name="settings_metadata_clear_advanced_message">Zure TMDB API gakoa eta auto-ostatatutako zerbitzariaren helbidea gailu honetatik ezabatuko dira, eta OwnTV barneko zerbitzu partekatura itzuliko da bere eguneko kuotarekin.</string>
-    <string name="settings_metadata_fair_share">Barneko zerbitzua OwnTV erabiltzen duten guztien artean partekatzen da. Minutuko, orduko edo eguneko kuota agortzen bada, TMDB xehetasunak pausatu egiten dira leiho hori berrezarri arte; erreprodukzio-zerrendako informazioak funtzionatzen jarraitzen du. Zure gakoak edo Workerrak kuota hau kentzen du.</string>
+    <string name="settings_metadata_clear_advanced_message">Zure TMDB API gakoa eta auto-ostatatutako zerbitzariaren helbidea gailu honetatik ezabatuko dira, eta МОЁ ТВ barneko zerbitzu partekatura itzuliko da bere eguneko kuotarekin.</string>
+    <string name="settings_metadata_fair_share">Barneko zerbitzua МОЁ ТВ erabiltzen duten guztien artean partekatzen da. Minutuko, orduko edo eguneko kuota agortzen bada, TMDB xehetasunak pausatu egiten dira leiho hori berrezarri arte; erreprodukzio-zerrendako informazioak funtzionatzen jarraitzen du. Zure gakoak edo Workerrak kuota hau kentzen du.</string>
     <string name="settings_metadata_limit_reached">Eguneko metadatuen kuota agortu da — gehitu zure TMDB gakoa Ezarpenak → Metadatuak atalean muga hau kentzeko.</string>
     <string name="settings_metadata_language">Metadatuen hizkuntza</string>
     <string name="settings_metadata_language_description">TMDBren sinopsien, generoen eta izenburuen hizkuntza. TMDBk itzuli ez dituen eremuak ingelesez geratzen dira. Xehetasunak hizkuntzako gordetzen dira cachean, beraz atzera aldatzea berehalakoa da.</string>
@@ -294,8 +294,8 @@
     <string name="settings_auto_frame_rate_warning_suffix">Ez da gomendagarria telebista honetan: Android 12 baino lehenagoko bertsioetan maiztasuna ezin da leun aldatu.</string>
     <string name="settings_auto_frame_rate_warning_title">Ez da gomendagarria telebista honetan</string>
     <string name="settings_auto_frame_rate_warning_title_mobile">Ez da gomendagarria gailu honetan</string>
-    <string name="settings_auto_frame_rate_warning_description">Gailu honek Android <xliff:g id="android_version">%1$s</xliff:g> exekutatzen du. Android 12 baino lehenagoko bertsioetan telebistak ezin dio OwnTVri esan zein freskatze-maiztasunetara alda dezakeen leun, beraz maiztasuna aldatzeak pantaila segundo bat edo bi beltz utz dezake — batzuetan programa batean zehar behin baino gehiagotan.\n\nHemen Fotograma-maiztasun automatikoa desaktibatuta uztea gomendatzen dugu. Zure telebistak garbi aldatzen badu, aktibatu eta probatu: edonoiz alda dezakezu berriro.</string>
-    <string name="settings_auto_frame_rate_warning_description_mobile">Gailu honek Android <xliff:g id="android_version">%1$s</xliff:g> exekutatzen du. Android 12 baino lehenagoko bertsioetan gailuak ezin dio OwnTVri esan zein freskatze-maiztasunetara alda dezakeen leun, beraz maiztasuna aldatzeak pantaila segundo bat edo bi beltz utz dezake — batzuetan programa batean zehar behin baino gehiagotan.\n\nHemen Fotograma-maiztasun automatikoa desaktibatuta uztea gomendatzen dugu. Zure pantailak garbi aldatzen badu, aktibatu eta probatu: edonoiz alda dezakezu berriro.</string>
+    <string name="settings_auto_frame_rate_warning_description">Gailu honek Android <xliff:g id="android_version">%1$s</xliff:g> exekutatzen du. Android 12 baino lehenagoko bertsioetan telebistak ezin dio МОЁ ТВri esan zein freskatze-maiztasunetara alda dezakeen leun, beraz maiztasuna aldatzeak pantaila segundo bat edo bi beltz utz dezake — batzuetan programa batean zehar behin baino gehiagotan.\n\nHemen Fotograma-maiztasun automatikoa desaktibatuta uztea gomendatzen dugu. Zure telebistak garbi aldatzen badu, aktibatu eta probatu: edonoiz alda dezakezu berriro.</string>
+    <string name="settings_auto_frame_rate_warning_description_mobile">Gailu honek Android <xliff:g id="android_version">%1$s</xliff:g> exekutatzen du. Android 12 baino lehenagoko bertsioetan gailuak ezin dio МОЁ ТВri esan zein freskatze-maiztasunetara alda dezakeen leun, beraz maiztasuna aldatzeak pantaila segundo bat edo bi beltz utz dezake — batzuetan programa batean zehar behin baino gehiagotan.\n\nHemen Fotograma-maiztasun automatikoa desaktibatuta uztea gomendatzen dugu. Zure pantailak garbi aldatzen badu, aktibatu eta probatu: edonoiz alda dezakezu berriro.</string>
     <string name="settings_auto_frame_rate_keep_off">Mantendu desaktibatuta</string>
     <string name="settings_auto_frame_rate_turn_on_anyway">Aktibatu hala ere</string>
     <string name="settings_surround_sound">Surround soinua</string>
@@ -325,15 +325,15 @@
     <string name="settings_player_zoom">Erreproduzigailuaren zooma</string>
     <string name="settings_app_group">Aplikazioa</string>
     <string name="settings_app_startup">Aplikazioaren abioa</string>
-    <string name="settings_app_startup_description">Zer irekitzen duen OwnTVk abiatzean</string>
+    <string name="settings_app_startup_description">Zer irekitzen duen МОЁ ТВk abiatzean</string>
     <string name="settings_check_updates">Bilatu eguneraketak</string>
     <string name="settings_check_updates_description">Lortu azken bertsioa GitHub Releases-etik</string>
     <string name="settings_update_startup">Bilatu eguneraketak abiatzean</string>
     <string name="settings_update_startup_description">Bilatu bertsio berri bat aplikazioa irekitzean</string>
     <string name="settings_auto_start_boot">Abiarazi automatikoki piztean</string>
-    <string name="settings_auto_start_boot_description">Ireki OwnTV telebista pizten denean</string>
+    <string name="settings_auto_start_boot_description">Ireki МОЁ ТВ telebista pizten denean</string>
     <string name="settings_auto_start_wake">Abiarazi automatikoki esnatzean</string>
-    <string name="settings_auto_start_wake_description">Ireki OwnTV telebista lo-egoeratik esnatzen denean</string>
+    <string name="settings_auto_start_wake_description">Ireki МОЁ ТВ telebista lo-egoeratik esnatzen denean</string>
     <string name="settings_auto_start_needs_overlay">“Bistaratu beste aplikazioen gainean” behar da</string>
     <string name="settings_about">Honi buruz</string>
     <string name="settings_live_latency">Zuzeneko latentzia</string>
@@ -611,7 +611,7 @@
     <string name="settings_guide_synced">Telebista-gida sinkronizatuta</string>
     <string name="settings_guide_sync_failed">Telebista-gidaren sinkronizazioak huts egin du</string>
     <string name="settings_restore_remote_title">Leheneratu beste gailu batetik</string>
-    <string name="settings_restore_remote_description">Wi-Fi sare berean dagoen telefono, tableta edo ordenagailu batean, eskaneatu QRa (edo ireki URLa), idatzi PIN hau, aukeratu zure OwnTV babeskopia-fitxategia eta sakatu Bidali telebistara. Ondoren, hemen aukeratuko duzu zer leheneratu.</string>
+    <string name="settings_restore_remote_description">Wi-Fi sare berean dagoen telefono, tableta edo ordenagailu batean, eskaneatu QRa (edo ireki URLa), idatzi PIN hau, aukeratu zure МОЁ ТВ babeskopia-fitxategia eta sakatu Bidali telebistara. Ondoren, hemen aukeratuko duzu zer leheneratu.</string>
     <string name="settings_try_again">Saiatu berriro</string>
     <string name="settings_new_pin">Hasi berriro PIN berri batekin</string>
     <string name="settings_download_remote_title">Deskargatu beste gailu batean</string>
@@ -761,9 +761,9 @@
     <string name="settings_sources_ignore_limit">Ez ikusiarena egin konexio-mugari</string>
     <string name="settings_sources_ignore_limit_on">Konexio-muga ez da kontuan hartzen: Multiview-ek eta grabazioek erreprodukzio-zerrenda honek dioena baino transmisio gehiago ireki ditzakete. Hornitzaileak transmisio bat ukatzen badu, hala esango da.</string>
     <string name="settings_sources_probe_title">Erreprodukzio-zerrenda hau probatu?</string>
-    <string name="settings_sources_probe_warning">Hornitzaile askok ez dute inoiz esaten zenbat kanal ikus ditzakezun aldi berean, beraz OwnTVk hainbat ireki eta zeintzuk irauten duten ikusiz jakiten du. Orain erreproduzitzen ari den guztia gelditu egingo da, eta honek bi minutu arte iraun dezake.</string>
+    <string name="settings_sources_probe_warning">Hornitzaile askok ez dute inoiz esaten zenbat kanal ikus ditzakezun aldi berean, beraz МОЁ ТВk hainbat ireki eta zeintzuk irauten duten ikusiz jakiten du. Orain erreproduzitzen ari den guztia gelditu egingo da, eta honek bi minutu arte iraun dezake.</string>
     <string name="settings_sources_probe_running">Hornitzaile honek zenbat kanal onartzen dituen egiaztatzen… (<xliff:g id="current">%1$d</xliff:g> / <xliff:g id="total">%2$d</xliff:g>)</string>
-    <string name="settings_sources_probe_unknown">OwnTVk ezin izan du jakin hornitzaile honek zenbat kanal onartzen dituen.</string>
+    <string name="settings_sources_probe_unknown">МОЁ ТВk ezin izan du jakin hornitzaile honek zenbat kanal onartzen dituen.</string>
     <string name="settings_sources_probe_skip">Saltatu</string>
     <string name="settings_sources_auto_refresh">⟳ <xliff:g id="mode">%1$s</xliff:g></string>
     <string name="settings_sources_default">LEHENETSIA</string>
@@ -1009,7 +1009,7 @@
     <string name="settings_move_category_keep">Mantendu “<xliff:g id="name">%1$s</xliff:g>” kategorian ere</string>
     <string name="settings_move_category_action">Mugitu</string>
     <string name="settings_dns_description">Erabili DNS zerbitzari pertsonalizatu bat domeinu-bilaketetarako</string>
-    <string name="settings_dns_toggle_description">Ebatzi OwnTVren domeinu-bilaketa guztiak DNS zerbitzari pertsonalizatu baten bidez.</string>
+    <string name="settings_dns_toggle_description">Ebatzi МОЁ ТВren domeinu-bilaketa guztiak DNS zerbitzari pertsonalizatu baten bidez.</string>
     <string name="settings_dns_use_custom">Erabili DNS pertsonalizatua</string>
     <string name="settings_dns_server_missing">DNS pertsonalizatua gaituta dago baina ez da zerbitzaririk konfiguratu. Idatzi zerbitzari-helbide bat eta hautatu Gorde, edo desaktibatu hau.</string>
     <string name="settings_dns_server">DNS zerbitzaria</string>
@@ -1054,7 +1054,7 @@
     <string name="settings_live_preroll">Aurrebufferatu zuzeneko jarioak</string>
     <string name="settings_live_preroll_description">Bildu bideo-kopuru hau zuzeneko kanal bat erreproduzitzen hasi aurretik, eta berriro eten baten ondoren. Bideo-kopuru bat da, ez atzerako kontaketa bat. Desaktibatuta, hasiera ahalik eta azkarrena mantentzen da eta hornitzaile gehienentzat zuzena da. Igo soilik erreprodukzioak benetan eten-etenka egiten badu: hornitzaile askok zuzenekoaren aurretik segundo gutxi batzuk soilik argitaratzen dituzte, eta bidaltzen dutena baino bideo gehiago eskatzeak etenak okerrago ditzake.</string>
     <string name="settings_live_tune_timeout">Utzi kanal bati honen ondoren</string>
-    <string name="settings_live_tune_timeout_description">Zuzeneko kanal batek ordu honetarako irudirik erakutsi ez badu, OwnTVk saiatzeari uzten dio eta jakinarazten dizu, pantaila beltza utzi beharrean bere erreproduzigailu guztiak probatzen dituen bitartean. Inoiz ez saiatzen jarraitzen du, eta horrek minutu bat baino gehiago iraun dezake zure hornitzaileak kendu duen kanal batean. Hornitzaileak eskatutako itxaronaldiak ez dira kontatzen.</string>
+    <string name="settings_live_tune_timeout_description">Zuzeneko kanal batek ordu honetarako irudirik erakutsi ez badu, МОЁ ТВk saiatzeari uzten dio eta jakinarazten dizu, pantaila beltza utzi beharrean bere erreproduzigailu guztiak probatzen dituen bitartean. Inoiz ez saiatzen jarraitzen du, eta horrek minutu bat baino gehiago iraun dezake zure hornitzaileak kendu duen kanal batean. Hornitzaileak eskatutako itxaronaldiak ez dira kontatzen.</string>
     <string name="settings_live_preroll_per_playlist">Aurrebufferra erreprodukzio-zerrendaka</string>
     <string name="settings_live_preroll_per_playlist_description">Gainidatzi goiko ezarpena erreprodukzio-zerrenda baterako, zure beste erreprodukzio-zerrendak azkar mantenduz.</string>
     <string name="settings_live_latency_per_playlist">Zuzeneko latentzia erreprodukzio-zerrendaka</string>
@@ -1072,7 +1072,7 @@
     <string name="settings_surround_auto_description_mobile">Automatikoa — saiatu Dolby/DTS surround, eta automatikoki estereora itzuli bozgorailuak, aurikularrek edo konektatutako hartzaileak erreproduzitzen ez badute. Gomendatua.</string>
     <string name="settings_surround_stereo_description">Estereo soilik — deskodetu beti aplikazioan eta bidali 2.0 soinu arrunta. Erabili hau telebistaren bozgorailuetan edo soinu-barra estereo batean, edo audioa irudiaren atzetik badoa.</string>
     <string name="settings_surround_stereo_description_mobile">Estereo soilik — deskodetu beti aplikazioan eta bidali 2.0 soinu arrunta. Erabili hau barneko bozgorailurako, aurikularretarako edo soinu-barra estereo baterako, edo audioa irudiaren atzetik badoa.</string>
-    <string name="settings_surround_forced_description">Surround — bidali Dolby/DTS benetako 5.1/7.1 hartzaile bati. Isildu edo eten-etenka egiten badu, OwnTVk estereora itzultzen da eta jakinarazten dizu.</string>
+    <string name="settings_surround_forced_description">Surround — bidali Dolby/DTS benetako 5.1/7.1 hartzaile bati. Isildu edo eten-etenka egiten badu, МОЁ ТВk estereora itzultzen da eta jakinarazten dizu.</string>
     <string name="settings_panel_width">Panelen zabaleraren doikuntza</string>
     <string name="settings_panel_width_description">Aldatu Zuzeneko telebistako, Filmetako eta Telesailetako kategoria-, zerrenda- eta aurrebista-panelen tamaina.</string>
     <string name="settings_vod_layout">Filmen eta Telesailen diseinua</string>
@@ -1122,11 +1122,11 @@
     <string name="settings_panel_width_disable_preview_description">Zuzeneko aurrebistaren bideoa aktibatuta dago une honetan. Aurrebista-panela ezkutatzeak bideoa desaktibatuko du, eta ezin da berriro aktibatu Aurrebista-panelari zabalera bat eman arte Panelen zabaleraren doikuntzan.</string>
     <string name="settings_live_preview_panel_hidden_title">Zuzeneko aurrebistaren bideoa ez dago erabilgarri</string>
     <string name="settings_live_preview_panel_hidden_description">Zuzeneko telebistaren Aurrebista-panela ezkutatuta dago. Eman 0%% baino zabalera handiagoa Panelen zabaleraren doikuntzan Aurrebistaren bideoa aktibatu aurretik.</string>
-    <string name="settings_language_help_translate">Lagundu OwnTV zure hizkuntzara itzultzen</string>
-    <string name="settings_language_contribution_description">Eskaneatu QR kodea edo ireki esteka erabilgarri dagoen edozein hizkuntza aukeratzeko eta OwnTVren sei itzulpen-osagaietan guztietan laguntzeko.</string>
+    <string name="settings_language_help_translate">Lagundu МОЁ ТВ zure hizkuntzara itzultzen</string>
+    <string name="settings_language_contribution_description">Eskaneatu QR kodea edo ireki esteka erabilgarri dagoen edozein hizkuntza aukeratzeko eta МОЁ ТВren sei itzulpen-osagaietan guztietan laguntzeko.</string>
     <string name="settings_language_request_workflow">Zerrendatuta ez dagoen hizkuntza bat gehitu nahi duzu? Ireki lehenik hizkuntza-eskaera bat. Mantentzaile batek erregistratuko du eta oinarrizko itzulpen-fitxategiak prestatuko ditu; Hosted Weblate-n agertzen denean, ekarpenak egiten hasi zaitezke.</string>
     <string name="settings_language_request_new">Eskatu hizkuntza berri bat</string>
-    <string name="settings_language_contribution_qr_description">OwnTV itzulpen-proiektuaren ikuspegi orokorraren QR kodea</string>
+    <string name="settings_language_contribution_qr_description">МОЁ ТВ itzulpen-proiektuaren ikuspegi orokorraren QR kodea</string>
     <string name="settings_language_contribution_qr_failed">Ezin izan da QR kodea sortu. Erabili beheko esteka horren ordez.</string>
     <string name="settings_language_contribution_copy">Kopiatu esteka</string>
     <string name="settings_language_contribution_copied">Esteka kopiatu da</string>
@@ -1208,7 +1208,7 @@
     <string name="local_sync_received_items">Jasotako elementuak: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_sent">Zure datuak bidali dira</string>
     <string name="local_sync_failed">Sinkronizazioak huts egin du</string>
-    <string name="local_sync_error_unreachable">Gailu hori ezin izan da atzitu. Bertan, ireki OwnTV → Gehiago → Tokiko sinkronizazioa eta aktibatu Sinkronizazio modua. Bi gailuak Wi-Fi sare berean egon behar dute.</string>
+    <string name="local_sync_error_unreachable">Gailu hori ezin izan da atzitu. Bertan, ireki МОЁ ТВ → Gehiago → Tokiko sinkronizazioa eta aktibatu Sinkronizazio modua. Bi gailuak Wi-Fi sare berean egon behar dute.</string>
     <string name="local_sync_error_unauthorized">Beste gailuak ukatu egin du. Baliteke PINa okerra izatea, edo gailu hau ahaztu izana.</string>
     <string name="local_sync_error_bad_payload">Iritsi dena ezin izan da irakurri. Pasahitz bat erabili baduzu, egiaztatu bi gailuetan berdina dela.</string>
     <string name="local_sync_error_unknown">Zerbait gaizki atera da. Saiatu berriro.</string>
@@ -1226,7 +1226,7 @@
     <string name="local_auto_sync_waiting"><xliff:g id="device">%1$s</xliff:g> gailuak baimena eman zain…</string>
     <string name="local_auto_sync_declined"><xliff:g id="device">%1$s</xliff:g> gailuak ez du sinkronizazio automatikoa baimendu.</string>
     <string name="local_auto_sync_accept_title">Sinkronizazio automatikoa baimendu?</string>
-    <string name="local_auto_sync_accept_body"><xliff:g id="device">%1$s</xliff:g> gailuak berez sinkronizatu nahi du gailu honekin, OwnTV bietan irekita dagoen bakoitzean. Gailu honetan baimentzen duzuna bakarrik sartzen da, eta bietako edozeinek desaktiba dezake.</string>
+    <string name="local_auto_sync_accept_body"><xliff:g id="device">%1$s</xliff:g> gailuak berez sinkronizatu nahi du gailu honekin, МОЁ ТВ bietan irekita dagoen bakoitzean. Gailu honetan baimentzen duzuna bakarrik sartzen da, eta bietako edozeinek desaktiba dezake.</string>
     <string name="local_auto_sync_accept">Baimendu</string>
     <string name="local_auto_sync_decline">Ez baimendu</string>
     <string name="local_auto_sync_what_to_sync">Gailu honek zer sinkronizatzen duen</string>
@@ -1242,7 +1242,7 @@
     <string name="local_auto_sync_turned_off">Sinkronizazio automatikoa desaktibatuta <xliff:g id="device">%1$s</xliff:g> gailuan</string>
     <string name="local_auto_sync_unreachable">Ezin izan da <xliff:g id="device">%1$s</xliff:g> gailura iritsi, berriro saiatuko da</string>
     <string name="local_auto_sync_listen">Mantendu sinkronizazio automatikoa entzuten</string>
-    <string name="local_auto_sync_listen_description">Aktibatuta: parekatutako gailuak honekin sinkroniza daitezke OwnTV hemen irekita dagoen bakoitzean. Desaktibatuta: sinkronizazio modua aktibatuta dagoen bitartean bakarrik.</string>
+    <string name="local_auto_sync_listen_description">Aktibatuta: parekatutako gailuak honekin sinkroniza daitezke МОЁ ТВ hemen irekita dagoen bakoitzean. Desaktibatuta: sinkronizazio modua aktibatuta dagoen bitartean bakarrik.</string>
     <string name="local_auto_sync_listening">Entzuten</string>
     <string name="more_pane_last_backup">Azken babeskopia</string>
     <string name="more_pane_encrypted">Enkriptatuta</string>
@@ -1261,8 +1261,8 @@
     <string name="settings_multiview_keep_two">Mantendu 2</string>
     <string name="settings_multiview_use_anyway">Erabili hala ere</string>
     <string name="settings_app_icon">Aplikazioaren ikonoa</string>
-    <string name="settings_app_icon_summary">OwnTVren ikonoaren eta logoaren kolorea</string>
-    <string name="settings_app_icon_sheet_mobile">Nola agertzen den OwnTV hasierako pantailan. Aplikazioa behin berrabiaraziko da.</string>
+    <string name="settings_app_icon_summary">МОЁ ТВren ikonoaren eta logoaren kolorea</string>
+    <string name="settings_app_icon_sheet_mobile">Nola agertzen den МОЁ ТВ hasierako pantailan. Aplikazioa behin berrabiaraziko da.</string>
     <string name="settings_brand_accent">Azentu-koloreko logotipoa</string>
     <string name="app_icon_petrol">Petrolioa</string>
     <string name="app_icon_sunflower">Eguzkilorea</string>
@@ -1273,8 +1273,8 @@
     <string name="app_icon_olive">Oliba</string>
     <string name="app_icon_olive_cream">Oliba krema gainean</string>
     <string name="app_icon_pixel">Pixela</string>
-    <string name="app_icon_restart_title">OwnTV berrabiarazi?</string>
-    <string name="app_icon_restart_message">Ikono eta logo berri bat aukeratu duzu. OwnTV berrabiarazi ondoren izango dute eragina.</string>
+    <string name="app_icon_restart_title">МОЁ ТВ berrabiarazi?</string>
+    <string name="app_icon_restart_message">Ikono eta logo berri bat aukeratu duzu. МОЁ ТВ berrabiarazi ondoren izango dute eragina.</string>
     <string name="app_icon_restart_now">Berrabiarazi orain</string>
     <string name="settings_navigation">Nabigazioa</string>
     <string name="settings_navigation_description">Ezkerreko menuak nola jokatzen duen</string>
@@ -1531,10 +1531,10 @@
     <string name="settings_line_glass_reset">Eszenaren koloreak, beira aktibatuta, <xliff:g id="percent" example="56%">%1$s</xliff:g></string>
     <string name="settings_bg_preview_note">Zuzeneko telebista atzealde honekin. Aldaketak mugitzen zarenean erakusten dira.</string>
     <string name="settings_help_catchup_timezone">Berrikusteak zure hornitzailearen artxiboko saioak erreproduzitzen ditu. Automatikoak hornitzaileak adierazten duen ordu-zona erabiltzen du, edo telebistaren erlojua, ez badu bat ere adierazten; aukeratu UTC desplazamendu finko bat berrikustea oraindik ordu okerrean hasten bada. Hemen aukeratzen duzu berrikusteak zein erreproduzitzaile erabiltzen duen ere.</string>
-    <string name="settings_help_theme">Iluna da OwnTV diseinatuta dagoen gaia. Sistemak telebistaren ezarpen propioa jarraitzen du dagoen tokian; Argiak gela argitsu batentzat balio du.</string>
+    <string name="settings_help_theme">Iluna da МОЁ ТВ diseinatuta dagoen gaia. Sistemak telebistaren ezarpen propioa jarraitzen du dagoen tokian; Argiak gela argitsu batentzat balio du.</string>
     <string name="settings_help_accent">Botoiak, fokuaren distira, aurrerapen-barrak eta nabarmentzeak tindatzen ditu leku guztietan. Aukeratu aurrezarpen bat, edo sakatu Ados paletarako eta edozein hex koderako.</string>
     <string name="settings_help_focus">Fokua duen edozeinen inguruan marrazten den eraztuna. Aukeratu bere kolorea eta lodiera, sofatik jarraitzeko erraza izan dadin.</string>
-    <string name="settings_help_fonts">OwnTV osoan erabiltzen den letra-tipoa, eta testua zein handi marrazten den. Leiho gainerakorrek letra-tipo bera erabiltzen dute.</string>
+    <string name="settings_help_fonts">МОЁ ТВ osoan erabiltzen den letra-tipoa, eta testua zein handi marrazten den. Leiho gainerakorrek letra-tipo bera erabiltzen dute.</string>
     <string name="settings_help_popup_size">Leiho gainerakorrak, menuak eta elkarrizketa-koadroak osotasunean handiago edo txikiago egiten ditu. Erabili leiho gainerakorrak estuak sentitzen direnean edo pantaila gehiegi estaltzen dutenean.</string>
     <string name="settings_help_zoom">Pantailako dena eskalatzen du. Handiagoa errazagoa da urrunetik irakurtzeko; txikiagoak elementu gehiago sartzen ditu pantailan. 85%% azpitik, memoria gutxiko telebista-kutxek memoria agor dezakete.</string>
     <string name="settings_help_animations">Orriak, menuak eta fokua leunki mugitzen dira hau aktibatuta dagoen bitartean. Desaktibatuta, aldaketa guztiak berehalakoak dira.</string>
@@ -1544,13 +1544,13 @@
     <string name="settings_help_vod_layout">Zinematografikoak fokuan dagoen izenburuaren azala erakusten du poster-sareta baten atzean. Bereiziak kategoriak, izenburuak eta xehetasunak alboz albo erakusten ditu.</string>
     <string name="settings_help_home">Aukeratu Hasierak zein errenkada erakusten dituen eta zer ordenatan, eta Orain joeran errenkadak nolako itxura duen.</string>
     <string name="settings_help_customize">Ezkutatu inoiz ikusten ez dituzun kategoriak eta elementuak, eman kategoriei zure izenak eta jarri zure ordenan. Ezkutatutakoak hemen itzultzen dira, inoiz ez galduta.</string>
-    <string name="settings_help_app_icon">Zure telebistaren hasierako pantailako OwnTV ikonoa. Baliteke abiarazleak une bat behar izatea aldaketa erakusteko.</string>
-    <string name="settings_help_brand_accent">Menuko, Honi buruz ataleko eta konfigurazioko OwnTV logotipoak bere play triangelua zure azentu-koloreaz erakusten du. Hasierako pantailako ikonoak bere koloreak mantentzen ditu.</string>
-    <string name="settings_help_startup">OwnTVk abiatzean zer erakusten duen: Hasiera, azkenekoz ikusi duzun kanala, zure gogokoak, edo zuk aukeratutako kanal bat.</string>
-    <string name="settings_help_check_updates">GitHuben OwnTV berriago bat bilatzen du orain eta instalatzea eskaintzen du. Zure erreprodukzio-zerrendak, gogokoak eta ezarpenak berdin geratzen dira.</string>
-    <string name="settings_help_update_startup">Bertsio berri bat bilatzen du OwnTV abiatzen den bakoitzean eta jakinarazten dizu dagoenean. Ez da ezer instalatzen galdetu gabe.</string>
-    <string name="settings_help_auto_start_boot">OwnTV bere kabuz irekitzen du telebista abiarazi ondoren, Aplikazioaren abioa ezarpenean aukeratutako pantailan. Android-ek aplikazio bati bere kabuz irekitzen uzten dio beste aplikazioen gainean bistara badaiteke soilik; beraz, hau aktibatzean baimen horren pantaila irekitzen da. Telebista batzuek ez dute eskaintzen, eta haietan abiarazte automatikoak ezin du funtzionatu.</string>
-    <string name="settings_help_auto_start_wake">OwnTV irekitzen du telebista lo-egoeratik esnatzen den bakoitzean, beste aplikazio baterako esnatu baduzu ere. Aplikazioaren abioak kanal bat irekitzen badu, esnatze bakoitzak jario hori abiarazten du. Aktibatuta dagoen bitartean, OwnTV-k atzeko planoko zerbitzu txiki bat mantentzen du jakinarazpen isil batekin. Piztean abiaraztea bezala, beste aplikazioen gainean bistaratzeko baimena behar du.</string>
+    <string name="settings_help_app_icon">Zure telebistaren hasierako pantailako МОЁ ТВ ikonoa. Baliteke abiarazleak une bat behar izatea aldaketa erakusteko.</string>
+    <string name="settings_help_brand_accent">Menuko, Honi buruz ataleko eta konfigurazioko МОЁ ТВ logotipoak bere play triangelua zure azentu-koloreaz erakusten du. Hasierako pantailako ikonoak bere koloreak mantentzen ditu.</string>
+    <string name="settings_help_startup">МОЁ ТВk abiatzean zer erakusten duen: Hasiera, azkenekoz ikusi duzun kanala, zure gogokoak, edo zuk aukeratutako kanal bat.</string>
+    <string name="settings_help_check_updates">GitHuben МОЁ ТВ berriago bat bilatzen du orain eta instalatzea eskaintzen du. Zure erreprodukzio-zerrendak, gogokoak eta ezarpenak berdin geratzen dira.</string>
+    <string name="settings_help_update_startup">Bertsio berri bat bilatzen du МОЁ ТВ abiatzen den bakoitzean eta jakinarazten dizu dagoenean. Ez da ezer instalatzen galdetu gabe.</string>
+    <string name="settings_help_auto_start_boot">МОЁ ТВ bere kabuz irekitzen du telebista abiarazi ondoren, Aplikazioaren abioa ezarpenean aukeratutako pantailan. Android-ek aplikazio bati bere kabuz irekitzen uzten dio beste aplikazioen gainean bistara badaiteke soilik; beraz, hau aktibatzean baimen horren pantaila irekitzen da. Telebista batzuek ez dute eskaintzen, eta haietan abiarazte automatikoak ezin du funtzionatu.</string>
+    <string name="settings_help_auto_start_wake">МОЁ ТВ irekitzen du telebista lo-egoeratik esnatzen den bakoitzean, beste aplikazio baterako esnatu baduzu ere. Aplikazioaren abioak kanal bat irekitzen badu, esnatze bakoitzak jario hori abiarazten du. Aktibatuta dagoen bitartean, МОЁ ТВ-k atzeko planoko zerbitzu txiki bat mantentzen du jakinarazpen isil batekin. Piztean abiaraztea bezala, beste aplikazioen gainean bistaratzeko baimena behar du.</string>
     <string name="settings_help_dns">Zure hornitzailearen helbideak zuk aukeratutako DNS zerbitzari batekin bilatzen ditu zure sarearen berberaren ordez — baliagarria zure sareak blokeatu edo birbideratzen dituenean.</string>
     <string name="settings_help_hw">Telebistaren hardware-deskodetzailea erabiltzen du: 4K leuna eta bero gutxiago. Desaktibatu soilik jario batzuk eten-etenka badabiltza edo blokeak erakusten badituzte; orduan software bidezko deskodetzaileak egiten du lana.</string>
     <string name="settings_help_volume">Kanal, film eta atal guztiak zein bolumenetan hasten diren. 100%% gainetik jario isilak anplifikatzen dira. Erreproduzigailuan aldatzen duzun bolumena izenburu horretarako gordetzen da berrezarri arte.</string>
@@ -1564,7 +1564,7 @@
     <string name="settings_help_timeshift_window">Berrikusterik gabeko kanal batean Pausatu eta atzeratu zuzeneko telebistak zenbat atzera egin dezakeen. Luzeagoak kanalaren zati handiago bat mantentzen du gailu honen biltegiratzean.</string>
     <string name="settings_help_resume">Galdetu jarraitzeko aukerak Jarraitu edo Hasi berriro eskaintzen du film edo atal batek gordetako posizioa duenean. Jarraitu beti gelditu zinen tokian jarraitzen du; Ez jarraitu inoiz hasieratik hasten da.</string>
     <string name="settings_help_mini">Arakatzen ari zaren bitartean kanal bat izkina batean martxan mantentzen duen erreproduzigailu txikia. Aukeratu bere tamaina eta kokatzen den izkina.</string>
-    <string name="settings_help_pip">Sakatu Hasiera edo ireki beste aplikazio bat bideo bat pantaila osoan edo mini erreproduzigailuan erreproduzitzen ari den bitartean, eta leiho txiki batean jarraituko du telebistaren gainerakoaren gainean. Ireki berriro OwnTV pantaila osora itzultzeko; itxi leihoa erreprodukzioa gelditzeko. Multiview OwnTV barruan geratzen da.</string>
+    <string name="settings_help_pip">Sakatu Hasiera edo ireki beste aplikazio bat bideo bat pantaila osoan edo mini erreproduzigailuan erreproduzitzen ari den bitartean, eta leiho txiki batean jarraituko du telebistaren gainerakoaren gainean. Ireki berriro МОЁ ТВ pantaila osora itzultzeko; itxi leihoa erreprodukzioa gelditzeko. Multiview МОЁ ТВ barruan geratzen da.</string>
     <string name="settings_key_palette">Paleta</string>
     <string name="settings_live_preview_note">Aldaketak hemen erakusten dira mugitzen zarenean, errenkada utzi aurretik.</string>
     <string name="settings_synced_at">Sinkronizatuta: <xliff:g id="when">%1$s</xliff:g></string>
@@ -1575,8 +1575,8 @@
     <string name="settings_profile_add">Gehitu profila</string>
     <string name="settings_profile_add_line">Bere gogokoak, historia eta ezarpenak dituen ikusle bat</string>
     <plurals name="settings_help_language">
-        <item quantity="one">OwnTVko menu eta mezu guztien hizkuntza. <xliff:g id="count">%1$d</xliff:g> hizkuntza; telebistaren hizkuntza propioa jarraitzen du bat aukeratu arte.</item>
-        <item quantity="other">OwnTVko menu eta mezu guztien hizkuntza. <xliff:g id="count">%1$d</xliff:g> hizkuntza; telebistaren hizkuntza propioa jarraitzen du bat aukeratu arte.</item>
+        <item quantity="one">МОЁ ТВko menu eta mezu guztien hizkuntza. <xliff:g id="count">%1$d</xliff:g> hizkuntza; telebistaren hizkuntza propioa jarraitzen du bat aukeratu arte.</item>
+        <item quantity="other">МОЁ ТВko menu eta mezu guztien hizkuntza. <xliff:g id="count">%1$d</xliff:g> hizkuntza; telebistaren hizkuntza propioa jarraitzen du bat aukeratu arte.</item>
     </plurals>
     <plurals name="settings_profile_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> profil</item>
@@ -1612,8 +1612,8 @@
     <string name="settings_home_show_row">Erakutsi errenkada hau</string>
     <string name="settings_home_move_row">Mugitu (▲ ▼, gero Ados)</string>
     <string name="settings_line_remote_shortcuts_on">Desaktibatuta zure esleipenak mantentzen ditu</string>
-    <string name="settings_language_system_help">OwnTVk telebistaren hizkuntza jarraitzen du (orain <xliff:g id="language">%1$s</xliff:g>). Aukeratu bat behean OwnTVn soilik erabiltzeko.</string>
-    <string name="settings_language_pick_help">Erabili <xliff:g id="language">%1$s</xliff:g> OwnTVn, telebista zein hizkuntzatan dagoen ere.</string>
+    <string name="settings_language_system_help">МОЁ ТВk telebistaren hizkuntza jarraitzen du (orain <xliff:g id="language">%1$s</xliff:g>). Aukeratu bat behean МОЁ ТВn soilik erabiltzeko.</string>
+    <string name="settings_language_pick_help">Erabili <xliff:g id="language">%1$s</xliff:g> МОЁ ТВn, telebista zein hizkuntzatan dagoen ere.</string>
     <string name="settings_key_use">Erabili</string>
     <string name="settings_line_metadata_source">Filmen &amp; Telesailen xehetasunak nondik datozen</string>
     <string name="settings_line_metadata_language">TMDBren sinopsiak, generoak eta izenburuak</string>
@@ -1652,7 +1652,7 @@
     <string name="settings_line_glass_bg">Atzealdea, irudiaren itxura, beira</string>
     <string name="settings_bg_background">Atzealdea</string>
     <string name="settings_line_bg_background">Pantaila bakoitzaren atzean dagoena</string>
-    <string name="settings_help_bg_background">Eszenak OwnTVren kolore leun propioak marrazten ditu. Irudiak zure irudi bat erakusten du pantaila bakoitzaren atzean. Arruntak bete-betean iluna den betegarri lau bat da.</string>
+    <string name="settings_help_bg_background">Eszenak МОЁ ТВren kolore leun propioak marrazten ditu. Irudiak zure irudi bat erakusten du pantaila bakoitzaren atzean. Arruntak bete-betean iluna den betegarri lau bat da.</string>
     <string name="settings_bg_stage">Eszena</string>
     <string name="settings_bg_picture">Irudia</string>
     <string name="settings_bg_plain">Arrunta</string>

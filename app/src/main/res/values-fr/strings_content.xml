@@ -28,7 +28,7 @@
     <string name="content_genre_scifi">Science-fiction</string>
     <string name="content_genre_series">Séries</string>
     <string name="content_genre_sport">Sport</string>
-    <string name="content_exit_owntv">Quitter OwnTV ?</string>
+    <string name="content_exit_owntv">Quitter МОЁ ТВ ?</string>
     <string name="content_exit_confirmation">Voulez-vous vraiment fermer l’application ?</string>
     <string name="content_restore_incomplete_title">Une restauration ne s’est pas terminée</string>
     <string name="content_restore_incomplete_message">L’application s’est fermée pendant la restauration de <xliff:g id="description">%1$s</xliff:g>. Certains éléments peuvent donc manquer. Rien n’a été supprimé — relancez la même restauration depuis Paramètres → Sauvegarde et restauration pour récupérer le reste.</string>
@@ -144,7 +144,7 @@
     <string name="content_storage_choose_folder">Choisir un autre dossier…</string>
     <string name="content_storage_chosen_folder">Dossier choisi</string>
     <string name="content_storage_folder_lost">Ce dossier n’est plus disponible. Choisissez-le à nouveau ou sélectionnez-en un autre.</string>
-    <string name="content_storage_folder_fallback">Votre dossier de téléchargement n’est pas disponible pour le moment : les téléchargements sont enregistrés dans le dossier d’OwnTV jusqu’à son retour.</string>
+    <string name="content_storage_folder_fallback">Votre dossier de téléchargement n’est pas disponible pour le moment : les téléchargements sont enregistrés dans le dossier d’МОЁ ТВ jusqu’à son retour.</string>
     <string name="content_downloads_reason_account_busy">Compte occupé : un autre flux utilise la connexion</string>
     <string name="content_downloads_reason_refused">Le serveur a refusé le lien</string>
     <string name="content_downloads_reason_not_found">Le serveur n\'a plus ce fichier</string>

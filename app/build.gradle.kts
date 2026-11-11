@@ -44,7 +44,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "tv.own.myowntv"
+        applicationId = "com.github.dimzon.owntv"
         minSdk = 26
         targetSdk = 36
         // CI injects these from the git tag (see .github/workflows/android.yml) so releases never

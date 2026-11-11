@@ -26,7 +26,7 @@
     <string name="content_genre_scifi">Sci-Fi</string>
     <string name="content_genre_series">Series</string>
     <string name="content_genre_sport">Sport</string>
-    <string name="content_exit_owntv">OwnTV afsluiten?</string>
+    <string name="content_exit_owntv">МОЁ ТВ afsluiten?</string>
     <string name="content_exit_confirmation">Weet je zeker dat je de app wilt sluiten?</string>
     <string name="content_restore_incomplete_title">Een herstelbewerking is niet voltooid</string>
     <string name="content_restore_incomplete_message">De app is gesloten tijdens het herstellen van <xliff:g id="description">%1$s</xliff:g>, waardoor er mogelijk een deel ontbreekt. Er is niets verwijderd — voer dezelfde herstelbewerking opnieuw uit via Instellingen → Back-up en herstellen om de rest aan te vullen.</string>
@@ -138,7 +138,7 @@
     <string name="content_storage_choose_folder">Andere map kiezen…</string>
     <string name="content_storage_chosen_folder">Gekozen map</string>
     <string name="content_storage_folder_lost">Die map is niet meer beschikbaar. Kies de map opnieuw of selecteer een andere.</string>
-    <string name="content_storage_folder_fallback">Je downloadmap is nu niet beschikbaar, dus downloads worden in de eigen map van OwnTV opgeslagen tot hij terug is.</string>
+    <string name="content_storage_folder_fallback">Je downloadmap is nu niet beschikbaar, dus downloads worden in de eigen map van МОЁ ТВ opgeslagen tot hij terug is.</string>
     <string name="content_downloads_reason_account_busy">Account bezet: een andere stream gebruikt de verbinding</string>
     <string name="content_downloads_reason_refused">De server heeft de link geweigerd</string>
     <string name="content_downloads_reason_not_found">De server heeft dit bestand niet meer</string>
