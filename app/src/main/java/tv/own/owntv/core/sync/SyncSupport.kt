@@ -185,7 +185,7 @@ internal class SyncSupport(
         val announced = upsert.newRows.filter { it.remoteId !in quietRemoteIds }
         if (!freshSource && announced.isNotEmpty()) {
             stats.processedCounts.merge(CATEGORIES_ADDED_KEY, announced.size, Int::plus)
-            applyHideNewCategoriesDefault(s.id, type, announced)
+            applyHideNewCategoriesDefault(type, announced)
         }
         // Ids come straight from the upsert (existing rows + returned insert rowids) — the old
         // second existingCategoriesByRemoteId round-trip only re-fetched just-upserted rows.
@@ -261,19 +261,12 @@ internal class SyncSupport(
         )
     }
 
-    /** Applies each profile's own "hide new categories" preference (same across sections) to
-     *  categories just discovered on a resync — a source can be shared by several profiles.
-     *  Non-private: M3uSyncer discovers categories incrementally during the stream, so it applies
-     *  this itself at end-of-parse instead of going through [refreshCategories]. */
-    suspend fun applyHideNewCategoriesDefault(sourceId: Long, type: MediaType, newRows: List<CategoryEntity>) {
-        val profileIds = sourceDao.profileIdsForSource(sourceId)
-        if (profileIds.isEmpty()) return
-        val keys = newRows.map { CustomizeKeys.category(it) }
-        profileIds.forEach { profileId ->
-            if (settings.hideNewCategoriesDefault(profileId).first()) {
-                customize.setCategoriesHidden(profileId, type, keys, hidden = true)
-            }
-        }
+    /** Applies the "hide new categories" preference (same across sections) to categories just
+     *  discovered on a resync. Non-private: M3uSyncer discovers categories incrementally during the
+     *  stream, so it applies this itself at end-of-parse instead of going through [refreshCategories]. */
+    suspend fun applyHideNewCategoriesDefault(type: MediaType, newRows: List<CategoryEntity>) {
+        if (newRows.isEmpty() || !settings.hideNewCategoriesDefault().first()) return
+        customize.setCategoriesHidden(type, newRows.map { CustomizeKeys.category(it) }, hidden = true)
     }
 
     /**

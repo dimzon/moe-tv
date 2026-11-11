@@ -1,8 +1,8 @@
 package tv.own.owntv.core.live
 
 /**
- * The remembered Live TV category to bring back, given the category list as loaded for this profile
- * and these playlists — or null to leave the screen where it is. Both apps restore through this.
+ * The remembered Live TV category to bring back, given the category list as loaded for these
+ * playlists — or null to leave the screen where it is. Both apps restore through this.
  *
  * Favorites and History are always there. Anything else comes back only while the list holds it and
  * it opens without a PIN: a hidden All or Catch-up, a deleted or re-synced-away folder and a locked

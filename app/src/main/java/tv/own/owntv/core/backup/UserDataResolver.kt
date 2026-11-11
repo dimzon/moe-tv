@@ -17,7 +17,6 @@ import tv.own.owntv.core.database.dao.CustomCategoryMemberExportRow
 import tv.own.owntv.core.database.dao.TombstoneDao
 import tv.own.owntv.core.database.dao.FavoriteDao
 import tv.own.owntv.core.database.dao.HistoryDao
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.dao.UserDataExportRow
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.database.entity.CustomCategoryMemberEntity
@@ -40,17 +39,16 @@ internal val Context.pendingStore: DataStore<Preferences> by preferencesDataStor
 internal val PENDING_KEY = stringPreferencesKey("entries")
 
 /**
- * Backs up and restores the per-profile user data that lives on volatile content ids: favorites,
- * watch history, and resume positions. Content rows are clear-then-insert on every sync, so ids
- * can't be exported directly — instead each record is exported with a stable identity
- * (sourceId + provider remoteId, falling back to the name) and re-resolved against the content
- * tables AFTER the post-restore sync repopulates them. Unresolvable records stay pending and are
- * retried after every sync (and after a show's episodes load), so they heal as content appears.
+ * Backs up and restores the user data that lives on volatile content ids: favorites, watch
+ * history, and manual positions (the app has a single user — profiles are gone). Content rows are
+ * clear-then-insert on every sync, so ids can't be exported directly — instead each record is
+ * exported with a stable identity (sourceId + provider remoteId, falling back to the name) and
+ * re-resolved against the content tables AFTER the post-restore sync repopulates them. Unresolvable
+ * records stay pending and are retried after every sync, so they heal as content appears.
  */
 class UserDataResolver(
     private val context: Context,
     private val channelDao: ChannelDao,
-    private val profileDao: ProfileDao,
     private val favoriteDao: FavoriteDao,
     private val historyDao: HistoryDao,
     private val contentOrderDao: ContentOrderDao,
@@ -62,7 +60,7 @@ class UserDataResolver(
     // --- deletions (v36) -------------------------------------------------------------------------
     //
     // Local sync merges and never clobbers, so an absent row is indistinguishable from one the other
-    // device has not heard about yet — and the merge puts it back. These four functions are the other
+    // device has not heard about yet — and the merge puts it back. These functions are the other
     // half: a deletion the user meant is remembered as a fact with a timestamp, travels in the sync
     // payload exactly like a favorite does, and beats any older copy of the row on the far side.
 
@@ -73,7 +71,8 @@ class UserDataResolver(
      *
      * [record] is a record as [describe] builds it (or as a sync payload carries it, already remapped
      * to this device's source ids). Everything identifying is copied; the bookkeeping fields
-     * (`p`/`kind`/`at`/`oid`/`pos`/`dur`) are not, because they say when and by whom, not what.
+     * (`kind`/`at`/`oid`/`pos`/`dur`) are not, because they say when and by whom, not what.
+     * Old files and payloads may also carry a per-profile `p`; profiles are gone and it is ignored.
      */
     fun canonicalIdentity(record: JSONObject): String = JSONObject().apply {
         put("t", record.optString("t"))
@@ -93,7 +92,7 @@ class UserDataResolver(
     suspend fun identityOf(type: MediaType, itemId: Long): JSONObject? = describe(type, itemId)
 
     /**
-     * Remembers that [profileId] deleted one row, so the deletion survives a sync.
+     * Remembers that one row was deleted, so the deletion survives a sync.
      *
      * Call it BEFORE the delete, inside the same transaction: [describe] reads the content row the
      * record points at, and after the delete there may be nothing left to describe. A row whose
@@ -101,7 +100,6 @@ class UserDataResolver(
      * choice the user made, and propagating it would delete the item on a device where it is fine.
      */
     suspend fun recordDeletion(
-        profileId: Long,
         kind: String,
         type: MediaType,
         itemId: Long,
@@ -110,7 +108,7 @@ class UserDataResolver(
     ) {
         val record = describe(type, itemId) ?: return
         contextKey?.let { record.put("ctx", it) }
-        tombstoneDao.record(profileId, kind, canonicalIdentity(record), at)
+        tombstoneDao.record(kind, canonicalIdentity(record), at)
     }
 
     /** Trims the tombstone table to [MAX_TOMBSTONES]. Called once after a bulk deletion, not per row. */
@@ -119,21 +117,20 @@ class UserDataResolver(
     }
 
     /**
-     * Drops this device's deletion markers for [profileIds] — see [TombstoneDao.deleteForProfiles].
+     * Drops this device's deletion markers — see [TombstoneDao.deleteAll].
      * A restore calls this before applying the file; a merge never does.
      */
-    suspend fun clearDeletionsFor(profileIds: Collection<Long>) {
-        if (profileIds.isNotEmpty()) tombstoneDao.deleteForProfiles(profileIds.toList())
+    suspend fun clearDeletions() {
+        tombstoneDao.deleteAll()
     }
 
     /** The deletions to put in a sync payload, as records of the same shape [exportAll] produces. */
-    suspend fun exportTombstones(kinds: Set<String>, profileIds: Set<Long>? = null): JSONArray {
+    suspend fun exportTombstones(kinds: Set<String>): JSONArray {
         val out = JSONArray()
         tombstoneDao.getAllOnce().forEach { row ->
             if (row.kind !in kinds) return@forEach
-            if (profileIds != null && row.profileId !in profileIds) return@forEach
             val record = runCatching { JSONObject(row.identity) }.getOrNull() ?: return@forEach
-            out.put(record.put("p", row.profileId).put("kind", row.kind).put("at", row.deletedAt))
+            out.put(record.put("kind", row.kind).put("at", row.deletedAt))
         }
         return out
     }
@@ -166,22 +163,20 @@ class UserDataResolver(
     private suspend fun applyTombstone(e: JSONObject): Boolean {
         val kind = e.optString("kind")
         if (kind !in TOMBSTONE_KINDS) return false
-        val pid = e.optLong("p", -1)
-        if (pid < 0 || profileDao.getById(pid) == null) return false
         val at = e.optLong("at", 0)
         // Recorded first: the row may not even exist here (nothing to delete), but a third device
         // still has to learn that it was deleted, and an older copy of it may arrive later.
-        tombstoneDao.record(pid, kind, canonicalIdentity(e), at)
+        tombstoneDao.record(kind, canonicalIdentity(e), at)
         val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
         val itemId = locate(type, e) ?: return false
         val deleted = when (kind) {
-            "fav" -> favoriteDao.removeIfOlderThan(pid, type, itemId, at)
-            "his" -> historyDao.removeIfOlderThan(pid, type, itemId, at)
+            "fav" -> favoriteDao.removeIfOlderThan(type, itemId, at)
+            "his" -> historyDao.removeIfOlderThan(type, itemId, at)
             // Memberships carry no timestamp of their own — the row is a position in a list, not an
             // event — so the deletion simply wins. Re-adding the item locally afterwards writes a
             // fresh row, and the stale tombstone only ever suppresses records older than itself.
             "member" -> {
-                customCategoryDao.deleteItem(pid, type, e.optString("ctx"), itemId)
+                customCategoryDao.deleteItem(type, e.optString("ctx"), itemId)
                 1
             }
             else -> 0
@@ -193,19 +188,19 @@ class UserDataResolver(
     suspend fun exportAll(kinds: Set<String> = setOf("fav", "his", "order", "member")): JSONArray {
         val out = JSONArray()
         if ("fav" in kinds) favoriteDao.getAllOnce().forEach { f ->
-            describe(f.mediaType, f.itemId)?.let { out.put(it.put("p", f.profileId).put("kind", "fav").put("at", f.addedAt)) }
+            describe(f.mediaType, f.itemId)?.let { out.put(it.put("kind", "fav").put("at", f.addedAt)) }
         }
         if ("his" in kinds) historyDao.getAllOnce().forEach { h ->
-            describe(h.mediaType, h.itemId)?.let { out.put(it.put("p", h.profileId).put("kind", "his").put("at", h.watchedAt)) }
+            describe(h.mediaType, h.itemId)?.let { out.put(it.put("kind", "his").put("at", h.watchedAt)) }
         }
         if ("order" in kinds) contentOrderDao.getAllOnce().forEach { o ->
             describe(o.mediaType, o.itemId)?.let {
-                out.put(it.put("p", o.profileId).put("kind", "order").put("ctx", o.contextKey).put("pos", o.position))
+                out.put(it.put("kind", "order").put("ctx", o.contextKey).put("pos", o.position))
             }
         }
         if ("member" in kinds) customCategoryDao.getAllOnce().forEach { m ->
             describe(m.mediaType, m.itemId)?.let {
-                out.put(it.put("p", m.profileId).put("kind", "member").put("ctx", m.contextKey).put("pos", m.position))
+                out.put(it.put("kind", "member").put("ctx", m.contextKey).put("pos", m.position))
             }
         }
         return out
@@ -230,21 +225,21 @@ class UserDataResolver(
     private fun ContentOrderExportRow.toJson(): JSONObject? {
         val itemName = name ?: return null
         return JSONObject().put("t", mediaType.name).put("src", sourceId).putOpt("rid", remoteId).put("name", itemName)
-            .put("p", profileId).put("kind", "order").put("ctx", contextKey).put("pos", position)
+            .put("kind", "order").put("ctx", contextKey).put("pos", position)
             .put("oid", itemId)
     }
 
     private fun CustomCategoryMemberExportRow.toJson(): JSONObject? {
         val itemName = name ?: return null
         return JSONObject().put("t", mediaType.name).put("src", sourceId).putOpt("rid", remoteId).put("name", itemName)
-            .put("p", profileId).put("kind", "member").put("ctx", contextKey).put("pos", position)
+            .put("kind", "member").put("ctx", contextKey).put("pos", position)
             .put("oid", itemId)
     }
 
     private fun UserDataExportRow.toJson(kind: String): JSONObject? {
         val itemName = name ?: return null
         return JSONObject().put("t", mediaType.name).put("src", sourceId).putOpt("rid", remoteId).put("name", itemName)
-            .put("p", profileId).put("kind", kind).put("at", at).put("oid", itemId)
+            .put("kind", kind).put("at", at).put("oid", itemId)
     }
 
     /**
@@ -283,21 +278,21 @@ class UserDataResolver(
         for (i in 0 until snapshot.length()) {
             val e = snapshot.getJSONObject(i)
             val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: continue
-            rows += SnapshotRow(e.optString("kind"), e.getLong("p"), type, e.getLong("oid"))
+            rows += SnapshotRow(e.optString("kind"), type, e.getLong("oid"))
         }
-        // These tables have a unique (profileId, mediaType, itemId) index: one indexed delete per row.
+        // These tables have a unique (mediaType, itemId) index: one indexed delete per row.
         for (row in rows) {
             when (row.kind) {
-                "fav" -> favoriteDao.purgeSnapshotOrphan(row.profileId, row.type, row.itemId)
-                "his" -> historyDao.purgeSnapshotOrphan(row.profileId, row.type, row.itemId)
+                "fav" -> favoriteDao.purgeSnapshotOrphan(row.type, row.itemId)
+                "his" -> historyDao.purgeSnapshotOrphan(row.type, row.itemId)
             }
         }
-        // These two are keyed by folder first, so a one-row delete scans every row of the profile:
+        // These two are keyed by folder first, so a one-row delete scans every row of the table:
         // with tens of thousands of custom-category members that was hours under the writer lock.
         for (batch in snapshotPurgeBatches(rows, setOf("order", "member"))) {
             when (batch.kind) {
-                "order" -> contentOrderDao.purgeSnapshotOrphans(batch.profileId, batch.type, batch.itemIds)
-                "member" -> customCategoryDao.purgeSnapshotOrphans(batch.profileId, batch.type, batch.itemIds)
+                "order" -> contentOrderDao.purgeSnapshotOrphans(batch.type, batch.itemIds)
+                "member" -> customCategoryDao.purgeSnapshotOrphans(batch.type, batch.itemIds)
             }
         }
     }
@@ -317,7 +312,7 @@ class UserDataResolver(
     }
 
     /** Merge-restore (backup): appends the backup's records to the pending set (deduplicated) and
-     *  tries resolving — never drops records already pending for profiles not in the backup.
+     *  tries resolving — never drops records already pending.
      *
      *  Returns how many records a newer local deletion refused. Those are dropped for good rather
      *  than left pending, so the caller must not count them as restored — see [BackupManager]. */
@@ -328,8 +323,8 @@ class UserDataResolver(
 
     /**
      * Tries to attach pending records to current content rows. Called after every successful source
-     * sync and after a show's episodes load; resolved records are inserted (idempotently — the user
-     * data tables have unique (profile, type, item) indices) and removed from the pending set.
+     * sync; resolved records are inserted (idempotently — the user data tables have unique
+     * (type, item) indices) and removed from the pending set.
      */
     suspend fun resolvePending(): Int {
         val raw = context.pendingStore.data.first()[PENDING_KEY] ?: return 0
@@ -399,32 +394,32 @@ class UserDataResolver(
      * and attach itself when the catalogue arrives, which is a change the user should be told about.
      * A record a local deletion already outranks does not, because applying it would do nothing.
      */
-    suspend fun wouldAdd(profileId: Long, kind: String, e: JSONObject): Boolean {
+    suspend fun wouldAdd(kind: String, e: JSONObject): Boolean {
         val at = e.optLong("at", 0)
-        if (tombstoneDao.deletedAt(profileId, kind, canonicalIdentity(e))?.let { it >= at } == true) return false
+        if (tombstoneDao.deletedAt(kind, canonicalIdentity(e))?.let { it >= at } == true) return false
         val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
         val itemId = locate(type, e) ?: return true
         val ctx = e.optString("ctx")
         return when (kind) {
-            "fav" -> !favoriteDao.exists(profileId, type, itemId)
-            "his" -> !historyDao.exists(profileId, type, itemId)
-            "order" -> !contentOrderDao.exists(profileId, type, ctx, itemId)
-            "member" -> !customCategoryDao.exists(profileId, type, ctx, itemId)
+            "fav" -> !favoriteDao.exists(type, itemId)
+            "his" -> !historyDao.exists(type, itemId)
+            "order" -> !contentOrderDao.exists(type, ctx, itemId)
+            "member" -> !customCategoryDao.exists(type, ctx, itemId)
             else -> false
         }
     }
 
     /** Would this incoming deletion actually remove a row that is here now? */
-    suspend fun wouldRemove(profileId: Long, e: JSONObject): Boolean {
+    suspend fun wouldRemove(e: JSONObject): Boolean {
         val kind = e.optString("kind")
         if (kind !in TOMBSTONE_KINDS) return false
         val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
         val itemId = locate(type, e) ?: return false
         val at = e.optLong("at", 0)
         return when (kind) {
-            "fav" -> favoriteDao.exists(profileId, type, itemId) && favoriteDao.addedAt(profileId, type, itemId).let { it != null && it <= at }
-            "his" -> historyDao.watchedAt(profileId, type, itemId).let { it != null && it <= at }
-            "member" -> customCategoryDao.exists(profileId, type, e.optString("ctx"), itemId)
+            "fav" -> favoriteDao.exists(type, itemId) && favoriteDao.addedAt(type, itemId).let { it != null && it <= at }
+            "his" -> historyDao.watchedAt(type, itemId).let { it != null && it <= at }
+            "member" -> customCategoryDao.exists(type, e.optString("ctx"), itemId)
             else -> false
         }
     }
@@ -462,15 +457,8 @@ class UserDataResolver(
         val itemId: Long = locate(type, e)
             ?: return if (type == MediaType.LIVE) Resolution.PENDING else Resolution.HANDLED
 
-        // The record's own profile or nothing. This used to fall back to whichever profile happened to
-        // be first, which is right for "the active profile was deleted, show me something" but wrong
-        // here: it dumps a deleted profile's favorites, history and resume positions into another
-        // person's account — a Kids profile's content least of all. BackupManager already maps profile
-        // ids itself and skips records with no home on this device; this is the same rule one layer
-        // down. Returns true ("handled") so such a record is dropped rather than retried for ever
-        // against a profile that is never coming back.
-        val pid = e.getLong("p")
-        if (pid < 0 || profileDao.getById(pid) == null) return Resolution.HANDLED
+        // The record's own profile (`p`) is no longer read: the app has one user, and old files or
+        // payloads that still carry the field are applied as that one user's data.
         val at = e.optLong("at", System.currentTimeMillis())
         // The other half of the merge rule: a record older than a deletion of the same row loses to
         // it. Without this, a merge sync hands back every favorite the user has ever removed, because
@@ -478,26 +466,26 @@ class UserDataResolver(
         // Dropped rather than retried for ever — but reported as REFUSED, because the caller must be
         // able to tell "put back" from "deliberately not put back". A restore clears this device's
         // markers first (see BackupManager.ImportMode.RESTORE), so there it refuses nothing.
-        if (tombstonesPresent && tombstoneDao.deletedAt(pid, e.optString("kind"), canonicalIdentity(e))?.let { it >= at } == true) {
+        if (tombstonesPresent && tombstoneDao.deletedAt(e.optString("kind"), canonicalIdentity(e))?.let { it >= at } == true) {
             return Resolution.REFUSED
         }
         return runCatching {
             when (e.getString("kind")) {
-                "fav" -> favoriteDao.add(FavoriteEntity(profileId = pid, mediaType = type, itemId = itemId, addedAt = at))
+                "fav" -> favoriteDao.add(FavoriteEntity(mediaType = type, itemId = itemId, addedAt = at))
                 // Newest wins, both of them. An incoming record is a fact with a time on it exactly
                 // like a deletion is, and the later fact is the true one — so these insert when the
                 // row is absent and then move it forward only if the incoming copy is actually newer.
                 // A plain REPLACE would let the other device's older state win purely by arriving
                 // second, which is the difference between a merge and a coin toss.
                 "his" -> {
-                    historyDao.insertIfAbsent(WatchHistoryEntity(profileId = pid, mediaType = type, itemId = itemId, watchedAt = at))
-                    historyDao.bumpIfNewer(pid, type, itemId, at)
+                    historyDao.insertIfAbsent(WatchHistoryEntity(mediaType = type, itemId = itemId, watchedAt = at))
+                    historyDao.bumpIfNewer(type, itemId, at)
                 }
                 "order" -> contentOrderDao.insertAll(
-                    listOf(ContentOrderEntity(profileId = pid, mediaType = type, contextKey = e.getString("ctx"), itemId = itemId, position = e.getInt("pos"))),
+                    listOf(ContentOrderEntity(mediaType = type, contextKey = e.getString("ctx"), itemId = itemId, position = e.getInt("pos"))),
                 )
                 "member" -> customCategoryDao.insertAll(
-                    listOf(CustomCategoryMemberEntity(profileId = pid, mediaType = type, contextKey = e.getString("ctx"), itemId = itemId, position = e.getInt("pos"))),
+                    listOf(CustomCategoryMemberEntity(mediaType = type, contextKey = e.getString("ctx"), itemId = itemId, position = e.getInt("pos"))),
                 )
             }
             Resolution.HANDLED
@@ -522,16 +510,16 @@ class UserDataResolver(
 }
 
 /** One row of a re-sync snapshot, as the orphan purge needs it. */
-internal data class SnapshotRow(val kind: String, val profileId: Long, val type: MediaType, val itemId: Long)
+internal data class SnapshotRow(val kind: String, val type: MediaType, val itemId: Long)
 
-/** Ids of one kind, profile and type, deleted in one statement. */
-internal data class SnapshotPurgeBatch(val kind: String, val profileId: Long, val type: MediaType, val itemIds: List<Long>)
+/** Ids of one kind and type, deleted in one statement. */
+internal data class SnapshotPurgeBatch(val kind: String, val type: MediaType, val itemIds: List<Long>)
 
-/** [rows] of [kinds], grouped by kind, profile and type, each id once, at most [chunk] ids a batch
+/** [rows] of [kinds], grouped by kind and type, each id once, at most [chunk] ids a batch
  *  (SQLite allows 999 bound values on older engines). */
 internal fun snapshotPurgeBatches(rows: List<SnapshotRow>, kinds: Set<String>, chunk: Int = 900): List<SnapshotPurgeBatch> =
     rows.filter { it.kind in kinds }
-        .groupBy { Triple(it.kind, it.profileId, it.type) }
+        .groupBy { Pair(it.kind, it.type) }
         .flatMap { (key, group) ->
-            group.map { it.itemId }.distinct().chunked(chunk).map { SnapshotPurgeBatch(key.first, key.second, key.third, it) }
+            group.map { it.itemId }.distinct().chunked(chunk).map { SnapshotPurgeBatch(key.first, key.second, it) }
         }

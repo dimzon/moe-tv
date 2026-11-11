@@ -14,7 +14,6 @@ class StageDefaultsTest {
     @Test
     fun `an update gets the Stage rail, glass and background`() {
         val prefs = mutablePreferencesOf(
-            Keys.ACTIVE_PROFILE to 1L,
             Keys.NAV_STYLE to "FLOATING", Keys.NAV_SIZE to "WIDE", Keys.NAV_LENGTH to "FULL",
             Keys.GLASS_SCOPE to 0, Keys.GLASS_ALPHA to 80,
             Keys.BG_STYLE to "PICTURE", Keys.BG_LOOK to "DARK", Keys.BG_DIM to 70,
@@ -51,9 +50,9 @@ class StageDefaultsTest {
 
     @Test
     fun `an existing phone install keeps its own look`() {
-        val withProfile = mutablePreferencesOf(Keys.ACTIVE_PROFILE to 1L)
-        SettingsRepository.phoneStageDefaults(withProfile, alphaPct = 51)
-        assertNull(withProfile[Keys.GLASS_SCOPE])
+        val withBackground = mutablePreferencesOf(Keys.BG_STYLE to "SOLID")
+        SettingsRepository.phoneStageDefaults(withBackground, alphaPct = 51)
+        assertNull(withBackground[Keys.GLASS_SCOPE])
         val glassOff = mutablePreferencesOf(Keys.GLASS_SCOPE to 0)
         SettingsRepository.phoneStageDefaults(glassOff, alphaPct = 51)
         assertEquals(0, glassOff[Keys.GLASS_SCOPE])

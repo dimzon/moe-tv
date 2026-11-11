@@ -5,7 +5,7 @@ import tv.own.owntv.core.live.LiveKey
 /**
  * The browse view of a section's customizations once category locks are applied.
  *
- * A lock only counts while the profile has a Customize PIN: without one there is nothing to check an
+ * A lock only counts while there is a Customize PIN: without one there is nothing to check an
  * entry against, so a lock left behind (a partial restore, say) must not wall a category off for good.
  * The locked categories [unlocked] does not hold become [SectionCustomizations.sealedCategories],
  * hidden or not: a plain hide does not reach Favorites, History or custom categories, a seal does.

@@ -17,20 +17,20 @@ interface TvProviderProgramDao {
     suspend fun upsertAll(rows: List<TvProviderProgramEntity>)
 
     @Query(
-        "SELECT * FROM tv_provider_programs WHERE profileId = :profileId AND surface = :surface " +
+        "SELECT * FROM tv_provider_programs WHERE surface = :surface " +
             "AND mediaType = :mediaType AND groupId = :groupId LIMIT 1",
     )
-    suspend fun find(profileId: Long, surface: TvProviderSurface, mediaType: MediaType, groupId: Long): TvProviderProgramEntity?
+    suspend fun find(surface: TvProviderSurface, mediaType: MediaType, groupId: Long): TvProviderProgramEntity?
 
-    @Query("SELECT * FROM tv_provider_programs WHERE profileId = :profileId ORDER BY surface ASC, lastPublishedAt DESC")
-    suspend fun getAllForProfile(profileId: Long): List<TvProviderProgramEntity>
+    @Query("SELECT * FROM tv_provider_programs ORDER BY surface ASC, lastPublishedAt DESC")
+    suspend fun all(): List<TvProviderProgramEntity>
 
-    @Query("SELECT * FROM tv_provider_programs WHERE profileId = :profileId AND surface = :surface")
-    suspend fun getForSurface(profileId: Long, surface: TvProviderSurface): List<TvProviderProgramEntity>
+    @Query("SELECT * FROM tv_provider_programs WHERE surface = :surface")
+    suspend fun getForSurface(surface: TvProviderSurface): List<TvProviderProgramEntity>
 
-    @Query("DELETE FROM tv_provider_programs WHERE profileId = :profileId AND surface = :surface AND mediaType = :mediaType AND groupId = :groupId")
-    suspend fun delete(profileId: Long, surface: TvProviderSurface, mediaType: MediaType, groupId: Long)
+    @Query("DELETE FROM tv_provider_programs WHERE surface = :surface AND mediaType = :mediaType AND groupId = :groupId")
+    suspend fun delete(surface: TvProviderSurface, mediaType: MediaType, groupId: Long)
 
-    @Query("DELETE FROM tv_provider_programs WHERE profileId = :profileId")
-    suspend fun deleteForProfile(profileId: Long)
+    @Query("DELETE FROM tv_provider_programs")
+    suspend fun clearAll()
 }

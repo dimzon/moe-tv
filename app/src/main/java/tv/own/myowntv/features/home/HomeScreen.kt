@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -479,7 +478,7 @@ internal fun Modifier.tracked(requester: FocusRequester? = null, track: (FocusRe
 }
 
 /**
- * Keep watching: the channels the profile last watched, 16:9 stills 336 × 189. After 3 s on a card
+ * Keep watching: the channels last watched, 16:9 stills 336 × 189. After 3 s on a card
  * its preview plays inside the still (the card does not widen, nothing is drawn over it).
  */
 @Composable

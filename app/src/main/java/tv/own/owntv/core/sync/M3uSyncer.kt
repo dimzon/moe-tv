@@ -242,7 +242,7 @@ internal class M3uSyncer(
             newCategoriesByType.forEach { (type, cats) ->
                 if (cats.isNotEmpty()) {
                     stats.processedCounts.merge(SyncSupport.CATEGORIES_ADDED_KEY, cats.size, Int::plus)
-                    support.applyHideNewCategoriesDefault(s.id, type, cats)
+                    support.applyHideNewCategoriesDefault(type, cats)
                 }
             }
             header

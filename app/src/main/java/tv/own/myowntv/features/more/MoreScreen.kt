@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -48,10 +47,8 @@ import androidx.compose.foundation.layout.size
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -59,7 +56,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -73,6 +69,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
@@ -84,9 +81,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.em
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
@@ -95,13 +90,11 @@ import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.BuildConfig
 import tv.own.myowntv.R
-import tv.own.myowntv.features.profiles.PinPrompt
-import tv.own.myowntv.features.settings.BackupScreen
+import tv.own.myowntv.features.categorylock.PinPrompt
 import tv.own.myowntv.features.settings.LocalSyncScreen
 import tv.own.myowntv.features.settings.SettingsViewModel
 import tv.own.myowntv.features.settings.lock.SettingsPinViewModel
 import tv.own.owntv.core.settings.guardsPage
-import tv.own.myowntv.features.shell.components.RailAvatar
 import tv.own.owntv.player.PlaybackErrorLog
 import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.stage.StageGroupItem
@@ -110,30 +103,23 @@ import tv.own.myowntv.ui.stage.StageSurface
 import tv.own.myowntv.ui.stage.stageGlass
 import tv.own.myowntv.ui.theme.StageColors
 import tv.own.myowntv.ui.theme.mpx
-import tv.own.myowntv.ui.theme.stageAccent
 import tv.own.myowntv.ui.theme.stageText
 
 /** The sheet's items, top to bottom. */
-private enum class MoreItem { SETTINGS, FAVORITES, HISTORY, BACKUP, LOCAL_SYNC, ERROR_LOG, ABOUT }
+private enum class MoreItem { SETTINGS, FAVORITES, HISTORY, LOCAL_SYNC, ERROR_LOG, ABOUT }
 
 /** The pages that ask for the Settings PIN when it is on. */
-private val PIN_PAGES = setOf(MoreItem.BACKUP, MoreItem.LOCAL_SYNC)
+private val PIN_PAGES = setOf(MoreItem.LOCAL_SYNC)
 
 /**
- * More: the glass section sheet, topped by the profile, and one page on the right
+ * More: the glass section sheet, and one page on the right
  * for the item chosen with OK. Two layers, never three: ▲ ▼ move focus, OK selects the item (focus stays), ▶ enters the page, Back returns to
  * the sheet, Back again leaves More. Nothing opens full screen any more — Settings is the one door out,
  * through its group cards.
  */
 @Composable
 fun MoreScreen(
-    profileName: String,
     playlistLabel: String,
-    avatarId: Int,
-    avatarPath: String,
-    onSwitchProfile: () -> Unit,
-    /** OK on the avatar: the avatar picker, with "Your own picture". */
-    onPickAvatar: () -> Unit,
     onOpenSettings: (group: Int?, search: Boolean) -> Unit,
     /** ▶ / OK on a Favourites or History row: the same path Home uses, straight to the channel. */
     onPlayChannel: (Long) -> Unit,
@@ -147,10 +133,10 @@ fun MoreScreen(
     settingsVm: SettingsViewModel = koinViewModel(),
     pinVm: SettingsPinViewModel = koinViewModel(),
 ) {
-    // Backup & Restore, Local sync and Developer can restore or copy settings, so the Settings PIN
+    // Local sync and Developer can restore or copy settings, so the Settings PIN
     // guards them too; one unlock holds until More is left.
     val pinLock by pinVm.lock.collectAsStateWithLifecycle()
-    var pinPagesUnlocked by remember(pinLock.profileId) { mutableStateOf(false) }
+    var pinPagesUnlocked by remember { mutableStateOf(false) }
     var askPinFor by remember { mutableStateOf<MoreItem?>(null) }
     val pinShut: (MoreItem) -> Boolean = { it in PIN_PAGES && pinLock.guardsPage(pinPagesUnlocked) }
     var chosen by rememberSaveable { mutableStateOf(MoreItem.SETTINGS) }
@@ -190,8 +176,6 @@ fun MoreScreen(
     val favorites by vm.favorites.collectAsStateWithLifecycle()
     val history by vm.history.collectAsStateWithLifecycle()
     val sync by vm.sync.collectAsStateWithLifecycle()
-    val lastBackup by vm.lastBackup.collectAsStateWithLifecycle()
-    val playlists by vm.playlistCount.collectAsStateWithLifecycle()
     val pinned by settingsVm.quickPinnedKeys.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var logVersion by remember { mutableIntStateOf(0) }
@@ -213,7 +197,6 @@ fun MoreScreen(
                 }
                 .focusGroup(),
         ) {
-            ProfileRow(profileName, playlistLabel, playlists, avatarId, avatarPath, onSwitchProfile, onPickAvatar)
             val item = @Composable { it: MoreItem, icon: MyOwnTVIcon, label: String, value: String?, warn: Boolean ->
                 StageGroupItem(
                     text = label, icon = icon, value = value, warn = warn,
@@ -227,10 +210,6 @@ fun MoreScreen(
             item(MoreItem.FAVORITES, MyOwnTVIcon.FAVORITE, stringResource(R.string.content_category_favorites), favorites.total.toString(), false)
             item(MoreItem.HISTORY, MyOwnTVIcon.HISTORY, stringResource(R.string.content_category_history), history.total.toString(), false)
             GroupLabel(stringResource(R.string.more_group_keep_safe))
-            item(
-                MoreItem.BACKUP, MyOwnTVIcon.DOWNLOADS, stringResource(R.string.settings_backup_restore),
-                lastBackup?.let { relativeShort(it.at) } ?: stringResource(R.string.common_never), lastBackup == null,
-            )
             item(MoreItem.LOCAL_SYNC, MyOwnTVIcon.PHONE, stringResource(R.string.local_sync_title), stringResource(if (sync.listening) R.string.common_on else R.string.common_off), false)
             GroupLabel(stringResource(R.string.settings_app_group))
             item(MoreItem.ERROR_LOG, MyOwnTVIcon.WARNING, stringResource(R.string.settings_playback_error_log), logCount.toString(), false)
@@ -270,10 +249,9 @@ fun MoreScreen(
                     onClearHistory = { settingsVm.clearWatchHistory(it) },
                     onPlayChannel = onPlayChannel,
                 )
-                MoreItem.BACKUP -> BackupScreen(entry = pageTarget, modifier = Modifier.fillMaxSize())
                 MoreItem.LOCAL_SYNC -> LocalSyncScreen(entry = pageTarget, modifier = Modifier.fillMaxSize())
                 MoreItem.ERROR_LOG -> ErrorLogPage(setEntry = setEntry, onCountChanged = { logVersion++ })
-                MoreItem.ABOUT -> AboutPage(vm = vm, entry = pageTarget, onOpenLanguage = { onOpenSettings(8, false) })
+                MoreItem.ABOUT -> AboutPage(vm = vm, entry = pageTarget, onOpenLanguage = { onOpenSettings(7, false) })
             }
         }
     }
@@ -289,38 +267,6 @@ fun MoreScreen(
     }
 }
 
-/** The sheet's head: avatar 58 (OK changes it), name 24/800, "All playlists · 3 playlists", and **Switch**. */
-@Composable
-private fun ProfileRow(name: String, playlistLabel: String, playlists: Int, avatarId: Int, avatarPath: String, onSwitch: () -> Unit, onPickAvatar: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().padding(start = 14.mpx, end = 14.mpx, top = 4.mpx, bottom = 18.mpx),
-        horizontalArrangement = Arrangement.spacedBy(16.mpx),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        StageSurface(onClick = onPickAvatar, radius = 29.mpx, modifier = Modifier.size(58.mpx), focusStyle = tv.own.myowntv.ui.stage.StageFocus.POSTER, contentAlignment = Alignment.Center) {
-            RailAvatar(name.take(1).uppercase(), size = 58, textSize = 24, avatarId = avatarId, imagePath = avatarPath)
-        }
-        Column(Modifier.weight(1f)) {
-            Text(name, style = stageText(24, 800), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(
-                playlistLabel + stringResource(R.string.content_epg_bits_separator) + pluralStringResource(R.plurals.more_playlist_count, playlists, playlists),
-                style = stageText(15.5f, 500), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis,
-            )
-        }
-        StageSurface(
-            onClick = onSwitch, radius = 15.mpx, modifier = Modifier.height(40.mpx),
-            idle = Modifier.background(StageColors.ControlFill, RoundedCornerShape(15.mpx)),
-            contentAlignment = Alignment.Center,
-        ) { focused ->
-            Text(
-                stringResource(R.string.more_profile_switch), style = stageText(15, 700),
-                color = if (focused) stageAccent.onAccent else StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(horizontal = 16.mpx),
-            )
-        }
-    }
-}
-
 /** `.gsheet .gl`: 12.5/800 +0.13em in dim, upper-cased in the user's own locale. */
 @Composable
 private fun GroupLabel(text: String) {
@@ -330,9 +276,3 @@ private fun GroupLabel(text: String) {
         modifier = Modifier.padding(start = 16.mpx, end = 16.mpx, top = 16.mpx, bottom = 6.mpx),
     )
 }
-
-/** "2 days ago" — Android's own relative time, so it is localised without a string of ours. */
-private fun relativeShort(at: Long): String =
-    android.text.format.DateUtils.getRelativeTimeSpanString(
-        at, System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS,
-    ).toString()

@@ -19,7 +19,7 @@ sealed interface CategoryLockPrompt {
     /** Remove lock: the PIN takes the lock off for good. */
     data class RemoveLock(override val type: MediaType, override val key: LiveKey) : CategoryLockPrompt
 
-    /** Lock with PIN on a profile with no Customize PIN yet: enter one, then the same again. */
+    /** Lock with PIN while no Customize PIN exists yet: enter one, then the same again. */
     data class CreatePin(
         override val type: MediaType,
         override val key: LiveKey,

@@ -135,7 +135,7 @@ val ChannelEntity.matchName: String get() = providerName ?: name
  * recommended adding that gate on the strength of the comment. It would be wrong. Panels lie about
  * `allowed_output_formats`: gating here breaks HLS for every user on an under-reporting panel, and for
  * every source that has not finished syncing yet. The authoritative note is on the field itself in
- * `ProfileEntities.kt`. A channel whose `.m3u8` genuinely doesn't work is handled after the fact, per
+ * `SourceEntities.kt`. A channel whose `.m3u8` genuinely doesn't work is handled after the fact, per
  * channel and per engine, by `LiveStreamQuirks.rememberNoHlsVariant`.
  */
 fun ChannelEntity.playStreamUrl(source: SourceEntity?): String =

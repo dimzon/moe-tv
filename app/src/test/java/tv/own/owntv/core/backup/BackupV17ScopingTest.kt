@@ -76,25 +76,6 @@ class BackupV17ScopingTest {
         assertFalse(filtered.has("99"))
     }
 
-    // --- PIN hashes: sealed with a passphrase, never written in the clear ---
-
-    @Test
-    fun `sealed map values round-trip and unreadable ones are dropped rather than restored blank`() {
-        // Stand-ins for the real AES-GCM pair (android.util.Base64 is not available in a JVM test).
-        val seal: (String) -> JSONObject = { JSONObject().put("ct", it.reversed()) }
-        val unseal: (Any?) -> String? = { v -> (v as? JSONObject)?.optString("ct")?.reversed() }
-
-        val pins = JSONObject().put("1", "salt:hash").put("2", "other:hash")
-        val sealed = sealValues(pins, seal)
-        assertFalse("the hash must not survive in readable form", sealed.optString("1") == "salt:hash")
-
-        assertEquals("salt:hash", unsealValues(sealed, unseal).optString("1"))
-        assertEquals("other:hash", unsealValues(sealed, unseal).optString("2"))
-
-        // No key (no passphrase given for an encrypted file) → the entry is skipped entirely, so a
-        // restore leaves the device's own PIN in place instead of clearing the lock.
-        assertEquals(0, unsealValues(sealed) { null }.length())
-    }
 
     // --- 3. schema parity tripwire ---
 

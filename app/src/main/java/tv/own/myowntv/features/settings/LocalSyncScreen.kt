@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -334,8 +333,8 @@ private fun SyncTile(
  *
  * It lives beside [LocalSyncScreen] rather than in the setup package so it can reuse that screen's
  * step blocks unchanged — they are the substance of it, and a second copy of them would be a second
- * thing to keep right. Presented as a settings panel for the same reason `RemoteBackupRestoreScreen`
- * is: the wizard already borrows a settings screen for a step.
+ * thing to keep right. Presented as a settings panel: the wizard already borrows a settings screen
+ * for a step.
  *
  * Two things differ from the settings screen, and only two:
  *  - **it never hosts.** A television still being set up has nothing worth serving, and announcing an
@@ -378,7 +377,7 @@ fun SetupLocalSyncScreen(onRestored: () -> Unit, onBack: () -> Unit, modifier: M
     val finding = step is LocalSyncViewModel.Step.FindDevice
     // The wizard frame; the devices found and the address as rows, Cancel and Continue below.
     tv.own.myowntv.features.setup.WizardFrame(
-        step = tv.own.myowntv.features.setup.WizardStep.PROFILE,
+        step = tv.own.myowntv.features.setup.WizardStep.PLAYLIST,
         title = stringResource(R.string.setup_sync_device),
         sub = stringResource(R.string.local_sync_find_hint),
         back = tv.own.myowntv.features.setup.WizardAction(stringResource(R.string.common_cancel), leave),
@@ -733,7 +732,7 @@ private fun DirectionBlock(vm: LocalSyncViewModel, step: LocalSyncViewModel.Step
     }
 }
 
-/** The same list of parts Backup & Restore offers, ticked with OK. */
+/** The list of parts a sync can carry, ticked with OK. */
 @Composable
 private fun SectionsBlock(vm: LocalSyncViewModel, step: LocalSyncViewModel.Step.ChooseSections) {
     var sections by remember { mutableStateOf(BackupManager.Section.entries.toSet()) }
@@ -750,8 +749,6 @@ private fun SectionsBlock(vm: LocalSyncViewModel, step: LocalSyncViewModel.Step.
             color = StageColors.Text,
         )
         Text(stringResource(R.string.local_sync_sections_hint), style = stageText(18, 400), color = StageColors.Muted)
-        val profile by vm.activeProfileName.collectAsStateWithLifecycle()
-        Text(stringResource(R.string.local_sync_profile_note, profile), style = stageText(18, 600), color = StageColors.Muted, modifier = Modifier.padding(top = 6.mpx))
         Spacer(Modifier.height(14.mpx))
         BackupManager.Section.entries.forEach { section ->
             OnOffOption(
@@ -784,7 +781,6 @@ private fun ConfirmBlock(vm: LocalSyncViewModel, step: LocalSyncViewModel.Step.C
         } else {
             Text(stringResource(R.string.local_sync_confirm_hint), style = stageText(18, 400), color = StageColors.Muted)
             Spacer(Modifier.height(14.mpx))
-            Change(R.string.local_sync_change_profiles, preview.newProfiles)
             Change(R.string.local_sync_change_sources, preview.newSources)
             Change(R.string.local_sync_change_favorites, preview.newFavorites)
             Change(R.string.local_sync_change_history, preview.newHistory)

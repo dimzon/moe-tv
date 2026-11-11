@@ -9,9 +9,9 @@ import tv.own.owntv.core.sports.model.Match
 data class SportsSuggestion(val key: String, val name: String, val abbreviation: String, val plays: Int, val team: FollowedTeam?)
 
 /**
- * What the profile's sports settings remember from use: the channel chosen per competition
+ * What the sports settings remember from use: the channel chosen per competition
  * ("Always use for Bundesliga"), plays from the hub, and the suggestions made of them. Pure
- * functions on [SportsConfig]; the caller writes the result with `updateSportsConfig(pid) { … }`.
+ * functions on [SportsConfig]; the caller writes the result with `updateSportsConfig { … }`.
  * Nothing here ever follows anything — a suggestion is only offered.
  */
 object SportsMemory {

@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -98,7 +97,7 @@ private val COUNTRIES = listOf("DE", "AT", "CH", "UK", "US", "FR", "BE", "ES", "
  * Settings → Sports, drawn as every Settings page is, with its sub-pages: Sports
  * and leagues (two panes: sports, then the chosen sport's leagues), My teams (search + suggested), Goal
  * alerts (the TV's in-player toast only), languages, countries, playlists, Remembered channels and About
- * sports data. Every value is the profile's; backups carry it.
+ * sports data. Every value is the user's; backups carry it.
  */
 @Composable
 fun SportsSettingsScreen(
@@ -273,7 +272,7 @@ private fun MainRows(vm: SportsSettingsViewModel, c: SportsConfig, shown: Boolea
     Row(MyOwnTVIcon.INFO, stringResource(R.string.sports_about), stringResource(R.string.sports_about_summary), SettingValue.Opens(null)) { open(SportsSettingsPage.ABOUT) }
 }
 
-/** "My teams", "Followed leagues", both, or Off — what Goal alerts covers on this profile. */
+/** "My teams", "Followed leagues", both, or Off — what Goal alerts covers. */
 @Composable
 private fun alertsSummary(c: SportsConfig): String {
     val a = c.alerts

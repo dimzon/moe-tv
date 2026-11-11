@@ -7,14 +7,10 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import tv.own.myowntv.R
 import tv.own.owntv.core.backup.BackupManager
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.dao.SourceDao
-import tv.own.owntv.core.database.entity.ProfileEntity
-import tv.own.owntv.core.database.entity.ProfileSourceCrossRef
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.SourceType
 import tv.own.owntv.core.network.ConnectivityObserver
@@ -36,14 +32,13 @@ import tv.own.owntv.core.sync.SyncScopeChoice
 import tv.own.owntv.core.sync.SyncWarning
 import tv.own.owntv.core.sync.work.CatalogSyncScheduler
 import tv.own.owntv.core.util.FriendlySyncFailure
-import tv.own.owntv.core.util.Pin
 import tv.own.owntv.core.util.classifySyncFailure
 import java.io.File
 
 /**
- * Adding content to a profile, from the first-run wizard or from the settings screen: create the
- * profile, add a source, sync it, finalize it, enqueue whatever was deferred — and, when any of that
- * fails, undo exactly as much as is safe to undo.
+ * Adding content, from the first-run wizard or from the settings screen: add a source, sync it,
+ * finalize it, enqueue whatever was deferred — and, when any of that fails, undo exactly as much as
+ * is safe to undo. The app has one user and global sources: there is no profile to create or attach.
  *
  * Every function here suspends and the **caller owns the job**, because "Run in background" is the
  * whole reason the job outlives its screen: the host launches into a scope that survives the wizard
@@ -51,7 +46,6 @@ import java.io.File
  * Cancelling the caller's job cancels the import and runs the same cleanup.
  */
 class SourceImporter(
-    private val profileDao: ProfileDao,
     private val sourceDao: SourceDao,
     private val sourceRepository: SourceRepository,
     private val backup: BackupManager,
@@ -61,7 +55,6 @@ class SourceImporter(
     private val catalogSyncScheduler: CatalogSyncScheduler,
     private val stalkerAuth: StalkerAuthManager,
     private val xtreamClient: XtreamClient,
-    private val protection: tv.own.owntv.core.profile.ProfileProtection,
     private val context: Context,
 ) {
 
@@ -108,33 +101,6 @@ class SourceImporter(
      */
     var backgroundHandoff = false
 
-    private var createdProfileId = -1L
-    private var createdProfileName = ""
-
-    /** Creates the profile (not active yet); the rest of onboarding attaches content to it. */
-    suspend fun createProfile(name: String, avatarId: Int, isKids: Boolean, pin: String?): Long {
-        createdProfileName = name
-        createdProfileId = profileDao.insert(
-            ProfileEntity(
-                name = name,
-                avatarColor = 0,
-                avatarId = avatarId,
-                isKids = isKids,
-                pinHash = pin?.takeIf { it.isNotBlank() }?.let { Pin.hash(it) },
-            ),
-        )
-        return createdProfileId
-    }
-
-    /**
-     * Attach what follows to a profile that already exists — "add a playlist" from an app that is
-     * already set up, where onboarding's brand-new profile is not what the user asked for. Without
-     * it the next add would silently create a second profile.
-     */
-    fun useProfile(id: Long) {
-        createdProfileId = id
-    }
-
     /**
      * RuTube: attach the single built-in source and sync it. No credentials, no address —
      * the public API is the whole provider. The canvas drives the same ImportState as an
@@ -143,8 +109,8 @@ class SourceImporter(
     suspend fun rutube(autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF, makeDefault: Boolean = false) {
         runImport(
             autoRefresh, requiresNetwork = true, makeDefault = makeDefault,
-        ) { profileId ->
-            sourceRepository.ensureRutube(profileId)
+        ) {
+            sourceRepository.ensureRutube()
         }
     }
 
@@ -166,9 +132,8 @@ class SourceImporter(
         runImport(
             autoRefresh, priority, enabledScope = enabled, enqueueRemainder = true,
             requiresNetwork = true, makeDefault = makeDefault,
-        ) { profileId ->
+        ) {
             sourceRepository.addXtreamSource(
-                profileId = profileId,
                 name = uniqueName(name),
                 serverUrl = server.trim(),
                 username = username.trim(),
@@ -183,7 +148,7 @@ class SourceImporter(
     }
 
     /** Stalker/MAC portal: the handshake is verified BEFORE the source is saved, so a typo'd portal
-     *  or MAC fails with a clear error instead of leaving a dead source on a brand-new profile. */
+     *  or MAC fails with a clear error instead of leaving a dead source behind. */
     suspend fun stalker(
         name: String,
         portalUrl: String,
@@ -213,7 +178,7 @@ class SourceImporter(
         runImport(
             autoRefresh, contentTypes = priority, enabledScope = enabled, enqueueRemainder = true,
             requiresNetwork = true, makeDefault = makeDefault,
-        ) { profileId ->
+        ) {
             stalkerAuth.testConnection(
                 StalkerCredentials(
                     sourceId = STALKER_TEST_SOURCE_ID,
@@ -231,7 +196,7 @@ class SourceImporter(
                 ),
             )
             sourceRepository.addStalkerSource(
-                profileId, uniqueName(name), portalUrl.trim(), canonicalMac,
+                name = uniqueName(name), portalUrl = portalUrl.trim(), mac = canonicalMac,
                 serialNumber.trim().takeIf { it.isNotBlank() },
                 deviceId.trim().takeIf { it.isNotBlank() },
                 deviceId2.trim().takeIf { it.isNotBlank() },
@@ -278,9 +243,8 @@ class SourceImporter(
             }
         }
         val playlistUrl = XtreamM3uLink.clean(url)
-        runImport(autoRefresh, requiresNetwork = !playlistUrl.isLocalPlaylistPath(), makeDefault = makeDefault) { profileId ->
+        runImport(autoRefresh, requiresNetwork = !playlistUrl.isLocalPlaylistPath(), makeDefault = makeDefault) {
             sourceRepository.addM3uSource(
-                profileId = profileId,
                 name = uniqueName(name),
                 url = playlistUrl,
                 userAgent = userAgent.trim().takeIf { it.isNotBlank() },
@@ -299,7 +263,7 @@ class SourceImporter(
         /** "Make this the default playlist" — set once the sync succeeded, never on a source that
          *  is about to be cleaned up again. */
         makeDefault: Boolean = false,
-        addSource: suspend (Long) -> SourceEntity,
+        addSource: suspend () -> SourceEntity,
     ) {
         _state.value = ImportState.Running
         _progress.value = null
@@ -309,8 +273,7 @@ class SourceImporter(
                 _state.value = ImportState.Failed(SetupFailure.Sync(classifySyncFailure(null, online = false)))
                 return
             }
-            val profileId = createdProfileId.takeIf { it > 0 } ?: ensureFallbackProfile()
-            source = addSource(profileId)
+            source = addSource()
             val freshSync = source.lastSyncAt == null
             val remainder = if (enqueueRemainder) {
                 enabledScope.remainderAfter(contentTypes)
@@ -364,28 +327,19 @@ class SourceImporter(
     }
 
     /**
-     * Other profiles' playlists that aren't already on the new profile, leaving out every playlist a
-     * protected profile uses (see [tv.own.owntv.core.profile.inheritableSourceIds]).
+     * The playlists already on this device, for a "use an existing playlist" step: sources are global
+     * now, so there is nothing to link — the step only re-syncs what the user ticks.
      */
-    suspend fun availableExistingSources(): List<SourceEntity> {
-        val links = sourceDao.allLinks()
-        val fromOthers = links.filter { it.profileId != createdProfileId }.map { it.sourceId }.toSet()
-        val alreadyMine = links.filter { it.profileId == createdProfileId }.map { it.sourceId }.toSet()
-        val wanted = (fromOthers intersect protection.inheritableSourceIds().toSet()) - alreadyMine
-        return sourceDao.getAllOnce().filter { it.id in wanted }
-    }
+    suspend fun availableExistingSources(): List<SourceEntity> = sourceDao.getAllOnce()
 
     /**
-     * Link the chosen existing sources to the new profile (shared content, separate favorites and
-     * history), then re-sync each one so its catalog is fresh — exactly like adding a brand-new
+     * Re-sync the chosen existing sources so their catalog is fresh — exactly like adding a brand-new
      * source. Drives the same [state] and [progress] as an add, so the host shows one import screen.
      */
     suspend fun linkExisting(sourceIds: Set<Long>) {
         _state.value = ImportState.Running
         _progress.value = null
         try {
-            val pid = createdProfileId.takeIf { it > 0 } ?: ensureFallbackProfile()
-            sourceIds.forEach { sourceDao.link(ProfileSourceCrossRef(profileId = pid, sourceId = it)) }
             val sources = sourceDao.getAllOnce().filter { it.id in sourceIds }
             var total = SyncCounts(0, 0)
             var failure: String? = null
@@ -463,10 +417,8 @@ class SourceImporter(
         sections: Set<BackupManager.Section>,
         deviceSettings: Boolean,
     ): Boolean =
-        // Setup has no PIN step: a protected profile already on this device is left as it is.
         backup.import(
             file, sections, backupPassword = password, deviceSettings = deviceSettings,
-            holdBack = protection.heldBack(activeId = createdProfileId),
         ).fold(
             onSuccess = { summary ->
                 val needPassword = if (BackupManager.Section.SOURCES in sections) syncRestoredSources() else emptyList()
@@ -526,26 +478,17 @@ class SourceImporter(
         return numberedName(name.trim(), taken) { base, n -> context.getString(R.string.setup_name_numbered, base, n) }
     }
 
-    private suspend fun ensureFallbackProfile(): Long {
-        if (createdProfileId > 0) return createdProfileId
-        createdProfileId = profileDao.insert(ProfileEntity(name = createdProfileName, avatarColor = 0, avatarId = 0))
-        return createdProfileId
-    }
-
     fun reset() {
         _state.value = ImportState.Idle
         _progress.value = null
     }
 
     /**
-     * Completes onboarding: the new profile becomes active, which is what routes the app into the
-     * shell — and what every screen reading `activeProfileSources()` waits for. Returns the active
-     * profile id, or null when there is none.
+     * Completes onboarding: everything a first run adds is already synced and the settings already
+     * point at it. The app has no profile step, so there is nothing left to switch — the shell routes
+     * itself by "setup done + a source exists".
      */
-    suspend fun finish(): Long? {
-        if (createdProfileId > 0) settings.setActiveProfile(createdProfileId)
-        return settings.activeProfileId.first().takeIf { it >= 0L }
-    }
+    suspend fun finish() = Unit
 
     private suspend fun cleanupFailedAdd(source: SourceEntity?) {
         if (source == null) return
@@ -553,7 +496,7 @@ class SourceImporter(
             catalogSyncScheduler.cancelSync(source.id)
             // The built-in RuTube source is the app's only provider and is recreated on demand;
             // never delete it on a transient first-sync failure (a network blip would otherwise
-            // leave the profile with no way back except another full setup).
+            // leave the app with no way back except another full setup).
             if (source.type == SourceType.RUTUBE) {
                 runCatching { sourceRepository.clearSourceContent(source.id) }
             } else if (backgroundHandoff) {

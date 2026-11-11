@@ -74,8 +74,6 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
         val deviceId: String,
         val deviceName: String,
         val theirSections: Set<tv.own.owntv.core.backup.BackupManager.Section> = emptySet(),
-        /** The asking device's profile in use: the one this device's profile in use will be synced with. */
-        val theirProfileName: String = "",
     )
 
     private val _autoSyncRequests = MutableStateFlow<List<AutoSyncRequest>>(emptyList())
@@ -97,7 +95,6 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
         deviceId: String,
         deviceName: String,
         theirSections: Set<tv.own.owntv.core.backup.BackupManager.Section> = emptySet(),
-        theirProfileName: String = "",
     ): Boolean {
         // A device that asks again is asking a fresh question: its previous request belongs to a
         // screen that has already stopped waiting, and leaving it up would put two prompts for the
@@ -109,7 +106,7 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
             }
             requests.filterNot { it.deviceId == deviceId }
         }
-        val request = AutoSyncRequest(UUID.randomUUID().toString(), deviceId, deviceName, theirSections, theirProfileName)
+        val request = AutoSyncRequest(UUID.randomUUID().toString(), deviceId, deviceName, theirSections)
         val answer = CompletableDeferred<Boolean>()
         autoSyncAnswers[request.id] = answer
         _autoSyncRequests.update { it + request }

@@ -5,8 +5,6 @@ import android.util.Log
 import androidx.work.ExistingWorkPolicy
 import kotlinx.coroutines.flow.first
 import tv.own.owntv.core.database.dao.EpgDao
-import tv.own.owntv.core.database.dao.ProfileDao
-import tv.own.owntv.core.database.dao.resolveExistingProfileId
 import tv.own.owntv.core.epg.EpgSourceStore
 import tv.own.owntv.core.repository.SourceRepository
 import tv.own.owntv.core.settings.EpgAutoRefresh
@@ -36,7 +34,6 @@ import tv.own.owntv.core.sync.work.EpgSyncScheduler
 class AutoRefresh(
     private val settings: SettingsRepository,
     private val sourceRepository: SourceRepository,
-    private val profileDao: ProfileDao,
     private val catalogSyncScheduler: CatalogSyncScheduler,
     private val epgSyncScheduler: EpgSyncScheduler,
     private val epgSourceStore: EpgSourceStore,
@@ -58,11 +55,10 @@ class AutoRefresh(
             }
         }
         val nowMs = System.currentTimeMillis()
-        val pid = profileDao.resolveExistingProfileId(settings.activeProfileId.first()) ?: return
         // --- Playlist sources ---
         val playlistModes = settings.playlistAutoRefresh.first()
         if (playlistModes.isNotEmpty()) {
-            sourceRepository.observeSources(pid).first().forEach { source ->
+            sourceRepository.observeSources().first().forEach { source ->
                 val mode = playlistModes[source.id] ?: PlaylistRefresh.OFF
                 if (shouldRefresh(mode, source.lastSyncAt, nowMs, includeStartup)) {
                     val counts = importFinalizer.contentCounts(source.id)

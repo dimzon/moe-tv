@@ -3,7 +3,6 @@ package tv.own.owntv.core.database.dao
 import tv.own.owntv.core.model.MediaType
 
 data class UserDataExportRow(
-    val profileId: Long,
     val mediaType: MediaType,
     val itemId: Long,
     val sourceId: Long,

@@ -25,7 +25,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -63,10 +62,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.myowntv.ui.stage.PlaylistMark
 import tv.own.owntv.core.database.dao.SourceDao
-import tv.own.owntv.core.database.dao.resolveExistingProfileId
 import tv.own.owntv.core.content.SearchIntent
 import tv.own.owntv.core.content.SearchKind
 import tv.own.owntv.core.content.SearchReader
@@ -76,28 +73,27 @@ import tv.own.owntv.core.repository.activeProfileSources
 import tv.own.owntv.core.settings.SettingsRepository
 
 /**
- * Cross-section search over a profile's channels and the guide.
+ * Cross-section search over the app's channels and the guide.
  *
  * The searching itself is core's [SearchReader]: the FTS expression, the hidden items and
- * categories, the kids filter and the Customize renames are the same rules on a phone as on a
+ * categories and the Customize renames are the same rules on a phone as on a
  * television, so they are not written twice. What stays here is the screen's own behaviour —
  * debouncing and the recents list. A result is never played here: OK goes to it. Core's result
  * object still carries the (VOD-dead) movie and series lists; the television only ever reads the
  * channels and programmes out of it.
  */
 class SearchViewModel(
-    private val profileDao: ProfileDao,
     private val sourceDao: SourceDao,
     private val settings: SettingsRepository,
     private val searchReader: SearchReader,
 ) : ViewModel() {
 
-    // Observe the active profile's sources reactively so adding/removing a playlist refreshes Search
+    // Observe the sources reactively so adding/removing a playlist refreshes Search
     // immediately (was read once at startup, so a new playlist showed nothing until app restart).
     // Per-section Off flags split the id sets so an Off section never surfaces in results.
     private val ctx: StateFlow<ActiveProfileSources> = activeProfileSources(settings, sourceDao)
         .distinctUntilChanged()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, ActiveProfileSources(-1L, emptyList()))
+        .stateIn(viewModelScope, SharingStarted.Eagerly, ActiveProfileSources(emptyList()))
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
@@ -144,14 +140,11 @@ class SearchViewModel(
     val curatedResults: StateFlow<SearchResults> = combine(_intent, ctx) { i, c -> i to c }
         .flatMapLatest { (i, c) ->
             if (i == null) flowOf(SearchResults())
-            else flowOf(searchReader.curated(c.profileId, c, i))
+            else flowOf(searchReader.curated(c, i))
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SearchResults())
 
-    private suspend fun search(q: String): SearchResults {
-        val pid = currentProfileId() ?: return SearchResults()
-        return searchReader.search(pid, ctx.value, q)
-    }
+    private suspend fun search(q: String): SearchResults = searchReader.search(ctx.value, q)
 
     // --- Stage page ---
 
@@ -169,9 +162,4 @@ class SearchViewModel(
     val playlistMarks: StateFlow<Map<Long, PlaylistMark>> = ctx
         .map { aps -> if (aps.sources.size < 2) emptyMap() else aps.sources.withIndex().associate { (i, s) -> s.id to PlaylistMark.of(s.name, i) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
-
-    private suspend fun currentProfileId(): Long? {
-        val preferred = settings.activeProfileId.first()
-        return if (preferred >= 0) profileDao.resolveExistingProfileId(preferred) else null
-    }
 }

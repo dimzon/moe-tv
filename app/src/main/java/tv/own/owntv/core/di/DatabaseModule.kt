@@ -12,11 +12,6 @@ import tv.own.owntv.core.database.OwnTVDatabase
 /**
  * Provides the Room database (WAL journal mode for fast concurrent reads during large imports) and
  * each DAO. Foreign-key enforcement is on by default in Room.
- *
- * There is deliberately NO destructive-migration fallback: [OwnTVDatabase.ALL_MIGRATIONS] covers every
- * shipped version, and a wipe-on-mismatch "safety net" would silently delete a user's profiles,
- * sources, favorites, history and resume positions on the first schema surprise. A missing or
- * failing migration must surface as an error we can fix, not as an empty app.
  */
 val databaseModule = module {
     single {
@@ -33,12 +28,16 @@ val databaseModule = module {
             // Revert path, if 3.x ever misbehaves on a specific device: change this to
             // AndroidSQLiteDriver(). Nothing else in the codebase knows the difference.
             .setDriver(BundledSQLiteDriver())
-            .addMigrations(*OwnTVDatabase.ALL_MIGRATIONS)
+            // Redesign period, zero installed apps: the schema was reset to v1 without migrations,
+            // so any pre-existing database (dev builds) is simply dropped and recreated.
+            // DELETE THIS LINE before a public release — a wipe-on-mismatch fallback silently
+            // deletes real users' favorites and history.
+            .fallbackToDestructiveMigration(dropAllTables = true)
             .addCallback(object : RoomDatabase.Callback() {
                 // Self-heal index/FTS drift on every open (no-op when healthy): an interrupted bulk
                 // import can leave BulkInsertHelper's dropped indexes missing, which is invisible
-                // now but fails Room's full-schema validation at the NEXT version bump (the
-                // 4.0.x → 4.1.0 crash-loop). Healing here repairs drift long before that migration.
+                // now but fails Room's full-schema validation at the next open. Healing here
+                // repairs drift immediately.
                 //
                 // Gated behind a single sqlite_master count so a healthy open pays one index
                 // lookup instead of ~30 DDL statements on the thread issuing the first query. The
@@ -56,7 +55,7 @@ val databaseModule = module {
                     // cable can cost the tail of a catalogue import, and that re-syncs.
                     //
                     // The page cache is per-connection and defaults to ~2MB. Home alone opens a dozen
-                    // profile-scoped queries over the same handful of index pages, and every screen
+                    // user-data queries over the same handful of index pages, and every screen
                     // after it re-reads them; a negative value is SQLite's "this many KiB" form.
                     runCatching {
                         connection.execSQL("PRAGMA synchronous=NORMAL")
@@ -98,7 +97,6 @@ val databaseModule = module {
             .build()
     }
 
-    single { get<OwnTVDatabase>().profileDao() }
     single { get<OwnTVDatabase>().sourceDao() }
     single { get<OwnTVDatabase>().categoryDao() }
     single { get<OwnTVDatabase>().channelDao() }

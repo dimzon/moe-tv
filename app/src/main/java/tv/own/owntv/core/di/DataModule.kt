@@ -168,7 +168,8 @@ val dataModule = module {
     single { tv.own.owntv.core.sports.SportsTeams(get(), get(), get()) }
     // "Where is it live": the database reads (Search's own channel ↔ guide mapping) and the cached ranking.
     single<tv.own.owntv.core.sports.WatchData> {
-        tv.own.owntv.core.sports.RoomWatchData(get(), get(), get(), get(), get(), get(), get())
+        // epgDao, channelDao, categoryDao, sourceDao, customize, settings (profileDao is gone with the profiles)
+        tv.own.owntv.core.sports.RoomWatchData(get(), get(), get(), get(), get(), get())
     }
     single { tv.own.owntv.core.sports.WatchReader(get()) }
     single { tv.own.owntv.core.sports.SportOnChannels(get()) }
@@ -197,8 +198,6 @@ val dataModule = module {
             discovery = get(),
             autoSync = get(),
             autoServer = get(),
-            settings = get(),
-            profileDao = get(),
         )
     }
     // Automatic sync with paired devices: its agreements, the paired-only listener on its own port,
@@ -207,7 +206,7 @@ val dataModule = module {
     single { tv.own.owntv.core.sync.local.LocalAutoSyncStore(androidContext(), get()) }
     single { tv.own.owntv.core.sync.local.AutoSyncLocks() }
     single { tv.own.owntv.core.sync.local.LocalAutoSyncClient() }
-    single { tv.own.owntv.core.sync.local.AutoSyncTransfer(get(), get()) { androidContext().cacheDir } }
+    single { tv.own.owntv.core.sync.local.AutoSyncTransfer(get()) { androidContext().cacheDir } }
     single {
         tv.own.owntv.core.sync.local.LocalAutoSyncServer(
             store = get(),
@@ -239,13 +238,13 @@ val dataModule = module {
             epgSourceStore = get(),
         )
     }
-    // context, channelDao, profileDao, favoriteDao, historyDao, contentOrderDao, customCategoryDao,
+    // context, channelDao, favoriteDao, historyDao, contentOrderDao, customCategoryDao,
     // tombstoneDao, db
-    single { UserDataResolver(androidContext(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    single { UserDataResolver(androidContext(), get(), get(), get(), get(), get(), get(), get()) }
     // The one place a user deletion is written: it records the tombstone local sync needs and does
     // the delete in the same transaction. db, favoriteDao, historyDao, customCategoryDao, userData
     single { tv.own.owntv.core.backup.UserDataWriter(get(), get(), get(), get(), get()) }
-    // sourceDao, syncManager, userDataResolver, channelDao, categoryDao
+    // sourceDao, syncManager, userDataResolver, channelDao, categoryDao, playbackQuirkDao, playbackPrefsDao
     single { SourceRepository(get(), get(), get(), get(), get(), playbackQuirkDao = get(), playbackPrefsDao = get()) }
     // sourceDao, stalkerAuthManager, catalogSyncScheduler, importFinalizer
     single { tv.own.owntv.core.repository.SourceEditor(get(), get(), get(), get()) }
@@ -294,8 +293,8 @@ val dataModule = module {
             rutube = get(),
         )
     }
-    // channelDao, categoryDao, sourceDao, profileDao, customize, settings
-    single { tv.own.owntv.core.live.ChannelVersions(get(), get(), get(), get(), get(), get()) }
+    // channelDao, categoryDao, sourceDao, customize, settings (profileDao is gone with the profiles)
+    single { tv.own.owntv.core.live.ChannelVersions(get(), get(), get(), get(), get()) }
     // Who currently holds a stream on which playlist. Multiview tiles and the main playback spend the
     // same provider connections, so both count against one register.
     single { tv.own.owntv.core.live.OpenStreamRegistry() }
@@ -306,30 +305,24 @@ val dataModule = module {
     // re-arms, whether or not BOOT_COMPLETED arrived.
     single { tv.own.owntv.core.reminder.ReminderScheduler(androidContext(), get()) }
     single(createdAtStart = true) { tv.own.owntv.core.reminder.ReminderManager(get(), get()) }
-    // profileDao, sourceDao, settings, customizationStore, userDataResolver, epgSourceStore,
+    // sourceDao, settings, customizationStore, userDataResolver, epgSourceStore,
     // db, backgroundsDir (the folder ingestBackgroundImage writes to — the .own container carries the
-    // wallpaper), avatarStore
+    // wallpaper). Profiles and avatars are gone with the live-only redesign.
     single {
         BackupManager(
-            get(), get(), get(), get(), get(), get(), get(),
+            get(), get(), get(), get(), get(), get(),
             java.io.File(androidContext().filesDir, "backgrounds"),
-            get(),
         )
     }
-    // profileDao, sourceDao, settings, avatarStore, protection — creating,
-    // editing, switching and deleting a profile, shared by both apps' profile gates.
-    single { tv.own.owntv.core.profile.ProfileAvatarStore(androidContext()) }
-    single { tv.own.owntv.core.profile.ProfileProtection(get(), get(), get(), get()) }
-    single { tv.own.owntv.core.profile.ProfileManager(get(), get(), get(), get(), get()) }
     // context, okHttpClient, settings — in-app updates from GitHub Releases
     single { UpdateManager(androidContext(), get(), get()) }
     single { CatalogSyncScheduler(androidContext()) }
     single { EpgSyncScheduler(androidContext()) }
-    // settings, sourceRepository, profileDao, catalogSyncScheduler, epgSyncScheduler, epgSourceStore,
-    // epgDao, importFinalizer — the Auto refresh settings, run by both apps on start and resume.
-    single { tv.own.owntv.core.sync.AutoRefresh(get(), get(), get(), get(), get(), get(), get(), get()) }
-    // profileDao, sourceDao, sourceRepository, backup, settings, connectivity, importFinalizer,
-    // catalogSyncScheduler, stalkerAuth, xtreamClient, protection, context — onboarding: add a
+    // settings, sourceRepository, catalogSyncScheduler, epgSyncScheduler, epgSourceStore,
+    // epgDao, importFinalizer — the Auto refresh settings, run on start and resume.
+    single { tv.own.owntv.core.sync.AutoRefresh(get(), get(), get(), get(), get(), get(), get()) }
+    // sourceDao, sourceRepository, backup, settings, connectivity, importFinalizer,
+    // catalogSyncScheduler, stalkerAuth, xtreamClient, context — onboarding: add a
     // source, sync it, undo it when it fails. Factory, not single: each wizard run owns its own state machine.
-    factory { tv.own.owntv.core.setup.SourceImporter(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), androidContext()) }
+    factory { tv.own.owntv.core.setup.SourceImporter(get(), get(), get(), get(), get(), get(), get(), get(), get(), androidContext()) }
 }

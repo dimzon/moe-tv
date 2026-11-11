@@ -37,14 +37,14 @@ class ReminderManager(
         scope.launch { scheduler.rearmAll() }
     }
 
-    fun observe(profileId: Long): Flow<List<ReminderEntity>> = reminderDao.observeForProfile(profileId)
+    /** All the user's reminders. */
+    fun observe(): Flow<List<ReminderEntity>> = reminderDao.observeAll()
 
     /**
-     * Remind [profileId] of a programme; setting it again for the same programme replaces it.
+     * Remind of a programme; setting it again for the same programme replaces it.
      * Returns false for a programme that has already started.
      */
     suspend fun add(
-        profileId: Long,
         channelId: Long,
         channelName: String,
         epgChannelId: String?,
@@ -56,7 +56,7 @@ class ReminderManager(
         val now = clock()
         if (!ReminderSchedule.canRemind(startMs, now)) return false
         val reminder = ReminderEntity(
-            profileId = profileId, channelId = channelId, channelName = channelName, epgChannelId = epgChannelId,
+            channelId = channelId, channelName = channelName, epgChannelId = epgChannelId,
             title = title, startMs = startMs, stopMs = stopMs, leadMinutes = leadMinutes, createdAt = now,
         )
         val id = reminderDao.upsert(reminder)

@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -56,7 +55,6 @@ import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.R
 import tv.own.owntv.core.live.LiveKey
 import tv.own.owntv.core.model.MediaType
-import tv.own.myowntv.features.profiles.PinDialog
 import tv.own.owntv.core.categorylock.CategoryLockPrompt
 import tv.own.owntv.core.categorylock.CategoryLockUi
 import tv.own.owntv.core.categorylock.SealedCategoryAction

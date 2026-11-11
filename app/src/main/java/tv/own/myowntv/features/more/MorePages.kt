@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -236,17 +235,16 @@ private fun EmptyNote(title: String, body: String? = null) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Settings: Search and the twelve group cards
+// Settings: Search and the eleven group cards
 // ---------------------------------------------------------------------------------------------
 
 /**
- * The twelve Settings groups, in the order of `SettingsGroup`: a card's index is the group it opens.
+ * The eleven Settings groups, in the order of `SettingsGroup`: a card's index is the group it opens.
  */
 private data class SettingsGroupCard(val icon: MyOwnTVIcon, val nameRes: Int, val summaryRes: Int, val count: Int?)
 
 private val SettingsCards = listOf(
     SettingsGroupCard(MyOwnTVIcon.SPARKLE, R.string.settings_group_quick, R.string.settings_group_summary_quick, null),
-    SettingsGroupCard(MyOwnTVIcon.PERSON, R.string.settings_group_profile, R.string.settings_card_profile, 3),
     SettingsGroupCard(MyOwnTVIcon.LIST, R.string.settings_group_sources, R.string.settings_card_sources, 8),
     SettingsGroupCard(MyOwnTVIcon.PALETTE, R.string.settings_group_appearance, R.string.settings_card_appearance, 9),
     SettingsGroupCard(MyOwnTVIcon.GRID, R.string.settings_group_layout, R.string.settings_card_layout, 10),
@@ -265,7 +263,6 @@ private var lastOpenedCard: Int? = null
 @Composable
 internal fun SettingsPage(entry: FocusRequester, pinned: Int, onOpenGroup: (Int) -> Unit, onSearch: () -> Unit) {
     val back = lastOpenedCard
-    val profiles = tv.own.myowntv.features.settings.profileCount()
     Column(Modifier.fillMaxSize().focusGroup()) {
         PageHead(stringResource(R.string.common_nav_settings)) {
             Spacer(Modifier.weight(1f))
@@ -298,7 +295,7 @@ internal fun SettingsPage(entry: FocusRequester, pinned: Int, onOpenGroup: (Int)
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     MyOwnTVIcon(card.icon, if (focused) StageColors.Text else StageColors.Muted, Modifier.size(28.mpx))
                                     Spacer(Modifier.weight(1f))
-                                    Text((if (index == 1) profiles else card.count ?: pinned).toString(), style = stageText(17, 700), color = StageColors.Dim)
+                                    Text((card.count ?: pinned).toString(), style = stageText(17, 700), color = StageColors.Dim)
                                 }
                                 Text(stringResource(card.nameRes), style = stageText(24, 800), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 14.mpx))
                                 Text(stringResource(card.summaryRes), style = stageText(16, 500), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.mpx))

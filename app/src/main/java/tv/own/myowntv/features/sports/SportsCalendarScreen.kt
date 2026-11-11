@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -469,7 +468,7 @@ private fun code(t: tv.own.owntv.core.sports.model.Team): String =
 
 /**
  * `.ag`: the chosen day — its title and count, the "saved earlier" note when ESPN cannot be reached,
- * then the matches grouped by league in the profile's order, each heading opening that league in the
+ * then the matches grouped by league in the saved order, each heading opening that league in the
  * Leagues tab. Nothing that day: says so, where to change the leagues, and what comes next.
  */
 @Composable

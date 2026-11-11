@@ -49,22 +49,22 @@ class LockedFlowsTest {
         assertEquals("Ch 2", seen.last())
     }
 
-    private fun reminder(id: Long, profileId: Long, channelId: Long) = ReminderEntity(
-        id = id, profileId = profileId, channelId = channelId, channelName = "Ch $channelId",
+    private fun reminder(id: Long, channelId: Long) = ReminderEntity(
+        id = id, channelId = channelId, channelName = "Ch $channelId",
         title = "Show $id", startMs = 0, stopMs = 1, leadMinutes = 0, createdAt = 0,
     )
 
     @Test
     fun aDueReminderOnASealedChannelWaitsAndTheNextOneComesUp() {
-        val due = MutableStateFlow(listOf(reminder(1, profileId = 2, channelId = 3), reminder(2, profileId = 1, channelId = 1), reminder(3, profileId = 1, channelId = 3)))
-        val shown = due.firstUnsealed(profileId = 1, sealed = sealed, categoryOf = categoryOf).values()
-        assertEquals(2L, shown.last()?.id)
+        val due = MutableStateFlow(listOf(reminder(1, channelId = 1), reminder(2, channelId = 3)))
+        val shown = due.firstUnsealed(sealed = sealed, categoryOf = categoryOf).values()
+        assertEquals(1L, shown.last()?.id) // ch 1 (category 10) is first and nothing is sealed
         sealed.value = setOf(10)
-        assertEquals(3L, shown.last()?.id)
+        assertEquals(2L, shown.last()?.id) // ch 1's category seals, so ch 3 (category 20) comes up
         sealed.value = setOf(10, 20)
         assertEquals(null, shown.last())
         sealed.value = emptySet()
-        assertEquals(2L, shown.last()?.id)
+        assertEquals(1L, shown.last()?.id)
     }
 
     @Test

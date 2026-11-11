@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -81,7 +80,7 @@ import tv.own.myowntv.ui.theme.mpx
 import tv.own.myowntv.ui.theme.stageText
 
 /**
- * One paired device's auto-sync: the switch, what this device lets travel, whose profiles, how often.
+ * One paired device's auto-sync: the switch, what this device lets travel, and how often.
  *
  * Turning the switch on asks the other device (its Local sync page open), whose screen shows the
  * question; this side's terms are written only on its yes, with the choices below as they are then —
@@ -92,7 +91,6 @@ import tv.own.myowntv.ui.theme.stageText
 fun LocalAutoSyncSheet(device: PairedDevice, onDismiss: () -> Unit) {
     val vm: LocalAutoSyncViewModel = koinViewModel()
     val agreements by vm.agreements.collectAsStateWithLifecycle()
-    val profiles by vm.profiles.collectAsStateWithLifecycle()
     val enableState by vm.enableState.collectAsStateWithLifecycle()
     val agreement = agreements[device.id]
     val enabled = agreement != null
@@ -147,13 +145,8 @@ fun LocalAutoSyncSheet(device: PairedDevice, onDismiss: () -> Unit) {
                 is LocalAutoSyncViewModel.EnableState.Failed -> StatusText(stringResource(state.reason.messageRes()), danger = true)
                 else -> Unit
             }
-            // Which profiles this is between: fixed when it was set up, whatever is on screen later.
-            val activeId by vm.activeProfileId.collectAsStateWithLifecycle()
-            val hereName = profiles.firstOrNull { it.id == (agreement?.localProfileId ?: activeId) }?.name.orEmpty()
-            StatusText(
-                if (agreement != null) stringResource(R.string.local_auto_sync_profiles, hereName, agreement.theirProfileName)
-                else stringResource(R.string.local_auto_sync_profile_hint, hereName, device.name),
-            )
+            // The two devices trade the sections chosen here; the app has one viewer, so
+            // an agreement pairs the two devices outright.
             agreement?.theirSections?.takeIf { it.isNotEmpty() }?.let { theirs ->
                 StatusText(
                     stringResource(

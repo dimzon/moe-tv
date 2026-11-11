@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -93,8 +92,8 @@ import tv.own.myowntv.ui.theme.stageText
 /** One footer button of a wizard step: its label and what OK on it does. */
 internal class WizardAction(val label: String, val onClick: () -> Unit, val focus: FocusRequester? = null, val enabled: Boolean = true)
 
-/** The five steps the dots show: which one a page belongs to. */
-internal enum class WizardStep { LANGUAGE, DISPLAY, PROFILE, PLAYLIST, READY }
+/** The four steps the dots show: which one a page belongs to. */
+internal enum class WizardStep { LANGUAGE, DISPLAY, PLAYLIST, READY }
 
 /**
  * Every setup step's frame: the Stage background, the OwnTV lockup top left, the step
@@ -196,7 +195,6 @@ private fun StepDots(current: WizardStep, modifier: Modifier) {
 private val WizardStep.labelRes: Int get() = when (this) {
     WizardStep.LANGUAGE -> R.string.settings_language
     WizardStep.DISPLAY -> R.string.setup_step_display
-    WizardStep.PROFILE -> R.string.settings_group_profile
     WizardStep.PLAYLIST -> R.string.setup_step_playlist
     WizardStep.READY -> R.string.setup_step_ready
 }

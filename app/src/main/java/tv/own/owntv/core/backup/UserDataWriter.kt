@@ -17,7 +17,7 @@ import tv.own.owntv.core.model.MediaType
  * straight back on the next sync. Every function below writes the marker and does the delete in one
  * transaction, so the two can never come apart.
  *
- * **Only user actions belong here.** The orphan purges after a re-sync and the profile cascade go on
+ * **Only user actions belong here.** The orphan purges after a re-sync go on
  * calling the DAOs directly and deliberately: those rows are being tidied up, not thrown away, and
  * turning "the playlist was refreshed" into "delete this everywhere" would lose real data.
  */
@@ -30,26 +30,25 @@ class UserDataWriter(
 ) {
 
     /** Unfavorite one item. */
-    suspend fun removeFavorite(profileId: Long, type: MediaType, itemId: Long) = db.transaction {
-        userData.recordDeletion(profileId, "fav", type, itemId)
-        favoriteDao.remove(profileId, type, itemId)
+    suspend fun removeFavorite(type: MediaType, itemId: Long) = db.transaction {
+        userData.recordDeletion("fav", type, itemId)
+        favoriteDao.remove(type, itemId)
     }
 
     /** "Remove from history" for one item. */
-    suspend fun removeHistory(profileId: Long, type: MediaType, itemId: Long) = db.transaction {
-        userData.recordDeletion(profileId, "his", type, itemId)
-        historyDao.remove(profileId, type, itemId)
+    suspend fun removeHistory(type: MediaType, itemId: Long) = db.transaction {
+        userData.recordDeletion("his", type, itemId)
+        historyDao.remove(type, itemId)
     }
 
     /** Take one item out of one custom category. */
     suspend fun removeCustomCategoryMember(
-        profileId: Long,
         type: MediaType,
         contextKey: String,
         itemId: Long,
     ) = db.transaction {
-        userData.recordDeletion(profileId, "member", type, itemId, contextKey = contextKey)
-        customCategoryDao.deleteItem(profileId, type, contextKey, itemId)
+        userData.recordDeletion("member", type, itemId, contextKey = contextKey)
+        customCategoryDao.deleteItem(type, contextKey, itemId)
     }
 
     /**
@@ -59,13 +58,13 @@ class UserDataWriter(
      * That is the price of the deletion actually sticking on the user's other device, and it is a
      * once-in-a-while action taken from a settings screen, not something on a hot path.
      */
-    suspend fun clearHistory(profileId: Long, type: MediaType? = null) = db.transaction {
-        val history = if (type == null) historyDao.getForProfile(profileId) else historyDao.getForProfileType(profileId, type)
-        history.forEach { userData.recordDeletion(profileId, "his", it.mediaType, it.itemId) }
+    suspend fun clearHistory(type: MediaType? = null) = db.transaction {
+        val history = if (type == null) historyDao.getAll() else historyDao.getAllOfType(type)
+        history.forEach { userData.recordDeletion("his", it.mediaType, it.itemId) }
         if (type == null) {
-            historyDao.clear(profileId)
+            historyDao.clear()
         } else {
-            historyDao.clearType(profileId, type)
+            historyDao.clearType(type)
         }
         userData.pruneTombstones()
     }

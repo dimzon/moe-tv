@@ -12,7 +12,6 @@ import tv.own.owntv.core.database.entity.CategoryEntity
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.CustomCategoryMemberEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
-import tv.own.owntv.core.database.entity.ProfileEntity
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
 import tv.own.owntv.core.model.MediaType
@@ -27,7 +26,6 @@ import tv.own.owntv.core.model.SourceType
 class ExcludingCountDaoTest {
 
     private lateinit var db: OwnTVDatabase
-    private var profile = 0L
     private var source = 0L
     private var locked = 0L
     private var open = 0L
@@ -35,7 +33,6 @@ class ExcludingCountDaoTest {
     @Before
     fun setUp() = runBlocking {
         db = ownTVTestDatabase()
-        profile = db.profileDao().insert(ProfileEntity(name = "Test", avatarColor = 0))
         source = db.sourceDao().insert(SourceEntity(name = "Test", type = SourceType.M3U, url = "http://test"))
         val (a, b) = db.categoryDao().insertAll(
             listOf(
@@ -74,20 +71,20 @@ class ExcludingCountDaoTest {
     @Test
     fun favoritesAndHistoryKeepUncategorisedItemsAndSkipOrphans() = runBlocking {
         listOf(1L, 3L, 4L, ORPHAN).forEach {
-            db.favoriteDao().add(FavoriteEntity(profileId = profile, mediaType = MediaType.LIVE, itemId = it))
-            db.historyDao().record(WatchHistoryEntity(profileId = profile, mediaType = MediaType.LIVE, itemId = it))
+            db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = it))
+            db.historyDao().record(WatchHistoryEntity(mediaType = MediaType.LIVE, itemId = it))
         }
         val channels = db.channelDao()
         val sources = listOf(source)
-        assertEquals(2, channels.countFavoritesExcluding(profile, sources, listOf(locked)).first())
-        assertEquals(2, channels.countHistoryExcluding(profile, sources, listOf(locked)).first())
+        assertEquals(2, channels.countFavoritesExcluding(sources, listOf(locked)).first())
+        assertEquals(2, channels.countHistoryExcluding(sources, listOf(locked)).first())
         assertEquals(
-            channels.countFavorites(profile, sources).first(),
-            channels.countFavoritesExcluding(profile, sources, emptyList()).first(),
+            channels.countFavorites(sources).first(),
+            channels.countFavoritesExcluding(sources, emptyList()).first(),
         )
         assertEquals(
-            channels.countHistory(profile, sources).first(),
-            channels.countHistoryExcluding(profile, sources, emptyList()).first(),
+            channels.countHistory(sources).first(),
+            channels.countHistoryExcluding(sources, emptyList()).first(),
         )
     }
 
@@ -98,25 +95,25 @@ class ExcludingCountDaoTest {
             listOf(1L, 3L, 4L, ORPHAN).mapIndexed { i, id -> member(FIRST, id, i) } + member(SECOND, 2L, 0),
         )
         val sources = listOf(source)
-        assertEquals(2, custom.countMembersExcluding(profile, MediaType.LIVE, FIRST, sources, listOf(locked)).first())
+        assertEquals(2, custom.countMembersExcluding(MediaType.LIVE, FIRST, sources, listOf(locked)).first())
         assertEquals(
-            custom.countMembers(profile, MediaType.LIVE, FIRST, sources).first(),
-            custom.countMembersExcluding(profile, MediaType.LIVE, FIRST, sources, emptyList()).first(),
+            custom.countMembers(MediaType.LIVE, FIRST, sources).first(),
+            custom.countMembersExcluding(MediaType.LIVE, FIRST, sources, emptyList()).first(),
         )
         val contexts = listOf(FIRST, SECOND)
         assertEquals(
             mapOf(FIRST to 2),
-            custom.observeCountsByContextsExcluding(profile, MediaType.LIVE, contexts, sources, listOf(locked))
+            custom.observeCountsByContextsExcluding(MediaType.LIVE, contexts, sources, listOf(locked))
                 .first().associate { it.contextKey to it.count },
         )
         assertEquals(
-            custom.observeCountsByContexts(profile, MediaType.LIVE, contexts, sources).first().toSet(),
-            custom.observeCountsByContextsExcluding(profile, MediaType.LIVE, contexts, sources, emptyList()).first().toSet(),
+            custom.observeCountsByContexts(MediaType.LIVE, contexts, sources).first().toSet(),
+            custom.observeCountsByContextsExcluding(MediaType.LIVE, contexts, sources, emptyList()).first().toSet(),
         )
     }
 
     private fun member(context: String, itemId: Long, position: Int) = CustomCategoryMemberEntity(
-        profileId = profile, mediaType = MediaType.LIVE, contextKey = context, itemId = itemId, position = position,
+        mediaType = MediaType.LIVE, contextKey = context, itemId = itemId, position = position,
     )
 
     private companion object {

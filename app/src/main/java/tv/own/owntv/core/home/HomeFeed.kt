@@ -13,7 +13,6 @@ import tv.own.owntv.core.customize.SectionCustomizations
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.ChannelWithWatchedAt
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
@@ -73,7 +72,7 @@ data class GuideSliceState(
         get() = channels.isNotEmpty()
 }
 
-/** Everything Home shows, for one profile, at one moment. */
+/** Everything Home shows, at one moment. */
 @Immutable
 data class HomeFeed(
     val heroItems: List<HeroItem> = emptyList(),
@@ -88,10 +87,9 @@ data class HomeFeed(
  * Building Home's rails.
  *
  * These are dependent reads over watch history, the channel list, the customizations and the guide,
- * and the *rules* between them are the app's, not any one screen's: which playlists count, what a
- * kids profile may not see, what the user hid, and which channels are eligible to be the hero. A
- * television and a phone lay Home out completely differently and must still agree, item for item,
- * on what is in it.
+ * and the *rules* between them are the app's, not any one screen's: which playlists count, what the
+ * user hid, and which channels are eligible to be the hero. A television and a phone lay Home out
+ * completely differently and must still agree, item for item, on what is in it.
  */
 class HomeFeedReader(
     private val channelDao: ChannelDao,
@@ -99,24 +97,23 @@ class HomeFeedReader(
     private val customize: CustomizationStore,
     private val sourceDao: SourceDao,
     private val settings: SettingsRepository,
-    private val profileDao: ProfileDao,
     private val guide: GuideReader,
 ) {
-    suspend fun load(profileId: Long): HomeFeed = withContext(Dispatchers.IO) {
+    suspend fun load(): HomeFeed = withContext(Dispatchers.IO) {
         coroutineScope {
-            val configAsync = async { settings.homeConfig(profileId).first() }
-            // Active-playlist filter + enabledScope: Home rails never show Off sections.
-            val liveIdsAsync = async { activeSourceIds(settings, sourceDao, profileId, MediaType.LIVE).toSet() }
-            val allIdsAsync = async { sourceDao.sourceIdsForProfile(profileId).toSet() }
-            val favouritesAsync = async { channelDao.favoritesListAlpha(profileId).first() }
+            val configAsync = async { settings.homeConfig().first() }
+            // Active-playlist filter + syncLive: Home rails never show Off sections.
+            val liveIdsAsync = async { activeSourceIds(settings, sourceDao, MediaType.LIVE).toSet() }
+            val allIdsAsync = async { sourceDao.allSourceIds().toSet() }
+            val favouritesAsync = async { channelDao.favoritesListAlpha().first() }
 
             val config = configAsync.await()
             val liveIds = liveIdsAsync.await()
 
-            // Hidden items / hidden categories (per profile) never surface on Home either.
-            val hidden = hiddenState(profileId, allIdsAsync.await().toList())
+            // Hidden items / hidden categories never surface on Home either.
+            val hidden = hiddenState(allIdsAsync.await().toList())
             val recentLiveAsync = async {
-                channelDao.recentlyWatchedWithTimestampFiltered(profileId, liveIds.toList(), RECENT_LIVE_ROW_LIMIT).first()
+                channelDao.recentlyWatchedWithTimestampFiltered(liveIds.toList(), RECENT_LIVE_ROW_LIMIT).first()
             }
             val liveWithTs = recentLiveAsync.await().filterNot { isChannelHidden(it.channel, hidden) }
             val live = liveWithTs.map { it.channel }
@@ -127,14 +124,14 @@ class HomeFeedReader(
             // The two guide slices read different channel sets and never depend on each other.
             val recentGuideAsync = async {
                 if (HomeRow.RECENT_CHANNELS in config.visibleOrder && config.recentLiveMode == HomeLiveRowMode.ON_NOW) {
-                    liveGuide(profileId, liveIds, live)
+                    liveGuide(liveIds, live)
                 } else {
                     GuideSliceState()
                 }
             }
             val favoriteGuideAsync = async {
                 if (HomeRow.FAVORITE_CHANNELS in config.visibleOrder && config.favoriteLiveMode == HomeLiveRowMode.ON_NOW) {
-                    liveGuide(profileId, liveIds, favLive)
+                    liveGuide(liveIds, favLive)
                 } else {
                     GuideSliceState()
                 }
@@ -154,7 +151,7 @@ class HomeFeedReader(
         }
     }
 
-    /** This profile's hide customizations for live channels, with category keys resolved to ids. */
+    /** The user's hide customizations for live channels, with category keys resolved to ids. */
     private data class HiddenState(
         val live: SectionCustomizations,
         val liveCats: Set<Long>,
@@ -163,16 +160,14 @@ class HomeFeedReader(
             get() = live.hiddenItems.isEmpty() && liveCats.isEmpty()
     }
 
-    private suspend fun hiddenState(profileId: Long, sourceIds: List<Long>): HiddenState {
-        val live = customize.observeVisible(profileId, MediaType.LIVE).first()
-        val isKidsProfile = profileDao.getById(profileId)?.isKids == true
-        val liveCats = if ((live.hiddenCategories.isEmpty() && !isKidsProfile) || sourceIds.isEmpty()) {
+    private suspend fun hiddenState(sourceIds: List<Long>): HiddenState {
+        val live = customize.observeVisible(MediaType.LIVE).first()
+        val liveCats = if (live.hiddenCategories.isEmpty() || sourceIds.isEmpty()) {
             emptySet()
         } else {
             AdultCategoryClassifier.hiddenCategoryIds(
                 categoryDao.observe(sourceIds, MediaType.LIVE).first(),
                 live.hiddenCategories,
-                isKidsProfile,
             )
         }
         return HiddenState(live = live, liveCats = liveCats)
@@ -205,7 +200,6 @@ class HomeFeedReader(
 
     /** A live rail in "On now" mode: six hours of guide for the channels it is about to draw. */
     private suspend fun liveGuide(
-        profileId: Long,
         activeIds: Set<Long>,
         channels: List<ChannelEntity>,
     ): GuideSliceState {
@@ -218,7 +212,7 @@ class HomeFeedReader(
             channels = channels,
             programmes = guide.slice(
                 channels = channels,
-                cust = customize.observe(profileId, MediaType.LIVE).first(),
+                cust = customize.observe(MediaType.LIVE).first(),
                 globalShiftMinutes = settings.epgOffsetMinutes.first(),
                 from = windowStart,
                 to = windowEnd,

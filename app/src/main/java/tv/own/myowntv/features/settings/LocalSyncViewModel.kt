@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -76,14 +75,7 @@ import tv.own.owntv.core.sync.local.SyncFailure
  */
 class LocalSyncViewModel(
     private val sync: LocalSyncManager,
-    profileDao: tv.own.owntv.core.database.dao.ProfileDao,
-    settings: tv.own.owntv.core.settings.SettingsRepository,
 ) : ViewModel() {
-
-    /** The profile in use: the only one a sync carries, merged with the one in use on the other device. */
-    val activeProfileName: StateFlow<String> = kotlinx.coroutines.flow.combine(profileDao.observeAll(), settings.activeProfileId) { profiles, id ->
-        profiles.firstOrNull { it.id == id }?.name.orEmpty()
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), "")
 
 
     val paired: StateFlow<List<PairedDevice>> = sync.pairedDevices

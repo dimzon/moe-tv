@@ -134,14 +134,10 @@ class EpgRepository(
             Log.w("EpgRepository", "Unable to read channel EPG ids — using unfiltered guide sync", e)
         }
         try {
-            // EVERY profile's matches, not just the one that happens to be signed in. The sync filters
-            // the feed down to this set, so reading only the active profile silently dropped every
-            // other profile's hand-matched channels out of the download — their guide then emptied on
-            // the next sync, and switching profile was the only way to notice.
-            for (profile in db.profileDao().getAllOnce()) {
-                customize.observe(profile.id, MediaType.LIVE).first().epgMatches.values
-                    .forEach { ids.add(it.trim().lowercase()) }
-            }
+            // The house's hand-matched channels. The sync filters the feed down to this set; reading
+            // it empty would silently narrow every guide to nothing.
+            customize.observe(MediaType.LIVE).first().epgMatches.values
+                .forEach { ids.add(it.trim().lowercase()) }
         } catch (c: CancellationException) {
             throw c
         } catch (e: Exception) {

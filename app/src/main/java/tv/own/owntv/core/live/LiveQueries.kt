@@ -14,10 +14,10 @@ import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.settings.SettingsRepository
 
 /**
- * Which query backs a Live TV rail selection, and which channels survive the profile's customizations.
+ * Which query backs a Live TV rail selection, and which channels survive the user's customizations.
  *
  * Split out of the view models: these are pure functions of their arguments — every piece of state they
- * once read off the view model (the profile's folder context keys, the contexts that carry a manual
+ * once read off the view model (the folder context keys, the contexts that carry a manual
  * order) is now passed in, so there is nothing here to get out of step with a tune.
  */
 
@@ -25,7 +25,6 @@ import tv.own.owntv.core.settings.SettingsRepository
  *  [hasManualOrder] says whether that folder actually carries manual-order rows — see the fast path. */
 fun livePagingSource(
     key: LiveKey,
-    profileId: Long,
     sourceIds: List<Long>,
     query: String,
     sort: SettingsRepository.SortMode,
@@ -39,9 +38,9 @@ fun livePagingSource(
     return if (query.isBlank()) {
         when (key) {
             LiveKey.All -> if (playlist) channelDao.pagingAllOriginal(ids) else channelDao.pagingAll(ids)
-            LiveKey.Favorites -> channelDao.pagingFavoritesManual(profileId, ContentOrderEntity.FAV_CONTEXT, ids)
-            LiveKey.History -> channelDao.pagingHistory(profileId, ids)
-            is LiveKey.Custom -> customCategoryDao.pagingChannels(profileId, key.id, ids, alpha = !playlist)
+            LiveKey.Favorites -> channelDao.pagingFavoritesManual(ContentOrderEntity.FAV_CONTEXT, ids)
+            LiveKey.History -> channelDao.pagingHistory(ids)
+            is LiveKey.Custom -> customCategoryDao.pagingChannels(key.id, ids, alpha = !playlist)
             is LiveKey.Folder -> {
                 val ctxKey = contextKey(key.id) ?: ""
                 // Fast path: no manual order in this folder → the plain indexed query has
@@ -49,16 +48,16 @@ fun livePagingSource(
                 if (!hasManualOrder(ctxKey)) {
                     if (playlist) channelDao.pagingByCategory(key.id) else channelDao.pagingByCategoryAlpha(key.id)
                 } else {
-                    channelDao.pagingByCategoryManual(key.id, profileId, ctxKey, alpha = !playlist)
+                    channelDao.pagingByCategoryManual(key.id, ctxKey, alpha = !playlist)
                 }
             }
         }
     } else {
         when (key) {
             LiveKey.All -> channelDao.searchAll(query, ids)
-            LiveKey.Favorites -> channelDao.searchFavorites(query, profileId, ids)
-            LiveKey.History -> channelDao.searchHistory(query, profileId, ids)
-            is LiveKey.Custom -> customCategoryDao.searchChannels(query, profileId, key.id, ids)
+            LiveKey.Favorites -> channelDao.searchFavorites(query, ids)
+            LiveKey.History -> channelDao.searchHistory(query, ids)
+            is LiveKey.Custom -> customCategoryDao.searchChannels(query, key.id, ids)
             is LiveKey.Folder -> channelDao.searchInCategory(query, key.id)
         }
     }
@@ -70,7 +69,6 @@ fun livePagingSource(
  */
 fun liveCountFlow(
     key: LiveKey,
-    profileId: Long,
     sourceIds: List<Long>,
     hiddenCats: Set<Long>,
     channelDao: ChannelDao,
@@ -81,12 +79,12 @@ fun liveCountFlow(
     val sealed = sealedCats.toList()
     return when (key) {
         LiveKey.All -> if (hiddenCats.isEmpty()) channelDao.countAll(ids) else channelDao.countAllExcluding(ids, hiddenCats.toList())
-        LiveKey.Favorites -> if (sealed.isEmpty()) channelDao.countFavorites(profileId, ids)
-            else channelDao.countFavoritesExcluding(profileId, ids, sealed)
-        LiveKey.History -> if (sealed.isEmpty()) channelDao.countHistory(profileId, ids)
-            else channelDao.countHistoryExcluding(profileId, ids, sealed)
-        is LiveKey.Custom -> if (sealed.isEmpty()) customCategoryDao.countMembers(profileId, MediaType.LIVE, key.id, ids)
-            else customCategoryDao.countMembersExcluding(profileId, MediaType.LIVE, key.id, ids, sealed)
+        LiveKey.Favorites -> if (sealed.isEmpty()) channelDao.countFavorites(ids)
+            else channelDao.countFavoritesExcluding(ids, sealed)
+        LiveKey.History -> if (sealed.isEmpty()) channelDao.countHistory(ids)
+            else channelDao.countHistoryExcluding(ids, sealed)
+        is LiveKey.Custom -> if (sealed.isEmpty()) customCategoryDao.countMembers(MediaType.LIVE, key.id, ids)
+            else customCategoryDao.countMembersExcluding(MediaType.LIVE, key.id, ids, sealed)
         is LiveKey.Folder -> channelDao.countByCategory(key.id)
     }
 }

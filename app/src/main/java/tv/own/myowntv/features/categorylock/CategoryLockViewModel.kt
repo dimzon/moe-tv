@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -57,7 +56,6 @@ import tv.own.owntv.core.categorylock.SealedCategoryAction
 import tv.own.owntv.core.customize.CategoryUnlockSession
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.database.dao.CategoryDao
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.live.LiveKey
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.settings.SettingsRepository
@@ -65,14 +63,13 @@ import tv.own.owntv.core.settings.SettingsRepository
 /** Core's [CategoryLockFlow] for the Live TV screen, which shows its own prompts. */
 class CategoryLockViewModel(
     settings: SettingsRepository,
-    profileDao: ProfileDao,
     categoryDao: CategoryDao,
     customize: CustomizationStore,
     session: CategoryUnlockSession,
     limiters: PinAttemptLimiters,
 ) : ViewModel() {
     private val flow = CategoryLockFlow(
-        viewModelScope, settings, profileDao, categoryDao, customize, session, limiters.of(PinDoor.CATEGORY),
+        viewModelScope, settings, categoryDao, customize, session, limiters.of(PinDoor.CATEGORY),
     )
 
     val ui: StateFlow<CategoryLockUi> = flow.ui

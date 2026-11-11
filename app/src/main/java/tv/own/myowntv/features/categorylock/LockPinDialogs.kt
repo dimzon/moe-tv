@@ -1,4 +1,4 @@
-package tv.own.myowntv.features.profiles
+package tv.own.myowntv.features.categorylock
 import tv.own.owntv.*
 import tv.own.owntv.core.*
 import tv.own.owntv.core.backup.*
@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -46,6 +45,7 @@ import tv.own.owntv.player.*
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,7 +56,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import kotlinx.coroutines.delay
@@ -67,7 +71,67 @@ import tv.own.owntv.core.categorylock.PinAttempt
 import tv.own.owntv.core.categorylock.PinAttemptLimiters
 import tv.own.owntv.core.categorylock.PinDoor
 import tv.own.myowntv.features.categorylock.pinEntryTitle
+import tv.own.myowntv.ui.theme.StageColors
 import tv.own.myowntv.ui.theme.mpx
+import tv.own.myowntv.ui.theme.stageText
+import tv.own.myowntv.ui.theme.PopupFontTheme
+
+/**
+ * The PIN-locked UIs the lock features share: the numeric PIN dialog, the prompt that verifies
+ * against a [PinDoor]'s stored PIN, and the full "screen locked" page. They lived with the profiles
+ * feature; profiles are gone, the one global PIN stays — Settings lock, category lock and the
+ * Customize PIN all authenticate through these.
+ */
+
+/** Numeric PIN entry. Calls [onSubmit] with the entered digits. [compact] renders the small
+ *  popup-menu treatment (narrow panel, Caladea font) used by the Customize screen. */
+@Composable
+internal fun PinDialog(title: String, onSubmit: (String) -> Unit, onDismiss: () -> Unit, compact: Boolean = false) {
+    val dialog: @Composable () -> Unit = { PinDialogBody(title, onSubmit, onDismiss, compact) }
+    if (compact) PopupFontTheme(content = dialog) else dialog()
+}
+
+@Composable
+private fun PinDialogBody(title: String, onSubmit: (String) -> Unit, onDismiss: () -> Unit, compact: Boolean) {
+    var pin by remember { mutableStateOf("") }
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+    // Explicit start/end links: spatial D-pad search from Cancel would otherwise wander into
+    // the locked content BEHIND the dialog before reaching OK.
+    val cancelFocus = remember { FocusRequester() }
+    val okFocus = remember { FocusRequester() }
+    tv.own.myowntv.ui.stage.StagePopup(
+        onDismiss = onDismiss,
+        title = title,
+        eyebrow = null,
+        width = if (compact) 560.mpx else 700.mpx,
+        buttons = {
+            tv.own.myowntv.ui.stage.StagePopupButton(
+                stringResource(R.string.common_cancel),
+                onClick = onDismiss,
+                modifier = Modifier.focusRequester(cancelFocus).focusProperties { end = okFocus },
+                primary = false,
+            )
+            tv.own.myowntv.ui.stage.StagePopupButton(
+                stringResource(R.string.common_ok),
+                onClick = { onSubmit(pin) },
+                modifier = Modifier.focusRequester(okFocus).focusProperties { start = cancelFocus },
+                enabled = pin.length >= 4,
+            )
+        },
+    ) {
+        tv.own.myowntv.features.settings.StageFieldRow(
+            icon = tv.own.myowntv.ui.components.MyOwnTVIcon.PENCIL,
+            label = stringResource(R.string.profiles_pin),
+            value = pin,
+            onValueChange = { if (it.length <= 6 && it.all(Char::isDigit)) pin = it },
+            modifier = Modifier.fillMaxWidth().focusRequester(focus),
+            placeholder = stringResource(R.string.profiles_pin_placeholder),
+            password = true,
+            keyboardType = KeyboardType.NumberPassword,
+        )
+    }
+}
 
 /**
  * Stands in for a PIN-locked screen until the PIN is entered: the screen's [title], a "PIN-locked"
@@ -89,11 +153,11 @@ internal fun PinLockedScreen(
             .fillMaxSize()
             .padding(horizontal = 40.dp, vertical = 28.dp),
     ) {
-        Text(title, style = tv.own.myowntv.ui.theme.stageText(42, 800), color = tv.own.myowntv.ui.theme.StageColors.Text)
+        Text(title, style = stageText(42, 800), color = StageColors.Text)
         Text(
             stringResource(R.string.settings_customize_pin_locked),
-            style = tv.own.myowntv.ui.theme.stageText(18, 500),
-            color = tv.own.myowntv.ui.theme.StageColors.Muted,
+            style = stageText(18, 500),
+            color = StageColors.Muted,
             modifier = Modifier.padding(top = 10.mpx),
         )
     }

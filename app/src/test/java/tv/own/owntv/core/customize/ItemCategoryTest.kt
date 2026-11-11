@@ -5,7 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** A row whose item a re-sync left unresolved stays sealed until every lock of the profile is open. */
+/** A row whose item a re-sync left unresolved stays sealed until its category lock is open. */
 class ItemCategoryTest {
 
     private val lockedKey = "1:adult"

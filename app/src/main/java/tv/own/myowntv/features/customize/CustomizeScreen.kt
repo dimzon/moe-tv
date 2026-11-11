@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -91,7 +90,7 @@ import tv.own.myowntv.features.settings.settingHints
 import tv.own.myowntv.features.settings.StageAction
 import tv.own.myowntv.features.settings.StageActionColumn
 import tv.own.myowntv.features.settings.SpanHelpBlock
-import tv.own.myowntv.features.profiles.PinDialog
+import tv.own.myowntv.features.categorylock.PinDialog
 import tv.own.myowntv.features.settings.PickerDialog
 import tv.own.myowntv.features.settings.SettingsViewModel
 import tv.own.owntv.core.settings.SettingsRepository
@@ -105,7 +104,7 @@ import tv.own.owntv.core.customize.SpanSelector
 
 /**
  * Settings → Customize Categories & Items: hide / rename / reorder the Live TV categories, and unhide
- * hidden channels. Everything is per-profile and survives source re-syncs.
+ * hidden channels. Everything survives source re-syncs.
  * Optionally locked behind a PIN (set from this screen's top-right) so hidden items can't be
  * unhidden by someone else — the PIN is asked on every entry.
  */
@@ -527,7 +526,7 @@ fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         if (current == null) {
             checkingPin = null
         } else {
-            tv.own.myowntv.features.profiles.PinPrompt(
+            tv.own.myowntv.features.categorylock.PinPrompt(
                 pin = current,
                 door = tv.own.owntv.core.categorylock.PinDoor.CATEGORY,
                 onUnlock = {

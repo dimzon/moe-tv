@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -54,20 +53,18 @@ import tv.own.owntv.core.settings.SettingsPinLock
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.settings.activeSettingsPinLock
 
-/** The active profile's Settings lock, and Settings › App › Settings lock's changes to it. */
+/** The Settings lock, and Settings › App › Settings lock's changes to it. */
 class SettingsPinViewModel(private val settings: SettingsRepository) : ViewModel() {
 
     val lock: StateFlow<SettingsPinLock> = settings.activeSettingsPinLock()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsPinLock())
 
     /** A new PIN turns the lock on (or changes it); null turns it off. */
-    fun setPin(pin: String?) = edit { settings.setSettingsLockPin(it, pin) }
+    fun setPin(pin: String?) {
+        viewModelScope.launch { settings.setSettingsLockPin(pin) }
+    }
 
-    fun setLockMenus(enabled: Boolean) = edit { settings.setSettingsLockMenus(it, enabled) }
-
-    private fun edit(block: suspend (Long) -> Unit) {
-        val pid = lock.value.profileId
-        if (pid < 0) return
-        viewModelScope.launch { block(pid) }
+    fun setLockMenus(enabled: Boolean) {
+        viewModelScope.launch { settings.setSettingsLockMenus(enabled) }
     }
 }

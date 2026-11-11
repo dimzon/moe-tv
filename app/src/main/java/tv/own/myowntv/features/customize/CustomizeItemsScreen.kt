@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -121,7 +120,7 @@ fun CustomizeItemsScreen(
     val ctx = parentVm.ctxForItems()
     LaunchedEffect(selectedCategory) {
         val row = selectedCategory
-        if (row != null && ctx != null) {
+        if (row != null) {
             vm.open(
                 CustomizeItemsViewModel.CatInfo(
                     categoryId = ctx.categoryId,

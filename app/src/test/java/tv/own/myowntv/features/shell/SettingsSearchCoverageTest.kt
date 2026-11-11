@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -78,10 +77,10 @@ class SettingsSearchCoverageTest {
     }
 
     /**
-     * Tabs deliberately absent from search. Backup and Local sync live under ⋯ More, not Settings, and
-     * the code says so: a result that lands somewhere the row is not is worse than no result.
+     * Tabs deliberately absent from search. Local sync lives under ⋯ More, not Settings, and the code
+     * says so: a result that lands somewhere the row is not is worse than no result.
      */
-    private val notSearchable = setOf("ROOT", "BACKUP", "LOCAL_SYNC")
+    private val notSearchable = setOf("ROOT", "LOCAL_SYNC")
 
     @Test
     fun `every settings screen can be found by search`() {
@@ -180,12 +179,10 @@ class SettingsSearchCoverageTest {
      * not settings and are listed here instead.
      */
     private val notSettings = setOf(
-        "settings_backup_encrypt_title", "settings_backup_export_title", "settings_backup_restore_title",
-        "settings_backup_what_backup", "settings_backup_what_restore",
         "settings_remote_shortcuts_add", "settings_remote_shortcuts_choose_action", "settings_remote_shortcuts_enabled",
         "settings_remote_shortcuts_reset", "common_reset", "settings_delete_all_subtitles", "settings_delete_subtitle",
         "settings_epg_sources_delete_title", "settings_sources_refresh_days_title", "content_epg_title",
-        "settings_panel_width_customize", "settings_refresh_now", "profiles_delete_title",
+        "settings_panel_width_customize", "settings_refresh_now",
         "settings_sources_delete_title", "settings_sources_probe_title", "settings_metadata_clear_advanced_title",
         "settings_metadata_key_from_phone", "settings_metadata_remote_advanced", "settings_behavior",
         "player_subtitles_connected_user", "player_subtitles_delete_action", "player_subtitles_sign_in",
@@ -217,9 +214,9 @@ class SettingsSearchCoverageTest {
         val index = searchBlock + source.substring(helperFrom, helperTo) + screenRows
         fun normalize(res: String) = res.removePrefix("settings_").removePrefix("quick_")
         val present = Regex("""R\.string\.([a-z_0-9]+)""").findAll(index).map { normalize(it.groupValues[1]) }.toSet()
-        // Backup and Local sync are More pages, not Settings (see notSearchable); Local sync's
-        // Auto-sync popup belongs to its page.
-        val skipped = setOf("BackupScreen.kt", "LocalSyncScreen.kt", "LocalAutoSyncScreen.kt", "RemoteBackupRestoreScreen.kt", "VideoPlayerSettingsScreen.kt")
+        // Local sync is a More page, not Settings (see notSearchable); its Auto-sync popup belongs
+        // to that page. (The file-backup screens are gone with the live-only redesign.)
+        val skipped = setOf("LocalSyncScreen.kt", "LocalAutoSyncScreen.kt", "VideoPlayerSettingsScreen.kt")
         val screens = File("src/main/java/tv/own/myowntv/features/settings").listFiles { f ->
             f.name.endsWith("Screen.kt") && f.name !in skipped
         }.orEmpty()

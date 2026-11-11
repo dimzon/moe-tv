@@ -27,7 +27,7 @@ data class CategoryRestorePlan(
 /**
  * Works out the plan for [contextKey]. [memberKeys] lists the customization keys of the items that
  * natively belong to the category (provider folder rows, or a custom category's members); it is only
- * called when something is hidden, so a profile that hides nothing never pays for it.
+ * called when something is hidden, so a section that hides nothing never pays for it.
  *
  * A provider folder has an order to clear whenever one is saved. A combined category always has an
  * order (the one its items were added in), so a saved order only counts when it differs from that.
@@ -35,13 +35,12 @@ data class CategoryRestorePlan(
 suspend fun planCategoryRestore(
     customize: CustomizationStore,
     contentOrderDao: ContentOrderDao,
-    profileId: Long,
     type: MediaType,
     contextKey: String,
     customCategoryDao: CustomCategoryDao,
     memberKeys: suspend () -> Set<String>,
 ): CategoryRestorePlan {
-    val cust = customize.observe(profileId, type).first()
+    val cust = customize.observe(type).first()
     val hidden = if (cust.hiddenItems.isEmpty()) emptyMap() else {
         val members = memberKeys()
         cust.hiddenItems.filterKeys { it in members }
@@ -49,8 +48,8 @@ suspend fun planCategoryRestore(
     return CategoryRestorePlan(
         hidden = hidden,
         movedOut = cust.movedFromOrigin.filterValues { it == contextKey }.keys,
-        hasOrder = contextKey in contentOrderDao.observeContextKeys(profileId, type).first() &&
-            (!CustomizeKeys.isCustom(contextKey) || combinedOrderDiffers(contentOrderDao, customCategoryDao, profileId, type, contextKey)),
+        hasOrder = contextKey in contentOrderDao.observeContextKeys(type).first() &&
+            (!CustomizeKeys.isCustom(contextKey) || combinedOrderDiffers(contentOrderDao, customCategoryDao, type, contextKey)),
     )
 }
 
@@ -59,16 +58,15 @@ suspend fun planCategoryRestore(
 private suspend fun combinedOrderDiffers(
     contentOrderDao: ContentOrderDao,
     customCategoryDao: CustomCategoryDao,
-    profileId: Long,
     type: MediaType,
     contextKey: String,
 ): Boolean {
     val added = customCategoryDao.getAllOnce()
-        .filter { it.profileId == profileId && it.mediaType == type && it.contextKey == contextKey }
+        .filter { it.mediaType == type && it.contextKey == contextKey }
         .sortedBy { it.position }
         .map { it.itemId }
     val saved = contentOrderDao.getAllOnce()
-        .filter { it.profileId == profileId && it.mediaType == type && it.contextKey == contextKey }
+        .filter { it.mediaType == type && it.contextKey == contextKey }
         .associate { it.itemId to it.position }
     return savedOrderDiffers(added, saved)
 }
@@ -87,14 +85,13 @@ internal fun savedOrderDiffers(added: List<Long>, saved: Map<Long, Int>): Boolea
 suspend fun restoreCategoryToDefault(
     customize: CustomizationStore,
     contentOrderDao: ContentOrderDao,
-    profileId: Long,
     type: MediaType,
     contextKey: String,
     plan: CategoryRestorePlan,
 ) {
-    if (plan.hasOrder) contentOrderDao.clearContext(profileId, type, contextKey)
+    if (plan.hasOrder) contentOrderDao.clearContext(type, contextKey)
     if (plan.hidden.isEmpty() && plan.movedOut.isEmpty()) return
-    customize.update(profileId, type) { c ->
+    customize.update(type) { c ->
         c.copy(
             hiddenItems = c.hiddenItems - plan.hidden.keys,
             movedFromOrigin = c.movedFromOrigin - plan.movedOut,

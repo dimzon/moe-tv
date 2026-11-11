@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -130,7 +129,6 @@ import tv.own.myowntv.ui.theme.stageText
 
 @Composable
 private fun epgMessageText(message: EpgMessage): String = when (message) {
-    EpgMessage.CreateProfile -> stringResource(R.string.content_epg_create_profile)
     EpgMessage.AddPlaylist -> stringResource(R.string.content_epg_add_playlist)
     is EpgMessage.NoChannelsForQuery -> stringResource(R.string.content_epg_no_channels_query, message.query)
     EpgMessage.MismatchedIds -> stringResource(R.string.content_epg_mismatched_ids)

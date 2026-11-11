@@ -1,16 +1,14 @@
 package tv.own.owntv.core.customize
 
 import kotlinx.coroutines.flow.first
-import tv.own.owntv.core.content.AdultCategoryClassifier
 import tv.own.owntv.core.database.dao.CategoryDao
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.entity.CategoryEntity
 import tv.own.owntv.core.live.LiveKey
 import tv.own.owntv.core.model.MediaType
 
 /**
- * The category rail, exactly as a browse screen shows it: the kids filter, the profile's custom
- * combined categories, hides, renames and the manual order (or A–Z when [alphabetical]), in one place.
+ * The category rail, exactly as a browse screen shows it: the user's custom combined categories,
+ * hides, renames and the manual order (or A–Z when [alphabetical]), in one place.
  *
  * Both apps' Live / Movies / Series rails read this, and so does [CategoryMove] — which is the
  * point. A move that reorders a list built any other way reorders a list that is not the one on
@@ -18,15 +16,9 @@ import tv.own.owntv.core.model.MediaType
  */
 fun List<CategoryEntity>.railCategories(
     c: SectionCustomizations,
-    kids: Boolean,
     alphabetical: Boolean = false,
-): List<CustomizedCategory> {
-    val cats = if (kids) filterNot { AdultCategoryClassifier.isAdult(it.name) } else this
-    val customs =
-        if (kids) c.customCategories.filterNot { AdultCategoryClassifier.isAdult(it.name) }
-        else c.customCategories
-    return cats.applyCustomizationsWithCustoms(c.forRail(), customs, alphabetical)
-}
+): List<CustomizedCategory> =
+    applyCustomizationsWithCustoms(c.forRail(), c.customCategories, alphabetical)
 
 /**
  * One category being moved through the rail, before the new order is committed.
@@ -79,7 +71,6 @@ data class CategoryMove(
 class CategoryRailEditor(
     private val customize: CustomizationStore,
     private val categoryDao: CategoryDao,
-    private val profileDao: ProfileDao,
 ) {
     /** The customization key behind a rail selection, or null for All / Favorites / History / Catch-up. */
     suspend fun customizationKey(key: LiveKey): String? = when (key) {
@@ -90,42 +81,38 @@ class CategoryRailEditor(
 
     /** The rail's categories, exactly as the screen has them. */
     private suspend fun rows(
-        profileId: Long,
         sourceIds: List<Long>,
         type: MediaType,
         alphabetical: Boolean,
     ): List<CustomizedCategory> = categoryDao.observe(sourceIds, type).first().railCategories(
-        customize.observe(profileId, type).first(),
-        kids = profileDao.getById(profileId)?.isKids == true,
+        customize.observe(type).first(),
         alphabetical = alphabetical,
     )
 
-    suspend fun hide(profileId: Long, type: MediaType, key: LiveKey) {
-        customize.setCategoryHidden(profileId, type, customizationKey(key) ?: return, true)
+    suspend fun hide(type: MediaType, key: LiveKey) {
+        customize.setCategoryHidden(type, customizationKey(key) ?: return, true)
     }
 
     /** Starts a move the caller then steps and commits itself — the television's overlay. */
     suspend fun beginMove(
-        profileId: Long,
         sourceIds: List<Long>,
         type: MediaType,
         alphabetical: Boolean,
         key: LiveKey,
     ): CategoryMove? = CategoryMove.begin(
-        rows(profileId, sourceIds, type, alphabetical),
+        rows(sourceIds, type, alphabetical),
         customizationKey(key) ?: return null,
     )
 
     /** Moves a category one step and stores the result — the phone's menu. */
     suspend fun move(
-        profileId: Long,
         sourceIds: List<Long>,
         type: MediaType,
         alphabetical: Boolean,
         key: LiveKey,
         kind: MoveKind,
     ) {
-        val moved = beginMove(profileId, sourceIds, type, alphabetical, key)?.moved(kind) ?: return
-        customize.saveCategoryMove(profileId, type, moved.keys, moved.carried)
+        val moved = beginMove(sourceIds, type, alphabetical, key)?.moved(kind) ?: return
+        customize.saveCategoryMove(type, moved.keys, moved.carried)
     }
 }

@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -69,9 +68,7 @@ import org.koin.compose.koinInject
 import tv.own.myowntv.R
 import tv.own.owntv.core.companion.CompanionPayload
 import tv.own.owntv.core.database.dao.ChannelDao
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.dao.SourceDao
-import tv.own.owntv.core.database.dao.resolveExistingProfileId
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.HlsSupport
 import tv.own.owntv.core.model.SourceType
@@ -202,19 +199,12 @@ fun AddSourceScreen(
     val startImportFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) { runCatching { firstFocus.requestFocus() } }
 
-    // Profile-wide "hide new categories on sync" default. Written straight to
-    // DataStore — no callback signature change — so it lands on the ACTIVE profile at add time. The row
-    // is only shown while ADDING (an edit re-syncs nothing new) and only when a profile exists (the
-    // setup wizard may still be profile-less; the value defaults to off there).
+    // Device-wide "hide new categories on sync" default. Written straight to
+    // DataStore — no callback signature change. The row is only shown while ADDING
+    // (an edit re-syncs nothing new); the value defaults to off.
     val settings: SettingsRepository = koinInject()
-    val profileDao: ProfileDao = koinInject()
     val scope = rememberCoroutineScope()
-    var hideNewCatsProfile by remember { mutableStateOf(-1L) }
-    LaunchedEffect(Unit) {
-        val preferred = settings.activeProfileId.first()
-        hideNewCatsProfile = profileDao.resolveExistingProfileId(preferred) ?: -1L
-    }
-    val hideNewCats by settings.hideNewCategoriesDefault(hideNewCatsProfile)
+    val hideNewCats by settings.hideNewCategoriesDefault()
         .collectAsStateWithLifecycle(initialValue = false)
 
     // ---- "Test HLS support" (Xtream) ----
@@ -681,7 +671,7 @@ fun AddSourceScreen(
             val scopeHelp = stringResource(if (editing) R.string.setup_sync_off_editing else R.string.setup_sync_choices)
             SyncScopeStageRow(MyOwnTVIcon.LIVE_TV, stringResource(R.string.setup_live_tv), stringResource(R.string.setup_channels_categories), syncLive, editing, help(stringResource(R.string.setup_live_tv), scopeHelp, changeKeys), toSubmit) { syncLive = it }
         }
-        if (!editing && hideNewCatsProfile >= 0) {
+        if (!editing) {
             val hideTitle = stringResource(R.string.setup_hide_new_categories)
             val hideDesc = stringResource(R.string.setup_hide_new_categories_description)
             StageSettingRow(
@@ -689,7 +679,7 @@ fun AddSourceScreen(
                 title = hideTitle,
                 desc = hideDesc,
                 value = SettingValue.Switch(hideNewCats),
-                onClick = { scope.launch { settings.setHideNewCategoriesDefault(hideNewCatsProfile, !hideNewCats) } },
+                onClick = { scope.launch { settings.setHideNewCategoriesDefault(!hideNewCats) } },
                 modifier = toSubmit,
                 help = help(hideTitle, hideDesc, switchKeys),
             )

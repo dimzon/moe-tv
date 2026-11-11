@@ -18,8 +18,8 @@ import tv.own.owntv.core.settings.guardsMenuChange
 val GUARDED_MENU_ACTIONS: Set<String> = setOf("rename", "hide", "remove_history", "move", "move_to_category", "remove_from_category")
 
 /**
- * Asks before a long-press change when the active profile's Settings lock says so. One right PIN
- * opens every change until the app is left or the profile changes ([CategoryUnlockSession.relockAll]).
+ * Asks before a long-press change when the Settings lock says so. One right PIN opens every change
+ * until the app is left ([CategoryUnlockSession.relockAll]).
  *
  * Decided without waiting, from the lock as last read in [scope]: a menu's action runs in the same
  * click that chose it, as it did before there was anything to ask.
@@ -32,16 +32,16 @@ class MenuChangeGuard(
     private val lock: StateFlow<SettingsPinLock> = settings.activeSettingsPinLock()
         .stateIn(scope, SharingStarted.Eagerly, SettingsPinLock())
 
-    /** What to ask for before a change: the profile and its Settings PIN, or null to go ahead now. */
+    /** What to ask for before a change: the Settings PIN, or null to go ahead now. */
     fun pinToAsk(): Ask? {
         val current = lock.value
         val pin = current.pin ?: return null
-        if (!current.guardsMenuChange(unlocked = session.changesUnlocked(current.profileId))) return null
-        return Ask(current.profileId, pin, session.epoch())
+        if (!current.guardsMenuChange(unlocked = session.changesUnlocked())) return null
+        return Ask(pin, session.epoch())
     }
 
     /** The PIN asked by [ask] was right. False when the session relocked while it was typed. */
-    fun unlocked(ask: Ask): Boolean = session.unlockChanges(ask.profileId, since = ask.epoch)
+    fun unlocked(ask: Ask): Boolean = session.unlockChanges(since = ask.epoch)
 
-    data class Ask(val profileId: Long, val pin: String, val epoch: Long)
+    data class Ask(val pin: String, val epoch: Long)
 }

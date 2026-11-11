@@ -1,67 +1,9 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 57,
-    "identityHash": "758f328df10e6cd76d03afd8761da22c",
+    "version": 1,
+    "identityHash": "38e04c5dfe645285a82eeb8839636da1",
     "entities": [
-      {
-        "tableName": "profiles",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `avatarColor` INTEGER NOT NULL, `avatarId` INTEGER NOT NULL, `avatarPath` TEXT, `isKids` INTEGER NOT NULL, `pinHash` TEXT, `createdAt` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "name",
-            "columnName": "name",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "avatarColor",
-            "columnName": "avatarColor",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "avatarId",
-            "columnName": "avatarId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "avatarPath",
-            "columnName": "avatarPath",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "isKids",
-            "columnName": "isKids",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "pinHash",
-            "columnName": "pinHash",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "createdAt",
-            "columnName": "createdAt",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": true,
-          "columnNames": [
-            "id"
-          ]
-        }
-      },
       {
         "tableName": "sources",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `url` TEXT NOT NULL, `username` TEXT, `password` TEXT, `mac` TEXT, `stalkerSerialNumber` TEXT, `stalkerDeviceId` TEXT, `stalkerDeviceId2` TEXT, `stalkerSignature` TEXT, `userAgent` TEXT, `epgUrl` TEXT, `syncLive` INTEGER NOT NULL, `syncMovies` INTEGER NOT NULL, `syncSeries` INTEGER NOT NULL, `importPortalEpg` INTEGER NOT NULL DEFAULT 1, `hlsSupported` INTEGER NOT NULL, `preferHls` INTEGER NOT NULL, `livePrerollSecs` INTEGER NOT NULL, `liveEnginePreference` TEXT, `liveLatencyMode` TEXT, `liveLatencyCustomSecs` INTEGER NOT NULL, `maxConnections` INTEGER NOT NULL, `maxConnectionsProbedAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `lastSyncAt` INTEGER, `catchupTimezone` TEXT, `catchupOffsetMin` INTEGER, `liveTuneTimeoutSecs` INTEGER, `httpReferer` TEXT, `serverTimeZone` TEXT, `cleanChannelNames` INTEGER NOT NULL DEFAULT 0, `channelNameStrip` TEXT, `ignoreConnectionLimit` INTEGER NOT NULL DEFAULT 0, `isPaid` INTEGER NOT NULL DEFAULT 0)",
@@ -284,66 +226,6 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_sources_type` ON `${TABLE_NAME}` (`type`)"
-          }
-        ]
-      },
-      {
-        "tableName": "profile_source",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profileId` INTEGER NOT NULL, `sourceId` INTEGER NOT NULL, PRIMARY KEY(`profileId`, `sourceId`), FOREIGN KEY(`profileId`) REFERENCES `profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`sourceId`) REFERENCES `sources`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
-        "fields": [
-          {
-            "fieldPath": "profileId",
-            "columnName": "profileId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sourceId",
-            "columnName": "sourceId",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "profileId",
-            "sourceId"
-          ]
-        },
-        "indices": [
-          {
-            "name": "index_profile_source_sourceId",
-            "unique": false,
-            "columnNames": [
-              "sourceId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_profile_source_sourceId` ON `${TABLE_NAME}` (`sourceId`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "profiles",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "profileId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          },
-          {
-            "table": "sources",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "sourceId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
           }
         ]
       },
@@ -673,17 +555,11 @@
       },
       {
         "tableName": "favorites",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `profileId` INTEGER NOT NULL, `mediaType` TEXT NOT NULL, `itemId` INTEGER NOT NULL, `addedAt` INTEGER NOT NULL, FOREIGN KEY(`profileId`) REFERENCES `profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mediaType` TEXT NOT NULL, `itemId` INTEGER NOT NULL, `addedAt` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "profileId",
-            "columnName": "profileId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -714,53 +590,24 @@
         },
         "indices": [
           {
-            "name": "index_favorites_profileId",
-            "unique": false,
-            "columnNames": [
-              "profileId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_favorites_profileId` ON `${TABLE_NAME}` (`profileId`)"
-          },
-          {
-            "name": "index_favorites_profileId_mediaType_itemId",
+            "name": "index_favorites_mediaType_itemId",
             "unique": true,
             "columnNames": [
-              "profileId",
               "mediaType",
               "itemId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_favorites_profileId_mediaType_itemId` ON `${TABLE_NAME}` (`profileId`, `mediaType`, `itemId`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "profiles",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "profileId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_favorites_mediaType_itemId` ON `${TABLE_NAME}` (`mediaType`, `itemId`)"
           }
         ]
       },
       {
         "tableName": "watch_history",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `profileId` INTEGER NOT NULL, `mediaType` TEXT NOT NULL, `itemId` INTEGER NOT NULL, `watchedAt` INTEGER NOT NULL, FOREIGN KEY(`profileId`) REFERENCES `profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mediaType` TEXT NOT NULL, `itemId` INTEGER NOT NULL, `watchedAt` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "profileId",
-            "columnName": "profileId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -791,63 +638,33 @@
         },
         "indices": [
           {
-            "name": "index_watch_history_profileId",
+            "name": "index_watch_history_watchedAt",
             "unique": false,
             "columnNames": [
-              "profileId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_watch_history_profileId` ON `${TABLE_NAME}` (`profileId`)"
-          },
-          {
-            "name": "index_watch_history_profileId_watchedAt",
-            "unique": false,
-            "columnNames": [
-              "profileId",
               "watchedAt"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_watch_history_profileId_watchedAt` ON `${TABLE_NAME}` (`profileId`, `watchedAt`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_watch_history_watchedAt` ON `${TABLE_NAME}` (`watchedAt`)"
           },
           {
-            "name": "index_watch_history_profileId_mediaType_itemId",
+            "name": "index_watch_history_mediaType_itemId",
             "unique": true,
             "columnNames": [
-              "profileId",
               "mediaType",
               "itemId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_watch_history_profileId_mediaType_itemId` ON `${TABLE_NAME}` (`profileId`, `mediaType`, `itemId`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "profiles",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "profileId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_watch_history_mediaType_itemId` ON `${TABLE_NAME}` (`mediaType`, `itemId`)"
           }
         ]
       },
       {
         "tableName": "content_order",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `profileId` INTEGER NOT NULL, `mediaType` TEXT NOT NULL, `contextKey` TEXT NOT NULL, `itemId` INTEGER NOT NULL, `position` INTEGER NOT NULL, FOREIGN KEY(`profileId`) REFERENCES `profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mediaType` TEXT NOT NULL, `contextKey` TEXT NOT NULL, `itemId` INTEGER NOT NULL, `position` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "profileId",
-            "columnName": "profileId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -884,65 +701,35 @@
         },
         "indices": [
           {
-            "name": "index_content_order_profileId",
+            "name": "index_content_order_mediaType_contextKey",
             "unique": false,
             "columnNames": [
-              "profileId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_content_order_profileId` ON `${TABLE_NAME}` (`profileId`)"
-          },
-          {
-            "name": "index_content_order_profileId_mediaType_contextKey",
-            "unique": false,
-            "columnNames": [
-              "profileId",
               "mediaType",
               "contextKey"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_content_order_profileId_mediaType_contextKey` ON `${TABLE_NAME}` (`profileId`, `mediaType`, `contextKey`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_content_order_mediaType_contextKey` ON `${TABLE_NAME}` (`mediaType`, `contextKey`)"
           },
           {
-            "name": "index_content_order_profileId_mediaType_contextKey_itemId",
+            "name": "index_content_order_mediaType_contextKey_itemId",
             "unique": true,
             "columnNames": [
-              "profileId",
               "mediaType",
               "contextKey",
               "itemId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_content_order_profileId_mediaType_contextKey_itemId` ON `${TABLE_NAME}` (`profileId`, `mediaType`, `contextKey`, `itemId`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "profiles",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "profileId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_content_order_mediaType_contextKey_itemId` ON `${TABLE_NAME}` (`mediaType`, `contextKey`, `itemId`)"
           }
         ]
       },
       {
         "tableName": "custom_category_members",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `profileId` INTEGER NOT NULL, `mediaType` TEXT NOT NULL, `contextKey` TEXT NOT NULL, `itemId` INTEGER NOT NULL, `position` INTEGER NOT NULL, FOREIGN KEY(`profileId`) REFERENCES `profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mediaType` TEXT NOT NULL, `contextKey` TEXT NOT NULL, `itemId` INTEGER NOT NULL, `position` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "profileId",
-            "columnName": "profileId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -979,62 +766,32 @@
         },
         "indices": [
           {
-            "name": "index_custom_category_members_profileId",
+            "name": "index_custom_category_members_mediaType_contextKey",
             "unique": false,
             "columnNames": [
-              "profileId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_custom_category_members_profileId` ON `${TABLE_NAME}` (`profileId`)"
-          },
-          {
-            "name": "index_custom_category_members_profileId_mediaType_contextKey",
-            "unique": false,
-            "columnNames": [
-              "profileId",
               "mediaType",
               "contextKey"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_custom_category_members_profileId_mediaType_contextKey` ON `${TABLE_NAME}` (`profileId`, `mediaType`, `contextKey`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_custom_category_members_mediaType_contextKey` ON `${TABLE_NAME}` (`mediaType`, `contextKey`)"
           },
           {
-            "name": "index_custom_category_members_profileId_mediaType_contextKey_itemId",
+            "name": "index_custom_category_members_mediaType_contextKey_itemId",
             "unique": true,
             "columnNames": [
-              "profileId",
               "mediaType",
               "contextKey",
               "itemId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_custom_category_members_profileId_mediaType_contextKey_itemId` ON `${TABLE_NAME}` (`profileId`, `mediaType`, `contextKey`, `itemId`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "profiles",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "profileId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_custom_category_members_mediaType_contextKey_itemId` ON `${TABLE_NAME}` (`mediaType`, `contextKey`, `itemId`)"
           }
         ]
       },
       {
         "tableName": "playback_prefs",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profileId` INTEGER NOT NULL, `contentKey` TEXT NOT NULL, `zoomMode` TEXT, `volumeBoost` INTEGER, `audioDelayMs` INTEGER, `updatedAt` INTEGER NOT NULL, `sourceId` INTEGER NOT NULL DEFAULT -1, `audioLang` TEXT, `subtitleLang` TEXT, PRIMARY KEY(`profileId`, `contentKey`), FOREIGN KEY(`profileId`) REFERENCES `profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentKey` TEXT NOT NULL, `zoomMode` TEXT, `volumeBoost` INTEGER, `audioDelayMs` INTEGER, `updatedAt` INTEGER NOT NULL, `sourceId` INTEGER NOT NULL DEFAULT -1, `audioLang` TEXT, `subtitleLang` TEXT, PRIMARY KEY(`contentKey`))",
         "fields": [
-          {
-            "fieldPath": "profileId",
-            "columnName": "profileId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
           {
             "fieldPath": "contentKey",
             "columnName": "contentKey",
@@ -1083,20 +840,10 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "profileId",
             "contentKey"
           ]
         },
         "indices": [
-          {
-            "name": "index_playback_prefs_profileId",
-            "unique": false,
-            "columnNames": [
-              "profileId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_playback_prefs_profileId` ON `${TABLE_NAME}` (`profileId`)"
-          },
           {
             "name": "index_playback_prefs_sourceId",
             "unique": false,
@@ -1105,19 +852,6 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_playback_prefs_sourceId` ON `${TABLE_NAME}` (`sourceId`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "profiles",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "profileId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
           }
         ]
       },
@@ -1180,17 +914,11 @@
       },
       {
         "tableName": "user_data_tombstones",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `profileId` INTEGER NOT NULL, `kind` TEXT NOT NULL, `identity` TEXT NOT NULL, `deletedAt` INTEGER NOT NULL, FOREIGN KEY(`profileId`) REFERENCES `profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `kind` TEXT NOT NULL, `identity` TEXT NOT NULL, `deletedAt` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "profileId",
-            "columnName": "profileId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -1221,24 +949,14 @@
         },
         "indices": [
           {
-            "name": "index_user_data_tombstones_profileId",
-            "unique": false,
-            "columnNames": [
-              "profileId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_user_data_tombstones_profileId` ON `${TABLE_NAME}` (`profileId`)"
-          },
-          {
-            "name": "index_user_data_tombstones_profileId_kind_identity",
+            "name": "index_user_data_tombstones_kind_identity",
             "unique": true,
             "columnNames": [
-              "profileId",
               "kind",
               "identity"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_user_data_tombstones_profileId_kind_identity` ON `${TABLE_NAME}` (`profileId`, `kind`, `identity`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_user_data_tombstones_kind_identity` ON `${TABLE_NAME}` (`kind`, `identity`)"
           },
           {
             "name": "index_user_data_tombstones_deletedAt",
@@ -1249,34 +967,15 @@
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_user_data_tombstones_deletedAt` ON `${TABLE_NAME}` (`deletedAt`)"
           }
-        ],
-        "foreignKeys": [
-          {
-            "table": "profiles",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "profileId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
         ]
       },
       {
         "tableName": "programme_reminders",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `profileId` INTEGER NOT NULL, `channelId` INTEGER NOT NULL, `channelName` TEXT NOT NULL, `epgChannelId` TEXT, `title` TEXT NOT NULL, `startMs` INTEGER NOT NULL, `stopMs` INTEGER NOT NULL, `leadMinutes` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, FOREIGN KEY(`profileId`) REFERENCES `profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `channelId` INTEGER NOT NULL, `channelName` TEXT NOT NULL, `epgChannelId` TEXT, `title` TEXT NOT NULL, `startMs` INTEGER NOT NULL, `stopMs` INTEGER NOT NULL, `leadMinutes` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "profileId",
-            "columnName": "profileId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -1336,15 +1035,6 @@
         },
         "indices": [
           {
-            "name": "index_programme_reminders_profileId",
-            "unique": false,
-            "columnNames": [
-              "profileId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_programme_reminders_profileId` ON `${TABLE_NAME}` (`profileId`)"
-          },
-          {
             "name": "index_programme_reminders_startMs",
             "unique": false,
             "columnNames": [
@@ -1354,44 +1044,24 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_programme_reminders_startMs` ON `${TABLE_NAME}` (`startMs`)"
           },
           {
-            "name": "index_programme_reminders_profileId_channelId_startMs",
+            "name": "index_programme_reminders_channelId_startMs",
             "unique": true,
             "columnNames": [
-              "profileId",
               "channelId",
               "startMs"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_programme_reminders_profileId_channelId_startMs` ON `${TABLE_NAME}` (`profileId`, `channelId`, `startMs`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "profiles",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "profileId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_programme_reminders_channelId_startMs` ON `${TABLE_NAME}` (`channelId`, `startMs`)"
           }
         ]
       },
       {
         "tableName": "tv_provider_programs",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `profileId` INTEGER NOT NULL, `surface` TEXT NOT NULL, `mediaType` TEXT NOT NULL, `groupId` INTEGER NOT NULL, `targetItemId` INTEGER NOT NULL, `providerProgramId` INTEGER, `lastPositionMs` INTEGER NOT NULL, `durationMs` INTEGER NOT NULL, `lastEngagementAt` INTEGER NOT NULL, `lastPublishedAt` INTEGER NOT NULL, FOREIGN KEY(`profileId`) REFERENCES `profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `surface` TEXT NOT NULL, `mediaType` TEXT NOT NULL, `groupId` INTEGER NOT NULL, `targetItemId` INTEGER NOT NULL, `providerProgramId` INTEGER, `lastPositionMs` INTEGER NOT NULL, `durationMs` INTEGER NOT NULL, `lastEngagementAt` INTEGER NOT NULL, `lastPublishedAt` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "profileId",
-            "columnName": "profileId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -1457,38 +1127,15 @@
         },
         "indices": [
           {
-            "name": "index_tv_provider_programs_profileId",
-            "unique": false,
-            "columnNames": [
-              "profileId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_tv_provider_programs_profileId` ON `${TABLE_NAME}` (`profileId`)"
-          },
-          {
-            "name": "index_tv_provider_programs_profileId_surface_mediaType_groupId",
+            "name": "index_tv_provider_programs_surface_mediaType_groupId",
             "unique": true,
             "columnNames": [
-              "profileId",
               "surface",
               "mediaType",
               "groupId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_tv_provider_programs_profileId_surface_mediaType_groupId` ON `${TABLE_NAME}` (`profileId`, `surface`, `mediaType`, `groupId`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "profiles",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "profileId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_tv_provider_programs_surface_mediaType_groupId` ON `${TABLE_NAME}` (`surface`, `mediaType`, `groupId`)"
           }
         ]
       },
@@ -1735,7 +1382,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '758f328df10e6cd76d03afd8761da22c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '38e04c5dfe645285a82eeb8839636da1')"
     ]
   }
 }

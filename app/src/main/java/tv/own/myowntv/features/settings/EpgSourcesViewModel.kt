@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -173,12 +172,8 @@ class EpgSourcesViewModel(
         epgDao.countGuideChannels(listOf(id)) to epgDao.countForSources(listOf(id))
 
     /** Playlists whose own EPG can pre-fill the add form (Xtream xmltv.php / M3U url-tvg). */
-    suspend fun playlistEpgOptions(): List<PlaylistEpg> {
-        val pid = settings.activeProfileId.first()
-        if (pid < 0) return emptyList()
-        return sourceRepository.observeSources(pid).first()
+    suspend fun playlistEpgOptions(): List<PlaylistEpg> =
+        sourceRepository.observeSources().first()
             // A comma-separated url-tvg names several feeds; offer each one on its own.
             .flatMap { src -> epgRepository.guideUrls(src).map { PlaylistEpg(src.name, it) } }
-
-    }
 }

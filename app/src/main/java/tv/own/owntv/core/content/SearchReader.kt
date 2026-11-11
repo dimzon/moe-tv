@@ -10,7 +10,6 @@ import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.ChannelSearchResult
 import tv.own.owntv.core.database.dao.EpgDao
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.epg.EpgDedupe
@@ -59,39 +58,36 @@ enum class SearchIntent {
 }
 
 /**
- * Searching a profile's channels and guide programmes at once.
+ * Searching the user's channels and guide programmes at once.
  *
  * The queries themselves are the DAOs'; what lives here is everything that decides *which* of their
- * rows a user may see — the FTS expression, the hidden items, the hidden categories, a kids
- * profile's adult filter, and the renames a user made in Customize. Two apps searching the same
- * database have to agree on all of them, so it is written once rather than in each app's search screen.
+ * rows the user may see — the FTS expression, the hidden items, the hidden categories, and the
+ * renames a user made in Customize. Two apps searching the same database have to agree on all of
+ * them, so it is written once rather than in each app's search screen.
  */
 class SearchReader(
     private val channelDao: ChannelDao,
     private val categoryDao: CategoryDao,
-    private val profileDao: ProfileDao,
     private val customize: CustomizationStore,
     private val epgDao: EpgDao,
     private val settings: SettingsRepository,
 ) {
 
     /**
-     * Results for a typed query, already filtered and renamed for [profileId].
+     * Results for a typed query, already filtered and renamed.
      *
-     * [sources] is the profile's active playlists, so a section switched Off never surfaces.
-     * Returns nothing at all when the profile has no sources — there is nothing to search.
+     * [sources] is the set of active playlists, so a section switched Off never surfaces.
+     * Returns nothing at all when there are no sources — there is nothing to search.
      */
     suspend fun search(
-        profileId: Long,
         sources: ActiveProfileSources,
         query: String,
         limit: Int = MATCH_LIMIT,
     ): SearchResults {
-        if (profileId < 0 || !sources.hasAny) return SearchResults()
+        if (!sources.hasAny) return SearchResults()
         val fts = ftsQuery(query)
-        val custLive = customize.observeVisible(profileId, MediaType.LIVE).first()
-        val isKids = profileDao.getById(profileId)?.isKids == true
-        val hiddenLiveCats = hiddenCategoryIds(sources.liveSourceIds, MediaType.LIVE, custLive, isKids)
+        val custLive = customize.observeVisible(MediaType.LIVE).first()
+        val hiddenLiveCats = hiddenCategoryIds(sources.liveSourceIds, MediaType.LIVE, custLive)
         return SearchResults(
             channels = if (sources.liveSourceIds.isEmpty()) emptyList() else
                 (
@@ -113,7 +109,7 @@ class SearchReader(
 
     /**
      * Programmes whose title contains [query], from now until [PROGRAMME_HORIZON_MS] ahead, each on a
-     * channel this profile may see. Only the stored (XMLTV) guide is searched — the provider's own
+     * channel the user may see. Only the stored (XMLTV) guide is searched — the provider's own
      * short EPG is fetched per channel and is never in the table.
      *
      * A channel reads its guide by its manual match first and its own id second (as the Guide does), so
@@ -165,22 +161,21 @@ class SearchReader(
 
     /** One of the curated lists shown before anything is typed. Bounded, and already source-filtered. */
     suspend fun curated(
-        profileId: Long,
         sources: ActiveProfileSources,
         intent: SearchIntent,
         limit: Int = LIMIT,
     ): SearchResults {
-        if (profileId < 0 || !sources.hasAny) return SearchResults()
+        if (!sources.hasAny) return SearchResults()
         // Curated lists never dropped user-hidden categories; only a locked one's items are kept out.
-        val live = customize.observeVisible(profileId, MediaType.LIVE).first()
+        val live = customize.observeVisible(MediaType.LIVE).first()
         return when (intent) {
             SearchIntent.CONTINUE -> SearchResults(
-                channels = channelDao.recentlyWatched(profileId, limit).first()
+                channels = channelDao.recentlyWatched(limit).first()
                     .filter { it.sourceId in sources.liveSourceIds && !live.sealsItemIn(it.categoryId) }
                     .map { ChannelSearchResult(it, null) },
             )
             SearchIntent.CHANNELS -> SearchResults(
-                channels = channelDao.favoritesListAlpha(profileId).first()
+                channels = channelDao.favoritesListAlpha().first()
                     .filter { it.sourceId in sources.liveSourceIds && !live.sealsItemIn(it.categoryId) }
                     .take(limit)
                     .map { ChannelSearchResult(it, null) },
@@ -188,18 +183,16 @@ class SearchReader(
         }
     }
 
-    /** DB ids of this profile's hidden categories for [type] (so hidden groups drop out of search too). */
+    /** DB ids of the user's hidden categories for [type] (so hidden groups drop out of search too). */
     private suspend fun hiddenCategoryIds(
         sourceIds: List<Long>,
         type: MediaType,
         cust: SectionCustomizations,
-        isKidsProfile: Boolean,
     ): Set<Long> {
-        if (cust.hiddenCategories.isEmpty() && !isKidsProfile) return emptySet()
+        if (cust.hiddenCategories.isEmpty()) return emptySet()
         return AdultCategoryClassifier.hiddenCategoryIds(
             categoryDao.observe(sourceIds, type).first(),
             cust.hiddenCategories,
-            isKidsProfile,
         )
     }
 
@@ -243,6 +236,6 @@ class SearchReader(
     }
 }
 
-/** True when the profile has at least one playlist a search could look in. */
+/** True when there is at least one playlist a search could look in. */
 private val ActiveProfileSources.hasAny: Boolean
     get() = liveSourceIds.isNotEmpty()

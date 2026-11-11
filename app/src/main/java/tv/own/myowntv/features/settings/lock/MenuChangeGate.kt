@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -51,12 +50,12 @@ import androidx.compose.runtime.setValue
 import org.koin.compose.koinInject
 import tv.own.owntv.core.categorylock.MenuChangeGuard
 import tv.own.owntv.core.categorylock.PinDoor
-import tv.own.myowntv.features.profiles.PinPrompt
+import tv.own.myowntv.features.categorylock.PinPrompt
 
 /**
  * Runs a long-press change (hide, move, rename, lock a category, remove from History) at once, or —
  * with the Settings lock's long-press switch on — after the Settings PIN. [MenuChangeGateHost] draws
- * the prompt; one right PIN opens every change until the app is left or the profile changes.
+ * the prompt; one right PIN opens every change until the app is left.
  */
 class MenuChangeGate(private val guard: MenuChangeGuard) {
 

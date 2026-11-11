@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -66,14 +65,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import tv.own.owntv.core.content.AdultCategoryClassifier
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.customize.SectionCustomizations
-import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.dao.SourceDao
-import tv.own.owntv.core.database.dao.resolveExistingProfileId
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.home.GuideSliceState
 import tv.own.owntv.core.home.HeroItem
@@ -85,8 +80,8 @@ import tv.own.owntv.core.categorylock.sealedCategoryKeys
 import tv.own.owntv.player.HeroPreviewEngine
 
 /**
- * The "Keep watching" hero card. The app is live TV only, so the cards are the channels the profile
- * last watched; the preview the dwell starts is the channel's own stream.
+ * The "Keep watching" hero card. The app is live TV only, so the cards are the channels last
+ * watched; the preview the dwell starts is the channel's own stream.
  */
 @Immutable
 data class HomeHeroCard(
@@ -104,8 +99,8 @@ data class HomeUiState(
     val recentGuide: GuideSliceState = GuideSliceState(),
     val favoriteGuide: GuideSliceState = GuideSliceState(),
     /**
-     * True until the first [HomeViewModel.loadHomeData] completes. Home's queries are profile-scoped and
-     * already indexed, but on a cold boot their first reads come off slow eMMC (pages not yet in the OS
+     * True until the first [HomeViewModel.loadHomeData] completes. Home's queries are already indexed,
+     * but on a cold boot their first reads come off slow eMMC (pages not yet in the OS
      * page cache) — that's the ~half-second gap between the shell painting and `home-data`. While that
      * runs Home draws nothing over the background rather than flashing the empty state (which looks wrong
      * for a user who does have history). Flips to false the moment real data publishes, and stays false
@@ -131,10 +126,8 @@ data class ContinueTarget(
 class HomeViewModel(
     private val feed: HomeFeedReader,
     private val channelDao: ChannelDao,
-    private val categoryDao: CategoryDao,
     private val sourceDao: SourceDao,
     private val settings: SettingsRepository,
-    private val profileDao: ProfileDao,
     private val heroPreviewEngine: HeroPreviewEngine,
     private val historyDao: tv.own.owntv.core.database.dao.HistoryDao,
     private val customize: CustomizationStore,
@@ -146,52 +139,44 @@ class HomeViewModel(
      * Single entry point for "rebuild the Home rails". Every trigger goes through here rather than
      * calling loadHomeData directly, because there is more than one of them and on a cold start they
      * all fire at once, and the shell runs its own refresh as soon as Home is the selected section.
-     * Measured on a TCL, two full loads — the profile-scoped queries each — landed on the database
+     * Measured on a TCL, two full loads landed on the database
      * concurrently at the single most contended moment of launch. Conflating buffer + debounce
      * collapses that burst into one load, and collectLatest keeps a genuine invalidation from
      * queueing behind a stale in-flight pass.
      */
-    private val reloadRequests = MutableSharedFlow<Long?>(
+    private val reloadRequests = MutableSharedFlow<Unit>(
         replay = 1, // the first request is emitted before the collector below is running — don't lose it
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
     init {
         viewModelScope.launch {
-            reloadRequests.collectLatest { known ->
-                (known ?: currentProfileId())?.let { profileId ->
-                    loadHomeData(profileId)
-                }
-            }
+            reloadRequests.collectLatest { loadHomeData() }
         }
         // A lock closing or opening (the relock on leaving the app, a PIN entry) changes which channels
         // the rows may show. drop(1): the shell asks for the first load.
         viewModelScope.launch {
-            customize.sealedCategoryKeys(settings.activeProfileId).drop(1).collect { reloadRequests.emit(null) }
+            customize.sealedCategoryKeys().drop(1).collect { reloadRequests.emit(Unit) }
         }
     }
 
     // --- The single most-recent resumable channel, for the shared top-bar Continue chip. ---
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    val continueTarget: StateFlow<ContinueTarget?> = settings.activeProfileId
-        .flatMapLatest { pid ->
-            if (pid < 0) flowOf(null)
-            // The section's customizations ride along so a rename in Customize retitles the chip at once.
-            else combine(historyDao.observeMostRecent(pid), customize.sealedCategoryKeys(flowOf(pid))) { h, _ -> h }
-                .flatMapLatest { h ->
-                    if (h == null || h.mediaType != MediaType.LIVE) return@flatMapLatest flowOf(null)
-                    customize.observe(pid, MediaType.LIVE).map { cust -> resolveContinue(pid, h, cust) }
-                }
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    val continueTarget: StateFlow<ContinueTarget?> =
+        // The section's customizations ride along so a rename in Customize retitles the chip at once.
+        combine(historyDao.observeMostRecent(), customize.sealedCategoryKeys()) { h, _ -> h }
+            .flatMapLatest { h ->
+                if (h == null || h.mediaType != MediaType.LIVE) return@flatMapLatest flowOf(null)
+                customize.observe(MediaType.LIVE).map { cust -> resolveContinue(h, cust) }
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private suspend fun resolveContinue(
-        pid: Long,
         h: tv.own.owntv.core.database.entity.WatchHistoryEntity,
         cust: SectionCustomizations,
     ): ContinueTarget? = when (h.mediaType) {
         MediaType.LIVE -> channelDao.getById(h.itemId)?.let { c ->
-            if (!AdultCategoryClassifier.allows(pid, c.categoryId, profileDao, categoryDao) || customize.sealsCategory(pid, c.categoryId)) return@let null
+            if (customize.sealsCategory(c.categoryId)) return@let null
             ContinueTarget(ContinueKind.LIVE, cust.displayName(c), ContinueAction.LAST_CHANNEL, channelId = c.id)
         }
         else -> null
@@ -247,15 +232,9 @@ class HomeViewModel(
         )
     }
 
-    /**
-     * [profileId] lets a caller that already holds a *validated* active profile skip the lookup this
-     * would otherwise do — a settings read plus a database round-trip that measured ~99ms on a TCL,
-     * spent while the rails are still blank. The shell qualifies: it only composes once the launch
-     * gate has confirmed the active id against Room's profile list. Everyone else passes nothing and
-     * gets the lookup.
-     */
-    fun refresh(profileId: Long? = null) {
-        reloadRequests.tryEmit(profileId?.takeIf { it >= 0 })
+    /** Rebuild the rails (debounced through [reloadRequests]). */
+    fun refresh() {
+        reloadRequests.tryEmit(Unit)
     }
 
     /**
@@ -263,9 +242,9 @@ class HomeViewModel(
      * stays here is what only a television does with it: the hero carousel's position. Core's feed
      * still resolves the (VOD-dead) continuation candidates; this TV surface keeps only the live ones.
      */
-    private suspend fun loadHomeData(profileId: Long) {
+    private suspend fun loadHomeData() {
         val previous = _uiState.value
-        val data = feed.load(profileId)
+        val data = feed.load()
         val heroCards = data.heroItems.filterIsInstance<HeroItem.LiveHero>()
             .map { HomeHeroCard(it.channel, it.watchedAt) }
         _uiState.value = HomeUiState(
@@ -280,11 +259,6 @@ class HomeViewModel(
             isLoading = false,
         )
         tv.own.owntv.core.util.Perf.stamp("home-data")
-    }
-
-    private suspend fun currentProfileId(): Long? {
-        val preferred = settings.activeProfileId.first()
-        return if (preferred >= 0) profileDao.resolveExistingProfileId(preferred) else null
     }
 
 }

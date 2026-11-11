@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -108,7 +107,7 @@ import tv.own.myowntv.ui.theme.stageText
 /**
  * A channel list that slides in over the playing video, as a Stage glass sheet 20 from the screen edge.
  * Two instances exist in the player: Left opens the playing channel's own provider category (anchored
- * left), Right opens the profile's watch history (anchored right, [watchedAt] set). Rows are the Live TV
+ * left), Right opens the watch history (anchored right, [watchedAt] set). Rows are the Live TV
  * list's own [LiveStageRow]; the playing channel carries the accent bar. Browse with the D-pad, OK
  * switches channel, Back — or pushing outwards past the list edge — closes it, all without leaving
  * full-screen. The current channel is focused first; in the history list it is the newest row, so focus

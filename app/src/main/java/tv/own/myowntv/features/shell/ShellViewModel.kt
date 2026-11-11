@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -54,12 +53,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -71,7 +67,6 @@ import tv.own.owntv.core.nav.NavVisibility
 import tv.own.owntv.core.network.ConnectivityObserver
 import tv.own.owntv.core.weather.WeatherInfo
 import tv.own.owntv.core.weather.WeatherRepository
-import tv.own.owntv.core.database.dao.resolveExistingProfileId
 import tv.own.owntv.core.repository.SourceRepository
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.theme.AccentColor
@@ -86,13 +81,11 @@ import tv.own.owntv.core.categorylock.SealedPlaybackGuard
 class ShellViewModel(
     private val settings: SettingsRepository,
     private val sourceRepository: SourceRepository,
-    private val profileDao: tv.own.owntv.core.database.dao.ProfileDao,
     connectivity: ConnectivityObserver,
     private val epgMigration: tv.own.owntv.core.epg.EpgMigration,
     private val autoRefresh: tv.own.owntv.core.sync.AutoRefresh,
     private val weatherRepository: WeatherRepository,
     private val navVisibility: NavVisibility,
-    private val profiles: tv.own.owntv.core.profile.ProfileManager,
     private val catalogSyncScheduler: tv.own.owntv.core.sync.work.CatalogSyncScheduler,
     private val importFinalizer: tv.own.owntv.core.sync.ImportFinalizer,
     private val categoryUnlocks: CategoryUnlockSession,
@@ -112,30 +105,14 @@ class ShellViewModel(
     /** The startup update check runs once per launch, not once per shell composition. */
     var startupUpdateCheckDone = false
 
-    /** Relocks the categories the PIN opened when the app leaves the screen or the profile changes. */
-    private val relock = CategoryRelock(viewModelScope, settings, customize, categoryUnlocks)
+    /** Relocks the categories the PIN opened when the app leaves the screen. */
+    private val relock = CategoryRelock(viewModelScope, customize, categoryUnlocks)
 
     init {
         // One-time: move any existing playlist EPG into the new standalone EPG sources (v2.2.0).
         viewModelScope.launch { runCatching { epgMigration.run() } }
         // The one-shot settings migrations run from core at process start (PlaybackStartup).
-        viewModelScope.launch {
-            settings.activeProfileId
-                .distinctUntilChanged()
-                .collect { pid ->
-                    // What the PIN opened belongs to the profile that entered it.
-                    relock.profileChanged(pid)
-                    Log.d(TAG, "activeProfileChanged profile=$pid androidTvHomeEnabled=${settings.androidTvHomeEnabled.first()}")
-                }
-        }
     }
-
-    /**
-     * Set by the shell while it is up: leaves the player and Multiview and stops the preview. The profile
-     * gate calls it before it takes the screen, because the player's state lives here and outlives the
-     * shell — the profile would otherwise come back to a player whose stream the gate already freed.
-     */
-    internal var leavePlayback: (() -> Unit)? = null
 
     /** Set by the shell while it is up: stops what plays from a category a relock seals. */
     internal var sealedPlayback: SealedPlaybackGuard?
@@ -219,29 +196,8 @@ class ShellViewModel(
     val backgroundConfig: StateFlow<tv.own.owntv.core.theme.BackgroundConfig> = settings.backgroundConfig
         .stateIn(viewModelScope, SharingStarted.Eagerly, tv.own.owntv.core.theme.BackgroundConfig())
 
-    /** The active profile's avatar (so the sidebar reflects profile edits, not a separate setting). */
-    val avatarId: StateFlow<Int> = settings.activeProfileId
-        .flatMapLatest { pid -> if (pid < 0) flowOf(0) else profileDao.observeById(pid).map { it?.avatarId ?: 0 } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
-
-    /**
-     * The active profile's own picture, when it has one — blank means the drawn tile named by
-     * [avatarId]. Every surface that draws an avatar reads this alongside the id, so a picture set
-     * here shows up in the sidebar, the profile gate and the profile list without any of them
-     * knowing where it came from.
-     */
-    val avatarPath: StateFlow<String> = settings.activeProfileId
-        .flatMapLatest { pid -> if (pid < 0) flowOf("") else profileDao.observeById(pid).map { it?.avatarPath.orEmpty() } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
-
-    /** The active profile's name, shown in the sidebar profile card. */
-    val profileName: StateFlow<String> = settings.activeProfileId
-        .flatMapLatest { pid -> if (pid < 0) flowOf("") else profileDao.observeById(pid).map { it?.name ?: "" } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
-
-    /** The active (default) source's name for the sidebar; null means the profile has none. */
-    val sourceSummary: StateFlow<String?> = settings.activeProfileId
-        .flatMapLatest { pid -> if (pid < 0) flowOf(emptyList<tv.own.owntv.core.database.entity.SourceEntity>()) else sourceRepository.observeSources(pid) }
+    /** The (default) source's name for the top bar; null means no source exists yet. */
+    val sourceSummary: StateFlow<String?> = sourceRepository.observeSources()
         .combine(settings.defaultSourceId) { sources, defaultId ->
             when {
                 sources.isEmpty() -> null
@@ -250,9 +206,8 @@ class ShellViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    /** The active profile's playlists, for the top-bar quick switcher (empty when the profile has none). */
-    val playlists: StateFlow<List<tv.own.owntv.core.database.entity.SourceEntity>> = settings.activeProfileId
-        .flatMapLatest { pid -> if (pid < 0) flowOf(emptyList()) else sourceRepository.observeSources(pid) }
+    /** All sources, for the top-bar quick switcher (empty before the first one is added). */
+    val playlists: StateFlow<List<tv.own.owntv.core.database.entity.SourceEntity>> = sourceRepository.observeSources()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** The chosen active-playlist filter: -1 = All playlists (merged view), else a single playlist id. */
@@ -280,11 +235,6 @@ class ShellViewModel(
     /** °F display for the weather chip (default °C). */
     val weatherFahrenheit: StateFlow<Boolean> = settings.weatherFahrenheit
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-
-    /** null = still loading; < 0 = first run (show setup wizard); >= 0 = active profile (show shell). */
-    val activeProfileId: StateFlow<Long?> = settings.activeProfileId
-        .map<Long, Long?> { it }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _selectedSection = MutableStateFlow(MainSection.HOME)
     val selectedSection: StateFlow<MainSection> = _selectedSection.asStateFlow()
@@ -352,38 +302,5 @@ class ShellViewModel(
 
     fun setAccent(accent: AccentColor) {
         viewModelScope.launch { settings.setAccent(accent) }
-    }
-
-    fun setAvatar(id: Int) {
-        viewModelScope.launch {
-            val pid = currentProfileId() ?: return@launch
-            profileDao.setAvatar(pid, id)
-        }
-    }
-
-    /**
-     * Give the active profile a picture of its own, from a file the user picked on this device or
-     * one a phone sent over the local network. [onResult] reports whether the file was a readable
-     * image, so the caller can say so rather than leaving a dialog that appears to have done nothing.
-     */
-    fun setCustomAvatar(source: java.io.File, onResult: (Boolean) -> Unit = {}) {
-        viewModelScope.launch {
-            val pid = currentProfileId()
-            val profile = pid?.let { profileDao.getById(it) }
-            onResult(profile != null && profiles.setCustomAvatar(profile, source))
-        }
-    }
-
-    /** Drop the active profile's own picture; the drawn tile it already had comes back. */
-    fun clearCustomAvatar() {
-        viewModelScope.launch {
-            val pid = currentProfileId() ?: return@launch
-            profileDao.getById(pid)?.let { profiles.clearCustomAvatar(it) }
-        }
-    }
-
-    private suspend fun currentProfileId(): Long? {
-        val preferred = settings.activeProfileId.first()
-        return profileDao.resolveExistingProfileId(preferred)
     }
 }

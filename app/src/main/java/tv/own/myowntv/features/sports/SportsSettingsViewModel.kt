@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -69,7 +68,7 @@ import tv.own.owntv.core.sports.model.Team
 import java.util.Locale
 
 /**
- * Settings → Sports. Every value is the active profile's `SportsConfig`, so it travels in
+ * Settings → Sports. Every value is the device's `SportsConfig`, so it travels in
  * backups and local sync with no extra work; "Show Sports in the menu" is the Navigation setting's own
  * hidden set.
  */
@@ -88,7 +87,7 @@ class SportsSettingsViewModel(
     val shownInMenu: StateFlow<Boolean> = settings.navMenuHidden.map { MainSection.SPORTS.name !in it }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
-    /** The profile's live playlists (id → name), for the Playlist filter. */
+    /** The live playlists (id → name), for the Playlist filter. */
     val playlists: StateFlow<List<Pair<Long, String>>> = activeProfileSources(settings, sourceDao)
         .map { a -> a.sources.filter { it.syncLive }.map { it.id to it.name } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -108,7 +107,7 @@ class SportsSettingsViewModel(
     val appLanguage: String get() = Locale.getDefault().language
 
     fun update(transform: (SportsConfig) -> SportsConfig) = viewModelScope.launch {
-        settings.updateSportsConfig(settings.activeProfileIdNow(), transform)
+        settings.updateSportsConfig(transform)
     }
 
     fun setShownInMenu(on: Boolean) = viewModelScope.launch {

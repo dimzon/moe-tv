@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -106,7 +105,7 @@ import tv.own.myowntv.features.setup.AddSourceScreen
 import tv.own.myowntv.features.setup.RemoteSetupScreen
 import tv.own.myowntv.ui.components.OwnTVSpinner
 
-/** List / add / re-sync / delete the active profile's IPTV sources. */
+/** List / add / re-sync / delete the device.s IPTV sources. */
 @Composable
 fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val vm: SettingsViewModel = koinViewModel()

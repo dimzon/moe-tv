@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -86,7 +85,7 @@ internal class LiveCategoryMemory(private val scope: CoroutineScope, private val
 
     /**
      * Brings the saved category back: [stored] (null with the setting off) checked against [rail], the
-     * first category list complete for this profile and these playlists. The wait ends with that list,
+     * first category list complete for these playlists. The wait ends with that list,
      * whether or not the category is in it, so a large provider's slow list cannot leave it waiting for
      * ever; a pick or a startup choice ends it sooner. Not saved, and the stored value is left alone.
      */

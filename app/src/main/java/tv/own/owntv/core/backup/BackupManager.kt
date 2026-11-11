@@ -8,13 +8,10 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import tv.own.owntv.core.customize.CustomizationStore
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.FOLLOW_GLOBAL_LATENCY_SECS
 import tv.own.owntv.core.database.entity.FOLLOW_GLOBAL_PREROLL
 import tv.own.owntv.core.model.HlsSupport
-import tv.own.owntv.core.database.entity.ProfileEntity
-import tv.own.owntv.core.database.entity.ProfileSourceCrossRef
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.database.transaction
 import tv.own.owntv.core.model.SourceType
@@ -22,17 +19,19 @@ import tv.own.owntv.core.stalker.StalkerClient
 import tv.own.owntv.core.settings.SettingsRepository
 
 /**
- * Backup & restore of the painful-to-re-enter setup: **profiles** (name/avatar/kids/PIN),
- * **sources** (URLs + credentials + per-source UA) and their profile links, plus per-profile
+ * Backup & restore of the painful-to-re-enter setup: **sources** (URLs + credentials + per-source UA),
  * **customizations** (hidden/renamed/reordered categories & channels), favorites, watch history,
  * resume positions and manual Move positions — as a JSON file. The user picks which [Section]s to
- * include on export and which
- * to apply on restore. Content (channels/movies/series) is NOT backed up — it's large and re-syncs
- * from the sources after restore. Profile/source ids are preserved on restore, so customization keys
- * stay valid.
+ * include on export and which to apply on restore. Content (channels) is NOT backed up — it's large
+ * and re-syncs from the sources after restore. Source ids are preserved on restore, so
+ * customization keys stay valid.
+ *
+ * The app has no profiles any more (live-only redesign): the file no longer carries profile rows,
+ * profile-source links, profile pictures, per-profile settings maps or per-profile PIN hashes. Old
+ * files that still hold those blocks import as well as they can — the profile-shaped parts are
+ * silently ignored, the sources and user data are applied to the single user.
  */
 class BackupManager(
-    private val profileDao: ProfileDao,
     private val sourceDao: SourceDao,
     private val settings: SettingsRepository,
     private val customize: CustomizationStore,
@@ -41,13 +40,8 @@ class BackupManager(
     private val db: tv.own.owntv.core.database.OwnTVDatabase,
     /** `filesDir/backgrounds` — where the background picture lives, so a backup can carry it. */
     private val backgroundsDir: File,
-    /** Writes a restored profile picture into `filesDir/avatars`; the one thing that puts files there. */
-    private val avatarStore: tv.own.owntv.core.profile.ProfileAvatarStore,
 ) {
-    /** What a backup can contain; the user multi-selects these for export and restore. Profiles are
-     *  NOT a section: every backup is inherently profile-based — the export flow's first step picks
-     *  which profiles to include (PIN-verified for locked non-active ones), and the ticked profiles'
-     *  rows always ride in the file. */
+    /** What a backup can contain; the user multi-selects these for export and restore. */
     enum class Section {
         SOURCES,
         CUSTOMIZE,
@@ -76,28 +70,14 @@ class BackupManager(
         folder: File,
         sections: Set<Section> = Section.entries.toSet(),
         backupPassword: String? = null,
-        /** Profiles to include (PIN-authorized by the caller). Null = all (legacy callers/tests). */
-        profileIds: Set<Long>? = null,
         /**
          * False for a Local sync transfer: that file is a sealed hand-over in the cache, deleted after the
          * session, not a backup the user can restore from — counting it hid "Never backed up".
          */
         recordAsBackup: Boolean = true,
-        /**
-         * Local sync: each profile's own settings (landing screen, languages, sports, last categories)
-         * travel even when Settings is not ticked — they belong to the viewer, not the device. Its
-         * PINs never travel this way.
-         */
-        profileSettings: Boolean = false,
     ): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
-            // Profile scoping: only the ticked profiles' rows and per-profile data enter the file.
-            val allProfiles = profileDao.getAllOnce()
-            val profiles = if (profileIds == null) allProfiles else allProfiles.filter { it.id in profileIds }
-            val pids = profiles.map { it.id }.toSet()
-            val pidKeys = pids.map { it.toString() }.toSet()
-            val allLinks = sourceDao.allLinks().filter { it.profileId in pids }
-            val linkedSourceIds = allLinks.map { it.sourceId }.toSet()
+            val sourceIds = sourceDao.getAllOnce().map { it.id }.toSet()
             // Set up field encryption only if a passphrase was provided.
             val pass = backupPassword?.takeIf { it.isNotBlank() }
             val salt = if (pass != null) BackupCrypto.newSalt() else null
@@ -105,61 +85,47 @@ class BackupManager(
             val seal: ((String) -> JSONObject)? = key?.let { k -> { plain -> BackupCrypto.encrypt(k, plain) } }
 
             val root = JSONObject().apply {
-                put("version", 26) // v26: "settingsPins" — each profile's Settings lock PIN hash, sealed like "customizePins" (encrypted backups only); "settingsLockMenus" — each profile's "also lock long-press changes" switch ({ "<profileId>": true }). "downloadsAllowed" — each profile's Allow downloads switch ({ "<profileId>": false }); a profile with no entry may download. "lastCategories" — each profile's remembered Live TV / Movies / Series category in portable form ({ "<profileId>": { "last_live_category": "FAV", … } }); the device-wide last_*_category values in "settings" are no longer written and, from older files, restore as the fallback for profiles with none of their own. Sources carry "ignoreConnectionLimit" (absent = off). A Move keeps only the moved items' positions (customizations "catPos" for categories, userData "order" rows for items); older files saved every item of a list, so their folder item orders and category orders ("catOrder") are dropped on import, Favorites kept. v25: "sportsConfigs" — each profile's Settings → Sports blob ({ "<profileId>": { ... } }: followed leagues and teams, filters, alerts, remembered channels by portable name); a file without it restores with the defaults. v24: "preferredLanguages" — each profile's preferred audio/subtitle language ({ "<profileId>": { "a", "s" } }); the shared pref_audio_lang/pref_sub_lang settings stay as the fallback for a profile with no entry. v23: "playbackQuirks" — what a stream needs, shared by every profile (sound-only marks and audio delays; engine pins then still lived in "compatMode", a block dropped at v26 with the second playback engine), and playbackPrefs carry the remembered track languages ("al"/"sl"). A playbackPrefs "d" from an older file restores into the shared delay. v22: sources carry the measured stream limit (maxConnections + maxConnectionsProbedAt), because measuring it costs minutes and interrupts playback and the answer belongs to the account, not the device. v21: "tombstones" — the user data the user DELETED, so a merge (restore or local sync) does not reinstate it. Older readers ignore the block and behave exactly as they do today. v20: playbackPrefs carry the per-item A/V-sync offset. v19: sources carry the per-playlist Live TV engine and Live latency overrides. v18: per-profile specific-channel startup targets. v17: startupModes/customizePins moved SOURCES→SETTINGS (readers accept both); PIN hashes and legacy URL-shaped player keys are encrypted-only; sources carry preferHls/livePrerollSecs/hlsSupported; source-keyed blocks scoped to the ticked profiles' sources. v16: optional Stalker serial/device IDs/signature. v15: custom category membership rides userData as kind "member"; customCategories blobs pass through unremapped. v14: .own container (wallpaper rides along). v13: sources.syncLive/Movies/Series. v12: per-profile OpenSubtitles login (encrypted-only). v11: profile-scoped export. v10: sources.mac. v9: custom TMDB names, encrypted TMDB key
+                // Format v26 — the last version ever WRITTEN. The profile-era blocks of older
+                // files ("profiles", "links", "activeProfileId", avatar entries, "startupModes",
+                // "startupChannels", "preferredLanguages", "sportsConfigs", "lastCategories",
+                // "settingsPins", "customizePins", "settingsLockMenus", "homeConfigs",
+                // "hideNewCategories", playbackPrefs "p", userData/tombstone "p") are no longer
+                // written and are silently ignored on import. The version number is deliberately
+                // not raised: there are zero installs to negotiate with during the redesign.
+                put("version", 26)
                 put("sections", JSONArray().apply { sections.forEach { put(it.name) } })
                 if (salt != null) put("crypto", BackupCrypto.cryptoBlock(salt))
-                // Ticked profiles always ride (backup is profile-based); restore needs SOURCES to apply them.
-                put("profiles", JSONArray().apply { profiles.forEach { put(profileJson(it, seal)) } })
-                // Which of them was in use. A fresh device used to adopt whichever profile happened to
-                // come first out of the id map, so a two-profile household could land on the kids
-                // profile after a restore. Only recorded when that profile is actually in the file.
-                settings.activeProfileId.first().takeIf { it in pids }?.let { put("activeProfileId", it) }
                 if (Section.SOURCES in sections) {
-                    // Only sources at least one ticked profile uses, and only ticked profiles' links.
-                    put("sources", JSONArray().apply { sourceDao.getAllOnce().filter { it.id in linkedSourceIds }.forEach { put(sourceJson(it, seal)) } })
-                    put("links", JSONArray().apply { allLinks.forEach { put(JSONObject().put("profileId", it.profileId).put("sourceId", it.sourceId)) } })
+                    put("sources", JSONArray().apply { sourceDao.getAllOnce().forEach { put(sourceJson(it, seal)) } })
                     put("epgSources", epgSources.exportJson()) // standalone EPG feeds ride with sources
                     // Per-source auto-refresh selections + default source, keyed by the preserved ids.
-                    // Scoped to the ticked profiles' sources: an id belonging to a source that is NOT in
+                    // Scoped to the sources in this file: an id belonging to a source that is NOT in
                     // this file cannot be remapped on restore, and an unmapped numeric id silently
                     // matches whatever unrelated source happens to hold it on the target device.
-                    put("playlistAutoRefresh", filterBySourceId(settings.exportPlaylistAutoRefresh(), linkedSourceIds))
+                    put("playlistAutoRefresh", filterBySourceId(settings.exportPlaylistAutoRefresh(), sourceIds))
                     put("epgAutoRefresh", settings.exportEpgAutoRefresh())
                     put("epgUseLogos", settings.exportEpgUseLogos())
-                    settings.currentDefaultSourceId()?.takeIf { it in linkedSourceIds }?.let { put("defaultSourceId", it) }
+                    settings.currentDefaultSourceId()?.takeIf { it in sourceIds }?.let { put("defaultSourceId", it) }
                 }
                 if (Section.CUSTOMIZE in sections) {
-                    // Customization entries are keyed "cust_<profileId>_<TYPE>" — keep ticked profiles only.
                     put(
                         "customizations",
                         JSONObject().apply {
-                            customize.exportAll()
-                                .filterKeys { k -> k.removePrefix("cust_").substringBefore('_') in pidKeys }
-                                .forEach { (k, v) -> put(k, v) }
+                            customize.exportAll().forEach { (k, v) -> put(k, v) }
                         },
                     )
-                    put("homeConfigs", filterByProfile(settings.exportHomeConfigs(), pidKeys))
-                    put("hideNewCategories", filterByProfile(settings.exportHideNewCategories(), pidKeys))
                 }
-                // Favorites / history / resume positions, exported with stable keys (see UserDataResolver),
-                // filtered to the ticked profiles (each record carries its owner in "p").
+                // Favorites / history / resume positions, exported with stable keys (see UserDataResolver).
                 val kinds = kindsFor(sections)
                 if (kinds.isNotEmpty()) {
-                    val all = userData.exportAll(kinds)
-                    val filtered = JSONArray()
-                    for (i in 0 until all.length()) {
-                        val e = all.getJSONObject(i)
-                        if (e.optLong("p", -1) in pids) filtered.put(e)
-                    }
-                    put("userData", filtered)
+                    put("userData", userData.exportAll(kinds))
                     // The deletions that go with them (v21). A file carrying only the surviving rows
                     // is indistinguishable from one written before the user removed anything, so a
                     // merge — which is what both restore and local sync are — silently reinstates
                     // every favorite and history entry they have ever deleted.
-                    userData.exportTombstones(kinds.intersect(UserDataResolver.TOMBSTONE_KINDS), pids)
+                    userData.exportTombstones(kinds.intersect(UserDataResolver.TOMBSTONE_KINDS))
                         .takeIf { it.length() > 0 }?.let { put("tombstones", it) }
                 }
-                if (profileSettings && Section.SETTINGS !in sections) putProfileSettings(pidKeys)
                 if (Section.SETTINGS in sections) {
                     val s = settings.exportSettings() // non-secret keys, incl. proxy host/port/user/enabled
                     // Proxy password rides here as an encrypted object (key not in the settings whitelist,
@@ -170,45 +136,25 @@ class BackupManager(
                     // Which device wrote this, so a restore can hold back the hardware settings when
                     // it lands somewhere else (see DeviceIdentity).
                     put("device", settings.deviceIdentity().toJson())
-                    // Per-profile landing screen + the Customize PIN lock. These moved out of the
-                    // SOURCES block in v17: neither is a playlist or a credential, so a user who
-                    // deselected "Sources" was silently dropping them. Readers accept both places.
-                    putProfileSettings(pidKeys)
-                    // The Customize PIN is stored as a salted hash, but a 4-digit PIN behind one SHA-256
-                    // pass is seconds of offline brute force — so it follows the same rule as every other
-                    // secret: encrypted with the backup passphrase, or left out entirely.
-                    if (seal != null) {
-                        put("customizePins", sealValues(filterByProfile(settings.exportCustomizePins(), pidKeys), seal))
-                        // The Settings lock's own PIN, by the same rule.
-                        put("settingsPins", sealValues(filterByProfile(settings.exportSettingsLockPins(), pidKeys), seal))
-                    }
-                    put("settingsLockMenus", filterByProfile(settings.exportSettingsLockMenus(), pidKeys))
                     // The per-item stores are keyed by [tv.own.owntv.core.player.contentKey] —
                     // "<sourceId>:<MEDIA_TYPE>:<remoteId>" — so the source id DOES have to be remapped
                     // on restore (an older comment claimed they were stream-URL keyed; that stopped
                     // being true when the stable key was introduced, and an unremapped id silently
-                    // moved values onto the wrong source's items). Rows are scoped to
-                    // the ticked profiles' sources for the same reason. Keys still in the legacy
+                    // moved values onto the wrong source's items). Keys still in the legacy
                     // stream-URL shape carry no source id and frequently embed the account's username
                     // and password, so they ride only when there is a passphrase.
                     val urlKeysAllowed = seal != null
-                    // Per-item zoom / volume (DB v32). Same key shape as every per-item store —
-                    // [tv.own.owntv.core.player.contentKey] —
-                    // so BOTH ids travel and both are remapped on restore: the profile id (these rows
-                    // are per profile) and the source id inside `contentKey`. Scoped to the ticked
-                    // profiles and their sources; legacy stream-URL keys need a passphrase, exactly as
-                    // the key rule above says. Optional block: older readers skip it.
+                    // Per-item zoom / volume / track languages (DB v32). Same key shape as every
+                    // per-item store — [tv.own.owntv.core.player.contentKey] —
+                    // scoped to the sources in this file for the same reason as the key rule above.
                     run {
-                        val ticked = profiles.map { it.id }.toSet()
                         val rows = runCatching { db.playbackPrefsDao().getAllOnce() }.getOrDefault(emptyList())
                         put("playbackPrefs", JSONArray().apply {
                             rows.filter { row ->
-                                row.profileId in ticked &&
-                                    filterContentKeys(listOf(row.contentKey), linkedSourceIds, urlKeysAllowed).isNotEmpty()
+                                filterContentKeys(listOf(row.contentKey), sourceIds, urlKeysAllowed).isNotEmpty()
                             }.forEach { row ->
                                 put(
                                     JSONObject().apply {
-                                        put("p", row.profileId)
                                         put("k", row.contentKey)
                                         row.zoomMode?.let { put("z", it) }
                                         row.volumeBoost?.let { put("v", it) }
@@ -218,13 +164,13 @@ class BackupManager(
                                 )
                             }
                         })
-                        // v23: sound-only marks and audio delays, shared by every profile — scoped and
+                        // v23: sound-only marks and audio delays, shared by every stream — scoped and
                         // key-guarded exactly like the rows above.
                         val quirks = runCatching { db.playbackQuirkDao().getAllOnce() }.getOrDefault(emptyList())
                         put("playbackQuirks", JSONArray().apply {
                             quirks.filter { q ->
                                 (q.audioOnly == true || q.audioDelayMs != null) &&
-                                    filterContentKeys(listOf(q.contentKey), linkedSourceIds, urlKeysAllowed).isNotEmpty()
+                                    filterContentKeys(listOf(q.contentKey), sourceIds, urlKeysAllowed).isNotEmpty()
                             }.forEach { q ->
                                 put(
                                     JSONObject().apply {
@@ -239,13 +185,12 @@ class BackupManager(
                     }
                 }
             }
-            // Profile pictures, bytes and all, for the same reason as the wallpaper below: the path in
-            // the profile row is this device's and means nothing on another one.
-            val avatarFiles = exportAvatars(root, profiles)
 
             // The wallpaper's bytes, not its path. `settings.bg_image_path` still rides in the settings
             // block, but it points into THIS device's filesDir — restoring it verbatim gave the next
             // device a dangling path and a blank background. Import re-derives the path from this entry.
+            // (Profile pictures are gone with the profiles; old containers that carry them simply
+            // leave those bytes unpacked.)
             val wallpaper = if (Section.SETTINGS in sections) currentWallpaper() else null
             wallpaper?.let { root.put("wallpaper", it.name) }
 
@@ -254,7 +199,7 @@ class BackupManager(
             val path = writeAtomically(
                 target,
                 BackupContainer.pack(
-                    BackupContainer.Payload(root.toString(2), wallpaper, avatarFiles),
+                    BackupContainer.Payload(root.toString(2), wallpaper),
                     backupPassword,
                 ),
             )
@@ -270,56 +215,6 @@ class BackupManager(
             )
             path
         }
-    }
-
-    /**
-     * Pack each exported profile's own picture into the container, and note the entry name on that
-     * profile's JSON so restore can find it again (`avatarFile`).
-     *
-     * The same reasoning as the wallpaper: `profiles.avatarPath` points into this device's private
-     * storage, so a profile restored onto another television would come back wearing the drawn tile
-     * with no sign that a picture was ever chosen. A profile with no picture, or one whose file has
-     * gone, simply contributes nothing.
-     *
-     * Nothing here needs a size cap the way the wallpaper does — `ProfileAvatarStore` has already
-     * scaled every one of these to at most 512 px, so a whole household's pictures are a few hundred
-     * kilobytes.
-     */
-    private fun exportAvatars(root: JSONObject, profiles: List<ProfileEntity>): Map<String, ByteArray> {
-        val files = LinkedHashMap<String, ByteArray>()
-        val byId = (root.optJSONArray("profiles") ?: return files).let { array ->
-            (0 until array.length()).associate { array.getJSONObject(it).optLong("id") to array.getJSONObject(it) }
-        }
-        profiles.forEach { profile ->
-            val path = profile.avatarPath?.takeIf { it.isNotBlank() } ?: return@forEach
-            val file = File(path)
-            if (!file.isFile) return@forEach
-            val bytes = runCatching { file.readBytes() }.getOrNull() ?: return@forEach
-            val entry = "${profile.id}_${file.name}"
-            files[entry] = bytes
-            byId[profile.id]?.put("avatarFile", entry)
-        }
-        return files
-    }
-
-    /**
-     * Write a restored profile's picture into this device's own storage and point the row at it.
-     * [localProfileId] is the id the profile has *here*, which a merge by name may well have changed
-     * from the one in the file — the entry is found by the `avatarFile` field, never by the id in it.
-     *
-     * Returns the new absolute path, or null when the backup carried no picture for this profile, in
-     * which case the caller leaves whatever the device already had alone.
-     */
-    private suspend fun restoreAvatar(
-        profileJson: JSONObject,
-        localProfileId: Long,
-        avatars: Map<String, ByteArray>,
-    ): String? {
-        val entry = profileJson.optString("avatarFile").takeIf { it.isNotEmpty() } ?: return null
-        val bytes = avatars[entry] ?: return null
-        return runCatching { avatarStore.save(localProfileId, bytes.inputStream()) }
-            .onFailure { Log.w(TAG, "Profile picture restore failed: ${it.message}") }
-            .getOrNull()
     }
 
     /** The current background picture as a container asset, or null when unset/missing/oversized. */
@@ -399,24 +294,7 @@ class BackupManager(
          * `deviceSettings`. Only meaningful when [sections] has [Section.SETTINGS].
          */
         val fromOtherDevice: Boolean = true,
-        /** The file's profiles whose name a profile on this device already has (as [import] matches them). */
-        val clashes: List<ProfileClash> = emptyList(),
     )
-
-    /** A profile in the file named like [deviceProfileId] here: [import] asks for a [ProfileRestoreChoice]. */
-    data class ProfileClash(val fileProfileId: Long, val name: String, val deviceProfileId: Long)
-
-    /** What a restore does with a profile in the file that has the name of one already here. */
-    sealed interface ProfileRestoreChoice {
-        /** Keep what it has here and add what the file brings (the default). */
-        data object Merge : ProfileRestoreChoice
-
-        /** Clear its data here in the restored sections first, then restore the file's. */
-        data object Replace : ProfileRestoreChoice
-
-        /** Restore the file's profile as a new one named [name] (numbered if that is taken too). */
-        data class KeepBoth(val name: String) : ProfileRestoreChoice
-    }
 
     /** True when [file] is a container that cannot be inspected at all without the backup password. */
     suspend fun isSealed(file: File): Boolean = withContext(Dispatchers.IO) {
@@ -424,17 +302,13 @@ class BackupManager(
     }
 
     /**
-     * Outcome of a restore: how many rows/entries were applied, and how many `sources[]` entries were
-     * left out because this build doesn't know their [SourceType] (see [sourceFrom]).
-     */
-    /**
      * Why a file is being applied. The two are not the same instruction and must not share one.
      *
      * [MERGE] reconciles two timelines: a deletion here beats an older record from there, which is
      * what stops an unfavorited channel coming back on every sync. [RESTORE] is the user pointing at
      * a file and saying "my data is what this says" — so a deletion made *after* that file was
-     * written is no longer true, and this device's markers for the profiles in the file are dropped
-     * before it is applied. The file's own deletions still apply: they are part of the snapshot.
+     * written is no longer true, and this device's markers are dropped before it is applied. The
+     * file's own deletions still apply: they are part of the snapshot.
      *
      * Getting this wrong is not loud. Restoring onto a *fresh* device works either way (no markers
      * exist yet), so a merge-shaped restore looks perfect right up until someone restores onto the
@@ -461,14 +335,9 @@ class BackupManager(
             val sealed = BackupContainer.probe(file) == BackupContainer.Kind.ENCRYPTED_CONTAINER
             val (root, _) = readBackup(file, password)
             val out = mutableSetOf<Section>()
-            // v11+ files always carry "profiles" (backup is profile-based); only "sources" marks the
-            // Sources section. Older files wrote both together, so this reads them identically.
+            // "sources" marks the Sources section (it always has, for every version still readable).
             if (root.has("sources")) out += Section.SOURCES
-            if (
-                root.optJSONObject("customizations")?.keys()?.hasNext() == true ||
-                root.optJSONObject("homeConfigs")?.keys()?.hasNext() == true ||
-                root.optJSONObject("hideNewCategories")?.keys()?.hasNext() == true
-            ) out += Section.CUSTOMIZE
+            if (root.optJSONObject("customizations")?.keys()?.hasNext() == true) out += Section.CUSTOMIZE
             if (root.optJSONObject("settings")?.keys()?.hasNext() == true) out += Section.SETTINGS
             root.optJSONArray("userData")?.let { arr ->
                 for (i in 0 until arr.length()) {
@@ -485,7 +354,6 @@ class BackupManager(
                 encrypted = root.has("crypto"),
                 sealed = sealed,
                 fromOtherDevice = !DeviceIdentity.sameDevice(DeviceIdentity.fromJson(root.optJSONObject("device")), settings.deviceIdentity()),
-                clashes = clashes(root),
             )
         }
     }
@@ -498,13 +366,12 @@ class BackupManager(
      * finding out afterwards. So the counts here are per section and phrased as *change*, not as
      * volume: how many rows would appear that are not here now, and how many would be removed.
      *
-     * Reads only. Every lookup mirrors what [import] does — profiles matched by name, sources by
-     * type/URL/username — so the numbers are the same ones the apply will produce, minus anything
-     * that lands after a sync of the catalogue (a favorite whose channel this device has not
-     * downloaded yet counts as new, and heals into place later exactly as a restore's does).
+     * Reads only. Every lookup mirrors what [import] does — sources by type/URL/username — so the
+     * numbers are the same ones the apply will produce, minus anything that lands after a sync of
+     * the catalogue (a favorite whose channel this device has not downloaded yet counts as new, and
+     * heals into place later exactly as a restore's does).
      */
     data class Preview(
-        val newProfiles: Int = 0,
         val newSources: Int = 0,
         val newFavorites: Int = 0,
         val newHistory: Int = 0,
@@ -520,7 +387,7 @@ class BackupManager(
         val hasDeviceSettings: Boolean = false,
     ) {
         val isEmpty: Boolean
-            get() = newProfiles == 0 && newSources == 0 && newFavorites == 0 && newHistory == 0 &&
+            get() = newSources == 0 && newFavorites == 0 && newHistory == 0 &&
                 newReorder == 0 && changedSettings == 0 && !hasCustomizations && deletions == 0
     }
 
@@ -528,26 +395,11 @@ class BackupManager(
         file: File,
         sections: Set<Section> = Section.entries.toSet(),
         backupPassword: String? = null,
-        /** Local sync: count as [import] with the same `intoProfile` would apply it. */
-        intoProfile: Long? = null,
     ): Result<Preview> = withContext(Dispatchers.IO) {
         runCatching {
             val (root, _) = readBackup(file, backupPassword)
             // Secrets stay sealed: a preview never needs to read a password, so it never derives a key.
             val noSecrets: (Any?) -> String? = { v -> (v as? String)?.takeIf { it.isNotEmpty() } }
-
-            val deviceProfiles = profileDao.getAllOnce()
-            val knownProfileNames = deviceProfiles.map { profileMatchKey(it.name) }.toSet()
-            val profileIdByFileId = HashMap<Long, Long>()
-            var newProfiles = 0
-            val fileProfiles = root.optJSONArray("profiles") ?: JSONArray()
-            for (i in 0 until fileProfiles.length()) {
-                val incoming = profileFrom(fileProfiles.getJSONObject(i), noSecrets)
-                val existing = deviceProfiles.firstOrNull { profileMatchKey(it.name) == profileMatchKey(incoming.name) }
-                if (intoProfile != null) continue
-                if (existing != null) profileIdByFileId[incoming.id] = existing.id else newProfiles++
-            }
-            if (intoProfile != null) syncedFileProfile(root, fileProfiles)?.let { profileIdByFileId[it] = intoProfile }
 
             var newSources = 0
             val sourceIdByFileId = HashMap<Long, Long>()
@@ -589,9 +441,8 @@ class BackupManager(
                         val kind = e.optString("kind")
                         if (kind !in kinds) continue
                         if (isOldListOrder(e, fileVersion)) continue
-                        val pid = profileIdByFileId[e.optLong("p", -1)] ?: continue
                         sourceIdByFileId[e.optLong("src", -1)]?.let { e.put("src", it) }
-                        if (!userData.wouldAdd(pid, kind, e)) continue
+                        if (!userData.wouldAdd(kind, e)) continue
                         counts[kind] = (counts[kind] ?: 0) + 1
                     }
                 }
@@ -599,9 +450,8 @@ class BackupManager(
                     for (i in 0 until arr.length()) {
                         val e = arr.getJSONObject(i)
                         if (e.optString("kind") !in kinds) continue
-                        val pid = profileIdByFileId[e.optLong("p", -1)] ?: continue
                         sourceIdByFileId[e.optLong("src", -1)]?.let { e.put("src", it) }
-                        if (userData.wouldRemove(pid, e)) deletions++
+                        if (userData.wouldRemove(e)) deletions++
                     }
                 }
             }
@@ -617,7 +467,6 @@ class BackupManager(
             }
 
             Preview(
-                newProfiles = newProfiles,
                 newSources = newSources,
                 newFavorites = counts["fav"] ?: 0,
                 newHistory = counts["his"] ?: 0,
@@ -633,41 +482,16 @@ class BackupManager(
         }
     }
 
-    /** The file's profiles that have the name of a profile already on this device. */
-    private suspend fun clashes(root: JSONObject): List<ProfileClash> {
-        val byName = profileDao.getAllOnce().associateBy { profileMatchKey(it.name) }
-        val fileProfiles = root.optJSONArray("profiles") ?: return emptyList()
-        return (0 until fileProfiles.length()).mapNotNull { i ->
-            val o = fileProfiles.getJSONObject(i)
-            val here = byName[profileMatchKey(o.optString("name"))] ?: return@mapNotNull null
-            ProfileClash(o.optLong("id"), o.optString("name"), here.id)
-        }
-    }
-
-    /**
-     * Local sync merges the other device's profile in use into this device's profile in use, whatever
-     * their names: the file's active profile (or its only one) is the one taken; the rest are skipped.
-     */
-    private fun syncedFileProfile(root: JSONObject, fileProfiles: JSONArray): Long? {
-        val ids = (0 until fileProfiles.length()).map { fileProfiles.getJSONObject(it).optLong("id") }
-        return root.optLong("activeProfileId", -1L).takeIf { it in ids } ?: ids.firstOrNull()
-    }
-
     /**
      * Applies the chosen [sections] of the file (only those it actually contains) as a MERGE — a
      * restore never deletes anything that already exists on the device:
      *
-     * - Profiles are matched **by name** (case-insensitive): a match is updated in place (avatar,
-     *   kids flag, PIN); a new name is added (with a fresh id if the file's id is taken). Device
-     *   profiles not in the file are untouched. Ids can't be the match key — they're per-device
-     *   auto-increments, so "id 1" on two devices is usually two different people.
      * - Sources are matched by type+URL+username (plus the MAC for Stalker, whose playlists share a
      *   portal URL and have no username): matches keep the device row (secrets updated when the file
      *   carries them); unknown sources are added, and each device row is claimed at most once.
      *   Nothing is wiped.
-     * - Every id in the file (profile/source/EPG-source) is remapped to its device id before any
-     *   per-profile or per-source data (links, favorites/history, customizations,
-     *   auto-refresh, startup modes, Customize PINs, home configs) is applied.
+     * - Every id in the file (source/EPG-source) is remapped to its device id before any
+     *   per-source data (favorites/history, customizations, auto-refresh) is applied.
      *
      * For encrypted backups: if [backupPassword] is provided it is validated BEFORE any write — a
      * wrong passphrase fails fast with [WrongPasswordException] and changes nothing. If the
@@ -687,32 +511,16 @@ class BackupManager(
          * this device's unless this is true. Local sync follows the same rule.
          */
         deviceSettings: Boolean = false,
-        /**
-         * This device's profiles the restore must leave exactly as they are: protected ones the user did
-         * not unlock (see [tv.own.owntv.core.profile.ProfileProtection]). Their file entries are not
-         * mapped, so every per-profile block skips them, and the playlists they use are not rewritten.
-         */
-        holdBack: Set<Long> = emptySet(),
-        /** Restore: what to do with each same-name profile, by its id in the file; [ProfileRestoreChoice.Merge] when absent. */
-        profileChoices: Map<Long, ProfileRestoreChoice> = emptyMap(),
-        /**
-         * Local sync: the profile here that the other device's profile in use merges into, whatever the
-         * names. No profile row is added or changed, its PINs stay as they are, and
-         * its own settings come along even when Settings is not ticked (see [export]'s `profileSettings`).
-         */
-        intoProfile: Long? = null,
     ): Result<ImportSummary> = withContext(Dispatchers.IO) {
         runCatching {
             val (root, payload) = readBackup(file, backupPassword)
             val wallpaper = payload.wallpaper
             // Schema version of the FILE (not of this build). Only needed where a block moved between
-            // sections: up to v16 the per-profile startup mode and Customize PIN lock rode with
-            // SOURCES, from v17 they ride with SETTINGS. Both places are read, so either file restores
-            // whichever section the user ticks — see the `startupModes` handling below.
+            // sections: up to v16 some blocks rode with SOURCES, from v17 with SETTINGS. Readers
+            // accept both places, so either file restores whichever section the user ticks.
             val fileVersion = root.optInt("version", 0)
             val crypto = root.optJSONObject("crypto")
             val pass = backupPassword?.takeIf { it.isNotBlank() }
-            var existingProfileIds = profileDao.getAllOnce().map { it.id }.toSet()
 
             // Derive + validate the key up front, before any destructive write.
             val key = if (crypto != null && pass != null) {
@@ -739,26 +547,14 @@ class BackupManager(
             var localeFieldPresent = false
             var invalidLocale = false
 
-            // Id remapping (file id → device id). Filled during the profile/source merge below. When
+            // Id remapping (file id → device id). Filled during the source merge below. When
             // the SOURCES section isn't being restored, matching still runs read-only so the other
             // sections can attach to the right device rows; unmatched ids fall through unchanged.
-            val profileIdMap = HashMap<Long, Long>()
-            // Profiles here whose data a Replace cleared (their customizations are cleared with the merge).
-            val replacedProfiles = HashSet<Long>()
-            // The file's ids of the profiles [holdBack] keeps as they are: left unmapped, and never
-            // allowed through the unmapped-id fallback below either.
-            val heldBackFileIds = HashSet<Long>()
-            // Each restored profile paired with its entry in the file, so the pictures the container
-            // carries can be written once the database work is done.
-            val restoredAvatars = ArrayList<Pair<Long, JSONObject>>()
             val sourceIdMap = HashMap<Long, Long>()
             var epgIdMap: Map<Long, Long> = emptyMap()
-            // A device with no usable active profile (first run) adopts this one once everything is in.
-            var profileToAdopt: Long? = null
 
-            val fileProfiles = root.optJSONArray("profiles") ?: JSONArray()
             val fileSources = root.optJSONArray("sources") ?: JSONArray()
-            val applySources = Section.SOURCES in sections && (root.has("profiles") || root.has("sources"))
+            val applySources = Section.SOURCES in sections && root.has("sources")
 
             // Interrupted-restore marker: set before the first write of any kind, cleared only
             // after the last one. A restore spans the database AND several DataStore files, so no
@@ -768,80 +564,16 @@ class BackupManager(
             Log.i(
                 TAG,
                 "Restore start file=${file.name} sections=${sections.joinToString(",") { it.name }} " +
-                    "encrypted=${crypto != null} key=${key != null} profiles=${fileProfiles.length()} sources=${fileSources.length()}",
+                    "encrypted=${crypto != null} key=${key != null} sources=${fileSources.length()}",
             )
 
-            // MERGE-restore: a restore never deletes existing profiles or sources.
-            // One transaction wraps the profile/source/link row writes — the part where a partial
-            // apply would be actively wrong (a source inserted but its profile link missing). The
-            // DataStore-backed sections below (settings, customizations, logins) can't
-            // join it, and neither can the user-data resolve, which is deliberately chunked so
-            // a large restore doesn't hold one write transaction for its whole duration.
+            // MERGE-restore: a restore never deletes existing sources.
+            // One transaction wraps the source row writes — the part where a partial
+            // apply would be actively wrong. The DataStore-backed sections below (settings,
+            // customizations) can't join it, and neither can the user-data resolve, which is
+            // deliberately chunked so a large restore doesn't hold one write transaction for its
+            // whole duration.
             db.transaction {
-                // --- profiles: match by NAME (case-insensitive) — ids are per-device counters and
-                // collide across devices, so they can't identify a person. Match → update in place;
-                // new name → insert (keeping the file id only when it's free).
-                val deviceProfiles = profileDao.getAllOnce()
-                val byName = deviceProfiles.associateBy { profileMatchKey(it.name) }
-                val heldBackSources = if (holdBack.isEmpty()) emptySet() else
-                    sourceDao.allLinks().filter { it.profileId in holdBack }.mapTo(mutableSetOf()) { it.sourceId }
-                val takenProfileIds = deviceProfiles.map { it.id }.toMutableSet()
-                val takenNames = deviceProfiles.mapTo(HashSet()) { profileMatchKey(it.name) }
-                val syncedFrom = intoProfile?.let { syncedFileProfile(root, fileProfiles) }
-                for (i in 0 until fileProfiles.length()) {
-                    val incoming = profileFrom(fileProfiles.getJSONObject(i), unseal)
-                    if (intoProfile != null) {
-                        if (incoming.id == syncedFrom) profileIdMap[incoming.id] = intoProfile
-                        continue
-                    }
-                    val choice = profileChoices[incoming.id] ?: ProfileRestoreChoice.Merge
-                    val existing = byName[profileMatchKey(incoming.name)]
-                        ?.takeIf { choice !is ProfileRestoreChoice.KeepBoth }
-                    if (existing != null && choice == ProfileRestoreChoice.Replace && existing.id !in holdBack) {
-                        clearProfileData(existing.id, sections)
-                        if (Section.CUSTOMIZE in sections) replacedProfiles += existing.id
-                    }
-                    if (existing != null && existing.id in holdBack) {
-                        heldBackFileIds += incoming.id
-                        continue
-                    }
-                    // Which local profile each entry ended up as, so its picture can be written to
-                    // disk AFTER this transaction — a database transaction is no place for file I/O.
-                    fun claimedAvatar(localId: Long) {
-                        restoredAvatars += localId to fileProfiles.getJSONObject(i)
-                    }
-                    when {
-                        existing != null -> {
-                            if (applySources) {
-                                profileDao.update(
-                                    existing.copy(
-                                        avatarColor = incoming.avatarColor, avatarId = incoming.avatarId,
-                                        isKids = incoming.isKids,
-                                        // A passwordless backup omits PIN hashes (v17), so `null` here
-                                        // means "not carried", not "this profile has no lock" — keep the
-                                        // device's own PIN rather than silently unlocking the profile.
-                                        pinHash = incoming.pinHash ?: existing.pinHash,
-                                    ),
-                                )
-                            }
-                            profileIdMap[incoming.id] = existing.id
-                            if (applySources) claimedAvatar(existing.id)
-                        }
-                        applySources -> {
-                            val keepId = incoming.id > 0 && incoming.id !in takenProfileIds
-                            val named = if (choice is ProfileRestoreChoice.KeepBoth) incoming.copy(name = freeName(choice.name, takenNames)) else incoming
-                            takenNames += profileMatchKey(named.name)
-                            val rowId = profileDao.insert(if (keepId) named else named.copy(id = 0))
-                            val deviceId = if (keepId) incoming.id else rowId
-                            takenProfileIds += deviceId
-                            profileIdMap[incoming.id] = deviceId
-                            claimedAvatar(deviceId)
-                        }
-                        // else: not restoring SOURCES and no matching profile on the device — leave
-                        // unmapped; the per-profile blocks below skip unmapped ids safely.
-                    }
-                }
-
                 // --- sources: match by type+URL+username, plus the MAC for Stalker. Match → keep the
                 // device row (refresh the secrets/extras the file carries); unknown → insert.
                 // Nothing is wiped.
@@ -861,7 +593,7 @@ class BackupManager(
                         ?.also { unclaimedSources.remove(it) }
                     when {
                         existing != null -> {
-                            if (applySources && existing.id !in heldBackSources) {
+                            if (applySources) {
                                 // Non-secret playlist settings are applied from the FILE when it carries
                                 // them. They used to be skipped, so restoring onto an install that
                                 // already had the playlist kept the device's values and silently lost
@@ -923,42 +655,12 @@ class BackupManager(
                         }
                     }
                 }
-
-                if (applySources) {
-                    val links = root.optJSONArray("links") ?: JSONArray()
-                    for (i in 0 until links.length()) {
-                        val l = links.getJSONObject(i)
-                        val pid = profileIdMap[l.getLong("profileId")] ?: continue
-                        val sid = sourceIdMap[l.getLong("sourceId")] ?: continue
-                        sourceDao.link(ProfileSourceCrossRef(profileId = pid, sourceId = sid)) // IGNORE on dup
-                    }
-                }
             }
 
             if (applySources) {
                 // EPG sources merge by URL; the returned map remaps the auto-refresh keys below.
                 epgIdMap = epgSources.mergeJson(root.optString("epgSources").takeIf { it.isNotBlank() })
 
-                val profileIds = profileDao.getAllOnce().map { it.id }.toSet()
-                // Only a device with no usable active profile (fresh install) adopts a restored one —
-                // a merge restore must not switch the profile out from under someone mid-session.
-                // Which one it adopts now comes from the file (v17) instead of being whichever id the
-                // map happened to yield first; older files fall back to that same arbitrary pick.
-                // Only chosen here; it is applied at the very end. An active profile is what lets the
-                // app leave first-run setup, so adopting it now opened the app on a profile whose
-                // favourites, history and settings had not been written yet.
-                if (settings.activeProfileId.first() !in profileIds) {
-                    val preferred = root.optLong("activeProfileId", -1L)
-                        .takeIf { it > 0 }?.let { profileIdMap[it] }
-                    profileToAdopt = preferred ?: profileIdMap.values.firstOrNull()
-                }
-                // Pre-v17 files carried these in the SOURCES block, so keep honouring that for them.
-                // v17+ files are handled in the SETTINGS block, where they now belong.
-                if (fileVersion < 17) {
-                    root.optJSONObject("startupModes")?.let { settings.importStartupModes(remapProfileKeys(it, profileIdMap), profileIds) }
-                    root.optJSONObject("customizePins")?.let { settings.importCustomizePins(remapProfileKeys(it, profileIdMap), profileIds) }
-                }
-                existingProfileIds = profileIds
                 // Auto-refresh maps + default source, remapped to device ids; entries whose ids didn't
                 // survive the merge are dropped; the device's other choices are kept (merge).
                 val sourceIds = sourceDao.getAllOnce().map { it.id }.toSet()
@@ -972,43 +674,28 @@ class BackupManager(
                     // to hold that number, silently repointing the user's default playlist.
                     sourceIdMap[root.getLong("defaultSourceId")]?.let { settings.importDefaultSource(it, sourceIds) }
                 }
-                count += fileProfiles.length() + fileSources.length() - skippedSources
+                count += fileSources.length() - skippedSources
             }
 
             if (Section.CUSTOMIZE in sections) {
-                // A Replace clears the profile's customizations before the file's are merged in.
-                replacedProfiles.forEach { customize.clearProfile(it) }
                 root.optJSONObject("customizations")?.let { o ->
-                    // Remap "cust_<pid>_<TYPE>" keys and the "<sourceId>:…" content keys inside each
-                    // value, then MERGE — other profiles' customizations stay untouched.
+                    // Remap the "<sourceId>:…" content keys inside each value, then MERGE.
+                    // The keys themselves are customization namespaces, not per-profile any more
+                    // (the profile-shaped keys of pre-redesign files pass through; they simply stop
+                    // matching what this build reads and writes).
                     val cust = HashMap<String, String>()
                     o.keys().forEach { k ->
                         if (!k.startsWith("cust_")) return@forEach
-                        val body = k.removePrefix("cust_")
-                        val filePid = body.substringBefore('_').toLongOrNull() ?: return@forEach
-                        // Unmapped = that person is not on this device. Falling back to the file's number
-                        // handed their customizations (parental state included) to whoever has it here.
-                        val pid = profileIdMap[filePid] ?: return@forEach
-                        cust["cust_${pid}_${body.substringAfter('_')}"] = remapCustomizationValue(o.getString(k), sourceIdMap)
+                        cust[k] = remapCustomizationValue(o.getString(k), sourceIdMap)
                     }
                     customize.mergeAll(cust)
                     count += cust.size
                 }
-                root.optJSONObject("homeConfigs")?.let { settings.importHomeConfigs(remapProfileKeys(it, profileIdMap), existingProfileIds) }
-                root.optJSONObject("hideNewCategories")?.let { settings.importHideNewCategories(remapProfileKeys(it, profileIdMap), existingProfileIds) }
-            }
-
-            // Profile pictures: written now that the transaction has closed. A backup that carries
-            // none leaves every profile's picture exactly as this device had it — a restore must not
-            // strip a picture off a profile just because the file predates the feature.
-            restoredAvatars.forEach { (localId, json) ->
-                restoreAvatar(json, localId, payload.avatars)?.let { path -> profileDao.setAvatarPath(localId, path) }
             }
 
             // Favorites/history/progress: stashed as pending records — they attach automatically as
             // the post-restore syncs repopulate the content tables (UserDataResolver.resolvePending).
-            // Each record's profile ("p") and source ("src") ids are remapped to the merged device ids;
-            // records whose profile has no home on this device are skipped.
+            // Each record's source ("src") id is remapped to the merged device id.
             val kinds = kindsFor(sections)
             if (kinds.isNotEmpty()) {
                 // Both the surviving rows and the deletions are records of the same shape and need the
@@ -1018,11 +705,6 @@ class BackupManager(
                     for (i in 0 until arr.length()) {
                         val e = arr.getJSONObject(i)
                         if (e.optString("kind") !in kinds) continue
-                        val fileP = e.optLong("p", -1)
-                        if (fileP in heldBackFileIds) continue
-                        val p = profileIdMap[fileP] ?: if (applySources) continue else fileP
-                        if (p in holdBack) continue
-                        e.put("p", p)
                         val src = e.optLong("src", -1)
                         sourceIdMap[src]?.let { e.put("src", it) }
                         // Manual-order context keys for provider folders use the same
@@ -1035,12 +717,11 @@ class BackupManager(
                     }
                     return filtered
                 }
-                // A restore drops this device's own deletion markers for the profiles in the file
-                // BEFORE anything is applied — otherwise they refuse the very rows being restored
+                // A restore drops this device's own deletion markers BEFORE anything is applied —
+                // otherwise they refuse the very rows being restored
                 // (UserDataResolver.Resolution.REFUSED) and the next local sync would delete them
-                // again. Only the profiles this file actually maps onto; nobody else's markers move.
-                // A merge must never do this — see [ImportMode].
-                if (mode == ImportMode.RESTORE) userData.clearDeletionsFor(profileIdMap.values)
+                // again. A merge must never do this — see [ImportMode].
+                if (mode == ImportMode.RESTORE) userData.clearDeletions()
                 // Deletions FIRST (v21): they remove any local row older than the deletion, and they
                 // are recorded here, so the very next step cannot re-insert what this one removed.
                 root.optJSONArray("tombstones")?.let { userData.applyTombstones(remapUserData(it)) }
@@ -1053,9 +734,6 @@ class BackupManager(
                 }
             }
 
-            if (intoProfile != null && Section.SETTINGS !in sections && fileVersion >= 17) {
-                importProfileSettings(root, profileIdMap, sourceIdMap, profileDao.getAllOnce().map { it.id }.toSet())
-            }
             if (Section.SETTINGS in sections) {
                 // Decision 9: another device's hardware settings — the global ones below —
                 // only come along when the user ticked them.
@@ -1077,41 +755,18 @@ class BackupManager(
                 }
                 // After importSettings, because that is what wrote the file's (device-local) bg path.
                 applyWallpaper(wallpaper)
-                // Per-profile landing screen + Customize PIN lock (v17: moved here from SOURCES).
-                if (fileVersion >= 17) {
-                    val pids = profileDao.getAllOnce().map { it.id }.toSet()
-                    importProfileSettings(root, profileIdMap, sourceIdMap, pids)
-                    // A profile sync leaves the profile's locks as they are here.
-                    if (intoProfile == null) {
-                    // Encrypted-only since v17, so this restores the lock exactly when the passphrase
-                    // is available and otherwise leaves the device's own Customize PIN untouched.
-                    root.optJSONObject("customizePins")?.let { o ->
-                        settings.importCustomizePins(remapProfileKeys(unsealValues(o, unseal), profileIdMap), pids)
-                    }
-                    root.optJSONObject("settingsPins")?.let { o ->
-                        settings.importSettingsLockPins(remapProfileKeys(unsealValues(o, unseal), profileIdMap), pids)
-                    }
-                    root.optJSONObject("settingsLockMenus")?.let { settings.importSettingsLockMenus(remapProfileKeys(it, profileIdMap), pids) }
-                    }
-                }
                 // Older files carry a "compatMode" block of per-item engine pins; the engine it pinned
                 // to is gone, so the block is read by nobody now — an old file simply loses those pins.
-                // Per-item zoom / volume / audio delay. Merged in (REPLACE on the same profile+key), so a restore
-                // never drops what this device already remembers for other items. Rows whose profile
-                // isn't on this device are skipped — a foreign key would reject them anyway.
+                // Per-item zoom / volume / audio delay. Merged in (REPLACE on the same key), so a restore
+                // never drops what this device already remembers for other items.
                 root.optJSONArray("playbackPrefs")?.let { arr ->
-                    val deviceProfileIds = profileDao.getAllOnce().map { it.id }.toSet()
                     val rows = ArrayList<tv.own.owntv.core.database.entity.PlaybackPrefsEntity>()
                     for (i in 0 until arr.length()) {
                         val e = arr.optJSONObject(i) ?: continue
-                        val filePid = e.optLong("p", -1)
-                        // Unmapped = not on this device; the file's own number may be someone else here.
-                        val pid = profileIdMap[filePid] ?: continue
-                        if (pid !in deviceProfileIds) continue
                         // Same [tv.own.owntv.core.player.contentKey] shape as every per-item store —
                         // remap the source id, or the
                         // restored zoom/volume lands on the wrong item (or on nothing at all).
-                        val key = e.optString("k").takeIf { it.isNotBlank() }
+                        val key2 = e.optString("k").takeIf { it.isNotBlank() }
                             ?.let { remapContentKey(it, sourceIdMap) } ?: continue
                         val zoom = e.optString("z").takeIf { it.isNotBlank() }
                         val volume = if (e.has("v")) e.optInt("v").coerceIn(0, 150) else null
@@ -1122,38 +777,35 @@ class BackupManager(
                         if (e.has("d")) {
                             val delay = e.optInt("d").coerceIn(-5_000, 5_000)
                             runCatching {
-                                db.playbackQuirkDao().setAudioDelay(key, tv.own.owntv.core.player.sourceIdOfContentKey(key), tv.own.owntv.core.player.mediaTypeOfContentKey(key) ?: "LIVE", delay)
+                                db.playbackQuirkDao().setAudioDelay(key2, tv.own.owntv.core.player.sourceIdOfContentKey(key2), tv.own.owntv.core.player.mediaTypeOfContentKey(key2) ?: "LIVE", delay)
                             }
                         }
                         if (zoom == null && volume == null && audioLang == null && subtitleLang == null) continue
                         rows += tv.own.owntv.core.database.entity.PlaybackPrefsEntity(
-                            profileId = pid, contentKey = key, zoomMode = zoom, volumeBoost = volume,
-                            sourceId = tv.own.owntv.core.player.sourceIdOfContentKey(key),
+                            contentKey = key2, zoomMode = zoom, volumeBoost = volume,
+                            sourceId = tv.own.owntv.core.player.sourceIdOfContentKey(key2),
                             audioLang = audioLang, subtitleLang = subtitleLang,
                         )
                     }
                     if (rows.isNotEmpty()) runCatching { db.playbackPrefsDao().insertAll(rows) }
                 }
-                // v23: sound-only marks and audio delays, shared by every profile. Remapped like every
+                // v23: sound-only marks and audio delays, shared by every stream. Remapped like every
                 // per-item key; a key whose playlist did not come along is dropped.
                 root.optJSONArray("playbackQuirks")?.let { arr ->
                     val dao = db.playbackQuirkDao()
                     for (i in 0 until arr.length()) {
                         val e = arr.optJSONObject(i) ?: continue
-                        val key = e.optString("k").takeIf { it.isNotBlank() }
+                        val key2 = e.optString("k").takeIf { it.isNotBlank() }
                             ?.let { remapContentKey(it, sourceIdMap) } ?: continue
-                        val sourceId = tv.own.owntv.core.player.sourceIdOfContentKey(key)
-                        val type = e.optString("t").takeIf { it.isNotBlank() } ?: tv.own.owntv.core.player.mediaTypeOfContentKey(key) ?: "LIVE"
+                        val sourceId = tv.own.owntv.core.player.sourceIdOfContentKey(key2)
+                        val type = e.optString("t").takeIf { it.isNotBlank() } ?: tv.own.owntv.core.player.mediaTypeOfContentKey(key2) ?: "LIVE"
                         runCatching {
-                            if (e.optBoolean("a", false)) dao.setAudioOnly(key, sourceId, type, true)
-                            if (e.has("d")) dao.setAudioDelay(key, sourceId, type, e.optInt("d").coerceIn(-5_000, 5_000))
+                            if (e.optBoolean("a", false)) dao.setAudioOnly(key2, sourceId, type, true)
+                            if (e.has("d")) dao.setAudioDelay(key2, sourceId, type, e.optInt("d").coerceIn(-5_000, 5_000))
                         }
                     }
                 }
             }
-            // Before the marker is cleared: a restore killed in between still reports itself as
-            // interrupted rather than leaving a profile that looks complete.
-            profileToAdopt?.let { settings.setActiveProfile(it) }
             settings.clearRestoreMarker()
             // Locale writes are last by design: all restore work and the interrupted-restore marker
             // are complete before LocalizedContent can observe a script-family change and recreate
@@ -1166,36 +818,7 @@ class BackupManager(
         }
     }
 
-    /** Each profile's own settings that belong to the viewer, not the device: landing screen, languages, sports, last categories. */
-    private suspend fun JSONObject.putProfileSettings(pidKeys: Set<String>) {
-        put("startupModes", filterByProfile(settings.exportStartupModes(), pidKeys))
-        put("startupChannels", filterByProfile(settings.exportStartupChannels(), pidKeys))
-        put("preferredLanguages", filterByProfile(settings.exportPreferredLanguages(), pidKeys))
-        put("sportsConfigs", filterByProfile(settings.exportSportsConfigs(), pidKeys))
-        put("lastCategories", filterByProfile(settings.exportLastCategories(), pidKeys))
-    }
-
-    /** [putProfileSettings]'s blocks back, onto the profiles they map to. */
-    private suspend fun importProfileSettings(root: JSONObject, profileIdMap: Map<Long, Long>, sourceIdMap: Map<Long, Long>, pids: Set<Long>) {
-        root.optJSONObject("startupModes")?.let { settings.importStartupModes(remapProfileKeys(it, profileIdMap), pids) }
-        root.optJSONObject("startupChannels")?.let { settings.importStartupChannels(remapProfileKeys(it, profileIdMap), pids, sourceIdMap) }
-        settings.repairSpecificStartupModes(pids)
-        root.optJSONObject("preferredLanguages")?.let { settings.importPreferredLanguages(remapProfileKeys(it, profileIdMap), pids) }
-        root.optJSONObject("sportsConfigs")?.let { settings.importSportsConfigs(remapProfileKeys(it, profileIdMap), pids) }
-        root.optJSONObject("lastCategories")?.let { settings.importLastCategories(remapProfileKeys(it, profileIdMap), pids) }
-    }
-
-    /** A Replace: [profileId]'s favorites, history, resume positions and manual order here, for the restored [sections]. */
-    private suspend fun clearProfileData(profileId: Long, sections: Set<Section>) {
-        if (Section.FAVORITES in sections) db.favoriteDao().clearProfile(profileId)
-        if (Section.HISTORY in sections) db.historyDao().clear(profileId)
-        if (Section.MANUAL_REORDER in sections) {
-            db.contentOrderDao().clearProfile(profileId)
-            db.customCategoryDao().clearProfileMembers(profileId)
-        }
-    }
-
-        /** Confirms the derived key opens at least one encrypted secret in the file (GCM tag check). */
+    /** Confirms the derived key opens at least one encrypted secret in the file (GCM tag check). */
     private fun validatePassphrase(root: JSONObject, key: javax.crypto.SecretKey): Boolean {
         firstEncryptedSecret(root)?.let { sealed ->
             return runCatching { BackupCrypto.decrypt(key, sealed); true }.getOrDefault(false)
@@ -1205,20 +828,6 @@ class BackupManager(
 
     /** Finds the first encrypted secret object in the file (a source password, a Stalker MAC, or the proxy/TMDB key). */
     private fun firstEncryptedSecret(root: JSONObject): JSONObject? {
-        // Profile PIN hashes are sealed from v17 on — probe them first, because a settings-only or
-        // profiles-only backup may have no source password to validate the passphrase against.
-        root.optJSONArray("profiles")?.let { arr ->
-            for (i in 0 until arr.length()) {
-                val pin = arr.getJSONObject(i).opt("pinHash")
-                if (BackupCrypto.isEncrypted(pin)) return pin as JSONObject
-            }
-        }
-        listOfNotNull(root.optJSONObject("customizePins"), root.optJSONObject("settingsPins")).forEach { pins ->
-            pins.keys().forEach { k ->
-                val sealed = pins.opt(k)
-                if (BackupCrypto.isEncrypted(sealed)) return sealed as JSONObject
-            }
-        }
         root.optJSONArray("sources")?.let { arr ->
             for (i in 0 until arr.length()) {
                 val src = arr.getJSONObject(i)
@@ -1239,35 +848,12 @@ class BackupManager(
     private fun kindsFor(sections: Set<Section>): Set<String> = buildSet {
         if (Section.FAVORITES in sections) add("fav")
         if (Section.HISTORY in sections) add("his")
-        // "member" (custom category membership) rides with MANUAL_REORDER: it is a per-profile,
+        // "member" (custom category membership) rides with MANUAL_REORDER: it is a
         // per-item ordering preference like the reorder positions, so one tick covers it.
         if (Section.MANUAL_REORDER in sections) { add("order"); add("member") }
     }
 
     // --- mapping ---
-    /**
-     * One profile row. The PIN hash is a **secret** (v17): `Pin.hash` is a single salted SHA-256
-     * pass, and a 4-digit PIN is only 10 000 candidates, so a hash sitting in an unencrypted backup
-     * is recovered in well under a second. It therefore follows the same rule as every other secret —
-     * sealed when there is a passphrase, omitted entirely when there is not. `pinLocked` still says
-     * the profile *had* a lock, so restore can tell "no PIN carried" from "no PIN set".
-     */
-    private fun profileJson(p: ProfileEntity, seal: ((String) -> JSONObject)?) = JSONObject().apply {
-        put("id", p.id); put("name", p.name); put("avatarColor", p.avatarColor); put("avatarId", p.avatarId)
-        put("isKids", p.isKids); put("createdAt", p.createdAt)
-        val pin = p.pinHash?.takeIf { it.isNotEmpty() }
-        put("pinHash", if (pin != null && seal != null) seal(pin) else JSONObject.NULL)
-        if (pin != null) put("pinLocked", true)
-    }
-
-    private fun profileFrom(o: JSONObject, unseal: (Any?) -> String?) = ProfileEntity(
-        id = o.getLong("id"), name = o.getString("name"), avatarColor = o.getInt("avatarColor"),
-        avatarId = o.optInt("avatarId", 0), isKids = o.optBoolean("isKids", false),
-        // Pre-v17 backups stored the hash as a plain string; `unseal` returns those unchanged.
-        pinHash = if (o.isNull("pinHash")) null else unseal(o.opt("pinHash")),
-        createdAt = o.optLong("createdAt", System.currentTimeMillis()),
-    )
-
     private fun sourceJson(s: SourceEntity, seal: ((String) -> JSONObject)?) = JSONObject().apply {
         put("id", s.id); put("name", s.name); put("type", s.type.name); put("url", s.url)
         put("username", s.username ?: JSONObject.NULL)
@@ -1448,15 +1034,8 @@ class BackupManager(
 //
 // Top-level and `internal` rather than private members of BackupManager: they are pure String/JSON
 // functions with no dependency on the manager's DAOs, and a merge-restore that gets one of them
-// wrong silently attaches a restored profile's favorites, folder customizations or TMDB overrides to
-// the WRONG source on the device. That is worth unit tests, and unit tests need them reachable.
-
-/**
- * Identity a restored profile is merged onto: the display name, trimmed and case-folded. Case-folded
- * with Kotlin's locale-invariant [lowercase] on purpose — a Turkish-locale device must not decide
- * "Kids" and "KIDS" are different people and end up with two profiles.
- */
-internal fun profileMatchKey(name: String) = name.trim().lowercase()
+// wrong silently attaches a restored backup's folder customizations to the WRONG source on the
+// device. That is worth unit tests, and unit tests need them reachable.
 
 /**
  * Identity a restored source is merged onto. Username is part of the key because one portal commonly
@@ -1502,22 +1081,6 @@ internal fun matchSourceForRestore(candidates: List<SourceEntity>, incoming: Sou
     }
 }
 
-/**
- * [remapKeys] for maps keyed by **profile** id (startup modes, Customize PINs, home layouts, "hide new
- * categories"). An id with no entry in [profileIdMap] belongs to someone who is not on this device —
- * profiles are matched by name, so every person who is here is mapped — and is dropped. Passing it
- * through, as [remapKeys] does for sources, handed that person's layout or PIN to whoever holds the
- * same number here. Non-numeric keys pass through.
- */
-internal fun remapProfileKeys(o: JSONObject, profileIdMap: Map<Long, Long>): JSONObject {
-    val out = JSONObject()
-    o.keys().forEach { k ->
-        val id = k.toLongOrNull()
-        if (id == null) out.put(k, o.get(k)) else profileIdMap[id]?.let { out.put(it.toString(), o.get(k)) }
-    }
-    return out
-}
-
 /** Rewrites an id-keyed JSON map ({"<fileId>": …}) to device ids; unmapped keys pass through. */
 internal fun remapKeys(o: JSONObject, idMap: Map<Long, Long>): JSONObject {
     if (idMap.isEmpty()) return o
@@ -1537,14 +1100,6 @@ internal fun remapContentContextKey(contextKey: String, sourceIdMap: Map<Long, L
 }
 
 /**
- * Rewrites the "<sourceId>:<rest>" content keys inside one SectionCustomizations JSON blob.
- *
- * Custom category ids ("custom:<uuid>", the `customCats` array and any custom keys in the maps)
- * contain no source id — "custom" never parses as a Long, so [remapContentKey] passes them through
- * verbatim. The `customCats` array holds OBJECTS (id/name/icon) rather than strings, so the array
- * branch handles both element kinds; without this the whole blob fell back unremapped.
- */
-/**
  * True for a manual item order from a file older than v26. Those files saved the whole list on every Move, so
  * each item would keep a fixed place and the sort chip could never sort the list again; they are dropped and
  * the list starts from the playlist's order. Favorites has no sort chip, so its order is kept.
@@ -1561,6 +1116,15 @@ internal fun JSONArray.withoutOldListOrders(fileVersion: Int): JSONArray {
     return out
 }
 
+/**
+ * Rewrites the "<sourceId>:<rest>" content keys inside one SectionCustomizations JSON blob and its
+ * values.
+ *
+ * Custom category ids ("custom:<uuid>", the `customCats` array and any custom keys in the maps)
+ * contain no source id — "custom" never parses as a Long, so the inner [remapContentKey] passes them
+ * through verbatim. The `customCats` array holds OBJECTS (id/name/icon) rather than strings, so the
+ * array branch handles both element kinds; without this the whole blob fell back unremapped.
+ */
 internal fun remapCustomizationValue(raw: String, sourceIdMap: Map<Long, Long>): String {
     if (sourceIdMap.isEmpty()) return raw
     fun remapContentKey(k: String): String {
@@ -1601,13 +1165,6 @@ internal fun remapCustomizationValue(raw: String, sourceIdMap: Map<Long, Long>):
         }
         out.toString()
     }.getOrDefault(raw)
-}
-
-/** Keeps only the entries of a profile-id-keyed JSON map that belong to the ticked profiles. */
-internal fun filterByProfile(map: JSONObject, pidKeys: Set<String>): JSONObject {
-    val out = JSONObject()
-    map.keys().forEach { k -> if (k in pidKeys) out.put(k, map.get(k)) }
-    return out
 }
 
 /** Keeps only the entries of a source-id-keyed JSON map whose source rides in this backup. */
@@ -1651,20 +1208,6 @@ internal fun filterContentKeys(
     if (sourceId == null) allowUrlKeys else sourceId in sourceIds
 }
 
-/** Seals every string value of a flat JSON map, leaving the keys readable. */
-internal fun sealValues(map: JSONObject, seal: (String) -> JSONObject): JSONObject {
-    val out = JSONObject()
-    map.keys().forEach { k -> (map.opt(k) as? String)?.let { out.put(k, seal(it)) } }
-    return out
-}
-
-/** Opens a [sealValues] map. Entries that cannot be decrypted (no key / wrong key) are dropped. */
-internal fun unsealValues(map: JSONObject, unseal: (Any?) -> String?): JSONObject {
-    val out = JSONObject()
-    map.keys().forEach { k -> unseal(map.opt(k))?.let { out.put(k, it) } }
-    return out
-}
-
 private fun JSONObject.optStringOrNull(key: String): String? = if (isNull(key)) null else optString(key).takeIf { it.isNotEmpty() }
 
 /** An int field that may be absent or JSON null (both mean "not set"). */
@@ -1679,12 +1222,4 @@ private fun jsonStrings(arr: JSONArray?): List<String> {
         if (v is String && v.isNotBlank()) out += v
     }
     return out
-}
-
-/** [wanted], or "[wanted] 2", "[wanted] 3"… — the first that no profile here has ([taken] holds match keys). */
-internal fun freeName(wanted: String, taken: Set<String>): String {
-    if (profileMatchKey(wanted) !in taken) return wanted
-    var n = 2
-    while (profileMatchKey("$wanted $n") in taken) n++
-    return "$wanted $n"
 }

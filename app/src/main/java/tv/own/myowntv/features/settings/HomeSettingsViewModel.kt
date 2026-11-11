@@ -25,7 +25,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -51,8 +50,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import tv.own.owntv.core.model.HomeConfig
@@ -67,8 +64,7 @@ import tv.own.owntv.core.settings.SettingsRepository
 class HomeSettingsViewModel(
     private val settings: SettingsRepository,
 ) : ViewModel() {
-    val config: StateFlow<HomeConfig> = settings.activeProfileId
-        .flatMapLatest { pid -> if (pid < 0) flowOf(HomeConfig()) else settings.homeConfig(pid) }
+    val config: StateFlow<HomeConfig> = settings.homeConfig()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeConfig())
 
     /** Whether the expanded Home hero plays its video. Defaults off on low-RAM devices. */
@@ -135,9 +131,7 @@ class HomeSettingsViewModel(
 
     private fun updateConfig(transform: (HomeConfig) -> HomeConfig) {
         viewModelScope.launch {
-            val pid = settings.activeProfileId.first()
-            if (pid < 0) return@launch
-            settings.updateHomeConfig(pid) { current -> transform(current) }
+            settings.updateHomeConfig { current -> transform(current) }
         }
     }
 }

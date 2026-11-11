@@ -16,30 +16,27 @@ import tv.own.owntv.core.customize.CategoryRailEditor
 import tv.own.owntv.core.customize.CategoryUnlockSession
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.database.dao.CategoryDao
-import tv.own.owntv.core.database.dao.ProfileDao
-import tv.own.owntv.core.database.dao.resolveExistingProfileId
 import tv.own.owntv.core.live.LiveKey
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.util.Pin
 
 /**
- * Locking a category with the profile's Customize PIN, and opening a locked one: the PIN prompts' state
- * and what an entry does. Each app draws [ui] and passes entries to [submit]; its Live TV, Movies and
+ * Locking a category with the Customize PIN, and opening a locked one: the PIN prompts' state and
+ * what an entry does. Each app draws [ui] and passes entries to [submit]; its Live TV, Movies and
  * Series screens each show only the prompts for their own [MediaType]. Runs in [scope], the owning
  * screen's. [onLocksChanged] runs after a lock is added or removed, for what the app republishes then.
  */
 class CategoryLockFlow(
     private val scope: CoroutineScope,
     private val settings: SettingsRepository,
-    private val profileDao: ProfileDao,
     categoryDao: CategoryDao,
     private val customize: CustomizationStore,
     private val session: CategoryUnlockSession,
     private val limiter: PinAttemptLimiter,
-    private val onLocksChanged: suspend (profileId: Long) -> Unit = {},
+    private val onLocksChanged: suspend () -> Unit = {},
 ) {
-    private val keys = CategoryRailEditor(customize, categoryDao, profileDao)
+    private val keys = CategoryRailEditor(customize, categoryDao)
 
     private val _ui = MutableStateFlow(CategoryLockUi())
     val ui: StateFlow<CategoryLockUi> = _ui.asStateFlow()
@@ -59,14 +56,13 @@ class CategoryLockFlow(
     /** The long-press menu's Lock with PIN / Remove lock. Locking needs no entry once a PIN exists. */
     fun toggleLock(type: MediaType, key: LiveKey) {
         scope.launch {
-            val pid = profileId() ?: return@launch
             val catKey = keys.customizationKey(key) ?: return@launch
-            val stored = settings.customizePin(pid).first()
+            val stored = settings.customizePin().first()
             when {
                 stored == null -> show(CategoryLockPrompt.CreatePin(type, key))
-                catKey in customize.observe(pid, type).first().lockedCategories ->
+                catKey in customize.observe(type).first().lockedCategories ->
                     show(CategoryLockPrompt.RemoveLock(type, key))
-                else -> lock(pid, type, catKey, stored)
+                else -> lock(type, catKey, stored)
             }
         }
     }
@@ -93,31 +89,27 @@ class CategoryLockFlow(
             return
         }
         scope.launch {
-            val pid = profileId() ?: return@launch
             val catKey = keys.customizationKey(prompt.key) ?: return@launch
-            settings.setCustomizePin(pid, pin)
-            lock(pid, prompt.type, catKey, settings.customizePin(pid).first() ?: return@launch)
+            settings.setCustomizePin(pin)
+            lock(prompt.type, catKey, settings.customizePin().first() ?: return@launch)
             close(prompt, opened = false)
         }
     }
 
     private fun checkPin(prompt: CategoryLockPrompt, pin: String) {
         scope.launch {
-            val pid = profileId() ?: return@launch
             // Read before the check: a relock while it runs (the app left the screen) voids this entry.
             val relocks = session.epoch()
-            val stored = settings.customizePin(pid).first()
+            val stored = settings.customizePin().first()
             // No stored PIN means nothing to check against: Pin.verifyCustomize would let any entry through.
             when (val result = limiter.attempt { stored != null && Pin.verifyCustomize(pin, stored) }) {
                 PinAttempt.Accepted -> {
                     val catKey = keys.customizationKey(prompt.key) ?: return@launch
-                    // The PIN was the profile's that was active when it was typed; another one may be now.
-                    if (profileId() != pid) return@launch close(prompt, opened = false)
                     if (prompt is CategoryLockPrompt.Open) {
-                        if (!session.unlock(pid, prompt.type, catKey, since = relocks)) return@launch close(prompt, opened = false)
+                        if (!session.unlock(prompt.type, catKey, since = relocks)) return@launch close(prompt, opened = false)
                     } else {
-                        customize.setCategoryLocked(pid, prompt.type, catKey, false)
-                        onLocksChanged(pid)
+                        customize.setCategoryLocked(prompt.type, catKey, false)
+                        onLocksChanged()
                     }
                     close(prompt, opened = prompt is CategoryLockPrompt.Open)
                 }
@@ -131,11 +123,11 @@ class CategoryLockFlow(
     }
 
     /** Locks [catKey]. A PIN saved before PINs were hashed is stored hashed first. */
-    private suspend fun lock(pid: Long, type: MediaType, catKey: String, storedPin: String) {
-        if (!Pin.isHashed(storedPin)) settings.setCustomizePin(pid, storedPin)
-        customize.setCategoryLocked(pid, type, catKey, true)
-        session.relock(pid, type, catKey)
-        onLocksChanged(pid)
+    private suspend fun lock(type: MediaType, catKey: String, storedPin: String) {
+        if (!Pin.isHashed(storedPin)) settings.setCustomizePin(storedPin)
+        customize.setCategoryLocked(type, catKey, true)
+        session.relock(type, catKey)
+        onLocksChanged()
     }
 
     private fun show(prompt: CategoryLockPrompt) {
@@ -158,10 +150,5 @@ class CategoryLockFlow(
                 if (left > 0) delay(1_000)
             } while (left > 0)
         }
-    }
-
-    private suspend fun profileId(): Long? {
-        val preferred = settings.activeProfileId.first()
-        return if (preferred >= 0) profileDao.resolveExistingProfileId(preferred) else null
     }
 }

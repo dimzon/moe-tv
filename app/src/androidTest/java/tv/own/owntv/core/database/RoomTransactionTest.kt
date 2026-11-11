@@ -7,7 +7,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import tv.own.owntv.core.database.entity.ProfileEntity
+import tv.own.owntv.core.database.entity.SourceEntity
+import tv.own.owntv.core.model.SourceType
 
 /**
  * [transaction] against the engine the app ships, because the predecessor it replaced could not run
@@ -36,11 +37,11 @@ class RoomTransactionTest {
     @Test
     fun aTransactionCommitsItsWrites() = runBlocking {
         db.transaction {
-            db.profileDao().insert(ProfileEntity(name = "Primary", avatarColor = 0x112233))
-            db.profileDao().insert(ProfileEntity(name = "Junior", avatarColor = 0x445566))
+            db.sourceDao().insert(SourceEntity(name = "Primary", type = SourceType.XTREAM, url = "https://a.test"))
+            db.sourceDao().insert(SourceEntity(name = "Junior", type = SourceType.XTREAM, url = "https://b.test"))
         }
 
-        assertEquals(2, db.profileDao().getAllOnce().size)
+        assertEquals(2, db.sourceDao().getAllOnce().size)
     }
 
     /**
@@ -51,11 +52,11 @@ class RoomTransactionTest {
     fun aFailureRollsTheWholeBlockBack() = runBlocking {
         runCatching {
             db.transaction {
-                db.profileDao().insert(ProfileEntity(name = "Primary", avatarColor = 0x112233))
+                db.sourceDao().insert(SourceEntity(name = "Primary", type = SourceType.XTREAM, url = "https://a.test"))
                 error("boom")
             }
         }
 
-        assertEquals(0, db.profileDao().getAllOnce().size)
+        assertEquals(0, db.sourceDao().getAllOnce().size)
     }
 }

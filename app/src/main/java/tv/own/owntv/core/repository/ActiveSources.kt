@@ -4,26 +4,25 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.settings.SettingsRepository
 
 /**
- * The set of sources the Browse screens should show right now: the active profile's linked sources,
- * narrowed to the user's chosen "active playlist" ([SettingsRepository.defaultSourceId]) when one is set.
+ * The set of sources the Browse screens should show right now: every stored source, narrowed to the
+ * user's chosen "active playlist" ([SettingsRepository.defaultSourceId]) when one is set.
  *
- * A default of `-1` (or a default that no longer belongs to the profile) means **All playlists** — the
- * full merged view. This is purely a *display* filter: every playlist still imports and stores all of its
- * content and EPG; this only decides which source ids the grids/guide read from.
+ * A default of `-1` (or a default that no longer exists) means **All playlists** — the full merged
+ * view. This is purely a *display* filter: every playlist still imports and stores all of its content
+ * and EPG; this only decides which source ids the grids/guide read from.
  *
- * The app is live-only (v57): [liveSourceIds] hides sources whose `syncLive` scope is Off — cache stays
- * on disk, rows just don't surface. The [MediaType] parameter of [sourceIdsFor] is kept for call-site
- * compatibility and maps every type to [liveSourceIds], since live channels are the only content there is.
+ * The app is live-only: [liveSourceIds] hides sources whose `syncLive` scope is Off — cache stays on
+ * disk, rows just don't surface. The [MediaType] parameter of [sourceIdsFor] is kept for call-site
+ * compatibility and maps every type to [liveSourceIds], since live channels are the only content.
  */
-data class ActiveProfileSources(val profileId: Long, val sources: List<SourceEntity>) {
+data class ActiveProfileSources(val sources: List<SourceEntity>) {
     val sourceIds: List<Long> get() = sources.map { it.id }
     val liveSourceIds: List<Long> get() = sources.filter { it.syncLive }.map { it.id }
 
@@ -31,31 +30,22 @@ data class ActiveProfileSources(val profileId: Long, val sources: List<SourceEnt
 }
 
 /**
- * Reactive [ActiveProfileSources] for the current profile + active-playlist filter. Emits again whenever
- * the profile, its linked sources, or the chosen default changes, so Browse refreshes live.
+ * Reactive [ActiveProfileSources] with the active-playlist filter. Emits again whenever a source is
+ * added/removed or the chosen default changes, so Browse refreshes live.
  */
-@Suppress("OPT_IN_USAGE")
 fun activeProfileSources(
     settings: SettingsRepository,
     sourceDao: SourceDao,
 ): Flow<ActiveProfileSources> =
-    settings.activeProfileId
-        .flatMapLatest { pid ->
-            if (pid < 0) {
-                flowOf(ActiveProfileSources(pid, emptyList()))
-            } else {
-                combine(sourceDao.observeForProfile(pid), settings.defaultSourceId) { srcs, defaultId ->
-                    val filtered = if (defaultId > 0 && srcs.any { it.id == defaultId }) {
-                        srcs.filter { it.id == defaultId }
-                    } else {
-                        srcs
-                    }
-                    filtered.forEach(::seedSessionLimit)
-                    ActiveProfileSources(pid, filtered)
-                }
-            }
+    combine(sourceDao.observeAll(), settings.defaultSourceId) { srcs, defaultId ->
+        val filtered = if (defaultId > 0 && srcs.any { it.id == defaultId }) {
+            srcs.filter { it.id == defaultId }
+        } else {
+            srcs
         }
-        .distinctUntilChanged()
+        filtered.forEach(::seedSessionLimit)
+        ActiveProfileSources(filtered)
+    }.distinctUntilChanged()
 
 /**
  * Tell the playback layer about a provider that allows only one stream at a time, using the value the
@@ -76,18 +66,17 @@ private fun seedSessionLimit(s: SourceEntity) {
 }
 
 /**
- * One-shot version of [activeProfileSources] for imperative code paths: the [profileId]'s linked source
- * ids, narrowed to the active-playlist filter when one is set (else all). Empty when the profile has none.
+ * One-shot version of [activeProfileSources] for imperative code paths: every source id, narrowed to
+ * the active-playlist filter when one is set (else all).
  *
  * When [section] is set, only sources with that section's enabledScope flag On are returned.
  */
 suspend fun activeSourceIds(
     settings: SettingsRepository,
     sourceDao: SourceDao,
-    profileId: Long,
     section: MediaType? = null,
 ): List<Long> {
-    val all = sourceDao.observeForProfile(profileId).first()
+    val all = sourceDao.observeAll().first()
     val defaultId = settings.defaultSourceId.first()
     val filtered = if (defaultId > 0 && all.any { it.id == defaultId }) {
         all.filter { it.id == defaultId }
@@ -97,3 +86,7 @@ suspend fun activeSourceIds(
     val scoped = if (section == null) filtered else filtered.filter { it.syncLive }
     return scoped.map { it.id }
 }
+
+/** The sources alone (no active-playlist narrowing), for screens that list what exists. */
+fun allSources(sourceDao: SourceDao): Flow<List<SourceEntity>> =
+    sourceDao.observeAll().map { srcs -> srcs.also { it.forEach(::seedSessionLimit) } }

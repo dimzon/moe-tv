@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -44,7 +43,6 @@ import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
 
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
@@ -55,7 +53,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -65,7 +62,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -91,8 +87,6 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
@@ -180,13 +174,6 @@ fun StageRail(
     onSelect: (MainSection) -> Unit,
     count: (MainSection) -> Int?,
     detail: @Composable (MainSection) -> String?,
-    profileName: String,
-    profileLine: String,
-    onSwitchProfile: () -> Unit,
-    onPickAvatar: () -> Unit,
-    /** The profile's drawn avatar (-1 = none) and its own picture (blank = none). */
-    avatarId: Int = -1,
-    avatarPath: String = "",
     selectedItemFocusRequester: FocusRequester,
     contentFocusRequester: FocusRequester,
     /** A screen's own way in, when it has one (Home returns to the exact control left from). */
@@ -353,10 +340,6 @@ fun StageRail(
                     modifier = if (section == focusSection) Modifier.focusRequester(selectedItemFocusRequester) else Modifier,
                 )
             }
-            // Full height: the profile sits at the bottom, after the last separator.
-            if (full) Spacer(Modifier.weight(1f))
-            RailSeparator(shown)
-            RailProfile(shown, namesAlpha, profileName, profileLine.takeIf { counts }, avatarId, avatarPath, onSwitchProfile, onPickAvatar)
         }
     }
 }
@@ -503,59 +486,4 @@ private fun RailActiveDot(modifier: Modifier) {
     )
 }
 
-/**
- * The profile: the 46 px avatar alone in the capsule, avatar + name when open, with "All playlists ·
- * switch ›" under it from Size Wide up ([line]). OK switches profile; a long press changes the avatar.
- */
-@Composable
-private fun RailProfile(open: Boolean, namesAlpha: () -> Float, name: String, line: String?, avatarId: Int, avatarPath: String, onSwitchProfile: () -> Unit, onPickAvatar: () -> Unit) {
-    val a = stageAccent
-    val initial = name.trim().take(1).uppercase().ifEmpty { "?" }
-    StageSurface(
-        onClick = onSwitchProfile,
-        onLongClick = onPickAvatar,
-        radius = if (open) 20.mpx else 23.mpx,
-        modifier = if (open) Modifier.padding(top = 4.mpx).fillMaxWidth().heightIn(min = 46.mpx) else Modifier.padding(top = 4.mpx).size(46.mpx),
-        // Alone in the capsule the avatar covers a fill, so it takes the ring instead.
-        focusStyle = if (open) StageFocus.FILLED else StageFocus.POSTER,
-        contentAlignment = if (open) Alignment.CenterStart else Alignment.Center,
-    ) { focused ->
-        if (!open) {
-            RailAvatar(initial, avatarId = avatarId, imagePath = avatarPath)
-            return@StageSurface
-        }
-        Row(
-            Modifier.padding(horizontal = 12.mpx),
-            horizontalArrangement = Arrangement.spacedBy(14.mpx),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            RailAvatar(initial, avatarId = avatarId, imagePath = avatarPath)
-            Column(Modifier.graphicsLayer { alpha = namesAlpha() }) {
-                Text(name, style = stageText(19, 700), color = if (focused) a.onAccent else StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                if (line != null) {
-                    Text("$line ›", style = stageText(15, 400), color = if (focused) a.onAccent else StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-            }
-        }
-    }
-}
 
-/**
- * `.frail .av`: the profile's avatar or own picture in a circle; with neither, its initial on the orange
- * gradient, 20/800 in #2A0D12. More's profile row draws it 58 / 24.
- */
-@Composable
-internal fun RailAvatar(initial: String, size: Int = 46, textSize: Int = 20, avatarId: Int = -1, imagePath: String = "") {
-    if (avatarId != -1 || imagePath.isNotBlank()) {
-        tv.own.myowntv.ui.components.MyOwnTVAvatar(avatarId = avatarId, imagePath = imagePath, modifier = Modifier.size(size.mpx).clip(CircleShape))
-        return
-    }
-    Box(
-        Modifier
-            .size(size.mpx)
-            .background(Brush.linearGradient(listOf(Color(0xFFFFB35C), Color(0xFFFF5F7A))), CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(initial, style = stageText(textSize, 800), color = Color(0xFF2A0D12), maxLines = 1, overflow = TextOverflow.Ellipsis)
-    }
-}

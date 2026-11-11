@@ -12,18 +12,12 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import tv.own.owntv.core.brand.AppIcon
 import tv.own.owntv.core.CoreBuildInfo
 import tv.own.owntv.core.i18n.LocaleStore
@@ -43,7 +37,7 @@ import tv.own.owntv.core.theme.ThemeMode
 import tv.own.owntv.core.theme.UiFontScale
 import tv.own.owntv.core.theme.UiZoom
 
-/** Per-profile startup landing. LAST_CHANNEL also covers "auto-play my channel" since
+/** Startup landing. LAST_CHANNEL also covers "auto-play my channel" since
  *  it's always the one you last watched. LAST_CHANNEL_GUIDE and LAST_CHANNEL_LIVE open the TV Guide
  *  or Live TV instead, on that channel's category with the channel focused in the preview.
  *  Saved by name, so the order here is only the order the choices are listed in. */
@@ -275,17 +269,11 @@ object SeekSteps {
 }
 
 /**
- * Persists app-level preferences: global ones in the settings file, per-profile ones under keys that
- * carry the profile id.
+ * Persists app-level preferences in the settings file. The app has one user: every value below is
+ * simply the value, no per-profile copies.
  */
 class SettingsRepository(private val context: Context, private val localeStore: LocaleStore) :
     CustomizePinSettings by CustomizePinStore(context.dataStore) {
-
-    /**
-     * Scope for the warm settings snapshots below. Lives as long as this singleton — deliberately never
-     * cancelled, because the alternative is paying a DataStore read on every metadata resolve.
-     */
-    private val repoScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /** Result of importing the optional locale field without allowing bad backup data to abort the restore. */
     data class SettingsImportResult(
@@ -314,34 +302,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
     private fun <T> positionFlow(key: Preferences.Key<T>): Flow<T?> =
         context.positionStore.data.map { it[key] }.distinctUntilChanged()
 
-    /**
-     * A remembered position of the profile in use, following profile switches. Each profile keeps its
-     * own under `<name>_<profileId>`; one that has not saved one yet reads the value the whole device
-     * shared before positions were kept per profile, so nobody loses their place on upgrade.
-     */
-    @Suppress("UNCHECKED_CAST") // the stored value has the type it was written with: [shared]'s
-    private fun <T> profilePositionFlow(shared: Preferences.Key<T>): Flow<T?> =
-        combine(prefsFlow { it[Keys.ACTIVE_PROFILE] ?: -1L }, context.positionStore.data) { pid, p ->
-            ProfilePositions.read(p.asMap().mapKeys { it.key.name }, shared.name, pid) as T?
-        }.distinctUntilChanged()
-
-    private suspend fun <T> setProfilePosition(shared: Preferences.Key<T>, value: T) {
-        val key = profilePositionKey(shared, activeProfileIdNow())
-        context.positionStore.edit { it[key] = value }
-    }
-
-    /** [shared]'s own copy for [profileId]: the same name with `_<profileId>`, and the same value type. */
-    @Suppress("UNCHECKED_CAST")
-    private fun <T> profilePositionKey(shared: Preferences.Key<T>, profileId: Long): Preferences.Key<T> {
-        val name = ProfilePositions.name(shared.name, profileId)
-        return (if (shared == Keys.LAST_LIVE_CHANNEL) longPreferencesKey(name) else stringPreferencesKey(name)) as Preferences.Key<T>
-    }
-
-    /** Drops [profileId]'s remembered positions, for a profile being deleted. */
-    suspend fun forgetProfilePositions(profileId: Long) {
-        context.positionStore.edit { p -> Keys.POSITIONS.forEach { p.remove(profilePositionKey(it, profileId)) } }
-    }
-
     // Glass is off until it is set (a fresh install's Stage defaults turn it on).
     private val GLASS_SCOPE_DEFAULT_BITS: Int = 0
     private val NAV_WIDEN_OFF = "OFF"
@@ -359,8 +319,14 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val ACCENT_CUSTOM = stringPreferencesKey("accent_custom")
         val FOCUS_HIGHLIGHT = stringPreferencesKey("focus_highlight_color")
         val FOCUS_HIGHLIGHT_WIDTH = intPreferencesKey("focus_highlight_width")
-        val ACTIVE_PROFILE = longPreferencesKey("active_profile_id")
         val DEFAULT_SOURCE = longPreferencesKey("default_source_id")
+        // The one user's startup landing, Home layout and Sports settings (plain keys; the app has
+        // no profiles, so these are simply *the* values).
+        val STARTUP_MODE = stringPreferencesKey("startup_mode")
+        val STARTUP_CHANNEL = stringPreferencesKey("startup_channel")
+        val HOME_CONFIG = stringPreferencesKey("home_config")
+        val SPORTS_CONFIG = stringPreferencesKey("sports_config")
+        val HIDE_NEW_CATEGORIES = booleanPreferencesKey("hide_new_categories")
         val REFRESH_SOURCE_IDS = stringSetPreferencesKey("refresh_source_ids")
         // Per-source auto-refresh selections (JSON maps: { "<sourceId>": "<EnumName>" }). Replace the
         // binary refresh-on-startup set with Off/Startup + staleness thresholds. Migration-safe: the legacy
@@ -582,9 +548,8 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val GUIDE_FOLLOWS_LIVE_CATEGORY = booleanPreferencesKey("guide_follows_live_category")
 
         /**
-         * Written while browsing, so kept in their own store rather than the settings file. These four
-         * are the values the whole device shared; each profile now keeps its own copy beside them
-         * (see profilePositionFlow), and these are read only by a profile that has none yet.
+         * Written while browsing, so kept in their own store rather than the settings file. The one
+         * user's remembered places — last focused channel, last category.
          */
         val POSITIONS: List<Preferences.Key<*>> = listOf(LAST_LIVE_CHANNEL, LAST_LIVE_CATEGORY)
         // Background picture (Glass & background). bg_image_path holds the absolute path of the image we
@@ -654,77 +619,67 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         context.dataStore.edit { it[Keys.LAST_UPDATE_CHECK_AT] = at }
     }
 
-    // --- Live TV: remember the last focused channel so reopening lands focus back on it (per profile) ---
-    val lastLiveChannelId: Flow<Long> = profilePositionFlow(Keys.LAST_LIVE_CHANNEL).map { it ?: -1L }
-    suspend fun setLastLiveChannelId(id: Long) = setProfilePosition(Keys.LAST_LIVE_CHANNEL, id)
+    // --- Live TV: remember the last focused channel so reopening lands focus back on it ---
+    val lastLiveChannelId: Flow<Long> = positionFlow(Keys.LAST_LIVE_CHANNEL).map { it ?: -1L }
+    suspend fun setLastLiveChannelId(id: Long) {
+        context.positionStore.edit { it[Keys.LAST_LIVE_CHANNEL] = id }
+    }
 
-    // --- Startup: per-profile landing (v4.0.0). Falls back to the legacy global resume toggle for existing
-    //     users (so "Resume last channel = On" keeps working until they pick a per-profile mode). ---
-    fun startupMode(profileId: Long): Flow<StartupMode> = prefsFlow { prefs ->
-        prefs[stringPreferencesKey("startup_mode_$profileId")]?.let { runCatching { StartupMode.valueOf(it) }.getOrNull() }
+    // --- Startup landing (v4.0.0). Falls back to the legacy global resume toggle for existing
+    //     users (so "Resume last channel = On" keeps working until they pick a mode). ---
+    fun startupMode(): Flow<StartupMode> = prefsFlow { prefs ->
+        prefs[Keys.STARTUP_MODE]?.let { runCatching { StartupMode.valueOf(it) }.getOrNull() }
             ?: if (prefs[Keys.RESUME_LAST_CHANNEL] == true) StartupMode.LAST_CHANNEL else StartupMode.HOME
     }
-    suspend fun setStartupMode(profileId: Long, mode: StartupMode) {
-        context.dataStore.edit { it[stringPreferencesKey("startup_mode_$profileId")] = mode.name }
+    suspend fun setStartupMode(mode: StartupMode) {
+        context.dataStore.edit { it[Keys.STARTUP_MODE] = mode.name }
     }
 
-    fun startupChannel(profileId: Long): Flow<StartupChannelRef?> =
-        parsedFlow(stringPreferencesKey("startup_channel_$profileId")) { StartupChannelRef.fromJson(it) }
+    fun startupChannel(): Flow<StartupChannelRef?> =
+        parsedFlow(Keys.STARTUP_CHANNEL) { StartupChannelRef.fromJson(it) }
 
-    suspend fun setStartupChannel(profileId: Long, channel: StartupChannelRef?) {
+    suspend fun setStartupChannel(channel: StartupChannelRef?) {
         context.dataStore.edit { prefs ->
-            val key = stringPreferencesKey("startup_channel_$profileId")
-            if (channel == null) prefs.remove(key) else prefs[key] = channel.toJson().toString()
+            if (channel == null) prefs.remove(Keys.STARTUP_CHANNEL) else prefs[Keys.STARTUP_CHANNEL] = channel.toJson().toString()
         }
     }
 
-    suspend fun setSpecificStartupChannel(profileId: Long, channel: StartupChannelRef) {
+    suspend fun setSpecificStartupChannel(channel: StartupChannelRef) {
         context.dataStore.edit { prefs ->
-            prefs[stringPreferencesKey("startup_channel_$profileId")] = channel.toJson().toString()
-            prefs[stringPreferencesKey("startup_mode_$profileId")] = StartupMode.SPECIFIC_CHANNEL.name
+            prefs[Keys.STARTUP_CHANNEL] = channel.toJson().toString()
+            prefs[Keys.STARTUP_MODE] = StartupMode.SPECIFIC_CHANNEL.name
         }
     }
 
     /** Whether a category the provider adds on a later resync is hidden automatically. Same across
-     *  Live/Movies/Series for a profile — there's no reason to want it to differ by section. */
-    fun hideNewCategoriesDefault(profileId: Long): Flow<Boolean> = prefsFlow { prefs ->
-        prefs[booleanPreferencesKey("hide_new_categories_$profileId")] ?: false
+     *  Live/Movies/Series — there's no reason to want it to differ by section. */
+    fun hideNewCategoriesDefault(): Flow<Boolean> = prefsFlow { it[Keys.HIDE_NEW_CATEGORIES] ?: false }
+
+    suspend fun setHideNewCategoriesDefault(hidden: Boolean) {
+        context.dataStore.edit { it[Keys.HIDE_NEW_CATEGORIES] = hidden }
     }
 
-    suspend fun setHideNewCategoriesDefault(profileId: Long, hidden: Boolean) {
-        context.dataStore.edit { it[booleanPreferencesKey("hide_new_categories_$profileId")] = hidden }
-    }
+    // --- Home: row order / visibility / hero filters. ---
+    fun homeConfig(): Flow<HomeConfig> = parsedFlow(Keys.HOME_CONFIG) { HomeConfig.fromJson(it) }
 
-    // --- Home: per-profile row order / visibility / hero filters. ---
-    private fun homeConfigKey(profileId: Long) = stringPreferencesKey("home_config_$profileId")
-
-    fun homeConfig(profileId: Long): Flow<HomeConfig> = parsedFlow(homeConfigKey(profileId)) { HomeConfig.fromJson(it) }
-
-    suspend fun updateHomeConfig(profileId: Long, transform: (HomeConfig) -> HomeConfig) {
+    suspend fun updateHomeConfig(transform: (HomeConfig) -> HomeConfig) {
         context.dataStore.edit { prefs ->
-            val key = homeConfigKey(profileId)
-            val next = transform(HomeConfig.fromJson(prefs[key]))
-            if (next == HomeConfig()) prefs.remove(key) else prefs[key] = next.toJson().toString()
+            val next = transform(HomeConfig.fromJson(prefs[Keys.HOME_CONFIG]))
+            if (next == HomeConfig()) prefs.remove(Keys.HOME_CONFIG) else prefs[Keys.HOME_CONFIG] = next.toJson().toString()
         }
     }
 
-    // --- Sports: one blob per profile, like Home's (see [tv.own.owntv.core.sports.SportsConfig]). ---
-    private fun sportsConfigKey(profileId: Long) = stringPreferencesKey("$SPORTS_CONFIG_PREFIX$profileId")
+    // --- Sports: one blob, like Home's (see [tv.own.owntv.core.sports.SportsConfig]). ---
+    fun sportsConfig(): Flow<tv.own.owntv.core.sports.SportsConfig> =
+        parsedFlow(Keys.SPORTS_CONFIG) { tv.own.owntv.core.sports.SportsConfig.fromJson(it) }
 
-    fun sportsConfig(profileId: Long): Flow<tv.own.owntv.core.sports.SportsConfig> =
-        parsedFlow(sportsConfigKey(profileId)) { tv.own.owntv.core.sports.SportsConfig.fromJson(it) }
+    /** The sports settings. (Named for the old per-profile flow the shell used to follow; now simply the one value.) */
+    val activeSportsConfig: Flow<tv.own.owntv.core.sports.SportsConfig> = sportsConfig()
 
-    /** The active profile's sports settings, following profile switches. */
-    val activeSportsConfig: Flow<tv.own.owntv.core.sports.SportsConfig> = context.dataStore.data
-        .map { it[sportsConfigKey(it[Keys.ACTIVE_PROFILE] ?: -1L)] }
-        .distinctUntilChanged()
-        .map { tv.own.owntv.core.sports.SportsConfig.fromJson(it) }
-
-    suspend fun updateSportsConfig(profileId: Long, transform: (tv.own.owntv.core.sports.SportsConfig) -> tv.own.owntv.core.sports.SportsConfig) {
+    suspend fun updateSportsConfig(transform: (tv.own.owntv.core.sports.SportsConfig) -> tv.own.owntv.core.sports.SportsConfig) {
         context.dataStore.edit { prefs ->
-            val key = sportsConfigKey(profileId)
-            val next = transform(tv.own.owntv.core.sports.SportsConfig.fromJson(prefs[key]))
-            if (next == tv.own.owntv.core.sports.SportsConfig()) prefs.remove(key) else prefs[key] = next.toJson().toString()
+            val next = transform(tv.own.owntv.core.sports.SportsConfig.fromJson(prefs[Keys.SPORTS_CONFIG]))
+            if (next == tv.own.owntv.core.sports.SportsConfig()) prefs.remove(Keys.SPORTS_CONFIG) else prefs[Keys.SPORTS_CONFIG] = next.toJson().toString()
         }
     }
 
@@ -734,10 +689,12 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         context.dataStore.edit { it[Keys.RESUME_LAST_CHANNEL] = enabled }
     }
 
-    // --- Remember the last selected category so reopening a section lands where you left off — each
-    //     profile its own. Written by each section's view model (debounced), read once on restore. ---
-    val lastLiveCategory: Flow<String> = profilePositionFlow(Keys.LAST_LIVE_CATEGORY).map { it ?: "" }
-    suspend fun setLastLiveCategory(key: String) = setProfilePosition(Keys.LAST_LIVE_CATEGORY, key)
+    // --- Remember the last selected category so reopening a section lands where you left off.
+    //     Written by each section's view model (debounced), read once on restore. ---
+    val lastLiveCategory: Flow<String> = positionFlow(Keys.LAST_LIVE_CATEGORY).map { it ?: "" }
+    suspend fun setLastLiveCategory(key: String) {
+        context.positionStore.edit { it[Keys.LAST_LIVE_CATEGORY] = key }
+    }
 
     // --- "TV Guide follows Live TV's category" (default off: the Guide keeps a category of its own). On,
     //     the Guide opens on Live TV's remembered category and a category picked there becomes it. ---
@@ -857,15 +814,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         }
         context.dataStore.edit { it[key] = value.trim() }
     }
-
-    /** Same treatment as the other hot paths: a warm snapshot of the active profile, so per-event
-     *  readers pay an in-memory field read instead of a DataStore `first()` (74–128 ms on a real TV). */
-    private val activeProfileIdState: StateFlow<Long?> =
-        prefsFlow { it[Keys.ACTIVE_PROFILE] ?: -1L }.stateIn(repoScope, SharingStarted.Eagerly, null)
-
-    /** Cheap counterpart to collecting [activeProfileId], for the same per-event hot path. */
-    suspend fun activeProfileIdNow(): Long = activeProfileIdState.value ?: activeProfileId.first()
-
 
     // --- EPG time offset ---
 
@@ -1658,28 +1606,26 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         }
     }
 
-    // Preferred languages are per profile: "pref_audio_lang_<id>" / "pref_sub_lang_<id>". A profile
-    // that never chose one follows the old shared key, so nobody's language changed with the upgrade.
-    // Both flows follow the active profile, so a profile switch reaches the player like any other change.
+    // The user's preferred track languages — one pair of values ("pref_audio_lang" / "pref_sub_lang").
 
-    /** Preferred audio language of the active profile (ISO code, the player's track preference); blank = no preference. */
-    val preferredAudioLang: Flow<String> = prefsFlow { profileLang(it, PREF_AUDIO_LANG_PREFIX, Keys.PREF_AUDIO_LANG) }
+    /** Preferred audio language (ISO code, the player's track preference); blank = no preference. */
+    val preferredAudioLang: Flow<String> = prefsFlow { it[Keys.PREF_AUDIO_LANG] ?: "" }
 
     suspend fun setPreferredAudioLang(lang: String) {
-        context.dataStore.edit { it[activeProfileLangKey(it, PREF_AUDIO_LANG_PREFIX)] = lang }
+        context.dataStore.edit { it[Keys.PREF_AUDIO_LANG] = lang }
     }
 
-    /** Preferred subtitle language of the active profile (ISO code); blank = no preference. */
-    val preferredSubLang: Flow<String> = prefsFlow { profileLang(it, PREF_SUB_LANG_PREFIX, Keys.PREF_SUB_LANG) }
+    /** Preferred subtitle language (ISO code); blank = no preference. */
+    val preferredSubLang: Flow<String> = prefsFlow { it[Keys.PREF_SUB_LANG] ?: "" }
 
     suspend fun setPreferredSubLang(lang: String) {
-        context.dataStore.edit { it[activeProfileLangKey(it, PREF_SUB_LANG_PREFIX)] = lang }
+        context.dataStore.edit { it[Keys.PREF_SUB_LANG] = lang }
     }
 
     /**
      * The Settings rows the user pinned to the Quick group, in the order they should appear.
      * Stored as a comma-joined list of row keys. Unknown keys are kept here but ignored when the list
-     * is drawn, so a pin that belongs to a row hidden by the current theme/profile survives.
+     * is drawn, so a pin that belongs to a row hidden by the current theme survives.
      */
     val quickPinnedKeys: Flow<List<String>> = parsedFlow(Keys.QUICK_PINNED) { raw ->
         (raw ?: DEFAULT_QUICK_PINNED.joinToString(","))
@@ -2212,7 +2158,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     /**
      * The phone app's start for a new user: the Stage background and glass on every surface
-     * at [alphaPct]. Written only on a fresh install — no profile yet and neither glass nor background ever set —
+     * at [alphaPct]. Written only on a fresh install — neither glass nor background ever set —
      * so an existing install keeps whatever it has. The TV uses [applyStageDefaults].
      */
     suspend fun applyPhoneStageDefaults(alphaPct: Int) {
@@ -2405,13 +2351,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         context.dataStore.edit { it[Keys.GLASS_ALPHA] = pct.coerceIn(0, 100) }
     }
 
-    /** Active profile id; -1 means first-run / setup not yet completed. */
-    val activeProfileId: Flow<Long> = prefsFlow { it[Keys.ACTIVE_PROFILE] ?: -1L }
-
-    suspend fun setActiveProfile(id: Long) {
-        context.dataStore.edit { it[Keys.ACTIVE_PROFILE] = id }
-    }
-
     // --- Global proxy (Approach 1 — one app-wide HTTP proxy) ---
     // Covers all OkHttp traffic (playlist/API/EPG/images/downloads/updates/weather) and ExoPlayer
     // playback. Per-source overrides and SOCKS are future work; the proxy
@@ -2441,8 +2380,8 @@ class SettingsRepository(private val context: Context, private val localeStore: 
     }
 
     // --- Backup / restore of pure UI/player preferences (device-agnostic) ---
-    // Deliberately EXCLUDES the download folder (a device-specific path) and the profile/source-coupled
-    // keys (active profile, default source, refresh-on-startup) — those ride with the sources backup.
+    // Deliberately EXCLUDES the download folder (a device-specific path) and the source-coupled keys
+    // (default source, refresh-on-startup) — those ride with the sources backup.
 
     // A new key belongs in one of these lists, or in SettingsBackupCoverageTest's exclusions with a reason.
     internal object BackupKeys {
@@ -2452,6 +2391,10 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             Keys.PREF_AUDIO_LANG, Keys.PREF_SUB_LANG, Keys.SORT_LIVE, Keys.SORT_GUIDE, Keys.ANIMATION_LEVEL, Keys.GUIDE_VIEW,
             Keys.LIVE_LAYOUT, Keys.LIVE_VIEW, Keys.REMINDER_MODE, Keys.PLAYER_HOLD_OK, Keys.PLAYER_SHORT_OK,
             Keys.WEATHER_LOCATION, Keys.RECENT_SEARCHES,
+            // The one user's startup landing, Home layout and Sports blob ride with settings now that
+            // they are plain keys rather than per-profile maps. A restored startup target is checked
+            // against the surviving sources after the SOURCES section lands (repairSpecificStartupChannel).
+            Keys.STARTUP_MODE, Keys.STARTUP_CHANNEL, Keys.HOME_CONFIG, Keys.SPORTS_CONFIG,
             Keys.CLOCK_TIME_COLOR, Keys.CLOCK_DATE_COLOR, Keys.CLOCK_WEATHER_COLOR,
             // Global proxy — non-secret fields only. The proxy password (Keys.PROXY_PASS) is NEVER part of
             // this whitelist; it is handled separately by BackupManager (encrypted or omitted).
@@ -2513,6 +2456,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             Keys.MEASURED_STREAM_STATS, Keys.DETAILED_DIAGNOSTICS, Keys.DIRECT_TUNE,
             Keys.EXTERNAL_PLAYER_LIVE, Keys.UPDATE_CHECK_ON_START, Keys.SURROUND_SOUND, Keys.PROXY_ENABLED,
             Keys.WEATHER_ENABLED, Keys.WEATHER_FAHRENHEIT, Keys.RESUME_LAST_CHANNEL, Keys.CH_NAV_ENABLED, Keys.PLAYER_SWAP_CHANNEL_KEYS, Keys.PLAYER_NUMBER_KEYS_TUNE,
+            Keys.HIDE_NEW_CATEGORIES,
             Keys.DNS_ENABLED,
             Keys.REMEMBER_LAST_LIVE,
             Keys.REMEMBER_CAT_LIVE, Keys.GUIDE_FOLLOWS_LIVE_CATEGORY,
@@ -2545,7 +2489,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         /** Whether [k] goes into a new backup, given this device's stored [p]. */
         fun exports(k: Preferences.Key<*>, p: Preferences): Boolean = when (k) {
             Keys.PIP_ON_BACK -> false
-            // The fallback for every profile that never picked a startup mode; only "on" changes anything.
+            // The fallback for a user who never picked a startup mode; only "on" changes anything.
             Keys.RESUME_LAST_CHANNEL -> p[Keys.RESUME_LAST_CHANNEL] == true
             else -> legacySuccessors[k]?.any { p[it] == null } ?: true
         }
@@ -2564,8 +2508,8 @@ class SettingsRepository(private val context: Context, private val localeStore: 
      * by every sync (the catalog is clear-then-insert), so that value means nothing on another device
      * — restoring it would land the user in an arbitrary category. The stable forms travel:
      * "ALL" / "FAV" / "HIST" and "CUSTOM:<uuid>", a user-created category whose id really
-     * is portable. Each profile's travel in [exportLastCategories]; [importSettings] still reads the
-     * single device-wide values older files carry.
+     * is portable. The one user's value travels in [exportLastCategories]; [importSettings] reads
+     * the same plain key an older file carries.
      *
      * `last_live_channel` is deliberately absent for the same reason and has no stable form at all:
      * it is a Room channel id, so there is nothing here worth carrying.
@@ -2577,17 +2521,20 @@ class SettingsRepository(private val context: Context, private val localeStore: 
     private fun isPortableCategoryKey(value: String): Boolean =
         value == "ALL" || value == "FAV" || value == "HIST" || value.startsWith("CUSTOM:")
 
-    /** Each profile's portable remembered categories, as `{ "<profileId>": { "last_live_category": … } }`. */
-    suspend fun exportLastCategories(): org.json.JSONObject = ProfilePositions.export(
-        context.positionStore.data.first().asMap().mapKeys { it.key.name },
-        backupLastCategoryKeys.map { it.name },
-        ::isPortableCategoryKey,
-    )
+    /** The remembered category, portable values only, as `{ "last_live_category": … }`. */
+    suspend fun exportLastCategories(): org.json.JSONObject {
+        val out = org.json.JSONObject()
+        val value = context.positionStore.data.first()[Keys.LAST_LIVE_CATEGORY]
+        if (value != null && isPortableCategoryKey(value)) out.put(Keys.LAST_LIVE_CATEGORY.name, value)
+        return out
+    }
 
-    /** Restores [exportLastCategories] only for profile ids in [existingProfileIds], portable values only. */
-    suspend fun importLastCategories(o: org.json.JSONObject, existingProfileIds: Set<Long>) {
-        val values = ProfilePositions.import(o, backupLastCategoryKeys.map { it.name }, existingProfileIds, ::isPortableCategoryKey)
-        context.positionStore.edit { positions -> values.forEach { (name, value) -> positions[stringPreferencesKey(name)] = value } }
+    /** Restores [exportLastCategories]: the portable value only; anything else is dropped safely. */
+    suspend fun importLastCategories(o: org.json.JSONObject) {
+        val name = Keys.LAST_LIVE_CATEGORY.name
+        if (!o.has(name)) return
+        val value = runCatching { o.getString(name) }.getOrNull()?.takeIf(::isPortableCategoryKey) ?: return
+        context.positionStore.edit { positions -> positions[Keys.LAST_LIVE_CATEGORY] = value }
     }
 
     suspend fun exportSettings(): org.json.JSONObject {
@@ -2663,9 +2610,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         // The last categories live in the position store. Guarded on read as well as on write: a file
         // written by another build (or edited by hand) must not be able to restore a "FOLDER:<id>" that
         // points at whatever this device's sync happens to have put behind that number.
-        // Only files from before the values were kept per profile carry them here (one for the whole
-        // device): they go back to the shared value that every profile without its own falls back to.
-        // Newer files carry them per profile, see importLastCategories.
         context.positionStore.edit { positions ->
             backupLastCategoryKeys.forEach { k ->
                 if (o.has(k.name)) runCatching { o.getString(k.name).takeIf(::isPortableCategoryKey)?.let { positions[k] = it } }
@@ -2697,7 +2641,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
         /** The writes of [applyStageDefaults] (except the picture file), apart so a unit test can check them. */
         internal fun stageDefaults(prefs: MutablePreferences) {
-            val update = prefs[Keys.ACTIVE_PROFILE] != null
             prefs[Keys.NAV_STYLE] = NavStyle.DOCKED.name
             prefs[Keys.NAV_SIZE] = NavSize.COMPACT.name
             prefs[Keys.NAV_LENGTH] = NavLength.FIT.name
@@ -2710,7 +2653,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
         /** The writes of [applyPhoneStageDefaults]; nothing at all unless this is a fresh install. */
         internal fun phoneStageDefaults(prefs: MutablePreferences, alphaPct: Int) {
-            val fresh = prefs[Keys.ACTIVE_PROFILE] == null && prefs[Keys.GLASS_SCOPE] == null && prefs[Keys.BG_STYLE] == null
+            val fresh = prefs[Keys.GLASS_SCOPE] == null && prefs[Keys.BG_STYLE] == null
             if (!fresh) return
             prefs[Keys.GLASS_SCOPE] = tv.own.owntv.core.theme.GlassConfig.ON_BITS
             prefs[Keys.GLASS_ALPHA] = alphaPct
@@ -2728,182 +2671,23 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         )
     }
 
-    // --- Backup: per-profile startup landing (dynamic "startup_mode_<id>" keys) ---
-
-    /** Exports all per-profile startup-mode keys as { "<profileId>": "<MODE>" }. */
-    suspend fun exportStartupModes(): org.json.JSONObject {
-        val prefix = "startup_mode_"
-        val out = org.json.JSONObject()
-        context.dataStore.data.first().asMap().forEach { (k, v) ->
-            if (k.name.startsWith(prefix) && v is String) {
-                out.put(k.name.removePrefix(prefix), v)
-            }
-        }
-        return out
-    }
-
-    /** Exports stable per-profile Live channel startup targets. */
-    suspend fun exportStartupChannels(): org.json.JSONObject {
-        val prefix = "startup_channel_"
-        val out = org.json.JSONObject()
-        context.dataStore.data.first().asMap().forEach { (k, v) ->
-            if (k.name.startsWith(prefix) && v is String) {
-                StartupChannelRef.fromJson(v)?.let { out.put(k.name.removePrefix(prefix), it.toJson()) }
-            }
-        }
-        return out
-    }
-
-    /** Exports all per-profile Home config blobs as { "<profileId>": { ... } }. */
-    suspend fun exportHomeConfigs(): org.json.JSONObject {
-        val prefix = "home_config_"
-        val out = org.json.JSONObject()
-        context.dataStore.data.first().asMap().forEach { (k, v) ->
-            if (k.name.startsWith(prefix) && v is String) {
-                val blob = runCatching { org.json.JSONObject(v) }.getOrNull() ?: return@forEach
-                out.put(k.name.removePrefix(prefix), blob)
-            }
-        }
-        return out
-    }
-
-    /** Restores startup modes only for profile ids in [existingProfileIds] (others are dropped safely). */
-    suspend fun importStartupModes(o: org.json.JSONObject, existingProfileIds: Set<Long>) {
-        context.dataStore.edit { prefs ->
-            o.keys().forEach { key ->
-                val pid = key.toLongOrNull() ?: return@forEach
-                if (pid !in existingProfileIds) return@forEach
-                val mode = o.optString(key).takeIf { it.isNotEmpty() } ?: return@forEach
-                if (runCatching { StartupMode.valueOf(mode) }.isSuccess) {
-                    prefs[stringPreferencesKey("startup_mode_$pid")] = mode
-                }
-            }
-        }
-    }
-
-    /** Restores startup targets after profile/source ids have been remapped by backup import. */
-    suspend fun importStartupChannels(
-        o: org.json.JSONObject,
-        existingProfileIds: Set<Long>,
-        sourceIdMap: Map<Long, Long>,
-    ) {
-        context.dataStore.edit { prefs ->
-            o.keys().forEach { key ->
-                val pid = key.toLongOrNull() ?: return@forEach
-                if (pid !in existingProfileIds) return@forEach
-                val raw = o.optJSONObject(key)?.toString() ?: return@forEach
-                val ref = StartupChannelRef.fromJson(raw) ?: return@forEach
-                val mappedSourceId = sourceIdMap[ref.sourceId] ?: return@forEach
-                prefs[stringPreferencesKey("startup_channel_$pid")] =
-                    ref.copy(sourceId = mappedSourceId, itemId = -1L).toJson().toString()
-            }
-        }
-    }
-
-    /** A restored specific-channel mode must never point at an absent or unmapped source target. */
-    suspend fun repairSpecificStartupModes(profileIds: Set<Long>) {
-        context.dataStore.edit { prefs ->
-            profileIds.forEach { profileId ->
-                val modeKey = stringPreferencesKey("startup_mode_$profileId")
-                if (prefs[modeKey] == StartupMode.SPECIFIC_CHANNEL.name) {
-                    val channel = StartupChannelRef.fromJson(prefs[stringPreferencesKey("startup_channel_$profileId")])
-                    if (channel == null) prefs[modeKey] = StartupMode.HOME.name
-                }
-            }
-        }
-    }
-
-    /** Restores Home configs only for profile ids in [existingProfileIds] (others are dropped safely). */
-    suspend fun importHomeConfigs(o: org.json.JSONObject, existingProfileIds: Set<Long>) {
-        context.dataStore.edit { prefs ->
-            o.keys().forEach { key ->
-                val pid = key.toLongOrNull() ?: return@forEach
-                if (pid !in existingProfileIds) return@forEach
-                val blob = o.optJSONObject(key) ?: return@forEach
-                prefs[homeConfigKey(pid)] = blob.toString()
-            }
-        }
-    }
-
-    // --- Backup: per-profile sports settings (dynamic "sports_config_<id>" keys) ---
-
-    /** Exports all per-profile sports blobs as { "<profileId>": { ... } }. */
-    suspend fun exportSportsConfigs(): org.json.JSONObject {
-        val out = org.json.JSONObject()
-        context.dataStore.data.first().asMap().forEach { (k, v) ->
-            if (k.name.startsWith(SPORTS_CONFIG_PREFIX) && v is String) {
-                val blob = runCatching { org.json.JSONObject(v) }.getOrNull() ?: return@forEach
-                out.put(k.name.removePrefix(SPORTS_CONFIG_PREFIX), blob)
-            }
-        }
-        return out
-    }
+    // --- Backup repair after the SOURCES section lands (startup_mode/startup_channel/home_config/
+    //     sports_config now ride with "settings" as plain keys; per-profile section maps are gone) ---
 
     /**
-     * Restores sports blobs only for profile ids in [existingProfileIds] (others are dropped safely).
-     * Each blob is read through [tv.own.owntv.core.sports.SportsConfig.fromJson] and written back, so
-     * the import rules apply and a value this build does not know is left out.
+     * A restored SPECIFIC_CHANNEL must never point at a source that did not survive the restore.
+     * BackupManager calls this once the SOURCES section has been applied, with the ids it has then.
      */
-    suspend fun importSportsConfigs(o: org.json.JSONObject, existingProfileIds: Set<Long>) {
+    suspend fun repairSpecificStartupChannel(existingSourceIds: Set<Long>) {
         context.dataStore.edit { prefs ->
-            o.keys().forEach { key ->
-                val pid = key.toLongOrNull()?.takeIf { it in existingProfileIds } ?: return@forEach
-                val blob = o.optJSONObject(key) ?: return@forEach
-                prefs[sportsConfigKey(pid)] = tv.own.owntv.core.sports.SportsConfig.fromJson(blob.toString()).toJson().toString()
-            }
-        }
-    }
-
-    // --- Backup: per-profile preferred languages (dynamic "pref_audio_lang_<id>" / "pref_sub_lang_<id>") ---
-
-    /** Exports { "<profileId>": { "a": "<audio>", "s": "<subtitle>" } }; a side the profile never chose is absent. */
-    suspend fun exportPreferredLanguages(): org.json.JSONObject {
-        val out = org.json.JSONObject()
-        context.dataStore.data.first().asMap().forEach { (k, v) ->
-            if (v !is String) return@forEach
-            val (pid, field) = when {
-                k.name.startsWith(PREF_AUDIO_LANG_PREFIX) -> k.name.removePrefix(PREF_AUDIO_LANG_PREFIX) to "a"
-                k.name.startsWith(PREF_SUB_LANG_PREFIX) -> k.name.removePrefix(PREF_SUB_LANG_PREFIX) to "s"
-                else -> return@forEach
-            }
-            (out.optJSONObject(pid) ?: org.json.JSONObject().also { out.put(pid, it) }).put(field, v)
-        }
-        return out
-    }
-
-    /** Restores the languages only for profile ids in [existingProfileIds] (others are dropped safely). */
-    suspend fun importPreferredLanguages(o: org.json.JSONObject, existingProfileIds: Set<Long>) {
-        context.dataStore.edit { prefs ->
-            o.keys().forEach { key ->
-                val pid = key.toLongOrNull()?.takeIf { it in existingProfileIds } ?: return@forEach
-                val langs = o.optJSONObject(key) ?: return@forEach
-                if (langs.has("a")) prefs[stringPreferencesKey(PREF_AUDIO_LANG_PREFIX + pid)] = langs.optString("a")
-                if (langs.has("s")) prefs[stringPreferencesKey(PREF_SUB_LANG_PREFIX + pid)] = langs.optString("s")
-            }
-        }
-    }
-
-    // --- Backup: per-profile "hide new categories" preference (dynamic "hide_new_categories_<id>" keys) ---
-
-    /** Exports all per-profile "hide new categories" preferences as { "<profileId>": true/false }. */
-    suspend fun exportHideNewCategories(): org.json.JSONObject {
-        val prefix = "hide_new_categories_"
-        val out = org.json.JSONObject()
-        context.dataStore.data.first().asMap().forEach { (k, v) ->
-            if (k.name.startsWith(prefix) && v is Boolean) {
-                out.put(k.name.removePrefix(prefix), v)
-            }
-        }
-        return out
-    }
-
-    /** Restores the preference only for profile ids in [existingProfileIds] (others are dropped safely). */
-    suspend fun importHideNewCategories(o: org.json.JSONObject, existingProfileIds: Set<Long>) {
-        context.dataStore.edit { prefs ->
-            o.keys().forEach { key ->
-                val pid = key.toLongOrNull() ?: return@forEach
-                if (pid !in existingProfileIds) return@forEach
-                prefs[booleanPreferencesKey("hide_new_categories_$pid")] = o.getBoolean(key)
+            if (prefs[Keys.STARTUP_MODE] != StartupMode.SPECIFIC_CHANNEL.name) return@edit
+            val channel = StartupChannelRef.fromJson(prefs[Keys.STARTUP_CHANNEL])
+            if (channel == null || channel.sourceId !in existingSourceIds) {
+                prefs[Keys.STARTUP_MODE] = StartupMode.HOME.name
+                prefs.remove(Keys.STARTUP_CHANNEL)
+            } else {
+                // The catalog was clear-then-inserted by the restore; the local item id is stale.
+                prefs[Keys.STARTUP_CHANNEL] = channel.copy(itemId = -1L).toJson().toString()
             }
         }
     }
@@ -3031,16 +2815,3 @@ class SettingsRepository(private val context: Context, private val localeStore: 
     }
 }
 
-/** Per-profile sports settings blob; the profile id follows. */
-internal const val SPORTS_CONFIG_PREFIX = "sports_config_"
-
-/** Per-profile preferred-language keys; the profile id follows. */
-internal const val PREF_AUDIO_LANG_PREFIX = "pref_audio_lang_"
-internal const val PREF_SUB_LANG_PREFIX = "pref_sub_lang_"
-
-internal fun activeProfileLangKey(prefs: Preferences, prefix: String): Preferences.Key<String> =
-    stringPreferencesKey(prefix + (prefs[SettingsRepository.Keys.ACTIVE_PROFILE] ?: -1L))
-
-/** The active profile's own choice, else the shared setting, else no preference. */
-internal fun profileLang(prefs: Preferences, prefix: String, shared: Preferences.Key<String>): String =
-    prefs[activeProfileLangKey(prefs, prefix)] ?: prefs[shared] ?: ""

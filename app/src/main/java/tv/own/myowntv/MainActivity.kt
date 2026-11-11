@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -51,7 +50,6 @@ import android.util.Log
 import androidx.room.useWriterConnection
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.background
@@ -77,9 +75,6 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import tv.own.owntv.core.util.Perf
 import tv.own.owntv.core.launcher.LauncherDeepLink
-import tv.own.myowntv.features.profiles.ProfileGate
-import tv.own.myowntv.features.profiles.ProfileGateSessionViewModel
-import tv.own.myowntv.features.profiles.ProfilesViewModel
 import tv.own.myowntv.features.setup.Onboarding
 import tv.own.myowntv.features.shell.MyOwnTVShell
 import tv.own.myowntv.features.shell.ShellViewModel
@@ -100,7 +95,7 @@ open class MainActivity : ComponentActivity() {
         private const val DB_PROBE_TIMEOUT_MS = 5_000L
 
         /**
-         * Hard ceiling on the splash. A stuck DataStore/profile read must never leave the user
+         * Hard ceiling on the splash. A stuck DataStore read must never leave the user
          * staring at a static logo — past this the splash dismisses whatever the state is.
          *
          * Kept short deliberately: the old build drew its (blank) first frame at ~1.1s, so anything
@@ -110,25 +105,36 @@ open class MainActivity : ComponentActivity() {
         private const val SPLASH_TIMEOUT_MS = 2_000L
 
         /**
-         * How much longer, once the profile is known, the splash waits for the start-up screen. Home settles
+         * How much longer, once the destination is known, the splash waits for the start-up screen. Home settles
          * at once, so only a start on the last channel ever waits; on a 55k-channel playlist on the TCL that
          * took 2.2–3.3 s from launch, and a shorter wait showed Home for a moment before Live TV or the Guide.
          */
         private const val STARTUP_SETTLE_TIMEOUT_MS = 3_000L
+
+        /** First-run onboarding, remembered across launches. There are no profiles to check — this
+         *  flag is what decides between the setup wizard and the shell. */
+        private const val SETUP_PREFS = "setup_state"
+        private const val KEY_ONBOARDED = "onboarded"
+    }
+
+    private fun isOnboarded(): Boolean =
+        getSharedPreferences(SETUP_PREFS, android.content.Context.MODE_PRIVATE).getBoolean(KEY_ONBOARDED, false)
+
+    private fun markOnboarded() {
+        getSharedPreferences(SETUP_PREFS, android.content.Context.MODE_PRIVATE)
+            .edit().putBoolean(KEY_ONBOARDED, true).apply()
     }
 
     /**
-     * False while the app has no destination to draw yet (active profile id unknown, or the
-     * profile query has not returned on a cold start) — exactly the two `when` branches that used to
-     * render a blank window. Latched true and never cleared, so a mid-session empty-profile window
-     * during backup restore cannot bring the splash back; the foreground gate still refuses to
-     * compose the shell until the loaded list and active-id check are valid.
+     * The destination is now decided synchronously (the first-run flag), so this latches true at the
+     * top of [onCreate] — the only failure it still guards against is a database that cannot be
+     * opened, which shows its own recovery screen instead.
      */
     @Volatile
     private var contentReady = false
 
     /**
-     * Whether the shell has opened where the profile's start-up choice says (the TV Guide, Live TV, the
+     * Whether the shell has opened where the app's start-up choice says (the TV Guide, Live TV, the
      * player...). The shell first composes on Home and applies that choice a moment later, so the splash
      * stays up until then and Home never flashes on the way. Owned by this activity, so a relaunch in a
      * process that is still alive waits again.
@@ -280,6 +286,10 @@ open class MainActivity : ComponentActivity() {
             return
         }
         Perf.stamp("db-probed") // main thread was blocked here: everything above is pre-composition
+        // The destination needs no asynchronous data any more: one stored flag says wizard or shell,
+        // and the splash is never held over a decision that was already made.
+        contentReady = true
+        if (!isOnboarded()) startupSettled = true // the wizard is the destination; nothing to settle on
         setContent {
             // First composition pass — splits "process start → Compose is running" from
             // "Compose is running → the destination's data arrived".
@@ -324,9 +334,6 @@ open class MainActivity : ComponentActivity() {
             val bgImagePath by viewModel.bgImagePath.collectAsStateWithLifecycle()
             val glassConfig by viewModel.glassConfig.collectAsStateWithLifecycle()
             val background by viewModel.backgroundConfig.collectAsStateWithLifecycle()
-            val avatarId by viewModel.avatarId.collectAsStateWithLifecycle()
-            val avatarPath by viewModel.avatarPath.collectAsStateWithLifecycle()
-            val profileName by viewModel.profileName.collectAsStateWithLifecycle()
             val sourceSummary by viewModel.sourceSummary.collectAsStateWithLifecycle()
             val playlists by viewModel.playlists.collectAsStateWithLifecycle()
             val activePlaylistId by viewModel.activePlaylistId.collectAsStateWithLifecycle()
@@ -334,73 +341,16 @@ open class MainActivity : ComponentActivity() {
             val weatherFahrenheit by viewModel.weatherFahrenheit.collectAsStateWithLifecycle()
             val selectedSection by viewModel.selectedSection.collectAsStateWithLifecycle()
             val visibleSections by viewModel.visibleSections.collectAsStateWithLifecycle()
-            val activeProfileId by viewModel.activeProfileId.collectAsStateWithLifecycle()
             val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
 
-            val profilesVm: ProfilesViewModel = koinViewModel()
-            val profileState by profilesVm.profileState.collectAsStateWithLifecycle()
-            val profiles = (profileState as? tv.own.myowntv.features.profiles.ProfileLoadState.Loaded)?.profiles.orEmpty()
-            val profilesLoaded = profileState is tv.own.myowntv.features.profiles.ProfileLoadState.Loaded
-            // Activity-scoped gate/session state: configuration-only retention through the Activity's
-            // ViewModelStore. Survives recreation (font scale, dark mode, a script-family language
-            // switch) but is cleared on process death — an authentication result must never be restored
-            // after a kill-and-restore, so there is deliberately no SavedStateHandle / rememberSaveable
-            // (see docs/internationalization.md, "The profile gate: configuration-only retention").
-            val gateSession: ProfileGateSessionViewModel = koinViewModel()
-            val authenticatedProfileId = gateSession.authenticatedProfileId
-            val addingProfile = gateSession.addingProfile
-            val switchProfileRequested = gateSession.switchProfileRequested
-            // The active id and the Room list are separate asynchronous streams. Neither one is a
-            // launch decision by itself: an id >= 0 can point at a locked profile that Room has not
-            // emitted yet, and a loaded empty list can be a restore/recovery window. The shell stays
-            // out of the composition until the list is Loaded and the gate decision is complete.
-            val loadedProfileId = activeProfileId
-            val activeProfileKnown = loadedProfileId != null &&
-                (loadedProfileId < 0L || profiles.any { it.id == loadedProfileId })
-            // Authentication is profile-bound. Invalidate the old session before a changed active id
-            // can become a shell destination (profile deletion, backup restore, or another writer).
-            LaunchedEffect(loadedProfileId) {
-                gateSession.invalidateIfNotProfile(loadedProfileId)
-            }
-            LaunchedEffect(loadedProfileId != null) {
-                if (loadedProfileId != null) Perf.stamp("profile-id-loaded")
-            }
-            val shouldShowProfileGate = profilesLoaded && tv.own.myowntv.features.profiles.profileGateRequired(profiles)
-            // Keep the pure launch policy in the actual composition path as well as in its unit
-            // tests. The policy checks the Room list, active-id membership, and authentication as
-            // one decision; a future branch must not accidentally make the shell depend on only
-            // one of the asynchronous inputs again.
-            val gateRequired = shouldShowProfileGate || switchProfileRequested
-            val authenticatedForActiveProfile = loadedProfileId != null &&
-                authenticatedProfileId == loadedProfileId
-            val shellReady = tv.own.myowntv.features.profiles.shellMayCompose(
-                profileState = profileState,
-                activeProfileId = loadedProfileId,
-                authenticatedProfileId = authenticatedProfileId,
-                gateRequired = gateRequired,
-            )
-            // Back from a user-requested switch returns to the shell (the cold-start gate exits the app).
-            BackHandler(enabled = switchProfileRequested && !addingProfile) {
-                gateSession.cancelSwitchProfileRequest(loadedProfileId)
-            }
-            LaunchedEffect(profilesLoaded) {
-                if (profilesLoaded) Perf.stamp("profiles-loaded")
-            }
-            val destinationReady = loadedProfileId != null && profilesLoaded
-            // A profile or PIN gate is the destination itself; the shell's start-up choice comes after it.
-            LaunchedEffect(destinationReady, shellReady) {
-                if (destinationReady && !shellReady) startupSettled = true
-            }
-            LaunchedEffect(destinationReady) {
-                if (destinationReady && !contentReady) {
-                    contentReady = true
-                    Perf.stamp("destination-ready") // splash hand-off — the number startup work moves
-                }
-            }
+            // Profiles are gone: the only destination decision left is "first run or not", a flag
+            // the wizard raises when it finishes. Read once per launch, flipped in-session so the
+            // shell composes the moment onboarding ends — no restart.
+            var onboarded by remember { mutableStateOf(isOnboarded()) }
 
-            // "Refresh on startup" — re-sync sources once the active profile is known.
-            LaunchedEffect(activeProfileId) {
-                if ((activeProfileId ?: -1L) >= 0L) viewModel.checkAutoRefresh(includeStartup = true)
+            // "Refresh on startup" — re-sync sources once the shell is the destination.
+            LaunchedEffect(onboarded) {
+                if (onboarded) viewModel.checkAutoRefresh(includeStartup = true)
             }
 
             OwnTVTheme(
@@ -469,41 +419,15 @@ open class MainActivity : ComponentActivity() {
                         if (background.showsPicture) BackgroundLayer(background, blurred)
 
                         Box(modifier = Modifier.fillMaxSize()) {
-                        val profile = activeProfileId
-                        when {
-                            profile == null || !profilesLoaded -> Unit // active id / Room list loading
-                            // Adding a profile from the gate → onboard the new profile.
-                            addingProfile -> Onboarding(
-                                firstRun = false,
-                                onDone = { profileId -> gateSession.completeAddingProfile(profileId) },
-                                onCancel = { gateSession.cancelAddingProfile() },
+                        if (!onboarded) {
+                            // First run: the setup wizard, and the shell the moment it finishes.
+                            Onboarding(
+                                onDone = { markOnboarded(); onboarded = true },
                                 modifier = Modifier.fillMaxSize(),
                             )
-                            // First run (no profile yet) → full onboarding.
-                            profile < 0L -> Onboarding(
-                                firstRun = true,
-                                onDone = { profileId -> gateSession.authenticateProfile(profileId) },
-                                onCancel = {},
-                                modifier = Modifier.fillMaxSize(),
-                            )
-                            // A loaded list that does not contain the persisted active id is also
-                            // recovery/onboarding, never permission to enter MyOwnTVShell. This covers
-                            // both an empty restore window and a stale id left by an interrupted restore.
-                            !activeProfileKnown -> Onboarding(
-                                firstRun = false,
-                                onDone = { profileId -> gateSession.authenticateProfile(profileId) },
-                                onCancel = {},
-                                modifier = Modifier.fillMaxSize(),
-                            )
-                            // Run 2+ (or a single locked profile): "Who's watching?" — choose a profile or add one.
-                            // Also opens when the sidebar avatar is single-clicked (switchProfileRequested),
-                            // which is the only way to switch when there's a single unpinned profile.
-                            gateRequired && !authenticatedForActiveProfile -> ProfileGate(
-                                onEnter = { profileId -> gateSession.authenticateProfile(profileId) },
-                                onAddProfile = { gateSession.startAddingProfile() },
-                                modifier = Modifier.fillMaxSize(),
-                            )
-                            shellReady -> MyOwnTVShell(
+                        } else {
+                            LaunchedEffect(Unit) { Perf.stamp("destination-ready") } // splash hand-off — the number startup work moves
+                            MyOwnTVShell(
                                 selectedSection = selectedSection,
                                 visibleSections = visibleSections,
                                 onSelectSection = viewModel::selectSection,
@@ -512,38 +436,19 @@ open class MainActivity : ComponentActivity() {
                                 onSetZoom = viewModel::setUiZoom,
                                 fontCustomization = fontCustomization,
                                 onSetFontCustomization = viewModel::setFontCustomization,
-                                avatarId = avatarId,
-                                onSetAvatar = viewModel::setAvatar,
-                                avatarPath = avatarPath,
-                                onSetCustomAvatar = { file -> viewModel.setCustomAvatar(file) },
-                                onClearCustomAvatar = viewModel::clearCustomAvatar,
-                                profileName = profileName,
                                 sourceSummary = sourceSummary,
                                 playlists = playlists,
                                 activePlaylistId = activePlaylistId,
                                 onSelectPlaylist = viewModel::setActivePlaylist,
                                 weatherInfo = weather,
                                 weatherFahrenheit = weatherFahrenheit,
-                                activeProfileId = activeProfileId,
                                 pendingDeepLink = pendingDeepLink,
                                 onDeepLinkConsumed = { pendingDeepLink = null },
                                 isOffline = !isOnline,
                                 onExitApp = { finish() },
                                 onStartupSettled = { startupSettled = true },
-                                onSwitchProfile = {
-                                    // Stop playback and return to the "Who's watching?" gate — no app restart.
-                                    tv.own.myowntv.features.profiles.stopPlaybackForProfileGate(shellViewModel, engines)
-                                    // Force the gate open even with a single unpinned profile (cold-start gate would
-                                    // skip it). requestSwitchProfile() clears the active profile
-                                    // authentication and raises the request.
-                                    gateSession.requestSwitchProfile()
-                                },
                                 modifier = Modifier.fillMaxSize(),
                             )
-                            // No unexpected combination of asynchronous state may fall through to
-                            // the shell. The known loading/onboarding/gate cases are above; a blank
-                            // frame is safer than rendering protected content if a new state is added.
-                            else -> Unit
                         }
                         } // end foreground Box (above the background layer)
                     }

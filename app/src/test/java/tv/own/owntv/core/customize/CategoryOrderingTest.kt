@@ -26,14 +26,8 @@ class CategoryOrderingTest {
             hiddenCategories = setOf(keyOf(2)),
             categoryNames = mapOf(keyOf(1) to "Sport"),
         )
-        val rows = cats.railCategories(c, kids = false)
+        val rows = cats.railCategories(c)
         assertEquals(listOf("Sport", "Adult", "Movies"), rows.map { it.displayName })
-    }
-
-    @Test
-    fun `a kids profile never sees an adult category`() {
-        val rows = cats.railCategories(SectionCustomizations(), kids = true)
-        assertEquals(listOf("Sports", "News", "Movies"), rows.map { it.displayName })
     }
 
     @Test
@@ -42,7 +36,7 @@ class CategoryOrderingTest {
             customCategories = listOf(CustomCategory(id = "custom:x", name = "Mine")),
             categoryPositions = mapOf(keyOf(4) to 0),
         )
-        val rows = cats.railCategories(c, kids = false)
+        val rows = cats.railCategories(c)
         assertEquals(listOf("Movies", "Mine", "Sports", "News", "Adult"), rows.map { it.displayName })
     }
 
@@ -53,20 +47,20 @@ class CategoryOrderingTest {
             categoryNames = mapOf(keyOf(1) to "Football"),
             categoryPositions = mapOf(keyOf(2) to 1),
         )
-        val rows = cats.railCategories(c, kids = false, alphabetical = true)
+        val rows = cats.railCategories(c, alphabetical = true)
         assertEquals(listOf("Adult", "News", "Football", "Mine", "Movies"), rows.map { it.displayName })
     }
 
     @Test
     fun `a move pins only the carried category, so the rest still follow the sort`() {
-        val rows = cats.railCategories(SectionCustomizations(), kids = false)
+        val rows = cats.railCategories(SectionCustomizations())
         val moved = CategoryMove.begin(rows, keyOf(1))!!.moved(MoveKind.DOWN)!!.moved(MoveKind.DOWN)!!
         assertEquals(setOf(keyOf(1)), moved.carried)
         val c = SectionCustomizations(categoryPositions = pinnedAfterMove(moved.keys, emptySet(), moved.carried))
 
         assertEquals(mapOf(keyOf(1) to 2), c.categoryPositions)
-        assertEquals(listOf("News", "Adult", "Sports", "Movies"), cats.railCategories(c, kids = false).map { it.displayName })
-        assertEquals(listOf("Adult", "Movies", "Sports", "News"), cats.railCategories(c, kids = false, alphabetical = true).map { it.displayName })
+        assertEquals(listOf("News", "Adult", "Sports", "Movies"), cats.railCategories(c).map { it.displayName })
+        assertEquals(listOf("Adult", "Movies", "Sports", "News"), cats.railCategories(c, alphabetical = true).map { it.displayName })
     }
 
     @Test
@@ -86,7 +80,7 @@ class CategoryOrderingTest {
     @Test
     fun `a move walks the rail's own list, and committing it reproduces that order`() {
         val c = SectionCustomizations()
-        val rows = cats.railCategories(c, kids = false)
+        val rows = cats.railCategories(c)
         val move = CategoryMove.begin(rows, keyOf(4))!!
 
         assertEquals(rows.map { it.key }, move.keys)
@@ -98,12 +92,12 @@ class CategoryOrderingTest {
 
         // What the store is given must be what the rail then shows.
         val committed = c.copy(categoryPositions = pinnedAfterMove(up.keys, emptySet(), up.carried))
-        assertEquals(up.items, cats.railCategories(committed, kids = false).map { it.displayName })
+        assertEquals(up.items, cats.railCategories(committed).map { it.displayName })
     }
 
     @Test
     fun `a move off either end is a no-op, and a category that is not on the rail cannot move`() {
-        val rows = cats.railCategories(SectionCustomizations(), kids = false)
+        val rows = cats.railCategories(SectionCustomizations())
         assertNull(CategoryMove.begin(rows, keyOf(1))!!.moved(MoveKind.UP))
         assertNull(CategoryMove.begin(rows, keyOf(4))!!.moved(MoveKind.DOWN))
         assertNull(CategoryMove.begin(rows, "custom:gone"))
@@ -111,7 +105,7 @@ class CategoryOrderingTest {
 
     @Test
     fun `move to top and bottom reach the ends`() {
-        val rows = cats.railCategories(SectionCustomizations(), kids = false)
+        val rows = cats.railCategories(SectionCustomizations())
         val top = CategoryMove.begin(rows, keyOf(3))!!.moved(MoveKind.TOP)!!
         assertEquals(listOf("Adult", "Sports", "News", "Movies"), top.items)
         assertEquals(0, top.activeIndex)

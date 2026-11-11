@@ -8,7 +8,6 @@ import tv.own.owntv.core.model.MediaType
  * rows carry a context key + position instead of a timestamp, and never cover episodes.
  */
 data class ContentOrderExportRow(
-    val profileId: Long,
     val mediaType: MediaType,
     val itemId: Long,
     val contextKey: String,

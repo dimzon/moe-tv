@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -96,7 +95,7 @@ data class FavouriteLists(
     val now: Long = 0L,
 )
 
-/** One More › History row: a channel the profile last watched. */
+/** One More › History row: a channel last watched. */
 data class HistoryEntry(
     val id: Long,
     val title: String,
@@ -144,9 +143,9 @@ class MoreCountsViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private val ctx: StateFlow<ActiveProfileSources> = activeProfileSources(settings, sourceDao)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ActiveProfileSources(-1L, emptyList()))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ActiveProfileSources(emptyList()))
 
-    /** How many playlists the active profile shows. */
+    /** How many playlists the app shows. */
     val playlistCount: StateFlow<Int> = ctx.map { it.sources.size }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
@@ -157,10 +156,8 @@ class MoreCountsViewModel(
     private val reload = MutableStateFlow(0)
 
     /** Each type's browse view; items in a category a lock still keeps shut stay off both pages. */
-    private val visible: Flow<Map<MediaType, SectionCustomizations>> = ctx.flatMapLatest { c ->
-        if (c.profileId < 0) flowOf(emptyMap())
-        else combine(LISTED.map { t -> customize.observeVisible(c.profileId, t).map { t to it } }) { it.toMap() }
-    }
+    private val visible: Flow<Map<MediaType, SectionCustomizations>> =
+        combine(LISTED.map { t -> customize.observeVisible(t).map { t to it } }) { it.toMap() }
 
     /** Rebuilt whenever the favourite counts change, so starring or removing shows at once. */
     val favouriteLists: StateFlow<FavouriteLists> = combine(ctx, favorites, reload, visible) { c, _, _, v -> c to v }
@@ -181,14 +178,13 @@ class MoreCountsViewModel(
     private fun ids(c: ActiveProfileSources, type: MediaType) = c.sourceIdsFor(type).ifEmpty { listOf(-1L) }
 
     private suspend fun loadFavourites(c: ActiveProfileSources, sealed: Sealed): FavouriteLists {
-        if (c.profileId < 0) return FavouriteLists()
         val key = ContentOrderEntity.FAV_CONTEXT
-        val live = channelDao.snapshotFavoritesManual(c.profileId, key, ids(c, MediaType.LIVE), LIST_LIMIT)
+        val live = channelDao.snapshotFavoritesManual(key, ids(c, MediaType.LIVE), LIST_LIMIT)
             .filterNot { sealed.holds(MediaType.LIVE, it.categoryId) }
         val now = System.currentTimeMillis()
         val onNow = if (live.isEmpty()) emptyMap() else guide.onNow(
             channels = live,
-            cust = customize.observe(c.profileId, MediaType.LIVE).first(),
+            cust = customize.observe(MediaType.LIVE).first(),
             globalShiftMinutes = settings.epgOffsetMinutes.first(),
             atMs = now,
             // A real window: an empty one (now..now) finds no programme at all.
@@ -198,9 +194,7 @@ class MoreCountsViewModel(
     }
 
     private suspend fun loadHistory(c: ActiveProfileSources, sealed: Sealed): HistoryLists {
-        val pid = c.profileId
-        if (pid < 0) return HistoryLists()
-        val live = channelDao.recentlyWatchedWithTimestampFiltered(pid, ids(c, MediaType.LIVE), LIST_LIMIT).first()
+        val live = channelDao.recentlyWatchedWithTimestampFiltered(ids(c, MediaType.LIVE), LIST_LIMIT).first()
             .filterNot { sealed.holds(MediaType.LIVE, it.channel.categoryId) }.map {
             HistoryEntry(it.channel.id, it.channel.name, it.channel, it.watchedAt)
         }
@@ -208,14 +202,12 @@ class MoreCountsViewModel(
     }
 
     fun removeFavourite(type: MediaType, id: Long) {
-        val pid = ctx.value.profileId.takeIf { it >= 0 } ?: return
-        viewModelScope.launch { userDataWriter.removeFavorite(pid, type, id) }
+        viewModelScope.launch { userDataWriter.removeFavorite(type, id) }
     }
 
     /** The same removal the Live TV list's "Remove from History" does. */
     fun removeHistory(entry: HistoryEntry) {
-        val pid = ctx.value.profileId.takeIf { it >= 0 } ?: return
-        viewModelScope.launch { userDataWriter.removeHistory(pid, MediaType.LIVE, entry.id) }
+        viewModelScope.launch { userDataWriter.removeHistory(MediaType.LIVE, entry.id) }
     }
 
     /** Move starts on the favourite channels' whole list, in its current order. */
@@ -239,12 +231,11 @@ class MoreCountsViewModel(
     fun commitMove() {
         val m = _move.value ?: return
         _move.value = null
-        val pid = ctx.value.profileId.takeIf { it >= 0 } ?: return
         val key = ContentOrderEntity.FAV_CONTEXT
         viewModelScope.launch {
             contentOrderDao.replaceContext(
-                profileId = pid, type = m.type, contextKey = key,
-                rows = m.ids.mapIndexed { i, id -> ContentOrderEntity(profileId = pid, mediaType = m.type, contextKey = key, itemId = id, position = i) },
+                type = m.type, contextKey = key,
+                rows = m.ids.mapIndexed { i, id -> ContentOrderEntity(mediaType = m.type, contextKey = key, itemId = id, position = i) },
             )
             reload.value++
         }
@@ -254,17 +245,13 @@ class MoreCountsViewModel(
 
     private fun counts(favorites: Boolean): StateFlow<TypeCounts> = ctx
         .flatMapLatest { c ->
-            if (c.profileId < 0) {
-                flowOf(TypeCounts())
-            } else {
-                // What a locked category holds leaves the counts too, so they agree with the lists.
-                fun count(type: MediaType, all: (Long, List<Long>) -> Flow<Int>, excluding: (Long, List<Long>, List<Long>) -> Flow<Int>) =
-                    lockAwareCount(customize.sealedCategoryIds(c.profileId, type), { all(c.profileId, ids(c, type)) }) { excluding(c.profileId, ids(c, type), it) }
-                (
-                    if (favorites) count(MediaType.LIVE, channelDao::countFavorites, channelDao::countFavoritesExcluding)
-                    else count(MediaType.LIVE, channelDao::countHistory, channelDao::countHistoryExcluding)
-                ).map { TypeCounts(it) }
-            }
+            // What a locked category holds leaves the counts too, so they agree with the lists.
+            fun count(type: MediaType, all: (List<Long>) -> Flow<Int>, excluding: (List<Long>, List<Long>) -> Flow<Int>) =
+                lockAwareCount(customize.sealedCategoryIds(type), { all(ids(c, type)) }) { excluding(ids(c, type), it) }
+            (
+                if (favorites) count(MediaType.LIVE, channelDao::countFavorites, channelDao::countFavoritesExcluding)
+                else count(MediaType.LIVE, channelDao::countHistory, channelDao::countHistoryExcluding)
+            ).map { TypeCounts(it) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TypeCounts())
 

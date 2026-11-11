@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -73,7 +72,7 @@ internal suspend fun reconcileHiddenSelection(
 }
 
 /**
- * After a playlist or profile switch drops the selected folder [stale], wait for a loaded rail (not
+ * After a playlist switch drops the selected folder [stale], wait for a loaded rail (not
  * [placeholder]) that no longer lists it and land on its [LiveViewModel.fallbackKey], so a hidden All
  * never picks a folder from the old playlist's rail. All when no such rail arrives within [timeoutMs].
  */

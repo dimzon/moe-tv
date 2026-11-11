@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -139,7 +138,7 @@ sealed interface SettingValue {
     class Saved(val text: String, val any: Boolean) : SettingValue
     /** A plain action word in full text colour ("Forget", "Check now"). */
     class Action(val text: String) : SettingValue
-    /** Anything else drawn there (accent swatches, profile tags). */
+    /** Anything else drawn there (accent swatches, tags). */
     class Custom(val content: @Composable () -> Unit) : SettingValue
 }
 

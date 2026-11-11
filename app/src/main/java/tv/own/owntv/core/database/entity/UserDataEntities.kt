@@ -1,30 +1,24 @@
 package tv.own.owntv.core.database.entity
 
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import tv.own.owntv.core.model.MediaType
 
 /*
- * User data is scoped per profile. `itemId` is the local id of a channel/movie/series/episode and is
- * disambiguated by `mediaType` (it can't be a single foreign key since it points at several tables),
- * so referential cleanup of these rows is handled in the repository layer.
+ * The app has a single user (profiles were removed with the live-only redesign), so every user-data
+ * table is global. `itemId` is the local id of a channel and is disambiguated by `mediaType`, so
+ * referential cleanup of these rows is handled in the repository layer.
  */
 
 @Entity(
     tableName = "favorites",
-    foreignKeys = [
-        ForeignKey(entity = ProfileEntity::class, parentColumns = ["id"], childColumns = ["profileId"], onDelete = ForeignKey.CASCADE),
-    ],
     indices = [
-        Index("profileId"),
-        Index(value = ["profileId", "mediaType", "itemId"], unique = true),
+        Index(value = ["mediaType", "itemId"], unique = true),
     ],
 )
 data class FavoriteEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val profileId: Long,
     val mediaType: MediaType,
     val itemId: Long,
     val addedAt: Long = System.currentTimeMillis(),
@@ -32,18 +26,13 @@ data class FavoriteEntity(
 
 @Entity(
     tableName = "watch_history",
-    foreignKeys = [
-        ForeignKey(entity = ProfileEntity::class, parentColumns = ["id"], childColumns = ["profileId"], onDelete = ForeignKey.CASCADE),
-    ],
     indices = [
-        Index("profileId"),
-        Index(value = ["profileId", "watchedAt"]),
-        Index(value = ["profileId", "mediaType", "itemId"], unique = true),
+        Index("watchedAt"),
+        Index(value = ["mediaType", "itemId"], unique = true),
     ],
 )
 data class WatchHistoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val profileId: Long,
     val mediaType: MediaType,
     val itemId: Long,
     val watchedAt: Long = System.currentTimeMillis(),
@@ -51,18 +40,13 @@ data class WatchHistoryEntity(
 
 @Entity(
     tableName = "content_order",
-    foreignKeys = [
-        ForeignKey(entity = ProfileEntity::class, parentColumns = ["id"], childColumns = ["profileId"], onDelete = ForeignKey.CASCADE),
-    ],
     indices = [
-        Index("profileId"),
-        Index(value = ["profileId", "mediaType", "contextKey"]),
-        Index(value = ["profileId", "mediaType", "contextKey", "itemId"], unique = true),
+        Index(value = ["mediaType", "contextKey"]),
+        Index(value = ["mediaType", "contextKey", "itemId"], unique = true),
     ],
 )
 data class ContentOrderEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val profileId: Long,
     /** LIVE / MOVIE / SERIES — never EPISODE (episodes aren't reorderable). */
     val mediaType: MediaType,
     /** A category stable key (CustomizeKeys.category) for a folder, or [FAV_CONTEXT] for Favorites. */
@@ -77,10 +61,10 @@ data class ContentOrderEntity(
 }
 
 /**
- * Per-profile, per-item playback preferences: the zoom/aspect mode and the volume level the user
- * last chose while watching one specific channel, film or episode. Both are nullable and a null
- * means "no per-item choice — follow the global default in Settings", which is also why there is no
- * row at all until the user changes something in the player.
+ * Per-item playback preferences: the zoom/aspect mode and the volume level the user last chose
+ * while watching one specific channel, film or episode. Both are nullable and a null means "no
+ * per-item choice — follow the global default in Settings", which is also why there is no row at
+ * all until the user changes something in the player.
  *
  * [contentKey] is deliberately NOT the volatile Room `itemId` that favorites/history use. It is the
  * stable identity — `sourceId:mediaType:remoteId` from
@@ -91,14 +75,10 @@ data class ContentOrderEntity(
  */
 @Entity(
     tableName = "playback_prefs",
-    primaryKeys = ["profileId", "contentKey"],
-    foreignKeys = [
-        ForeignKey(entity = ProfileEntity::class, parentColumns = ["id"], childColumns = ["profileId"], onDelete = ForeignKey.CASCADE),
-    ],
-    indices = [Index("profileId"), Index("sourceId")],
+    primaryKeys = ["contentKey"],
+    indices = [Index("sourceId")],
 )
 data class PlaybackPrefsEntity(
-    val profileId: Long,
     /** [tv.own.owntv.core.player.contentKey] result, or the stream URL when the row has none. */
     val contentKey: String,
     /** A [tv.own.owntv.player.ZoomMode] name; null = follow the global default zoom. */
@@ -115,20 +95,20 @@ data class PlaybackPrefsEntity(
     val audioDelayMs: Int? = null,
     val updatedAt: Long = System.currentTimeMillis(),
     /**
-     * v44: the playlist [contentKey] belongs to, so deleting a playlist deletes its rows.
+     * The playlist [contentKey] belongs to, so deleting a playlist deletes its rows.
      * `-1` = unknown — a legacy stream-URL key, or a row written before v44.
      */
     @androidx.room.ColumnInfo(defaultValue = "-1") val sourceId: Long = -1,
-    /** v44: the audio track language this profile last chose here; null = follow the preference. */
+    /** The audio track language last chosen here; null = follow the preference. */
     val audioLang: String? = null,
-    /** v44: the subtitle track language this profile last chose here; `""` = subtitles off. */
+    /** The subtitle track language last chosen here; `""` = subtitles off. */
     val subtitleLang: String? = null,
 )
 
 /**
- * What a **stream** needs, whoever is watching (v44). [playback_prefs][PlaybackPrefsEntity]
- * is what a *person* prefers — zoom and volume — and stays per profile; the facts here belong to the
- * stream and the device's output, so they are shared: whether it is sound only, its lip-sync correction.
+ * What a **stream** needs (v44). [playback_prefs][PlaybackPrefsEntity] is what the *person* prefers —
+ * zoom and volume; the facts here belong to the stream and the device's output: whether it is sound
+ * only, its lip-sync correction.
  *
  * Keyed by [tv.own.owntv.core.player.contentKey] like every per-item store. The per-stream engine
  * pin it also used to carry is gone with the second engine (v56); what is left is the audio-only
@@ -158,7 +138,7 @@ data class PlaybackQuirkEntity(
  * Membership rows of the user's custom combined categories. One row pins one content
  * item (channel/movie/series) to a [position] inside a custom category, identified by its stable
  * DataStore key — `CustomizeKeys` with the `"custom:"` prefix, e.g. `"custom:1b2f…"` — in
- * [contextKey]. Modeled EXACTLY on [ContentOrderEntity]: the same (profileId, mediaType, contextKey,
+ * [contextKey]. Modeled EXACTLY on [ContentOrderEntity]: the same (mediaType, contextKey,
  * itemId) uniqueness, the same position semantics (a custom category's rails JOIN this table and
  * order by [position] first), so Move works inside custom categories through the identical
  * content_order machinery (the custom category's own order rows live HERE, not in content_order).
@@ -171,18 +151,13 @@ data class PlaybackQuirkEntity(
  */
 @Entity(
     tableName = "custom_category_members",
-    foreignKeys = [
-        ForeignKey(entity = ProfileEntity::class, parentColumns = ["id"], childColumns = ["profileId"], onDelete = ForeignKey.CASCADE),
-    ],
     indices = [
-        Index("profileId"),
-        Index(value = ["profileId", "mediaType", "contextKey"]),
-        Index(value = ["profileId", "mediaType", "contextKey", "itemId"], unique = true),
+        Index(value = ["mediaType", "contextKey"]),
+        Index(value = ["mediaType", "contextKey", "itemId"], unique = true),
     ],
 )
 data class CustomCategoryMemberEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val profileId: Long,
     /** LIVE / MOVIE / SERIES — never EPISODE (episodes aren't added to custom categories). */
     val mediaType: MediaType,
     /** The custom category's stable key (`"custom:<uuid>"`, see CustomizeKeys.CUSTOM_PREFIX). */
@@ -206,27 +181,21 @@ data class CustomCategoryMemberEntity(
  * clear-then-insert of a re-sync on this one.
  *
  * Only genuine user deletions are recorded. Housekeeping deletes — the orphan purges after a
- * re-sync, a profile cascade — must never write one: that would turn "your playlist was refreshed"
- * into "delete this on every other device too".
+ * re-sync — must never write one: that would turn "your playlist was refreshed" into "delete this
+ * on every other device too".
  */
 @Entity(
     tableName = "user_data_tombstones",
-    foreignKeys = [
-        ForeignKey(entity = ProfileEntity::class, parentColumns = ["id"], childColumns = ["profileId"], onDelete = ForeignKey.CASCADE),
-    ],
     indices = [
-        Index("profileId"),
-        Index(value = ["profileId", "kind", "identity"], unique = true),
+        Index(value = ["kind", "identity"], unique = true),
         Index("deletedAt"),
     ],
 )
 data class UserDataTombstoneEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val profileId: Long,
     /** Which list the row was deleted from: `fav`, `his`, `prog` or `member` — UserDataResolver's kinds. */
     val kind: String,
     /** Canonical stable content key JSON; see [tv.own.owntv.core.backup.UserDataResolver.canonicalIdentity]. */
     val identity: String,
     val deletedAt: Long = System.currentTimeMillis(),
 )
-

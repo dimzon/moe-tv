@@ -12,22 +12,15 @@ import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.SourceType
 
 /**
- * A merge-restore never trusts the ids in the backup file: profiles are matched by name and
- * sources by type+url+username, so every id the file carries has to be rewritten to the device's own
- * id before anything is written. Getting that wrong is silent and destructive — a restored profile's
- * favorites, folder customizations or TMDB name overrides end up attached to a DIFFERENT source or a
- * different person, with no error anywhere. None of it was covered.
+ * A merge-restore never trusts the ids in the backup file: sources are matched by type+url+username
+ * (and a Stalker playlist's MAC), so every id the file carries has to be rewritten to the device's own
+ * id before anything is written. Getting that wrong is silent and destructive — a restored source's
+ * favorites, folder customizations or name overrides end up attached to a DIFFERENT source,
+ * with no error anywhere. None of it was covered.
  */
 class BackupMergeRemappingTest {
 
     // --- match keys: which rows merge, and which duplicate ---
-
-    @Test
-    fun `profiles match on the trimmed, case-folded name`() {
-        assertEquals(profileMatchKey("Kids"), profileMatchKey("  KIDS  "))
-        assertEquals(profileMatchKey("Kids"), profileMatchKey("kids"))
-        assertTrue(profileMatchKey("Kids") != profileMatchKey("Kids 2"))
-    }
 
     @Test
     fun `sources match on type, url and username, but not on the password`() {
@@ -116,7 +109,7 @@ class BackupMergeRemappingTest {
         assertNull(matchSourceForRestore(device, incoming.copy(username = "other")))
     }
 
-    // --- remapKeys: profile-id-keyed and source-id-keyed settings maps ---
+    // --- remapKeys: source-id-keyed settings maps ---
 
     @Test
     fun `remapKeys rewrites mapped ids and passes unmapped keys through untouched`() {
@@ -125,8 +118,8 @@ class BackupMergeRemappingTest {
 
         assertEquals("a", out.getString("40"))
         assertEquals("b", out.getString("41"))
-        // 9 had no match on this device — kept as-is so a later profile-id filter can drop it,
-        // rather than being silently rewritten onto someone else.
+        // 9 had no match on this device — kept as-is so the later `filterBySourceId` pass can drop
+        // it, rather than being silently rewritten onto someone else's source.
         assertEquals("c", out.getString("9"))
         assertEquals(3, out.length())
     }
@@ -141,7 +134,7 @@ class BackupMergeRemappingTest {
 
     @Test
     fun `remapKeys collapsing two file ids onto one device id keeps a single entry`() {
-        // Two profiles in the file whose names both match the same device profile.
+        // Two file rows that both match the same device source (added twice on the other box).
         val out = remapKeys(JSONObject().put("1", "first").put("2", "second"), mapOf(1L to 5L, 2L to 5L))
         assertEquals(1, out.length())
         assertNotNull(out.opt("5"))
@@ -178,8 +171,8 @@ class BackupMergeRemappingTest {
     fun `custom category ids pass through unremapped and the object array survives`() {
         // A custom category's id is "custom:<uuid>" — no source id to remap, and the
         // customCats field is an array of OBJECTS, not strings. Before the fix the getString(i) on
-        // an object threw and the WHOLE blob fell back to the raw (unremapped) value, so a profile
-        // with a custom category silently lost every source-id remap on restore.
+        // an object threw and the WHOLE blob fell back to the raw (unremapped) value, so a restore
+        // with a custom category silently lost every source-id remap.
         val raw = JSONObject()
             .put("catOrder", JSONArray(listOf("custom:abc-123", "10:live:1")))
             .put("hiddenItems", JSONObject().put("10:live:7", "News"))
@@ -238,12 +231,12 @@ class BackupMergeRemappingTest {
         assertEquals("{\"a\":1}", remapCustomizationValue("{\"a\":1}", emptyMap()))
     }
 
-    // --- filterByProfile: the "only the ticked profiles" gate ---
+    // --- filterBySourceId: the "only the sources riding in this backup" gate ---
 
     @Test
-    fun `filterByProfile keeps only the selected profile ids`() {
+    fun `filterBySourceId keeps only the selected source ids`() {
         val map = JSONObject().put("1", "a").put("2", "b").put("3", "c")
-        val out = filterByProfile(map, setOf("1", "3"))
+        val out = filterBySourceId(map, setOf(1L, 3L))
         assertEquals(2, out.length())
         assertEquals("a", out.getString("1"))
         assertEquals("c", out.getString("3"))
@@ -251,37 +244,25 @@ class BackupMergeRemappingTest {
     }
 
     @Test
-    fun `filterByProfile with no selection keeps nothing`() {
-        assertEquals(0, filterByProfile(JSONObject().put("1", "a"), emptySet()).length())
+    fun `filterBySourceId with no selection keeps nothing`() {
+        assertEquals(0, filterBySourceId(JSONObject().put("1", "a"), emptySet()).length())
     }
 
     /**
      * The order the import applies these in matters: keys are remapped to device ids FIRST, then
-     * filtered against the device's profile ids. Filtering first would test file ids against device
-     * ids and throw away everything whenever the two devices number their profiles differently.
+     * filtered against the device's source ids. Filtering first would test file ids against device
+     * ids and throw away everything whenever the two devices number their sources differently.
      */
     @Test
-    fun `remap then filter keeps the restored profile, filter then remap loses it`() {
-        val file = JSONObject().put("1", "kids-config")
-        val profileIdMap = mapOf(1L to 77L)
-        val deviceProfileIds = setOf("77")
+    fun `remap then filter keeps the restored source, filter then remap loses it`() {
+        val file = JSONObject().put("1", "playlist-config")
+        val sourceIdMap = mapOf(1L to 77L)
+        val deviceSourceIds = setOf(77L)
 
-        val correct = filterByProfile(remapKeys(file, profileIdMap), deviceProfileIds)
-        assertEquals("kids-config", correct.getString("77"))
+        val correct = filterBySourceId(remapKeys(file, sourceIdMap), deviceSourceIds)
+        assertEquals("playlist-config", correct.getString("77"))
 
-        val wrongOrder = remapKeys(filterByProfile(file, deviceProfileIds), profileIdMap)
+        val wrongOrder = remapKeys(filterBySourceId(file, deviceSourceIds), sourceIdMap)
         assertEquals(0, wrongOrder.length())
-    }
-
-    @Test
-    fun `a profile key with no one here is dropped, not handed to whoever has that number`() {
-        // File profile 3 was not matched on this device; device profile 3 is somebody else.
-        val file = JSONObject().put("1", "mine").put("3", "their-pin").put("theme", "dark")
-        val out = remapProfileKeys(file, mapOf(1L to 3L))
-        assertEquals("mine", out.getString("3"))
-        assertEquals(false, out.has("1"))
-        assertEquals("dark", out.getString("theme"))
-        assertEquals(2, out.length())
-        assertEquals(0, remapProfileKeys(JSONObject().put("5", "x"), emptyMap()).length())
     }
 }

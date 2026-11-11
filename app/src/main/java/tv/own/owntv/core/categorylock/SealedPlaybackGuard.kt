@@ -16,7 +16,7 @@ data class PlayingCategories(
 )
 
 /**
- * Stops what a relock (leaving the app, a profile change) has just sealed, so nothing from a locked
+ * Stops what a relock (leaving the app) has just sealed, so nothing from a locked
  * category plays on, resumes on return, or stays in the preview pane. The shell sets one up while it is
  * on screen. [playing] is read before the relock, while the player still holds its stream; going to
  * the background frees it, and the player no longer knows which item it had.

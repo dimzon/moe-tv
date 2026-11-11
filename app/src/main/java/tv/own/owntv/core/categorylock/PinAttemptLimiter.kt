@@ -44,7 +44,7 @@ class PinAttemptLimiter(
 }
 
 /** The doors a PIN opens. Each has its own PIN and its own count of wrong entries. */
-enum class PinDoor { PROFILE, CATEGORY, SETTINGS }
+enum class PinDoor { CATEGORY, SETTINGS }
 
 /**
  * One [PinAttemptLimiter] per [PinDoor]: guessing at one door never makes another wait, so a child

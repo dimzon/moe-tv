@@ -2,37 +2,10 @@ package tv.own.owntv.core.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import tv.own.owntv.core.model.HlsSupport
 import tv.own.owntv.core.model.SourceType
-
-/**
- * A user profile (hybrid model). Owns its sources via [ProfileSourceCrossRef] and its own
- * favorites / history / progress (scoped by `profileId`). Kids profiles hide adult categories;
- * locked profiles store only a salted PIN hash.
- */
-@Entity(tableName = "profiles")
-data class ProfileEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val name: String,
-    val avatarColor: Int,
-    /** Index into the shell's `OwnTVAvatars` cartoon set. */
-    val avatarId: Int = 0,
-    /**
-     * A picture of the user's own, as an absolute path in app-private storage, or null for the drawn
-     * tile named by [avatarId] (v37). Written by `ProfileAvatarStore`, which is the only thing that
-     * puts files there.
-     *
-     * A path rather than the bytes: profiles are read on every screen that shows who is watching, and
-     * carrying an image blob through those queries would cost something on every one of them.
-     */
-    val avatarPath: String? = null,
-    val isKids: Boolean = false,
-    val pinHash: String? = null,
-    val createdAt: Long = System.currentTimeMillis(),
-)
 
 /** [SourceEntity.livePrerollSecs] sentinel: use the global Settings value rather than a per-playlist one. */
 const val FOLLOW_GLOBAL_PREROLL = -1
@@ -171,34 +144,8 @@ data class SourceEntity(
     @ColumnInfo(defaultValue = "0") val ignoreConnectionLimit: Boolean = false,
     /**
      * Whether this channel list is subscription-only (RuTube `is_paid`, v54). RuTube-only: the
-     * play-options endpoint answers `login_required` for these, so the UI badges them and the
-     * player never attempts a tune. Defaults false for every existing row and every other
-     * source type, which are all free.
+     * play-options endpoint answers `login_required` for these, so the UI badges them and the player
+     * never attempts a tune. Defaults false for every other source type, which are all free.
      */
     @ColumnInfo(defaultValue = "0") val isPaid: Boolean = false,
-)
-
-/** Many-to-many link letting a source be shared across profiles (hybrid model). */
-@Entity(
-    tableName = "profile_source",
-    primaryKeys = ["profileId", "sourceId"],
-    foreignKeys = [
-        ForeignKey(
-            entity = ProfileEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["profileId"],
-            onDelete = ForeignKey.CASCADE,
-        ),
-        ForeignKey(
-            entity = SourceEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["sourceId"],
-            onDelete = ForeignKey.CASCADE,
-        ),
-    ],
-    indices = [Index("sourceId")],
-)
-data class ProfileSourceCrossRef(
-    val profileId: Long,
-    val sourceId: Long,
 )

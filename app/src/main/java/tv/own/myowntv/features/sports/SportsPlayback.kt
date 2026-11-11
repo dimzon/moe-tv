@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -137,7 +136,7 @@ class SportsPlayback(
     }
 
     /**
-     * [match]'s channels as "Watch live" lists them by default (the profile's filter) — only if Find
+     * [match]'s channels as "Watch live" lists them by default (the saved filter) — only if Find
      * channels already found them; empty otherwise, and nothing is searched here.
      */
     suspend fun channelsFor(match: Match): List<WatchOption> {

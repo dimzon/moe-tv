@@ -57,16 +57,9 @@ class AdultCategoryClassifierTest {
     }
 
     @Test
-    fun `normal profile does not system-hide adult categories`() {
+    fun `a category the user has not hidden is never hidden`() {
         val adult = category(1, "Adults 18+")
-        assertTrue(AdultCategoryClassifier.hiddenCategoryIds(listOf(adult), emptySet(), false).isEmpty())
-    }
-
-    @Test
-    fun `kids profile system-hides only classified adult categories`() {
-        val adult = category(1, "Adults 18+")
-        val safe = category(2, "Family Movies")
-        assertTrue(AdultCategoryClassifier.hiddenCategoryIds(listOf(adult, safe), emptySet(), true) == setOf(1L))
+        assertTrue(AdultCategoryClassifier.hiddenCategoryIds(listOf(adult), emptySet()).isEmpty())
     }
 
     private fun category(id: Long, name: String) = CategoryEntity(

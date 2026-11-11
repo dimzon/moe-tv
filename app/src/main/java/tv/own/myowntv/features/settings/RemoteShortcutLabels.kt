@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -117,7 +116,6 @@ internal fun remoteActionLabel(action: RemoteShortcutAction): String = when (act
     RemoteShortcutAction.OPEN_GUIDE -> stringResource(R.string.common_nav_guide)
     RemoteShortcutAction.OPEN_SEARCH -> stringResource(R.string.common_nav_search)
     RemoteShortcutAction.OPEN_SETTINGS -> stringResource(R.string.common_nav_settings)
-    RemoteShortcutAction.OPEN_PROFILE_SWITCHER -> stringResource(R.string.profiles_title)
     RemoteShortcutAction.OPEN_PLAYLIST_SWITCHER -> stringResource(R.string.settings_playlists)
     RemoteShortcutAction.CONTINUE_LAST_WATCHED -> stringResource(R.string.settings_remote_action_continue)
     RemoteShortcutAction.FOCUS_NOW_PLAYING -> stringResource(R.string.settings_remote_action_focus_now_playing)
@@ -149,7 +147,6 @@ internal fun remoteActionIcon(action: RemoteShortcutAction): MyOwnTVIcon = when 
     RemoteShortcutAction.OPEN_GUIDE -> MyOwnTVIcon.EPG
     RemoteShortcutAction.OPEN_SEARCH -> MyOwnTVIcon.SEARCH
     RemoteShortcutAction.OPEN_SETTINGS -> MyOwnTVIcon.SETTINGS
-    RemoteShortcutAction.OPEN_PROFILE_SWITCHER -> MyOwnTVIcon.PERSON
     RemoteShortcutAction.OPEN_PLAYLIST_SWITCHER -> MyOwnTVIcon.PLAYLIST
     RemoteShortcutAction.CONTINUE_LAST_WATCHED, RemoteShortcutAction.PLAY_PAUSE -> MyOwnTVIcon.PLAY
     RemoteShortcutAction.FOCUS_NOW_PLAYING -> MyOwnTVIcon.FOCUS_HIGHLIGHT

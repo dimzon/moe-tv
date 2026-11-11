@@ -5,8 +5,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * A hashed PIN opens only with the right digits; no stored PIN means no lock. Only the Customize PIN
- * still accepts a legacy plain value; profile and backup PINs reject anything that is not a hash.
+ * A hashed PIN opens only with the right digits; no stored PIN means no lock. Only the Customize
+ * (category lock) PIN still accepts a legacy plain value; the global settings lock PIN rejects
+ * anything that is not a hash.
  */
 class PinTest {
 
@@ -30,7 +31,7 @@ class PinTest {
     }
 
     @Test
-    fun `a profile or backup PIN that is not a hash never matches`() {
+    fun `a settings lock PIN that is not a hash never matches`() {
         assertFalse(Pin.verify("4321", "4321"))
         assertFalse(Pin.verify("1234", "zz:abcd"))
         assertFalse(Pin.verify("a:b", "a:b"))

@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -47,27 +46,22 @@ import tv.own.owntv.player.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import tv.own.owntv.core.content.AdultCategoryClassifier
 import tv.own.owntv.core.customize.CustomizationStore
+import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.HistoryDao
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.nav.MainSection
-import tv.own.owntv.core.repository.activeProfileSources
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.categorylock.lockAwareCount
-import tv.own.owntv.core.categorylock.recheckedOn
 import tv.own.owntv.core.categorylock.sealedCategoryIds
 
 /** The rail's details lines (Size = Extra wide), as data; the shell turns them into text. */
@@ -79,7 +73,8 @@ data class RailDetails(
  * The number beside Live TV in the open Stage rail, for the playlists being shown ("All playlists"
  * or the one picked), and the details line under it. Titles in adult or locked categories stay
  * hidden exactly as in the Continue pill: the count leaves out what a locked category holds, and
- * both follow a lock closing or opening, not only new history.
+ * both follow a lock closing or opening, not only new history. Sources are global: every screen
+ * counts the same set.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class RailCountsViewModel(
@@ -87,36 +82,42 @@ class RailCountsViewModel(
     settings: SettingsRepository,
     sourceDao: SourceDao,
     historyDao: HistoryDao,
-    profileDao: ProfileDao,
     categoryDao: CategoryDao,
     customize: CustomizationStore,
 ) : ViewModel() {
 
-    val counts: StateFlow<Map<MainSection, Int>> = activeProfileSources(settings, sourceDao)
-        .flatMapLatest { c ->
-            if (c.profileId < 0) return@flatMapLatest flowOf(emptyMap())
-            // An empty id list would make the IN clause meaningless; -1 matches nothing.
-            val ids = c.sourceIdsFor(MediaType.LIVE).ifEmpty { listOf(-1L) }
-            lockAwareCount(customize.sealedCategoryIds(c.profileId, MediaType.LIVE), { channelDao.countAll(ids) }) {
+    val counts: StateFlow<Map<MainSection, Int>> =
+        combine(sourceDao.observeAll(), settings.defaultSourceId) { sources, defaultId ->
+            val visible = if (defaultId > 0 && sources.any { it.id == defaultId }) {
+                sources.filter { it.id == defaultId }
+            } else {
+                sources
+            }
+            // The live-only app surfaces only sources whose live sync scope is on. An empty id list
+            // would make the IN clause meaningless; -1 matches nothing.
+            visible.filter { it.syncLive }.map { it.id }.ifEmpty { listOf(-1L) }
+        }
+        .flatMapLatest { ids ->
+            lockAwareCount(customize.sealedCategoryIds(MediaType.LIVE), { channelDao.countAll(ids) }) {
                 channelDao.countAllExcluding(ids, it)
             }.map { live -> mapOf(MainSection.LIVE_TV to live) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    val details: StateFlow<RailDetails> = settings.activeProfileId
-        .flatMapLatest { pid ->
-            if (pid < 0) return@flatMapLatest flowOf(RailDetails())
-            suspend fun allowed(categoryId: Long?) =
-                AdultCategoryClassifier.allows(pid, categoryId, profileDao, categoryDao) && !customize.sealsCategory(pid, categoryId)
-            // With the section's customizations, so a rename in Customize shows here too.
-            combine(
-                historyDao.observeMostRecentOfType(pid, MediaType.LIVE).recheckedOn(customize.sealedCategoryIds(pid, MediaType.LIVE)),
-                customize.observe(pid, MediaType.LIVE),
-            ) { h, cust -> h to cust }
-                .map { (h, cust) ->
-                    h?.let { channelDao.getById(it.itemId) }?.takeIf { allowed(it.categoryId) }?.let { cust.displayName(it) }
-                }
-                .map { RailDetails(lastChannel = it) }
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RailDetails())
+    val details: StateFlow<RailDetails> =
+        combine(
+            historyDao.observeMostRecentOfType(MediaType.LIVE),
+            customize.observe(MediaType.LIVE),
+            customize.sealedCategoryIds(MediaType.LIVE),
+        ) { h, cust, sealed -> Triple(h, cust, sealed) }
+            .map { (h, cust, sealed) ->
+                // A channel's title shows only when its category is neither hidden in Customize nor
+                // sealed by a lock; with the section's customizations, so a rename shows here too.
+                h?.let { channelDao.getById(it.itemId) }?.takeIf { ch ->
+                    val catKey = ch.categoryId?.let { categoryDao.getById(it) }?.let(CustomizeKeys::category)
+                    ch.categoryId !in sealed && (catKey == null || catKey !in cust.hiddenCategories)
+                }?.let { cust.displayName(it) }
+            }
+            .map { RailDetails(lastChannel = it) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RailDetails())
 }

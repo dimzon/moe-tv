@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -54,8 +53,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import tv.own.owntv.core.backup.BackupManager
-import tv.own.owntv.core.database.dao.ProfileDao
-import tv.own.owntv.core.database.entity.ProfileEntity
 import tv.own.owntv.core.sync.local.AutoSyncAgreement
 import tv.own.owntv.core.sync.local.AutoSyncEnableResult
 import tv.own.owntv.core.sync.local.AutoSyncEvent
@@ -73,13 +70,7 @@ class LocalAutoSyncViewModel(
     private val sync: LocalSyncManager,
     runner: LocalAutoSyncRunner,
     server: LocalAutoSyncServer,
-    profileDao: ProfileDao,
-    settings: tv.own.owntv.core.settings.SettingsRepository,
 ) : ViewModel() {
-
-    /** The profile in use: the one an auto-sync set up now pairs with the other device's. */
-    val activeProfileId: StateFlow<Long> = settings.activeProfileId
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), -1L)
 
 
     val agreements: StateFlow<Map<String, AutoSyncAgreement>> = store.agreements
@@ -91,9 +82,6 @@ class LocalAutoSyncViewModel(
 
     /** The last pass per device, this session. */
     val events: StateFlow<Map<String, AutoSyncEvent>> = runner.events
-
-    val profiles: StateFlow<List<ProfileEntity>> = profileDao.observeAll()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), emptyList())
 
     val listenAlways: StateFlow<Boolean> = store.listenAlways
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), false)

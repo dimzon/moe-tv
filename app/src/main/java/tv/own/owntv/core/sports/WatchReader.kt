@@ -12,7 +12,6 @@ import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.EpgDao
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeLite
@@ -24,7 +23,7 @@ import tv.own.owntv.core.sports.model.Match
 
 /**
  * The reads "Watch live" needs, behind an interface so [WatchReader] is unit-tested on a fake.
- * Every channel returned is one the active profile may see (hidden channels and categories removed).
+ * Every channel returned is one the user may see (hidden channels and categories removed).
  */
 interface WatchData {
     /** Changes whenever a recompute is due: a guide write, a playlist sync, a manual guide match, a hide. */
@@ -169,13 +168,12 @@ class WatchReader(private val data: WatchData) {
     }
 }
 
-/** [WatchData] on the database, for the active profile — the reads Search's "On TV" already does. */
+/** [WatchData] on the database — the reads Search's "On TV" already does. */
 class RoomWatchData(
     private val epgDao: EpgDao,
     private val channelDao: ChannelDao,
     private val categoryDao: CategoryDao,
     private val sourceDao: SourceDao,
-    private val profileDao: ProfileDao,
     private val customize: CustomizationStore,
     private val settings: SettingsRepository,
 ) : WatchData {
@@ -184,19 +182,17 @@ class RoomWatchData(
 
     private suspend fun scope(): Scope {
         val sources = activeProfileSources(settings, sourceDao).first()
-        val cust = customize.observe(sources.profileId, MediaType.LIVE).first()
+        val cust = customize.observe(MediaType.LIVE).first()
         val ids = sources.liveSourceIds
-        val isKids = profileDao.getById(sources.profileId)?.isKids == true
-        val hiddenCats = if (cust.hiddenCategories.isEmpty() && !isKids || ids.isEmpty()) emptySet()
-        else AdultCategoryClassifier.hiddenCategoryIds(categoryDao.observe(ids, MediaType.LIVE).first(), cust.hiddenCategories, isKids)
+        val hiddenCats = if (cust.hiddenCategories.isEmpty() || ids.isEmpty()) emptySet()
+        else AdultCategoryClassifier.hiddenCategoryIds(categoryDao.observe(ids, MediaType.LIVE).first(), cust.hiddenCategories)
         return Scope(ids, { ch -> CustomizeKeys.channel(ch) !in cust.hiddenItems && (ch.categoryId == null || ch.categoryId !in hiddenCats) }, cust)
     }
 
     override suspend fun fingerprint(): String = withContext(Dispatchers.IO) {
         val sources = activeProfileSources(settings, sourceDao).first()
-        val cust = customize.observe(sources.profileId, MediaType.LIVE).first()
+        val cust = customize.observe(MediaType.LIVE).first()
         listOf(
-            sources.profileId,
             sources.sources.filter { it.syncLive }.joinToString(",") { "${it.id}@${it.lastSyncAt}" },
             epgDao.newestProgrammeId(),
             cust.epgMatches.hashCode(), cust.hiddenItems.keys.hashCode(), cust.hiddenCategories.hashCode(),

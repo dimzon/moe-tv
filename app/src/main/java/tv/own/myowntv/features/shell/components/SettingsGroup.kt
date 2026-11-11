@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -48,12 +47,11 @@ import tv.own.myowntv.R
 import tv.own.myowntv.features.settings.VideoGroup
 
 /**
- * The twelve Settings groups, in the order of More › Settings' cards — a card's index is the
+ * The eleven Settings groups, in the order of More › Settings' cards — a card's index is the
  * group it opens. [video] marks the five groups whose rows are the Video player's.
  */
 internal enum class SettingsGroup(val titleRes: Int, val video: VideoGroup? = null) {
     QUICK(R.string.settings_group_quick),
-    PROFILE(R.string.settings_group_profile),
     SOURCES(R.string.settings_group_sources),
     APPEARANCE(R.string.settings_group_appearance),
     LAYOUT(R.string.settings_group_layout),

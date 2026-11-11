@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -229,7 +228,7 @@ fun SportsScreen(
     }
 }
 
-/** The chips' filter, kept up to date with the profile's sports settings. */
+/** The chips' filter, kept up to date with the sports settings. */
 @Composable
 internal fun rememberChipFilter(vm: SportsViewModel): ChipFilter {
     val config by vm.sportsConfig.collectAsStateWithLifecycle()

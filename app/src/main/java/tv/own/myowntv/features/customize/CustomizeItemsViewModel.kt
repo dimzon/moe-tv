@@ -25,7 +25,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -113,14 +112,14 @@ class CustomizeItemsViewModel(
     private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
 ) : ViewModel() {
 
-    private data class Ctx(val profileId: Long, val sources: List<tv.own.owntv.core.database.entity.SourceEntity>) {
-        fun sourceIdsFor(type: MediaType): List<Long> = ActiveProfileSources(profileId, sources).sourceIdsFor(type)
+    private data class Ctx(val sources: List<tv.own.owntv.core.database.entity.SourceEntity>) {
+        fun sourceIdsFor(type: MediaType): List<Long> = ActiveProfileSources(sources).sourceIdsFor(type)
     }
 
     private val ctx: StateFlow<Ctx> = activeProfileSources(settings, sourceDao)
-        .map { aps -> Ctx(aps.profileId, aps.sources) }
+        .map { aps -> Ctx(aps.sources) }
         .distinctUntilChanged()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, Ctx(-1L, emptyList()))
+        .stateIn(viewModelScope, SharingStarted.Eagerly, Ctx(emptyList()))
 
     /** The category whose items are shown. Set via [open], cleared via [close]. [categoryId] is null
      *  for a user's custom combined category — its items live in the membership table. */
@@ -154,8 +153,8 @@ class CustomizeItemsViewModel(
     /** Whether this category has manual-order rows (fast-path switch, same as LiveViewModel). */
     private val hasOrder: StateFlow<Boolean> = combine(ctx, _catInfo) { c, ci -> c to ci }
         .flatMapLatest { (c, ci) ->
-            if (c.profileId < 0 || ci == null) flowOf(false)
-            else contentOrderDao.observeContextKeys(c.profileId, ci.mediaType)
+            if (ci == null) flowOf(false)
+            else contentOrderDao.observeContextKeys(ci.mediaType)
                 .map { keys -> ci.contextKey in keys }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
@@ -164,8 +163,8 @@ class CustomizeItemsViewModel(
     private val customizeForItems: StateFlow<tv.own.owntv.core.customize.SectionCustomizations> =
         combine(ctx, _catInfo) { c, ci -> c to ci }
             .flatMapLatest { (c, ci) ->
-                if (c.profileId < 0 || ci == null) flowOf(tv.own.owntv.core.customize.SectionCustomizations())
-                else customize.observe(c.profileId, ci.mediaType)
+                if (ci == null) flowOf(tv.own.owntv.core.customize.SectionCustomizations())
+                else customize.observe(ci.mediaType)
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.customize.SectionCustomizations())
 
@@ -230,7 +229,7 @@ class CustomizeItemsViewModel(
         val ci = _catInfo.value ?: return
         viewModelScope.launch {
             val labels = loadedRows.value.filter { it.key in keys }.associate { it.key to it.originalName }
-            customize.setItemsHidden(ctx.value.profileId, ci.mediaType, labels, hidden)
+            customize.setItemsHidden(ci.mediaType, labels, hidden)
         }
         span.cancel()
     }
@@ -242,25 +241,23 @@ class CustomizeItemsViewModel(
     private val moveMutex = Mutex()
 
     /** Snapshot of the whole category in current display order: (itemId, stable key) pairs.
-     *  Null when there is no profile. Custom categories snapshot the membership join (same rail-order
+     *  Custom categories snapshot the membership join (same rail-order
      *  query as the browse screens). Channels only. */
-    private suspend fun orderedSnapshot(ci: CatInfo): List<Pair<Long, String>>? {
-        val pid = ctx.value.profileId
-        if (pid < 0) return null
+    private suspend fun orderedSnapshot(ci: CatInfo): List<Pair<Long, String>> {
         if (ci.isCustom) {
-            return customCategoryDao.snapshotChannels(pid, ci.contextKey, ci.sourceIds, false, SNAPSHOT_LIMIT)
+            return customCategoryDao.snapshotChannels(ci.contextKey, ci.sourceIds, false, SNAPSHOT_LIMIT)
                 .map { it.id to CustomizeKeys.channel(it) }
         }
-        return channelDao.snapshotByCategoryManual(ci.categoryId!!, pid, ci.contextKey, false, SNAPSHOT_LIMIT)
+        return channelDao.snapshotByCategoryManual(ci.categoryId!!, ci.contextKey, false, SNAPSHOT_LIMIT)
             .map { it.id to CustomizeKeys.channel(it) }
     }
 
     /** Saves a move for this context: the moved items keep their place (the Move commit point). */
     private suspend fun runMove(ci: CatInfo, block: (List<Pair<Long, String>>) -> Pair<List<Long>, Set<Long>>?) {
         moveMutex.withLock {
-            val snapshot = orderedSnapshot(ci) ?: return
+            val snapshot = orderedSnapshot(ci)
             val (reordered, carried) = block(snapshot) ?: return
-            contentOrderDao.saveMove(ctx.value.profileId, ci.mediaType, ci.contextKey, reordered, carried)
+            contentOrderDao.saveMove(ci.mediaType, ci.contextKey, reordered, carried)
         }
     }
 
@@ -320,9 +317,9 @@ class CustomizeItemsViewModel(
      *  so [ordered] doesn't matter there. Channels only. */
     private fun pagingSource(categoryId: Long?, info: CatInfo, ordered: Boolean): PagingSource<Int, *> =
         if (info.isCustom) {
-            customCategoryDao.pagingChannels(ctx.value.profileId, info.contextKey, info.sourceIds, alpha = false)
+            customCategoryDao.pagingChannels(info.contextKey, info.sourceIds, alpha = false)
         } else if (ordered) {
-            channelDao.pagingByCategoryManual(categoryId!!, ctx.value.profileId, info.contextKey, alpha = false)
+            channelDao.pagingByCategoryManual(categoryId!!, info.contextKey, alpha = false)
         } else {
             channelDao.pagingByCategory(categoryId!!)
         }
@@ -349,7 +346,7 @@ class CustomizeItemsViewModel(
     fun setItemHidden(row: CustomizeItemRow, hidden: Boolean) {
         val ci = _catInfo.value ?: return
         viewModelScope.launch {
-            customize.setItemHidden(ctx.value.profileId, ci.mediaType, row.key, row.originalName, hidden)
+            customize.setItemHidden(ci.mediaType, row.key, row.originalName, hidden)
         }
     }
 
@@ -357,7 +354,7 @@ class CustomizeItemsViewModel(
     fun renameItem(row: CustomizeItemRow, name: String?) {
         val ci = _catInfo.value ?: return
         viewModelScope.launch {
-            customize.renameItem(ctx.value.profileId, ci.mediaType, row.key, name)
+            customize.renameItem(ci.mediaType, row.key, name)
         }
     }
 
@@ -371,17 +368,16 @@ class CustomizeItemsViewModel(
         scope = viewModelScope,
         persist = { renames ->
             val ci = _catInfo.value
-            if (ci != null) customize.applyBulkRenames(ctx.value.profileId, ci.mediaType, renames)
+            if (ci != null) customize.applyBulkRenames(ci.mediaType, renames)
         },
         restore = { keys ->
             val ci = _catInfo.value
-            if (ci != null) customize.clearItemNames(ctx.value.profileId, ci.mediaType, keys)
+            if (ci != null) customize.clearItemNames(ci.mediaType, keys)
         },
         existingNames = { selectedKeys ->
             val ci = _catInfo.value
-            val pid = ctx.value.profileId
-            if (ci == null || pid < 0) emptySet<String>()
-            else customize.observe(pid, ci.mediaType).first().itemNames
+            if (ci == null) emptySet<String>()
+            else customize.observe(ci.mediaType).first().itemNames
                 .filterKeys { it !in selectedKeys }
                 .values.toSet() + loadedRows.value.filter { it.key !in selectedKeys }.map { it.originalName }
         },
@@ -407,12 +403,11 @@ class CustomizeItemsViewModel(
     val moveTargets: StateFlow<List<MoveTarget>> = combine(ctx, _catInfo, customizeForItems) { c, ci, cust ->
         Triple(c, ci, cust)
     }.flatMapLatest { (c, ci, cust) ->
-        if (c.profileId < 0 || ci == null || cust.customCategories.isEmpty()) flowOf(emptyList())
+        if (ci == null || cust.customCategories.isEmpty()) flowOf(emptyList())
         else {
             val targets = cust.customCategories.map { it.id }.filterNot { it == ci.contextKey }
             if (targets.isEmpty()) flowOf(emptyList())
             else customCategoryDao.observeCountsByContexts(
-                c.profileId,
                 ci.mediaType,
                 targets,
                 ci.sourceIds.ifEmpty { listOf(-1L) },
@@ -433,7 +428,7 @@ class CustomizeItemsViewModel(
     fun createCustomCategory(name: String) {
         val ci = _catInfo.value ?: return
         viewModelScope.launch {
-            customize.createCustomCategory(ctx.value.profileId, ci.mediaType, name)
+            customize.createCustomCategory(ci.mediaType, name)
         }
     }
 
@@ -448,10 +443,9 @@ class CustomizeItemsViewModel(
     fun removeFromCategory(row: CustomizeItemRow) {
         val ci = _catInfo.value?.takeIf { it.isCustom } ?: return
         viewModelScope.launch {
-            val pid = ctx.value.profileId
-            userDataWriter.removeCustomCategoryMember(pid, ci.mediaType, ci.contextKey, row.itemId)
-            customize.observe(pid, ci.mediaType).first().movedFromOrigin[row.key]?.let { origin ->
-                customize.setItemMovedFromOrigin(pid, ci.mediaType, row.key, origin, moved = false)
+            userDataWriter.removeCustomCategoryMember(ci.mediaType, ci.contextKey, row.itemId)
+            customize.observe(ci.mediaType).first().movedFromOrigin[row.key]?.let { origin ->
+                customize.setItemMovedFromOrigin(ci.mediaType, row.key, origin, moved = false)
             }
         }
     }
@@ -460,18 +454,17 @@ class CustomizeItemsViewModel(
         val ci = _catInfo.value ?: return
         if (targetId == ci.contextKey) return
         viewModelScope.launch {
-            val pid = ctx.value.profileId
-            customCategoryDao.appendItem(pid, ci.mediaType, targetId, row.itemId)
+            customCategoryDao.appendItem(ci.mediaType, targetId, row.itemId)
             if (!keepInOrigin) {
                 when {
                     // Custom origin → drop the membership row (the item leaves THIS category).
                     // Through the writer, so the removal is recorded and a sync cannot bring it back.
                     CustomizeKeys.isCustom(ci.contextKey) ->
-                        userDataWriter.removeCustomCategoryMember(pid, ci.mediaType, ci.contextKey, row.itemId)
+                        userDataWriter.removeCustomCategoryMember(ci.mediaType, ci.contextKey, row.itemId)
                     // Provider-folder origin → mark it moved-out; the browse pager then drops the
                     // item from that folder while keeping it in All/search/recent. (Favorites can't
                     // be an origin here — this screen is only opened from Customize's category rows.)
-                    else -> customize.setItemMovedFromOrigin(pid, ci.mediaType, row.key, ci.contextKey, moved = true)
+                    else -> customize.setItemMovedFromOrigin(ci.mediaType, row.key, ci.contextKey, moved = true)
                 }
             }
         }

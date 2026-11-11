@@ -14,7 +14,7 @@ import tv.own.owntv.core.settings.SettingsRepository
 
 /**
  * Applies category locks to what browsing reads: [CustomizationStore.observeVisible] and
- * [CustomizationStore.sealsCategory] go through here. A lock needs the profile's Customize PIN and is
+ * [CustomizationStore.sealsCategory] go through here. A lock needs the Customize PIN and is
  * lifted for the rest of the session by [CategoryUnlockSession]; see [withLocks] for the rules.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -23,57 +23,54 @@ class CategoryLockView(
     private val session: CategoryUnlockSession,
     private val categoryDao: CategoryDao,
 ) {
-    fun visible(profileId: Long, type: MediaType, raw: Flow<SectionCustomizations>): Flow<SectionCustomizations> =
-        combine(raw, hasPin(profileId), session.unlocked(profileId, type)) { c, pin, open -> c.withLocks(pin, open) }
+    fun visible(type: MediaType, raw: Flow<SectionCustomizations>): Flow<SectionCustomizations> =
+        combine(raw, hasPin(), session.unlocked(type)) { c, pin, open -> c.withLocks(pin, open) }
             .flatMapLatest { c -> withSealedIds(type, c) }
             .distinctUntilChanged()
 
     /**
      * True when [item]'s category is locked and, unless [anySession], not opened this session. An
-     * unresolved item is sealed while the profile has such a lock in any section (see [isSealed]).
+     * unresolved item is sealed while there is such a lock in any section (see [isSealed]).
      */
     suspend fun seals(
-        profileId: Long,
         item: ItemCategory,
         anySession: Boolean,
         raw: suspend (MediaType) -> SectionCustomizations,
-    ): Boolean = item.isSealed({ anySealed(profileId, anySession, raw) }) { categoryId ->
-        sealsCategory(profileId, categoryId, anySession, raw)
+    ): Boolean = item.isSealed({ anySealed(anySession, raw) }) { categoryId ->
+        sealsCategory(categoryId, anySession, raw)
     }
 
     private suspend fun sealsCategory(
-        profileId: Long,
         categoryId: Long,
         anySession: Boolean,
         raw: suspend (MediaType) -> SectionCustomizations,
     ): Boolean {
         // A category row a re-sync removed after the item was read is as unknown as a gone item.
-        val category = categoryDao.getById(categoryId) ?: return anySealed(profileId, anySession, raw)
+        val category = categoryDao.getById(categoryId) ?: return anySealed(anySession, raw)
         val locked = raw(category.mediaType).lockedCategories
-        if (locked.isEmpty() || !hasPin(profileId).first()) return false
+        if (locked.isEmpty() || !hasPin().first()) return false
         val key = CustomizeKeys.category(category)
-        return key in locked && (anySession || !session.isUnlocked(profileId, category.mediaType, key))
+        return key in locked && (anySession || !session.isUnlocked(category.mediaType, key))
     }
 
-    /** Whether the profile has a lock, in any section, that unless [anySession] this session has not opened. */
+    /** Whether there is a lock, in any section, that unless [anySession] this session has not opened. */
     private suspend fun anySealed(
-        profileId: Long,
         anySession: Boolean,
         raw: suspend (MediaType) -> SectionCustomizations,
     ): Boolean {
         val sealed = LOCKABLE_SECTIONS.any { type ->
-            raw(type).lockedCategories.any { key -> anySession || !session.isUnlocked(profileId, type, key) }
+            raw(type).lockedCategories.any { key -> anySession || !session.isUnlocked(type, key) }
         }
-        return sealed && hasPin(profileId).first()
+        return sealed && hasPin().first()
     }
 
-    /** Whether a lock can seal anything on [profileId]: it has the PIN and a locked category in some section. */
-    fun hasLocks(profileId: Long, raw: (MediaType) -> Flow<SectionCustomizations>): Flow<Boolean> =
+    /** Whether a lock can seal anything: the PIN and a locked category in some section. */
+    fun hasLocks(raw: (MediaType) -> Flow<SectionCustomizations>): Flow<Boolean> =
         combine(LOCKABLE_SECTIONS.map { type -> raw(type).map { it.lockedCategories.isNotEmpty() } }) { it.any { locked -> locked } }
-            .combine(hasPin(profileId)) { locked, pin -> locked && pin }
+            .combine(hasPin()) { locked, pin -> locked && pin }
             .distinctUntilChanged()
 
-    private fun hasPin(profileId: Long): Flow<Boolean> = settings.customizePin(profileId).map { it != null }
+    private fun hasPin(): Flow<Boolean> = settings.customizePin().map { it != null }
 
     /** Resolves the sealed provider folders to DB ids; custom ids have no row and stay key-only. */
     private fun withSealedIds(type: MediaType, c: SectionCustomizations): Flow<SectionCustomizations> {

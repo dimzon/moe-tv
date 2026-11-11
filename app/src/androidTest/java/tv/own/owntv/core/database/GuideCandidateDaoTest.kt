@@ -18,7 +18,7 @@ import tv.own.owntv.core.epg.GuideCandidates
  * The two candidate queries, against a real database.
  *
  * What is being proved is a *negative*: that neither query filters by source. The unit tests cover
- * the merge; only a database can show that a row belonging to a source no profile references still
+ * the merge; only a database can show that a row belonging to a source that no longer exists still
  * comes back, which is the condition behind the "no guide channels match" report.
  */
 @RunWith(AndroidJUnit4::class)
@@ -38,9 +38,9 @@ class GuideCandidateDaoTest {
 
     @Test
     fun rowsUnderAnUnreferencedSourceAreStillCandidates() = runBlocking {
-        // Source 4242 is in no profile and no source table — exactly what a deleted-and-re-added
-        // playlist, or a standalone EPG feed, leaves behind. The old query filtered these out while
-        // the guide kept drawing their programmes.
+        // Source 4242 is in no source table — exactly what a deleted-and-re-added playlist, or a
+        // standalone EPG feed, leaves behind. The old query filtered these out while the guide kept
+        // drawing their programmes.
         db.epgDao().upsertChannels(
             listOf(EpgChannelEntity(sourceId = 4242, epgChannelId = "bbc1", displayName = "BBC One")),
         )

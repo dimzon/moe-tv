@@ -25,7 +25,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -67,7 +66,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.player.AudioOutputPolicy
 import tv.own.owntv.core.player.SurroundMode
 import tv.own.owntv.core.database.dao.SourceDao
@@ -86,7 +84,6 @@ import tv.own.owntv.core.util.FriendlySyncFailure
 import tv.own.owntv.core.util.classifySyncFailure
 import tv.own.owntv.core.sync.work.CatalogSyncState
 import tv.own.owntv.core.sync.work.CatalogSyncScheduler
-import tv.own.owntv.core.database.dao.resolveExistingProfileId
 import tv.own.owntv.core.settings.ChNavLimits
 import tv.own.owntv.core.settings.EpgRefresh
 import tv.own.owntv.core.settings.PanelSection
@@ -99,9 +96,8 @@ import tv.own.owntv.core.theme.AccentColor
 import tv.own.owntv.core.theme.ThemeMode
 import tv.own.owntv.core.theme.UiZoom
 
-/** Manage IPTV sources (list / add / re-sync / delete) for the active profile. */
+/** Manage IPTV sources (list / add / re-sync / delete) for the whole device. */
 class SettingsViewModel(
-    private val profileDao: ProfileDao,
     private val sourceDao: SourceDao,
     private val sourceRepository: SourceRepository,
     private val settings: SettingsRepository,
@@ -171,16 +167,14 @@ class SettingsViewModel(
     /** Skip (from the prompt) or acknowledge (after Done) — either way, close the EPG flow. */
     fun dismissPendingEpg() { pendingEpgSource = null; _epgSync.value = EpgSyncUi.Hidden }
 
-    /** Clear the active profile's watch history (the "recently watched" rows).
+    /** Clear the watch history (the "recently watched" rows).
      *  [type] null = everything; otherwise just LIVE / MOVIE / SERIES. */
     fun clearWatchHistory(type: tv.own.owntv.core.model.MediaType? = null) {
         viewModelScope.launch {
-            val pid = settings.activeProfileId.first()
-            if (pid < 0) return@launch
             // The [type] split covers the old Movies/Series scopes — the callers pass LIVE today,
             // and the core tables for the other scopes are pruned in wave 2. userDataWriter records
             // each deletion so a local sync does not hand the cleared history straight back.
-            userDataWriter.clearHistory(pid, type)
+            userDataWriter.clearHistory(type)
         }
     }
 
@@ -203,9 +197,8 @@ class SettingsViewModel(
         data class Failed(val failure: FriendlySyncFailure) : ImportState
     }
 
-    /** The profile's playlists; null until the first read, so a count never shows 0 while loading. */
-    val loadedSources: StateFlow<List<SourceEntity>?> = settings.activeProfileId
-        .flatMapLatest { pid -> if (pid < 0) flowOf(emptyList()) else sourceRepository.observeSources(pid) }
+    /** The playlists; null until the first read, so a count never shows 0 while loading. */
+    val loadedSources: StateFlow<List<SourceEntity>?> = sourceRepository.observeSources()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val sources: StateFlow<List<SourceEntity>> = loadedSources
@@ -483,21 +476,16 @@ class SettingsViewModel(
         settings.resumeLastChannel.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
     fun setResumeLastChannel(enabled: Boolean) { viewModelScope.launch { settings.setResumeLastChannel(enabled) } }
 
-    // Per-profile startup landing (v4.0.0): Home / Last channel / Live·Favorites.
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    // Startup landing (v4.0.0): Home / Last channel / Live·Favorites.
     val startupMode: StateFlow<tv.own.owntv.core.settings.StartupMode> =
-        settings.activeProfileId
-            .flatMapLatest { settings.startupMode(it) }
+        settings.startupMode()
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.settings.StartupMode.HOME)
     fun setStartupMode(mode: tv.own.owntv.core.settings.StartupMode) {
-        viewModelScope.launch { settings.setStartupMode(settings.activeProfileId.first(), mode) }
+        viewModelScope.launch { settings.setStartupMode(mode) }
     }
 
     val startupChannel: StateFlow<tv.own.owntv.core.settings.StartupChannelRef?> =
-        settings.activeProfileId
-            .flatMapLatest { profileId ->
-                if (profileId < 0L) flowOf(null) else settings.startupChannel(profileId)
-            }
+        settings.startupChannel()
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private val _startupChannelQuery = MutableStateFlow("")
@@ -507,11 +495,10 @@ class SettingsViewModel(
     @OptIn(kotlinx.coroutines.FlowPreview::class)
     val startupChannelResults: StateFlow<List<tv.own.owntv.core.database.entity.ChannelEntity>> =
         combine(
-            settings.activeProfileId,
             _startupChannelQuery.debounce(180),
             startupChannelRefresh,
-        ) { profileId, query, _ -> profileId to query }
-            .mapLatest { (profileId, query) -> loadStartupChannelResults(profileId, query) }
+        ) { query, _ -> query }
+            .mapLatest { loadStartupChannelResults(it) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun setStartupChannelQuery(query: String) { _startupChannelQuery.value = query }
@@ -520,10 +507,7 @@ class SettingsViewModel(
 
     fun setStartupChannel(channel: tv.own.owntv.core.database.entity.ChannelEntity) {
         viewModelScope.launch {
-            val profileId = settings.activeProfileId.first()
-            if (profileId < 0L) return@launch
             settings.setSpecificStartupChannel(
-                profileId,
                 tv.own.owntv.core.settings.StartupChannelRef(
                     sourceId = channel.sourceId,
                     remoteId = channel.remoteId,
@@ -534,12 +518,8 @@ class SettingsViewModel(
         }
     }
 
-    private suspend fun loadStartupChannelResults(
-        profileId: Long,
-        query: String,
-    ): List<tv.own.owntv.core.database.entity.ChannelEntity> {
-        if (profileId < 0L) return emptyList()
-        val sources = sourceDao.observeForProfile(profileId).first().filter { it.syncLive }
+    private suspend fun loadStartupChannelResults(query: String): List<tv.own.owntv.core.database.entity.ChannelEntity> {
+        val sources = sourceDao.observeAll().first().filter { it.syncLive }
         val defaultSourceId = settings.defaultSourceId.first()
         val sourceIds = if (defaultSourceId > 0L && sources.any { it.id == defaultSourceId }) {
             listOf(defaultSourceId)
@@ -547,12 +527,10 @@ class SettingsViewModel(
             sources.map { it.id }
         }
         if (sourceIds.isEmpty()) return emptyList()
-        val customizations = customizationStore.observeVisible(profileId, tv.own.owntv.core.model.MediaType.LIVE).first()
-        val isKids = profileDao.getById(profileId)?.isKids == true
+        val customizations = customizationStore.observeVisible(tv.own.owntv.core.model.MediaType.LIVE).first()
         val hiddenCategoryIds = tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
             categoryDao.observe(sourceIds, tv.own.owntv.core.model.MediaType.LIVE).first(),
             customizations.hiddenCategories,
-            isKids,
         )
         return channelDao.searchList(query.trim(), sourceIds, 500)
             .asSequence()
@@ -1128,18 +1106,13 @@ class SettingsViewModel(
      * and not core's: refresh the Android TV launcher rows, and offer a one-tap guide sync when the
      * playlist actually has a guide feed.
      *
-     * [SourceImporter.useProfile] is what keeps this an *add* rather than an onboarding run — without
-     * it core would create a second profile for a user who already has one.
      */
     private fun runImport(block: suspend () -> Unit) {
         importJob?.cancel()
         val job = viewModelScope.launch {
-            val pid = profileDao.resolveExistingProfileId(settings.activeProfileId.first()) ?: return@launch
-            Log.d(TAG, "runImport profile=$pid")
-            importer.useProfile(pid)
             block()
             val done = importer.state.value as? SourceImporter.ImportState.Success ?: return@launch
-            Log.d(TAG, "runImport sync success sourceId=${done.source?.id} profile=$pid")
+            Log.d(TAG, "runImport sync success sourceId=${done.source?.id}")
             done.source?.let { synced ->
                 if (epgRepository.guideUrl(synced) != null) {
                     pendingEpgSource = synced

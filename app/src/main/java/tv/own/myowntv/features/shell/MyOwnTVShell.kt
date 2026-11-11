@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -111,7 +110,6 @@ import tv.own.owntv.core.settings.RemoteShortcutAction
 import tv.own.owntv.core.settings.RemoteShortcutBindings
 import tv.own.myowntv.player.MiniPlayer
 import tv.own.myowntv.player.PlayerHud
-import tv.own.myowntv.features.shell.components.AvatarPickerDialog
 import tv.own.myowntv.features.shell.components.ExitDialog
 import tv.own.myowntv.features.shell.components.IncompleteRestoreDialog
 import tv.own.myowntv.features.shell.components.SettingsScreen
@@ -149,27 +147,18 @@ fun MyOwnTVShell(
     onSetZoom: (Int) -> Unit,
     fontCustomization: tv.own.owntv.core.theme.FontCustomization,
     onSetFontCustomization: (tv.own.owntv.core.theme.FontCustomization) -> Unit,
-    avatarId: Int,
-    onSetAvatar: (Int) -> Unit,
-    // The active profile's own picture, and the two things that can be done to it. Blank = none.
-    avatarPath: String = "",
-    onSetCustomAvatar: (java.io.File) -> Unit = {},
-    onClearCustomAvatar: () -> Unit = {},
-    profileName: String,
     sourceSummary: String?,
     playlists: List<tv.own.owntv.core.database.entity.SourceEntity> = emptyList(),
     activePlaylistId: Long = -1L,
     onSelectPlaylist: (Long) -> Unit = {},
     weatherInfo: tv.own.owntv.core.weather.WeatherInfo? = null,
     weatherFahrenheit: Boolean = false,
-    activeProfileId: Long?,
     pendingDeepLink: LauncherDeepLink?,
     onDeepLinkConsumed: () -> Unit,
     isOffline: Boolean = false,
     onExitApp: () -> Unit,
-    onSwitchProfile: () -> Unit,
     modifier: Modifier = Modifier,
-    // Called once the profile's start-up choice has been applied; the splash waits for it.
+    // Called once the app's start-up choice has been applied; the splash waits for it.
     onStartupSettled: () -> Unit = {},
 ) {
     val noSourceLabel = stringResource(R.string.shell_no_source)
@@ -189,8 +178,6 @@ fun MyOwnTVShell(
     val homeFirstRowFocus = remember { FocusRequester() }
     var focusedLayer by remember { mutableStateOf(ShellLayer.SIDEBAR) }
     var showExit by remember { mutableStateOf(false) }
-    var showAvatarPicker by remember { mutableStateOf(false) }
-    var showAvatarChooser by remember { mutableStateOf(false) }
     var showPlaylistPicker by remember { mutableStateOf(false) }
     // Held by the Activity-scoped ShellViewModel, so a recreation (a script-family language switch)
     // does not close the channel that is playing.
@@ -408,14 +395,12 @@ fun MyOwnTVShell(
     // The single most-recent resumable channel, surfaced as a shared top-bar "Continue" chip.
     val continueTarget by homeVm.continueTarget.collectAsStateWithLifecycle()
 
-    // Per-profile startup action runs once when the authenticated shell first appears. With one unlocked
-    // profile that is immediately; profile/PIN gates keep the shell out of composition until authorized.
+    // The start-up action runs once when the shell first appears.
     val resumeSettings = koinInject<tv.own.owntv.core.settings.SettingsRepository>()
     val startupChannelUnavailable = androidx.compose.ui.res.stringResource(tv.own.myowntv.R.string.settings_startup_channel_unavailable)
     LaunchedEffect(Unit) {
         if (playerMode != PlayerMode.NONE) { onStartupSettled(); return@LaunchedEffect }
-        val pid = resumeSettings.activeProfileId.first()
-        when (val startupMode = resumeSettings.startupMode(pid).first()) {
+        when (val startupMode = resumeSettings.startupMode().first()) {
             tv.own.owntv.core.settings.StartupMode.LAST_CHANNEL -> {
                 val ch = liveVm.lastWatchedLiveChannel()
                 if (ch != null && playerMode == PlayerMode.NONE) {
@@ -430,7 +415,7 @@ fun MyOwnTVShell(
             // The category is shown for this run, not remembered as the user's pick.
             tv.own.owntv.core.settings.StartupMode.LAST_CHANNEL_GUIDE,
             tv.own.owntv.core.settings.StartupMode.LAST_CHANNEL_LIVE -> {
-                val ch = liveVm.lastWatchedLiveChannel()?.takeIf { liveVm.isVisibleToActiveProfile(it) }
+                val ch = liveVm.lastWatchedLiveChannel()
                 val toGuide = startupMode == tv.own.owntv.core.settings.StartupMode.LAST_CHANNEL_GUIDE
                 if (ch != null && playerMode == PlayerMode.NONE) {
                     if (!toGuide && resumeSettings.liveView.first() == tv.own.owntv.core.settings.SettingsRepository.LiveView.LIST) {
@@ -454,29 +439,26 @@ fun MyOwnTVShell(
                 restoreFocus = true
             }
             tv.own.owntv.core.settings.StartupMode.SPECIFIC_CHANNEL -> {
-                val ref = resumeSettings.startupChannel(pid).first()
+                val ref = resumeSettings.startupChannel().first()
                 var channel: ChannelEntity? = null
                 if (ref != null) {
                     if (!ref.remoteId.isNullOrBlank()) {
                         channel = liveVm.resolveLauncherChannel(
-                            pid,
                             LauncherDeepLink.Live(sourceId = ref.sourceId, remoteId = ref.remoteId),
                         )
                     }
                     if (channel == null) {
                         channel = liveVm.resolveLauncherChannel(
-                            pid,
                             LauncherDeepLink.Live(sourceId = ref.sourceId, name = ref.name),
                         )
                     }
                     if (channel == null && ref.itemId > 0L) {
                         channel = liveVm.resolveLauncherChannel(
-                            pid,
                             LauncherDeepLink.Live(sourceId = ref.sourceId, itemId = ref.itemId),
                         )
                     }
                 }
-                if (channel != null && liveVm.isVisibleToActiveProfile(channel) && playerMode == PlayerMode.NONE) {
+                if (channel != null && playerMode == PlayerMode.NONE) {
                     zapSource = MainSection.LIVE_TV
                     if (liveVm.watchFullscreen(channel, emptyList())) playerMode = PlayerMode.FULLSCREEN
                 } else {
@@ -584,10 +566,6 @@ fun MyOwnTVShell(
     DisposableEffect(sleepTimer) {
         sleepTimer.stopPlayback = { stopForSleep() }
         onDispose { sleepTimer.stopPlayback = null }
-    }
-    DisposableEffect(shellVm) {
-        shellVm.leavePlayback = { stopForSleep() }
-        onDispose { shellVm.leavePlayback = null }
     }
     // The kept selection is spent the moment a channel actually starts playing full screen: that
     // press is the "and now open it" the plan describes, and nothing else in the app claims it.
@@ -734,10 +712,6 @@ fun MyOwnTVShell(
             RemoteShortcutAction.OPEN_GUIDE -> openShortcutSection(MainSection.EPG)
             RemoteShortcutAction.OPEN_SEARCH -> openShortcutSection(MainSection.SEARCH)
             RemoteShortcutAction.OPEN_SETTINGS -> openShortcutSection(MainSection.SETTINGS)
-            RemoteShortcutAction.OPEN_PROFILE_SWITCHER -> {
-                if (playerMode == PlayerMode.FULLSCREEN) dockPlayer()
-                onSwitchProfile()
-            }
             RemoteShortcutAction.OPEN_PLAYLIST_SWITCHER -> {
                 if (playerMode == PlayerMode.FULLSCREEN) dockPlayer()
                 if (playlists.size > 1) showPlaylistPicker = true
@@ -778,10 +752,8 @@ fun MyOwnTVShell(
         focusRail()
     }
 
-    LaunchedEffect(pendingDeepLink, activeProfileId) {
+    LaunchedEffect(pendingDeepLink) {
         val deepLink = pendingDeepLink ?: return@LaunchedEffect
-        val pid = activeProfileId ?: return@LaunchedEffect
-        if (pid < 0) return@LaunchedEffect
         when (deepLink) {
             LauncherDeepLink.OpenLiveSection -> {
                 onSelectSection(MainSection.LIVE_TV)
@@ -790,8 +762,8 @@ fun MyOwnTVShell(
             else -> {
                 // Live links resolve through the live view model; old movie/episode/show links
                 // predate the live-only app and are consumed silently.
-                val channel = (deepLink as? LauncherDeepLink.Live)?.let { liveVm.resolveLauncherChannel(pid, it) }
-                if (channel != null && liveVm.isVisibleToActiveProfile(channel)) {
+                val channel = (deepLink as? LauncherDeepLink.Live)?.let { liveVm.resolveLauncherChannel(it) }
+                if (channel != null) {
                     onSelectSection(MainSection.LIVE_TV)
                     // A launcher tile has no browse rail, so arm the channel's provider context before
                     // opening the player. A bare ensurePlaying() leaves CH+/CH- with no list to step through.
@@ -812,9 +784,9 @@ fun MyOwnTVShell(
         if (selectedSection != MainSection.HOME || playerMode != PlayerMode.NONE) homeVm.stopPreview()
     }
 
-    LaunchedEffect(selectedSection, playerMode, activeProfileId, activePlaylistId) {
-        if (selectedSection == MainSection.HOME && playerMode == PlayerMode.NONE && (activeProfileId?.let { it >= 0 } == true)) {
-            homeVm.refresh(activeProfileId)
+    LaunchedEffect(selectedSection, playerMode, activePlaylistId) {
+        if (selectedSection == MainSection.HOME && playerMode == PlayerMode.NONE) {
+            homeVm.refresh()
         }
     }
 
@@ -831,7 +803,6 @@ fun MyOwnTVShell(
     BackHandler {
         when {
             playerMode == PlayerMode.FULLSCREEN -> exitPlayer()
-            showAvatarPicker -> showAvatarPicker = false
             showPlaylistPicker -> showPlaylistPicker = false
             showExit -> showExit = false
             // Settings is reached through More now, so Back out of its root goes back there — one
@@ -862,7 +833,7 @@ fun MyOwnTVShell(
     var shortcutKeyCode by remember { mutableStateOf(android.view.KeyEvent.KEYCODE_UNKNOWN) }
     var shortcutLongFired by remember { mutableStateOf(false) }
     var shortcutHoldJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
-    val longPressBackArmed = playerMode == PlayerMode.MINI && !showExit && !showAvatarPicker && !showPlaylistPicker
+    val longPressBackArmed = playerMode == PlayerMode.MINI && !showExit && !showPlaylistPicker
     // Media keys (the third way in) act on the docked window wherever focus is — but only if nothing nearer
     // claimed them first, which is why this is a bubbling handler: a focused browse list still gets its
     // CH+/CH− paging, and the full-screen HUD still owns zapping.
@@ -1075,12 +1046,7 @@ fun MyOwnTVShell(
                     when {
                         // More — the hub the rail's last item opens. Settings is a row in it.
                         selectedSection == MainSection.MORE -> tv.own.myowntv.features.more.MoreScreen(
-                            profileName = profileName.ifBlank { stringResource(R.string.common_own_tv_user) },
                             playlistLabel = playlistLabel,
-                            avatarId = avatarId,
-                            avatarPath = avatarPath,
-                            onSwitchProfile = onSwitchProfile,
-                            onPickAvatar = { showAvatarPicker = true },
                             onOpenSettings = { group, search ->
                                 settingsStart = tv.own.myowntv.features.shell.components.SettingsStart(group, search)
                                 onSelectSection(MainSection.SETTINGS)
@@ -1251,12 +1217,6 @@ fun MyOwnTVShell(
                 onSelect = selectFromNav,
                 count = { section -> railCounts[section]?.takeIf { it > 0 } },
                 detail = { section -> railDetail(section, railDetails) },
-                profileName = profileName.ifBlank { stringResource(R.string.common_own_tv_user) },
-                profileLine = stringResource(R.string.shell_rail_profile_line, playlistLabel),
-                onSwitchProfile = onSwitchProfile,
-                onPickAvatar = { showAvatarPicker = true },
-                avatarId = avatarId,
-                avatarPath = avatarPath,
                 selectedItemFocusRequester = sidebarFocus,
                 contentFocusRequester = contentAreaFocus,
                 enterContent = when (selectedSection) {
@@ -1522,7 +1482,7 @@ fun MyOwnTVShell(
                 // Programme reminders setting) — over whatever is on screen, the player included.
                 val reminderManager = koinInject<tv.own.owntv.core.reminder.ReminderManager>()
                 val reminderMode by settingsRepo.reminderMode.collectAsStateWithLifecycle(tv.own.owntv.core.settings.SettingsRepository.ReminderMode.ASK)
-                val dueReminder = rememberDueReminder(activeProfileId)
+                val dueReminder = rememberDueReminder()
                 val watchReminder: (tv.own.owntv.core.database.entity.ReminderEntity) -> Unit = { r ->
                     scope.launch {
                         reminderManager.dismiss(r.id)
@@ -1629,24 +1589,6 @@ fun MyOwnTVShell(
     tv.own.myowntv.features.settings.lock.MenuChangeGateHost()
     if (showExit) {
         ExitDialog(onConfirm = onExitApp, onDismiss = { showExit = false })
-    }
-    if (showAvatarPicker) {
-        AvatarPickerDialog(
-                selectedId = avatarId,
-                onSelect = onSetAvatar,
-                customPath = avatarPath,
-                onPickCustom = { showAvatarPicker = false; showAvatarChooser = true },
-                onClearCustom = { onClearCustomAvatar(); showAvatarPicker = false },
-                onDismiss = { showAvatarPicker = false },
-        )
-    }
-    if (showAvatarChooser) {
-        tv.own.myowntv.features.profiles.ProfilePictureChooser(
-                hasImage = avatarPath.isNotBlank(),
-                onPicked = { file -> onSetCustomAvatar(file); showAvatarChooser = false },
-                onClear = { onClearCustomAvatar(); showAvatarChooser = false },
-                onDismiss = { showAvatarChooser = false },
-            )
     }
     if (showPlaylistPicker) {
         tv.own.myowntv.ui.components.MyOwnTVPopup(onDismissRequest = { showPlaylistPicker = false }, stageLayout = true) {

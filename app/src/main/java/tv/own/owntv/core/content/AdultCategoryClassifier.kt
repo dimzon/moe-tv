@@ -3,17 +3,15 @@ package tv.own.owntv.core.content
 import java.text.Normalizer
 import java.util.Locale
 import tv.own.owntv.core.customize.CustomizeKeys
-import tv.own.owntv.core.database.dao.CategoryDao
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.entity.CategoryEntity
 
 /**
- * Conservative parental-control classifier for provider category/folder names.
+ * Conservative classifier for provider category/folder names.
  *
  * IPTV protocols expose a category name, but no dependable adult flag. Keep this classifier
  * category-only: applying these words to programme or movie titles would create false positives
- * such as "Sex and the City". Provider categories classified here are system-hidden for kids
- * profiles; ordinary profile customizations cannot unhide them.
+ * such as "Sex and the City". [isAdult] remains for name-driven chips (genre colouring); the
+ * kids-profile policy it used to enforce is gone with the profiles.
  */
 object AdultCategoryClassifier {
     private val safeExceptions = listOf(
@@ -43,31 +41,13 @@ object AdultCategoryClassifier {
         }
     }
 
-    /** Category ids hidden by either profile customization or the kids-profile system policy. */
+    /** The ids of categories the user hid in Customize. */
     fun hiddenCategoryIds(
         categories: List<CategoryEntity>,
         customizedHiddenKeys: Set<String>,
-        isKidsProfile: Boolean,
     ): Set<Long> = categories.asSequence()
-        .filter { category ->
-            CustomizeKeys.category(category) in customizedHiddenKeys ||
-                (isKidsProfile && isAdult(category.name))
-        }
+        .filter { category -> CustomizeKeys.category(category) in customizedHiddenKeys }
         .mapTo(linkedSetOf()) { it.id }
-
-    /** Final access check for playback, downloads and deep links that bypass visible lists. */
-    suspend fun allows(
-        profileId: Long,
-        categoryId: Long?,
-        profileDao: ProfileDao,
-        categoryDao: CategoryDao,
-    ): Boolean {
-        if (profileId < 0L) return false
-        val profile = profileDao.getById(profileId) ?: return false
-        if (!profile.isKids) return true
-        val categoryName = categoryId?.let { categoryDao.getById(it)?.name }
-        return !isAdult(categoryName)
-    }
 
     private fun compact(value: String): String = value
             .replace(Regex("[^\\p{L}\\p{N}+]"), " ")

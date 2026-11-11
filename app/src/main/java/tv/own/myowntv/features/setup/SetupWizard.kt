@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -55,12 +54,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -73,33 +70,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.R
 import tv.own.owntv.core.brand.AppIcon
-import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.setup.SourceImporter
 import tv.own.owntv.core.sync.importProgressDisplay
 import tv.own.owntv.core.theme.UiFontScale
 import tv.own.owntv.core.theme.UiZoom
 import tv.own.myowntv.features.settings.EpgSyncDialog
 import tv.own.myowntv.features.settings.FirstRunLanguageSelector
-import tv.own.myowntv.features.settings.RemoteBackupRestoreScreen
-import tv.own.myowntv.features.settings.SectionPickerDialog
 import tv.own.myowntv.features.settings.SettingValue
 import tv.own.myowntv.features.settings.SetupLocalSyncScreen
-import tv.own.myowntv.features.settings.StageFieldRow
 import tv.own.myowntv.features.settings.StageSettingRow
-import tv.own.myowntv.features.settings.SettingHelp
 import tv.own.myowntv.features.shell.PendingShellRequest
 import tv.own.myowntv.ui.components.BrandMark
-import tv.own.myowntv.ui.components.BrowseMode
-import tv.own.myowntv.ui.components.MyOwnTVAvatar
-import tv.own.myowntv.ui.components.MyOwnTVAvatars
 import tv.own.myowntv.ui.components.MyOwnTVIcon
-import tv.own.myowntv.ui.components.StorageBrowser
 import tv.own.myowntv.ui.components.detailText
 import tv.own.myowntv.ui.components.displayText
 import tv.own.myowntv.ui.format.localizedInteger
@@ -113,41 +100,27 @@ import tv.own.myowntv.ui.theme.mpx
 import tv.own.myowntv.ui.theme.stageAccent
 import tv.own.myowntv.ui.theme.stageText
 
-private enum class Step { WELCOME, DISPLAY_SIZE, DISCLAIMER, SETUP_CHOICE, SYNC_DEVICE, CREATE_PROFILE, ADD_CONTENT, ADD_SOURCE_REMOTE, ADD_SOURCE, IMPORTING, EXISTING, IMPORT_BACKUP_CHOOSER, IMPORT_BACKUP_REMOTE, IMPORT_BACKUP }
+private enum class Step { WELCOME, DISPLAY_SIZE, DISCLAIMER, SETUP_CHOICE, SYNC_DEVICE, ADD_CONTENT, ADD_SOURCE_REMOTE, ADD_SOURCE, IMPORTING }
 
 /**
- * Onboarding for one profile. [firstRun] shows language/welcome/disclaimer; otherwise it
- * starts at profile creation (used by "Add profile"). [onDone] receives the newly active profile id and
- * enters the app; [onCancel] backs out (to the gate). Every step is a [WizardFrame]; adding a playlist
- * reuses the Settings › Add a source pages.
+ * First-run onboarding: language, screen size, then content (the built-in RuTube catalogue, a new
+ * source, a device sync, or skip). Sources are global — there are no profiles. [onDone] enters the
+ * app. Every step is a [WizardFrame]; adding a playlist reuses the Settings › Add a source pages.
  */
 @Composable
-fun Onboarding(firstRun: Boolean, onDone: (Long?) -> Unit, onCancel: () -> Unit, modifier: Modifier = Modifier) {
+fun Onboarding(onDone: () -> Unit, modifier: Modifier = Modifier) {
     val vm: SetupViewModel = koinViewModel()
-    val defaultProfileName = stringResource(R.string.setup_default_profile)
     val defaultIptvName = stringResource(R.string.setup_default_iptv)
     val defaultPlaylistName = stringResource(R.string.setup_name_default_playlist)
     val defaultPortalName = stringResource(R.string.setup_default_portal)
-    var step by rememberSaveable(firstRun) { mutableStateOf(if (firstRun) Step.WELCOME else Step.CREATE_PROFILE) }
+    var step by rememberSaveable { mutableStateOf(Step.WELCOME) }
     val importState by vm.state.collectAsStateWithLifecycle()
     val progress by vm.progress.collectAsStateWithLifecycle()
     val epgSync by vm.epgSync.collectAsStateWithLifecycle()
-    var existing by remember { mutableStateOf<List<SourceEntity>>(emptyList()) }
-    // Where "Try Again" returns to when an import fails (new source vs. linking existing).
+    // Where "Try Again" returns to when an import fails.
     var importOrigin by remember { mutableStateOf(Step.ADD_SOURCE) }
-    // The playlist being imported, for "Importing <name>"; null when linking existing playlists.
+    // The playlist being imported, for "Importing <name>".
     var importName by remember { mutableStateOf<String?>(null) }
-    // Where Back from the backup-restore picker returns to (first-run choice vs. add-content step).
-    var backupOrigin by remember { mutableStateOf(Step.ADD_CONTENT) }
-    // The chosen backup file and what the user wants out of it. A file with no choice yet is what
-    // raises the section dialog below; picking a file no longer starts the restore by itself.
-    var restoreFile by remember { mutableStateOf<java.io.File?>(null) }
-    var restoreSections by remember { mutableStateOf<Set<tv.own.owntv.core.backup.BackupManager.Section>?>(null) }
-    // "Hardware settings from the other device" — asked with the sections, carried like them.
-    val restoreDeviceSettings = remember { mutableStateOf(false) }
-
-    // Refresh the "existing playlists" availability whenever we land on the add-content step.
-    LaunchedEffect(step) { if (step == Step.ADD_CONTENT) existing = runCatching { vm.availableExistingSources() }.getOrDefault(emptyList()) }
 
     val accent = stageAccent.accent
     Box(modifier = modifier.fillMaxSize().stageBackground(accent)) {
@@ -163,12 +136,12 @@ fun Onboarding(firstRun: Boolean, onDone: (Long?) -> Unit, onCancel: () -> Unit,
                 back = WizardAction(stringResource(R.string.common_back), { step = Step.DISPLAY_SIZE }),
                 next = WizardAction(stringResource(R.string.setup_i_understand), { step = Step.SETUP_CHOICE }, rememberFirstFocus()),
             )
-            // First decision: start fresh or bring everything back from a backup (profiles included —
-            // no point creating a profile first that the restore would replace).
+            // First decision: pull down the built-in catalogue now, or bring everything back from
+            // another television in the house.
             Step.SETUP_CHOICE -> {
                 val first = rememberFirstFocus()
                 WizardFrame(
-                    step = WizardStep.PROFILE,
+                    step = WizardStep.PLAYLIST,
                     title = stringResource(R.string.setup_set_up_owntv),
                     sub = stringResource(R.string.setup_setup_choice_description),
                     back = WizardAction(stringResource(R.string.common_back), { step = Step.DISCLAIMER }),
@@ -176,9 +149,8 @@ fun Onboarding(firstRun: Boolean, onDone: (Long?) -> Unit, onCancel: () -> Unit,
                 ) {
                     WizardCards(
                         listOf(
-                            WizardCard(MyOwnTVIcon.PERSON, stringResource(R.string.setup_new_profile), stringResource(R.string.setup_create_profile_add_sources)) { step = Step.CREATE_PROFILE },
-                            WizardCard(MyOwnTVIcon.DOWNLOADS, stringResource(R.string.setup_restore_a_backup), stringResource(R.string.setup_restore_card_line)) {
-                                backupOrigin = Step.SETUP_CHOICE; step = Step.IMPORT_BACKUP_CHOOSER
+                            WizardCard(MyOwnTVIcon.PERSON, stringResource(R.string.setup_new_profile), stringResource(R.string.setup_create_profile_add_sources)) {
+                                importName = "RuTube"; vm.startRutube(); importOrigin = Step.SETUP_CHOICE; step = Step.IMPORTING
                             },
                             WizardCard(MyOwnTVIcon.PHONE, stringResource(R.string.setup_sync_device), stringResource(R.string.setup_sync_device_description)) { step = Step.SYNC_DEVICE },
                         ),
@@ -186,24 +158,15 @@ fun Onboarding(firstRun: Boolean, onDone: (Long?) -> Unit, onCancel: () -> Unit,
                     )
                 }
             }
-            // A sync brings whole profiles with it, exactly as a restored backup does, so it finishes
-            // the wizard the same way: hand over with no profile chosen and let MainActivity ask for
-            // the PIN of whichever one the user picks.
+            // A sync brings the other device's whole setup with it, so it finishes the wizard the
+            // same way the built-in catalogue does: enter the app once the data has landed.
             Step.SYNC_DEVICE -> SetupLocalSyncScreen(
-                onRestored = { onDone(null) },
+                onRestored = onDone,
                 onBack = { step = Step.SETUP_CHOICE },
             )
-            Step.CREATE_PROFILE -> ProfileStep(
-                defaultName = defaultProfileName,
-                onCreate = { name, avatar, kids, pin, picture -> vm.createProfile(name.ifBlank { defaultProfileName }, avatar, kids, pin, picture) { importName = "RuTube"; vm.startRutube(); importOrigin = Step.CREATE_PROFILE; step = Step.IMPORTING } },
-                onBack = { if (firstRun) step = Step.SETUP_CHOICE else onCancel() },
-            )
             Step.ADD_CONTENT -> AddContentStep(
-                hasExisting = existing.isNotEmpty(),
                 onPhone = { step = Step.ADD_SOURCE_REMOTE },
                 onType = { step = Step.ADD_SOURCE },
-                onExisting = { step = Step.EXISTING },
-                onImport = { backupOrigin = Step.ADD_CONTENT; step = Step.IMPORT_BACKUP_CHOOSER },
                 onSkip = { vm.finish(onDone) },
             )
             Step.ADD_SOURCE_REMOTE -> RemoteSetupScreen(
@@ -254,74 +217,6 @@ fun Onboarding(firstRun: Boolean, onDone: (Long?) -> Unit, onCancel: () -> Unit,
                 onRetry = { vm.reset(); step = importOrigin },
                 onCancel = { vm.cancelImport(); step = importOrigin },
                 onBackground = { vm.continueInBackground(onDone) }, // enter the app; sync keeps running
-            )
-            Step.EXISTING -> ExistingSourcesStep(
-                sources = existing,
-                onAdd = { ids -> importName = null; vm.linkExisting(ids); importOrigin = Step.EXISTING; step = Step.IMPORTING },
-                onBack = { step = Step.ADD_CONTENT },
-            )
-            Step.IMPORT_BACKUP_CHOOSER -> {
-                val first = rememberFirstFocus()
-                WizardFrame(
-                    step = if (backupOrigin == Step.SETUP_CHOICE) WizardStep.PROFILE else WizardStep.PLAYLIST,
-                    title = stringResource(R.string.setup_restore_a_backup),
-                    sub = stringResource(R.string.setup_restore_choice_description),
-                    back = WizardAction(stringResource(R.string.common_back), { step = backupOrigin }),
-                    next = null,
-                ) {
-                    WizardCards(
-                        listOf(
-                            WizardCard(MyOwnTVIcon.PHONE, stringResource(R.string.setup_from_phone), stringResource(R.string.setup_upload_from_wifi_device)) { step = Step.IMPORT_BACKUP_REMOTE },
-                            WizardCard(MyOwnTVIcon.FOLDER, stringResource(R.string.setup_local_file), stringResource(R.string.setup_pick_backup_local)) { step = Step.IMPORT_BACKUP },
-                        ),
-                        first,
-                    )
-                }
-            }
-            Step.IMPORT_BACKUP_REMOTE -> RemoteBackupRestoreScreen(
-                state = vm.remoteState.collectAsStateWithLifecycle().value,
-                backups = vm.remoteBackups,
-                onStart = { port -> vm.startRemoteRestore(port) },
-                onStop = { vm.stopRemoteRestore() },
-                // An uploaded file asks what to take out of it first; the state-driven IMPORT_BACKUP
-                // screen shows progress, the password prompt, or the result from here on.
-                onBackupReceived = { file ->
-                    restoreSections = null
-                    restoreFile = file
-                    step = Step.IMPORT_BACKUP
-                },
-                onBack = { vm.stopRemoteRestore(); step = Step.IMPORT_BACKUP_CHOOSER },
-            )
-            Step.IMPORT_BACKUP -> ImportBackupStep(
-                state = importState,
-                wizardStep = if (backupOrigin == Step.SETUP_CHOICE) WizardStep.PROFILE else WizardStep.PLAYLIST,
-                onPick = { file -> restoreSections = null; restoreFile = file },
-                fileChosen = restoreFile != null,
-                // The same choice, carried across the password question: a sealed file is chosen
-                // from before it can be opened, so the answer has to outlive the prompt.
-                onPassword = { file, pass ->
-                    vm.restoreWithPassword(file, pass, onDone, restoreSections ?: allRestoreSections, restoreDeviceSettings.value)
-                },
-                onBack = { vm.reset(); restoreFile = null; restoreSections = null; step = backupOrigin },
-            )
-        }
-        // A file is chosen and nothing has been asked of it yet — so ask, over whatever is behind.
-        restoreFile?.takeIf { restoreSections == null }?.let { file ->
-            SectionPickerDialog(
-                title = stringResource(R.string.settings_backup_what_restore),
-                // Every section, not only the ones the file holds: a sealed file says nothing until its
-                // password arrives, and asking for that before the user has said what they want would
-                // be the wrong order. Ticking a section the file lacks restores nothing for it.
-                sections = tv.own.owntv.core.backup.BackupManager.Section.entries,
-                initial = allRestoreSections,
-                confirmLabel = stringResource(R.string.settings_backup_restore_action),
-                onConfirm = { chosen ->
-                    restoreSections = chosen
-                    vm.importBackup(file, onDone, chosen, restoreDeviceSettings.value) // restore activates a profile itself
-                },
-                onDismiss = { vm.reset(); restoreFile = null; step = backupOrigin },
-                deviceSettings = restoreDeviceSettings,
-                warnWithoutSources = firstRun,
             )
         }
         // Semi-auto EPG: after the first playlist imports, ask → sync (live count) → done (overlays "All set!").
@@ -493,94 +388,9 @@ private fun AppIconSwatches(icons: List<AppIcon>, chosen: AppIcon) {
     }
 }
 
-/**
- * Who's watching?: Name, Avatar (◀ ▶ through the pictures, the letter first), a picture of the
- * user's own, Kids profile and an optional PIN, then Create profile. The picture is held until then:
- * the profile has no id to store it under before it exists.
- */
+/** Add a playlist: From your phone, or Type it here. */
 @Composable
-private fun ProfileStep(defaultName: String, onCreate: (name: String, avatarId: Int, isKids: Boolean, pin: String?, picture: java.io.File?) -> Unit, onBack: () -> Unit) {
-    var name by remember { mutableStateOf(defaultName) }
-    var avatarId by remember { mutableIntStateOf(-1) } // new profiles start on the letter
-    var isKids by remember { mutableStateOf(false) }
-    var pin by remember { mutableStateOf("") }
-    var picture by remember { mutableStateOf<java.io.File?>(null) }
-    var choosingPicture by remember { mutableStateOf(false) }
-    val nameFocus = rememberFirstFocus()
-    val valid = name.isNotBlank() && (pin.isEmpty() || pin.length >= 4)
-    val nameLabel = stringResource(R.string.profiles_name)
-    val pinLabel = stringResource(R.string.profiles_optional_pin)
-    val fieldHelp = stringResource(R.string.settings_form_field_help)
-    WizardFrame(
-        step = WizardStep.PROFILE,
-        title = stringResource(R.string.profiles_gate_title),
-        sub = stringResource(R.string.setup_profile_sub),
-        back = WizardAction(stringResource(R.string.common_back), onBack),
-        next = WizardAction(stringResource(R.string.setup_create_profile), { if (valid) onCreate(name, avatarId, isKids, pin.takeIf { it.isNotBlank() }, picture) }, enabled = valid),
-    ) {
-        StageFieldRow(
-            MyOwnTVIcon.PENCIL, nameLabel, name, { name = it }, SettingHelp(nameLabel, fieldHelp),
-            placeholder = stringResource(R.string.profiles_name_hint), modifier = Modifier.focusRequester(nameFocus),
-        )
-        val ids = (-1 until MyOwnTVAvatars.COUNT).toList()
-        val at = ids.indexOf(avatarId).coerceAtLeast(0)
-        StageSettingRow(
-            icon = MyOwnTVIcon.PERSON,
-            title = stringResource(R.string.setup_avatar),
-            desc = stringResource(R.string.setup_avatar_line),
-            value = SettingValue.Custom { AvatarStrip(ids, avatarId) },
-            onClick = { avatarId = ids[(at + 1) % ids.size] },
-            onStep = { dir -> avatarId = ids[(at + dir + ids.size) % ids.size] },
-        )
-        StageSettingRow(
-            icon = MyOwnTVIcon.IMAGE,
-            title = stringResource(R.string.profiles_avatar_own_picture),
-            desc = null,
-            value = picture?.let { file -> SettingValue.Custom { MyOwnTVAvatar(avatarId = avatarId, imagePath = file.absolutePath, modifier = Modifier.size(34.mpx)) } },
-            onClick = { choosingPicture = true },
-        )
-        StageSettingRow(
-            icon = MyOwnTVIcon.FAVORITE,
-            title = stringResource(R.string.profiles_kids),
-            desc = stringResource(R.string.profiles_kids_description),
-            value = SettingValue.Switch(isKids),
-            onClick = { isKids = !isKids },
-        )
-        StageFieldRow(
-            MyOwnTVIcon.PENCIL, pinLabel, pin, { if (it.length <= 6 && it.all(Char::isDigit)) pin = it }, SettingHelp(pinLabel, fieldHelp),
-            placeholder = stringResource(R.string.profiles_pin_digits), password = true, keyboardType = KeyboardType.NumberPassword,
-        )
-    }
-    if (choosingPicture) {
-        tv.own.myowntv.features.profiles.ProfilePictureChooser(
-            hasImage = picture != null,
-            onPicked = { picture = it; choosingPicture = false },
-            onClear = { picture = null; choosingPicture = false },
-            onDismiss = { choosingPicture = false },
-        )
-    }
-}
-
-/** The avatar row's value: six pictures from the chosen one on, the chosen ringed, then "+N". */
-@Composable
-private fun AvatarStrip(ids: List<Int>, chosen: Int) {
-    val a = stageAccent
-    val start = ids.indexOf(chosen).coerceAtLeast(0)
-    val shown = List(6.coerceAtMost(ids.size)) { ids[(start + it) % ids.size] }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.mpx), verticalAlignment = Alignment.CenterVertically) {
-        shown.forEach { id ->
-            Box(
-                Modifier.size(34.mpx).then(if (id == chosen) Modifier.border(2.mpx, a.accent, CircleShape) else Modifier),
-                contentAlignment = Alignment.Center,
-            ) { MyOwnTVAvatar(avatarId = id, modifier = Modifier.size(30.mpx)) }
-        }
-        if (ids.size > shown.size) Text("+" + localizedInteger(ids.size - shown.size, grouping = false), style = stageText(17, 700), color = StageColors.Muted)
-    }
-}
-
-/** Add a playlist: From your phone, Type it here, Import (and Existing when another profile has some). */
-@Composable
-private fun AddContentStep(hasExisting: Boolean, onPhone: () -> Unit, onType: () -> Unit, onExisting: () -> Unit, onImport: () -> Unit, onSkip: () -> Unit) {
+private fun AddContentStep(onPhone: () -> Unit, onType: () -> Unit, onSkip: () -> Unit) {
     val first = rememberFirstFocus()
     WizardFrame(
         step = WizardStep.PLAYLIST,
@@ -592,112 +402,14 @@ private fun AddContentStep(hasExisting: Boolean, onPhone: () -> Unit, onType: ()
         onBack = null,
     ) {
         WizardCards(
-            listOfNotNull(
+            listOf(
                 WizardCard(MyOwnTVIcon.PHONE, stringResource(R.string.setup_from_phone), stringResource(R.string.setup_phone_card_line), onPhone),
                 WizardCard(MyOwnTVIcon.PENCIL, stringResource(R.string.settings_add_type_here), stringResource(R.string.settings_line_add_type_here), onType),
-                if (hasExisting) WizardCard(MyOwnTVIcon.PLAYLIST, stringResource(R.string.setup_existing), stringResource(R.string.setup_use_other_profile_playlists), onExisting) else null,
-                WizardCard(MyOwnTVIcon.DOWNLOADS, stringResource(R.string.setup_import), stringResource(R.string.setup_restore_backup_file), onImport),
             ),
             first,
         )
     }
 }
-
-/** Existing playlists: one switch row per playlist another profile has, then Add N playlists. */
-@Composable
-private fun ExistingSourcesStep(sources: List<SourceEntity>, onAdd: (Set<Long>) -> Unit, onBack: () -> Unit) {
-    var selected by remember { mutableStateOf(setOf<Long>()) }
-    val first = rememberFirstFocus()
-    WizardFrame(
-        step = WizardStep.PLAYLIST,
-        title = stringResource(R.string.setup_use_existing_playlists),
-        sub = stringResource(R.string.setup_pick_playlists),
-        back = WizardAction(stringResource(R.string.common_back), onBack),
-        next = WizardAction(
-            pluralStringResource(R.plurals.setup_add_selected_playlists, selected.size, selected.size),
-            { if (selected.isNotEmpty()) onAdd(selected) },
-            enabled = selected.isNotEmpty(),
-        ),
-    ) {
-        sources.forEachIndexed { i, src ->
-            val checked = src.id in selected
-            StageSettingRow(
-                icon = MyOwnTVIcon.PLAYLIST,
-                title = src.name,
-                desc = src.url,
-                value = SettingValue.Switch(checked),
-                onClick = { selected = if (checked) selected - src.id else selected + src.id },
-                modifier = if (i == 0) Modifier.focusRequester(first) else Modifier,
-            )
-        }
-    }
-}
-
-/** Restoring a backup: the file picker, then progress, the password question or the failure, in the frame. */
-@Composable
-private fun ImportBackupStep(
-    state: SourceImporter.ImportState,
-    wizardStep: WizardStep,
-    onPick: (java.io.File) -> Unit,
-    /** A file is picked: the browser closes, so it is not left behind the restore dialog. */
-    fileChosen: Boolean,
-    onPassword: (java.io.File, String?) -> Unit,
-    onBack: () -> Unit,
-) {
-    when (state) {
-        SourceImporter.ImportState.Running -> WizardFrame(
-            step = wizardStep,
-            title = stringResource(R.string.setup_restoring),
-            sub = null,
-            back = null,
-            next = null,
-        )
-        is SourceImporter.ImportState.NeedPassword -> {
-            var password by remember { mutableStateOf("") }
-            val first = rememberFirstFocus()
-            val label = stringResource(R.string.setup_backup_password)
-            WizardFrame(
-                step = wizardStep,
-                title = stringResource(if (state.retry) R.string.setup_wrong_backup_password else R.string.setup_enter_backup_password),
-                sub = when {
-                    state.retry && state.sealed -> stringResource(R.string.setup_password_mismatch_sealed)
-                    state.retry -> stringResource(R.string.setup_password_mismatch)
-                    state.sealed -> stringResource(R.string.setup_backup_encrypted_prompt)
-                    else -> stringResource(R.string.setup_backup_passwords_encrypted_prompt)
-                },
-                back = WizardAction(stringResource(R.string.common_back), onBack),
-                next = WizardAction(stringResource(R.string.setup_restore), { if (password.isNotBlank()) onPassword(state.file, password) }, enabled = password.isNotBlank()),
-                // No "Skip" for a sealed container: without the password there is nothing to restore.
-                extraLeft = if (state.sealed) emptyList() else listOf(WizardAction(stringResource(R.string.setup_skip_no_passwords), { onPassword(state.file, null) })),
-            ) {
-                StageFieldRow(
-                    MyOwnTVIcon.PENCIL, label, password, { password = it }, SettingHelp(label, ""),
-                    password = true, modifier = Modifier.focusRequester(first),
-                )
-            }
-        }
-        is SourceImporter.ImportState.Failed -> WizardFrame(
-            step = wizardStep,
-            title = stringResource(R.string.setup_restore_failed),
-            sub = state.failure.displayText(),
-            back = null,
-            next = WizardAction(stringResource(R.string.common_back), onBack, rememberFirstFocus()),
-            onBack = onBack,
-        )
-        else -> if (!fileChosen) StorageBrowser(
-            title = stringResource(R.string.setup_pick_backup_file),
-            mode = BrowseMode.FILE,
-            // `.own` containers plus pre-4.2 `.json` backups.
-            fileExtensions = tv.own.owntv.core.backup.BackupManager.RESTORE_EXTENSIONS,
-            onPick = onPick,
-            onDismiss = onBack,
-        )
-    }
-}
-
-/** Every section, the wizard's starting point for a restore. */
-private val allRestoreSections: Set<tv.own.owntv.core.backup.BackupManager.Section>
-    get() = tv.own.owntv.core.backup.BackupManager.Section.entries.toSet()
 
 /**
  * "Importing <name>" with the bar and where the import is, Cancel and Run in background; then

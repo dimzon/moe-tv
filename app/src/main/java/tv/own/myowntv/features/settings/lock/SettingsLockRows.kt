@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -57,8 +56,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import tv.own.myowntv.R
 import tv.own.owntv.core.categorylock.PinDoor
-import tv.own.myowntv.features.profiles.PinDialog
-import tv.own.myowntv.features.profiles.PinPrompt
+import tv.own.myowntv.features.categorylock.PinDialog
+import tv.own.myowntv.features.categorylock.PinPrompt
 import tv.own.myowntv.features.shell.components.RootRow
 import tv.own.myowntv.features.shell.components.SettingsSearchEntry
 import tv.own.myowntv.features.shell.components.TileTone

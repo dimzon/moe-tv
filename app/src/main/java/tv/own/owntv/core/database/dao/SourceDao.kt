@@ -7,7 +7,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
-import tv.own.owntv.core.database.entity.ProfileSourceCrossRef
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.HlsSupport
 
@@ -108,32 +107,13 @@ interface SourceDao {
     @Query("UPDATE sources SET cleanChannelNames = :enabled, channelNameStrip = :strip WHERE id = :id")
     suspend fun updateChannelNameCleanup(id: Long, enabled: Boolean, strip: String?)
 
-    // --- profile <-> source links (hybrid model) ---
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun link(ref: ProfileSourceCrossRef)
-
-    @Query(
-        "SELECT s.* FROM sources s " +
-            "INNER JOIN profile_source ps ON ps.sourceId = s.id " +
-            "WHERE ps.profileId = :profileId ORDER BY s.createdAt ASC",
-    )
-    fun observeForProfile(profileId: Long): Flow<List<SourceEntity>>
-
-    @Query("SELECT sourceId FROM profile_source WHERE profileId = :profileId")
-    suspend fun sourceIdsForProfile(profileId: Long): List<Long>
-
-    @Query("SELECT profileId FROM profile_source WHERE sourceId = :sourceId")
-    suspend fun profileIdsForSource(sourceId: Long): List<Long>
+    // --- sources are global: no profile links (the profile tables are gone) ---
 
     @Query("SELECT id FROM sources")
     suspend fun allSourceIds(): List<Long>
 
     @Query("SELECT * FROM sources ORDER BY createdAt ASC")
     suspend fun getAllOnce(): List<SourceEntity>
-
-    @Query("SELECT * FROM profile_source")
-    suspend fun allLinks(): List<ProfileSourceCrossRef>
 
     /** The built-in RuTube source, if it has been created yet (v54). */
     @Query("SELECT * FROM sources WHERE type = 'RUTUBE' ORDER BY createdAt ASC LIMIT 1")

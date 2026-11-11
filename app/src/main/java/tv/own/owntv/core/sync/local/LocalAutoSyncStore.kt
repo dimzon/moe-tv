@@ -43,26 +43,22 @@ class LocalAutoSyncStore internal constructor(
     suspend fun get(deviceId: String): AutoSyncAgreement? = current()[deviceId]
 
     /**
-     * Writes the terms of [deviceId]'s agreement — what this side syncs, the profile here it pairs, how
-     * often, and the other side's sections and profile as it last said them. The record of past tries is kept.
+     * Writes the terms of [deviceId]'s agreement — what this side syncs, how often, and the other
+     * side's sections as it last said them. The record of past tries is kept.
      */
     suspend fun saveTerms(
         deviceId: String,
         sections: Set<BackupManager.Section>,
-        localProfileId: Long,
         timing: LocalAutoSyncTiming,
         theirSections: Set<BackupManager.Section>? = null,
-        theirProfileName: String? = null,
     ) {
         store.edit { prefs ->
             val before = prefs[agreementKey(deviceId)]?.let(::decode) ?: AutoSyncAgreement(deviceId)
             prefs[agreementKey(deviceId)] = encode(
                 before.copy(
                     sections = sections,
-                    localProfileId = localProfileId,
                     timing = timing,
                     theirSections = theirSections ?: before.theirSections,
-                    theirProfileName = theirProfileName ?: before.theirProfileName,
                 ),
             )
             prefs.remove(turnedOffKey(deviceId))
@@ -159,8 +155,6 @@ class LocalAutoSyncStore internal constructor(
         fun encode(a: AutoSyncAgreement): String = JSONObject()
             .put("device", a.deviceId)
             .put("sections", JSONArray(a.sections.map { it.name }))
-            .put("profile", a.localProfileId)
-            .put("theirProfile", a.theirProfileName)
             .put("timing", a.timing.name)
             .put("theirSections", JSONArray(a.theirSections.map { it.name }))
             .put("lastAttemptAt", a.lastAttemptAt)
@@ -174,8 +168,6 @@ class LocalAutoSyncStore internal constructor(
             AutoSyncAgreement(
                 deviceId = o.getString("device"),
                 sections = sections(o.optJSONArray("sections")) ?: AutoSyncAgreement.DEFAULT_SECTIONS,
-                localProfileId = o.optLong("profile", -1L),
-                theirProfileName = o.optString("theirProfile"),
                 timing = LocalAutoSyncTiming.parse(o.optString("timing")),
                 theirSections = sections(o.optJSONArray("theirSections")).orEmpty(),
                 lastAttemptAt = o.optLong("lastAttemptAt"),

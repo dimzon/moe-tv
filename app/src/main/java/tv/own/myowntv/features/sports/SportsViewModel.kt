@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -135,11 +134,11 @@ internal class ChipFilter(val config: SportsConfig, val chips: Set<HubChip>, lea
     private val chosenSports = chips.filterIsInstance<HubChip.One>().map { it.sport }.toSet()
     private val myTeamKeys = config.teams.map { it.key }.toSet()
 
-    /** The followed leagues of the chosen sports, in the profile's order: the second chip row. */
+    /** The followed leagues of the chosen sports, in the saved order: the second chip row. */
     val sportLeagues: List<League> = config.followedLeagues().mapNotNull(SportsCatalog::league).filter { it.sport in chosenSports }
         .sortedWith(compareBy({ config.rankOf(it.sport, it.key).first }, { config.rankOf(it.sport, it.key).second }))
 
-    /** The chosen leagues; a remembered league the profile no longer follows filters nothing. */
+    /** The chosen leagues; a remembered league the saved list no longer follows filters nothing. */
     val activeLeagues: Set<String> = leagues.filterTo(HashSet()) { k -> sportLeagues.any { it.key == k } }
 
     val myTeams: Boolean get() = HubChip.MyTeams in chips
@@ -157,7 +156,7 @@ internal class ChipFilter(val config: SportsConfig, val chips: Set<HubChip>, lea
 
     private fun leaguesOf(sport: Sport) = activeLeagues.filterTo(HashSet()) { k -> sportLeagues.any { it.key == k && it.sport == sport } }
 
-    /** The followed leagues whose matches can pass, in the profile's order. */
+    /** The followed leagues whose matches can pass, in the saved order. */
     val leagueKeys: List<String> by lazy {
         val followed = config.followedLeagues().mapNotNull(SportsCatalog::league)
             .sortedWith(compareBy({ config.rankOf(it.sport, it.key).first }, { config.rankOf(it.sport, it.key).second }))
@@ -237,7 +236,7 @@ data class SportsHubState(
     val onNow: Map<GuideSport, List<GuideSportItem>> = emptyMap(),
     val hasPlaylist: Boolean = true,
     val rebuilding: Boolean = false,
-    /** Start times of the profile's programme reminders, keyed `start|title`, so a card can show "Reminder". */
+    /** Start times of the programme reminders, keyed `start|title`, so a card can show "Reminder". */
     val reminders: Set<String> = emptySet(),
 )
 
@@ -263,7 +262,7 @@ class SportsViewModel(
 
     private val board = repository.observe(Demand.Hub)
 
-    /** The profile's live playlists (id → name), for the filter panel's Playlist choice. */
+    /** The user's live playlists (id → name), for the filter panel's Playlist choice. */
     private val playlists = activeProfileSources(settings, sourceDao)
         .map { a -> a.sources.filter { it.syncLive }.map { it.id to it.name } }.distinctUntilChanged()
 
@@ -290,19 +289,17 @@ class SportsViewModel(
         .flowOn(Dispatchers.Default)
         .onStart { emit(emptyMap()) }
 
-    private val reminderKeys = settings.activeProfileId.flatMapLatest { pid ->
-        if (pid < 0) flowOf(emptySet()) else reminders.observe(pid).map { list -> list.map { reminderKey(it.startMs, it.title) }.toSet() }
-    }
+    private val reminderKeys = reminders.observe().map { list -> list.map { reminderKey(it.startMs, it.title) }.toSet() }
 
     val hub: StateFlow<SportsHubState> = combine(board, config, onNow, hasPlaylist, repository.rebuild) { b, c, n, has, r ->
         SportsHubState(b, c, n, has, rebuilding = r is RebuildState.Running)
     }.combine(reminderKeys) { s, r -> s.copy(reminders = r) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SportsHubState())
 
-    /** The profile's programme reminders, keyed `start|title` ([reminderKey]), so a row can show its bell. */
+    /** The user's programme reminders, keyed `start|title` ([reminderKey]), so a row can show its bell. */
     val reminderSet: StateFlow<Set<String>> = reminderKeys.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
-    /** The profile's sports settings alone — no scores are asked for by reading it. */
+    /** The user's sports settings alone — no scores are asked for by reading it. */
     val sportsConfig: StateFlow<SportsConfig> = config.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SportsConfig())
 
     // --- The chips, shared by the three tabs ---------------------------------------------------------
@@ -363,7 +360,7 @@ class SportsViewModel(
 
     /**
      * The Home "Live sports" row: followed matches while one is live or kicks off within the hour (core's
-     * `SportsHomeRow`) — the leagues the profile chose and its teams, never "All sports"' every league.
+     * `SportsHomeRow`) — the leagues the user chose and their teams, never "All sports"' every league.
      * No channels (found per match). Asks for scores only while collected, and only after
      * [HOME_ROW_DELAY_MS], so opening the app is never slowed by it.
      */
@@ -382,7 +379,7 @@ class SportsViewModel(
 
     private val openMatch = MutableStateFlow<Match?>(null)
 
-    /** The filter while a match page is open; null = the profile's defaults (Settings → Sports). */
+    /** The filter while a match page is open; null = the saved defaults (Settings → Sports). */
     private val pageFilter = MutableStateFlow<WatchFilter?>(null)
 
     /** Set by Find channels on the open match page; reset when another match opens. */
@@ -532,14 +529,14 @@ class SportsViewModel(
         if (config.first().rememberFilters) saveFilter(filter, remember = true)
     }
 
-    /** "Remember these filters for every match": on saves the current filter as the profile's default. */
+    /** "Remember these filters for every match": on saves the current filter as the default. */
     fun setRememberFilters(on: Boolean) = viewModelScope.launch {
         val filter = matchPage.value?.filter ?: return@launch
         saveFilter(filter, remember = on)
     }
 
     private suspend fun saveFilter(filter: WatchFilter, remember: Boolean) {
-        settings.updateSportsConfig(settings.activeProfileIdNow()) { c ->
+        settings.updateSportsConfig { c ->
             if (!remember) c.copy(rememberFilters = false)
             else c.copy(
                 rememberFilters = true,
@@ -557,12 +554,12 @@ class SportsViewModel(
 
     /** Hold OK on a channel: "Always use for <competition>". */
     fun rememberChannel(match: Match, channel: ChannelEntity) = viewModelScope.launch {
-        settings.updateSportsConfig(settings.activeProfileIdNow()) { SportsMemory.remember(it, match, channel) }
+        settings.updateSportsConfig { SportsMemory.remember(it, match, channel) }
     }
 
     /** The match page's Following: the competition it is fetched under, in or out of the followed set. */
     fun toggleLeague(feed: String) = viewModelScope.launch {
-        settings.updateSportsConfig(settings.activeProfileIdNow()) { c ->
+        settings.updateSportsConfig { c ->
             val now = c.leagues
             c.copy(leagues = if (feed in now) now - feed else now + feed)
         }
@@ -572,8 +569,7 @@ class SportsViewModel(
 
     /** Follow or unfollow a team (Hold OK on a card). */
     fun toggleTeam(team: FollowedTeam) = viewModelScope.launch {
-        val pid = settings.activeProfileIdNow()
-        settings.updateSportsConfig(pid) { c ->
+        settings.updateSportsConfig { c ->
             if (c.teams.any { it.key == team.key }) c.copy(teams = c.teams.filterNot { it.key == team.key })
             else c.copy(teams = c.teams + team)
         }
@@ -581,8 +577,7 @@ class SportsViewModel(
 
     /** "Remind me" on a match not started yet; the best channel's programme reminder. */
     fun remind(match: Match, channels: List<WatchOption>) = viewModelScope.launch {
-        val pid = settings.activeProfileIdNow()
-        alerts.remind(pid, match, channels, config.first().reminderLeadMinutes)
+        alerts.remind(match, channels, config.first().reminderLeadMinutes)
     }
 
     /**
@@ -598,11 +593,10 @@ class SportsViewModel(
     }
 
     private fun recordPlay(match: Match) = viewModelScope.launch {
-        val pid = settings.activeProfileIdNow()
-        settings.updateSportsConfig(pid) { SportsMemory.recordPlay(it, match) }
+        settings.updateSportsConfig { SportsMemory.recordPlay(it, match) }
     }
 
-    /** The sports the profile follows a league of, in chip order. */
+    /** The sports whose leagues are followed, in chip order. */
     fun followedSports(config: SportsConfig): List<Sport> {
         val keys = config.followedLeagues()
         return config.orderSports(SportsCatalog.sports.filter { s -> keys.any { SportsCatalog.league(it)?.sport == s } })

@@ -15,7 +15,6 @@ import org.junit.runner.RunWith
 import tv.own.owntv.core.database.OwnTVDatabase
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
-import tv.own.owntv.core.database.entity.ProfileEntity
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.model.SourceType
@@ -38,7 +37,6 @@ class UserDataResolverRelinkTest {
     private lateinit var db: OwnTVDatabase
     private lateinit var resolver: UserDataResolver
 
-    private var profileId = 0L
     private var sourceId = 0L
 
     @Before
@@ -47,7 +45,6 @@ class UserDataResolverRelinkTest {
         resolver = UserDataResolver(
             context = context,
             channelDao = db.channelDao(),
-            profileDao = db.profileDao(),
             favoriteDao = db.favoriteDao(),
             historyDao = db.historyDao(),
             contentOrderDao = db.contentOrderDao(),
@@ -55,7 +52,6 @@ class UserDataResolverRelinkTest {
             tombstoneDao = db.tombstoneDao(),
             db = db,
         )
-        profileId = db.profileDao().insert(ProfileEntity(name = "Primary", avatarColor = 0x112233))
         sourceId = db.sourceDao().insert(
             SourceEntity(name = "Portal", type = SourceType.XTREAM, url = "https://portal.test", username = "user"),
         )
@@ -83,7 +79,7 @@ class UserDataResolverRelinkTest {
     @Test
     fun favoriteFollowsAChannelAcrossAResyncThatChangesItsRowId() = runBlocking {
         val oldId = insertChannel(remoteId = "m-1", name = "BBC One")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = oldId, addedAt = 500))
+        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = oldId, addedAt = 500))
 
         val snapshot = resolver.exportForSource(sourceId, setOf("fav"))
         assertEquals(1, snapshot.length())
@@ -108,7 +104,7 @@ class UserDataResolverRelinkTest {
     @Test
     fun favoriteFollowsAChannelByNameWhenTheProviderHasNoRemoteId() = runBlocking {
         val oldId = insertChannel(remoteId = null, name = "Nameless Provider Channel")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = oldId, addedAt = 1))
+        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = oldId, addedAt = 1))
 
         val snapshot = resolver.exportForSource(sourceId, setOf("fav"))
         db.channelDao().clearSource(sourceId)
@@ -126,7 +122,7 @@ class UserDataResolverRelinkTest {
     @Test
     fun anUnresolvableRecordStaysPendingAndHealsWhenTheContentArrives() = runBlocking {
         val oldId = insertChannel(remoteId = "m-late", name = "Arrives Late")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = oldId, addedAt = 1))
+        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = oldId, addedAt = 1))
         val snapshot = resolver.exportForSource(sourceId, setOf("fav"))
 
         // Sync wiped the catalogue and the channel is not back yet.
@@ -149,7 +145,7 @@ class UserDataResolverRelinkTest {
     @Test
     fun purgeFalseKeepsAnOrphanedRowSoAFailedSyncCannotDeleteFavorites() = runBlocking {
         val oldId = insertChannel(remoteId = "m-2", name = "Interrupted")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = oldId, addedAt = 1))
+        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = oldId, addedAt = 1))
         val snapshot = resolver.exportForSource(sourceId, setOf("fav"))
 
         db.channelDao().clearSource(sourceId)
@@ -163,41 +159,13 @@ class UserDataResolverRelinkTest {
     @Test
     fun purgeTrueDropsTheOrphanedRowAfterASuccessfulSync() = runBlocking {
         val oldId = insertChannel(remoteId = "m-3", name = "Gone For Good")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = oldId, addedAt = 1))
+        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = oldId, addedAt = 1))
         val snapshot = resolver.exportForSource(sourceId, setOf("fav"))
 
         db.channelDao().clearSource(sourceId)
         resolver.relinkAfterSync(snapshot, purge = true)
 
         assertNull(db.favoriteDao().getAllOnce().firstOrNull { it.itemId == oldId })
-    }
-
-    /**
-     * A record whose profile no longer exists must not be re-attached to whatever profile happens to
-     * hold that id now — deleting a profile and restoring a backup would otherwise dump a stranger's
-     * favorites (and, for a Kids profile, their content) into someone else's account.
-     */
-    @Test
-    fun aRecordForADeletedProfileIsNotAttachedToAnyoneElse() = runBlocking {
-        val channelId = insertChannel(remoteId = "m-4", name = "Orphan Profile")
-        // A real second profile, deleted between the export and the relink — which is the actual
-        // sequence this guards against. Inventing an id that never existed cannot stand in for it:
-        // favorites carry a foreign key to profiles, so such a row is rejected before the test starts.
-        val secondProfile = ProfileEntity(name = "Second", avatarColor = 0x445566)
-        val secondProfileId = db.profileDao().insert(secondProfile)
-        db.favoriteDao().add(FavoriteEntity(profileId = secondProfileId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 1))
-        val snapshot = resolver.exportForSource(sourceId, setOf("fav"))
-        assertEquals(1, snapshot.length())
-        // Deleting the profile cascades its favorites away; the snapshot still names it.
-        db.profileDao().delete(secondProfile.copy(id = secondProfileId))
-        assertEquals(0, db.favoriteDao().getAllOnce().size)
-
-        resolver.relinkAfterSync(snapshot, purge = false)
-
-        assertNull(
-            "a record for a missing profile must not land on the surviving profile",
-            db.favoriteDao().getAllOnce().firstOrNull { it.itemId == channelId },
-        )
     }
 
     /**
@@ -208,13 +176,13 @@ class UserDataResolverRelinkTest {
     @Test
     fun purgeSnapshotOrphanDeletesOnlyOnceTheContentRowHasGone() = runBlocking {
         val channelId = insertChannel(remoteId = "m-9", name = "Purge Me")
-        db.favoriteDao().add(FavoriteEntity(profileId = profileId, mediaType = MediaType.LIVE, itemId = channelId, addedAt = 1))
+        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = channelId, addedAt = 1))
 
-        db.favoriteDao().purgeSnapshotOrphan(profileId, MediaType.LIVE, channelId)
+        db.favoriteDao().purgeSnapshotOrphan(MediaType.LIVE, channelId)
         assertEquals("the channel is still there — nothing to purge", 1, db.favoriteDao().getAllOnce().size)
 
         db.channelDao().clearSource(sourceId)
-        db.favoriteDao().purgeSnapshotOrphan(profileId, MediaType.LIVE, channelId)
+        db.favoriteDao().purgeSnapshotOrphan(MediaType.LIVE, channelId)
         assertEquals("the channel is gone — the favorite must go with it", 0, db.favoriteDao().getAllOnce().size)
     }
 

@@ -5,7 +5,7 @@ import org.json.JSONObject
 import tv.own.owntv.core.settings.SettingsImportRules
 import tv.own.owntv.core.sports.model.Sport
 
-/** A team (or athlete, or national side) the profile follows. [id] is ESPN's, unique within [sport]. */
+/** A team (or athlete, or national side) the user follows. [id] is ESPN's, unique within [sport]. */
 data class FollowedTeam(val sport: Sport, val id: String, val name: String, val abbreviation: String = "") {
     val key: String get() = "${sport.path}/$id"
 }
@@ -18,7 +18,7 @@ data class FollowedTeam(val sport: Sport, val id: String, val name: String, val 
 data class RememberedChannel(val name: String, val country: String? = null)
 
 /**
- * How often the profile played a team's (or a competition's) matches from the hub — what "Suggested
+ * How often the user played a team's (or a competition's) matches from the hub — what "Suggested
  * from what you watch" is made of. [name] is kept so a suggestion can be shown without a
  * network call.
  */
@@ -43,10 +43,10 @@ data class GoalAlerts(
 )
 
 /**
- * One profile's sports settings (Settings → Sports). Stored as one JSON blob per
- * profile, `sports_config_<id>`, the way Home's config is, and backed up in the same way.
+ * The user's sports settings (Settings → Sports). Stored as one JSON blob under the
+ * plain `sports_config` key, the way Home's config is, and backed up with the settings.
  *
- * A new profile follows nothing ([leagues] empty). [languages] is null until the user
+ * On a first run nothing is followed ([leagues] empty). [languages] is null until the user
  * first changes it: until then the app's own language is ranked first ([preferredLanguages]). Every read goes through [SettingsImportRules], so a value from another
  * build or a hand-edited backup can never be out of range.
  */
@@ -136,7 +136,7 @@ data class SportsConfig(
     companion object {
         const val DEFAULT_REMINDER_LEAD_MINUTES = 10
 
-        /** Most-played teams and leagues kept per profile. */
+        /** Most-played teams and leagues, kept bounded. */
         const val MAX_PLAYED = 60
 
         /** The Match reminders lead times. */

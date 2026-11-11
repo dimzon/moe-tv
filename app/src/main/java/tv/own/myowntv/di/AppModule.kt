@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -65,12 +64,9 @@ import tv.own.owntv.core.live.GuideReader
 import tv.own.owntv.core.live.LiveEpgReader
 import tv.own.myowntv.features.home.HomeViewModel
 import tv.own.myowntv.features.live.LiveViewModel
-import tv.own.myowntv.features.profiles.ProfileGateSessionViewModel
-import tv.own.myowntv.features.profiles.ProfilesViewModel
 import tv.own.myowntv.features.search.SearchViewModel
 import tv.own.myowntv.features.settings.LocalAutoSyncViewModel
 import tv.own.myowntv.features.settings.LocalSyncViewModel
-import tv.own.myowntv.features.settings.BackupViewModel
 import tv.own.myowntv.features.settings.ChannelNameCleanupViewModel
 import tv.own.myowntv.features.settings.EpgSourcesViewModel
 import tv.own.myowntv.features.settings.HomeSettingsViewModel
@@ -106,19 +102,16 @@ val appModule = module {
     singleOf(::SportsPlayback)
     // Picture-in-picture when leaving the app: one instance shared by the activity and the shell.
     singleOf(::PictureInPicture)
-    // Process-long scope for work that must outlive the screen that started it (a first-run restore).
-    single<kotlinx.coroutines.CoroutineScope> {
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default)
-    }
     viewModelOf(::HomeViewModel)
     viewModelOf(::SetupViewModel)
     viewModelOf(::DisplaySizeViewModel)
     // Takes a Context first; Koin resolves it from androidContext().
     //
     // Spelled out rather than `viewModelOf(::LiveViewModel)`: that reflective helper is generated for
-    // up to 22 constructor parameters and this class has 20. The failure is a "none of the
+    // up to 22 constructor parameters and this class is near the ceiling. The failure is a "none of the
     // following candidates is applicable" at the call above, which says nothing about arity — hence
-    // this note. Every argument is resolved by type, in declared order.
+    // this note. Every argument is resolved by type, in declared order. Profiles are gone: no
+    // profileDao argument any more.
     viewModel {
         LiveViewModel(
             get(), // appContext
@@ -127,7 +120,6 @@ val appModule = module {
             get(), // favoriteDao
             get(), // historyDao
             get(), // userDataWriter
-            get(), // profileDao
             get(), // sourceDao
             get(), // settings
             get(), // customize
@@ -145,17 +137,12 @@ val appModule = module {
     viewModelOf(::SportsSettingsViewModel)
     viewModelOf(::PlayerButtonsSettingsViewModel)
     viewModelOf(::SearchViewModel)
-    viewModelOf(::ProfilesViewModel)
-    // Activity-scoped session state for the profile gate (configuration-only retention, no saved
-    // state — see ProfileGateSessionViewModel).
-    viewModelOf(::ProfileGateSessionViewModel)
-    // 29 constructor parameters — past the highest arity Koin's `*Of` DSL generates, so this one
-    // binding stays explicit. Named arguments give it the same guarantee viewModelOf gives the rest:
-    // reordering the constructor is safe, and adding a parameter is a compile error here, not a
-    // silently mis-wired dependency at runtime.
+    // Past the highest arity Koin's `*Of` DSL generates, so this binding stays explicit. Named
+    // arguments give it the same guarantee viewModelOf gives the rest: reordering the constructor is
+    // safe, and adding a parameter is a compile error here, not a silently mis-wired dependency at
+    // runtime. Profiles are gone: no profileDao argument any more.
     viewModel {
         SettingsViewModel(
-            profileDao = get(),
             sourceDao = get(),
             sourceRepository = get(),
             settings = get(),
@@ -186,14 +173,14 @@ val appModule = module {
     viewModelOf(::LocalAutoSyncViewModel)
     viewModelOf(::HomeSettingsViewModel)
     viewModelOf(::LanguageSettingsViewModel)
-    // 18 constructor parameters — past the highest arity viewModelOf generates (see LiveViewModel).
+    // Past the highest arity viewModelOf generates (see LiveViewModel). Profiles are gone: no
+    // profileDao argument any more.
     viewModel {
         EpgViewModel(
             get(), // settings
             get(), // sourceRepository
             get(), // channelDao
             get(), // epgDao
-            get(), // profileDao
             get(), // epgRepository
             get(), // epgSourceStore
             get(), // connectivity
@@ -212,7 +199,6 @@ val appModule = module {
     viewModelOf(::CustomizeViewModel)
     viewModelOf(::SettingsPinViewModel)
     viewModelOf(::CustomizeItemsViewModel)
-    viewModelOf(::BackupViewModel)
     viewModelOf(::EpgSourcesViewModel)
     viewModelOf(::ChannelNameCleanupViewModel)
     // The counts the More rows and the Favourites / History tabs carry.

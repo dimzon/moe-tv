@@ -63,7 +63,6 @@ class PinAttemptLimiterTest {
         repeat(5) { doors.of(PinDoor.SETTINGS).attempt { false } }
         assertEquals(30, doors.of(PinDoor.SETTINGS).waitSeconds())
         assertEquals(0, doors.of(PinDoor.CATEGORY).waitSeconds())
-        assertEquals(0, doors.of(PinDoor.PROFILE).waitSeconds())
         assertEquals(PinAttempt.Accepted, doors.of(PinDoor.CATEGORY).attempt { true })
     }
 }

@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import tv.own.owntv.core.database.entity.PlaybackQuirkEntity
 
 /**
- * What a stream needs, shared by every profile — see [PlaybackQuirkEntity].
+ * What a stream needs, global for the whole device — see [PlaybackQuirkEntity].
  *
  * Each value is written on its own and never clears the others: correcting a channel's lip-sync must
  * not forget that it is sound only. A row whose values have all gone back to null is dropped.

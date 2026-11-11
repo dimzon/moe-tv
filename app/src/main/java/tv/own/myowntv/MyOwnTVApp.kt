@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -175,7 +174,6 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
         tv.own.owntv.core.brand.AppIconSwitcher.start(this, GlobalContext.get().get())
         // Auto start on wake-up: a force stop ends the wake listener, so the next app start brings it back.
         tv.own.myowntv.features.autostart.AutoStart.onAppStarted(this)
-        tv.own.myowntv.features.autostart.AutoStartProfileGate(this).register()
         // Diagnostics switch and the one-shot settings migrations — core's, shared with the phone, which
         // used to run none of them.
         tv.own.owntv.player.PlaybackStartup.start(

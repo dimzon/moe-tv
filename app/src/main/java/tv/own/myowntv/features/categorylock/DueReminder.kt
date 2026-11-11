@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -59,18 +58,18 @@ import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.reminder.ReminderManager
 
 /**
- * The programme reminder to bring up now for [profileId], null when none is due. One on a channel
- * filed under a locked category waits: it neither asks nor switches until the PIN opens the
- * category, so a reminder cannot show or tune what the lock keeps out of sight.
+ * The programme reminder to bring up now, null when none is due. One on a channel filed under a
+ * locked category waits: it neither asks nor switches until the PIN opens the category, so a
+ * reminder cannot show or tune what the lock keeps out of sight. Reminders are global: there are
+ * no profiles.
  */
 @Composable
-internal fun rememberDueReminder(profileId: Long?): ReminderEntity? {
+internal fun rememberDueReminder(): ReminderEntity? {
     val reminders = koinInject<ReminderManager>()
     val customize = koinInject<CustomizationStore>()
     val channels = koinInject<ChannelDao>()
-    val due = remember(profileId, reminders, customize, channels) {
-        if (profileId == null) flowOf(null)
-        else reminders.due.firstUnsealed(profileId, customize.sealedCategoryIds(profileId, MediaType.LIVE)) {
+    val due = remember(reminders, customize, channels) {
+        reminders.due.firstUnsealed(customize.sealedCategoryIds(MediaType.LIVE)) {
             channels.getById(it)?.categoryId
         }
     }

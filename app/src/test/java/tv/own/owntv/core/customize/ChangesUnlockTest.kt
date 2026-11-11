@@ -7,20 +7,19 @@ import org.junit.Test
 class ChangesUnlockTest {
 
     @Test
-    fun `the long-press changes stay open for the profile that entered the PIN`() {
+    fun `the long-press changes open when the PIN is entered`() {
         val session = CategoryUnlockSession()
-        assertFalse(session.changesUnlocked(1L))
-        assertTrue(session.unlockChanges(1L))
-        assertTrue(session.changesUnlocked(1L))
-        assertFalse(session.changesUnlocked(2L))
+        assertFalse(session.changesUnlocked())
+        assertTrue(session.unlockChanges())
+        assertTrue(session.changesUnlocked())
     }
 
     @Test
-    fun `leaving the app or switching profile closes them again`() {
+    fun `leaving the app closes them again`() {
         val session = CategoryUnlockSession()
-        session.unlockChanges(1L)
+        session.unlockChanges()
         session.relockAll()
-        assertFalse(session.changesUnlocked(1L))
+        assertFalse(session.changesUnlocked())
     }
 
     @Test
@@ -28,7 +27,7 @@ class ChangesUnlockTest {
         val session = CategoryUnlockSession()
         val before = session.epoch()
         session.relockAll()
-        assertFalse(session.unlockChanges(1L, since = before))
-        assertFalse(session.changesUnlocked(1L))
+        assertFalse(session.unlockChanges(since = before))
+        assertFalse(session.changesUnlocked())
     }
 }

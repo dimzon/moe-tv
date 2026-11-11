@@ -18,7 +18,7 @@ import tv.own.owntv.core.settings.SettingsRepository
  * - **STATIC** (the default): every browse item minus the set the user hid.
  * - **DYNAMIC**: derived from the active playlist's content — see [MainSection.dynamicVisible].
  *   When the source picker is on "All playlists" (`defaultSourceId <= 0`) the counts are unioned
- *   across the profile's sources, so a VOD-only playlist still hides Live in the merged view.
+ *   across the user's sources, so a VOD-only playlist still hides Live in the merged view.
  *   Per-section Off flags drop a section even when cached rows for it remain.
  *
  * The counts come from the reactive `countAll` DAO flows, which Room re-emits on every write, so the
@@ -45,12 +45,9 @@ class NavVisibility(
 
     /** The set DYNAMIC mode *would* show. Also what the settings screen's read-only rows report, so
      *  the two can never disagree about what DYNAMIC means. */
-    fun dynamicCaps(): Flow<Set<MainSection>> = settings.activeProfileId
-        .flatMapLatest { pid ->
-            if (pid < 0) flowOf(MainSection.allBrowse)
-            else sourceRepository.observeSources(pid).flatMapLatest { sources ->
-                settings.defaultSourceId.flatMapLatest { defaultId -> capsFlow(sources, defaultId) }
-            }
+    fun dynamicCaps(): Flow<Set<MainSection>> =
+        sourceRepository.observeSources().flatMapLatest { sources ->
+            settings.defaultSourceId.flatMapLatest { defaultId -> capsFlow(sources, defaultId) }
         }
 
     private fun capsFlow(sources: List<SourceEntity>, defaultId: Long): Flow<Set<MainSection>> {

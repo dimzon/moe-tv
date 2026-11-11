@@ -58,8 +58,8 @@ class EpgAutoMatcher(
     /**
      * Match every channel of [playlistIds] that has no working guide.
      *
-     * Nothing is persisted here — the caller writes [AutoMatchOutcome.applied], because writing is
-     * per-profile and the store is the app's to talk to.
+     * Nothing is persisted here — the caller writes [AutoMatchOutcome.applied], because the
+     * customization store is the app's to talk to.
      */
     suspend fun run(
         cust: SectionCustomizations,

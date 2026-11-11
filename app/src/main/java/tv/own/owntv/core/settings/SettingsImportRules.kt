@@ -34,6 +34,7 @@ internal object SettingsImportRules {
         "mini_player_position" -> v.takeIf { value -> MiniPlayerPosition.entries.any { it.name == value } }
         "player_hold_ok" -> v.takeIf { value -> PlayerHoldOkAction.entries.any { it.name == value } }
         "player_short_ok" -> v.takeIf { value -> PlayerShortOkAction.entries.any { it.name == value } }
+        "startup_mode" -> v.takeIf { value -> StartupMode.entries.any { it.name == value } }
         else -> v
     }
 
@@ -41,7 +42,7 @@ internal object SettingsImportRules {
     fun float(v: Double): Float? =
         v.takeIf { it.isFinite() && it > 0 }?.coerceIn(SUB_SCALE_MIN, SUB_SCALE_MAX)?.toFloat()
 
-    // --- Settings → Sports (per-profile `sports_config_<id>`, read through these on every load) ---
+    // --- Settings → Sports (the `sports_config` blob, read through these on every load) ---
 
     /** Live refresh: 30, 60, 90 or 120 s; anything else is the default. */
     fun sportsLiveRefresh(v: Int): Int = SportsRefreshPolicy.liveSeconds(v)

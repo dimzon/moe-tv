@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -727,7 +726,7 @@ private fun ClosedNote(window: tv.own.owntv.core.sports.WatchWindow) {
     }
 }
 
-/** No playlist on this profile (shown on the TV's Watch live side): scores work, channels need one. */
+/** No playlist (shown on the TV's Watch live side): scores work, channels need one. */
 @Composable
 private fun NoPlaylistNote(onAddPlaylist: () -> Unit) {
     Column(

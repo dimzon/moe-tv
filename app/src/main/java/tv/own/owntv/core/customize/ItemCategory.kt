@@ -15,7 +15,7 @@ sealed interface ItemCategory {
 
 /**
  * Whether an item is behind a seal. A found item is sealed when [sealedIn] says its category is. An
- * unresolved one fails closed: it is sealed while [anySealed], i.e. the profile has a lock this session
+ * unresolved one fails closed: it is sealed while [anySealed], i.e. there is a lock this session
  * has not opened, and shows as before once every lock is open or there is none.
  */
 inline fun ItemCategory.isSealed(anySealed: () -> Boolean, sealedIn: (categoryId: Long) -> Boolean): Boolean =
@@ -24,6 +24,6 @@ inline fun ItemCategory.isSealed(anySealed: () -> Boolean, sealedIn: (categoryId
         ItemCategory.Unresolved -> anySealed()
     }
 
-/** [isSealed] against this section's sealed provider folders; [anySealed] is the profile-wide state. */
+/** [isSealed] against this section's sealed provider folders; [anySealed] is the all-sections state. */
 fun SectionCustomizations.sealsItem(item: ItemCategory, anySealed: Boolean): Boolean =
     item.isSealed({ anySealed }) { sealsItemIn(it) }

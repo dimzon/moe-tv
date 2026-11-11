@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -50,7 +49,7 @@ import androidx.compose.ui.res.stringResource
 import tv.own.myowntv.R
 import tv.own.owntv.core.live.LiveKey
 
-/** Built-in rail labels are presentation text; category names remain provider/profile data. */
+/** Built-in rail labels are presentation text; category names remain provider data. */
 @Composable
 fun LiveRailItem.displayLabel(@StringRes allLabelRes: Int = R.string.content_category_all_channels): String = title ?: when (key) {
     LiveKey.Favorites -> stringResource(R.string.content_category_favorites)

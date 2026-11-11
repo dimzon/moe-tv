@@ -40,7 +40,7 @@ class CategoryLockRulesTest {
         assertTrue(c.lockedCategories.isEmpty())
         assertTrue(c.sealedCategories.isEmpty())
         assertTrue(c.hiddenCategories.isEmpty())
-        assertFalse(cats.railCategories(c, kids = false).any { it.locked })
+        assertFalse(cats.railCategories(c).any { it.locked })
     }
 
     @Test
@@ -48,17 +48,17 @@ class CategoryLockRulesTest {
         val c = locked.copy(hiddenCategories = setOf(keyOf(3))).withLocks(hasPin = true, unlocked = emptySet())
         assertEquals(setOf(keyOf(3)), c.sealedCategories)
         assertEquals(setOf(keyOf(3)), c.hiddenCategories)
-        assertTrue(cats.railCategories(c, kids = false).none { it.key == keyOf(3) })
+        assertTrue(cats.railCategories(c).none { it.key == keyOf(3) })
     }
 
     @Test
     fun `the rail keeps a sealed category, marked, and still drops real hides`() {
         val c = locked.copy(hiddenCategories = setOf(keyOf(2))).withLocks(hasPin = true, unlocked = emptySet())
-        val rows = cats.railCategories(c, kids = false)
+        val rows = cats.railCategories(c)
         assertEquals(listOf("Sports", "Adult"), rows.map { it.displayName })
         val adult = rows.single { it.key == keyOf(3) }
         assertTrue(adult.locked && adult.sealed)
-        val opened = cats.railCategories(locked.withLocks(hasPin = true, unlocked = setOf(keyOf(3))), kids = false)
+        val opened = cats.railCategories(locked.withLocks(hasPin = true, unlocked = setOf(keyOf(3))))
         assertTrue(opened.single { it.key == keyOf(3) }.let { it.locked && !it.sealed })
     }
 

@@ -18,14 +18,14 @@ interface TombstoneDao {
      * older tombstone loses to a re-add that happened in between — so the newest wins here too.
      */
     @Query(
-        "INSERT INTO user_data_tombstones (profileId, kind, identity, deletedAt) VALUES (:profileId, :kind, :identity, :deletedAt) " +
-            "ON CONFLICT(profileId, kind, identity) DO UPDATE SET deletedAt = MAX(deletedAt, :deletedAt)",
+        "INSERT INTO user_data_tombstones (kind, identity, deletedAt) VALUES (:kind, :identity, :deletedAt) " +
+            "ON CONFLICT(kind, identity) DO UPDATE SET deletedAt = MAX(deletedAt, :deletedAt)",
     )
-    suspend fun record(profileId: Long, kind: String, identity: String, deletedAt: Long)
+    suspend fun record(kind: String, identity: String, deletedAt: Long)
 
     /** When this row was deleted, or null if it never was. Gates a merge insert of the same record. */
-    @Query("SELECT deletedAt FROM user_data_tombstones WHERE profileId = :profileId AND kind = :kind AND identity = :identity")
-    suspend fun deletedAt(profileId: Long, kind: String, identity: String): Long?
+    @Query("SELECT deletedAt FROM user_data_tombstones WHERE kind = :kind AND identity = :identity")
+    suspend fun deletedAt(kind: String, identity: String): Long?
 
     /** Everything, for the sync payload. */
     @Query("SELECT * FROM user_data_tombstones")
@@ -35,7 +35,7 @@ interface TombstoneDao {
     suspend fun count(): Int
 
     /**
-     * Forgets this device's deletions for [profileIds] — what a *restore* does before applying a
+     * Forgets this device's deletions — what a *restore* does before applying a
      * file, and only a restore.
      *
      * A restore says "my data is what this file says", so a deletion made after the file was written
@@ -44,8 +44,8 @@ interface TombstoneDao {
      * local sync would delete them a second time. A merge must NOT call this: there the deletion is a
      * fact the other device still has to hear about.
      */
-    @Query("DELETE FROM user_data_tombstones WHERE profileId IN (:profileIds)")
-    suspend fun deleteForProfiles(profileIds: List<Long>)
+    @Query("DELETE FROM user_data_tombstones")
+    suspend fun deleteAll()
 
     /**
      * Drops all but the [keep] newest. A tombstone is only useful until every device has seen it, and

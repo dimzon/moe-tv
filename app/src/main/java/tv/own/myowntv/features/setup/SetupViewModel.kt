@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -46,27 +45,22 @@ import tv.own.owntv.player.*
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import tv.own.owntv.core.database.entity.SourceEntity
-import tv.own.owntv.core.backup.BackupManager
 import tv.own.owntv.core.setup.SourceImporter
 import tv.own.owntv.core.settings.PlaylistRefresh
 import tv.own.owntv.core.sync.SyncScopeChoice
-import java.io.File
 
 /**
- * Drives onboarding for a profile (first-run and "add profile"): create the profile, then add content
- * (new source, link an existing unlocked profile's playlists, restore a backup, or skip). The new
- * profile is only made active on [finish], so the wizard stays put until the user completes it.
+ * Drives first-run onboarding: add content (a new source, or skip). Sources are global — there are
+ * no profiles — and [finish] only ends the wizard, which is what routes the app into the shell.
  *
  * The import sequence itself is core's [SourceImporter], shared with the mobile app; this holds the
- * three things that are the television's own — the LAN companion server, the semi-auto EPG prompt,
+ * things that are the television's own — the LAN companion server, the semi-auto EPG prompt,
  * and the job whose lifetime "Run in background" depends on.
  */
 class SetupViewModel(
@@ -74,11 +68,6 @@ class SetupViewModel(
     private val epgRepository: tv.own.owntv.core.repository.EpgRepository,
     private val epgSourceStore: tv.own.owntv.core.epg.EpgSourceStore,
     private val companion: tv.own.owntv.core.companion.CompanionController,
-    /** A restore runs here, not in [viewModelScope]: Back while it runs leaves the app, and a restore
-     *  cancelled half way leaves a profile with some of its data and none of the rest. */
-    private val appScope: kotlinx.coroutines.CoroutineScope,
-    private val profiles: tv.own.owntv.core.profile.ProfileManager,
-    private val profileDao: tv.own.owntv.core.database.dao.ProfileDao,
 ) : ViewModel() {
 
     // ---- Remote (companion) add-source: a LAN web form fills the Add Source screen from another device. ----
@@ -94,13 +83,6 @@ class SetupViewModel(
     fun startRemoteListener(port: Int) = companion.start(port)
     fun stopRemoteListener() = companion.stop()
     fun consumeRemotePayload() = companion.consumePayload()
-
-    // ---- Remote restore: another device uploads a backup JSON to the TV over the LAN companion server. ----
-    /** Uploaded backup files — the remote-restore screen collects this and hands each to [importBackup]. */
-    val remoteBackups get() = companion.backups
-
-    fun startRemoteRestore(port: Int) = companion.startForBackupRestore(port)
-    fun stopRemoteRestore() = companion.stop()
 
     val state: StateFlow<SourceImporter.ImportState> = importer.state
     val progress = importer.progress
@@ -128,21 +110,9 @@ class SetupViewModel(
      * so it survives leaving the wizard — exactly like the playlist [continueInBackground]. We only
      * finish onboarding; the in-flight job is deliberately not cancelled.
      */
-    fun syncEpgInBackground(onDone: (Long?) -> Unit = {}) {
+    fun syncEpgInBackground(onDone: () -> Unit = {}) {
         pendingEpgSource = null
         finish(onDone)
-    }
-
-    /**
-     * Creates the profile (not active yet); the rest of onboarding attaches content to it. [picture],
-     * when one was chosen, is stored once the profile has an id to store it under.
-     */
-    fun createProfile(name: String, avatarId: Int, isKids: Boolean, pin: String?, picture: File?, onCreated: (Long) -> Unit = {}) {
-        viewModelScope.launch {
-            val id = importer.createProfile(name, avatarId, isKids, pin)
-            if (picture != null) profileDao.getById(id)?.let { profiles.setCustomAvatar(it, picture) }
-            onCreated(id)
-        }
     }
 
     fun startXtream(
@@ -207,54 +177,6 @@ class SetupViewModel(
         job.invokeOnCompletion { if (importJob == job) importJob = null }
     }
 
-    /** Other profiles' playlists not yet on the new profile, minus every one a protected profile uses. */
-    suspend fun availableExistingSources(): List<SourceEntity> = importer.availableExistingSources()
-
-    /** Link the chosen existing sources to the new profile, then re-sync each one. */
-    fun linkExisting(sourceIds: Set<Long>) = runImport { importer.linkExisting(sourceIds) }
-
-    /**
-     * Restore a backup file (merges profiles & sources, then activates one). Encrypted backups first
-     * ask for the backup password via [SourceImporter.ImportState.NeedPassword].
-     *
-     * [sections] is what the user ticked before the restore began, and defaults to all of it — which
-     * is what the wizard did unconditionally until it gained a picker of its own. More → Backup &
-     * Restore has always asked; the first run, where a restore is most likely, did not.
-     */
-    fun importBackup(
-        file: File,
-        onDone: (Long?) -> Unit,
-        sections: Set<BackupManager.Section> = BackupManager.Section.entries.toSet(),
-        /** Take another device's hardware settings too — see [BackupManager.import]. */
-        deviceSettings: Boolean = false,
-    ) {
-        appScope.launch {
-            if (importer.importBackup(file, sections, deviceSettings)) {
-                withContext(Dispatchers.Main) { onRestored(onDone) }
-            }
-        }
-    }
-
-    /** Continue an encrypted restore once the user provides (or skips, password = null) the passphrase. */
-    fun restoreWithPassword(
-        file: File,
-        password: String?,
-        onDone: (Long?) -> Unit,
-        sections: Set<BackupManager.Section> = BackupManager.Section.entries.toSet(),
-        deviceSettings: Boolean = false,
-    ) {
-        appScope.launch {
-            if (importer.restoreWithPassword(file, password, sections, deviceSettings)) {
-                withContext(Dispatchers.Main) { onRestored(onDone) }
-            }
-        }
-    }
-
-    // A backup may restore several profiles or a PIN-locked active profile. Restoring data is not
-    // authenticating a viewer, so let MainActivity require the selected profile's PIN rather than
-    // treating the restore as a gate pass.
-    private fun onRestored(onDone: (Long?) -> Unit) = onDone(null)
-
     fun reset() = importer.reset()
 
     fun cancelImport() {
@@ -271,14 +193,14 @@ class SetupViewModel(
      * EPG prompt is skipped (its dialog lives in the wizard); EPG stays user-initiated from
      * Settings → EPG Sources, matching the app's EPG opt-in policy.
      */
-    fun continueInBackground(onDone: (Long?) -> Unit = {}) {
+    fun continueInBackground(onDone: () -> Unit = {}) {
         importer.backgroundHandoff = true
         dismissPendingEpg()
         finish(onDone)
     }
 
-    /** Completes onboarding → makes the new profile active, routing the app into the shell. */
-    fun finish(onDone: (Long?) -> Unit = {}) {
-        viewModelScope.launch { onDone(importer.finish()) }
+    /** Completes onboarding, routing the app into the shell. */
+    fun finish(onDone: () -> Unit = {}) {
+        viewModelScope.launch { importer.finish(); onDone() }
     }
 }

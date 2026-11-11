@@ -23,7 +23,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -91,7 +90,7 @@ import tv.own.myowntv.ui.theme.stageAccent
 import tv.own.myowntv.ui.theme.stageText
 
 /**
- * Settings › Appearance's LIVE PREVIEW: a small Home drawn from the channel the profile is watching,
+ * Settings › Appearance's LIVE PREVIEW: a small Home drawn from the channel being watched,
  * at a third of the screen's size. Not a second Home — no data of its own, nothing focusable — but it
  * draws with the live accent, focus colour, glass and font, so a change shows here before the row is
  * left.
@@ -100,7 +99,7 @@ import tv.own.myowntv.ui.theme.stageText
 internal fun SettingsLivePreview() {
     val home: HomeViewModel = koinViewModel()
     val state by home.uiState.collectAsStateWithLifecycle()
-    // Keep watching, live: the channels the profile last played. The lead one owns the hero.
+    // Keep watching, live: the channels last played. The lead one owns the hero.
     val cards = state.heroCards
     val lead = cards.firstOrNull()?.channel
     val a = stageAccent

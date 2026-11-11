@@ -9,7 +9,6 @@ import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.matchName
@@ -80,16 +79,15 @@ object ChannelVersionRules {
 }
 
 /**
- * The versions of a channel among everything the active profile can see — the same reach as the
- * channel list: hidden channels, hidden and locked categories, and a Kids profile's adult categories
- * are left out. Read only when the user asks (the Sources button), and kept per channel until the
- * playlists or the profile's customizations change, so asking again costs nothing.
+ * The versions of a channel among everything the user can see — the same reach as the channel list:
+ * hidden channels and hidden or locked categories are left out. Read only when the user asks (the
+ * Sources button), and kept per channel until the playlists or the customizations change, so asking
+ * again costs nothing.
  */
 class ChannelVersions(
     private val channelDao: ChannelDao,
     private val categoryDao: CategoryDao,
     private val sourceDao: SourceDao,
-    private val profileDao: ProfileDao,
     private val customize: CustomizationStore,
     private val settings: SettingsRepository,
 ) {
@@ -104,18 +102,16 @@ class ChannelVersions(
         val sources = activeProfileSources(settings, sourceDao).first()
         val ids = sources.liveSourceIds
         // observeVisible: a locked category the PIN has not opened counts as hidden, as in every list.
-        val cust = customize.observeVisible(sources.profileId, MediaType.LIVE).first()
+        val cust = customize.observeVisible(MediaType.LIVE).first()
         val fingerprint = listOf(
-            sources.profileId,
             sources.sources.filter { it.syncLive }.joinToString(",") { "${it.id}@${it.lastSyncAt}" },
             cust.hiddenItems.keys.hashCode(), cust.hiddenCategories.hashCode(), cust.itemNames.hashCode(), cust.epgMatches.hashCode(),
         ).joinToString("|")
         synchronized(cache) { cache[channel.id]?.takeIf { it.fingerprint == fingerprint }?.let { return@withContext it.versions } }
         if (ids.isEmpty()) return@withContext emptyList()
 
-        val isKids = profileDao.getById(sources.profileId)?.isKids == true
         val categories = categoryDao.observe(ids, MediaType.LIVE).first()
-        val hiddenCats = AdultCategoryClassifier.hiddenCategoryIds(categories, cust.hiddenCategories, isKids)
+        val hiddenCats = AdultCategoryClassifier.hiddenCategoryIds(categories, cust.hiddenCategories)
         val categoryNames = categories.associate { it.id to it.name }
         val playlistNames = sources.sources.associate { it.id to it.name }
         fun visible(ch: ChannelEntity) =

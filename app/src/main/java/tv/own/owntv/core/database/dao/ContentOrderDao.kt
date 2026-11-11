@@ -11,7 +11,7 @@ import tv.own.owntv.core.customize.pinnedAfterMove
 import tv.own.owntv.core.model.MediaType
 
 /**
- * Write side of the per-profile manual item order ("Move up/down"). The ordered content lists are
+ * Write side of the manual item order ("Move up/down"). The ordered content lists are
  * produced by the content DAOs (LEFT JOIN content_order). See [ContentOrderEntity].
  */
 @Dao
@@ -19,23 +19,23 @@ interface ContentOrderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(rows: List<ContentOrderEntity>)
 
-    @Query("DELETE FROM content_order WHERE profileId = :profileId AND mediaType = :type AND contextKey = :contextKey")
-    suspend fun clearContext(profileId: Long, type: MediaType, contextKey: String)
+    @Query("DELETE FROM content_order WHERE mediaType = :type AND contextKey = :contextKey")
+    suspend fun clearContext(type: MediaType, contextKey: String)
 
-    /** Every manual position of one profile: a restore's Replace, before the backup's are put back. */
-    @Query("DELETE FROM content_order WHERE profileId = :profileId")
-    suspend fun clearProfile(profileId: Long)
+    /** Every manual position: a restore's Replace, before the backup's are put back. */
+    @Query("DELETE FROM content_order")
+    suspend fun clearAll()
 
-    /** Context keys that actually have manual-order rows for this profile/section — the fast
+    /** Context keys that actually have manual-order rows for this section — the fast
      *  path: folders with no overrides use the plain indexed paging query instead of the
      *  unindexable content_order join-sort (which materializes the whole folder per page). */
-    @Query("SELECT DISTINCT contextKey FROM content_order WHERE profileId = :profileId AND mediaType = :type")
-    fun observeContextKeys(profileId: Long, type: MediaType): Flow<List<String>>
+    @Query("SELECT DISTINCT contextKey FROM content_order WHERE mediaType = :type")
+    fun observeContextKeys(type: MediaType): Flow<List<String>>
 
     /** Replaces a context's entire order in one transaction (commit point of a Move). */
     @Transaction
-    suspend fun replaceContext(profileId: Long, type: MediaType, contextKey: String, rows: List<ContentOrderEntity>) {
-        clearContext(profileId, type, contextKey)
+    suspend fun replaceContext(type: MediaType, contextKey: String, rows: List<ContentOrderEntity>) {
+        clearContext(type, contextKey)
         if (rows.isNotEmpty()) insertAll(rows)
     }
 
@@ -45,13 +45,13 @@ interface ContentOrderDao {
      * chip around them (see `placePinned`). Favorites has no sort chip, so its whole order is kept.
      */
     @Transaction
-    suspend fun saveMove(profileId: Long, type: MediaType, contextKey: String, order: List<Long>, carried: Set<Long>) {
+    suspend fun saveMove(type: MediaType, contextKey: String, order: List<Long>, carried: Set<Long>) {
         val positions =
             if (contextKey == ContentOrderEntity.FAV_CONTEXT) order.withIndex().associate { (i, id) -> id to i }
-            else pinnedAfterMove(order, movedItemIds(profileId, type, contextKey).toSet(), carried)
+            else pinnedAfterMove(order, movedItemIds(type, contextKey).toSet(), carried)
         replaceContext(
-            profileId, type, contextKey,
-            positions.map { (id, pos) -> ContentOrderEntity(profileId = profileId, mediaType = type, contextKey = contextKey, itemId = id, position = pos) },
+            type, contextKey,
+            positions.map { (id, pos) -> ContentOrderEntity(mediaType = type, contextKey = contextKey, itemId = id, position = pos) },
         )
     }
 
@@ -60,14 +60,13 @@ interface ContentOrderDao {
     @Query("DELETE FROM content_order WHERE contextKey != :keep")
     suspend fun dropListOrdersExcept(keep: String)
 
-    /** Everything, for Backup & Restore / re-sync snapshotting. */
     /** Does this row already exist? The dry run before a sync counts what is genuinely new. */
-    @Query("SELECT EXISTS(SELECT 1 FROM content_order WHERE profileId = :profileId AND mediaType = :type AND contextKey = :contextKey AND itemId = :itemId)")
-    suspend fun exists(profileId: Long, type: MediaType, contextKey: String, itemId: Long): Boolean
+    @Query("SELECT EXISTS(SELECT 1 FROM content_order WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId)")
+    suspend fun exists(type: MediaType, contextKey: String, itemId: Long): Boolean
 
     /** The items of one list that the user moved by hand (they keep a saved position). */
-    @Query("SELECT itemId FROM content_order WHERE profileId = :profileId AND mediaType = :type AND contextKey = :contextKey")
-    suspend fun movedItemIds(profileId: Long, type: MediaType, contextKey: String): List<Long>
+    @Query("SELECT itemId FROM content_order WHERE mediaType = :type AND contextKey = :contextKey")
+    suspend fun movedItemIds(type: MediaType, contextKey: String): List<Long>
 
     @Query("SELECT * FROM content_order")
     suspend fun getAllOnce(): List<ContentOrderEntity>
@@ -79,7 +78,7 @@ interface ContentOrderDao {
      * the join only covers LIVE/MOVIE/SERIES.
      */
     @Query(
-        "SELECT o.profileId AS profileId, o.mediaType AS mediaType, o.itemId AS itemId, " +
+        "SELECT o.mediaType AS mediaType, o.itemId AS itemId, " +
             "o.contextKey AS contextKey, o.position AS position, " +
             "c.sourceId AS sourceId, c.remoteId AS remoteId, c.name AS name " +
             "FROM content_order o " +
@@ -90,15 +89,15 @@ interface ContentOrderDao {
 
     /**
      * Snapshot-scoped orphan drop (as FavoriteDao.purgeSnapshotOrphan) for many ids at once. This
-     * table has no index that starts with (profileId, mediaType, itemId), so a one-row form scans all of
-     * a profile's rows for every snapshot row — quadratic, and hours with tens of thousands of rows while
+     * table has no index that starts with (mediaType, itemId), so a one-row form scans all of
+     * the section's rows for every snapshot row — quadratic, and hours with tens of thousands of rows while
      * it holds the writer.
      */
     @Query(
-        "DELETE FROM content_order WHERE profileId = :profileId AND mediaType = :type AND itemId IN (:itemIds) " +
+        "DELETE FROM content_order WHERE mediaType = :type AND itemId IN (:itemIds) " +
             "AND itemId NOT IN (SELECT id FROM channels)",
     )
-    suspend fun purgeSnapshotOrphans(profileId: Long, type: MediaType, itemIds: List<Long>)
+    suspend fun purgeSnapshotOrphans(type: MediaType, itemIds: List<Long>)
 
     /**
      * Drops order rows whose content row no longer exists — content is clear-then-insert on every sync,

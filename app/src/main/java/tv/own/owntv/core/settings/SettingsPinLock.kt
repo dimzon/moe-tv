@@ -1,19 +1,15 @@
 package tv.own.owntv.core.settings
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 
 /**
- * One profile's Settings lock as stored: its Settings PIN ([pin], a salted hash, null while the lock
- * is off) and whether the long-press changes ask for it too ([lockMenus]). [loaded] is false until
- * both are read, so Settings never flashes open before the lock is known.
+ * The Settings lock as stored: its PIN ([pin], a salted hash, null while the lock is off) and whether
+ * the long-press changes ask for it too ([lockMenus]). [loaded] is false until both are read, so
+ * Settings never flashes open before the lock is known.
  */
 data class SettingsPinLock(
     val loaded: Boolean = false,
-    val profileId: Long = -1L,
     val pin: String? = null,
     val lockMenus: Boolean = false,
 ) {
@@ -40,14 +36,8 @@ fun SettingsPinLock.guardsPage(unlocked: Boolean): Boolean = !loaded || requires
  */
 fun SettingsPinLock.guardsMenuChange(unlocked: Boolean): Boolean = on && lockMenus && !unlocked
 
-/** The active profile's Settings lock, as stored; a new value on a profile switch or a change to either half. */
-@OptIn(ExperimentalCoroutinesApi::class)
-fun SettingsRepository.activeSettingsPinLock(): Flow<SettingsPinLock> = activeProfileId.flatMapLatest { pid ->
-    if (pid < 0) {
-        flowOf(SettingsPinLock(loaded = true, profileId = pid))
-    } else {
-        combine(settingsLockPin(pid), settingsLockMenus(pid)) { pin, menus ->
-            SettingsPinLock(loaded = true, profileId = pid, pin = pin, lockMenus = menus)
-        }
+/** The Settings lock, as stored; a new value when either half changes. */
+fun SettingsRepository.activeSettingsPinLock(): Flow<SettingsPinLock> =
+    combine(settingsLockPin(), settingsLockMenus()) { pin, menus ->
+        SettingsPinLock(loaded = true, pin = pin, lockMenus = menus)
     }
-}

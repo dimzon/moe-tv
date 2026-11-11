@@ -19,11 +19,11 @@ class SportsAlertsSetup(
     private val localeStore: LocaleStore,
 ) {
     /**
-     * Goal alerts on or off for [profileId]. Turning them on asks for notification permission once,
+     * Goal alerts on or off. Turning them on asks for notification permission once,
      * through the host's hook ([MatchAlertHost.requestNotificationPermission]), if it is not granted.
      */
-    suspend fun enable(profileId: Long, on: Boolean) {
-        settings.updateSportsConfig(profileId) { it.copy(alerts = it.alerts.copy(enabled = on)) }
+    suspend fun enable(on: Boolean) {
+        settings.updateSportsConfig { it.copy(alerts = it.alerts.copy(enabled = on)) }
         if (on && !notifications.canPost()) MatchAlertHost.requestNotificationPermission?.invoke()
     }
 
@@ -34,11 +34,10 @@ class SportsAlertsSetup(
      * so one reminder never arrives twice. Returns false when neither applies:
      * a TV with no channel for the match yet ("Guide not out yet").
      */
-    suspend fun remind(profileId: Long, match: Match, channels: List<WatchOption>, leadMinutes: Int): Boolean {
+    suspend fun remind(match: Match, channels: List<WatchOption>, leadMinutes: Int): Boolean {
         val pair = MatchNotifications.pair(AppLocale.wrap(context, localeStore.currentTag.value), match)
         val best = channels.firstOrNull()
         val programme = best != null && reminders.add(
-            profileId = profileId,
             channelId = best.channel.id,
             channelName = best.facets.name,
             epgChannelId = best.channel.epgChannelId,

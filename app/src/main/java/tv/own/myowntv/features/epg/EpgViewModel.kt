@@ -25,7 +25,6 @@ import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
 import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
-import tv.own.owntv.core.profile.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
@@ -77,15 +76,12 @@ import kotlinx.coroutines.withContext
 import tv.own.owntv.core.customize.SectionCustomizations
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.EpgDao
-import tv.own.owntv.core.database.dao.ProfileDao
 import tv.own.owntv.core.database.dao.SourceDao
-import tv.own.owntv.core.database.dao.resolveExistingProfileId
 import tv.own.owntv.core.epg.EpgAutoMatcher
 import tv.own.owntv.core.epg.GuideCandidate
 import tv.own.owntv.core.epg.GuideCandidates
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.customize.CustomizeKeys
-import tv.own.owntv.core.customize.railCategories
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.model.MediaType
@@ -97,7 +93,6 @@ import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.settings.GuideWidthShares
 
 sealed interface EpgMessage {
-    data object CreateProfile : EpgMessage
     data object AddPlaylist : EpgMessage
     data class NoChannelsForQuery(val query: String) : EpgMessage
     data object MismatchedIds : EpgMessage
@@ -126,7 +121,7 @@ data class EpgUiState(
 )
 
 /**
- * Drives the EPG guide grid. Loads the active profile's EPG-capable channels and the programmes in a
+ * Drives the EPG guide grid. Loads the EPG-capable channels and the programmes in a
  * rolling window from the DB — as many days forward as Settings' "Guide days to keep" stores —
  * and can re-download the bulk XMLTV guide via [EpgRepository].
  */
@@ -135,7 +130,6 @@ class EpgViewModel(
     private val sourceRepository: SourceRepository,
     private val channelDao: ChannelDao,
     private val epgDao: EpgDao,
-    private val profileDao: ProfileDao,
     private val epgRepository: EpgRepository,
     private val epgSourceStore: tv.own.owntv.core.epg.EpgSourceStore,
     private val connectivity: ConnectivityObserver,
@@ -171,10 +165,9 @@ class EpgViewModel(
     private val guideReader =
         tv.own.owntv.core.live.GuideReader(epgDao, epgSourceStore, sourceDao, liveEpgReader)
 
-    // This profile's customizations — shared by the Guide picker, guide rows, and manual EPG match.
+    // The user's customizations — shared by the Guide picker, guide rows, and manual EPG match.
     // It must be initialized before guideCategories (Kotlin property initializers run top-to-bottom).
-    private val custom: StateFlow<SectionCustomizations> = settings.activeProfileId
-        .flatMapLatest { pid -> if (pid < 0) flowOf(SectionCustomizations()) else customize.observe(pid, MediaType.LIVE) }
+    private val custom: StateFlow<SectionCustomizations> = customize.observe(MediaType.LIVE)
         .stateIn(viewModelScope, SharingStarted.Eagerly, SectionCustomizations())
 
     /** Global guide shift in minutes; a per-channel override in [custom] wins over it. */
@@ -376,10 +369,7 @@ class EpgViewModel(
             .launchIn(viewModelScope)
         // Reload when a category lock closes or opens (the relock on leaving the app, a PIN entry), so
         // the grid and the zap list armed from it follow. drop(1): the screen triggers the initial load.
-        settings.activeProfileId
-            .flatMapLatest { pid ->
-                if (pid < 0) flowOf(emptySet()) else customize.observeVisible(pid, MediaType.LIVE).map { it.sealedCategories }
-            }
+        customize.observeVisible(MediaType.LIVE).map { it.sealedCategories }
             .distinctUntilChanged()
             .drop(1)
             .onEach { load() }
@@ -439,20 +429,18 @@ class EpgViewModel(
     // the callbacks), so EpgScreen now REQUIRES them and this copy is gone: LiveViewModel is the
     // one place a live channel starts.
 
-    /** Live channels this profile has favourited — so the Guide can show/toggle a channel's star. */
-    val favoriteChannelIds: StateFlow<Set<Long>> = settings.activeProfileId
-        .flatMapLatest { pid -> if (pid < 0) flowOf(emptyList()) else favoriteDao.observeFavoriteIds(pid, MediaType.LIVE) }
+    /** Live channels the user has favourited — so the Guide can show/toggle a channel's star. */
+    val favoriteChannelIds: StateFlow<Set<Long>> = favoriteDao.observeFavoriteIds(MediaType.LIVE)
         .map { it.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
     /** Add/remove a channel from Favourites directly from the Guide (channel long-press / detail). */
     fun toggleFavoriteChannel(channel: ChannelEntity) {
         viewModelScope.launch {
-            val pid = currentProfileId() ?: return@launch
             if (favoriteChannelIds.value.contains(channel.id)) {
-                userDataWriter.removeFavorite(pid, MediaType.LIVE, channel.id)
+                userDataWriter.removeFavorite(MediaType.LIVE, channel.id)
             } else {
-                favoriteDao.add(tv.own.owntv.core.database.entity.FavoriteEntity(profileId = pid, mediaType = MediaType.LIVE, itemId = channel.id))
+                favoriteDao.add(tv.own.owntv.core.database.entity.FavoriteEntity(mediaType = MediaType.LIVE, itemId = channel.id))
             }
             // The "Favorites" guide sort shows only favourited channels — refresh it to match.
             if (settings.sortGuide.first() == SettingsRepository.GuideSort.FAVORITES) load()
@@ -461,10 +449,9 @@ class EpgViewModel(
 
     // --- Programme reminders ----------------------------------------------------------
 
-    /** This profile's reminders: the bell in a cell, and "Reminder set" on the programme's button. */
+    /** The reminders: the bell in a cell, and "Reminder set" on the programme's button. */
     val reminderRows: StateFlow<List<tv.own.owntv.core.database.entity.ReminderEntity>> =
-        settings.activeProfileId
-            .flatMapLatest { pid -> if (pid < 0) flowOf(emptyList()) else reminderManager.observe(pid) }
+        reminderManager.observe()
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** How early a reminder comes (Settings › Sources & guide › Reminder time) — the menu's "5 min before". */
@@ -478,9 +465,8 @@ class EpgViewModel(
     fun toggleReminder(channel: ChannelEntity, programme: EpgProgrammeEntity) {
         viewModelScope.launch {
             reminderFor(channel, programme)?.let { reminderManager.dismiss(it.id); return@launch }
-            val pid = currentProfileId() ?: return@launch
             reminderManager.add(
-                pid, channel.id, channel.name, channel.epgChannelId, programme.title,
+                channel.id, channel.name, channel.epgChannelId, programme.title,
                 programme.startMs, programme.stopMs, reminderLeadMinutes.value,
             )
         }
@@ -499,9 +485,8 @@ class EpgViewModel(
     /** Shift this channel's guide by [minutes] (null → follow the global offset), then refresh. */
     fun setEpgShift(channel: ChannelEntity, minutes: Int?) {
         viewModelScope.launch {
-            val pid = settings.activeProfileId.first()
             val key = CustomizeKeys.channel(channel)
-            customize.setEpgShift(pid, MediaType.LIVE, key, minutes)
+            customize.setEpgShift(MediaType.LIVE, key, minutes)
             // Rows re-read the shift from `custom` — wait for the DataStore edit to land there first,
             // or the refresh below can still render with the old offset.
             kotlinx.coroutines.withTimeoutOrNull(1_000) { custom.first { it.epgShifts[key]?.toIntOrNull() == minutes } }
@@ -514,23 +499,22 @@ class EpgViewModel(
 
     /**
      * Save a whole run's matches in ONE write. Each [CustomizationStore.setEpgMatch] re-reads, rewrites
-     * and re-saves the profile's entire customisation, so a lineup of a few thousand matches made that
+     * and re-saves the entire customisation, so a lineup of a few thousand matches made that
      * many writes of an ever-growing list — minutes on a television, with the Guide still saying
      * "Matching…" until the last one landed. Same ids, same normalisation, one write.
      */
-    private suspend fun saveEpgMatches(profileId: Long, matches: Collection<Pair<String, String>>) {
+    private suspend fun saveEpgMatches(matches: Collection<Pair<String, String>>) {
         val clean = matches.mapNotNull { (key, epgId) ->
             epgId.trim().lowercase().takeIf { it.isNotEmpty() }?.let { key to it }
         }.toMap()
         if (clean.isEmpty()) return
-        customize.update(profileId, MediaType.LIVE) { it.copy(epgMatches = it.epgMatches + clean) }
+        customize.update(MediaType.LIVE) { it.copy(epgMatches = it.epgMatches + clean) }
     }
 
     /** Set/clear a channel's manual EPG match (null clears → auto-match), then reload the guide. */
     fun setEpgMatch(channel: ChannelEntity, epgChannelId: String?) {
         viewModelScope.launch {
-            val pid = settings.activeProfileId.first()
-            customize.setEpgMatch(pid, MediaType.LIVE, CustomizeKeys.channel(channel), epgChannelId)
+            customize.setEpgMatch(MediaType.LIVE, CustomizeKeys.channel(channel), epgChannelId)
             if (epgChannelId != null) fillMatchedInBackground(listOf(epgChannelId)) else load()
         }
     }
@@ -561,8 +545,7 @@ class EpgViewModel(
 
 
     private suspend fun refreshAllEpgFromNetwork() {
-        val pid = settings.activeProfileId.first()
-        if (pid >= 0) sourceRepository.observeSources(pid).first().forEach { runCatching { epgRepository.refresh(it) } }
+        sourceRepository.observeSources().first().forEach { runCatching { epgRepository.refresh(it) } }
         epgSourceStore.getAll().forEach { runCatching { epgRepository.refreshUrl(it.id, it.url, it.userAgent) } }
     }
 
@@ -634,18 +617,17 @@ class EpgViewModel(
         viewModelScope.launch {
             _matching.value = true
             try {
-                val pid = settings.activeProfileId.first()
-                // The playlist(s) the guide is showing (the top-right choice), not every playlist on the
-                // profile: with a 400-channel playlist picked it scored a 55k lineup too.
-                val playlistIds = if (pid < 0) emptyList() else activeSourceIds(settings, sourceDao, pid, MediaType.LIVE)
+                // The playlist(s) the guide is showing (the top-right choice): with a 400-channel
+                // playlist picked, scoring the whole catalogue would waste the run.
+                val playlistIds = activeSourceIds(settings, sourceDao, MediaType.LIVE)
                 if (playlistIds.isEmpty()) { _matchSummary.value = EpgMatchSummary.AddPlaylist; return@launch }
-                val cust = customize.observe(pid, MediaType.LIVE).first()
+                val cust = customize.observe(MediaType.LIVE).first()
 
                 val outcome = autoMatcher.run(cust, playlistIds)
                 if (!outcome.hadCandidates) { finishRun(EpgMatchSummary.NoData); return@launch }
 
                 // Persist the confident hits — in one write, see [saveEpgMatches].
-                saveEpgMatches(pid, outcome.applied)
+                saveEpgMatches(outcome.applied)
 
                 runApplied = outcome.applied.map { it.second }
                 openReview(outcome.review.map {
@@ -698,8 +680,7 @@ class EpgViewModel(
     /** Accept a reviewed suggestion → persist the match and drop it from the review list. */
     fun acceptSuggestion(s: EpgMatchSuggestion) {
         viewModelScope.launch {
-            val pid = settings.activeProfileId.first()
-            customize.setEpgMatch(pid, MediaType.LIVE, CustomizeKeys.channel(s.channel), s.epgChannelId)
+            customize.setEpgMatch(MediaType.LIVE, CustomizeKeys.channel(s.channel), s.epgChannelId)
             _review.value = _review.value.filterNot { it.channel.id == s.channel.id }
             includeLogosIfTicked(listOf(s.epgChannelId))
             fillMatchedInBackground(listOf(s.epgChannelId))
@@ -716,8 +697,7 @@ class EpgViewModel(
         val all = _review.value
         if (all.isEmpty()) return
         viewModelScope.launch {
-            val pid = settings.activeProfileId.first()
-            saveEpgMatches(pid, all.map { CustomizeKeys.channel(it.channel) to it.epgChannelId })
+            saveEpgMatches(all.map { CustomizeKeys.channel(it.channel) to it.epgChannelId })
             _review.value = emptyList()
             includeLogosIfTicked(all.map { it.epgChannelId })
             fillMatchedInBackground(all.map { it.epgChannelId })
@@ -766,16 +746,7 @@ class EpgViewModel(
         // is already populated — keep the existing list on screen and refresh it silently, so opening the
         // Guide menu is instant instead of flashing a spinner and re-rendering from scratch every time.
         if (_state.value.channels.isEmpty()) _state.value = _state.value.copy(loading = true, message = null)
-        val pid = currentProfileId()
-        if (pid == null) {
-            _state.value = EpgUiState(
-                loading = false,
-                message = EpgMessage.CreateProfile,
-                hasEpgSources = epgSourceStore.getAll().isNotEmpty(),
-            )
-            return
-        }
-        val playlistIds = activeSourceIds(settings, sourceDao, pid, MediaType.LIVE)
+        val playlistIds = activeSourceIds(settings, sourceDao, MediaType.LIVE)
         val epgIds = epgSourceStore.getAll().map { it.id }
         // Channels come from the playlists; guide data is matched from BOTH the playlists' own EPG
         // (kept for compatibility) and the standalone EPG sources — by epgChannelId across all ids.
@@ -797,33 +768,31 @@ class EpgViewModel(
         val windowEnd = nowAligned + settings.guideDaysToKeep.first() * DAY_MS
 
         // Respect customizations: hidden channels stay out of the guide, renames show.
-        val cust = customize.observeVisible(pid, MediaType.LIVE).first()
+        val cust = customize.observeVisible(MediaType.LIVE).first()
         val q = _query.value.trim()
         val rawChannels = if (settings.guideShowEmpty.first()) channelDao.channelsForGuide(playlistIds, q, MAX_CHANNELS)
             else channelDao.channelsWithGuide(ids, q, MAX_CHANNELS)
-        val favoriteIds = favoriteDao.observeFavoriteIds(pid, MediaType.LIVE).first().toSet()
+        val favoriteIds = favoriteDao.observeFavoriteIds(MediaType.LIVE).first().toSet()
         val sortGuideMode = settings.sortGuide.first()
         // Hidden categories keep their channels out of the guide too (parity with Live TV), and a
         // filter pointing at a now-hidden category falls back to "All" instead of an empty grid.
-    val isKidsProfile = profileDao.getById(pid)?.isKids == true
-    val hiddenCatIds = if (cust.hiddenCategories.isEmpty() && !isKidsProfile) {
-        emptySet()
-    } else {
-        tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
-            categoryDao.observe(ids, MediaType.LIVE).first(),
-            cust.hiddenCategories,
-            isKidsProfile,
-        )
-    }
+        val hiddenCatIds = if (cust.hiddenCategories.isEmpty()) {
+            emptySet()
+        } else {
+            tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
+                categoryDao.observe(ids, MediaType.LIVE).first(),
+                cust.hiddenCategories,
+            )
+        }
         val filter = _categoryFilter.value
         // A provider folder keeps out the channels the user moved from it into a custom category.
         val folderKey = (filter as? tv.own.owntv.core.live.LiveKey.Folder)
             ?.let { categoryDao.getById(it.id) }?.let(CustomizeKeys::category)
         val memberIds: Set<Long>? = when (filter) {
-            is tv.own.owntv.core.live.LiveKey.Custom -> if (filter.id in cust.sealedCategories) emptySet() else customCategoryDao.itemIds(pid, MediaType.LIVE, filter.id).toSet()
+            is tv.own.owntv.core.live.LiveKey.Custom -> if (filter.id in cust.sealedCategories) emptySet() else customCategoryDao.itemIds(MediaType.LIVE, filter.id).toSet()
             tv.own.owntv.core.live.LiveKey.Favorites -> favoriteIds
             tv.own.owntv.core.live.LiveKey.History ->
-                historyDao.getForProfileType(pid, MediaType.LIVE).mapTo(HashSet()) { it.itemId }
+                historyDao.getAllOfType(MediaType.LIVE).mapTo(HashSet()) { it.itemId }
             else -> null
         }
         // Provider and A–Z are Live TV's own lists: in a folder, a custom category or Favourites the guide
@@ -832,10 +801,10 @@ class EpgViewModel(
         val alphaSort = sortGuideMode == SettingsRepository.GuideSort.ALPHA
         val liveTvSort = alphaSort || sortGuideMode == SettingsRepository.GuideSort.PROVIDER || sortGuideMode == SettingsRepository.GuideSort.LIVE_TV
         val liveOrder: Map<Long, Int>? = if (!liveTvSort) null else when (filter) {
-            is tv.own.owntv.core.live.LiveKey.Folder -> folderKey?.let { channelDao.snapshotByCategoryManual(filter.id, pid, it, alphaSort, MAX_CHANNELS) }
-            is tv.own.owntv.core.live.LiveKey.Custom -> customCategoryDao.snapshotChannels(pid, filter.id, playlistIds, alphaSort, MAX_CHANNELS)
+            is tv.own.owntv.core.live.LiveKey.Folder -> folderKey?.let { channelDao.snapshotByCategoryManual(filter.id, it, alphaSort, MAX_CHANNELS) }
+            is tv.own.owntv.core.live.LiveKey.Custom -> customCategoryDao.snapshotChannels(filter.id, playlistIds, alphaSort, MAX_CHANNELS)
             tv.own.owntv.core.live.LiveKey.Favorites ->
-                channelDao.snapshotFavoritesManual(pid, tv.own.owntv.core.database.entity.ContentOrderEntity.FAV_CONTEXT, playlistIds, MAX_CHANNELS)
+                channelDao.snapshotFavoritesManual(tv.own.owntv.core.database.entity.ContentOrderEntity.FAV_CONTEXT, playlistIds, MAX_CHANNELS)
             else -> null
         }?.withIndex()?.associate { (i, ch) -> ch.id to i }
         // Heavy work — filter hidden, apply renames + manual EPG matches, sort, category-filter — runs off
@@ -979,15 +948,8 @@ class EpgViewModel(
 
     /** Guide channels for the manual "Match EPG" picker, ranked so ones resembling [channelName]
      *  come first. The candidate set is core's and is filtered by no source — see [GuideCandidates]. */
-    suspend fun availableEpgChannels(channelName: String, query: String): List<GuideCandidate> {
-        currentProfileId() ?: return emptyList()
-        return guideCandidates.forPicker(channelName, query)
-    }
-
-    private suspend fun currentProfileId(): Long? {
-        val preferred = settings.activeProfileId.first()
-        return if (preferred >= 0) profileDao.resolveExistingProfileId(preferred) else null
-    }
+    suspend fun availableEpgChannels(channelName: String, query: String): List<GuideCandidate> =
+        guideCandidates.forPicker(channelName, query)
 
     companion object {
         // A sync writes the guide in batches, so every batch is reported. This must be longer than

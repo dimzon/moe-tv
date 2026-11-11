@@ -45,7 +45,7 @@ data class GuideCandidate(
  * every one of those invisible to the picker while their programmes sat in the database being drawn
  * by the guide.
  *
- * Takes only an [EpgDao] — no source store, no profile — because after the two points above there is
+ * Takes only an [EpgDao] — no source store, no settings — because after the two points above there is
  * nothing else to take. That is also what makes it constructible from either app without ceremony.
  */
 class GuideCandidates(private val epgDao: EpgDao) {

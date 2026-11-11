@@ -181,11 +181,6 @@ class LocalAutoSyncServer(
         if (device.address != address) paired.updateAddress(device.id, address)
         // Read per request, never a snapshot: an agreement turned off here refuses the very next one.
         var agreement = store.get(device.id)
-        // Its profile here was deleted: the agreement ends, and the other side is told at once.
-        if (agreement != null && !transfer.profileExists(agreement)) {
-            store.remove(device.id, tellThem = false)
-            agreement = null
-        }
         refusalFor(verdict, hasAgreement = agreement != null, route = route)?.let { return refuse(socket, it) }
         when (route) {
             Route.HELLO -> send(

@@ -102,7 +102,7 @@ class EpgMatchResolver(private val matches: Map<String, String>) {
  * A user-created category combining items from any provider category. Lives in the
  * same customization namespace as everything else via [CustomCategory.id] ("custom:<uuid>"), so
  * hide / rename / reorder work with no new code. Membership rows live in the Room table
- * `custom_category_members` (per profile), keyed by [CustomCategory.id] as contextKey.
+ * `custom_category_members`, keyed by [CustomCategory.id] as contextKey.
  */
 data class CustomCategory(
     val id: String,
@@ -111,7 +111,7 @@ data class CustomCategory(
     val icon: String? = null,
 )
 
-/** One browse section's customizations (categories + items) for a profile. */
+/** One browse section's customizations (categories + items). */
 data class SectionCustomizations(
     val hiddenCategories: Set<String> = emptySet(),
     /** Hidden channels/items: stable key → display label (so the unhide list can show a name). */
@@ -134,7 +134,7 @@ data class SectionCustomizations(
      *  folder — that's what makes a "sidebar of only my folders" possible. Stable keys, so a re-sync
      *  that re-lists the item does not undo the move. */
     val movedFromOrigin: Map<String, String> = emptyMap(),
-    /** Categories behind the profile's Customize PIN (stable keys, custom ids included). They stay
+    /** Categories behind the Customize PIN (stable keys, custom ids included). They stay
      *  on the rail with a lock; see [CategoryLockView] for what they hide until the PIN opens them.
      *  The lock follows the key, so a renamed or re-added provider group comes back unlocked. */
     val lockedCategories: Set<String> = emptySet(),
@@ -166,39 +166,40 @@ data class SectionCustomizations(
 }
 
 /**
- * Per-profile content customizations (TiviMate-style hide / rename / reorder), stored as JSON in
- * DataStore — deliberately NOT a Room table, so no schema change (the DB uses destructive
- * migrations) and edits survive every re-sync via [CustomizeKeys].
+ * The user's content customizations (TiviMate-style hide / rename / reorder), stored as JSON in
+ * DataStore — deliberately NOT a Room table, so no schema change (the DB is recreated in the
+ * redesign) and edits survive every re-sync via [CustomizeKeys]. The app has one user: one entry per
+ * browse section ("cust_LIVE", "cust_MOVIE", "cust_SERIES").
  */
 class CustomizationStore(private val context: Context, private val locks: CategoryLockView) {
 
-    private fun key(profileId: Long, type: MediaType) =
-        stringPreferencesKey("cust_${profileId}_${type.name}")
+    private fun key(type: MediaType) =
+        stringPreferencesKey("cust_${type.name}")
 
-    fun observe(profileId: Long, type: MediaType): Flow<SectionCustomizations> =
+    fun observe(type: MediaType): Flow<SectionCustomizations> =
         context.customizeStore.data
-            .map { prefs -> CustomizationJson.parse(prefs[key(profileId, type)]) }
+            .map { prefs -> CustomizationJson.parse(prefs[key(type)]) }
             .distinctUntilChanged()
 
     /** What browsing shows: [observe] with the locked categories the PIN has not opened this session
      *  counted as hidden. Customize and the store's own edits keep using [observe]. */
-    fun observeVisible(profileId: Long, type: MediaType): Flow<SectionCustomizations> =
-        locks.visible(profileId, type, observe(profileId, type))
+    fun observeVisible(type: MediaType): Flow<SectionCustomizations> =
+        locks.visible(type, observe(type))
 
-    /** Whether [profileId] has a category lock that can seal anything: a locked category and the PIN. */
-    fun observeHasLocks(profileId: Long): Flow<Boolean> = locks.hasLocks(profileId) { observe(profileId, it) }
+    /** Whether any category lock can seal anything: a locked category and the PIN. */
+    fun observeHasLocks(): Flow<Boolean> = locks.hasLocks { observe(it) }
 
     /** True when [categoryId]'s category is locked and, unless [anySession], not opened this session. */
-    suspend fun sealsCategory(profileId: Long, categoryId: Long?, anySession: Boolean = false): Boolean =
-        sealsItem(profileId, ItemCategory.Found(categoryId), anySession)
+    suspend fun sealsCategory(categoryId: Long?, anySession: Boolean = false): Boolean =
+        sealsItem(ItemCategory.Found(categoryId), anySession)
 
     /** [sealsCategory] for a row that names its item by local id, which a re-sync can leave unresolved. */
-    suspend fun sealsItem(profileId: Long, item: ItemCategory, anySession: Boolean = false): Boolean =
-        locks.seals(profileId, item, anySession) { type -> observe(profileId, type).first() }
+    suspend fun sealsItem(item: ItemCategory, anySession: Boolean = false): Boolean =
+        locks.seals(item, anySession) { type -> observe(type).first() }
 
-    suspend fun update(profileId: Long, type: MediaType, transform: (SectionCustomizations) -> SectionCustomizations) {
+    suspend fun update(type: MediaType, transform: (SectionCustomizations) -> SectionCustomizations) {
         context.customizeStore.edit { prefs ->
-            val k = key(profileId, type)
+            val k = key(type)
             val next = transform(CustomizationJson.parse(prefs[k]))
             if (next.isEmpty) prefs.remove(k) else prefs[k] = CustomizationJson.serialize(next)
         }
@@ -206,60 +207,60 @@ class CustomizationStore(private val context: Context, private val locks: Catego
 
     // --- convenience mutations ---
 
-    suspend fun setCategoryHidden(profileId: Long, type: MediaType, catKey: String, hidden: Boolean) =
-        update(profileId, type) {
+    suspend fun setCategoryHidden(type: MediaType, catKey: String, hidden: Boolean) =
+        update(type) {
             it.copy(hiddenCategories = if (hidden) it.hiddenCategories + catKey else it.hiddenCategories - catKey)
         }
 
     /** Put a category behind the Customize PIN, or take it out. The caller owns the PIN check. */
-    suspend fun setCategoryLocked(profileId: Long, type: MediaType, catKey: String, locked: Boolean) =
-        update(profileId, type) {
+    suspend fun setCategoryLocked(type: MediaType, catKey: String, locked: Boolean) =
+        update(type) {
             it.copy(lockedCategories = if (locked) it.lockedCategories + catKey else it.lockedCategories - catKey)
         }
 
-    /** Drops every category lock of the profile, in every section — removing the PIN does this. */
-    suspend fun clearCategoryLocks(profileId: Long) {
-        MediaType.entries.forEach { type -> update(profileId, type) { it.copy(lockedCategories = emptySet()) } }
+    /** Drops every category lock, in every section — removing the PIN does this. */
+    suspend fun clearCategoryLocks() {
+        MediaType.entries.forEach { type -> update(type) { it.copy(lockedCategories = emptySet()) } }
     }
 
     /** Hide/show a whole span of categories in one atomic edit (range select in Customize). */
-    suspend fun setCategoriesHidden(profileId: Long, type: MediaType, catKeys: Collection<String>, hidden: Boolean) =
-        update(profileId, type) {
+    suspend fun setCategoriesHidden(type: MediaType, catKeys: Collection<String>, hidden: Boolean) =
+        update(type) {
             it.copy(hiddenCategories = if (hidden) it.hiddenCategories + catKeys else it.hiddenCategories - catKeys)
         }
 
-    suspend fun setItemHidden(profileId: Long, type: MediaType, itemKey: String, label: String, hidden: Boolean) =
-        update(profileId, type) {
+    suspend fun setItemHidden(type: MediaType, itemKey: String, label: String, hidden: Boolean) =
+        update(type) {
             it.copy(hiddenItems = if (hidden) it.hiddenItems + (itemKey to label) else it.hiddenItems - itemKey)
         }
 
     /** Hide/show a whole span of items in one atomic edit (range select in the Customize items
      *  list). [items] maps stable key → label; the label is only meaningful when hiding. */
-    suspend fun setItemsHidden(profileId: Long, type: MediaType, items: Map<String, String>, hidden: Boolean) =
-        update(profileId, type) {
+    suspend fun setItemsHidden(type: MediaType, items: Map<String, String>, hidden: Boolean) =
+        update(type) {
             it.copy(hiddenItems = if (hidden) it.hiddenItems + items else it.hiddenItems - items.keys)
         }
 
-    suspend fun renameCategory(profileId: Long, type: MediaType, catKey: String, name: String?) =
-        update(profileId, type) {
+    suspend fun renameCategory(type: MediaType, catKey: String, name: String?) =
+        update(type) {
             it.copy(categoryNames = if (name.isNullOrBlank()) it.categoryNames - catKey else it.categoryNames + (catKey to name.trim()))
         }
 
-    suspend fun renameItem(profileId: Long, type: MediaType, itemKey: String, name: String?) =
-        update(profileId, type) {
+    suspend fun renameItem(type: MediaType, itemKey: String, name: String?) =
+        update(type) {
             it.copy(itemNames = if (name.isNullOrBlank()) it.itemNames - itemKey else it.itemNames + (itemKey to name.trim()))
         }
 
     /** Saves a category move: [onScreen] is the list as the move left it, [carried] the categories the
      *  user moved. Positions of categories not on screen (another playlist's) are kept. */
-    suspend fun saveCategoryMove(profileId: Long, type: MediaType, onScreen: List<String>, carried: Collection<String>) =
-        update(profileId, type) {
+    suspend fun saveCategoryMove(type: MediaType, onScreen: List<String>, carried: Collection<String>) =
+        update(type) {
             it.copy(categoryPositions = mergeCategoryPositions(it.categoryPositions, onScreen, carried.toSet()))
         }
 
     /** Manually map an item to an EPG channel id (null/blank clears the override → auto-match). */
-    suspend fun setEpgMatch(profileId: Long, type: MediaType, itemKey: String, epgChannelId: String?) =
-        update(profileId, type) {
+    suspend fun setEpgMatch(type: MediaType, itemKey: String, epgChannelId: String?) =
+        update(type) {
             val key = epgChannelId?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
             it.copy(epgMatches = if (key == null) it.epgMatches - itemKey else it.epgMatches + (itemKey to key))
         }
@@ -267,8 +268,8 @@ class CustomizationStore(private val context: Context, private val locks: Catego
     /** Shift this channel's guide by [minutes]; null clears the override → the global EPG offset.
      *  An explicit 0 IS an override — it pins one channel to the feed's own times while a global
      *  offset moves the rest. */
-    suspend fun setEpgShift(profileId: Long, type: MediaType, itemKey: String, minutes: Int?) =
-        update(profileId, type) {
+    suspend fun setEpgShift(type: MediaType, itemKey: String, minutes: Int?) =
+        update(type) {
             it.copy(epgShifts = if (minutes == null) it.epgShifts - itemKey else it.epgShifts + (itemKey to minutes.toString()))
         }
 
@@ -277,28 +278,28 @@ class CustomizationStore(private val context: Context, private val locks: Catego
      * lands as a single DataStore write. Values are trimmed; blank values are dropped (a bulk rule
      * can never clear a name — per-row blank restore stays [renameItem]'s job).
      */
-    suspend fun applyBulkRenames(profileId: Long, type: MediaType, renames: Map<String, String>) {
+    suspend fun applyBulkRenames(type: MediaType, renames: Map<String, String>) {
         val clean = renames.mapValues { (_, v) -> v.trim() }.filterValues { it.isNotEmpty() }
         if (clean.isEmpty()) return
-        update(profileId, type) { it.copy(itemNames = it.itemNames + clean) }
+        update(type) { it.copy(itemNames = it.itemNames + clean) }
     }
 
     /** Removes every rename entry for the given category keys in one atomic edit — the "↺ Restore
      *  original names" bulk path for category names. */
-    suspend fun clearCategoryNames(profileId: Long, type: MediaType, keys: Set<String>) =
-        update(profileId, type) { it.copy(categoryNames = it.categoryNames - keys) }
+    suspend fun clearCategoryNames(type: MediaType, keys: Set<String>) =
+        update(type) { it.copy(categoryNames = it.categoryNames - keys) }
 
     /** Removes every rename entry for the given item keys in one atomic edit — the "↺ Restore
      *  original names" bulk path for channel names. */
-    suspend fun clearItemNames(profileId: Long, type: MediaType, keys: Set<String>) =
-        update(profileId, type) { it.copy(itemNames = it.itemNames - keys) }
+    suspend fun clearItemNames(type: MediaType, keys: Set<String>) =
+        update(type) { it.copy(itemNames = it.itemNames - keys) }
 
     // --- custom categories ---
 
     /** Creates a custom category with a fresh stable id ("custom:<uuid>") and returns it. */
-    suspend fun createCustomCategory(profileId: Long, type: MediaType, name: String): CustomCategory {
+    suspend fun createCustomCategory(type: MediaType, name: String): CustomCategory {
         val cat = CustomCategory(id = "${CustomizeKeys.CUSTOM_PREFIX}${UUID.randomUUID()}", name = name.trim())
-        update(profileId, type) { it.copy(customCategories = it.customCategories + cat) }
+        update(type) { it.copy(customCategories = it.customCategories + cat) }
         return cat
     }
 
@@ -306,8 +307,8 @@ class CustomizationStore(private val context: Context, private val locks: Catego
      * Records or clears a "moved out of provider category [originKey]" mark for [itemKey].
      * The browse pager for [originKey]'s folder drops the item; All/search/recent keep it.
      */
-    suspend fun setItemMovedFromOrigin(profileId: Long, type: MediaType, itemKey: String, originKey: String, moved: Boolean) =
-        update(profileId, type) {
+    suspend fun setItemMovedFromOrigin(type: MediaType, itemKey: String, originKey: String, moved: Boolean) =
+        update(type) {
             it.copy(movedFromOrigin = if (moved) it.movedFromOrigin + (itemKey to originKey) else it.movedFromOrigin - itemKey)
         }
 
@@ -315,12 +316,11 @@ class CustomizationStore(private val context: Context, private val locks: Catego
      *  scrubs its category-level settings. Room member rows and
      *  content_order rows are the caller's job (CustomCategoryDao.clearContext / ContentOrderDao.clearContext). */
     suspend fun deleteCustomCategory(
-        profileId: Long,
         type: MediaType,
         id: String,
         restoreOriginItemKeys: Set<String> = emptySet(),
     ) =
-        update(profileId, type) {
+        update(type) {
             it.copy(
                 customCategories = it.customCategories.filterNot { c -> c.id == id },
                 hiddenCategories = it.hiddenCategories - id,
@@ -331,7 +331,7 @@ class CustomizationStore(private val context: Context, private val locks: Catego
             )
         }
 
-    // --- backup & restore (profile/source ids are preserved by BackupManager, so keys stay valid) ---
+    // --- backup & restore (source ids are preserved by BackupManager, so keys stay valid) ---
 
     /** All raw customization entries (preference key → JSON) for embedding into a backup file. */
     suspend fun exportAll(): Map<String, String> =
@@ -347,16 +347,7 @@ class CustomizationStore(private val context: Context, private val locks: Catego
         }
     }
 
-    /** Drops every customization of [profileId] (its "cust_<id>_<TYPE>" entries): a restore's Replace. */
-    suspend fun clearProfile(profileId: Long) {
-        val prefix = "cust_${profileId}_"
-        context.customizeStore.edit { prefs ->
-            prefs.asMap().keys.filter { it.name.startsWith(prefix) }.forEach { prefs.remove(it) }
-        }
-    }
-
-    /** Merge-restore (backup): overwrites only the provided keys, keeping every other profile's
-     *  customizations untouched (restore must never wipe profiles that aren't in the file). */
+    /** Merge-restore (backup): overwrites only the provided keys, keeping the rest as they are. */
     suspend fun mergeAll(entries: Map<String, String>) {
         if (entries.isEmpty()) return
         context.customizeStore.edit { prefs ->

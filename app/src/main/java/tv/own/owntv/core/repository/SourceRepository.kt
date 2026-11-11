@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import tv.own.owntv.core.database.dao.SourceDao
-import tv.own.owntv.core.database.entity.ProfileSourceCrossRef
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.SourceType
 import tv.own.owntv.core.sync.ImportStage
@@ -15,8 +14,8 @@ import tv.own.owntv.core.sync.SyncManager
 import tv.own.owntv.core.sync.SyncResult
 
 /**
- * Adds/links sources to a profile and runs imports. The setup wizard and the playlist screen
- * drive this; the actual parsing/inserting lives in [SyncManager].
+ * Adds sources (global — the app has no profiles) and runs imports. The setup wizard and the
+ * playlist screen drive this; the actual parsing/inserting lives in [SyncManager].
  */
 class SourceRepository(
     private val sourceDao: SourceDao,
@@ -27,18 +26,17 @@ class SourceRepository(
     private val playbackQuirkDao: tv.own.owntv.core.database.dao.PlaybackQuirkDao,
     private val playbackPrefsDao: tv.own.owntv.core.database.dao.PlaybackPrefsDao,
 ) {
-    fun observeSources(profileId: Long): Flow<List<SourceEntity>> = sourceDao.observeForProfile(profileId)
+    fun observeSources(): Flow<List<SourceEntity>> = sourceDao.observeAll()
 
     suspend fun getById(id: Long): SourceEntity? = sourceDao.getById(id)
 
     suspend fun addXtreamSource(
-        profileId: Long, name: String, serverUrl: String, username: String, password: String,
+        name: String, serverUrl: String, username: String, password: String,
         userAgent: String? = null, epgUrl: String? = null,
         syncLive: Boolean = true,
         preferHls: Boolean = false,
         httpReferer: String? = null,
-    ): SourceEntity = addAndLink(
-        profileId,
+    ): SourceEntity = add(
         SourceEntity(
             name = name, type = SourceType.XTREAM, url = serverUrl,
             username = username, password = password, userAgent = userAgent, epgUrl = epgUrl,
@@ -48,22 +46,20 @@ class SourceRepository(
     )
 
     suspend fun addM3uSource(
-        profileId: Long, name: String, url: String, userAgent: String? = null, epgUrl: String? = null,
+        name: String, url: String, userAgent: String? = null, epgUrl: String? = null,
         httpReferer: String? = null,
-    ): SourceEntity = addAndLink(
-        profileId,
+    ): SourceEntity = add(
         SourceEntity(name = name, type = SourceType.M3U, url = url, userAgent = userAgent, epgUrl = epgUrl, httpReferer = httpReferer),
     )
 
     suspend fun addStalkerSource(
-        profileId: Long, name: String, portalUrl: String, mac: String,
+        name: String, portalUrl: String, mac: String,
         serialNumber: String? = null, deviceId: String? = null, deviceId2: String? = null,
         signature: String? = null, userAgent: String? = null,
         syncLive: Boolean = true,
         httpReferer: String? = null,
         login: String? = null, password: String? = null,
-    ): SourceEntity = addAndLink(
-        profileId,
+    ): SourceEntity = add(
         SourceEntity(
             name = name, type = SourceType.STALKER, url = portalUrl, mac = mac,
             username = login, password = password,
@@ -75,22 +71,21 @@ class SourceRepository(
     )
 
     /**
-     * The one built-in RuTube source, shared by every profile. Idempotent: returns the
-     * existing row (linking it to [profileId] when needed) or creates it.
+     * The one built-in RuTube source, shared by everyone. Idempotent: returns the
+     * existing row or creates it.
      */
-    suspend fun ensureRutube(profileId: Long): SourceEntity = BuiltInSource.ensure(sourceDao, profileId)
+    suspend fun ensureRutube(): SourceEntity = BuiltInSource.ensure(sourceDao)
 
     suspend fun rutubeSource(): SourceEntity? = sourceDao.rutubeSource()
 
-    private suspend fun addAndLink(profileId: Long, source: SourceEntity): SourceEntity {
+    private suspend fun add(source: SourceEntity): SourceEntity {
         val id = sourceDao.insert(source)
-        sourceDao.link(ProfileSourceCrossRef(profileId = profileId, sourceId = id))
         return source.copy(id = id)
     }
 
     /**
      * Deletes the playlist and everything remembered for its items: engine pins,
-     * sound-only marks, audio delays, and every profile's zoom, volume and track choices. Those rows
+     * sound-only marks, audio delays, and the zoom, volume and track choices. Those rows
      * are keyed by content, not by a foreign key, so without this they outlived the playlist forever.
      */
     suspend fun deleteSource(source: SourceEntity) {
@@ -160,7 +155,7 @@ class SourceRepository(
     fun getLastSyncStats(sourceId: Long): tv.own.owntv.core.sync.SyncRunStats? =
         syncManager.getLastSyncStats(sourceId)
 
-    /** Per-mediaType row counts of a snapshot, e.g. "types={LIVE=8, MOVIE=6}" — upgrade-path diagnostics. */
+    /** Per-mediaType row counts of a snapshot, e.g. "types={LIVE=8, MOVIE=6}" — diagnostics. */
     private fun org.json.JSONArray.typeCounts(): String {
         val counts = LinkedHashMap<String, Int>()
         for (i in 0 until length()) {

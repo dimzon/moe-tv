@@ -4,9 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.customize.EpgMatchResolver
@@ -25,8 +23,7 @@ import tv.own.owntv.core.settings.SettingsRepository
  * and a catalog re-sync (which REPLACE-upserts every channel row) can't wipe the user's choice.
  *
  * A channel the user matched in Match EPG takes the logo of the guide channel it is matched **to**, not
- * of its own `tvg-id` — the same channel the guide shows for it. The active profile's Live TV matches are
- * followed for that.
+ * of its own `tvg-id` — the same channel the guide shows for it. The Live TV matches are followed for that.
  *
  * The map is Compose state, so flipping a toggle or finishing an EPG sync recomposes every logo on
  * screen. Nothing is loaded while no feed has it on — cold start stays free of EPG queries.
@@ -37,11 +34,10 @@ object EpgLogoStore {
     var icons by mutableStateOf<Map<String, String>>(emptyMap())
         internal set
 
-    /** The active profile's Live TV matches; empty until [start] has read them. */
+    /** The Live TV matches; empty until [start] has read them. */
     internal var matches by mutableStateOf(EpgMatchResolver(emptyMap()))
 
     /** Follow the enabled EPG sources; while any is enabled, follow their stored feed icons and the matches. */
-    @OptIn(ExperimentalCoroutinesApi::class)
     fun start(scope: CoroutineScope, settings: SettingsRepository, epgDao: EpgDao, customize: CustomizationStore) {
         scope.launch {
             settings.epgUseLogos.collectLatest { sourceIds ->
@@ -57,9 +53,7 @@ object EpgLogoStore {
             }
         }
         scope.launch {
-            settings.activeProfileId
-                .flatMapLatest { profileId -> customize.observe(profileId, MediaType.LIVE) }
-                .collectLatest { matches = it.epgMatchResolver }
+            customize.observe(MediaType.LIVE).collectLatest { matches = it.epgMatchResolver }
         }
     }
 
