@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -49,7 +47,7 @@ import tv.own.owntv.core.nav.MainSection
 
 class LockedSettingsExitTest {
 
-    private val visible = setOf(MainSection.HOME, MainSection.LIVE_TV, MainSection.SPORTS)
+    private val visible = setOf(MainSection.HOME, MainSection.LIVE_TV)
 
     @Test
     fun `returns to the section Settings was opened from`() {

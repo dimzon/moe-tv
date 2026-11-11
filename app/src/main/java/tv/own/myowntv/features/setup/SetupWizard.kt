@@ -21,15 +21,11 @@ import tv.own.owntv.core.menu.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
-import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
@@ -43,7 +39,6 @@ import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
 
-import android.icu.text.ListFormatter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -67,8 +62,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
@@ -84,7 +77,6 @@ import tv.own.myowntv.features.settings.FirstRunLanguageSelector
 import tv.own.myowntv.features.settings.SettingValue
 import tv.own.myowntv.features.settings.SetupLocalSyncScreen
 import tv.own.myowntv.features.settings.StageSettingRow
-import tv.own.myowntv.features.shell.PendingShellRequest
 import tv.own.myowntv.ui.components.BrandMark
 import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.components.detailText
@@ -100,26 +92,21 @@ import tv.own.myowntv.ui.theme.mpx
 import tv.own.myowntv.ui.theme.stageAccent
 import tv.own.myowntv.ui.theme.stageText
 
-private enum class Step { WELCOME, DISPLAY_SIZE, DISCLAIMER, SETUP_CHOICE, SYNC_DEVICE, ADD_CONTENT, ADD_SOURCE_REMOTE, ADD_SOURCE, IMPORTING }
+private enum class Step { WELCOME, DISPLAY_SIZE, DISCLAIMER, SETUP_CHOICE, SYNC_DEVICE, IMPORTING }
 
 /**
- * First-run onboarding: language, screen size, then content (the built-in RuTube catalogue, a new
- * source, a device sync, or skip). Sources are global — there are no profiles. [onDone] enters the
- * app. Every step is a [WizardFrame]; adding a playlist reuses the Settings › Add a source pages.
+ * First-run onboarding: language, screen size, disclaimer, then content — the built-in RuTube
+ * source (attach + sync) or a sync from another television in the house. Sources are global —
+ * there are no profiles. [onDone] enters the app. Every step is a [WizardFrame].
  */
 @Composable
 fun Onboarding(onDone: () -> Unit, modifier: Modifier = Modifier) {
     val vm: SetupViewModel = koinViewModel()
-    val defaultIptvName = stringResource(R.string.setup_default_iptv)
-    val defaultPlaylistName = stringResource(R.string.setup_name_default_playlist)
-    val defaultPortalName = stringResource(R.string.setup_default_portal)
     var step by rememberSaveable { mutableStateOf(Step.WELCOME) }
     val importState by vm.state.collectAsStateWithLifecycle()
     val progress by vm.progress.collectAsStateWithLifecycle()
     val epgSync by vm.epgSync.collectAsStateWithLifecycle()
-    // Where "Try Again" returns to when an import fails.
-    var importOrigin by remember { mutableStateOf(Step.ADD_SOURCE) }
-    // The playlist being imported, for "Importing <name>".
+    // The source being imported, for "Importing <name>".
     var importName by remember { mutableStateOf<String?>(null) }
 
     val accent = stageAccent.accent
@@ -136,8 +123,8 @@ fun Onboarding(onDone: () -> Unit, modifier: Modifier = Modifier) {
                 back = WizardAction(stringResource(R.string.common_back), { step = Step.DISPLAY_SIZE }),
                 next = WizardAction(stringResource(R.string.setup_i_understand), { step = Step.SETUP_CHOICE }, rememberFirstFocus()),
             )
-            // First decision: pull down the built-in catalogue now, or bring everything back from
-            // another television in the house.
+            // First decision: pull down the built-in RuTube catalogue now, or bring everything back
+            // from another television in the house.
             Step.SETUP_CHOICE -> {
                 val first = rememberFirstFocus()
                 WizardFrame(
@@ -150,7 +137,7 @@ fun Onboarding(onDone: () -> Unit, modifier: Modifier = Modifier) {
                     WizardCards(
                         listOf(
                             WizardCard(MyOwnTVIcon.PERSON, stringResource(R.string.setup_new_profile), stringResource(R.string.setup_create_profile_add_sources)) {
-                                importName = "RuTube"; vm.startRutube(); importOrigin = Step.SETUP_CHOICE; step = Step.IMPORTING
+                                importName = "RuTube"; vm.startRutube(); step = Step.IMPORTING
                             },
                             WizardCard(MyOwnTVIcon.PHONE, stringResource(R.string.setup_sync_device), stringResource(R.string.setup_sync_device_description)) { step = Step.SYNC_DEVICE },
                         ),
@@ -159,67 +146,22 @@ fun Onboarding(onDone: () -> Unit, modifier: Modifier = Modifier) {
                 }
             }
             // A sync brings the other device's whole setup with it, so it finishes the wizard the
-            // same way the built-in catalogue does: enter the app once the data has landed.
+            // same way the built-in source does: enter the app once the data has landed.
             Step.SYNC_DEVICE -> SetupLocalSyncScreen(
                 onRestored = onDone,
                 onBack = { step = Step.SETUP_CHOICE },
-            )
-            Step.ADD_CONTENT -> AddContentStep(
-                onPhone = { step = Step.ADD_SOURCE_REMOTE },
-                onType = { step = Step.ADD_SOURCE },
-                onSkip = { vm.finish(onDone) },
-            )
-            Step.ADD_SOURCE_REMOTE -> RemoteSetupScreen(
-                state = vm.remoteState.collectAsStateWithLifecycle().value,
-                payloads = vm.remotePayloads,
-                onStartListener = { port -> vm.startRemoteListener(port) },
-                onStopListener = { vm.stopRemoteListener() },
-                // A remote submission hands off to the pre-filled form (the user presses Start Import).
-                onPayloadReceived = { step = Step.ADD_SOURCE },
-                onBack = { vm.stopRemoteListener(); step = Step.ADD_CONTENT },
-            )
-            Step.ADD_SOURCE -> AddSourceScreen(
-                onStartXtream = { name, server, user, pass, ua, ref, epg, refresh, live, _, preferHls ->
-                    importName = name.ifBlank { defaultIptvName }
-                    vm.startXtream(importName!!, server, user, pass, ua, epg, refresh, live, preferHls, httpReferer = ref)
-                    importOrigin = Step.ADD_SOURCE
-                    step = Step.IMPORTING
-                },
-                onStartM3u = { name, url, ua, ref, epg, refresh, _ ->
-                    importName = name.ifBlank { defaultPlaylistName }
-                    vm.startM3u(importName!!, url, ua, epg, refresh, httpReferer = ref)
-                    importOrigin = Step.ADD_SOURCE
-                    step = Step.IMPORTING
-                },
-                onStartStalker = { name, portalUrl, mac, serialNumber, deviceId, deviceId2, signature, ua, ref, refresh, _, live, login, password ->
-                    importName = name.ifBlank { defaultPortalName }
-                    vm.startStalker(
-                        importName!!, portalUrl, mac, serialNumber, deviceId,
-                        deviceId2, signature, ua, refresh, live, httpReferer = ref,
-                        login = login, password = password,
-                    )
-                    importOrigin = Step.ADD_SOURCE
-                    step = Step.IMPORTING
-                },
-                // Submissions from the phone page land here pre-filled (type + fields).
-                remotePayload = vm.remotePayload,
-                onRemotePayloadConsumed = { vm.consumeRemotePayload() },
-                onBack = { step = Step.ADD_CONTENT },
-                showDefaultToggle = false, // first playlist in setup: nothing to be "default" over yet
             )
             Step.IMPORTING -> ImportProgressStep(
                 state = importState,
                 progress = progress,
                 name = importName,
-                onContinue = { vm.finish(onDone) }, // playlist + its EPG synced (auto)
-                // "Add a TV guide": finish setup, then the shell opens Settings › EPG sources › Add.
-                onAddGuide = { PendingShellRequest.addEpg = true; vm.finish(onDone) },
-                onRetry = { vm.reset(); step = importOrigin },
-                onCancel = { vm.cancelImport(); step = importOrigin },
+                onContinue = { vm.finish(onDone) }, // source + its guide synced (auto)
+                onRetry = { vm.reset(); step = Step.SETUP_CHOICE },
+                onCancel = { vm.cancelImport(); step = Step.SETUP_CHOICE },
                 onBackground = { vm.continueInBackground(onDone) }, // enter the app; sync keeps running
             )
         }
-        // Semi-auto EPG: after the first playlist imports, ask → sync (live count) → done (overlays "All set!").
+        // Semi-auto EPG: after the source lands, ask → sync (live count) → done (overlays "All set!").
         EpgSyncDialog(
             state = epgSync,
             onSync = vm::syncPendingEpg,
@@ -388,32 +330,9 @@ private fun AppIconSwatches(icons: List<AppIcon>, chosen: AppIcon) {
     }
 }
 
-/** Add a playlist: From your phone, or Type it here. */
-@Composable
-private fun AddContentStep(onPhone: () -> Unit, onType: () -> Unit, onSkip: () -> Unit) {
-    val first = rememberFirstFocus()
-    WizardFrame(
-        step = WizardStep.PLAYLIST,
-        title = stringResource(R.string.setup_add_playlist),
-        sub = stringResource(R.string.setup_add_playlist_description),
-        back = WizardAction(stringResource(R.string.setup_skip_for_now), onSkip),
-        next = null,
-        // Back on the remote does not skip: this step had no Back before, and skipping is a choice.
-        onBack = null,
-    ) {
-        WizardCards(
-            listOf(
-                WizardCard(MyOwnTVIcon.PHONE, stringResource(R.string.setup_from_phone), stringResource(R.string.setup_phone_card_line), onPhone),
-                WizardCard(MyOwnTVIcon.PENCIL, stringResource(R.string.settings_add_type_here), stringResource(R.string.settings_line_add_type_here), onType),
-            ),
-            first,
-        )
-    }
-}
-
 /**
  * "Importing <name>" with the bar and where the import is, Cancel and Run in background; then
- * "All set!" with what arrived and an Add a TV guide row; or the failure with Back and Try again.
+ * "All set!" with what arrived; or the failure with Back and Try again.
  */
 @Composable
 private fun ImportProgressStep(
@@ -421,14 +340,14 @@ private fun ImportProgressStep(
     progress: tv.own.owntv.core.sync.ImportStage?,
     name: String?,
     onContinue: () -> Unit,
-    onAddGuide: () -> Unit,
     onRetry: () -> Unit,
     onCancel: () -> Unit,
     onBackground: () -> Unit,
 ) {
     when (state) {
-        SourceImporter.ImportState.Running, SourceImporter.ImportState.Idle,
-        is SourceImporter.ImportState.NeedPassword -> {
+        // File-restore states are unreachable from the RuTube-only wizard; kept exhaustive.
+        is SourceImporter.ImportState.NeedPassword -> Unit
+        SourceImporter.ImportState.Running, SourceImporter.ImportState.Idle -> {
             val display = progress?.importProgressDisplay()
             WizardFrame(
                 step = WizardStep.PLAYLIST,
@@ -436,7 +355,7 @@ private fun ImportProgressStep(
                 sub = stringResource(R.string.setup_watching_during_import),
                 back = WizardAction(stringResource(R.string.common_cancel), onCancel),
                 // Enter the app right away; the import keeps running (VM is activity-scoped) and channels
-                // appear as they land — no need to sit through a big playlist sync.
+                // appear as they land — no need to sit through a big catalogue sync.
                 next = WizardAction(stringResource(R.string.setup_run_in_background), onBackground, rememberFirstFocus()),
             ) {
                 StageSettingRow(
@@ -451,13 +370,6 @@ private fun ImportProgressStep(
         is SourceImporter.ImportState.Success -> {
             val lines = listOfNotNull(
                 state.counts?.summaryText(includeEpg = true),
-                state.restoredItems?.let { pluralStringResource(R.plurals.setup_restored_items, it, it) },
-                if (state.passwordsOmitted) stringResource(R.string.setup_passwords_omitted) else null,
-                state.needPassword.takeIf { it.isNotEmpty() }?.let {
-                    stringResource(R.string.setup_need_password, ListFormatter.getInstance(LocalConfiguration.current.locales[0]).format(it))
-                },
-                state.skippedSources.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.setup_skipped_sources, it, it) },
-                if (state.invalidLocale) stringResource(R.string.setup_invalid_locale) else null,
                 state.warnings.warningText(),
                 state.remainder.remainderText(),
             )
@@ -468,15 +380,7 @@ private fun ImportProgressStep(
                 back = null,
                 next = WizardAction(stringResource(R.string.setup_continue), onContinue, rememberFirstFocus()),
                 onBack = onContinue,
-            ) {
-                StageSettingRow(
-                    icon = MyOwnTVIcon.EPG,
-                    title = stringResource(R.string.setup_add_guide),
-                    desc = stringResource(R.string.setup_add_guide_line),
-                    value = SettingValue.Opens(null),
-                    onClick = onAddGuide,
-                )
-            }
+            )
         }
         is SourceImporter.ImportState.Failed -> WizardFrame(
             step = WizardStep.PLAYLIST,

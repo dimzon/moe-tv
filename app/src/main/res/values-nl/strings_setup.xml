@@ -35,124 +35,23 @@
     <string name="setup_setup_choice_description">Begin opnieuw of herstel je profielen, afspeellijsten en favorieten vanuit een back-upbestand of een ander apparaat.</string>
     <string name="setup_new_profile">Nieuw profiel</string>
     <string name="setup_create_profile_add_sources">Maak een profiel en voeg bronnen toe</string>
-    <string name="setup_import_profiles_playlists">Profielen en afspeellijsten uit een bestand importeren</string>
     <string name="setup_sync_device">Vanaf een ander apparaat</string>
     <string name="setup_sync_device_description">Kopieer alles van je andere OwnTV-apparaat via wifi</string>
-    <string name="setup_add_playlist">Een afspeellijst toevoegen</string>
-    <string name="setup_add_playlist_description">Voeg een bron voor dit profiel toe of configureer er later een.</string>
-    <string name="setup_existing">Bestaand</string>
-    <string name="setup_use_other_profile_playlists">Gebruik afspeellijsten van een ander profiel</string>
     <string name="setup_import">Importeren</string>
-    <string name="setup_restore_backup_file">Herstellen vanuit een back-upbestand</string>
-    <string name="setup_skip_for_now">Voorlopig overslaan</string>
-    <string name="setup_use_existing_playlists">Bestaande afspeellijsten gebruiken</string>
-    <string name="setup_pick_playlists">Kies de afspeellijsten die je aan dit profiel wilt toevoegen.</string>
-    <plurals name="setup_add_selected_playlists">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> toevoegen</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> toevoegen</item>
-    </plurals>
-    <string name="setup_restoring">Herstellen…</string>
-    <string name="setup_wrong_backup_password">Onjuist back-upwachtwoord</string>
-    <string name="setup_enter_backup_password">Voer het back-upwachtwoord in</string>
-    <string name="setup_password_mismatch_sealed">Dat wachtwoord kwam niet overeen. Deze back-up is versleuteld — deze kan niet worden geopend zonder het wachtwoord waarmee de back-up is gemaakt.</string>
-    <string name="setup_password_mismatch">Dat wachtwoord kwam niet overeen. Probeer het opnieuw of sla deze stap over om alles behalve opgeslagen wachtwoorden te herstellen.</string>
-    <string name="setup_backup_encrypted_prompt">Deze back-up is versleuteld. Voer het back-upwachtwoord in om deze te openen en te herstellen.</string>
-    <string name="setup_backup_passwords_encrypted_prompt">De wachtwoorden in deze back-up zijn versleuteld. Voer het back-upwachtwoord in om ze te herstellen, of sla deze stap over om al het andere te herstellen en de wachtwoorden later opnieuw in te voeren.</string>
-    <string name="setup_backup_password">Back-upwachtwoord</string>
-    <string name="setup_skip_no_passwords">Overslaan (geen wachtwoorden)</string>
     <string name="setup_restore">Herstellen</string>
     <string name="setup_restore_failed">Herstellen mislukt</string>
     <string name="setup_backup_read_failed">Kan het back-upbestand niet lezen</string>
-    <string name="setup_invalid_mac">Ongeldig MAC-adres — gebruik AA:BB:CC:DD:EE:FF</string>
-    <string name="setup_pick_backup_file">Kies een back-upbestand om te herstellen</string>
-    <string name="setup_restore_a_backup">Een back-up herstellen</string>
-    <string name="setup_restore_choice_description">Stuur de back-up op afstand vanaf een apparaat met een browser op hetzelfde wifi-netwerk, of kies een back-upbestand dat al op dit apparaat staat.</string>
-    <string name="setup_upload_from_wifi_device">Uploaden vanaf een apparaat op je Wi-Fi-netwerk</string>
-    <string name="setup_local_file">Lokaal bestand</string>
-    <string name="setup_pick_backup_local">Kies een back-upbestand op dit apparaat</string>
     <string name="setup_run_in_background">Op de achtergrond uitvoeren</string>
     <string name="setup_importing_catalog">Catalogus importeren…</string>
     <string name="setup_preparing_catalog">Catalogus voorbereiden</string>
     <string name="setup_watching_during_import">Je kunt meteen beginnen met kijken terwijl de rest van de catalogus wordt geladen.</string>
     <string name="setup_all_set">Alles is gereed!</string>
-    <plurals name="setup_restored_items">
-        <item quantity="one"><xliff:g id="items">%1$d</xliff:g> item hersteld. Synchroniseer je bronnen opnieuw om content te laden.</item>
-        <item quantity="other"><xliff:g id="items">%1$d</xliff:g> items hersteld. Synchroniseer je bronnen opnieuw om content te laden.</item>
-    </plurals>
-    <string name="setup_passwords_omitted">Voer eventuele opgeslagen wachtwoorden daarna opnieuw in.</string>
-    <string name="setup_need_password">Geen wachtwoord opgeslagen, dus nog niet geladen: <xliff:g id="names">%1$s</xliff:g>. Open de afspeellijst in Instellingen en voer het wachtwoord in.</string>
-    <string name="setup_name_numbered"><xliff:g id="name">%1$s</xliff:g> <xliff:g id="number">%2$d</xliff:g></string>
-    <plurals name="setup_skipped_sources">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> bron is overgeslagen omdat deze versie het type afspeellijst niet ondersteunt.</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> bronnen zijn overgeslagen omdat deze versie de typen afspeellijsten niet ondersteunt.</item>
-    </plurals>
     <string name="setup_continue">Doorgaan</string>
     <string name="setup_import_failed">Importeren mislukt</string>
     <string name="setup_try_again_caps">Opnieuw proberen</string>
     <string name="setup_opening">Openen…</string>
-    <string name="setup_add_source">Een bron toevoegen</string>
-    <string name="setup_edit_source">Bron bewerken</string>
-    <string name="setup_edit_from_phone">Bewerken vanaf een ander apparaat</string>
-    <string name="setup_edit_source_description">Werk de gegevens van deze bron bij of wijzig de instelling voor automatisch vernieuwen.</string>
-    <string name="setup_byo_source_description">OwnTV is een speler — voeg je eigen Xtream-, M3U- of Stalker-bron toe.</string>
-    <string name="setup_xtream">Xtream</string>
-    <string name="setup_m3u">M3U / M3U8</string>
-    <string name="setup_stalker_mac">Stalker (MAC)</string>
-    <string name="setup_source_name_optional">Naam (optioneel)</string>
-    <string name="setup_default_iptv">Mijn IPTV</string>
-    <string name="setup_name_default_playlist">Mijn afspeellijst</string>
-    <string name="setup_default_portal">Mijn portaal</string>
-    <string name="setup_default_profile">Profiel</string>
-    <string name="setup_server_url">Server-URL</string>
-    <string name="setup_server_example">http://host:port</string>
-    <string name="setup_username">Gebruikersnaam</string>
-    <string name="setup_password">Wachtwoord</string>
-    <string name="setup_password_keep">Wachtwoord (leeg laten om te behouden)</string>
-    <string name="setup_playlist_url_local_file">URL van afspeellijst of lokaal bestand</string>
-    <string name="setup_playlist_example">http://…/playlist.m3u</string>
     <string name="setup_playlist_file_unavailable">Kan het afspeellijstbestand niet openen. Kies het opnieuw; het is mogelijk verplaatst.</string>
     <string name="setup_playlist_path_unsupported">Dit lokale pad naar de afspeellijst wordt niet ondersteund.</string>
-    <string name="setup_local_file_choose">Kies een lokaal .m3u- of .m3u8-bestand…</string>
-    <string name="setup_local_file_prefix">Lokaal bestand: <xliff:g id="name">%1$s</xliff:g></string>
-    <string name="setup_portal_url">Portaal-URL</string>
-    <string name="setup_portal_example">http://host:port/c/</string>
-    <string name="setup_mac_address">MAC-adres</string>
-    <string name="setup_mac_example">00:1A:79:AA:BB:CC</string>
-    <string name="setup_mac_invalid">Voer 12 tekens in, bijv. 00:1A:79:AA:BB:CC</string>
-    <string name="setup_device_model_preset">Voorinstelling voor apparaatmodel (User-Agent)…</string>
-    <string name="setup_testing">Testen…</string>
-    <string name="setup_test_connection">Verbinding testen</string>
-    <string name="setup_user_agent_optional">User-Agent (optioneel)</string>
-    <string name="setup_user_agent_example">bijv. VLC/3.0.20 LibVLC/3.0.20</string>
-    <string name="setup_referer_optional">Referer (optioneel)</string>
-    <string name="setup_referer_example">bijv. https://example.com/</string>
-    <string name="setup_auto_refresh">Automatisch vernieuwen</string>
-    <string name="setup_auto_refresh_description">Uit, bij het opstarten of wanneer gegevens verouderd zijn</string>
-    <string name="setup_default_playlist">Standaardafspeellijst</string>
-    <string name="setup_default_playlist_description">Toon in de hele app alleen deze afspeellijst. Schakel dit uit voor alle afspeellijsten; je kunt dit op elk moment wijzigen via de bovenbalk.</string>
-    <string name="setup_what_to_sync">Wat synchroniseren</string>
-    <string name="setup_sync_off_editing">Uitgeschakelde secties blijven verborgen en worden nooit opgehaald. Als je een sectie weer inschakelt, verschijnen rijen uit de cache onmiddellijk.</string>
-    <string name="setup_sync_choices">Nu wordt als eerste geïmporteerd · Later wordt op de achtergrond gesynchroniseerd · Uit wordt nooit opgehaald of weergegeven.</string>
-    <string name="setup_live_tv">Live-tv</string>
-    <string name="setup_channels_categories">Zenders en categorieën</string>
-    <string name="setup_movies">Films</string>
-    <string name="setup_vod_movie_catalog">VOD-filmcatalogus</string>
-    <string name="setup_series">Series</string>
-    <string name="setup_tv_series_catalog">Catalogus met tv-series</string>
-    <string name="setup_start_import">Importeren starten</string>
-    <string name="setup_update_source_save">Opslaan</string>
-    <string name="setup_pick_playlist_file">Kies een afspeellijstbestand (.m3u / .m3u8)</string>
-    <string name="setup_device_model_preset_title">Voorinstelling voor apparaatmodel</string>
-    <string name="setup_auto_refresh_title">Automatisch vernieuwen</string>
-    <string name="setup_on">Aan</string>
-    <string name="setup_now">Nu</string>
-    <string name="setup_later">Later</string>
-    <string name="setup_off">Uit</string>
-    <string name="setup_default_mag">Standaard (MAG200)</string>
-    <string name="setup_mag250">MAG250</string>
-    <string name="setup_mag254">MAG254</string>
-    <string name="setup_mag270">MAG270</string>
-    <string name="setup_mag420">MAG420</string>
     <string name="companion_pin_page_title">OwnTV — PIN invoeren</string>
     <string name="companion_pin_heading">Voer de PIN in</string>
     <string name="companion_pin_description">Typ de 6-cijferige PIN die op je tv wordt weergegeven om door te gaan.</string>
@@ -220,35 +119,6 @@
     <string name="companion_error_image_too_large">De afbeelding is te groot.</string>
     <string name="companion_error_invalid_image">Dit is geen geldige afbeeldingsupload.</string>
     <string name="companion_error_missing_fields">Verplichte velden ontbreken.</string>
-    <string name="setup_invalid_locale">Deze back-up bevatte een niet-ondersteunde app-taal. Het herstellen is gelukt, maar je huidige taal is behouden.</string>
-    <string name="setup_prefer_hls_live_tv">Voorkeur geven aan HLS voor live-tv</string>
-    <string name="setup_hide_new_categories">Nieuwe categorieën standaard verbergen</string>
-    <string name="setup_hide_new_categories_description">Voor het hele profiel: categorieën die bij toekomstige synchronisaties verschijnen, zijn aanvankelijk verborgen. Je kunt ze op elk moment bekijken onder Aanpassen.</string>
-    <string name="setup_prefer_hls_description">HLS (.m3u8) krijgt voorrang op MPEG-TS voor Live-tv. Als HLS mislukt, valt het terug op MPEG-TS. Uitgesteld kijken gebruikt altijd MPEG-TS.</string>
-    <string name="setup_prefer_hls_description_supported">HLS (.m3u8) krijgt voorrang op MPEG-TS voor Live-tv. Als HLS mislukt, valt het terug op MPEG-TS. Uitgesteld kijken gebruikt altijd MPEG-TS. Je provider geeft aan HLS te ondersteunen.</string>
-    <string name="setup_prefer_hls_description_unsupported">HLS (.m3u8) krijgt voorrang op MPEG-TS voor Live-tv. Als HLS mislukt, valt het terug op MPEG-TS. Uitgesteld kijken gebruikt altijd MPEG-TS. Je provider geeft niet aan HLS te ondersteunen — je kunt het toch proberen.</string>
-    <string name="setup_hls_test_support">Test HLS-ondersteuning</string>
-    <string name="setup_hls_testing">HLS testen…</string>
-    <string name="setup_hls_test_failed">Test mislukt: <xliff:g id="reason">%1$s</xliff:g></string>
-    <string name="setup_hls_test_provider_unreachable">De provider was niet bereikbaar — controleer de server-URL, gebruikersnaam en het wachtwoord.</string>
-    <string name="setup_hls_test_works">✓ HLS werkt — je provider gaf een afspeellijst terug.</string>
-    <string name="setup_hls_test_works_unadvertised">✓ HLS werkt — je provider gaf een afspeellijst terug, ook al geeft hij niet aan HLS te ondersteunen.</string>
-    <string name="setup_hls_test_busy">Kan niet worden afgerond — het account heeft op dit moment geen vrije verbindingen (HTTP <xliff:g id="status">%1$d</xliff:g>). Stop alles wat nog streamt en test opnieuw.</string>
-    <string name="setup_hls_test_not_served">HLS werkte niet — <xliff:g id="reason">%1$s</xliff:g>. Laat dit uit en Live-tv gebruikt MPEG-TS.</string>
-    <string name="setup_hls_test_reason_not_playlist">de server antwoordde, maar niet met een afspeellijst</string>
-    <string name="setup_hls_test_reason_no_endpoint">geen HLS-endpoint voor deze zender (HTTP <xliff:g id="status">%1$d</xliff:g>)</string>
-    <string name="setup_hls_test_inconclusive">Niet te verifiëren (<xliff:g id="reason">%1$s</xliff:g>). <xliff:g id="provider_claim">%2$s</xliff:g></string>
-    <string name="setup_hls_test_reason_http">HTTP <xliff:g id="status">%1$d</xliff:g></string>
-    <string name="setup_hls_test_reason_no_answer">geen antwoord</string>
-    <string name="setup_hls_test_reason_no_live_channels">deze afspeellijst bevat geen livezenders om te testen</string>
-    <string name="setup_hls_test_reason_dead_channel">de testzender speelde ook niet via MPEG-TS, dus misschien is hij gewoon kapot</string>
-    <string name="setup_hls_provider_advertises">Je provider geeft wél aan HLS te ondersteunen.</string>
-    <string name="setup_hls_provider_does_not_advertise">Je provider geeft niet aan HLS te ondersteunen.</string>
-    <string name="setup_stalker_advanced_identity">Geavanceerde apparaatidentificatie</string>
-    <string name="setup_stalker_serial_number_optional">Serienummer (optioneel)</string>
-    <string name="setup_stalker_device_id_optional">Apparaat-ID (optioneel)</string>
-    <string name="setup_stalker_device_id2_optional">Apparaat-ID2 (optioneel)</string>
-    <string name="setup_stalker_signature_optional">Handtekening (optioneel)</string>
     <string name="companion_error_pair_failed">Kon niet koppelen met dit apparaat.</string>
     <string name="local_sync_browser_title">OwnTV lokaal synchroniseren</string>
     <string name="local_sync_browser_body">Dit adres is bedoeld voor de OwnTV-app op je andere apparaat. Open daar Lokaal synchroniseren en kies dit apparaat uit de lijst.</string>
@@ -258,25 +128,12 @@
     <string name="setup_key_previous_step">Vorige stap</string>
     <string name="setup_welcome_title">Welkom bij OwnTV</string>
     <string name="setup_welcome_sub">Je eigen IPTV-speler. Kies een taal om te beginnen — je kunt die later wijzigen in Instellingen.</string>
-    <plurals name="setup_languages_all">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> taal</item>
-        <item quantity="other">Alle <xliff:g id="count">%1$d</xliff:g> talen</item>
-    </plurals>
     <string name="setup_display_sub">Hoe groot de interface en de tekst op deze tv zijn. De rij hieronder verandert mee.</string>
-    <string name="setup_display_sub_mobile">Hoe groot de interface en de tekst op deze telefoon zijn. De rij hieronder verandert mee.</string>
     <string name="setup_line_zoom">Alles op het scherm</string>
     <string name="setup_line_font">Alleen tekst</string>
     <string name="setup_line_app_icon">Hoe OwnTV op het startscherm van de tv verschijnt</string>
-    <string name="setup_line_app_icon_mobile">Hoe OwnTV op je startscherm verschijnt</string>
-    <string name="setup_restore_card_line">Uit een bestand, of op afstand vanaf een ander apparaat</string>
     <string name="setup_device_appear">Apparaten met Sync-modus aan verschijnen hier</string>
     <string name="setup_device_address_hint">of typ het adres van het andere apparaat</string>
-    <string name="setup_profile_sub">Een profiel heeft eigen favorieten, geschiedenis en Home. Voeg er later meer toe via Instellingen › Profiel.</string>
-    <string name="setup_avatar">Avatar</string>
-    <string name="setup_avatar_line">Kies er een, of houd de letter</string>
     <string name="setup_create_profile">Profiel aanmaken</string>
-    <string name="setup_phone_card_line">Vul het formulier in een browser op een ander apparaat in — het snelst</string>
     <string name="setup_importing_title"><xliff:g id="name">%1$s</xliff:g> importeren</string>
-    <string name="setup_add_guide">Tv-gids toevoegen</string>
-    <string name="setup_add_guide_line">Een nieuwe installatie heeft nog geen gids</string>
 </resources>

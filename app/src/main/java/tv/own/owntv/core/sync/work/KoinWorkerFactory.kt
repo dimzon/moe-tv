@@ -34,15 +34,6 @@ class KoinWorkerFactory : WorkerFactory() {
                 koin.get(),
                 koin.get(),
                 koin.get(),
-                koin.get(),
-            )
-            ConnectionMeasurementWorker::class.java.name -> ConnectionMeasurementWorker(
-                appContext,
-                workerParameters,
-                koin.get(),
-                koin.get(),
-                koin.get(),
-                koin.get(),
             )
             ContentIndexWorker::class.java.name -> ContentIndexWorker(
                 appContext,
@@ -52,14 +43,6 @@ class KoinWorkerFactory : WorkerFactory() {
             tv.own.owntv.core.sync.work.LocalAutoSyncWorker::class.java.name -> tv.own.owntv.core.sync.work.LocalAutoSyncWorker(
                 appContext,
                 workerParameters,
-                koin.get(),
-            )
-            tv.own.owntv.core.sports.MatchAlertWorker::class.java.name -> tv.own.owntv.core.sports.MatchAlertWorker(
-                appContext,
-                workerParameters,
-                koin.get(),
-                koin.get(),
-                koin.get(),
                 koin.get(),
             )
             else -> null

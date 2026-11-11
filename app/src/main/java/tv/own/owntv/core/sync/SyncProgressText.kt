@@ -3,17 +3,12 @@ package tv.own.owntv.core.sync
 data class SyncProgressCounts(
     val live: Int,
     val liveActive: Boolean,
-    /** The connection measurement's position, when it is the thing currently running. */
-    val measuringStream: Int = 0,
-    val measuringOf: Int = 0,
 ) {
     val hasItems: Boolean
         get() = live > 0
-
-    val measuringConnections: Boolean get() = measuringOf > 0
 }
 
-enum class SyncProgressPhase { PREPARING, CONNECTING, SYNCING, MEASURING_CONNECTIONS }
+enum class SyncProgressPhase { PREPARING, CONNECTING, SYNCING }
 
 data class SyncProgressDisplay(
     val counts: SyncProgressCounts?,
@@ -23,8 +18,6 @@ data class SyncProgressDisplay(
 fun ImportStage.progressCounts(): SyncProgressCounts = SyncProgressCounts(
     live = liveProcessed,
     liveActive = liveActive,
-    measuringStream = measuringStream,
-    measuringOf = measuringOf,
 )
 
 fun ImportStage.importProgressDisplay(): SyncProgressDisplay =
@@ -34,8 +27,6 @@ fun importProgressDisplay(counts: SyncProgressCounts?): SyncProgressDisplay = Sy
     counts = counts,
     phase = when {
         counts == null -> SyncProgressPhase.PREPARING
-        // Before anything has been fetched, so it is checked before the item counts.
-        counts.measuringConnections -> SyncProgressPhase.MEASURING_CONNECTIONS
         counts.hasItems -> SyncProgressPhase.SYNCING
         else -> SyncProgressPhase.CONNECTING
     },

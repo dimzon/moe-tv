@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -102,7 +100,6 @@ import androidx.tv.material3.Text
 import kotlinx.coroutines.launch
 import tv.own.myowntv.R
 import tv.own.owntv.core.database.entity.ChannelEntity
-import tv.own.owntv.core.epg.displayLogoUrl
 import tv.own.owntv.core.live.EpgNowNext
 import tv.own.owntv.core.live.ProviderName
 import tv.own.owntv.core.live.ProviderTags
@@ -115,10 +112,8 @@ import tv.own.myowntv.ui.components.OwnTVSpinner
 import tv.own.myowntv.ui.components.trapVerticalFocusExit
 import tv.own.myowntv.ui.format.rememberSystemTimeFormatter
 import tv.own.myowntv.ui.stage.shownColor
-import tv.own.myowntv.ui.stage.PlaylistMark
 import tv.own.myowntv.ui.stage.StageGroupLabel
 import tv.own.myowntv.ui.stage.StageLiveBadge
-import tv.own.myowntv.ui.stage.StagePlaylistMark
 import tv.own.myowntv.ui.stage.StageProgress
 import tv.own.myowntv.ui.stage.StageRow
 import tv.own.myowntv.ui.stage.StageSearchField
@@ -171,7 +166,7 @@ internal fun LiveHeader(category: String, count: Int?, showChevron: Boolean, mod
 /**
  * `.chrow`: 84 high, 20 padding, 18 gap — number (50, right-aligned, 20/600 dim), white logo plate
  * 76×54, name 22/700, "programme · time left" 17 muted (the time part at 60%), a 300×4 progress line;
- * then the provider tags, ♥ when a favourite, and the playlist mark. Focused = FX.
+ * then the provider tags and ♥ when a favourite. Focused = FX.
  * [trailing] replaces that end group (the player's History sheet shows when each was watched).
  */
 @Composable
@@ -182,7 +177,6 @@ internal fun LiveStageRow(
     nowTitle: String?,
     isFavorite: Boolean,
     showNumber: Boolean,
-    mark: PlaylistMark?,
     onFocus: () -> Unit,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -204,7 +198,7 @@ internal fun LiveStageRow(
                 modifier = Modifier.width(50.mpx),
             )
         }
-        LivePlate(channel.displayLogoUrl, 76.mpx, 54.mpx)
+        LivePlate(channel.logoUrl, 76.mpx, 54.mpx)
         Column(Modifier.weight(1f)) {
             Text(name.name, style = stageText(22, 700), color = if (focused) StageColors.FxText else StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
             val title = now?.title ?: nowTitle
@@ -229,7 +223,6 @@ internal fun LiveStageRow(
         else Row(horizontalArrangement = Arrangement.spacedBy(8.mpx), verticalAlignment = Alignment.CenterVertically) {
             name.tags.forEach { StageTag(it) }
             if (isFavorite) MyOwnTVIcon(MyOwnTVIcon.FAVORITE, stageAccent.accent, Modifier.size(22.mpx), filled = true)
-            mark?.let { StagePlaylistMark(it) }
         }
     }
 }
@@ -309,7 +302,7 @@ internal fun LiveStagePane(
         ) {
             if (channel != null) {
                 ChannelLogoTile(
-                    logoUrl = channel.displayLogoUrl,
+                    logoUrl = channel.logoUrl,
                     modifier = Modifier.size(288.mpx),
                     fill = Color.Transparent,
                 ) { MyOwnTVIcon(MyOwnTVIcon.LIVE_TV, tint = StageColors.Dim, modifier = Modifier.size(56.mpx)) }
@@ -333,7 +326,7 @@ internal fun LiveStagePane(
                     horizontalArrangement = Arrangement.spacedBy(14.mpx),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    LivePlate(channel.displayLogoUrl, 64.mpx, 46.mpx)
+                    LivePlate(channel.logoUrl, 64.mpx, 46.mpx)
                     Column {
                         channel.number?.let { Text(it.toString(), style = stageText(15, 600), color = Color(0xFFCFD8D4), maxLines = 1, overflow = TextOverflow.Ellipsis) }
                         Text(channelName.orEmpty(), style = stageText(22, 700), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -430,7 +423,6 @@ internal data class LiveCategoryEntry(
     val name: ProviderName?,
     val icon: MyOwnTVIcon?,
     val count: Int?,
-    val mark: PlaylistMark?,
 )
 
 /**
@@ -455,7 +447,6 @@ internal fun liveCategoryEntries(railItems: List<LiveRailItem>, railCounts: Map<
                 else -> if (item.locked) MyOwnTVIcon.LOCK else null
             },
             count = if (item.sealed) null else railCounts[item.key],
-            mark = null,
         )
     }
     val groupCountry = ProviderTags.sharedCountry(entries.mapNotNull { it.name })
@@ -632,7 +623,6 @@ internal fun LiveCategories(
                             tags = if (entry.name?.tags.isNullOrEmpty()) null else { focused ->
                                 entry.name.tags.forEach { StageTag(it, onAccent = if (focused) a.onAccent else null) }
                             },
-                            trailing = entry.mark?.let { m -> { _ -> StagePlaylistMark(m) } },
                             onLongClick = { onLongSelect(index) },
                             modifier = rowModifier,
                         )
@@ -649,7 +639,7 @@ internal fun LiveCategories(
 /**
  * `.fcat` (the Separate column): 52 high, radius 15, 18.5/600, gap 12, 2 px between rows; the
  * selected one is accent text with the 4 px glowing bar at its left edge; one tag, the count 15/700
- * dim, and the playlist's 7 px dot. Focused = FILLED.
+ * dim. Focused = FILLED.
  */
 @Composable
 private fun LiveColumnItem(
@@ -685,7 +675,6 @@ private fun LiveColumnItem(
                 if (tags.isNotEmpty()) Row(horizontalArrangement = Arrangement.spacedBy(6.mpx)) { tags.forEach { StageTag(it, onAccent = on) } }
             }
             entry.count?.let { Text(tv.own.myowntv.ui.components.formatCount(it), style = stageText(15, 700), color = on ?: StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-            entry.mark?.let { m -> Box(Modifier.size(7.mpx).background(m.shownColor, RoundedCornerShape(50))) }
         }
     }
 }

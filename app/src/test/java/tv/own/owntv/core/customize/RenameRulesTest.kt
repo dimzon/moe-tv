@@ -63,8 +63,8 @@ class RenameRulesTest {
 
     @Test
     fun removePrefix_eatsFollowingSeparator() {
-        val r = RenameRules.apply("4K Sports", listOf(remove(PREFIX, "4K")))
-        assertEquals("Sports", r.name)
+        val r = RenameRules.apply("4K Movies", listOf(remove(PREFIX, "4K")))
+        assertEquals("Movies", r.name)
         assertTrue(r.changed)
     }
 

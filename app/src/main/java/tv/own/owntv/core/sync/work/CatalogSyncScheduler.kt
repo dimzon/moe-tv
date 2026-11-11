@@ -66,31 +66,6 @@ class CatalogSyncScheduler(private val context: Context) {
             .enqueueUniqueWork(ContentIndexWorker.workName(), ExistingWorkPolicy.KEEP, request)
     }
 
-    /**
-     * Measure this provider's stream limit in the background.
-     *
-     * KEEP, not REPLACE: the measurement runs at most once per playlist, and a second enqueue from a
-     * re-sync must not restart one that is already waiting for the user to stop watching.
-     */
-    fun enqueueConnectionMeasurement(sourceId: Long) {
-        val request = OneTimeWorkRequestBuilder<ConnectionMeasurementWorker>()
-            .setInputData(workDataOf(ConnectionMeasurementWorker.KEY_SOURCE_ID to sourceId))
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build(),
-            )
-            .addTag(ConnectionMeasurementWorker.WORK_TAG)
-            .addTag("measure-source-$sourceId")
-            .build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            ConnectionMeasurementWorker.workName(sourceId),
-            ExistingWorkPolicy.KEEP,
-            request,
-        )
-        android.util.Log.i("ConnectionMeasurement", "measurement enqueued sourceId=$sourceId")
-    }
-
     fun observeSync(sourceId: Long): Flow<CatalogSyncState> =
         WorkManager.getInstance(context)
             .getWorkInfosForUniqueWorkFlow(workName(sourceId))

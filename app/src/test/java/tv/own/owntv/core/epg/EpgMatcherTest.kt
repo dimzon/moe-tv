@@ -12,7 +12,7 @@ class EpgMatcherTest {
     @Test
     fun normalize_stripsQualityCountryAndSeparators() {
         assertEquals("fuss tv 3", EpgMatcher.normalizeForEpg("DE| FUSS-TV 3 [HD]"))
-        assertEquals("sky sport bundesliga 1", EpgMatcher.normalizeForEpg("Sky Sport Bundesliga 1 FHD"))
+        assertEquals("sky liga bundesliga 1", EpgMatcher.normalizeForEpg("Sky Liga Bundesliga 1 FHD"))
         assertEquals("cnn", EpgMatcher.normalizeForEpg("(US) CNN ᴴᴰ"))
         assertEquals("bbc 1", EpgMatcher.normalizeForEpg("BBC.One.UK")) // number words → digits
     }
@@ -94,8 +94,8 @@ class EpgMatcherTest {
 
     @Test
     fun score_differentChannelNumbersNeverReachReview() {
-        val a = EpgMatcher.normalizeForEpg("Sky Sports 2")
-        val b = EpgMatcher.normalizeForEpg("Sky Sports 3")
+        val a = EpgMatcher.normalizeForEpg("Sky Cinema 2")
+        val b = EpgMatcher.normalizeForEpg("Sky Cinema 3")
         assertTrue(EpgMatcher.scoreNormalized(a, b) < EpgMatcher.REVIEW_THRESHOLD)
     }
 
@@ -187,8 +187,8 @@ class EpgMatcherTest {
 
     @Test
     fun search_seesThroughPunctuationAndNoise() {
-        assertTrue(EpgMatcher.matchesSearch("sky sport", "Sky-Sports HD", "sky.sports.uk"))
-        assertTrue(EpgMatcher.matchesSearch("skysports", "Sky-Sports HD", "sky.sports.uk"))
+        assertTrue(EpgMatcher.matchesSearch("sky cinema", "Sky-Cinema HD", "sky.cinema.uk"))
+        assertTrue(EpgMatcher.matchesSearch("skycinema", "Sky-Cinema HD", "sky.cinema.uk"))
     }
 
     @Test
@@ -221,7 +221,7 @@ class EpgMatcherTest {
     fun search_aQueryThatNormalizesAwayStillFilters() {
         // "HD" is noise to the normalizer, so it normalizes to nothing. It must not therefore match
         // the entire guide — it falls back to a plain substring.
-        assertTrue(EpgMatcher.matchesSearch("HD", "Sky Sports HD", "sky.sports.uk"))
+        assertTrue(EpgMatcher.matchesSearch("HD", "Sky Cinema HD", "sky.cinema.uk"))
         assertFalse(EpgMatcher.matchesSearch("HD", "BBC One", "bbc.one.uk"))
     }
 }

@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -64,7 +62,6 @@ import tv.own.owntv.core.model.HomeRow
 fun HomeRow.displayTitle(): String = stringResource(
     when (this) {
         HomeRow.HERO -> R.string.home_row_keep_watching
-        HomeRow.LIVE_SPORTS -> R.string.sports_home_row
         HomeRow.RECENT_CHANNELS -> R.string.home_row_recent_channels
         HomeRow.FAVORITE_CHANNELS -> R.string.home_row_favorite_channels
     },
@@ -74,7 +71,6 @@ fun HomeRow.displayTitle(): String = stringResource(
 fun HomeRow.settingsDescription(): String = stringResource(
     when (this) {
         HomeRow.HERO -> R.string.home_row_hero_description
-        HomeRow.LIVE_SPORTS -> R.string.sports_home_row_description
         HomeRow.RECENT_CHANNELS -> R.string.home_row_recent_description
         HomeRow.FAVORITE_CHANNELS -> R.string.home_row_favorite_description
     },

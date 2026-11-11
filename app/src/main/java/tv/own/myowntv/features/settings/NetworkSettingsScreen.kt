@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -67,7 +65,7 @@ internal val PROXY_SEARCH_ROWS: List<Int> = listOf(R.string.settings_use_proxy, 
 
 /**
  * Network → Proxy: one app-wide HTTP proxy. Enabling it routes all app traffic (playlist,
- * Xtream API, EPG, images, updates) and live stream playback through the proxy.
+ * API, EPG, images, updates) and live stream playback through the proxy.
  */
 @Composable
 fun NetworkSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {

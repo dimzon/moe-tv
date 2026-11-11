@@ -21,15 +21,11 @@ import tv.own.owntv.core.menu.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
-import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
@@ -43,10 +39,7 @@ import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
 
-import tv.own.myowntv.features.sports.SportsPlayback
 import tv.own.myowntv.features.pip.PictureInPicture
-import tv.own.myowntv.features.sports.SportsSettingsViewModel
-import tv.own.myowntv.features.sports.SportsViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -68,7 +61,6 @@ import tv.own.myowntv.features.search.SearchViewModel
 import tv.own.myowntv.features.settings.LocalAutoSyncViewModel
 import tv.own.myowntv.features.settings.LocalSyncViewModel
 import tv.own.myowntv.features.settings.ChannelNameCleanupViewModel
-import tv.own.myowntv.features.settings.EpgSourcesViewModel
 import tv.own.myowntv.features.settings.HomeSettingsViewModel
 import tv.own.myowntv.features.settings.LanguageSettingsViewModel
 import tv.own.myowntv.features.settings.PlayerButtonsSettingsViewModel
@@ -98,8 +90,6 @@ val appModule = module {
     singleOf(::GuideReader)
     singleOf(::SearchReader)
     singleOf(::HomeFeedReader)
-    // Sports Hub: which match the playing channel came from. Lazy; nothing runs until it is asked.
-    singleOf(::SportsPlayback)
     // Picture-in-picture when leaving the app: one instance shared by the activity and the shell.
     singleOf(::PictureInPicture)
     viewModelOf(::HomeViewModel)
@@ -133,8 +123,6 @@ val appModule = module {
             get(), // externalPlayerLauncher
         )
     }
-    viewModelOf(::SportsViewModel)
-    viewModelOf(::SportsSettingsViewModel)
     viewModelOf(::PlayerButtonsSettingsViewModel)
     viewModelOf(::SearchViewModel)
     // Past the highest arity Koin's `*Of` DSL generates, so this binding stays explicit. Named
@@ -146,27 +134,14 @@ val appModule = module {
             sourceDao = get(),
             sourceRepository = get(),
             settings = get(),
-            importFinalizer = get(),
             channelDao = get(),
             categoryDao = get(),
             customizationStore = get(),
             navVisibility = get(),
             userDataWriter = get(),
-            epgRepository = get(),
-            epgSourceStore = get(),
-            catalogSyncScheduler = get(),
             okHttpClient = get(),
-            stalkerAuth = get(),
-            stalkerClient = get(),
-            xtreamClient = get(),
-            sourceTester = get(),
             companion = get(),
             playbackPrefs = get(),
-            connectionLimits = get(),
-            livePreview = get(),
-            enginePool = get(),
-            importer = get(),
-            sourceEditor = get(),
         )
     }
     viewModelOf(::LocalSyncViewModel)
@@ -182,7 +157,6 @@ val appModule = module {
             get(), // channelDao
             get(), // epgDao
             get(), // epgRepository
-            get(), // epgSourceStore
             get(), // connectivity
             get(), // customize
             get(), // sourceDao
@@ -199,7 +173,6 @@ val appModule = module {
     viewModelOf(::CustomizeViewModel)
     viewModelOf(::SettingsPinViewModel)
     viewModelOf(::CustomizeItemsViewModel)
-    viewModelOf(::EpgSourcesViewModel)
     viewModelOf(::ChannelNameCleanupViewModel)
     // The counts the More rows and the Favourites / History tabs carry.
     viewModelOf(::MoreCountsViewModel)

@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -77,8 +75,8 @@ import tv.own.myowntv.ui.theme.StageColors
 import tv.own.myowntv.ui.theme.stageAccent
 import tv.own.myowntv.ui.theme.stageText
 
-/** The Home rails a live-only app can show: the hero, sports hub and the two live channel rows. */
-private val LIVE_HOME_ROWS = setOf(HomeRow.HERO, HomeRow.LIVE_SPORTS, HomeRow.RECENT_CHANNELS, HomeRow.FAVORITE_CHANNELS)
+/** The Home rails a live-only app can show: the hero and the two live channel rows. */
+private val LIVE_HOME_ROWS = setOf(HomeRow.HERO, HomeRow.RECENT_CHANNELS, HomeRow.FAVORITE_CHANNELS)
 
 /**
  * Settings › Layout › Home screen: the Home rows (shown or hidden,
@@ -223,7 +221,6 @@ private fun HomeSwitchRow(icon: MyOwnTVIcon, titleRes: Int, descRes: Int, on: Bo
 
 private val HomeRow.icon: MyOwnTVIcon get() = when (this) {
     HomeRow.HERO -> MyOwnTVIcon.PLAY_CIRCLE
-    HomeRow.LIVE_SPORTS -> MyOwnTVIcon.SPORTS
     HomeRow.RECENT_CHANNELS -> MyOwnTVIcon.LIVE_TV
     HomeRow.FAVORITE_CHANNELS -> MyOwnTVIcon.FAVORITE
 }

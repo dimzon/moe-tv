@@ -33,7 +33,7 @@ class ExcludingCountDaoTest {
     @Before
     fun setUp() = runBlocking {
         db = ownTVTestDatabase()
-        source = db.sourceDao().insert(SourceEntity(name = "Test", type = SourceType.M3U, url = "http://test"))
+        source = db.sourceDao().insert(SourceEntity(name = "Test", type = SourceType.RUTUBE, url = "https://test"))
         val (a, b) = db.categoryDao().insertAll(
             listOf(
                 CategoryEntity(sourceId = source, mediaType = MediaType.LIVE, name = "Locked"),

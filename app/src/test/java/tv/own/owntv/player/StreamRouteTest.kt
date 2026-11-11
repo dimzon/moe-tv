@@ -31,7 +31,7 @@ class StreamRouteTest {
 
     // --- the default, which must not have moved ---
 
-    /** The overwhelming majority: raw MPEG-TS Xtream live, nothing declared, nothing inferred. */
+    /** The overwhelming majority: raw MPEG-TS live, nothing declared, nothing inferred. */
     @Test
     fun `no evidence at all stays progressive`() {
         assertEquals(StreamRoute.PROGRESSIVE, route())
@@ -103,9 +103,9 @@ class StreamRouteTest {
     // --- the response sniff, which is the only route for an undeclared stream ---
 
     /**
-     * The Stalker / Xtream case. A portal hands back its own `cmd` and an Xtream live URL is one we
-     * build ourselves as `.ts`, so neither can ever carry a `manifest_type`. Without this rung those
-     * two source types could not reach DASH at all, no matter what the server served.
+     * The provider case. A portal hands back its own `cmd` and a live URL is one we build ourselves
+     * as `.ts`, so neither can ever carry a `manifest_type`. Without this rung those sources could
+     * not reach DASH at all, no matter what the server served.
      */
     @Test
     fun `a forced dash retry routes to dash with nothing declared`() {

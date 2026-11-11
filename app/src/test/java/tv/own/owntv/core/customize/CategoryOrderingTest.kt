@@ -16,7 +16,7 @@ class CategoryOrderingTest {
     private fun cat(id: Long, name: String) =
         CategoryEntity(id = id, sourceId = 1, mediaType = MediaType.LIVE, name = name, remoteId = "r$id")
 
-    private val cats = listOf(cat(1, "Sports"), cat(2, "News"), cat(3, "Adult"), cat(4, "Movies"))
+    private val cats = listOf(cat(1, "Music"), cat(2, "News"), cat(3, "Adult"), cat(4, "Movies"))
 
     private fun keyOf(id: Long) = CustomizeKeys.category(cats.first { it.id == id })
 
@@ -37,7 +37,7 @@ class CategoryOrderingTest {
             categoryPositions = mapOf(keyOf(4) to 0),
         )
         val rows = cats.railCategories(c)
-        assertEquals(listOf("Movies", "Mine", "Sports", "News", "Adult"), rows.map { it.displayName })
+        assertEquals(listOf("Movies", "Mine", "Music", "News", "Adult"), rows.map { it.displayName })
     }
 
     @Test
@@ -59,8 +59,8 @@ class CategoryOrderingTest {
         val c = SectionCustomizations(categoryPositions = pinnedAfterMove(moved.keys, emptySet(), moved.carried))
 
         assertEquals(mapOf(keyOf(1) to 2), c.categoryPositions)
-        assertEquals(listOf("News", "Adult", "Sports", "Movies"), cats.railCategories(c).map { it.displayName })
-        assertEquals(listOf("Adult", "Movies", "Sports", "News"), cats.railCategories(c, alphabetical = true).map { it.displayName })
+        assertEquals(listOf("News", "Adult", "Music", "Movies"), cats.railCategories(c).map { it.displayName })
+        assertEquals(listOf("Adult", "Movies", "Music", "News"), cats.railCategories(c, alphabetical = true).map { it.displayName })
     }
 
     @Test
@@ -87,7 +87,7 @@ class CategoryOrderingTest {
         assertEquals(3, move.activeIndex)
 
         val up = move.moved(MoveKind.UP)!!.moved(MoveKind.UP)!!
-        assertEquals(listOf("Sports", "Movies", "News", "Adult"), up.items)
+        assertEquals(listOf("Music", "Movies", "News", "Adult"), up.items)
         assertEquals(1, up.activeIndex)
 
         // What the store is given must be what the rail then shows.
@@ -107,11 +107,11 @@ class CategoryOrderingTest {
     fun `move to top and bottom reach the ends`() {
         val rows = cats.railCategories(SectionCustomizations())
         val top = CategoryMove.begin(rows, keyOf(3))!!.moved(MoveKind.TOP)!!
-        assertEquals(listOf("Adult", "Sports", "News", "Movies"), top.items)
+        assertEquals(listOf("Adult", "Music", "News", "Movies"), top.items)
         assertEquals(0, top.activeIndex)
 
         val bottom = CategoryMove.begin(rows, keyOf(1))!!.moved(MoveKind.BOTTOM)!!
-        assertEquals(listOf("News", "Adult", "Movies", "Sports"), bottom.items)
+        assertEquals(listOf("News", "Adult", "Movies", "Music"), bottom.items)
         assertEquals(3, bottom.activeIndex)
     }
 }

@@ -12,7 +12,6 @@ import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.database.entity.playStreamUrl
-import tv.own.owntv.core.epg.displayLogoUrl
 import tv.own.owntv.core.player.contentKey
 import tv.own.owntv.core.sync.RutubeCaption
 import tv.own.owntv.core.settings.LiveBuffer
@@ -580,7 +579,7 @@ class LiveTuneController(
         override fun meta(channel: ChannelEntity): MediaMeta = MediaMeta(
             title = channel.name,
             subtitle = label(channel),
-            logoUrl = channel.displayLogoUrl,
+            logoUrl = channel.logoUrl,
             contentKey = contentKey(channel.sourceId, tv.own.owntv.core.model.MediaType.LIVE.name, channel.remoteId),
         )
 

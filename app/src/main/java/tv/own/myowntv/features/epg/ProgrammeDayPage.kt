@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -88,7 +86,6 @@ import kotlinx.coroutines.delay
 import tv.own.myowntv.R
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
-import tv.own.owntv.core.epg.displayLogoUrl
 import tv.own.owntv.core.live.ProviderTags
 import tv.own.owntv.core.parser.EpgDetails
 import tv.own.myowntv.features.live.LivePlate
@@ -303,7 +300,7 @@ internal fun ProgrammeDayPage(
 private fun PageHeader(channel: ChannelEntity, day: Int, onDays: Boolean) {
     val a = stageAccent
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.mpx)) {
-        LivePlate(channel.displayLogoUrl, 84.mpx, 60.mpx)
+        LivePlate(channel.logoUrl, 84.mpx, 60.mpx)
         Column(Modifier.weight(1f)) {
             Text(
                 listOfNotNull(channel.number?.toString(), ProviderTags.parse(channel.name).name).joinToString(" · "),

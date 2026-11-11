@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -114,8 +112,6 @@ internal fun TopBar(
     // The clock. Rendered between two equal-weight halves so it lands on the true centre of the screen
     // whatever the channel name and guide card happen to be doing on either side of it.
     centre: (@Composable () -> Unit)? = null,
-    // One more line under the channel name (a Sports match's score).
-    below: (@Composable () -> Unit)? = null,
 ) {
     // Reactive meta so the title row updates instantly on a channel zap (the plain vars aren't observed).
     val meta by player.currentMeta.collectAsStateWithLifecycle()
@@ -158,7 +154,6 @@ internal fun TopBar(
                 }
                 Text(displayTitle, style = tv.own.myowntv.ui.theme.stageText(32, 600), color = hudInk, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            below?.invoke()
         }
       } // end left half
       if (centre != null) {
@@ -308,7 +303,6 @@ internal fun BottomBar(
     onInfo: (() -> Unit)? = null, infoOn: Boolean = false, onReport: (() -> Unit)? = null,
     favorite: Boolean = false, onToggleFavorite: (() -> Unit)? = null,
     onPreviousChannel: (() -> Unit)? = null,
-    onOtherChannels: (() -> Unit)? = null, otherChannelsCount: Int = 0,
     hasSources: Boolean = false,
     onOpenDialog: (HudDialog) -> Unit, onPip: (() -> Unit)?, onAudioMode: (() -> Unit)?,
     onMultiview: (() -> Unit)? = null, modifier: Modifier = Modifier,
@@ -349,12 +343,6 @@ internal fun BottomBar(
                         PlayerControl.PREVIOUS_CHANNEL -> if (onPreviousChannel != null) {
                             CtrlButton(MyOwnTVIcon.HISTORY, label = stringResource(R.string.player_previous_channel)) { onPreviousChannel() }
                         }
-                        // Sports Hub: only for a channel started from a match.
-                        PlayerControl.OTHER_CHANNELS -> if (onOtherChannels != null) {
-                            CtrlButton(MyOwnTVIcon.LIST, label = stringResource(R.string.sports_other_channels_count, otherChannelsCount)) { onOtherChannels() }
-                        }
-                        // Not shown on the TV: Back from the player already returns to the match page.
-                        PlayerControl.MATCH -> Unit
                         // The same channel in another quality, category or playlist; the
                         // list is read when it opens.
                         PlayerControl.SOURCES -> if (hasSources) {
@@ -433,7 +421,7 @@ internal fun BottomBar(
                         PlayerControl.GO_LIVE, PlayerControl.VOLUME, PlayerControl.BRIGHTNESS,
                         PlayerControl.SUBTITLES, PlayerControl.AUDIO,
                         PlayerControl.FAVOURITE, PlayerControl.PREVIOUS_CHANNEL,
-                        PlayerControl.OTHER_CHANNELS, PlayerControl.MATCH, PlayerControl.SOURCES,
+                        PlayerControl.SOURCES,
                         PlayerControl.CHANNEL_LIST,
                         -> Unit
                     }

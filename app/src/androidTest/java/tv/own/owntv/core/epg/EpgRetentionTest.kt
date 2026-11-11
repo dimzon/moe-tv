@@ -33,7 +33,7 @@ class EpgRetentionTest {
     fun setUp() {
         db = ownTVTestDatabase()
         // Programmes must belong to a real playlist row (epg_programmes.sourceId is a foreign key).
-        runBlocking { db.sourceDao().insert(SourceEntity(id = 1, name = "Playlist", type = SourceType.M3U, url = "http://example.invalid")) }
+        runBlocking { db.sourceDao().insert(SourceEntity(id = 1, name = "RuTube", type = SourceType.RUTUBE, url = "https://rutube.test")) }
     }
 
     @After

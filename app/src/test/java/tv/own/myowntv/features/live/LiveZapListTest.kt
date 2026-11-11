@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -96,7 +94,7 @@ class LiveZapListTest {
                 while (releaseWindow) delay(2)
                 window
             },
-            categoryName = { "Sports" },
+            categoryName = { "News" },
         )
 
         fun await(what: String, condition: () -> Boolean) = runBlocking {
@@ -273,7 +271,7 @@ class LiveZapListTest {
         runBlocking { delay(40) }
         assertTrue(closed)
         assertEquals(chosen, h.zap.channels.value)
-        assertEquals("Sports", h.zap.title.value)
+        assertEquals("News", h.zap.title.value)
         h.stop()
     }
 

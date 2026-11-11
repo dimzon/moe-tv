@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -77,7 +75,6 @@ import androidx.tv.material3.Text
 import tv.own.myowntv.R
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
-import tv.own.owntv.core.epg.displayLogoUrl
 import tv.own.owntv.core.home.GuideSliceState
 import tv.own.owntv.core.model.HomeLiveRowMode
 import tv.own.myowntv.ui.components.ChannelLogoTile
@@ -198,7 +195,7 @@ internal fun OnNowCard(
 @Composable
 fun ChannelPlate(channel: ChannelEntity, modifier: Modifier = Modifier) {
     ChannelLogoTile(
-        logoUrl = channel.displayLogoUrl,
+        logoUrl = channel.logoUrl,
         modifier = modifier.clip(RoundedCornerShape(StageRadii.Plate)),
         fill = StageColors.ControlFill,
     ) {

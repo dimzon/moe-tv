@@ -10,7 +10,6 @@ import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.epg.EpgShift
-import tv.own.owntv.core.epg.EpgSourceStore
 
 /** Guide rows are looked up by epg id in chunks, to stay inside SQLite's variable limit. */
 private const val KEY_CHUNK = 400
@@ -33,7 +32,6 @@ private const val KEY_CHUNK = 400
  */
 class GuideReader(
     private val epgDao: EpgDao,
-    private val epgSourceStore: EpgSourceStore,
     private val sourceDao: SourceDao,
     /**
      * The second guide. [row] falls back to its provider fetch when the stored table has nothing for
@@ -47,7 +45,7 @@ class GuideReader(
      * lineup — so narrowing this to the channels' own sources loses rows that are really there.
      */
     suspend fun guideSourceIds(): List<Long> = withContext(Dispatchers.IO) {
-        (sourceDao.allSourceIds() + epgSourceStore.getAll().map { it.id }).distinct()
+        sourceDao.allSourceIds()
     }
 
     // A `window(from, to)` used to live here: it paged the WHOLE guide window into one ArrayList and
@@ -98,7 +96,7 @@ class GuideReader(
                 .map { EpgShift.apply(it, shift) }
         }
         if (stored.isNotEmpty()) {
-            return@withContext epgSourceStore.priority().resolve(stored).also { collapsed ->
+            return@withContext stored.also { collapsed ->
                 CorePerf.log {
                     "guide_row source=stored channelId=${channel.id} key=$epgKey shift=$shift " +
                         "rows=${stored.size} collapsed=${collapsed.size} " +
@@ -148,7 +146,6 @@ class GuideReader(
         var chunks = 0
         var rowsRead = 0
         val collected = HashMap<Long, List<EpgProgrammeEntity>>()
-        val priority = epgSourceStore.priority()
         for ((shift, group) in keyed.groupBy { it.third }) {
             val rowsByKey = group
                 .map { it.second }.distinct()
@@ -164,7 +161,7 @@ class GuideReader(
                 .groupBy { it.epgChannelId }
             for ((channelId, epgKey, _) in group) {
                 rowsByKey[epgKey]?.takeIf { it.isNotEmpty() }
-                    ?.let { collected[channelId] = EpgShift.apply(priority.resolve(it), shift) }
+                    ?.let { collected[channelId] = EpgShift.apply(it, shift) }
             }
         }
         val ordered = LinkedHashMap<Long, List<EpgProgrammeEntity>>(collected.size)

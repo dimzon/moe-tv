@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -93,8 +91,6 @@ enum class MyOwnTVIcon {
     EYE_OFF, MOVE, EXTERNAL, TRASH, LOCK, MULTIVIEW, NOW, CALENDAR, TILES,
     // Audio mode's equaliser mark (the bar at rest, the rail's Now playing item).
     EQ,
-    // The Sports Hub's trophy (rail, Settings → Sports).
-    SPORTS,
     // Voice search, beside the search field.
     MIC,
 }

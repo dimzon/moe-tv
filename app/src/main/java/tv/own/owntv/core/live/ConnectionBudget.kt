@@ -44,13 +44,14 @@ sealed interface StreamGrant {
  * May one more stream start on this playlist?
  *
  * The feature is never capped: the tile-count setting always offers up to four and nothing reduces
- * it behind the user's back. An individual stream is checked before it tunes, and if there is
- * nothing spare that one tile is told why, in a sentence, instead of failing into a spinner. The
- * provider's own HTTP 458 remains the backstop for a number that was wrong or stale.
+ * it behind the user's back. The one provider — RuTube — publishes no connection limit, and
+ * [SourceEntity] no longer carries a measured one, so every stream is allowed and the provider's own
+ * refusal remains the backstop when a tile really cannot tune.
  *
- * Everything here is arithmetic over [SourceEntity.maxConnections]: no Android, no I/O, no clock.
+ * The [source]/[open]/[purpose] parameters and the refusal vocabulary stay for API compatibility:
+ * call sites still pass them and the sentence renderers still exist.
  *
- * @param source the playlist the stream would come from; null or an unknown limit allows everything.
+ * @param source the playlist the stream would come from; no published limit allows everything.
  * @param open the streams that playlist already has running.
  * @param reserveOneForWatching kept for API compatibility; recordings are gone, so it no longer
  *   changes anything.
@@ -60,24 +61,7 @@ fun connectionBudget(
     open: OpenStreams,
     purpose: StreamPurpose,
     reserveOneForWatching: Boolean = true,
-): StreamGrant {
-    // "Ignore connection limit" on the playlist reads as an unknown limit: every stream may try, and
-    // the provider's own refusal is what stops one.
-    val max = source?.takeIf { !it.ignoreConnectionLimit }?.maxConnections ?: 0
-    // 0 = the playlist never said. Allow everything and let the provider answer; warning text
-    // elsewhere tells the user that is what happened if a tile does fail.
-    if (max <= 0) return StreamGrant.Allowed
-
-    fun refuse(reason: StreamRefusal) = StreamGrant.Refused(reason, max, open)
-
-    return when (purpose) {
-        StreamPurpose.WATCHING -> when {
-            open.total < max -> StreamGrant.Allowed
-            max == 1 -> refuse(StreamRefusal.SINGLE_CONNECTION)
-            else -> refuse(StreamRefusal.ALL_IN_USE)
-        }
-    }
-}
+): StreamGrant = StreamGrant.Allowed
 
 /**
  * The sentence a refused tile shows in place of a picture. Says what the playlist allows and what is

@@ -21,15 +21,11 @@ import tv.own.owntv.core.menu.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
-import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
@@ -134,9 +130,9 @@ enum class RailState {
  */
 data class NowPlayingRail(val logoUrl: String?, val audioMode: Boolean, val playing: Boolean)
 
-/** The rail order: Search first, Sports then the Guide right after Live TV, More last. */
+/** The rail order: Search first, the Guide right after Live TV, More last. */
 private val StageRailOrder = listOf(
-    MainSection.SEARCH, MainSection.HOME, MainSection.LIVE_TV, MainSection.SPORTS, MainSection.EPG,
+    MainSection.SEARCH, MainSection.HOME, MainSection.LIVE_TV, MainSection.EPG,
 )
 
 /** The rail's width with names: Normal 280 · Wide 340 · Extra wide 400; Compact is the 84 capsule. */
@@ -350,7 +346,6 @@ private val MainSection.stageIcon: MyOwnTVIcon
         MainSection.HOME -> MyOwnTVIcon.HOME
         MainSection.LIVE_TV -> MyOwnTVIcon.LIVE_TV
         MainSection.EPG -> MyOwnTVIcon.EPG
-        MainSection.SPORTS -> MyOwnTVIcon.SPORTS
         MainSection.MORE, MainSection.SETTINGS -> MyOwnTVIcon.TILES
     }
 

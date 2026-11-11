@@ -7,7 +7,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.SourceEntity
-import tv.own.owntv.core.model.SourceType
 import tv.own.owntv.core.sync.ImportStage
 import tv.own.owntv.core.sync.SyncContentTypes
 import tv.own.owntv.core.sync.SyncManager
@@ -30,46 +29,6 @@ class SourceRepository(
 
     suspend fun getById(id: Long): SourceEntity? = sourceDao.getById(id)
 
-    suspend fun addXtreamSource(
-        name: String, serverUrl: String, username: String, password: String,
-        userAgent: String? = null, epgUrl: String? = null,
-        syncLive: Boolean = true,
-        preferHls: Boolean = false,
-        httpReferer: String? = null,
-    ): SourceEntity = add(
-        SourceEntity(
-            name = name, type = SourceType.XTREAM, url = serverUrl,
-            username = username, password = password, userAgent = userAgent, epgUrl = epgUrl,
-            syncLive = syncLive,
-            preferHls = preferHls, httpReferer = httpReferer,
-        ),
-    )
-
-    suspend fun addM3uSource(
-        name: String, url: String, userAgent: String? = null, epgUrl: String? = null,
-        httpReferer: String? = null,
-    ): SourceEntity = add(
-        SourceEntity(name = name, type = SourceType.M3U, url = url, userAgent = userAgent, epgUrl = epgUrl, httpReferer = httpReferer),
-    )
-
-    suspend fun addStalkerSource(
-        name: String, portalUrl: String, mac: String,
-        serialNumber: String? = null, deviceId: String? = null, deviceId2: String? = null,
-        signature: String? = null, userAgent: String? = null,
-        syncLive: Boolean = true,
-        httpReferer: String? = null,
-        login: String? = null, password: String? = null,
-    ): SourceEntity = add(
-        SourceEntity(
-            name = name, type = SourceType.STALKER, url = portalUrl, mac = mac,
-            username = login, password = password,
-            stalkerSerialNumber = serialNumber, stalkerDeviceId = deviceId,
-            stalkerDeviceId2 = deviceId2, stalkerSignature = signature, userAgent = userAgent,
-            syncLive = syncLive,
-            httpReferer = httpReferer,
-        ),
-    )
-
     /**
      * The one built-in RuTube source, shared by everyone. Idempotent: returns the
      * existing row or creates it.
@@ -77,11 +36,6 @@ class SourceRepository(
     suspend fun ensureRutube(): SourceEntity = BuiltInSource.ensure(sourceDao)
 
     suspend fun rutubeSource(): SourceEntity? = sourceDao.rutubeSource()
-
-    private suspend fun add(source: SourceEntity): SourceEntity {
-        val id = sourceDao.insert(source)
-        return source.copy(id = id)
-    }
 
     /**
      * Deletes the playlist and everything remembered for its items: engine pins,
@@ -133,7 +87,7 @@ class SourceRepository(
         val (result, _) = syncManager.sync(source, onProgress, contentTypes, forcePrune)
         Log.i(TAG, "core sync sourceId=${source.id} result=${result.name()} ms=${SystemClock.elapsedRealtime() - coreStartedAt}")
         // Always re-attach the snapshot to the new ids — a failed/cancelled sync can still have
-        // rewritten some rows (M3U is clear-then-insert; Xtream REPLACE-upserts renumber ids), and
+        // rewritten some rows (the clear-then-insert pass renumbers row ids), and
         // without a relink those favorites/history entries turn invisible until a later
         // successful sync. Purging genuinely-gone rows is only allowed after a complete enabled
         // success: a partial pass never touched the rest, and a failure proves nothing. Off

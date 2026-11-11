@@ -21,15 +21,11 @@ import tv.own.owntv.core.menu.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
-import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
@@ -43,7 +39,6 @@ import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -57,6 +52,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -82,19 +78,12 @@ class ShellViewModel(
     private val settings: SettingsRepository,
     private val sourceRepository: SourceRepository,
     connectivity: ConnectivityObserver,
-    private val epgMigration: tv.own.owntv.core.epg.EpgMigration,
     private val autoRefresh: tv.own.owntv.core.sync.AutoRefresh,
     private val weatherRepository: WeatherRepository,
     private val navVisibility: NavVisibility,
-    private val catalogSyncScheduler: tv.own.owntv.core.sync.work.CatalogSyncScheduler,
-    private val importFinalizer: tv.own.owntv.core.sync.ImportFinalizer,
     private val categoryUnlocks: CategoryUnlockSession,
     private val customize: CustomizationStore,
 ) : ViewModel() {
-
-    companion object {
-        private const val TAG = "OwnTVHome"
-    }
 
     /** Which player presentation is on screen, and which section armed it. Held here rather than in
      *  the composition so a recreation of the Activity (a script-family language switch) does not
@@ -107,12 +96,6 @@ class ShellViewModel(
 
     /** Relocks the categories the PIN opened when the app leaves the screen. */
     private val relock = CategoryRelock(viewModelScope, customize, categoryUnlocks)
-
-    init {
-        // One-time: move any existing playlist EPG into the new standalone EPG sources (v2.2.0).
-        viewModelScope.launch { runCatching { epgMigration.run() } }
-        // The one-shot settings migrations run from core at process start (PlaybackStartup).
-    }
 
     /** Set by the shell while it is up: stops what plays from a category a relock seals. */
     internal var sealedPlayback: SealedPlaybackGuard?
@@ -135,26 +118,6 @@ class ShellViewModel(
     /** The Auto refresh settings — core's [tv.own.owntv.core.sync.AutoRefresh], shared with the phone. */
     fun checkAutoRefresh(includeStartup: Boolean) {
         viewModelScope.launch { autoRefresh.check(includeStartup) }
-    }
-
-    /**
-     * The playlist menu's "Resync now": the same sync as Settings › Sources › Resync now, for
-     * [sources]. KEEP, so a playlist already syncing carries on instead of starting over.
-     */
-    fun resync(sources: List<tv.own.owntv.core.database.entity.SourceEntity>) {
-        viewModelScope.launch {
-            sources.forEach { source ->
-                Log.d(TAG, "resync enqueue sourceId=${source.id} from=playlist_menu")
-                val counts = importFinalizer.contentCounts(source.id)
-                catalogSyncScheduler.enqueueSync(
-                    source.id,
-                    reason = "manual_resync",
-                    contentTypes = tv.own.owntv.core.sync.SyncContentTypes.enabledOf(source),
-                    baseItemCount = counts.channels,
-                    policy = androidx.work.ExistingWorkPolicy.KEEP,
-                )
-            }
-        }
     }
 
     val themeMode: StateFlow<ThemeMode> = settings.themeMode
@@ -196,28 +159,10 @@ class ShellViewModel(
     val backgroundConfig: StateFlow<tv.own.owntv.core.theme.BackgroundConfig> = settings.backgroundConfig
         .stateIn(viewModelScope, SharingStarted.Eagerly, tv.own.owntv.core.theme.BackgroundConfig())
 
-    /** The (default) source's name for the top bar; null means no source exists yet. */
+    /** The built-in RuTube source's name for the top bar; null means it is not there yet. */
     val sourceSummary: StateFlow<String?> = sourceRepository.observeSources()
-        .combine(settings.defaultSourceId) { sources, defaultId ->
-            when {
-                sources.isEmpty() -> null
-                else -> (sources.firstOrNull { it.id == defaultId } ?: sources.first()).name
-            }
-        }
+        .map { it.firstOrNull()?.name }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
-
-    /** All sources, for the top-bar quick switcher (empty before the first one is added). */
-    val playlists: StateFlow<List<tv.own.owntv.core.database.entity.SourceEntity>> = sourceRepository.observeSources()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
-    /** The chosen active-playlist filter: -1 = All playlists (merged view), else a single playlist id. */
-    val activePlaylistId: StateFlow<Long> = settings.defaultSourceId
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), -1L)
-
-    /** Switch the active-playlist filter from the top-bar picker. Persists (survives restart). */
-    fun setActivePlaylist(id: Long) {
-        viewModelScope.launch { settings.setDefaultSource(id) }
-    }
 
     /**
      * Weather chip. Refreshes when connectivity returns, cached 30 min by repository.

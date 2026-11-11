@@ -7,10 +7,10 @@ import org.junit.Test
 /**
  * [LivePreviewEngine.shouldTryDirectSource] — the very last rung of the live ladder.
  *
- * The Xtream `direct_source` field is one every major IPTV client deliberately ignores, and for a good
- * reason: panels build it from the streaming server's configured domain and fall back to its raw IP,
- * so a misconfigured panel or load balancer publishes an address reachable only inside their own
- * network. Preferring it would break channels that work today.
+ * A provider's own `direct_source`-style address is one every major IPTV client deliberately ignores,
+ * and for a good reason: panels build it from the streaming server's configured domain and fall back
+ * to its raw IP, so a misconfigured panel or load balancer publishes an address reachable only inside
+ * their own network. Preferring it would break channels that work today.
  *
  * So the whole safety of this feature lives in *when* it fires, not in what it does. It is never
  * tuned first, never replaces the stored stream URL, and is reached only once every other rung is

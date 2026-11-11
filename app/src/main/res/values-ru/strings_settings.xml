@@ -524,7 +524,7 @@
     <string name="settings_series">Сериалы</string>
     <string name="settings_section_count"><xliff:g id="section">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g>)</string>
     <string name="settings_sync_guide_question">Синхронизировать программу передач сейчас?</string>
-    <string name="settings_sync_guide_description">Загрузить программу передач (EPG) для «<xliff:g id="source">%1$s</xliff:g>». Это также можно сделать позже в разделе «Настройки» → «Источники и телепрограмма» → «Источники EPG».</string>
+    <string name="settings_sync_guide_description">Загрузить программу передач (EPG) для «<xliff:g id="source">%1$s</xliff:g>». Это также произойдёт автоматически в фоне.</string>
     <string name="settings_not_now">Не сейчас</string>
     <string name="settings_sync_now">Синхронизировать сейчас</string>
     <string name="settings_syncing_guide">Синхронизация программы передач…</string>

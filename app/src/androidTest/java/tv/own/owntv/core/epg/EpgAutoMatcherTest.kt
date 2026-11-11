@@ -35,7 +35,7 @@ class EpgAutoMatcherTest {
     fun setUp() {
         db = ownTVTestDatabase()
         // Channels must belong to a real playlist row (channels.sourceId is a foreign key).
-        runBlocking { db.sourceDao().insert(SourceEntity(id = playlist, name = "Playlist", type = SourceType.M3U, url = "http://example.invalid")) }
+        runBlocking { db.sourceDao().insert(SourceEntity(id = playlist, name = "RuTube", type = SourceType.RUTUBE, url = "https://rutube.test")) }
         matcher = EpgAutoMatcher(db.channelDao(), GuideCandidates(db.epgDao()))
     }
 

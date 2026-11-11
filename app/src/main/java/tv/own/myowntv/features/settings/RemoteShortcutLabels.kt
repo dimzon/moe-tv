@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -116,7 +114,6 @@ internal fun remoteActionLabel(action: RemoteShortcutAction): String = when (act
     RemoteShortcutAction.OPEN_GUIDE -> stringResource(R.string.common_nav_guide)
     RemoteShortcutAction.OPEN_SEARCH -> stringResource(R.string.common_nav_search)
     RemoteShortcutAction.OPEN_SETTINGS -> stringResource(R.string.common_nav_settings)
-    RemoteShortcutAction.OPEN_PLAYLIST_SWITCHER -> stringResource(R.string.settings_playlists)
     RemoteShortcutAction.CONTINUE_LAST_WATCHED -> stringResource(R.string.settings_remote_action_continue)
     RemoteShortcutAction.FOCUS_NOW_PLAYING -> stringResource(R.string.settings_remote_action_focus_now_playing)
     RemoteShortcutAction.EXPAND_NOW_PLAYING -> stringResource(R.string.settings_remote_action_expand_now_playing)
@@ -138,6 +135,7 @@ internal fun remoteActionLabel(action: RemoteShortcutAction): String = when (act
     RemoteShortcutAction.OPEN_MOVIES,
     RemoteShortcutAction.OPEN_SERIES,
     RemoteShortcutAction.OPEN_DOWNLOADS,
+    RemoteShortcutAction.OPEN_PLAYLIST_SWITCHER,
     -> action.name
 }
 
@@ -147,7 +145,6 @@ internal fun remoteActionIcon(action: RemoteShortcutAction): MyOwnTVIcon = when 
     RemoteShortcutAction.OPEN_GUIDE -> MyOwnTVIcon.EPG
     RemoteShortcutAction.OPEN_SEARCH -> MyOwnTVIcon.SEARCH
     RemoteShortcutAction.OPEN_SETTINGS -> MyOwnTVIcon.SETTINGS
-    RemoteShortcutAction.OPEN_PLAYLIST_SWITCHER -> MyOwnTVIcon.PLAYLIST
     RemoteShortcutAction.CONTINUE_LAST_WATCHED, RemoteShortcutAction.PLAY_PAUSE -> MyOwnTVIcon.PLAY
     RemoteShortcutAction.FOCUS_NOW_PLAYING -> MyOwnTVIcon.FOCUS_HIGHLIGHT
     RemoteShortcutAction.EXPAND_NOW_PLAYING -> MyOwnTVIcon.EXPAND
@@ -161,5 +158,5 @@ internal fun remoteActionIcon(action: RemoteShortcutAction): MyOwnTVIcon = when 
     RemoteShortcutAction.PREVIOUS_CHANNEL -> MyOwnTVIcon.HISTORY
     RemoteShortcutAction.OPEN_MOVIES -> MyOwnTVIcon.MOVIES
     RemoteShortcutAction.OPEN_SERIES -> MyOwnTVIcon.SERIES
-    RemoteShortcutAction.OPEN_DOWNLOADS -> MyOwnTVIcon.DOWNLOADS
+    RemoteShortcutAction.OPEN_DOWNLOADS, RemoteShortcutAction.OPEN_PLAYLIST_SWITCHER -> MyOwnTVIcon.DOWNLOADS
 }

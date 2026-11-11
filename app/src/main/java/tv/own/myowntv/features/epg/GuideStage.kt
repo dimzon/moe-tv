@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -104,7 +102,6 @@ import androidx.tv.material3.Text
 import tv.own.myowntv.R
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
-import tv.own.owntv.core.epg.displayLogoUrl
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.myowntv.features.home.durationText
 import tv.own.myowntv.features.live.LivePlate
@@ -170,7 +167,7 @@ internal fun GuideVideo(
         contentAlignment = Alignment.Center,
     ) {
         if (channel != null) {
-            ChannelLogoTile(logoUrl = channel.displayLogoUrl, modifier = Modifier.size(200.mpx), fill = Color.Transparent) {
+            ChannelLogoTile(logoUrl = channel.logoUrl, modifier = Modifier.size(200.mpx), fill = Color.Transparent) {
                 MyOwnTVIcon(MyOwnTVIcon.LIVE_TV, tint = StageColors.Dim, modifier = Modifier.size(48.mpx))
             }
         }
@@ -299,25 +296,24 @@ internal fun GuideRuler(
 }
 
 /**
- * A channel's label column: the playlist's 7 px dot, the number (38 wide, 17/700 dim), the
+ * A channel's label column: the number (38 wide, 17/700 dim), the
  * logo on a 58×40 plate and the name 17/700. The row the focus is in has its number and name in accent.
  */
 @Composable
-internal fun GuideChannelLabel(channel: ChannelEntity, name: String, dot: Color?, selected: Boolean, numberWidth: Dp, modifier: Modifier = Modifier) {
+internal fun GuideChannelLabel(channel: ChannelEntity, name: String, selected: Boolean, numberWidth: Dp, modifier: Modifier = Modifier) {
     val a = stageAccent
     Row(
         modifier.padding(start = 8.mpx),
         horizontalArrangement = Arrangement.spacedBy(10.mpx),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(7.mpx).background(dot ?: Color.Transparent, RoundedCornerShape(50)))
         Text(
             channel.number?.toString().orEmpty(),
             style = stageText(17, 700).copy(fontFeatureSettings = Tabular), color = if (selected) a.accent else StageColors.Dim,
             // Always whole: the column fits the longest number in the list; only the name is cut.
             maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(numberWidth),
         )
-        LivePlate(channel.displayLogoUrl, 58.mpx, 40.mpx, radius = 10.mpx)
+        LivePlate(channel.logoUrl, 58.mpx, 40.mpx, radius = 10.mpx)
         Text(name, style = stageText(17, 700), color = if (selected) a.accent else StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
     }
 }
@@ -592,8 +588,6 @@ internal fun localMidnight(ms: Long): Long = java.util.Calendar.getInstance().ap
 internal fun GuideReviewPopup(
     suggestions: List<EpgViewModel.EpgMatchSuggestion>,
     matchedCount: Int?,
-    includeLogos: Boolean,
-    onIncludeLogos: (Boolean) -> Unit,
     onAccept: (EpgViewModel.EpgMatchSuggestion) -> Unit,
     onSkip: (EpgViewModel.EpgMatchSuggestion) -> Unit,
     onAcceptAll: () -> Unit,
@@ -676,17 +670,7 @@ internal fun GuideReviewPopup(
                     horizontalArrangement = Arrangement.spacedBy(12.mpx),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    StageSurface(onClick = { onIncludeLogos(!includeLogos) }, radius = 15.mpx) { focused ->
-                        Row(
-                            Modifier.height(56.mpx).padding(horizontal = 16.mpx),
-                            horizontalArrangement = Arrangement.spacedBy(12.mpx),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(stringResource(R.string.content_epg_include_logos), style = stageText(18, 700), color = if (focused) a.onAccent else StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            StageSwitch(includeLogos)
-                        }
-                    }
-                    Spacer(Modifier.weight(1f))
+                                        Spacer(Modifier.weight(1f))
                     // Bulk actions only make sense for a multi-channel run; a single auto-match shows just accept / skip.
                     if (suggestions.size > 1) {
                         StageButton(stringResource(R.string.content_epg_skip_all), onClick = onSkipAll, height = 56.mpx, textSize = 19)
@@ -723,7 +707,7 @@ private fun GuideReviewRow(
         horizontalArrangement = Arrangement.spacedBy(16.mpx),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        LivePlate(s.channel.displayLogoUrl, 70.mpx, 50.mpx)
+        LivePlate(s.channel.logoUrl, 70.mpx, 50.mpx)
         Text(s.channel.name, style = stageText(20, 700), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(300.mpx))
         Text("→", style = stageText(22, 400), color = StageColors.Dim)
         Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.mpx), verticalAlignment = Alignment.CenterVertically) {

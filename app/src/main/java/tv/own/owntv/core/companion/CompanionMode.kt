@@ -2,9 +2,6 @@ package tv.own.owntv.core.companion
 
 /**
  * What the companion HTTP server is currently serving:
- *  - [ADD_SOURCE] — the mobile add-source form (Xtream / M3U / Stalker), the original Remote flow;
- *  - [EDIT_SOURCE] — the same form for one existing playlist, its type fixed and secrets left out
- *    (see [CompanionSourceEdit]);
  *  - [BACKUP_RESTORE] — an upload page the remote device uses to send an OwnTV backup JSON to the TV;
  *  - [BACKUP_DOWNLOAD] — a download page the remote device uses to fetch a backup the TV just exported;
  *  - [IMAGE_UPLOAD] — an upload page the remote device uses to send a background image to the TV;
@@ -13,9 +10,12 @@ package tv.own.owntv.core.companion
  *    merge sends and receives in one session, and it answers `/sync/hello` and `/sync/pair` so the
  *    two devices can identify each other and remember the pairing.
  *
+ * Remote add-source and edit-source pages are gone: there is one provider (the built-in RuTube
+ * source) and nothing to type into a web form.
+ *
  * "Remote device" is any browser on the same Wi-Fi — a phone, a tablet or a desktop with the URL
  * typed in — which is why nothing here is named after a phone.
  *
  * One server, one PIN gate; the mode only changes which page is served and which endpoint is accepted.
  */
-enum class CompanionMode { ADD_SOURCE, EDIT_SOURCE, BACKUP_RESTORE, BACKUP_DOWNLOAD, IMAGE_UPLOAD, LOCAL_SYNC }
+enum class CompanionMode { BACKUP_RESTORE, BACKUP_DOWNLOAD, IMAGE_UPLOAD, LOCAL_SYNC }

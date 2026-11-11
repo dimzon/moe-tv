@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -44,7 +42,6 @@ import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
 
 import tv.own.myowntv.ui.components.onDpadLeft
-import tv.own.owntv.core.epg.displayLogoUrl
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
@@ -162,7 +159,6 @@ fun LiveScreen(
         }
     }
     val railItems by vm.railItems.collectAsStateWithLifecycle()
-    val providerNames by vm.providerNames.collectAsStateWithLifecycle()
     val railFocus = remember { FocusRequester() }
     val selectedKey by vm.selectedKey.collectAsStateWithLifecycle()
     val count by vm.count.collectAsStateWithLifecycle()
@@ -496,7 +492,6 @@ fun LiveScreen(
 
     val liveLayout by vm.liveLayout.collectAsStateWithLifecycle()
     val nowProgrammes by vm.nowProgrammes.collectAsStateWithLifecycle()
-    val playlistMarks by vm.playlistMarks.collectAsStateWithLifecycle()
     // Separate panels keeps the categories on screen; the Stage layout opens them as a sheet on Left.
     val separate = liveLayout == tv.own.owntv.core.settings.SettingsRepository.LiveLayout.SEPARATE && lockedKey == null
     var categoriesOpen by remember { mutableStateOf(false) }
@@ -828,7 +823,6 @@ fun LiveScreen(
                                     nowTitle = nowPlaying[channel.id],
                                     isFavorite = favoriteIds.contains(channel.id),
                                     showNumber = showChannelNumbers,
-                                    mark = playlistMarks[channel.sourceId],
                                     modifier = Modifier.gridFocusTarget(
                                         itemId = channel.id, index = index,
                                         contextId = contextChannelId, contextFocus = contextFocus,
@@ -1200,7 +1194,7 @@ private fun ChannelContextMenu(
                     title = listOfNotNull(channel.number?.toString(), ProviderTags.parse(channel.name).name).joinToString(" · "),
                     subtitle = subtitle,
                     leading = {
-                        LivePlate(channel.displayLogoUrl, 70.mpx, 50.mpx)
+                        LivePlate(channel.logoUrl, 70.mpx, 50.mpx)
                     },
                 )
                 val menu = arranged(ContentMenu.LIVE, actions)

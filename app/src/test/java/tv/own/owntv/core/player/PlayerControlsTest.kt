@@ -72,12 +72,12 @@ class PlayerControlsTest {
     }
 
     @Test
-    fun `the match tools follow previous channel, in the media cluster, on both apps`() {
-        // Other channels and Match sit right after the channel-history tools.
+    fun `sources follows previous channel, in the media cluster, on both apps`() {
+        // The other-versions list sits right after the channel-history tools.
         listOf(true, false).forEach { tv ->
             val media = PlayerControl.clusterFor(tv, ControlCluster.MEDIA)
             val i = media.indexOf(PlayerControl.PREVIOUS_CHANNEL)
-            assertEquals(listOf(PlayerControl.OTHER_CHANNELS, PlayerControl.MATCH), media.subList(i + 1, i + 3))
+            assertEquals(PlayerControl.SOURCES, media[i + 1])
         }
     }
 
@@ -116,8 +116,6 @@ class PlayerControlsTest {
                 PlayerControl.AUDIO,
                 PlayerControl.FAVOURITE,
                 PlayerControl.PREVIOUS_CHANNEL,
-                PlayerControl.OTHER_CHANNELS,
-                PlayerControl.MATCH,
                 PlayerControl.SOURCES,
                 PlayerControl.ASPECT,
                 PlayerControl.QUALITY,

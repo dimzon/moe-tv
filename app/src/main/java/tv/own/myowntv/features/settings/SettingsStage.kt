@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -847,31 +845,6 @@ fun StageSearchResultRow(icon: MyOwnTVIcon, path: String, title: String, value: 
             Row(horizontalArrangement = Arrangement.spacedBy(10.mpx), verticalAlignment = Alignment.CenterVertically) {
                 if (!value.isNullOrBlank()) Text(value, style = stageText(18, 600), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 MyOwnTVIcon(MyOwnTVIcon.CHEVRON, StageColors.Muted, Modifier.size(20.mpx))
-            }
-        }
-    }
-}
-
-/** When a playlist last synced: "Today 14:05" style, built from the Guide's own day labels. */
-@Composable
-private fun playlistSyncWhen(atMs: Long): String =
-    tv.own.myowntv.features.epg.guideDayLabel(tv.own.myowntv.features.epg.localMidnight(atMs)) + " " +
-        tv.own.myowntv.ui.format.rememberBestDateFormatter("jm")(atMs)
-
-/** Playlists' panel: each playlist's mark, its name and when it last synced. */
-@Composable
-fun PlaylistSyncList(sources: List<tv.own.owntv.core.database.entity.SourceEntity>) {
-    Column(Modifier.padding(top = 18.mpx), verticalArrangement = Arrangement.spacedBy(10.mpx)) {
-        sources.forEachIndexed { i, src ->
-            Row(horizontalArrangement = Arrangement.spacedBy(14.mpx), verticalAlignment = Alignment.CenterVertically) {
-                tv.own.myowntv.ui.stage.StagePlaylistMark(tv.own.myowntv.ui.stage.PlaylistMark.of(src.name, i))
-                Text(src.name, style = stageText(18, 700), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                src.lastSyncAt?.let {
-                    Text(
-                        stringResource(R.string.settings_synced_at, playlistSyncWhen(it)),
-                        style = stageText(15, 500), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    )
-                }
             }
         }
     }

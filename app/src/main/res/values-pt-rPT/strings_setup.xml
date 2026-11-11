@@ -35,127 +35,23 @@
     <string name="setup_setup_choice_description">Comece de novo ou recupere os seus perfis, listas de reprodução e favoritos a partir de um ficheiro de cópia de segurança ou de outro dispositivo.</string>
     <string name="setup_new_profile">Novo perfil</string>
     <string name="setup_create_profile_add_sources">Criar um perfil e adicionar origens</string>
-    <string name="setup_import_profiles_playlists">Importar perfis e listas de reprodução de um ficheiro</string>
     <string name="setup_sync_device">De outro dispositivo</string>
     <string name="setup_sync_device_description">Copie tudo do seu outro dispositivo OwnTV por Wi-Fi</string>
-    <string name="setup_add_playlist">Adicionar uma lista de reprodução</string>
-    <string name="setup_add_playlist_description">Adicione uma origem a este perfil ou configure-a mais tarde.</string>
-    <string name="setup_existing">Existentes</string>
-    <string name="setup_use_other_profile_playlists">Utilizar as listas de reprodução de outro perfil</string>
     <string name="setup_import">Importar</string>
-    <string name="setup_restore_backup_file">Restaurar a partir de um ficheiro de cópia de segurança</string>
-    <string name="setup_skip_for_now">Ignorar por agora</string>
-    <string name="setup_use_existing_playlists">Utilizar listas de reprodução existentes</string>
-    <string name="setup_pick_playlists">Escolha as listas de reprodução que pretende adicionar a este perfil.</string>
-    <plurals name="setup_add_selected_playlists">
-        <item quantity="one">Adicionar <xliff:g id="count">%1$d</xliff:g></item>
-        <item quantity="many">Adicionar <xliff:g id="count">%1$d</xliff:g></item>
-        <item quantity="other">Adicionar <xliff:g id="count">%1$d</xliff:g></item>
-    </plurals>
-    <string name="setup_restoring">A restaurar…</string>
-    <string name="setup_wrong_backup_password">Palavra-passe da cópia de segurança incorreta</string>
-    <string name="setup_enter_backup_password">Introduza a palavra-passe da cópia de segurança</string>
-    <string name="setup_password_mismatch_sealed">A palavra-passe não corresponde. Esta cópia de segurança está encriptada — não pode ser aberta sem a palavra-passe com que foi criada.</string>
-    <string name="setup_password_mismatch">A palavra-passe não corresponde. Tente novamente ou ignore este passo para restaurar tudo exceto as palavras-passe guardadas.</string>
-    <string name="setup_backup_encrypted_prompt">Esta cópia de segurança está encriptada. Introduza a respetiva palavra-passe para a abrir e restaurar.</string>
-    <string name="setup_backup_passwords_encrypted_prompt">As palavras-passe desta cópia de segurança estão encriptadas. Introduza a palavra-passe da cópia de segurança para as restaurar ou ignore este passo para restaurar tudo o resto e voltar a introduzir as palavras-passe mais tarde.</string>
-    <string name="setup_backup_password">Palavra-passe da cópia de segurança</string>
-    <string name="setup_skip_no_passwords">Ignorar (sem palavras-passe)</string>
     <string name="setup_restore">Restaurar</string>
     <string name="setup_restore_failed">Falha ao restaurar</string>
     <string name="setup_backup_read_failed">Não foi possível ler o ficheiro de cópia de segurança</string>
-    <string name="setup_invalid_mac">Endereço MAC inválido — utilize AA:BB:CC:DD:EE:FF</string>
-    <string name="setup_pick_backup_file">Escolher um ficheiro de cópia de segurança para restaurar</string>
-    <string name="setup_restore_a_backup">Restaurar uma cópia de segurança</string>
-    <string name="setup_restore_choice_description">Envie a cópia de segurança remotamente a partir de qualquer dispositivo com navegador na mesma rede Wi-Fi, ou escolha um ficheiro de cópia que já esteja neste dispositivo.</string>
-    <string name="setup_upload_from_wifi_device">Carregar a partir de um dispositivo ligado à sua rede Wi-Fi</string>
-    <string name="setup_local_file">Ficheiro local</string>
-    <string name="setup_pick_backup_local">Escolher um ficheiro de cópia de segurança neste dispositivo</string>
     <string name="setup_run_in_background">Executar em segundo plano</string>
     <string name="setup_importing_catalog">A importar o catálogo…</string>
     <string name="setup_preparing_catalog">A preparar o catálogo</string>
     <string name="setup_watching_during_import">Pode começar a ver enquanto o resto do catálogo é carregado.</string>
     <string name="setup_all_set">Tudo pronto!</string>
-    <plurals name="setup_restored_items">
-        <item quantity="one"><xliff:g id="items">%1$d</xliff:g> item restaurado. Volte a sincronizar as suas origens para carregar os conteúdos.</item>
-        <item quantity="many"><xliff:g id="items">%1$d</xliff:g> itens restaurados. Volte a sincronizar as suas origens para carregar os conteúdos.</item>
-        <item quantity="other"><xliff:g id="items">%1$d</xliff:g> itens restaurados. Volte a sincronizar as suas origens para carregar os conteúdos.</item>
-    </plurals>
-    <string name="setup_passwords_omitted">Volte a introduzir depois todas as palavras-passe guardadas.</string>
-    <string name="setup_need_password">Nenhuma palavra-passe guardada, por isso ainda não foi carregada: <xliff:g id="names">%1$s</xliff:g>. Abra a lista de reprodução nas Definições e introduza a respetiva palavra-passe.</string>
-    <string name="setup_name_numbered"><xliff:g id="name">%1$s</xliff:g> <xliff:g id="number">%2$d</xliff:g></string>
-    <plurals name="setup_skipped_sources">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> origem foi ignorada porque esta versão não é compatível com o respetivo tipo de lista de reprodução.</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> origens foram ignoradas porque esta versão não é compatível com os respetivos tipos de lista de reprodução.</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> origens foram ignoradas porque esta versão não é compatível com os respetivos tipos de lista de reprodução.</item>
-    </plurals>
     <string name="setup_continue">Continuar</string>
     <string name="setup_import_failed">Falha ao importar</string>
     <string name="setup_try_again_caps">Tentar novamente</string>
     <string name="setup_opening">A abrir…</string>
-    <string name="setup_add_source">Adicionar uma origem</string>
-    <string name="setup_edit_source">Editar origem</string>
-    <string name="setup_edit_from_phone">Editar a partir de outro dispositivo</string>
-    <string name="setup_edit_source_description">Atualize os dados desta origem ou altere a respetiva definição de atualização automática.</string>
-    <string name="setup_byo_source_description">O OwnTV é um leitor — adicione a sua própria origem Xtream, M3U ou Stalker.</string>
-    <string name="setup_xtream">Xtream</string>
-    <string name="setup_m3u">M3U / M3U8</string>
-    <string name="setup_stalker_mac">Stalker (MAC)</string>
-    <string name="setup_source_name_optional">Nome (opcional)</string>
-    <string name="setup_default_iptv">O meu IPTV</string>
-    <string name="setup_name_default_playlist">A minha lista de reprodução</string>
-    <string name="setup_default_portal">O meu portal</string>
-    <string name="setup_default_profile">Perfil</string>
-    <string name="setup_server_url">URL do servidor</string>
-    <string name="setup_server_example">http://host:port</string>
-    <string name="setup_username">Nome de utilizador</string>
-    <string name="setup_password">Palavra-passe</string>
-    <string name="setup_password_keep">Palavra-passe (deixe em branco para manter)</string>
-    <string name="setup_playlist_url_local_file">URL da lista de reprodução ou ficheiro local</string>
-    <string name="setup_playlist_example">http://…/lista-de-reproducao.m3u</string>
     <string name="setup_playlist_file_unavailable">Não foi possível abrir o ficheiro da lista de reprodução. Escolha-o novamente; poderá ter sido movido.</string>
     <string name="setup_playlist_path_unsupported">Este caminho de lista de reprodução local não é suportado.</string>
-    <string name="setup_local_file_choose">Escolher um ficheiro .m3u / .m3u8 local…</string>
-    <string name="setup_local_file_prefix">Ficheiro local: <xliff:g id="name">%1$s</xliff:g></string>
-    <string name="setup_portal_url">URL do portal</string>
-    <string name="setup_portal_example">http://host:port/c/</string>
-    <string name="setup_mac_address">Endereço MAC</string>
-    <string name="setup_mac_example">00:1A:79:AA:BB:CC</string>
-    <string name="setup_mac_invalid">Introduza 12 caracteres, por ex., 00:1A:79:AA:BB:CC</string>
-    <string name="setup_device_model_preset">Predefinição do modelo do dispositivo (User-Agent)…</string>
-    <string name="setup_testing">A testar…</string>
-    <string name="setup_test_connection">Testar ligação</string>
-    <string name="setup_user_agent_optional">User-Agent (opcional)</string>
-    <string name="setup_user_agent_example">por ex., VLC/3.0.20 LibVLC/3.0.20</string>
-    <string name="setup_referer_optional">Referer (opcional)</string>
-    <string name="setup_referer_example">por ex., https://example.com/</string>
-    <string name="setup_auto_refresh">Atualização automática</string>
-    <string name="setup_auto_refresh_description">Desativada, no arranque ou quando os dados estiverem desatualizados</string>
-    <string name="setup_default_playlist">Lista de reprodução predefinida</string>
-    <string name="setup_default_playlist_description">Apresenta apenas esta lista de reprodução em toda a aplicação. Desative para apresentar todas as listas de reprodução; pode alterar esta opção a qualquer momento na barra superior.</string>
-    <string name="setup_what_to_sync">O que sincronizar</string>
-    <string name="setup_sync_off_editing">As secções desativadas permanecem ocultas e nunca são obtidas. Ao voltar a ativar uma secção, as linhas em cache são imediatamente apresentadas.</string>
-    <string name="setup_sync_choices">Agora importa primeiro · Mais tarde sincroniza em segundo plano · Desativado nunca é obtido nem apresentado.</string>
-    <string name="setup_live_tv">TV em direto</string>
-    <string name="setup_channels_categories">Canais e categorias</string>
-    <string name="setup_movies">Filmes</string>
-    <string name="setup_vod_movie_catalog">Catálogo de filmes VOD</string>
-    <string name="setup_series">Séries</string>
-    <string name="setup_tv_series_catalog">Catálogo de séries de TV</string>
-    <string name="setup_start_import">Iniciar importação</string>
-    <string name="setup_update_source_save">Guardar</string>
-    <string name="setup_pick_playlist_file">Escolher um ficheiro de lista de reprodução (.m3u / .m3u8)</string>
-    <string name="setup_device_model_preset_title">Predefinição do modelo do dispositivo</string>
-    <string name="setup_auto_refresh_title">Atualização automática</string>
-    <string name="setup_on">Ativado</string>
-    <string name="setup_now">Agora</string>
-    <string name="setup_later">Mais tarde</string>
-    <string name="setup_off">Desativado</string>
-    <string name="setup_default_mag">Predefinição (MAG200)</string>
-    <string name="setup_mag250">MAG250</string>
-    <string name="setup_mag254">MAG254</string>
-    <string name="setup_mag270">MAG270</string>
-    <string name="setup_mag420">MAG420</string>
     <string name="companion_pin_page_title">OwnTV — Introduzir PIN</string>
     <string name="companion_pin_heading">Introduza o PIN</string>
     <string name="companion_pin_description">Introduza o PIN de 6 dígitos apresentado na TV para continuar.</string>
@@ -223,35 +119,6 @@
     <string name="companion_error_image_too_large">A imagem é demasiado grande.</string>
     <string name="companion_error_invalid_image">O ficheiro enviado não é uma imagem válida.</string>
     <string name="companion_error_missing_fields">Faltam campos obrigatórios.</string>
-    <string name="setup_invalid_locale">Esta cópia de segurança continha um idioma da aplicação não suportado. A restauração foi concluída, mas o idioma atual foi mantido.</string>
-    <string name="setup_prefer_hls_live_tv">Preferir HLS para TV em direto</string>
-    <string name="setup_hide_new_categories">Ocultar novas categorias por predefinição</string>
-    <string name="setup_hide_new_categories_description">Em todo o perfil: as categorias que surgirem em futuras sincronizações ficam inicialmente ocultas. Consulte-as a qualquer momento em Personalizar.</string>
-    <string name="setup_prefer_hls_description">Priorizar HLS (.m3u8) em vez de MPEG-TS para TV em direto. Se o HLS falhar, recorre a MPEG-TS. A TV em diferido utiliza sempre MPEG-TS.</string>
-    <string name="setup_prefer_hls_description_supported">Priorizar HLS (.m3u8) em vez de MPEG-TS para TV em direto. Se o HLS falhar, recorre a MPEG-TS. A TV em diferido utiliza sempre MPEG-TS. O seu fornecedor indica suporte para HLS.</string>
-    <string name="setup_prefer_hls_description_unsupported">Priorizar HLS (.m3u8) em vez de MPEG-TS para TV em direto. Se o HLS falhar, recorre a MPEG-TS. A TV em diferido utiliza sempre MPEG-TS. O seu fornecedor não indica suporte para HLS — pode na mesma experimentar.</string>
-    <string name="setup_hls_test_support">Testar suporte HLS</string>
-    <string name="setup_hls_testing">A testar HLS…</string>
-    <string name="setup_hls_test_failed">Teste falhou: <xliff:g id="reason">%1$s</xliff:g></string>
-    <string name="setup_hls_test_provider_unreachable">Não foi possível contactar o fornecedor — verifique o URL do servidor, o nome de utilizador e a palavra-passe.</string>
-    <string name="setup_hls_test_works">✓ O HLS funciona — o seu fornecedor devolveu uma lista de reprodução.</string>
-    <string name="setup_hls_test_works_unadvertised">✓ O HLS funciona — o seu fornecedor devolveu uma lista de reprodução mesmo sem anunciar HLS.</string>
-    <string name="setup_hls_test_busy">Não foi possível concluir — a conta está sem ligações disponíveis neste momento (HTTP <xliff:g id="status">%1$d</xliff:g>). Pare qualquer outra coisa que esteja a transmitir e teste novamente.</string>
-    <string name="setup_hls_test_not_served">O HLS não funcionou — <xliff:g id="reason">%1$s</xliff:g>. Deixe esta opção desativada e a TV em direto usará MPEG-TS.</string>
-    <string name="setup_hls_test_reason_not_playlist">o servidor respondeu, mas não com uma lista de reprodução</string>
-    <string name="setup_hls_test_reason_no_endpoint">sem endpoint HLS para este canal (HTTP <xliff:g id="status">%1$d</xliff:g>)</string>
-    <string name="setup_hls_test_inconclusive">Não foi possível verificar (<xliff:g id="reason">%1$s</xliff:g>). <xliff:g id="provider_claim">%2$s</xliff:g></string>
-    <string name="setup_hls_test_reason_http">HTTP <xliff:g id="status">%1$d</xliff:g></string>
-    <string name="setup_hls_test_reason_no_answer">sem resposta</string>
-    <string name="setup_hls_test_reason_no_live_channels">esta lista de reprodução não tem canais em direto para testar</string>
-    <string name="setup_hls_test_reason_dead_channel">o canal de teste também não reproduziu em MPEG-TS, por isso pode estar simplesmente inativo</string>
-    <string name="setup_hls_provider_advertises">O seu fornecedor anuncia HLS.</string>
-    <string name="setup_hls_provider_does_not_advertise">O seu fornecedor não anuncia HLS.</string>
-    <string name="setup_stalker_advanced_identity">Identificação avançada do dispositivo</string>
-    <string name="setup_stalker_serial_number_optional">Número de série (opcional)</string>
-    <string name="setup_stalker_device_id_optional">ID do dispositivo (opcional)</string>
-    <string name="setup_stalker_device_id2_optional">ID2 do dispositivo (opcional)</string>
-    <string name="setup_stalker_signature_optional">Assinatura (opcional)</string>
     <string name="companion_error_pair_failed">Não foi possível emparelhar com este dispositivo.</string>
     <string name="local_sync_browser_title">Sincronização local do OwnTV</string>
     <string name="local_sync_browser_body">Este endereço é para a aplicação OwnTV no seu outro dispositivo. Abra lá a Sincronização local e escolha este dispositivo na lista.</string>
@@ -261,26 +128,12 @@
     <string name="setup_key_previous_step">Passo anterior</string>
     <string name="setup_welcome_title">Bem-vindo ao OwnTV</string>
     <string name="setup_welcome_sub">O seu próprio leitor de IPTV. Escolha um idioma para começar — pode alterá-lo mais tarde nas Definições.</string>
-    <plurals name="setup_languages_all">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> idioma</item>
-        <item quantity="many">Todos os <xliff:g id="count">%1$d</xliff:g> idiomas</item>
-        <item quantity="other">Todos os <xliff:g id="count">%1$d</xliff:g> idiomas</item>
-    </plurals>
     <string name="setup_display_sub">O tamanho da interface e do texto nesta TV. A fila abaixo muda à medida que ajusta.</string>
-    <string name="setup_display_sub_mobile">O tamanho da interface e do texto neste telemóvel. A fila abaixo muda à medida que ajusta.</string>
     <string name="setup_line_zoom">Tudo no ecrã</string>
     <string name="setup_line_font">Só o texto</string>
     <string name="setup_line_app_icon">Como o OwnTV aparece no ecrã inicial da TV</string>
-    <string name="setup_line_app_icon_mobile">Como o OwnTV aparece no seu ecrã inicial</string>
-    <string name="setup_restore_card_line">A partir de um ficheiro, ou remotamente de outro dispositivo</string>
     <string name="setup_device_appear">Os dispositivos com o modo Sync ativo aparecem aqui</string>
     <string name="setup_device_address_hint">ou escreva o endereço do outro dispositivo</string>
-    <string name="setup_profile_sub">Cada perfil tem os seus favoritos, histórico e Início. Adicione mais tarde em Definições › Perfil.</string>
-    <string name="setup_avatar">Avatar</string>
-    <string name="setup_avatar_line">Escolha um ou mantenha a inicial</string>
     <string name="setup_create_profile">Criar perfil</string>
-    <string name="setup_phone_card_line">Preencha o formulário no navegador de outro dispositivo — o mais rápido</string>
     <string name="setup_importing_title">A importar <xliff:g id="name">%1$s</xliff:g></string>
-    <string name="setup_add_guide">Adicionar um guia de TV</string>
-    <string name="setup_add_guide_line">Uma instalação nova ainda não tem guia</string>
 </resources>

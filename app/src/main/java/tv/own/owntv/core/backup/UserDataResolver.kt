@@ -262,7 +262,7 @@ class UserDataResolver(
         // be dropped, and only when their content row is genuinely gone. An EMPTY snapshot must never
         // purge — the old fallback ran a GLOBAL orphan purge across ALL sources, which could delete
         // another source's favorites while that source's own sync had its content mid-rewrite
-        // (M3U clear-then-insert / Xtream stale-prune run concurrently on startup refresh).
+        // (a clear-then-insert sync runs concurrently on startup refresh).
         if (purge && snapshot.hasSourceSnapshotIds()) {
             purgeSnapshotOrphans(snapshot)
         }

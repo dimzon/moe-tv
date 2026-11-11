@@ -15,7 +15,7 @@ import tv.own.owntv.core.model.SourceType
 class ChannelNameCleanupSyncTest {
 
     private fun source(clean: Boolean, strip: String? = null) = SourceEntity(
-        id = 7, name = "Test", type = SourceType.M3U, url = "https://example.com/list.m3u",
+        id = 7, name = "Test", type = SourceType.RUTUBE, url = "https://example.test",
         cleanChannelNames = clean, channelNameStrip = strip,
     )
 

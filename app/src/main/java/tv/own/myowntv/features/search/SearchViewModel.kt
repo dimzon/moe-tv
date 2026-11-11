@@ -29,8 +29,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -62,7 +60,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import tv.own.myowntv.ui.stage.PlaylistMark
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.content.SearchIntent
 import tv.own.owntv.core.content.SearchKind
@@ -91,7 +88,7 @@ class SearchViewModel(
     // Observe the sources reactively so adding/removing a playlist refreshes Search
     // immediately (was read once at startup, so a new playlist showed nothing until app restart).
     // Per-section Off flags split the id sets so an Off section never surfaces in results.
-    private val ctx: StateFlow<ActiveProfileSources> = activeProfileSources(settings, sourceDao)
+    private val ctx: StateFlow<ActiveProfileSources> = activeProfileSources(sourceDao)
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, ActiveProfileSources(emptyList()))
 
@@ -157,9 +154,4 @@ class SearchViewModel(
 
     /** The row a "Go to" left from ("c12", "m34", "s56"), so Back to Search lands on it again. */
     var lastFocusKey: String? = null
-
-    /** Which playlist a row comes from, as on the browse screens; empty with one playlist. */
-    val playlistMarks: StateFlow<Map<Long, PlaylistMark>> = ctx
-        .map { aps -> if (aps.sources.size < 2) emptyMap() else aps.sources.withIndex().associate { (i, s) -> s.id to PlaylistMark.of(s.name, i) } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 }

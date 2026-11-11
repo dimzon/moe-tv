@@ -1,29 +1,20 @@
 package tv.own.owntv.core.drm
 
-import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import tv.own.owntv.core.parser.M3uEntry
-import tv.own.owntv.core.parser.M3uParser
 
 /**
- * Protected (Widevine/ClearKey) channels. A playlist declares the licence server on its own
- * `#KODIPROP` lines; every one of them used to be dropped, so the app had no way to know a stream was
- * encrypted, let alone where to ask for the key.
+ * Protected (Widevine/ClearKey) channels. A source declares the licence server via Kodi's
+ * `#KODIPROP`-shaped properties; every one of them used to be dropped, so the app had no way to know
+ * a stream was encrypted, let alone where to ask for the key.
  *
  * The rejection cases matter as much as the happy path: a licence config we cannot fully honour must
  * be dropped, not stored half-right. A stored-but-wrong config produces a failing licence request the
  * user cannot diagnose; no config at all fails exactly the way it does today.
  */
 class DrmConfigTest {
-
-    private fun parse(text: String): List<M3uEntry> = runBlocking {
-        val out = mutableListOf<M3uEntry>()
-        M3uParser().parse(text.byteInputStream()) { out += it }
-        out
-    }
 
     // --- fromKodiProps ---
 
@@ -60,7 +51,7 @@ class DrmConfigTest {
 
     @Test
     fun `a request body template we do not build is rejected outright`() {
-        // Kodi's postDataTemplate: the portal expects a body we never construct, so a licence request
+        // Kodi's postDataTemplate: the provider expects a body we never construct, so a licence request
         // built from this would always fail. Better to report "no DRM" than to fail unexplainably.
         assertNull(
             DrmConfig.fromKodiProps(
@@ -127,21 +118,6 @@ class DrmConfigTest {
         assertNull(DrmConfig.decode("""{"scheme":"widevine","license":"","clearKeys":{"$KID":"$KEY"}}"""))
     }
 
-    @Test
-    fun `an inline clearkey playlist entry parses`() {
-        val entries = parse(
-            """
-            #EXTM3U
-            #EXTINF:-1 group-title="Test",Inline ClearKey
-            #KODIPROP:inputstream.adaptive.license_type=clearkey
-            #KODIPROP:inputstream.adaptive.license_key=$KID:$KEY
-            https://host/live/cenc.mpd
-            """.trimIndent(),
-        )
-        assertEquals(mapOf(KID to KEY), entries[0].drm?.clearKeys)
-        assertEquals("https://host/live/cenc.mpd", entries[0].streamUrl)
-    }
-
     // --- FairPlay ---
 
     @Test
@@ -167,21 +143,6 @@ class DrmConfigTest {
         val stored = DrmConfig.decode(DrmConfig.encode(withServer))
         assertEquals(DrmConfig.Scheme.FAIRPLAY, stored?.scheme)
         assertEquals("", stored?.licenseUrl)
-    }
-
-    @Test
-    fun `a fairplay playlist entry parses into the fairplay marker`() {
-        val entries = parse(
-            """
-            #EXTM3U
-            #EXTINF:-1,Apple only
-            #KODIPROP:inputstream.adaptive.manifest_type=hls
-            #KODIPROP:inputstream.adaptive.license_type=com.apple.fps.1_0
-            #KODIPROP:inputstream.adaptive.license_key=https://host/fps/cert
-            https://host/live/master.m3u8
-            """.trimIndent(),
-        )
-        assertEquals(DrmConfig.Scheme.FAIRPLAY, entries[0].drm?.scheme)
     }
 
     private fun b64url(hex: String): String = java.util.Base64.getUrlEncoder().withoutPadding()
@@ -211,82 +172,5 @@ class DrmConfigTest {
         assertNull(DrmConfig.decode("not json"))
         assertNull(DrmConfig.decode("""{"scheme":"playready","license":"https://h/k"}"""))
         assertNull(DrmConfig.decode("""{"scheme":"widevine"}"""))
-    }
-
-    // --- the parser wiring ---
-
-    @Test
-    fun `the issue 115 playlist entry parses into a widevine config`() {
-        val entries = parse(
-            """
-            #EXTM3U
-            #EXTINF:-1 tvg-id="144" group-title="Entertainment", Colors HD
-            #KODIPROP:inputstream=inputstream.adaptive
-            #KODIPROP:inputstream.adaptive.manifest_type=mpd
-            #KODIPROP:inputstream.adaptive.license_type=com.widevine.alpha
-            #KODIPROP:inputstream.adaptive.license_key=https://tv.example/live/key/144
-            https://tv.example/live/mpd/143
-            """.trimIndent(),
-        )
-        assertEquals(1, entries.size)
-        assertEquals(DrmConfig.Scheme.WIDEVINE, entries[0].drm?.scheme)
-        assertEquals("https://tv.example/live/key/144", entries[0].drm?.licenseUrl)
-        assertEquals("https://tv.example/live/mpd/143", entries[0].streamUrl)
-    }
-
-    /** The older bare `inputstream.license_type` spelling is used by plenty of playlists. */
-    @Test
-    fun `the legacy property spelling works too`() {
-        val entries = parse(
-            """
-            #EXTM3U
-            #EXTINF:-1,Legacy
-            #KODIPROP:inputstream.license_type=com.widevine.alpha
-            #KODIPROP:inputstream.license_key=https://host/k
-            http://host/s.mpd
-            """.trimIndent(),
-        )
-        assertEquals(DrmConfig.Scheme.WIDEVINE, entries[0].drm?.scheme)
-    }
-
-    /** A licence must belong to the entry that declared it — never to the next channel. */
-    @Test
-    fun `drm does not leak into the following entry`() {
-        val entries = parse(
-            """
-            #EXTM3U
-            #EXTINF:-1,Protected
-            #KODIPROP:inputstream.adaptive.license_type=com.widevine.alpha
-            #KODIPROP:inputstream.adaptive.license_key=https://host/k
-            http://host/1.mpd
-            #EXTINF:-1,Plain
-            http://host/2.ts
-            """.trimIndent(),
-        )
-        assertEquals(DrmConfig.Scheme.WIDEVINE, entries[0].drm?.scheme)
-        assertNull(entries[1].drm)
-    }
-
-    /** DRM lines and header lines coexist on the same entry without consuming each other. */
-    @Test
-    fun `stream headers and drm properties are collected independently`() {
-        val entries = parse(
-            """
-            #EXTM3U
-            #EXTINF:-1,Both
-            #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Kodi%2F1.0
-            #KODIPROP:inputstream.adaptive.license_type=com.widevine.alpha
-            #KODIPROP:inputstream.adaptive.license_key=https://host/k
-            http://host/s.mpd
-            """.trimIndent(),
-        )
-        assertEquals("Kodi/1.0", entries[0].headers["User-Agent"])
-        assertEquals("https://host/k", entries[0].drm?.licenseUrl)
-    }
-
-    @Test
-    fun `a plain playlist entry carries no drm at all`() {
-        val entries = parse("#EXTM3U\n#EXTINF:-1,Plain\nhttp://host/a.ts")
-        assertNull(entries[0].drm)
     }
 }

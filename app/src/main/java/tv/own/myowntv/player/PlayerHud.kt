@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -200,15 +198,6 @@ fun PlayerHud(
     zapChannel: DirectTuneChannelInfo? = null,
     // When the programme on air ends, read as the sleep timer opens. Null = no "End of programme".
     sleepProgrammeEndMs: (() -> Long?)? = null,
-    // Sports Hub — only for a channel started from a match; all null means the plain Live player.
-    // The match's score line under the channel name, drawn only while the controls are up.
-    matchLine: (@Composable () -> Unit)? = null,
-    // The other channels showing the match, and their count for the tool's label.
-    onOtherChannels: (() -> Unit)? = null,
-    otherChannelsCount: Int = 0,
-    // The match page.
-    // A goal toast for another followed match is up: OK switches to it instead of showing the controls.
-    onToastOk: (() -> Unit)? = null,
     // Live only: the Sources button and its list. Null hides the button.
     sources: HudSources? = null,
     modifier: Modifier = Modifier,
@@ -341,8 +330,9 @@ fun PlayerHud(
             is TuneOsd.Tuned -> {
                 if (osd.info.restarted) {
                     withTimeoutOrNull(DIRECT_TUNE_PLAYBACK_WAIT_MS) {
-                        // Two phases: the outgoing stream can still report playing for a beat (Stalker
-                        // resolves its URL asynchronously), so wait for the teardown before the start.
+                        // Two phases: the outgoing stream can still report playing for a beat (a
+                        // re-resolve hands the engine a new URL asynchronously), so wait for the
+                        // teardown before the start.
                         snapshotFlow { isPlaying && !buffering && error == null }.first { !it }
                         snapshotFlow { (isPlaying && !buffering) || error != null }.first { it }
                     }
@@ -501,7 +491,7 @@ fun PlayerHud(
             }
             // Player buttons: OK with the controls hidden. No plan (the default) leaves OK to the code below.
             if (isPlayerOkKey(e.key) && e.type != KeyEventType.Unknown) {
-                val okPlan = if (controlsVisible || inert || dialog != HudDialog.NONE || digitsActive || onToastOk != null) null
+                val okPlan = if (controlsVisible || inert || dialog != HudDialog.NONE || digitsActive) null
                     else playerOkPlan(remoteOptions, PlayerOkTargets(channelList = onOpenChannelList != null, guide = true, programmeInfo = true))
                 val ok = okPress.onKey(e.type == KeyEventType.KeyDown, e.nativeKeyEvent.repeatCount, e.nativeKeyEvent.eventTime, okPlan)
                 if (ok is PlayerOkResult.Fire) when (ok.outcome) {
@@ -534,8 +524,6 @@ fun PlayerHud(
                     e.key.horizontalDirection(layoutDirection) == HorizontalDirection.START -> { onOpenChannelList(); true }
                 onOpenHistoryList != null && !controlsVisible &&
                     e.key.horizontalDirection(layoutDirection) == HorizontalDirection.END -> { onOpenHistoryList(); true }
-                onToastOk != null && !controlsVisible &&
-                    (e.key == Key.DirectionCenter || e.key == Key.Enter || e.key == Key.NumPadEnter) -> { onToastOk(); true }
                 controlsVisible -> { wakeTick++; false }
                 else -> false
             }
@@ -567,8 +555,9 @@ fun PlayerHud(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (tuned != null || (showFlash && !controlsVisible)) {
-                // A fresh tune drives the card from the lookup result, not player metadata: Stalker
-                // publishes its metadata after an async resolve, which would show the old channel.
+                // A fresh tune drives the card from the lookup result, not player metadata: a
+                // re-resolved stream publishes its metadata after the resolve, which would show
+                // the old channel.
                 val named = tuned ?: zapChannel
                 if (named != null) {
                     ChannelOsdCard(title = named.name, subtitle = named.number?.let { stringResource(R.string.player_channel_number, it) }, logoUrl = named.logoUrl, guide = zapGuide)
@@ -609,7 +598,6 @@ fun PlayerHud(
             TopBar(
                 player, streamChips.ifEmpty { listOfNotNull(videoRes) }, onBack,
                 modifier = Modifier.align(Alignment.TopStart),
-                below = matchLine,
                 trailing = if (error == null) liveEpgCard else null,
                 // Hidden behind an error overlay along with the rest of the chrome: a clock ticking
                 // over a failure message just draws the eye to the wrong thing.
@@ -629,7 +617,6 @@ fun PlayerHud(
                     player = player,
                     volume = volume, audioCount = audioCount, subCount = subCount, zoomMode = zoomMode,
                     onPreviousChannel = onPreviousChannel,
-                    onOtherChannels = onOtherChannels, otherChannelsCount = otherChannelsCount,
                     hasSources = sources != null,
                     onInfo = { showInfo = !showInfo }, infoOn = showInfo,
                     onReport = {

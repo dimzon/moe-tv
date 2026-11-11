@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -245,7 +243,7 @@ private data class SettingsGroupCard(val icon: MyOwnTVIcon, val nameRes: Int, va
 
 private val SettingsCards = listOf(
     SettingsGroupCard(MyOwnTVIcon.SPARKLE, R.string.settings_group_quick, R.string.settings_group_summary_quick, null),
-    SettingsGroupCard(MyOwnTVIcon.LIST, R.string.settings_group_sources, R.string.settings_card_sources, 8),
+    SettingsGroupCard(MyOwnTVIcon.EPG, R.string.settings_part_guide_catchup, R.string.settings_epg_guide_days, 4),
     SettingsGroupCard(MyOwnTVIcon.PALETTE, R.string.settings_group_appearance, R.string.settings_card_appearance, 9),
     SettingsGroupCard(MyOwnTVIcon.GRID, R.string.settings_group_layout, R.string.settings_card_layout, 10),
     SettingsGroupCard(MyOwnTVIcon.MOVIES, R.string.settings_group_content_metadata, R.string.settings_card_content, 3),

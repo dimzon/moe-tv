@@ -35,12 +35,12 @@ class EpgMatchResolverTest {
 
     @Test
     fun `a channel with no provider id is found by its name`() {
-        // An M3U channel with no id is keyed by its name, so that is the only thing left to match on.
-        val resolver = EpgMatchResolver(mapOf("7:Sky Sports F1" to "sky.f1.uk"))
+        // A channel with no provider id is keyed by its name, so that is the only thing left to match on.
+        val resolver = EpgMatchResolver(mapOf("7:Sky Movies F1" to "sky.f1.uk"))
 
         assertEquals(
             "sky.f1.uk",
-            resolver.epgIdFor(channel(sourceId = 42, remoteId = null, name = "SKY SPORTS F1 HD")),
+            resolver.epgIdFor(channel(sourceId = 42, remoteId = null, name = "SKY MOVIES F1 HD")),
         )
     }
 

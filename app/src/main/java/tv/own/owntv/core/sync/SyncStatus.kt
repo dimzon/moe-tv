@@ -27,24 +27,12 @@ enum class SyncScopeChoice {
 data class ImportStage(
     val liveProcessed: Int = 0,
     val liveActive: Boolean = false,
-    /**
-     * Which stream the connection measurement is opening, and how many it may open, or 0/0 when it
-     * is not running.
-     *
-     * Carried on the ordinary progress object so the measurement appears on whatever screen is
-     * already watching a sync — it runs *before* a single row is written and can take two minutes,
-     * which without a word on screen is indistinguishable from the app having hung.
-     */
-    val measuringStream: Int = 0,
-    val measuringOf: Int = 0,
 ) {
-    val measuringConnections: Boolean get() = measuringOf > 0
-
     val totalProcessed: Int
         get() = liveProcessed
 }
 
-/** Xtream / M3U progress is reported in the live phase. */
+/** Progress is reported in the live phase. */
 enum class SyncPhase {
     LIVE,
 }
@@ -66,20 +54,6 @@ sealed interface SyncWarningKind {
     data object GENERIC : SyncWarningKind
     data object PAGE_FAILURE : SyncWarningKind
     data class CATALOG_SHRINK(val stored: Int, val percentFewer: Int) : SyncWarningKind
-
-    /**
-     * The provider's bulk list stopped part-way and the per-category fallback finished the job.
-     *
-     * Measured on a real playlist: the bulk call ran for 242 seconds and the peer sent a connection
-     * reset part-way through. The catalogue still ended up complete, because the fallback recovered
-     * it — but it took ten minutes instead of thirty-six seconds, and *nothing said so*. The run
-     * reported `Success`, and the only trace was a warning under a log tag nobody was filtering on.
-     * That silence is the defect this kind exists to end.
-     *
-     * [recovered] says whether the fallback got everything back, which is what decides whether the
-     * user is looking at a slow sync or a short catalogue.
-     */
-    data class BULK_TRUNCATED(val itemsBeforeCutoff: Int, val recovered: Boolean) : SyncWarningKind
 }
 
 data class SyncWarning(
@@ -135,5 +109,4 @@ data class SyncRunStats(
     val phaseTiming: Map<String, Long>,
     val processedCounts: Map<String, Int>,
     val phaseErrors: Map<String, String>,
-    val usedFallback: Boolean,
 )

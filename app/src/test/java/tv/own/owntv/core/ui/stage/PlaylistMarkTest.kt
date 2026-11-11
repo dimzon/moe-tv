@@ -20,7 +20,7 @@ class PlaylistMarkTest {
     // --- the edges ---
 
     @Test
-    fun tvPrefixIsDroppedToo() = assertEquals("SPOR", PlaylistMark.textOf("TV - Sports"))
+    fun tvPrefixIsDroppedToo() = assertEquals("MOVI", PlaylistMark.textOf("TV - Movies"))
 
     @Test
     fun prefixOnlyCountsAsAWholeWord() = assertEquals("TVOL", PlaylistMark.textOf("Tvoli"))

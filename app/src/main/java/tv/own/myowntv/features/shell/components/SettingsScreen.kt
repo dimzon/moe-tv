@@ -21,15 +21,11 @@ import tv.own.owntv.core.menu.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
-import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
@@ -124,7 +120,6 @@ import tv.own.myowntv.features.settings.LanguageSettingsScreen
 import tv.own.myowntv.features.settings.LanguageSettingsViewModel
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.myowntv.features.update.UpdateDialog
-import tv.own.myowntv.features.settings.ManageSourcesScreen
 import tv.own.myowntv.features.settings.SettingsViewModel
 import tv.own.owntv.core.nav.MainSection
 import tv.own.myowntv.ui.components.BrowseMode
@@ -148,7 +143,7 @@ import tv.own.myowntv.ui.theme.primary
 
 internal enum class TileTone { PRIMARY, SECONDARY, TERTIARY }
 
-private enum class SettingsTab { ROOT, LANGUAGE, SOURCES, EPG, LOCAL_SYNC, CUSTOMIZE, HOME, NETWORK, DNS, WEATHER, CH_NAV, PANEL_WIDTH, GUIDE_WIDTH, GLASS_EFFECT, CONTENT_MENUS, FONTS, BROWSING, SUBTITLE_STYLE, SPORTS }
+private enum class SettingsTab { ROOT, LANGUAGE, LOCAL_SYNC, CUSTOMIZE, HOME, NETWORK, DNS, WEATHER, CH_NAV, PANEL_WIDTH, GUIDE_WIDTH, GLASS_EFFECT, CONTENT_MENUS, FONTS, BROWSING, SUBTITLE_STYLE }
 
 @Composable
 private fun epgShiftLabel(minutes: Int): String {
@@ -183,7 +178,6 @@ fun SettingsScreen(
     onSetZoom: (Int) -> Unit,
     fontCustomization: FontCustomization,
     onSetFontCustomization: (FontCustomization) -> Unit,
-    onOpenPlaylist: () -> Unit,
     modifier: Modifier = Modifier,
     /**
      * Where Back from the **root** of this screen goes. Settings sits behind More, so leaving
@@ -191,20 +185,14 @@ fun SettingsScreen(
      * behaviour, which is the shell's own handler.
      */
     onBack: (() -> Unit)? = null,
-    openEpgAdd: Boolean = false,
-    onEpgAddConsumed: () -> Unit = {},
     /** More › Settings: open at a root group, or with search open. */
     start: SettingsStart? = null,
     onStartConsumed: () -> Unit = {},
-    /** Settings → Sports → My teams: OK on a followed team opens its page in the Sports section. */
-    onOpenSportsTeam: (tv.own.owntv.core.sports.FollowedTeam) -> Unit = {},
 ) {
     // A cross-script language change recreates the Activity so Android can apply the new script's
     // shaping and font fallback. Keep the open settings sub-screen across that configuration change
     // instead of dropping back to the Settings root/sidebar.
     var tab by rememberSaveable { mutableStateOf(SettingsTab.ROOT) }
-    // Deep-link from the Guide's "Add EPG" button: jump straight to EPG Sources in add mode.
-    var consumeEpgAdd by remember { mutableStateOf(false) }
     var showZoom by remember { mutableStateOf(false) }
     var showAppIcon by remember { mutableStateOf(false) }
     var showPopupSize by remember { mutableStateOf(false) }
@@ -328,7 +316,6 @@ fun SettingsScreen(
     val quickPinned by settingsVm.quickPinnedKeys.collectAsStateWithLifecycle()
     val epgOffset by settingsVm.epgOffsetMinutes.collectAsStateWithLifecycle()
     val guideDays by settingsVm.guideDaysToKeep.collectAsStateWithLifecycle()
-    val playlistSources by settingsVm.sources.collectAsStateWithLifecycle()
     val accent by settingsVm.accent.collectAsStateWithLifecycle()
     val customAccent by settingsVm.customAccent.collectAsStateWithLifecycle()
     val focusHighlight by settingsVm.focusHighlight.collectAsStateWithLifecycle()
@@ -383,8 +370,6 @@ fun SettingsScreen(
 
     // Restore focus to the row a sub-screen was opened from when the user navigates back.
     var lastTab by rememberSaveable { mutableStateOf<SettingsTab?>(null) }
-    // The Sports hub's Settings button: straight to Settings → Sports; Back lands on its row. After the
-    // start effect above (which resets to the root), so this one wins.
     // Built from the enum, not hand-listed. It used to be a literal map of twenty entries, and
     // adding SettingsTab.RECORDING without adding a line to it crashed the whole Settings screen
     // with "Key RECORDING is missing in the map" — a `getValue` on a map that had quietly gone
@@ -416,9 +401,6 @@ fun SettingsScreen(
     // Opening a sub-screen the ordinary way cancels any pending Quick-shortcut return, or the Back
     // from it would aim at the shortcut instead of the row just used.
     val open: (SettingsTab) -> Unit = { lastTab = it; deepReturnKey = null; videoRowKey = null; tab = it }
-    LaunchedEffect(openEpgAdd) {
-        if (openEpgAdd) { consumeEpgAdd = true; open(SettingsTab.EPG); onEpgAddConsumed() }
-    }
 
     // Sub-screens sit below the status cluster (StageContentTop), 6 dp in from the edges.
     val sub = modifier.padding(start = 6.dp, end = 6.dp, bottom = 6.dp, top = StageContentTop)
@@ -428,8 +410,6 @@ fun SettingsScreen(
     CompositionLocalProvider(tv.own.myowntv.features.settings.LocalSettingsSearch provides openSearch) {
     when (tab) {
         SettingsTab.LANGUAGE -> { LanguageSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
-        SettingsTab.SOURCES -> { ManageSourcesScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
-        SettingsTab.EPG -> { tv.own.myowntv.features.settings.EpgSourcesScreen(onBack = { tab = SettingsTab.ROOT; consumeEpgAdd = false }, modifier = modifier, startOnAdd = consumeEpgAdd) }
         SettingsTab.LOCAL_SYNC -> { LocalSyncScreen(onBack = { tab = SettingsTab.ROOT }, modifier = sub) }
         SettingsTab.CUSTOMIZE -> { CustomizeScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
         SettingsTab.HOME -> { HomeSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
@@ -443,7 +423,6 @@ fun SettingsScreen(
             SettingsTab.GLASS_EFFECT -> { GlassEffectSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
             SettingsTab.SUBTITLE_STYLE -> tv.own.myowntv.features.settings.SubtitleStylePage(onBack = { tab = SettingsTab.ROOT }, modifier = modifier)
             SettingsTab.BROWSING -> tv.own.myowntv.features.settings.BrowsingListsSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier)
-            SettingsTab.SPORTS -> tv.own.myowntv.features.sports.SportsSettingsScreen(onBack = { tab = SettingsTab.ROOT }, onOpenTeam = onOpenSportsTeam, modifier = modifier)
             SettingsTab.FONTS -> tv.own.myowntv.features.settings.FontSettingsScreen(
                 current = fontCustomization, onSet = onSetFontCustomization, familyLabel = { fontFamilyLabel(it) },
                 onBack = { tab = SettingsTab.ROOT }, modifier = modifier,
@@ -503,25 +482,11 @@ fun SettingsScreen(
             chipTone = if (updateCheckOnStart) TileTone.PRIMARY else TileTone.SECONDARY,
             onClick = { settingsVm.setUpdateCheckOnStart(!updateCheckOnStart) },
         ),
-        RootGroup("group_sources", stringResource(R.string.settings_group_sources), MyOwnTVIcon.PLAYLIST, stringResource(R.string.settings_group_summary_sources)),
-        RootRow(
-            tabRowKey(SettingsTab.SOURCES), TileTone.PRIMARY, MyOwnTVIcon.PLAYLIST,
-            heading = stringResource(R.string.settings_sources_title),
-            title = stringResource(R.string.settings_playlists), desc = stringResource(R.string.settings_playlists_description),
-            focus = rowFocus.getValue(SettingsTab.SOURCES),
-            onClick = { open(SettingsTab.SOURCES) },
-        ),
-        RootRow(
-            tabRowKey(SettingsTab.EPG), TileTone.PRIMARY, MyOwnTVIcon.EPG,
-            title = stringResource(R.string.settings_epg_sources), desc = stringResource(R.string.settings_epg_sources_nav_description),
-            focus = rowFocus.getValue(SettingsTab.EPG),
-            onClick = { open(SettingsTab.EPG) },
-        ),
-        // The guide's own settings, under a divider of their own: they tune the guide, they are not
-        // sources, and sitting straight under the two source lists they read as if they were.
+        // The guide's own settings (one RuTube source fills it, so there are no source lists above
+        // it any more): the guide-wide offset, reminders and how far ahead the guide is stored.
+        RootGroup("group_guide", stringResource(R.string.settings_part_guide_catchup), MyOwnTVIcon.EPG, ""),
         RootRow(
             "epg_offset", TileTone.SECONDARY, MyOwnTVIcon.EPG,
-            heading = stringResource(R.string.settings_part_guide_catchup),
             title = stringResource(R.string.content_epg_time_offset),
             desc = stringResource(R.string.settings_epg_offset_root_description),
             chip = epgShiftLabel(epgOffset),
@@ -690,14 +655,6 @@ fun SettingsScreen(
         // and are More rows now; Clear history moved onto the History screen it acts on; the download
         // folder moved to the Downloads screen. With all four gone the group had nothing left in it.
         RootGroup("group_app", stringResource(R.string.settings_app_group), MyOwnTVIcon.INFO, stringResource(R.string.settings_group_summary_app)),
-        // Sports Hub: one row in App, opening the page with every Sports setting. Not a group of its
-        // own: More › Settings opens groups by position (SettingsGroup), and its 12 cards fill the page.
-        RootRow(
-            tabRowKey(SettingsTab.SPORTS), TileTone.PRIMARY, MyOwnTVIcon.SPORTS,
-            title = stringResource(R.string.sports_title), desc = stringResource(R.string.sports_leagues),
-            focus = rowFocus.getValue(SettingsTab.SPORTS),
-            onClick = { open(SettingsTab.SPORTS) },
-        ),
         RootRow(
             tabRowKey(SettingsTab.LANGUAGE), TileTone.PRIMARY, MyOwnTVIcon.LANGUAGE,
             heading = stringResource(R.string.settings_group_app),
@@ -916,19 +873,16 @@ fun SettingsScreen(
         val entries = listOfNotNull(
             SettingsSearchEntry(stringResource(R.string.settings_app_group), stringResource(R.string.settings_language), stringResource(R.string.settings_search_keywords_language), MyOwnTVIcon.LANGUAGE, TileTone.PRIMARY,
                 chip = languageChip, chipTone = TileTone.PRIMARY) { open(SettingsTab.LANGUAGE) },
-            SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.settings_playlists), stringResource(R.string.settings_search_keywords_playlists), MyOwnTVIcon.PLAYLIST, TileTone.PRIMARY) { open(SettingsTab.SOURCES) },
-            SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.settings_epg_sources), stringResource(R.string.settings_search_keywords_epg), MyOwnTVIcon.EPG, TileTone.PRIMARY) { open(SettingsTab.EPG) },
-            SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.content_epg_time_offset), stringResource(R.string.settings_search_keywords_epg_offset), MyOwnTVIcon.EPG, TileTone.SECONDARY,
+            SettingsSearchEntry(stringResource(R.string.settings_part_guide_catchup), stringResource(R.string.content_epg_time_offset), stringResource(R.string.settings_search_keywords_epg_offset), MyOwnTVIcon.EPG, TileTone.SECONDARY,
                 chip = epgShiftLabel(epgOffset), chipTone = if (epgOffset == 0) TileTone.SECONDARY else TileTone.PRIMARY) { saveScroll(); dialogReturn = searchFieldFocus; showEpgOffset = true },
-            SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.settings_epg_guide_days), stringResource(R.string.settings_search_keywords_epg), MyOwnTVIcon.EPG, TileTone.SECONDARY,
+            SettingsSearchEntry(stringResource(R.string.settings_part_guide_catchup), stringResource(R.string.settings_epg_guide_days), stringResource(R.string.settings_search_keywords_epg), MyOwnTVIcon.EPG, TileTone.SECONDARY,
                 chip = pluralStringResource(R.plurals.settings_epg_guide_days_value, guideDays, guideDays), chipTone = TileTone.PRIMARY) { saveScroll(); dialogReturn = searchFieldFocus; showGuideDays = true },
-            SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.settings_search_guide_logos), stringResource(R.string.settings_search_keywords_logos), MyOwnTVIcon.EPG, TileTone.SECONDARY) { open(SettingsTab.EPG) },
             SettingsSearchEntry(stringResource(R.string.settings_group_content_metadata), stringResource(R.string.settings_customize), stringResource(R.string.settings_search_keywords_customize), MyOwnTVIcon.SORT, TileTone.PRIMARY) { open(SettingsTab.CUSTOMIZE) },
             navigationSearchEntry(settingsVm) { saveScroll(); dialogReturn = searchFieldFocus; showNavigation = true },
             menuLabelsSearchEntry(settingsVm) { saveScroll(); dialogReturn = searchFieldFocus; showNavigation = true },
             liveLayoutSearchEntry(settingsVm) { saveScroll(); dialogReturn = searchFieldFocus; showLiveLayout = true },
             SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_live_opens_in), stringResource(R.string.settings_search_keywords_live_opens_in), MyOwnTVIcon.LIVE_TV, TileTone.PRIMARY) { saveScroll(); dialogReturn = searchFieldFocus; stageSettings.open = StageSettingsDialog.LIVE_OPENS_IN },
-            SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.settings_reminders), stringResource(R.string.settings_search_keywords_reminders), MyOwnTVIcon.BELL, TileTone.SECONDARY) { saveScroll(); dialogReturn = searchFieldFocus; stageSettings.open = StageSettingsDialog.REMINDERS },
+            SettingsSearchEntry(stringResource(R.string.settings_part_guide_catchup), stringResource(R.string.settings_reminders), stringResource(R.string.settings_search_keywords_reminders), MyOwnTVIcon.BELL, TileTone.SECONDARY) { saveScroll(); dialogReturn = searchFieldFocus; stageSettings.open = StageSettingsDialog.REMINDERS },
             SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_ch_paging), stringResource(R.string.settings_search_keywords_ch), MyOwnTVIcon.CH_NAV, TileTone.PRIMARY,
                 chip = if (chNavEnabled) stringResource(R.string.common_on) else stringResource(R.string.common_off), chipTone = if (chNavEnabled) TileTone.PRIMARY else TileTone.SECONDARY) { open(SettingsTab.CH_NAV) },
             SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_panel_width), stringResource(R.string.settings_search_keywords_panel_width), MyOwnTVIcon.PANEL_WIDTH, TileTone.PRIMARY,
@@ -1002,7 +956,6 @@ fun SettingsScreen(
             SettingsSearchEntry(tv.own.myowntv.features.settings.videoRowPath("vp_logging"), stringResource(R.string.settings_detailed_playback_logging), stringResource(R.string.settings_search_keywords_detailed_logging), MyOwnTVIcon.INFO, TileTone.SECONDARY) { jumpVideo("vp_logging", false) },
             SettingsSearchEntry(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_app), stringResource(R.string.settings_group_network)), stringResource(R.string.common_proxy), stringResource(R.string.settings_search_keywords_proxy), MyOwnTVIcon.NETWORK, TileTone.SECONDARY) { open(SettingsTab.NETWORK) },
             SettingsSearchEntry(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_app), stringResource(R.string.settings_group_network)), stringResource(R.string.settings_dns), stringResource(R.string.settings_search_keywords_dns), MyOwnTVIcon.DNS, TileTone.SECONDARY) { open(SettingsTab.DNS) },
-            SettingsSearchEntry(stringResource(R.string.settings_group_app), stringResource(R.string.sports_title), stringResource(R.string.sports_leagues), MyOwnTVIcon.SPORTS, TileTone.PRIMARY) { open(SettingsTab.SPORTS) },
             // Settings inside a sub-screen, by their own names (kept out of line: this function is at the JVM size limit).
             *subScreenSearchEntries { t -> open(t) }.toTypedArray(),
             SettingsSearchEntry(stringResource(R.string.settings_group_app), stringResource(R.string.settings_app_startup), stringResource(R.string.settings_search_keywords_startup), MyOwnTVIcon.POWER, TileTone.SECONDARY,
@@ -1095,7 +1048,7 @@ fun SettingsScreen(
     val extras = stageRowExtras(
         settingsVm, themeMode, uiZoomPercent, onSetZoom,
         onOpenZoom = { saveScroll(); dialogReturn = zoomRowFocus; showZoom = true },
-        fontCustomization, onSetFontCustomization, playlistSources,
+        fontCustomization, onSetFontCustomization,
     )
     // Shared with the dialogs below, so the simple ones open in the page's panel.
     val panel = remember { tv.own.myowntv.features.settings.SettingsPanelState() }
@@ -2002,14 +1955,8 @@ private fun GlassEffectSettingsScreen(onBack: () -> Unit, modifier: Modifier = M
     }
 }
 
-/** When a guide feed last synced: "Today 14:05" style, built from the Guide's own day labels. */
-@Composable
-private fun epgFeedWhen(atMs: Long): String =
-    tv.own.myowntv.features.epg.guideDayLabel(tv.own.myowntv.features.epg.localMidnight(atMs)) + " " +
-        tv.own.myowntv.ui.format.rememberBestDateFormatter("jm")(atMs)
-
 /**
- * Global guide shift. Some XMLTV feeds publish in a timezone the channels don't actually air in;
+ * Global guide shift. A guide can publish in a timezone the channels don't actually air in;
  * this moves every programme by a fixed amount. A per-channel override (channel long-press → EPG
  * time offset) wins over it — that's what a lineup carrying both East and West feeds needs, since
  * one global shift can only ever fix one of the two.
@@ -2093,7 +2040,6 @@ internal data class RootRow(
 /** The settings that live inside a sub-screen, findable by their own names; each opens its screen. */
 @Composable
 private fun subScreenSearchEntries(open: (SettingsTab) -> Unit): List<SettingsSearchEntry> = listOf(
-        SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.settings_epg_sources_auto_refresh_title), stringResource(R.string.settings_search_keywords_epg), MyOwnTVIcon.EPG, TileTone.SECONDARY) { open(SettingsTab.EPG) },
         SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_hero_preview), stringResource(R.string.settings_search_keywords_home), MyOwnTVIcon.HOME, TileTone.SECONDARY) { open(SettingsTab.HOME) },
         SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_live_keep_watching), stringResource(R.string.settings_search_keywords_home), MyOwnTVIcon.HOME, TileTone.SECONDARY) { open(SettingsTab.HOME) },
         SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_android_tv_home), stringResource(R.string.settings_search_keywords_home), MyOwnTVIcon.HOME, TileTone.SECONDARY) { open(SettingsTab.HOME) },
@@ -2235,9 +2181,7 @@ private fun stageRowExtras(
     onOpenZoom: () -> Unit,
     font: FontCustomization,
     onSetFont: (FontCustomization) -> Unit,
-    playlists: List<tv.own.owntv.core.database.entity.SourceEntity>,
 ): Map<String, RowExtra> {
-    val playlistsKnown by vm.loadedSources.collectAsStateWithLifecycle()
     val accent by vm.accent.collectAsStateWithLifecycle()
     val customAccent by vm.customAccent.collectAsStateWithLifecycle()
     val glass by vm.glassConfig.collectAsStateWithLifecycle()
@@ -2281,10 +2225,6 @@ private fun stageRowExtras(
     val languages = tv.own.owntv.core.i18n.SupportedLocales.all.count { it.packaged }
     val valueStyle = tv.own.myowntv.ui.theme.stageText(18, 700)
     return mapOf(
-        "tab_SOURCES" to RowExtra(
-            SettingValue.Opens(playlistsKnown?.let { pluralStringResource(R.plurals.more_playlist_count, it.size, it.size) }),
-            extra = { tv.own.myowntv.features.settings.PlaylistSyncList(playlists) },
-        ),
         "theme" to RowExtra(
             SettingValue.Segmented(themeNames, themes.indexOf(themeMode)),
             onStep = { vm.setThemeMode(cycle(themes, themeMode, it)) },
@@ -2352,42 +2292,15 @@ private fun stageRowExtras(
     ) + serviceRowExtras(vm)
 }
 
-/** EPG Sources, Metadata, Proxy and DNS: what each is set to, and the details in the panel. */
+/** Proxy and DNS: what each is set to, and the details in the panel. */
 @Composable
 private fun serviceRowExtras(vm: SettingsViewModel): Map<String, RowExtra> {
-    val epgVm: tv.own.myowntv.features.settings.EpgSourcesViewModel = org.koin.androidx.compose.koinViewModel()
-    val feeds by epgVm.sources.collectAsStateWithLifecycle()
     val proxy by vm.proxyConfig.collectAsStateWithLifecycle()
     val dns by vm.dnsConfig.collectAsStateWithLifecycle()
     val on = stringResource(R.string.common_on)
     val off = stringResource(R.string.common_off)
-    val small = tv.own.myowntv.ui.theme.stageText(17, 600)
-    @Composable fun line(label: String, value: String) = Row(Modifier.padding(top = 10.mpx)) {
-        Text(label, style = small, color = tv.own.myowntv.ui.theme.StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-        Text(value, style = small, color = tv.own.myowntv.ui.theme.StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-    }
     val dnsHost = dns.dohUrl.ifBlank { dns.host }.removePrefix("https://").substringBefore('/')
     return mapOf(
-        "tab_EPG" to RowExtra(
-            SettingValue.Opens(pluralStringResource(R.plurals.settings_epg_feed_count, feeds.size, feeds.size)),
-            extra = {
-                // As Playlists draws its list: the name in bold, when it last synced in small muted type.
-                Column(Modifier.padding(top = 18.mpx), verticalArrangement = Arrangement.spacedBy(10.mpx)) {
-                    feeds.forEach { f ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(f.name, style = tv.own.myowntv.ui.theme.stageText(18, 700), color = tv.own.myowntv.ui.theme.StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                            f.lastSyncAt?.let {
-                                Text(
-                                    stringResource(R.string.settings_synced_at, epgFeedWhen(it)),
-                                    style = tv.own.myowntv.ui.theme.stageText(15, 500), color = tv.own.myowntv.ui.theme.StageColors.Muted,
-                                    maxLines = 1, overflow = TextOverflow.Ellipsis,
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-        ),
         "tab_NETWORK" to RowExtra(SettingValue.Opens(if (proxy.usable) "${proxy.host}:${proxy.port}" else off)),
         "tab_DNS" to RowExtra(SettingValue.Opens(if (dns.enabled && dnsHost.isNotBlank()) dnsHost else if (dns.enabled) on else off)),
     )

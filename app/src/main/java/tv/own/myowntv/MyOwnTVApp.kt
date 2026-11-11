@@ -21,15 +21,11 @@ import tv.own.owntv.core.menu.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
-import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
@@ -79,9 +75,6 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
 
         /** Lower bound: below this the cache thrashes and stops saving any downloads. */
         private const val MIN_IMAGE_CACHE_BYTES = 32L * 1024 * 1024
-
-        /** Sports' Auto rebuild waits this long after launch, so it never competes with the first screen. */
-        private const val SPORTS_START_DELAY_MS = 15_000L
     }
 
     /** Application-lifetime scope for small fire-and-forget IO that must not touch the launch path. */
@@ -187,12 +180,6 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
             runCatching {
                 GlobalContext.get().get<tv.own.owntv.core.settings.SettingsRepository>().applyStageDefaults()
             }
-        }
-        // Sports: core decides from Auto rebuild whether the stored board is due ("on every app start",
-        // or older than the chosen hours). It reads one small file and touches no database.
-        appScope.launch {
-            kotlinx.coroutines.delay(SPORTS_START_DELAY_MS)
-            runCatching { GlobalContext.get().get<tv.own.owntv.core.sports.SportsRepository>().appStarted() }
         }
         // Local auto-sync: the paired-only listener and the moments a pass is tried (OwnTV to the
         // front or the back, the network back). Core owns what that means; no hourly check on a TV.

@@ -3,12 +3,12 @@ package tv.own.owntv.core.companion
 import android.graphics.Bitmap
 
 /**
- * Lifecycle of the Remote companion listener — a tiny embedded HTTP server on the TV that serves a
- * mobile-friendly add-source form any phone, tablet or PC on the same Wi-Fi can open.
+ * Lifecycle of the Remote companion listener — a tiny embedded HTTP server on the TV whose pages any
+ * phone, tablet or PC on the same Wi-Fi can open.
  *
- * The QR encodes only the [Listening.urls] address; the remote device is asked for [Listening.pin] on a gate
- * page before the form is served. Submissions arrive as [CompanionPayload]s (the TV user still presses
- * Start Import — the remote browser only fills the form).
+ * The QR encodes only the [Listening.urls] address; the remote device is asked for [Listening.pin] on a
+ * gate page before the page is served. The pages are the backup upload/download pair and the
+ * background-image upload; local sync has no browser page at all.
  */
 sealed interface CompanionFailure {
     data object InvalidPort : CompanionFailure

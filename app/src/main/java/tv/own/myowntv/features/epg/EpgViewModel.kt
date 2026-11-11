@@ -29,8 +29,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -45,7 +43,6 @@ import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
 
-import tv.own.owntv.core.epg.displayLogoUrl
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.FlowPreview
@@ -116,14 +113,12 @@ data class EpgUiState(
     val loading: Boolean = true,
     val refreshing: Boolean = false,
     val message: EpgMessage? = null,
-    /** False when the user hasn't added any EPG source yet → the screen shows an "Add EPG" prompt. */
-    val hasEpgSources: Boolean = true,
 )
 
 /**
  * Drives the EPG guide grid. Loads the EPG-capable channels and the programmes in a
  * rolling window from the DB — as many days forward as Settings' "Guide days to keep" stores —
- * and can re-download the bulk XMLTV guide via [EpgRepository].
+ * and can re-download the guide from the RuTube API via [EpgRepository].
  */
 class EpgViewModel(
     private val settings: SettingsRepository,
@@ -131,7 +126,6 @@ class EpgViewModel(
     private val channelDao: ChannelDao,
     private val epgDao: EpgDao,
     private val epgRepository: EpgRepository,
-    private val epgSourceStore: tv.own.owntv.core.epg.EpgSourceStore,
     private val connectivity: ConnectivityObserver,
     private val customize: CustomizationStore,
     private val sourceDao: SourceDao,
@@ -163,7 +157,7 @@ class EpgViewModel(
     /** Every windowed guide read this screen makes. The caches around it stay here — what to keep
      *  depends on how the grid scrolls, which is the screen's business, not core's. */
     private val guideReader =
-        tv.own.owntv.core.live.GuideReader(epgDao, epgSourceStore, sourceDao, liveEpgReader)
+        tv.own.owntv.core.live.GuideReader(epgDao, sourceDao, liveEpgReader)
 
     // The user's customizations — shared by the Guide picker, guide rows, and manual EPG match.
     // It must be initialized before guideCategories (Kotlin property initializers run top-to-bottom).
@@ -334,21 +328,12 @@ class EpgViewModel(
             .distinctUntilChanged()
             .onEach { load() }
             .launchIn(viewModelScope)
-        // Reload the guide when the active-playlist filter (Settings "Default" / Browse picker) changes,
-        // so the grid narrows to the chosen playlist's channels (or back to all). drop(1): initial load
-        // is triggered by the screen.
-        settings.defaultSourceId
-            .drop(1)
-            .distinctUntilChanged()
-            .onEach { load() }
-            .launchIn(viewModelScope)
-        // Reload when the guide's own data changes underneath an open screen — a feed added,
-        // re-synced or deleted. Leaving the Guide and coming back already picks it up (`load()` runs
+        // Reload when the guide's own data changes underneath an open screen — the guide re-synced. Leaving the Guide and coming back already picks it up (`load()` runs
         // on every mount and compares the stored count), but a background auto-refresh finishing
         // while the grid is on screen had no way to show itself. Room reports every write to the
         // programme table, so this waits for the writes to stop rather than reloading per batch, and
         // `load()`'s own stored-count guard means a settled sync that changed nothing costs nothing.
-        epgSourceStore.sources
+        sourceRepository.observeSources()
             .map { sources -> sources.map { it.id } }
             .distinctUntilChanged()
             .flatMapLatest { ids ->
@@ -519,16 +504,14 @@ class EpgViewModel(
         }
     }
 
-    /** Fill in matched channels' programmes from the cached XMLTV (no network) and refresh the guide — in the
+    /** Fill in matched channels' programmes from the stored guide (no network) and refresh the guide — in the
      *  BACKGROUND so the match action/spinner returns instantly and doesn't wait on a full cache re-parse. */
     private fun fillMatchedInBackground(epgIds: Collection<String>) {
         viewModelScope.launch {
             val ids = epgIds.map { it.trim().lowercase() }.filterTo(HashSet()) { it.isNotBlank() }
             if (ids.isEmpty()) return@launch
-            // One cache pass for the whole set; only re-sync over the network if the cache is gone/stale
-            // (returns false when it held none of the matched channels' programmes).
-            val handled = runCatching { epgRepository.storeProgrammesForIdsFromCache(ids) }.getOrDefault(false)
-            if (!handled) runCatching { refreshAllEpgFromNetwork() }
+            // The bulk sync already stores every catalogue channel's programmes; a manual match only
+            // repoints a channel at an id that is (almost always) already stored — re-read, no network.
             load()
             // Single-channel match (manual pick / review Accept / single auto-match): if the feed has no
             // current-or-upcoming programmes for it, its guide row will be empty even though the match
@@ -546,7 +529,6 @@ class EpgViewModel(
 
     private suspend fun refreshAllEpgFromNetwork() {
         sourceRepository.observeSources().first().forEach { runCatching { epgRepository.refresh(it) } }
-        epgSourceStore.getAll().forEach { runCatching { epgRepository.refreshUrl(it.id, it.url, it.userAgent) } }
     }
 
     // ---- Smart EPG matching: scan channels with no working guide and match them by name ----
@@ -571,22 +553,14 @@ class EpgViewModel(
      * "Use this guide's logos" on; while ticked, every match this run makes also turns that option on for
      * the EPG sources that carry a logo for it.
      */
-    private val _includeGuideLogos = MutableStateFlow(false)
-    val includeGuideLogos: StateFlow<Boolean> = _includeGuideLogos.asStateFlow()
 
     fun setIncludeGuideLogos(include: Boolean) {
-        _includeGuideLogos.value = include
     }
 
     /** Guide ids the current run applied on its own, before the review window opened. */
     private var runApplied: List<String> = emptyList()
 
-    private suspend fun includeLogosIfTicked(epgIds: List<String>) {
-        if (_includeGuideLogos.value) tv.own.owntv.core.epg.EpgLogoStore.includeLogosFor(settings, epgDao, runApplied + epgIds)
-    }
-
     private suspend fun openReview(suggestions: List<EpgMatchSuggestion>) {
-        if (suggestions.isNotEmpty()) _includeGuideLogos.value = settings.epgUseLogos.first().isNotEmpty()
         _review.value = suggestions
     }
 
@@ -619,7 +593,7 @@ class EpgViewModel(
             try {
                 // The playlist(s) the guide is showing (the top-right choice): with a 400-channel
                 // playlist picked, scoring the whole catalogue would waste the run.
-                val playlistIds = activeSourceIds(settings, sourceDao, MediaType.LIVE)
+                val playlistIds = activeSourceIds(sourceDao, MediaType.LIVE)
                 if (playlistIds.isEmpty()) { _matchSummary.value = EpgMatchSummary.AddPlaylist; return@launch }
                 val cust = customize.observe(MediaType.LIVE).first()
 
@@ -682,7 +656,6 @@ class EpgViewModel(
         viewModelScope.launch {
             customize.setEpgMatch(MediaType.LIVE, CustomizeKeys.channel(s.channel), s.epgChannelId)
             _review.value = _review.value.filterNot { it.channel.id == s.channel.id }
-            includeLogosIfTicked(listOf(s.epgChannelId))
             fillMatchedInBackground(listOf(s.epgChannelId))
         }
     }
@@ -699,7 +672,6 @@ class EpgViewModel(
         viewModelScope.launch {
             saveEpgMatches(all.map { CustomizeKeys.channel(it.channel) to it.epgChannelId })
             _review.value = emptyList()
-            includeLogosIfTicked(all.map { it.epgChannelId })
             fillMatchedInBackground(all.map { it.epgChannelId })
         }
     }
@@ -712,7 +684,6 @@ class EpgViewModel(
     /** Close the review list / clear the summary banner. */
     fun clearReview() {
         // Closing the window still honours the tick for the matches the run applied on its own.
-        if (_review.value.isNotEmpty() && runApplied.isNotEmpty()) viewModelScope.launch { includeLogosIfTicked(emptyList()) }
         _review.value = emptyList()
         _matchSummary.value = null
     }
@@ -746,11 +717,9 @@ class EpgViewModel(
         // is already populated — keep the existing list on screen and refresh it silently, so opening the
         // Guide menu is instant instead of flashing a spinner and re-rendering from scratch every time.
         if (_state.value.channels.isEmpty()) _state.value = _state.value.copy(loading = true, message = null)
-        val playlistIds = activeSourceIds(settings, sourceDao, MediaType.LIVE)
-        val epgIds = epgSourceStore.getAll().map { it.id }
-        // Channels come from the playlists; guide data is matched from BOTH the playlists' own EPG
-        // (kept for compatibility) and the standalone EPG sources — by epgChannelId across all ids.
-        val ids = playlistIds + epgIds
+        val playlistIds = activeSourceIds(sourceDao, MediaType.LIVE)
+        // Channels come from the playlists; the RuTube guide is stored under the playlist source ids.
+        val ids = playlistIds
 
         if (playlistIds.isEmpty()) {
             _state.value = EpgUiState(loading = false, message = EpgMessage.AddPlaylist)
@@ -870,22 +839,21 @@ class EpgViewModel(
             _cacheRevision.value++
         }
 
-        val hasEpg = epgIds.isNotEmpty()
         // A guide that synced its channels but no programmes: none of its channel ids are the playlist's,
         // so the sync kept nothing. That is a mismatch Auto-match can fix (its candidates are these same
         // guide channels), not an empty guide; a first sync still running has nothing stored yet either,
         // and the sync pill already says so.
-        val unmatchedGuide = stored == 0 && hasEpg && epgActivity.active.value.isEmpty() &&
+        val unmatchedGuide = stored == 0 && epgActivity.active.value.isEmpty() &&
             epgDao.guideChannelNames(1).isNotEmpty()
         val message = when {
-            stored == 0 && !unmatchedGuide -> null // handled by the "No EPG added" prompt (hasEpgSources=false)
+            stored == 0 && !unmatchedGuide -> null // nothing synced yet; the first RuTube sync fills the grid
             channels.isEmpty() && q.isNotBlank() -> EpgMessage.NoChannelsForQuery(q)
             channels.isEmpty() -> EpgMessage.MismatchedIds
             else -> null
         }
         _state.value = EpgUiState(
             channels = channels, windowStart = windowStart, windowEnd = windowEnd, now = now,
-            loading = false, message = message, hasEpgSources = hasEpg,
+            loading = false, message = message,
         )
 
         tv.own.owntv.core.CorePerf.log {
@@ -920,7 +888,7 @@ class EpgViewModel(
         // query-storm that dominated guide load time once a lot of channels had been smart-matched.
         val missingKeys = matches.keys.filter { it !in cust.hiddenItems }
         if (missingKeys.isNotEmpty()) {
-            // Resolve only the matched channels (their key's tail is the remoteId/Xtream stream id) in one
+            // Resolve only the matched channels (their key's tail is the remoteId) in one
             // query, instead of loading the entire channel table — that table-load was seconds on big lists.
             // In batches: SQLite rejects a statement with more than 999 bound parameters on older
             // Android, and someone who has matched a thousand channels by hand would otherwise crash

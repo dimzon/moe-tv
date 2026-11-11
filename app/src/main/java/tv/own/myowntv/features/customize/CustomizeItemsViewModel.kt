@@ -29,8 +29,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -116,7 +114,7 @@ class CustomizeItemsViewModel(
         fun sourceIdsFor(type: MediaType): List<Long> = ActiveProfileSources(sources).sourceIdsFor(type)
     }
 
-    private val ctx: StateFlow<Ctx> = activeProfileSources(settings, sourceDao)
+    private val ctx: StateFlow<Ctx> = activeProfileSources(sourceDao)
         .map { aps -> Ctx(aps.sources) }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, Ctx(emptyList()))

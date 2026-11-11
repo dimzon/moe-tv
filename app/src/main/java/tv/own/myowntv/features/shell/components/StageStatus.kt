@@ -21,15 +21,11 @@ import tv.own.owntv.core.menu.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
-import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
@@ -65,9 +61,6 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -96,27 +89,23 @@ data class ContinuePill(val icon: MyOwnTVIcon, val iconFilled: Boolean, val acti
 
 /**
  * The top-right cluster on every screen: the Continue pill —
- * or, in Audio mode, the now-playing bar in its place — the playlist pill, then the clock with the date
+ * or, in Audio mode, the now-playing bar in its place — the source pill, then the clock with the date
  * and weather below it. Placed by the shell at the top right, 64 × 34 from the corner.
  *
  * [pillsFocusable] keeps the pills out of D-pad reach while focus is deep in a content list, so an
- * up-press at the top of a list never jumps here. [onPlaylistPillBounds] reports the playlist pill's
- * window bounds, where the playlist menu draws its copy of the pill above its scrim.
+ * up-press at the top of a list never jumps here. The source pill is a static label — the app has the
+ * one built-in source, so there is nothing to open from it.
  */
 @Composable
 fun StageStatusCluster(
     continuePill: ContinuePill?,
     audioBar: (@Composable () -> Unit)?,
-    playlistLabel: String,
-    playlistInteractive: Boolean,
-    onPlaylistClick: () -> Unit,
     pillsFocusable: Boolean,
     weatherInfo: WeatherInfo?,
     weatherFahrenheit: Boolean,
     clockColors: ClockColors,
     modifier: Modifier = Modifier,
     playlistDownFocusRequester: FocusRequester? = null,
-    onPlaylistPillBounds: (Rect) -> Unit = {},
 ) {
     Row(
         modifier.padding(end = 64.mpx, top = 34.mpx),
@@ -138,13 +127,11 @@ fun StageStatusCluster(
                 )
             }
             StagePill(
-                text = playlistLabel,
+                text = "",
                 icon = MyOwnTVIcon.LAYERS,
-                trailingIcon = if (playlistInteractive) MyOwnTVIcon.CHEVRON_DOWN else null,
-                onClick = onPlaylistClick,
-                enabled = playlistInteractive,
+                onClick = {},
+                enabled = false,
                 modifier = Modifier
-                    .onGloballyPositioned { onPlaylistPillBounds(it.boundsInWindow()) }
                     .focusProperties {
                         canFocus = pillsFocusable
                         if (playlistDownFocusRequester != null) down = playlistDownFocusRequester

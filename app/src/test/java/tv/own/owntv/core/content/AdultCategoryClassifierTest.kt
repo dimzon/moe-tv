@@ -34,7 +34,7 @@ class AdultCategoryClassifierTest {
             "Kids",
             "Family Movies",
             "Channel 18",
-            "Sports +1",
+            "Movies +1",
             "",
         ).forEach { name ->
             assertFalse("Expected safe category: $name", AdultCategoryClassifier.isAdult(name))
@@ -44,8 +44,8 @@ class AdultCategoryClassifierTest {
     @Test
     fun `classifies the category names the backfill made visible`() {
         // Categories that only reach a user because the sync now asks for the ones a provider's bulk
-        // list omitted. These three are verbatim from live panels: the Stalker portal's censored genre,
-        // and two Xtream categories that merely look adult — Adult Swim is a cartoon block.
+        // list omitted. These are real-world category names that merely look adult — Adult Swim is
+        // a cartoon block.
         assertTrue(AdultCategoryClassifier.isAdult("18| FOR ADULTS"))
         assertFalse(AdultCategoryClassifier.isAdult("NETFLIX ADULT-SWIM"))
         assertFalse(AdultCategoryClassifier.isAdult("HBO MAX (ADULT SWIM)"))

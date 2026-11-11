@@ -8,18 +8,24 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import androidx.work.ForegroundInfo
 import kotlinx.coroutines.CancellationException
-import tv.own.owntv.core.epg.EpgSourceStore
+import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.i18n.LocaleStore
 import tv.own.owntv.core.network.ConnectivityObserver
 import tv.own.owntv.core.repository.EpgRepository
 import tv.own.owntv.core.sync.EpgActivityTracker
 import tv.own.owntv.core.util.isTransientSyncError
 
+/**
+ * The WorkManager entry for the guide refresh. RuTube is the only source, so this runs the RuTube
+ * EPG refresh ([EpgRepository.refreshRutube]) — the API-driven grid written straight into the
+ * shared EPG tables by [tv.own.owntv.core.sync.RuTubeEpgSyncer]. The old XMLTV-feed branch over a
+ * standalone EPG-source store is gone with that system.
+ */
 class EpgSyncWorker(
     context: Context,
     params: WorkerParameters,
     private val epgRepository: EpgRepository,
-    private val store: EpgSourceStore,
+    private val sourceDao: SourceDao,
     private val connectivity: ConnectivityObserver,
     private val activityTracker: EpgActivityTracker,
     private val localeStore: LocaleStore,
@@ -45,7 +51,7 @@ class EpgSyncWorker(
         val reason = inputData.getString(KEY_REASON) ?: "unknown"
         if (sourceId == Long.MIN_VALUE) return Result.failure()
 
-        val source = store.getAll().firstOrNull { it.id == sourceId } ?: run {
+        val source = sourceDao.getById(sourceId) ?: run {
             Log.i(TAG, "Skipping stale EPG sync sourceId=$sourceId reason=$reason")
             return Result.success()
         }
@@ -70,11 +76,10 @@ class EpgSyncWorker(
             .onFailure { Log.i(TAG, "EPG sync stays in the background: ${it.message}") }
 
         try {
-            val programmes = epgRepository.refreshUrl(source.id, source.url, source.userAgent) { channels, count ->
+            val programmes = epgRepository.refreshRutube(source) { channels, count ->
                 progress.publish(channels, count)
             }
             progress.flush()
-            store.setSynced(source.id, System.currentTimeMillis(), null)
             Log.i(
                 TAG,
                 "EPG sync finished sourceId=${source.id} reason=$reason programmes=$programmes ms=${SystemClock.elapsedRealtime() - startedAt}",
@@ -89,17 +94,13 @@ class EpgSyncWorker(
             // storing a translated sentence would freeze the language active during the background run.
             // The English comparison needles remain in ErrorMessages.kt and are stable protocol keys.
             val rawMessage = e.message
-            // Record the failure WITHOUT updating lastSyncAt — staleness-based auto-refresh treats
-            // lastSyncAt as the last *successful* sync, so a failed attempt must leave it untouched
-            // (otherwise a flaky network would falsely reset the threshold and stop retries).
-            store.markError(source.id, rawMessage)
             // Transient network trouble → WorkManager retry with backoff instead of staying stale
-            // until the next scheduled window. Permanent errors (bad URL, malformed XML) stay terminal.
+            // until the next scheduled window. Permanent errors stay terminal.
             return if (shouldRetryEpgSync(e, online, runAttemptCount)) {
                 Log.w(TAG, "EPG sync failed transiently sourceId=${source.id} reason=$reason attempt=$runAttemptCount — will retry", e)
                 Result.retry()
             } else {
-                Log.w(TAG, "EPG sync failed sourceId=${source.id} reason=$reason", e)
+                Log.w(TAG, "EPG sync failed sourceId=${source.id} reason=$reason message=$rawMessage", e)
                 Result.failure()
             }
         } finally {
@@ -202,21 +203,12 @@ internal const val MAX_EPG_RETRY_ATTEMPTS = 3
  *
  * Extracted so the classification can be tested without WorkManager.
  *
- * The retry test is "is this an IOException", which reads any of these as network trouble because
- * that is what they are built on. They are not: in each one the server did everything asked of it
- * and the answer was simply *nothing*. Repeating the request produces the same nothing, so what the
- * user got was "Connecting…" through three backoffs before a failure that was certain from the
- * first request. A definitive answer is reported once, and the source stays on the list to be tried
- * again whenever the user — or the next scheduled refresh — wants to.
- *
- * Anything genuinely broken mid-flight (a dropped connection, a truncated download) still arrives
- * as itself and is still retried.
+ * The RuTube guide reports "no schedule upstream" as empty data, not as an error, so anything that
+ * reaches this classification as an exception is real trouble. Genuinely broken mid-flight (a
+ * dropped connection, a truncated download) arrives as an IOException and is retried with backoff
+ * up to [MAX_EPG_RETRY_ATTEMPTS]; anything else is reported once and stays terminal.
  */
 internal fun shouldRetryEpgSync(error: Throwable, online: Boolean, runAttemptCount: Int): Boolean {
-    val definitive = error is tv.own.owntv.core.stalker.StalkerEpgLoader.PortalHasNoGuideException ||
-        error is tv.own.owntv.core.repository.EpgRepository.NoProgrammesInWindowException ||
-        error is tv.own.owntv.core.repository.EpgRepository.PortalGuideSourceGoneException
-    if (definitive) return false
     val transient = error is java.io.IOException || isTransientSyncError(error.message, online)
     return transient && runAttemptCount < MAX_EPG_RETRY_ATTEMPTS
 }

@@ -29,8 +29,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -126,12 +124,10 @@ class CustomizeViewModel(
         fun sourceIdsFor(type: MediaType): List<Long> = ActiveProfileSources(sources).sourceIdsFor(type)
     }
 
-    // Observe the sources reactively so adding/removing a playlist refreshes the
-    // customize lists immediately. Goes through activeProfileSources (like the Browse screens) so the
-    // chosen "active playlist" filter also applies HERE: with playlist A selected you only see A's
-    // categories, not B's. "All playlists" (default -1) still shows the merged set. Per-section Off
+    // Observe the sources reactively so a catalog change refreshes the customize lists
+    // immediately. Goes through activeProfileSources (like the Browse screens). Per-section Off
     // flags also hide that source's categories for the selected section.
-    private val ctx: StateFlow<Ctx> = activeProfileSources(settings, sourceDao)
+    private val ctx: StateFlow<Ctx> = activeProfileSources(sourceDao)
         .map { aps -> Ctx(aps.sources) }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, Ctx(emptyList()))
@@ -171,12 +167,10 @@ class CustomizeViewModel(
             combine(
                 categoryDao.observe(sourceIds, _section),
                 customize.observe(_section),
-                sourceDao.observeAll(),
-            ) { cats, cust, sources ->
-                val providerNames = sources.associate { it.id to it.name }.takeIf { sourceIds.size > 1 }
-                // Provider folders + the user's custom combined categories in ONE list, so
+            ) { cats, cust ->
+                // Built-in folders + the user's custom combined categories in ONE list, so
                 // hide/rename/reorder apply uniformly (their keys share the CustomizeKeys
-                // namespace). Custom rows carry categoryId = null and no provider name.
+                // namespace). Custom rows carry categoryId = null.
                 val entries = cust.customCategories.map { cc ->
                         CustomizeCatRow(
                             key = cc.id,
@@ -196,7 +190,7 @@ class CustomizeViewModel(
                             displayName = cust.categoryNames[key] ?: cat.name,
                             hidden = key in cust.hiddenCategories,
                             renamed = key in cust.categoryNames,
-                            providerName = providerNames?.get(cat.sourceId),
+                            providerName = null,
                         )
                     }
                     // A moved category keeps its position; the rest stay in playlist order around it.
@@ -292,11 +286,11 @@ class CustomizeViewModel(
         }
     }
 
-    /** The single playlist picked at the top right, or null for "All playlists" — what
-     *  [restoreSectionDefaults] covers, so the confirmation can name it. */
-    val restorePlaylistName: StateFlow<String?> = combine(ctx, settings.defaultSourceId) { c, id ->
-        c.sources.firstOrNull { it.id == id && id > 0 }?.name
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    /** The source [restoreSectionDefaults] will reset — the confirmation names it. With the
+     *  single built-in source that is its own name; null while nothing is loaded. */
+    val restorePlaylistName: StateFlow<String?> = ctx
+        .map { c -> c.sources.singleOrNull()?.name }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     /**
      * Puts the playlists this section is showing (the top-right choice) back to what they provide: their hidden categories

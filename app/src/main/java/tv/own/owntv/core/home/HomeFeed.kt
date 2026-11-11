@@ -102,8 +102,8 @@ class HomeFeedReader(
     suspend fun load(): HomeFeed = withContext(Dispatchers.IO) {
         coroutineScope {
             val configAsync = async { settings.homeConfig().first() }
-            // Active-playlist filter + syncLive: Home rails never show Off sections.
-            val liveIdsAsync = async { activeSourceIds(settings, sourceDao, MediaType.LIVE).toSet() }
+            // syncLive scope only (no active-playlist filter any more): Home rails never show Off sections.
+            val liveIdsAsync = async { activeSourceIds(sourceDao, MediaType.LIVE).toSet() }
             val allIdsAsync = async { sourceDao.allSourceIds().toSet() }
             val favouritesAsync = async { channelDao.favoritesListAlpha().first() }
 

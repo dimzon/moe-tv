@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -142,12 +140,8 @@ class MoreCountsViewModel(
     val lastUpdateCheckAt: StateFlow<Long?> = settings.lastUpdateCheckAt
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    private val ctx: StateFlow<ActiveProfileSources> = activeProfileSources(settings, sourceDao)
+    private val ctx: StateFlow<ActiveProfileSources> = activeProfileSources(sourceDao)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ActiveProfileSources(emptyList()))
-
-    /** How many playlists the app shows. */
-    val playlistCount: StateFlow<Int> = ctx.map { it.sources.size }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
     val favorites: StateFlow<TypeCounts> = counts(favorites = true)
     val history: StateFlow<TypeCounts> = counts(favorites = false)

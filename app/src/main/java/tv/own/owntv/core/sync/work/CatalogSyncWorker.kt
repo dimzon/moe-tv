@@ -25,7 +25,6 @@ class CatalogSyncWorker(
     private val importFinalizer: ImportFinalizer,
     private val catalogSyncScheduler: CatalogSyncScheduler,
     private val connectivity: ConnectivityObserver,
-    private val epgRepository: tv.own.owntv.core.repository.EpgRepository,
     private val settings: SettingsRepository,
     private val watchSession: tv.own.owntv.core.live.WatchSession,
 ) : CoroutineWorker(context, params) {
@@ -100,13 +99,6 @@ class CatalogSyncWorker(
                 if (deferIndexes) {
                     catalogSyncScheduler.enqueueContentIndexBuild(reason = "fresh_sync")
                 }
-                // A guide sync filters the feed to the channels the user owned when it *started*,
-                // so channels this pass just added have no programmes. Repair them from the cached
-                // feed (no network). A no-op for the usual case where nothing new appeared.
-                val gapFillStartedAt = SystemClock.elapsedRealtime()
-                runCatching { epgRepository.fillGuideGapsForSource(source.id) }
-                    .onSuccess { if (it > 0) Log.i(TAG, "Guide gap fill sourceId=${source.id} channels=$it ms=${SystemClock.elapsedRealtime() - gapFillStartedAt}") }
-                    .onFailure { Log.w(TAG, "Guide gap fill failed sourceId=${source.id}", it) }
                 Result.success()
             }
             is SyncResult.Failed -> {

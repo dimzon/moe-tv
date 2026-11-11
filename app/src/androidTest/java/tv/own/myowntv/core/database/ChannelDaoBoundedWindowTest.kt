@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -104,7 +102,7 @@ class ChannelDaoBoundedWindowTest {
             categoryId = 100, sourceId = 10,
             channels = listOf(
                 ChannelSpec(id = 1L, name = "A-News",   number = 5, sortOrder = 0),
-                ChannelSpec(id = 2L, name = "A-Sports", number = 5, sortOrder = 1),  // duplicate number
+                ChannelSpec(id = 2L, name = "A-Music", number = 5, sortOrder = 1),  // duplicate number
             ),
         )
         seedCategory(
@@ -337,7 +335,7 @@ class ChannelDaoBoundedWindowTest {
             categoryId = 100, sourceId = 10,
             channels = listOf(
                 ChannelSpec(id = 1L, name = "News-A",   number = 42, sortOrder = 0),
-                ChannelSpec(id = 2L, name = "Sports-A", number = 42, sortOrder = 1),  // duplicate
+                ChannelSpec(id = 2L, name = "Music-A", number = 42, sortOrder = 1),  // duplicate
                 ChannelSpec(id = 3L, name = "Movies-A", number = 42, sortOrder = 2),  // duplicate
             ),
         )
@@ -414,7 +412,7 @@ private suspend fun tv.own.owntv.core.database.dao.SourceDao.seedSources(seed: L
 
 private data class SourceSeed(val id: Long, val name: String) {
     fun toEntity() = tv.own.owntv.core.database.entity.SourceEntity(
-        id = id, name = name, type = SourceType.XTREAM, url = "https://example.test/$id",
+        id = id, name = name, type = SourceType.RUTUBE, url = "https://example.test/$id",
     )
 }
 

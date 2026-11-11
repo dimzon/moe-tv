@@ -23,15 +23,11 @@ import tv.own.owntv.core.menu.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
-import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
@@ -50,8 +46,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -59,7 +53,6 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -70,81 +63,40 @@ import tv.own.owntv.player.AudioOutputPolicy
 import tv.own.owntv.core.player.SurroundMode
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.SourceEntity
-import tv.own.owntv.core.repository.SourceEditor
 import tv.own.owntv.core.repository.SourceRepository
-import tv.own.owntv.core.repository.SourceTestResult
-import tv.own.owntv.core.setup.SourceImporter
-import tv.own.owntv.core.sync.ImportStage
-import tv.own.owntv.core.sync.SyncContentTypes
-import tv.own.owntv.core.sync.SyncCounts
-import tv.own.owntv.core.sync.SyncScopeChoice
-import tv.own.owntv.core.sync.SyncWarning
-import tv.own.owntv.core.stalker.stalkerCredentials
-import tv.own.owntv.core.util.FriendlySyncFailure
-import tv.own.owntv.core.util.classifySyncFailure
-import tv.own.owntv.core.sync.work.CatalogSyncState
-import tv.own.owntv.core.sync.work.CatalogSyncScheduler
 import tv.own.owntv.core.settings.ChNavLimits
-import tv.own.owntv.core.settings.EpgRefresh
 import tv.own.owntv.core.settings.PanelSection
 import tv.own.owntv.core.settings.PanelShares
 import tv.own.owntv.core.settings.GuideWidthShares
-import tv.own.owntv.core.settings.PlaylistRefresh
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.settings.SubtitleStyle
 import tv.own.owntv.core.theme.AccentColor
 import tv.own.owntv.core.theme.ThemeMode
 import tv.own.owntv.core.theme.UiZoom
 
-/** Manage IPTV sources (list / add / re-sync / delete) for the whole device. */
+/** Device-wide settings: personalization, playback, network, and the single RuTube source's overrides. */
 class SettingsViewModel(
     private val sourceDao: SourceDao,
     private val sourceRepository: SourceRepository,
     private val settings: SettingsRepository,
-    private val importFinalizer: tv.own.owntv.core.sync.ImportFinalizer,
     private val channelDao: tv.own.owntv.core.database.dao.ChannelDao,
     private val categoryDao: tv.own.owntv.core.database.dao.CategoryDao,
     private val customizationStore: tv.own.owntv.core.customize.CustomizationStore,
     private val navVisibility: tv.own.owntv.core.nav.NavVisibility,
     private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
-    private val epgRepository: tv.own.owntv.core.repository.EpgRepository,
-    private val epgSourceStore: tv.own.owntv.core.epg.EpgSourceStore,
-    private val catalogSyncScheduler: CatalogSyncScheduler,
     private val okHttpClient: okhttp3.OkHttpClient,
-    private val stalkerAuth: tv.own.owntv.core.stalker.StalkerAuthManager,
-    private val stalkerClient: tv.own.owntv.core.stalker.StalkerClient,
-    private val xtreamClient: tv.own.owntv.core.parser.XtreamClient,
-    private val sourceTester: tv.own.owntv.core.repository.SourceTester,
     private val companion: tv.own.owntv.core.companion.CompanionController,
     private val playbackPrefs: tv.own.owntv.core.player.PlaybackPrefsStore,
-    private val connectionLimits: tv.own.owntv.core.live.ConnectionLimits,
-    // The measurement opens streams, so whatever is playing has to stop first — on a
-    // single-connection account the measurement IS the thing that cuts the picture off.
-    private val livePreview: tv.own.owntv.player.LivePreviewEngine,
-    private val enginePool: tv.own.owntv.player.LiveEnginePool,
-    // Adding a playlist is core's sequence, not a copy of it — see [importState].
-    private val importer: SourceImporter,
-    private val sourceEditor: SourceEditor,
 ) : ViewModel() {
     companion object {
         private const val TAG = "OwnTVHome"
     }
 
-    // ---- Remote (companion) add-source: a LAN web form fills the Add Source screen from another device. ----
+    // ---- Remote server lifecycle, shared by the companion flows below. ----
     /** Server lifecycle (Idle / Starting / Listening with PIN+QR / Failed) for the Remote screen. */
     val remoteState get() = companion.state
 
-    /** Live submission stream — the Remote screen collects it to hand off to the Manual form. */
-    val remotePayloads get() = companion.payloads
-
-    /** Retained last submission, so the Manual form pre-fills even after the Remote screen left. */
-    val remotePayload get() = companion.lastPayload
-
-    fun startRemoteListener(port: Int) = companion.start(port)
-    /** The same server, serving [source]'s edit page; a submission lands on [remotePayload] already merged. */
-    fun startRemoteEditListener(port: Int, source: SourceEntity) = companion.startForSourceEdit(port, source)
     fun stopRemoteListener() = companion.stop()
-    fun consumeRemotePayload() = companion.consumePayload()
 
     // ---- Remote background image: another device uploads a photo over LAN (same PIN/QR companion flow). ----
 
@@ -152,20 +104,6 @@ class SettingsViewModel(
     val remoteImages get() = companion.images
 
     fun startRemoteImageListener(port: Int) = companion.startForImageUpload(port)
-
-    // Semi-auto EPG: after a playlist import, if the playlist has a guide URL we offer to sync the EPG now
-    // (rather than a slow automatic sync). "Sync now" shows a live programme count, just like the import.
-    private var pendingEpgSource: SourceEntity? = null
-    private val _epgSync = MutableStateFlow<EpgSyncUi>(EpgSyncUi.Hidden)
-    val epgSync: StateFlow<EpgSyncUi> = _epgSync.asStateFlow()
-
-    fun syncPendingEpg() {
-        val src = pendingEpgSource ?: return
-        viewModelScope.launch { runSemiAutoEpgSync(src, epgRepository, epgSourceStore) { _epgSync.value = it } }
-    }
-
-    /** Skip (from the prompt) or acknowledge (after Done) — either way, close the EPG flow. */
-    fun dismissPendingEpg() { pendingEpgSource = null; _epgSync.value = EpgSyncUi.Hidden }
 
     /** Clear the watch history (the "recently watched" rows).
      *  [type] null = everything; otherwise just LIVE / MOVIE / SERIES. */
@@ -178,82 +116,14 @@ class SettingsViewModel(
         }
     }
 
-    /** Content counts (channels/movies/series) for a source — shown on each Playlists row. */
-    fun contentCounts(sourceId: Long): kotlinx.coroutines.flow.Flow<SyncCounts> =
-        catalogSyncScheduler.catalogueSettled(sourceId)
-            .map { importFinalizer.contentCounts(sourceId) }
-
-    fun syncState(sourceId: Long): kotlinx.coroutines.flow.Flow<CatalogSyncState> =
-        catalogSyncScheduler.observeSync(sourceId)
-
-    sealed interface ImportState {
-        data object Idle : ImportState
-        data object Running : ImportState
-        data class Success(
-            val counts: SyncCounts,
-            val warnings: List<SyncWarning> = emptyList(),
-            val remainder: SyncContentTypes = SyncContentTypes(),
-        ) : ImportState
-        data class Failed(val failure: FriendlySyncFailure) : ImportState
-    }
-
-    /** The playlists; null until the first read, so a count never shows 0 while loading. */
+    /** The sources (the built-in RuTube one today); null until the first read, so a count never
+     *  shows 0 while loading. */
     val loadedSources: StateFlow<List<SourceEntity>?> = sourceRepository.observeSources()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val sources: StateFlow<List<SourceEntity>> = loadedSources
         .map { it.orEmpty() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
-    /**
-     * Subscription expiry per source id — the "Expires …" note in the Manage-sources row.
-     * Xtream reads `user_info.exp_date` from the panel; Stalker reads `account_info`/`get_profile`
-     * (see core's `stalkerExpiryOf`). M3U is a plain playlist file with no account concept — never listed.
-     * Fetched once per source per ViewModel lifetime (in-memory cache; only while the screen is
-     * subscribed); any failure simply leaves the line off the row.
-     */
-    private val expiryCache = java.util.concurrent.ConcurrentHashMap<Long, String>()
-    val sourceExpiry: StateFlow<Map<Long, String>> = sources
-        .map { list ->
-            val out = HashMap<Long, String>()
-            for (s in list) {
-                if (s.type != tv.own.owntv.core.model.SourceType.XTREAM &&
-                    s.type != tv.own.owntv.core.model.SourceType.STALKER
-                ) continue
-                val value = expiryCache[s.id] ?: fetchExpiry(s)?.also { expiryCache[s.id] = it } ?: continue
-                out[s.id] = value
-            }
-            out
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
-
-    private suspend fun fetchExpiry(s: SourceEntity): String? = runCatching {
-        when (s.type) {
-            tv.own.owntv.core.model.SourceType.XTREAM -> xtreamClient.accountExpiryMs(s)?.let {
-                java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(java.util.Date(it))
-            }
-            tv.own.owntv.core.model.SourceType.STALKER ->
-                s.mac?.let { tv.own.owntv.core.stalker.StalkerClient.canonicalizeMac(it) }?.let { mac ->
-                    val creds = s.stalkerCredentials(mac)
-                    stalkerAuth.withAuthRetry(creds) { session ->
-                        val info = runCatching {
-                            stalkerClient.getAccountInfo(session.apiBase, mac, session.token, creds.userAgent)
-                        }.getOrDefault(emptyMap())
-                        tv.own.owntv.core.stalker.stalkerExpiryOf(info)
-                            ?: tv.own.owntv.core.stalker.stalkerExpiryOf(session.profile)
-                    }
-                }
-            else -> null
-        }
-    }.getOrNull()
-
-    /** The source marked as default/active (shown in the sidebar). */
-    val defaultSourceId: StateFlow<Long> = settings.defaultSourceId
-        .stateIn(viewModelScope, SharingStarted.Eagerly, -1L)
-
-    fun setDefaultSource(id: Long) {
-        viewModelScope.launch { settings.setDefaultSource(id) }
-    }
 
     val livePreviewEnabled: StateFlow<Boolean> = settings.livePreviewEnabled
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
@@ -520,12 +390,7 @@ class SettingsViewModel(
 
     private suspend fun loadStartupChannelResults(query: String): List<tv.own.owntv.core.database.entity.ChannelEntity> {
         val sources = sourceDao.observeAll().first().filter { it.syncLive }
-        val defaultSourceId = settings.defaultSourceId.first()
-        val sourceIds = if (defaultSourceId > 0L && sources.any { it.id == defaultSourceId }) {
-            listOf(defaultSourceId)
-        } else {
-            sources.map { it.id }
-        }
+        val sourceIds = sources.map { it.id }
         if (sourceIds.isEmpty()) return emptyList()
         val customizations = customizationStore.observeVisible(tv.own.owntv.core.model.MediaType.LIVE).first()
         val hiddenCategoryIds = tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
@@ -848,348 +713,6 @@ class SettingsViewModel(
         settings.rememberLastLive.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
     fun setRememberLastLive(enabled: Boolean) { viewModelScope.launch { settings.setRememberLastLive(enabled) } }
 
-    /** Per-source playlist auto-refresh selection (Off / Startup / staleness threshold). */
-    val playlistAutoRefresh: StateFlow<Map<Long, PlaylistRefresh>> = settings.playlistAutoRefresh
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
-
-    /** Per-source EPG auto-refresh selection (Off / Startup / staleness threshold). */
-    val epgAutoRefresh: StateFlow<Map<Long, EpgRefresh>> = settings.epgAutoRefresh
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
-
-    fun setPlaylistAutoRefresh(sourceId: Long, mode: PlaylistRefresh) {
-        viewModelScope.launch { settings.setPlaylistAutoRefresh(sourceId, mode) }
-    }
-
-    fun setEpgAutoRefresh(sourceId: Long, refresh: EpgRefresh) {
-        viewModelScope.launch { settings.setEpgAutoRefresh(sourceId, refresh) }
-    }
-
-    /**
-     * Edit an existing source's settings. Blank fields keep what is stored; saving, the Stalker
-     * session drop and the resync decision are core's [SourceEditor].
-     */
-    fun updateSource(
-        id: Long,
-        name: String,
-        urlOrServer: String,
-        user: String,
-        pass: String,
-        userAgent: String,
-        epgUrl: String,
-        autoRefresh: PlaylistRefresh,
-        isDefault: Boolean = false,
-        mac: String = "",
-        stalkerSerialNumber: String = "",
-        stalkerDeviceId: String = "",
-        stalkerDeviceId2: String = "",
-        stalkerSignature: String = "",
-        syncLive: Boolean = true,
-        preferHls: Boolean = false,
-        httpReferer: String = "",
-    ) {
-        viewModelScope.launch {
-            val existing = sourceDao.getById(id) ?: return@launch
-            // A Stalker edit re-canonicalizes the MAC; a garbled edit keeps the stored one.
-            val newMac = tv.own.owntv.core.stalker.StalkerClient.canonicalizeMac(mac) ?: existing.mac
-            // A Stalker login is optional, so a cleared username removes it (and its password).
-            val stalker = existing.type == tv.own.owntv.core.model.SourceType.STALKER
-            val newUser = user.trim().takeIf { it.isNotBlank() } ?: existing.username.takeUnless { stalker }
-            val updated = existing.copy(
-                name = name.ifBlank { existing.name },
-                url = urlOrServer.trim().ifBlank { existing.url },
-                username = newUser,
-                password = if (stalker && newUser == null) null else pass.takeIf { it.isNotBlank() } ?: existing.password,
-                mac = newMac,
-                stalkerSerialNumber = stalkerSerialNumber.trim().takeIf { it.isNotBlank() },
-                stalkerDeviceId = stalkerDeviceId.trim().takeIf { it.isNotBlank() },
-                stalkerDeviceId2 = stalkerDeviceId2.trim().takeIf { it.isNotBlank() },
-                stalkerSignature = stalkerSignature.trim().takeIf { it.isNotBlank() },
-                userAgent = userAgent.trim().takeIf { it.isNotBlank() },
-                httpReferer = httpReferer.trim().takeIf { it.isNotEmpty() },
-                epgUrl = epgUrl.trim().takeIf { it.isNotBlank() },
-                syncLive = syncLive,
-                preferHls = preferHls,
-            )
-            sourceEditor.save(existing, updated)
-            settings.setPlaylistAutoRefresh(id, autoRefresh)
-            // Apply the "Default playlist" toggle: on → this becomes the active playlist; off → if this was
-            // the default, clear it back to All. Leaves another playlist's default untouched.
-            when {
-                isDefault -> settings.setDefaultSource(id)
-                settings.defaultSourceId.first() == id -> settings.setDefaultSource(-1L)
-            }
-        }
-    }
-
-    /**
-     * Adding a playlist is core's [SourceImporter], not a copy of it.
-     *
-     * This screen used to carry its own line-for-line duplicate of `SourceImporter.runImport`, and
-     * that duplicate is why hooks added in core silently did nothing here — the settings add never
-     * reached them. Everything below is presentation: core owns the sequence, this maps its state
-     * onto the UI's [ImportState] and adds the two things that are genuinely app-side (the launcher
-     * refresh and the "sync the guide too?" offer).
-     */
-    val importState: StateFlow<ImportState> = importer.state
-        .map { it.toUi() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ImportState.Idle)
-
-    val progress: StateFlow<ImportStage?> = importer.progress
-
-    /**
-     * Pre-fills the Add form after a failed add, so a typo does not mean re-typing a portal URL on a
-     * remote control.
-     *
-     * **It has never actually fired.** The field was introduced in v4.0.0 declared `null` and, then
-     * as now, the only assignment to it anywhere is back to `null` on success — so the retry form has
-     * always opened blank. Kept at its existing behaviour here rather than quietly fixed, because
-     * making it work is a change to what the user sees and is not part of removing the duplicated
-     * import flow.
-     */
-    val lastFailedSource: SourceEntity? get() = null
-
-    private fun SourceImporter.ImportState.toUi(): ImportState = when (this) {
-        SourceImporter.ImportState.Idle -> ImportState.Idle
-        SourceImporter.ImportState.Running -> ImportState.Running
-        is SourceImporter.ImportState.Success ->
-            ImportState.Success(counts ?: SyncCounts(0, 0), warnings, remainder)
-        is SourceImporter.ImportState.Failed -> ImportState.Failed(
-            when (val f = failure) {
-                SourceImporter.SetupFailure.InvalidMac -> FriendlySyncFailure.InvalidMac
-                is SourceImporter.SetupFailure.Sync -> f.failure
-                // Backup restore is the wizard's path, never this screen's.
-                else -> classifySyncFailure(null, online = true)
-            },
-        )
-        // Only reachable from a backup restore, which this screen does not offer.
-        is SourceImporter.ImportState.NeedPassword -> ImportState.Idle
-    }
-
-    private var importJob: Job? = null
-
-    fun addXtream(
-        name: String,
-        server: String,
-        user: String,
-        pass: String,
-        userAgent: String = "",
-        epgUrl: String = "",
-        autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF,
-        live: SyncScopeChoice = SyncScopeChoice.Now,
-        isDefault: Boolean = false,
-        preferHls: Boolean = false,
-        httpReferer: String = "",
-    ) = runImport {
-        importer.xtream(
-            name = name, server = server, username = user, password = pass,
-            userAgent = userAgent, epgUrl = epgUrl, autoRefresh = autoRefresh,
-            live = live,
-            preferHls = preferHls, makeDefault = isDefault, httpReferer = httpReferer,
-        )
-    }
-
-    // ---- "Test" on a saved playlist row ----
-
-    /** Null while no test is on screen; [SourceTestUi.Running] while the call is in flight. */
-    private val _sourceTest = MutableStateFlow<SourceTestUi?>(null)
-    val sourceTest: StateFlow<SourceTestUi?> = _sourceTest.asStateFlow()
-
-    /**
-     * The Info popup: what is already known, plus a quick liveness check.
-     *
-     * The measured stream limit is read straight from the playlist row and never re-measured here —
-     * measuring costs minutes and stops playback, so it belongs behind Re-test. Everything else is
-     * one short request, because "is this playlist still alive?" is the question this button has
-     * always really answered.
-     */
-    fun testSource(source: SourceEntity) {
-        viewModelScope.launch {
-            _sourceTest.value = SourceTestUi.Running(source.name)
-            val result = sourceTester.test(source)
-            // Back may have closed the popup while the request was still running; don't re-open it.
-            if (_sourceTest.value != null) {
-                _sourceTest.value = SourceTestUi.Done(source.name, result, connectionLimits.known(source))
-            }
-        }
-    }
-
-    /**
-     * Re-test: measure how many streams this provider really allows, by opening them.
-     *
-     * Stops playback first, and deliberately not gently — the user agreed to a warning that says so.
-     * A single-connection provider cuts the oldest stream when a new one starts, so a picture left
-     * running would both be killed by the measurement and corrupt its result.
-     */
-    /** Per-playlist "Ignore connection limit": Multiview stops counting the provider's limit. */
-    fun setIgnoreConnectionLimit(source: SourceEntity, ignore: Boolean) {
-        viewModelScope.launch { sourceDao.updateIgnoreConnectionLimit(source.id, ignore) }
-    }
-
-    fun retestSource(source: SourceEntity) {
-        measureJob?.cancel()
-        measureJob = viewModelScope.launch {
-            stopAllPlayback()
-            _sourceTest.value = SourceTestUi.Measuring(source.name, tv.own.owntv.core.live.ProbeProgress(1, 1, tv.own.owntv.core.live.MAX_PROBE_STREAMS))
-            val limit = connectionLimits.measureAndStore(source, force = true) { progress ->
-                if (_sourceTest.value is SourceTestUi.Measuring) {
-                    _sourceTest.value = SourceTestUi.Measuring(source.name, progress)
-                }
-            }
-            val result = sourceTester.test(source)
-            if (_sourceTest.value != null) _sourceTest.value = SourceTestUi.Done(source.name, result, limit)
-        }
-    }
-
-    /**
-     * Abandon a measurement in progress.
-     *
-     * Cancelling the coroutine is what closes the streams — the probe releases them in a `finally`,
-     * so nothing is left holding a connection the user is about to want back. Whatever the run had
-     * already confirmed is discarded rather than saved: half a measurement is a guess, and a wrong
-     * low number refuses tiles the user is entitled to.
-     */
-    fun skipConnectionMeasurement() {
-        measureJob?.cancel()
-        measureJob = null
-        _sourceTest.value = null
-    }
-
-    private var measureJob: kotlinx.coroutines.Job? = null
-
-    /** Every engine that could be holding one of this provider's connections. */
-    private fun stopAllPlayback() {
-        runCatching { livePreview.stop() }
-        runCatching { enginePool.releaseAll() }
-    }
-
-    fun dismissSourceTest() {
-        _sourceTest.value = null
-    }
-
-    // ---- Stalker portal ----
-
-    /**
-     * Save a Stalker source. Verifies the portal handshake first (same as Test connection) so a
-     * typo'd portal/MAC fails with a clear error instead of saving a dead source.
-     */
-    fun addStalker(
-        name: String,
-        portalUrl: String,
-        mac: String,
-        serialNumber: String = "",
-        deviceId: String = "",
-        deviceId2: String = "",
-        signature: String = "",
-        userAgent: String = "",
-        autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF,
-        isDefault: Boolean = false,
-        live: SyncScopeChoice = SyncScopeChoice.Now,
-        httpReferer: String = "",
-        login: String = "",
-        password: String = "",
-    ) = runImport {
-        importer.stalker(
-            name = name, portalUrl = portalUrl, mac = mac,
-            serialNumber = serialNumber, deviceId = deviceId, deviceId2 = deviceId2,
-            signature = signature, userAgent = userAgent, autoRefresh = autoRefresh,
-            live = live, makeDefault = isDefault,
-            httpReferer = httpReferer, login = login, password = password,
-        )
-    }
-
-    fun addM3u(name: String, url: String, userAgent: String = "", epgUrl: String = "", autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF, isDefault: Boolean = false, httpReferer: String = "") = runImport {
-        importer.m3u(name, url, userAgent, epgUrl, autoRefresh, makeDefault = isDefault, httpReferer = httpReferer)
-    }
-
-    /**
-     * Drive one of core's add-a-playlist calls, then do the two things that are this app's business
-     * and not core's: refresh the Android TV launcher rows, and offer a one-tap guide sync when the
-     * playlist actually has a guide feed.
-     *
-     */
-    private fun runImport(block: suspend () -> Unit) {
-        importJob?.cancel()
-        val job = viewModelScope.launch {
-            block()
-            val done = importer.state.value as? SourceImporter.ImportState.Success ?: return@launch
-            Log.d(TAG, "runImport sync success sourceId=${done.source?.id}")
-            done.source?.let { synced ->
-                if (epgRepository.guideUrl(synced) != null) {
-                    pendingEpgSource = synced
-                    _epgSync.value = EpgSyncUi.Ask(synced.name)
-                }
-            }
-        }
-        importJob = job
-        job.invokeOnCompletion { if (importJob == job) importJob = null }
-    }
-
-    /**
-     * Re-sync an existing source through WorkManager so it can continue after leaving this screen.
-     *
-     * [clean] bypasses the catalog-shrink prune guard for this run only. That guard normally refuses
-     * to delete more than half a source's rows, because a truncated provider response looks exactly
-     * like a shrunken catalog — but it also means a provider that genuinely dropped a lot of titles
-     * leaves them stuck in the app forever, with no way out short of deleting and re-adding the
-     * playlist. This is that way out. It is *not* a delete-and-reimport: rows keep their ids, so
-     * favorites, history and resume positions on everything still listed survive untouched.
-     */
-    fun resync(source: SourceEntity, clean: Boolean = false) {
-        Log.d(TAG, "resync enqueue sourceId=${source.id} clean=$clean")
-        viewModelScope.launch {
-            val counts = importFinalizer.contentCounts(source.id)
-            catalogSyncScheduler.enqueueSync(
-                source.id,
-                reason = if (clean) "manual_clean_resync" else "manual_resync",
-                contentTypes = SyncContentTypes.enabledOf(source),
-                baseItemCount = counts.channels,
-                forcePrune = clean,
-            )
-        }
-    }
-
-    fun cancelResync(source: SourceEntity) {
-        Log.d(TAG, "resync cancel sourceId=${source.id}")
-        catalogSyncScheduler.cancelSync(source.id)
-    }
-
-    fun getLastSyncStats(sourceId: Long): tv.own.owntv.core.sync.SyncRunStats? =
-        sourceRepository.getLastSyncStats(sourceId)
-
-    // Deleting a huge source (hundreds of thousands of cascaded rows) takes a while — surface it
-    // per-row so the user can see the removal is in progress instead of a silently frozen list.
-    private val _deletingSourceIds = MutableStateFlow<Set<Long>>(emptySet())
-    val deletingSourceIds: StateFlow<Set<Long>> = _deletingSourceIds.asStateFlow()
-
-    fun delete(source: SourceEntity) {
-        if (source.id in _deletingSourceIds.value) return
-        viewModelScope.launch {
-            Log.d(TAG, "delete sourceId=${source.id}")
-            _deletingSourceIds.value = _deletingSourceIds.value + source.id
-            try {
-                catalogSyncScheduler.cancelSync(source.id)
-                stalkerAuth.invalidate(source.id)
-                // NonCancellable: once confirmed, finish the cascade even if the user leaves the
-                // screen mid-delete — an interrupted half-deleted source is worse than a short wait.
-                withContext(NonCancellable) {
-                    sourceRepository.deleteSource(source)
-                    if (defaultSourceId.value == source.id) settings.setDefaultSource(-1L)
-                }
-            } finally {
-                _deletingSourceIds.value = _deletingSourceIds.value - source.id
-            }
-        }
-    }
-
-    fun resetImport() = importer.reset()
-
-    /** Cancelling the job cancels core's import, which runs the same cleanup an outright failure does. */
-    fun cancelImport() {
-        importJob?.cancel()
-        importJob = null
-        importer.reset()
-    }
-
     // --- Global proxy (Approach 1 — one app-wide HTTP proxy) ---
 
     val proxyConfig: StateFlow<tv.own.owntv.core.network.ProxyConfig> = settings.proxyConfig
@@ -1373,27 +896,4 @@ class SettingsViewModel(
         is java.net.ConnectException -> ProxyFailure.ConnectionFailed
         else -> ProxyFailure.Unknown(t.message?.takeIf { it.isNotBlank() })
     }
-}
-
-/** What the source-test popup is showing. */
-sealed interface SourceTestUi {
-    val sourceName: String
-
-    data class Running(override val sourceName: String) : SourceTestUi
-
-    /**
-     * The connection measurement, which takes minutes rather than the fraction of a second the
-     * liveness check takes — hence its own state, with the progress the user has to be able to see.
-     */
-    data class Measuring(
-        override val sourceName: String,
-        val progress: tv.own.owntv.core.live.ProbeProgress,
-    ) : SourceTestUi
-
-    data class Done(
-        override val sourceName: String,
-        val result: SourceTestResult,
-        /** What is stored for this playlist, measured or published. Null before anything is known. */
-        val limit: tv.own.owntv.core.live.ConnectionLimit? = null,
-    ) : SourceTestUi
 }

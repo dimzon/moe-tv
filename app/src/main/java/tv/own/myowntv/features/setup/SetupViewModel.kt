@@ -21,15 +21,11 @@ import tv.own.owntv.core.menu.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
-import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
@@ -52,42 +48,25 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.setup.SourceImporter
-import tv.own.owntv.core.settings.PlaylistRefresh
-import tv.own.owntv.core.sync.SyncScopeChoice
 
 /**
- * Drives first-run onboarding: add content (a new source, or skip). Sources are global — there are
- * no profiles — and [finish] only ends the wizard, which is what routes the app into the shell.
+ * Drives first-run onboarding: bring in content — attach the built-in RuTube source and sync it, or
+ * take the setup from another device (local sync, handled by the wizard itself). Sources are global —
+ * there are no profiles — and [finish] only ends the wizard, which is what routes the app into the shell.
  *
  * The import sequence itself is core's [SourceImporter], shared with the mobile app; this holds the
- * things that are the television's own — the LAN companion server, the semi-auto EPG prompt,
- * and the job whose lifetime "Run in background" depends on.
+ * things that are the television's own — the semi-auto EPG prompt and the job whose lifetime
+ * "Run in background" depends on.
  */
 class SetupViewModel(
     private val importer: SourceImporter,
     private val epgRepository: tv.own.owntv.core.repository.EpgRepository,
-    private val epgSourceStore: tv.own.owntv.core.epg.EpgSourceStore,
-    private val companion: tv.own.owntv.core.companion.CompanionController,
 ) : ViewModel() {
-
-    // ---- Remote (companion) add-source: a LAN web form fills the Add Source screen from another device. ----
-    /** Server lifecycle (Idle / Starting / Listening with PIN+QR / Failed) for the Remote screen. */
-    val remoteState get() = companion.state
-
-    /** Live submission stream — the Remote screen collects it to hand off to the Manual form. */
-    val remotePayloads get() = companion.payloads
-
-    /** Retained last submission, so the Manual form pre-fills even after the Remote screen left. */
-    val remotePayload get() = companion.lastPayload
-
-    fun startRemoteListener(port: Int) = companion.start(port)
-    fun stopRemoteListener() = companion.stop()
-    fun consumeRemotePayload() = companion.consumePayload()
 
     val state: StateFlow<SourceImporter.ImportState> = importer.state
     val progress = importer.progress
 
-    // Semi-auto EPG: after the first playlist imports, offer a one-tap guide sync (with a live count) if it
+    // Semi-auto EPG: after the source lands, offer a one-tap guide sync (with a live count) if it
     // has a guide feed.
     private var pendingEpgSource: SourceEntity? = null
     private val _epgSync = MutableStateFlow<tv.own.myowntv.features.settings.EpgSyncUi>(tv.own.myowntv.features.settings.EpgSyncUi.Hidden)
@@ -98,7 +77,7 @@ class SetupViewModel(
     fun syncPendingEpg() {
         val src = pendingEpgSource ?: return
         viewModelScope.launch {
-            tv.own.myowntv.features.settings.runSemiAutoEpgSync(src, epgRepository, epgSourceStore) { _epgSync.value = it }
+            tv.own.myowntv.features.settings.runSemiAutoEpgSync(src, epgRepository) { _epgSync.value = it }
         }
     }
 
@@ -107,7 +86,7 @@ class SetupViewModel(
     /**
      * "Run in background" for the semi-auto EPG sync: enter the app now while the guide keeps
      * downloading. The sync launched by [syncPendingEpg] runs in this activity-scoped [viewModelScope],
-     * so it survives leaving the wizard — exactly like the playlist [continueInBackground]. We only
+     * so it survives leaving the wizard — exactly like the import [continueInBackground]. We only
      * finish onboarding; the in-flight job is deliberately not cancelled.
      */
     fun syncEpgInBackground(onDone: () -> Unit = {}) {
@@ -115,52 +94,12 @@ class SetupViewModel(
         finish(onDone)
     }
 
-    fun startXtream(
-        name: String,
-        server: String,
-        username: String,
-        password: String,
-        userAgent: String = "",
-        epgUrl: String = "",
-        autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF,
-        live: SyncScopeChoice = SyncScopeChoice.Now,
-        preferHls: Boolean = false,
-        httpReferer: String = "",
-    ) = runImport {
-        importer.xtream(name, server, username, password, userAgent, epgUrl, autoRefresh, live, preferHls, httpReferer = httpReferer)
-    }
-
-    fun startStalker(
-        name: String,
-        portalUrl: String,
-        mac: String,
-        serialNumber: String = "",
-        deviceId: String = "",
-        deviceId2: String = "",
-        signature: String = "",
-        userAgent: String = "",
-        autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF,
-        live: SyncScopeChoice = SyncScopeChoice.Now,
-        httpReferer: String = "",
-        login: String = "",
-        password: String = "",
-    ) = runImport {
-        importer.stalker(
-            name, portalUrl, mac, serialNumber, deviceId, deviceId2, signature, userAgent,
-            autoRefresh, live, httpReferer = httpReferer, login = login, password = password,
-        )
-    }
-
-    fun startM3u(name: String, url: String, userAgent: String = "", epgUrl: String = "", autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF, httpReferer: String = "") =
-        runImport { importer.m3u(name, url, userAgent, epgUrl, autoRefresh, httpReferer = httpReferer) }
-
     /** RuTube: attach the single built-in source and sync it (no credentials, no address). */
-    fun startRutube(autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF) =
-        runImport { importer.rutube(autoRefresh) }
+    fun startRutube() = runImport { importer.ensureRutube() }
 
     /**
      * Runs one import in the activity-scoped [viewModelScope] so "Run in background" can walk away
-     * from it, then raises the semi-auto EPG prompt if the playlist that just landed has a guide feed.
+     * from it, then raises the semi-auto EPG prompt if the source that just landed has a guide feed.
      */
     private fun runImport(block: suspend () -> Unit) {
         importJob?.cancel()
@@ -190,8 +129,7 @@ class SetupViewModel(
      * activity-scoped, so the in-flight import survives leaving the wizard — the sync continues
      * exactly as if the user had waited (success still runs ImportFinalizer + the remainder enqueue).
      * Deliberately does NOT cancel: cancelling would delete the half-imported source. The semi-auto
-     * EPG prompt is skipped (its dialog lives in the wizard); EPG stays user-initiated from
-     * Settings → EPG Sources, matching the app's EPG opt-in policy.
+     * EPG prompt is skipped (its dialog lives in the wizard); EPG stays user-initiated.
      */
     fun continueInBackground(onDone: () -> Unit = {}) {
         importer.backgroundHandoff = true

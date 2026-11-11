@@ -7,7 +7,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
-import tv.own.owntv.core.sync.M3uSyncer
 import java.io.IOException
 import java.net.InetAddress
 import java.net.ServerSocket
@@ -47,7 +46,7 @@ class HttpClientStaleSocketTest {
             val requestLine = reader.readLine() ?: return
             if (requestLine.isEmpty()) continue
             while (reader.readLine()?.isNotEmpty() == true) Unit
-            out.write("HTTP/1.1 200 OK\r\nContent-Length: 7\r\nConnection: keep-alive\r\n\r\n#EXTM3U".toByteArray())
+            out.write("HTTP/1.1 200 OK\r\nContent-Length: 7\r\nConnection: keep-alive\r\n\r\nplay-ok".toByteArray())
             out.flush()
             if (closeAfterFirst) { it.close(); firstClosed.countDown(); return }
         }
@@ -57,7 +56,7 @@ class HttpClientStaleSocketTest {
 
     /** One request that leaves its socket in the pool, then the server closes that socket. */
     private fun primeStaleSocket() = runBlocking {
-        assertEquals("#EXTM3U", fetch(maxAttempts = 1))
+        assertEquals("play-ok", fetch(maxAttempts = 1))
         assertTrue(firstClosed.await(5, TimeUnit.SECONDS))
         Thread.sleep(100) // let the FIN reach the client side
     }
@@ -77,9 +76,9 @@ class HttpClientStaleSocketTest {
     }
 
     @Test
-    fun `the M3U download retries on a fresh connection`() {
+    fun `a download retries on a fresh connection`() {
         primeStaleSocket()
-        assertEquals("#EXTM3U", runBlocking { fetch(maxAttempts = M3uSyncer.M3U_DOWNLOAD_ATTEMPTS) })
+        assertEquals("play-ok", runBlocking { fetch(maxAttempts = 3) })
         assertEquals(2, connections.get())
     }
 }

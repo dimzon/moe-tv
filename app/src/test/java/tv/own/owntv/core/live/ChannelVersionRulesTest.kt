@@ -5,7 +5,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import tv.own.owntv.core.database.entity.ChannelEntity
-import tv.own.owntv.core.sports.ChannelFacets
 
 /** Which channels the player's Sources list offers as versions of the one playing. */
 class ChannelVersionRulesTest {
@@ -31,12 +30,12 @@ class ChannelVersionRulesTest {
 
     @Test
     fun `a shared guide id makes two names one channel when one name holds the other`() {
-        assertTrue(ChannelVersionRules.same(f("Sky Sports News HEVC"), "ssn.uk", f("Sky Sports News HQ"), "ssn.uk"))
+        assertTrue(ChannelVersionRules.same(f("Sky News Morning HEVC"), "ssn.uk", f("Sky News Morning HQ"), "ssn.uk"))
     }
 
     @Test
     fun `a sister channel filed under the same guide id is not a version`() {
-        assertFalse(ChannelVersionRules.same(f("Sky Sports News"), "ssn.uk", f("Sky Sports Main Events HEVC HD"), "ssn.uk"))
+        assertFalse(ChannelVersionRules.same(f("Sky News Morning"), "ssn.uk", f("Sky Events Morning HEVC HD"), "ssn.uk"))
     }
 
     @Test

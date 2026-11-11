@@ -1,34 +1,21 @@
 package tv.own.owntv.core.setup
 
-import android.content.Context
-import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
-import tv.own.myowntv.R
 import tv.own.owntv.core.backup.BackupManager
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.SourceEntity
-import tv.own.owntv.core.model.SourceType
 import tv.own.owntv.core.network.ConnectivityObserver
-import tv.own.owntv.core.parser.XtreamClient
-import tv.own.owntv.core.parser.XtreamM3uLink
 import tv.own.owntv.core.repository.SourceRepository
-import tv.own.owntv.core.settings.PlaylistRefresh
-import tv.own.owntv.core.settings.SettingsRepository
-import tv.own.owntv.core.stalker.StalkerAuthManager
-import tv.own.owntv.core.stalker.StalkerClient
-import tv.own.owntv.core.stalker.StalkerCredentials
-import tv.own.owntv.core.stalker.StalkerDeviceIdentity
 import tv.own.owntv.core.sync.ImportFinalizer
 import tv.own.owntv.core.sync.ImportStage
 import tv.own.owntv.core.sync.SyncContentTypes
 import tv.own.owntv.core.sync.SyncCounts
 import tv.own.owntv.core.sync.SyncResult
-import tv.own.owntv.core.sync.SyncScopeChoice
 import tv.own.owntv.core.sync.SyncWarning
 import tv.own.owntv.core.sync.work.CatalogSyncScheduler
 import tv.own.owntv.core.util.FriendlySyncFailure
@@ -36,9 +23,13 @@ import tv.own.owntv.core.util.classifySyncFailure
 import java.io.File
 
 /**
- * Adding content, from the first-run wizard or from the settings screen: add a source, sync it,
- * finalize it, enqueue whatever was deferred — and, when any of that fails, undo exactly as much as
- * is safe to undo. The app has one user and global sources: there is no profile to create or attach.
+ * Onboarding: attach the one built-in source, sync it, finalize it, enqueue whatever was deferred —
+ * and, when any of that fails, undo exactly as much as is safe to undo. RuTube is the only provider
+ * and needs no credentials or address, so there is nothing to import or type in; the wizard calls
+ * [ensureRutube] and the canvas drives the same [ImportState] the old add-source flows did.
+ *
+ * Backup restore (from the wizard's "from another device") rides here too: it goes through
+ * [BackupManager] and re-syncs whatever the restore brought back.
  *
  * Every function here suspends and the **caller owns the job**, because "Run in background" is the
  * whole reason the job outlives its screen: the host launches into a scope that survives the wizard
@@ -49,17 +40,12 @@ class SourceImporter(
     private val sourceDao: SourceDao,
     private val sourceRepository: SourceRepository,
     private val backup: BackupManager,
-    private val settings: SettingsRepository,
     private val connectivity: ConnectivityObserver,
     private val importFinalizer: ImportFinalizer,
     private val catalogSyncScheduler: CatalogSyncScheduler,
-    private val stalkerAuth: StalkerAuthManager,
-    private val xtreamClient: XtreamClient,
-    private val context: Context,
 ) {
 
     sealed interface SetupFailure {
-        data object InvalidMac : SetupFailure
         data object BackupRead : SetupFailure
         data object Restore : SetupFailure
         data class Sync(val failure: FriendlySyncFailure) : SetupFailure
@@ -73,8 +59,9 @@ class SourceImporter(
             val warnings: List<SyncWarning> = emptyList(),
             val remainder: SyncContentTypes = SyncContentTypes(live = false),
             val restoredItems: Int? = null,
+            /** Kept for the result screen's shape; sources carry no passwords any more. */
             val passwordsOmitted: Boolean = false,
-            /** Restored Xtream playlists with no saved password, by name — not synced until one is entered. */
+            /** Kept for the result screen's shape; nothing waits for a password any more. */
             val needPassword: List<String> = emptyList(),
             val skippedSources: Int = 0,
             val invalidLocale: Boolean = false,
@@ -96,173 +83,23 @@ class SourceImporter(
 
     /**
      * Set when the user left the wizard with "Run in background". A late failure must not silently
-     * DELETE the source they think they added — keep it, credentials intact, and wipe only the
-     * partial content.
+     * DELETE the source they think they added — keep it, and wipe only the partial content.
      */
     var backgroundHandoff = false
 
     /**
      * RuTube: attach the single built-in source and sync it. No credentials, no address —
-     * the public API is the whole provider. The canvas drives the same ImportState as an
-     * Xtream add (Importing → Success), so the wizard needs no special screen.
+     * the public API is the whole provider. The canvas drives the same [ImportState]
+     * (Running → Success), so the wizard needs no special screen.
      */
-    suspend fun rutube(autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF, makeDefault: Boolean = false) {
-        runImport(
-            autoRefresh, requiresNetwork = true, makeDefault = makeDefault,
-        ) {
+    suspend fun ensureRutube() {
+        runImport(requiresNetwork = true) {
             sourceRepository.ensureRutube()
         }
     }
 
-    suspend fun xtream(
-        name: String,
-        server: String,
-        username: String,
-        password: String,
-        userAgent: String = "",
-        epgUrl: String = "",
-        autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF,
-        live: SyncScopeChoice = SyncScopeChoice.Now,
-        preferHls: Boolean = false,
-        makeDefault: Boolean = false,
-        httpReferer: String = "",
-    ) {
-        val enabled = SyncContentTypes.fromChoices(live)
-        val priority = SyncContentTypes.priorityFromChoices(live)
-        runImport(
-            autoRefresh, priority, enabledScope = enabled, enqueueRemainder = true,
-            requiresNetwork = true, makeDefault = makeDefault,
-        ) {
-            sourceRepository.addXtreamSource(
-                name = uniqueName(name),
-                serverUrl = server.trim(),
-                username = username.trim(),
-                password = password,
-                userAgent = userAgent.trim().takeIf { it.isNotBlank() },
-                epgUrl = epgUrl.trim().takeIf { it.isNotBlank() },
-                syncLive = enabled.live,
-                preferHls = preferHls,
-                httpReferer = httpReferer.trim().takeIf { it.isNotBlank() },
-            )
-        }
-    }
-
-    /** Stalker/MAC portal: the handshake is verified BEFORE the source is saved, so a typo'd portal
-     *  or MAC fails with a clear error instead of leaving a dead source behind. */
-    suspend fun stalker(
-        name: String,
-        portalUrl: String,
-        mac: String,
-        serialNumber: String = "",
-        deviceId: String = "",
-        deviceId2: String = "",
-        signature: String = "",
-        userAgent: String = "",
-        autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF,
-        live: SyncScopeChoice = SyncScopeChoice.Now,
-        makeDefault: Boolean = false,
-        httpReferer: String = "",
-        /** The optional portal login on top of the MAC; blank for the usual MAC-only portal. */
-        login: String = "",
-        password: String = "",
-    ) {
-        val canonicalMac = StalkerClient.canonicalizeMac(mac)
-        val portalLogin = login.trim().takeIf { it.isNotBlank() }
-        val portalPassword = password.takeIf { portalLogin != null }
-        if (canonicalMac == null) {
-            _state.value = ImportState.Failed(SetupFailure.InvalidMac)
-            return
-        }
-        val enabled = SyncContentTypes.fromChoices(live)
-        val priority = SyncContentTypes.priorityFromChoices(live)
-        runImport(
-            autoRefresh, contentTypes = priority, enabledScope = enabled, enqueueRemainder = true,
-            requiresNetwork = true, makeDefault = makeDefault,
-        ) {
-            stalkerAuth.testConnection(
-                StalkerCredentials(
-                    sourceId = STALKER_TEST_SOURCE_ID,
-                    portalUrl = portalUrl.trim(),
-                    mac = canonicalMac,
-                    userAgent = userAgent.trim().takeIf { it.isNotBlank() },
-                    deviceIdentity = StalkerDeviceIdentity(
-                        serialNumber = serialNumber.trim().takeIf { it.isNotBlank() },
-                        deviceId = deviceId.trim().takeIf { it.isNotBlank() },
-                        deviceId2 = deviceId2.trim().takeIf { it.isNotBlank() },
-                        signature = signature.trim().takeIf { it.isNotBlank() },
-                    ),
-                    login = portalLogin,
-                    password = portalPassword,
-                ),
-            )
-            sourceRepository.addStalkerSource(
-                name = uniqueName(name), portalUrl = portalUrl.trim(), mac = canonicalMac,
-                serialNumber.trim().takeIf { it.isNotBlank() },
-                deviceId.trim().takeIf { it.isNotBlank() },
-                deviceId2.trim().takeIf { it.isNotBlank() },
-                signature.trim().takeIf { it.isNotBlank() },
-                userAgent.trim().takeIf { it.isNotBlank() },
-                syncLive = enabled.live,
-                httpReferer = httpReferer.trim().takeIf { it.isNotBlank() },
-                login = portalLogin, password = portalPassword,
-            )
-        }
-    }
-
-    suspend fun m3u(
-        name: String,
-        url: String,
-        userAgent: String = "",
-        epgUrl: String = "",
-        autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF,
-        makeDefault: Boolean = false,
-        httpReferer: String = "",
-    ) {
-        // A provider's `get.php` "M3U" is an Xtream account; import it as one when the panel agrees.
-        // Its M3U export files movies and series under Live TV, and some panels refuse it.
-        XtreamM3uLink.parse(url)?.let { link ->
-            _state.value = ImportState.Running
-            val probe = SourceEntity(
-                name = name, type = SourceType.XTREAM, url = link.server,
-                username = link.username, password = link.password,
-                userAgent = userAgent.trim().takeIf { it.isNotBlank() },
-            )
-            val isXtream = try {
-                xtreamClient.isXtreamAccount(probe)
-            } catch (c: CancellationException) {
-                _state.value = ImportState.Idle
-                throw c
-            }
-            if (isXtream) {
-                Log.i(TAG, "M3U link is an Xtream account — importing it as Xtream")
-                return xtream(
-                    name = name, server = link.server, username = link.username, password = link.password,
-                    userAgent = userAgent, epgUrl = epgUrl, autoRefresh = autoRefresh,
-                    preferHls = link.preferHls, makeDefault = makeDefault, httpReferer = httpReferer,
-                )
-            }
-        }
-        val playlistUrl = XtreamM3uLink.clean(url)
-        runImport(autoRefresh, requiresNetwork = !playlistUrl.isLocalPlaylistPath(), makeDefault = makeDefault) {
-            sourceRepository.addM3uSource(
-                name = uniqueName(name),
-                url = playlistUrl,
-                userAgent = userAgent.trim().takeIf { it.isNotBlank() },
-                epgUrl = epgUrl.trim().takeIf { it.isNotBlank() },
-                httpReferer = httpReferer.trim().takeIf { it.isNotBlank() },
-            )
-        }
-    }
-
     private suspend fun runImport(
-        autoRefresh: PlaylistRefresh = PlaylistRefresh.OFF,
-        contentTypes: SyncContentTypes = SyncContentTypes(),
-        enabledScope: SyncContentTypes = SyncContentTypes(),
-        enqueueRemainder: Boolean = false,
         requiresNetwork: Boolean = true,
-        /** "Make this the default playlist" — set once the sync succeeded, never on a source that
-         *  is about to be cleaned up again. */
-        makeDefault: Boolean = false,
         addSource: suspend () -> SourceEntity,
     ) {
         _state.value = ImportState.Running
@@ -275,24 +112,15 @@ class SourceImporter(
             }
             source = addSource()
             val freshSync = source.lastSyncAt == null
-            val remainder = if (enqueueRemainder) {
-                enabledScope.remainderAfter(contentTypes)
-            } else {
-                SyncContentTypes(live = false)
-            }
-            settings.setPlaylistAutoRefresh(source.id, autoRefresh)
-            when (val result = sourceRepository.sync(source, onProgress = { _progress.value = it }, contentTypes = contentTypes)) {
+            when (val result = sourceRepository.sync(source, onProgress = { _progress.value = it })) {
                 is SyncResult.Success -> {
-                    // Just the playlist content — EPG is added separately (Settings → EPG sources).
+                    // Just the catalogue — the guide is a separate prompt (Settings → EPG).
                     val counts = importFinalizer.finalize(source, deferIndexes = freshSync)
-                    if (makeDefault) settings.setDefaultSource(source.id)
                     val syncedSource = sourceDao.getById(source.id) ?: source
-                    if (enqueueRemainder) enqueueRemainderSync(source, contentTypes, enabledScope)
-                    if (freshSync && !remainder.hasAny) catalogSyncScheduler.enqueueContentIndexBuild(reason = "fresh_add")
+                    if (freshSync) catalogSyncScheduler.enqueueContentIndexBuild(reason = "fresh_add")
                     _state.value = ImportState.Success(
                         counts = counts,
                         warnings = result.warnings,
-                        remainder = remainder,
                         source = syncedSource,
                     )
                 }
@@ -316,25 +144,15 @@ class SourceImporter(
         }
     }
 
-    private fun String.isLocalPlaylistPath(): Boolean =
-        startsWith("/") || startsWith("file://") || startsWith("content://")
-
-    private fun enqueueRemainderSync(source: SourceEntity, priority: SyncContentTypes, enabledScope: SyncContentTypes) {
-        val remainder = enabledScope.remainderAfter(priority)
-        if (remainder.hasAny) {
-            catalogSyncScheduler.enqueueSync(source.id, reason = "add_remainder", contentTypes = remainder, completesInitialSync = true)
-        }
-    }
-
     /**
-     * The playlists already on this device, for a "use an existing playlist" step: sources are global
-     * now, so there is nothing to link — the step only re-syncs what the user ticks.
+     * The playlist already on this device, for a "use an existing playlist" step: the source is
+     * global, so there is nothing to link — the step only re-syncs it.
      */
     suspend fun availableExistingSources(): List<SourceEntity> = sourceDao.getAllOnce()
 
     /**
-     * Re-sync the chosen existing sources so their catalog is fresh — exactly like adding a brand-new
-     * source. Drives the same [state] and [progress] as an add, so the host shows one import screen.
+     * Re-sync the existing source so its catalog is fresh — exactly like adding a brand-new one.
+     * Drives the same [state] and [progress] as an add, so the host shows one import screen.
      */
     suspend fun linkExisting(sourceIds: Set<Long>) {
         _state.value = ImportState.Running
@@ -370,12 +188,9 @@ class SourceImporter(
      * Restore from a backup file. Encrypted backups first ask for the backup password via
      * [ImportState.NeedPassword]; returns true only when data was actually restored.
      *
-     * [sections] is what the user chose to bring back, and defaults to all of it. Setup used to have
-     * no say at all — Backup & Restore in Settings has offered the tick-list for as long as it has
-     * existed, but the first-run wizard called this with no sections and therefore took everything,
-     * so "my playlists but not that device's settings" was not expressible on the one screen where
-     * it is asked for most. The caller carries the choice across [ImportState.NeedPassword] and hands
-     * it back to [restoreWithPassword], because a sealed file is chosen from before it is opened.
+     * [sections] is what the user chose to bring back, and defaults to all of it. The caller carries
+     * the choice across [ImportState.NeedPassword] and hands it back to [restoreWithPassword],
+     * because a sealed file is chosen from before it is opened.
      */
     suspend fun importBackup(
         file: File,
@@ -421,11 +236,14 @@ class SourceImporter(
             file, sections, backupPassword = password, deviceSettings = deviceSettings,
         ).fold(
             onSuccess = { summary ->
-                val needPassword = if (BackupManager.Section.SOURCES in sections) syncRestoredSources() else emptyList()
+                // A restore brings back favorites/history, not the catalogue, and favourites and
+                // history only show once a catalogue is there to relink to. So the source is synced
+                // now, as an ordinary background sync — instead of an app that opens empty until
+                // someone thinks to re-sync. A source that already holds content is left alone.
+                syncRestoredSources()
                 _state.value = ImportState.Success(
                     restoredItems = summary.items,
                     passwordsOmitted = password.isNullOrBlank(),
-                    needPassword = needPassword,
                     skippedSources = summary.skippedSources,
                     invalidLocale = summary.invalidLocale,
                 )
@@ -441,41 +259,16 @@ class SourceImporter(
             },
         )
 
-    /**
-     * A restore brings back playlists, not their catalogues, and favourites and history only show once
-     * a catalogue is there to relink to. So every playlist with nothing in it yet is fetched now, as an
-     * ordinary background sync — instead of an app that opens empty until someone thinks to re-sync.
-     * Playlists that already hold content (a restore onto a set-up device) are left alone.
-     *
-     * An Xtream playlist, or a Stalker playlist with a portal login, restored without its password (a
-     * backup made with no backup password) is not fetched: the panel would refuse it. Returns those
-     * playlists' names so the result can say which ones wait for a password; entering it in the
-     * playlist's edit form fetches it.
-     */
-    private suspend fun syncRestoredSources(): List<String> {
-        val needPassword = mutableListOf<String>()
+    private suspend fun syncRestoredSources() {
         sourceDao.getAllOnce().forEach { source ->
             val counts = importFinalizer.contentCounts(source.id)
             if (counts.channels > 0) return@forEach
-            val needsLogin = source.type == SourceType.XTREAM ||
-                (source.type == SourceType.STALKER && !source.username.isNullOrBlank())
-            if (needsLogin && source.password.isNullOrBlank()) {
-                needPassword += source.name
-                return@forEach
-            }
             catalogSyncScheduler.enqueueSync(
                 source.id,
                 reason = "restore",
                 contentTypes = tv.own.owntv.core.sync.SyncContentTypes.enabledOf(source),
             )
         }
-        return needPassword
-    }
-
-    /** [name] trimmed, numbered ("My IPTV 2") when another playlist already carries it. */
-    private suspend fun uniqueName(name: String): String {
-        val taken = sourceDao.getAllOnce().map { it.name }
-        return numberedName(name.trim(), taken) { base, n -> context.getString(R.string.setup_name_numbered, base, n) }
     }
 
     fun reset() {
@@ -484,9 +277,9 @@ class SourceImporter(
     }
 
     /**
-     * Completes onboarding: everything a first run adds is already synced and the settings already
-     * point at it. The app has no profile step, so there is nothing left to switch — the shell routes
-     * itself by "setup done + a source exists".
+     * Completes onboarding: everything a first run adds is already synced. The app has no profile
+     * step and no default-playlist choice any more — the shell routes itself by "setup done + a
+     * source exists".
      */
     suspend fun finish() = Unit
 
@@ -496,40 +289,10 @@ class SourceImporter(
             catalogSyncScheduler.cancelSync(source.id)
             // The built-in RuTube source is the app's only provider and is recreated on demand;
             // never delete it on a transient first-sync failure (a network blip would otherwise
-            // leave the app with no way back except another full setup).
-            if (source.type == SourceType.RUTUBE) {
-                runCatching { sourceRepository.clearSourceContent(source.id) }
-            } else if (backgroundHandoff) {
-                // The user already entered the app with "Run in background" — deleting the source
-                // would make the playlist they just added silently vanish. Keep it so they can
-                // re-sync from Settings → Playlists; wipe only the partial content (a never-synced
-                // source re-syncs via insertFresh, which assumes empty tables — leftovers duplicate).
-                runCatching { sourceRepository.clearSourceContent(source.id) }
-            } else {
-                runCatching { sourceRepository.deleteSource(source) }
-                runCatching { settings.setPlaylistAutoRefresh(source.id, PlaylistRefresh.OFF) }
-            }
-        }
-    }
-
-    internal companion object {
-        private const val TAG = "SourceImporter"
-
-        /** Sentinel sourceId for the pre-save Stalker handshake. */
-        private const val STALKER_TEST_SOURCE_ID = -1L
-
-        /**
-         * [base] when no name in [taken] matches it, ignoring case; otherwise the first free
-         * [numbered] form from 2 up. Two playlists added without a name otherwise both read "My IPTV",
-         * and nothing on screen tells them apart.
-         */
-        fun numberedName(base: String, taken: Collection<String>, numbered: (String, Int) -> String): String {
-            if (base.isEmpty()) return base
-            val lower = taken.mapTo(HashSet()) { it.trim().lowercase() }
-            if (base.lowercase() !in lower) return base
-            var n = 2
-            while (numbered(base, n).lowercase() in lower) n++
-            return numbered(base, n)
+            // leave the app with no way back except another full setup). Wipe only the partial
+            // content (a never-synced source re-syncs via insertFresh, which assumes empty tables —
+            // leftovers would duplicate).
+            runCatching { sourceRepository.clearSourceContent(source.id) }
         }
     }
 }

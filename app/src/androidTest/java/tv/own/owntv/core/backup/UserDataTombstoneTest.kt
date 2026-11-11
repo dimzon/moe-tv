@@ -66,7 +66,7 @@ class UserDataTombstoneTest {
             userData = resolver,
         )
         sourceId = db.sourceDao().insert(
-            SourceEntity(name = "Portal", type = SourceType.XTREAM, url = "https://portal.test", username = "user"),
+            SourceEntity(name = "RuTube", type = SourceType.RUTUBE, url = "https://rutube.test"),
         )
         context.pendingStore.edit { it.remove(PENDING_KEY) }
     }

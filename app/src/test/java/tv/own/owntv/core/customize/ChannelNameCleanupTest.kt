@@ -40,8 +40,8 @@ class ChannelNameCleanupTest {
         assertEquals("News One", clean("News One HD"))
         assertEquals("Planet Wild", clean("Planet Wild [4K]"))
         assertEquals("Planet Wild", clean("Planet Wild (UHD)"))
-        assertEquals("Sports Arena", clean("Sports Arena FHD HEVC"))
-        assertEquals("Sports Arena", clean("Sports Arena - HD"))
+        assertEquals("Music Arena", clean("Music Arena FHD HEVC"))
+        assertEquals("Music Arena", clean("Music Arena - HD"))
         assertEquals("Movies Plus", clean("Movies Plus 1080p"))
     }
 

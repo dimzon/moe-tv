@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -112,7 +110,7 @@ import tv.own.myowntv.ui.theme.mpx
 
 /*
  * Home, Stage (hero, rows). Live TV only: Keep watching shows the last-watched channels, and under it
- * the live rails — Live sports, Recent and Favourite channels. The focused card is the same composable
+ * the live rails — Recent and Favourite channels. The focused card is the same composable
  * wherever the list sits.
  */
 
@@ -139,16 +137,9 @@ fun HomeScreen(
      * (A plain request on the content area drills to the nearest card instead.) Null on leaving.
      */
     onEntryHook: (((() -> Boolean)?) -> Unit)? = null,
-    /** Sports Hub: ▶ on a Live sports card opens its match page. */
-    onOpenMatch: (tv.own.owntv.core.sports.model.Match) -> Unit = {},
     modifier: Modifier = Modifier,
-    sportsVm: tv.own.myowntv.features.sports.SportsViewModel = org.koin.androidx.compose.koinViewModel(),
 ) {
     val state by vm.uiState.collectAsStateWithLifecycle()
-    // Asked for only while the row is switched on (Layout → Home rows); off costs nothing.
-    val sportsCards = if (HomeRow.LIVE_SPORTS in state.config.visibleOrder) {
-        sportsVm.homeRow.collectAsStateWithLifecycle().value
-    } else emptyList()
     val heroPreviewEngine = koinInject<HeroPreviewEngine>()
     val engineState by heroPreviewEngine.state.collectAsStateWithLifecycle()
     val isPreviewActive by vm.isPreviewActive.collectAsStateWithLifecycle()
@@ -163,10 +154,10 @@ fun HomeScreen(
     var focusedHeroIndex by remember { mutableStateOf(-1) }
     val orderedRows = state.config.visibleOrder
     val heroVisible = HomeRow.HERO in orderedRows
-    val hasNonHeroContent = orderedRows.any { it != HomeRow.HERO && rowHasData(it, state, sportsCards.size) }
+    val hasNonHeroContent = orderedRows.any { it != HomeRow.HERO && rowHasData(it, state) }
     val showHeroFallback = heroVisible && state.heroCards.isEmpty() && !hasNonHeroContent
-    val renderRows = orderedRows.filter { rowCanRender(it, state, showHeroFallback, sportsCards.size) }
-    val firstDataRow = renderRows.firstOrNull { it != HomeRow.HERO && rowHasData(it, state, sportsCards.size) }
+    val renderRows = orderedRows.filter { rowCanRender(it, state, showHeroFallback) }
+    val firstDataRow = renderRows.firstOrNull { it != HomeRow.HERO && rowHasData(it, state) }
     val showAllHiddenState = orderedRows.isEmpty()
     val showEmptyState = orderedRows.isNotEmpty() && renderRows.isEmpty()
     val rowFocusRequester: (HomeRow) -> FocusRequester? = { row ->
@@ -377,17 +368,6 @@ fun HomeScreen(
                                 )
                             }
 
-                            HomeRow.LIVE_SPORTS -> tv.own.myowntv.features.sports.LiveSportsRow(
-                                cards = sportsCards,
-                                config = sportsVm.sportsConfig.collectAsStateWithLifecycle().value,
-                                start = contentStart,
-                                onOpenMatch = onOpenMatch,
-                                onFocus = onNonHeroFocused,
-                                firstItemFocusRequester = firstItemFocusRequester,
-                                track = track,
-                                modifier = rowModifier,
-                            )
-
                             HomeRow.RECENT_CHANNELS -> HomeLiveRow(
                                 title = row.displayTitle(),
                                 mode = state.config.recentLiveMode,
@@ -446,8 +426,7 @@ fun HomeScreen(
     }
 }
 
-private fun rowHasData(row: HomeRow, state: HomeUiState, sportsCards: Int): Boolean = when (row) {
-    HomeRow.LIVE_SPORTS -> sportsCards > 0
+private fun rowHasData(row: HomeRow, state: HomeUiState): Boolean = when (row) {
     HomeRow.HERO -> state.heroCards.isNotEmpty()
     HomeRow.RECENT_CHANNELS -> when (state.config.recentLiveMode) {
         HomeLiveRowMode.CARDS -> state.recentLive.isNotEmpty()
@@ -460,10 +439,10 @@ private fun rowHasData(row: HomeRow, state: HomeUiState, sportsCards: Int): Bool
     else -> false // Trending, favourite/continue movie & series rails: VOD is gone, they never have data.
 }
 
-private fun rowCanRender(row: HomeRow, state: HomeUiState, showHeroFallback: Boolean, sportsCards: Int): Boolean =
+private fun rowCanRender(row: HomeRow, state: HomeUiState, showHeroFallback: Boolean): Boolean =
     when (row) {
         HomeRow.HERO -> state.heroCards.isNotEmpty() || showHeroFallback
-        else -> rowHasData(row, state, sportsCards)
+        else -> rowHasData(row, state)
     }
 
 /**

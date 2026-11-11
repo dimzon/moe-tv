@@ -19,22 +19,20 @@ import kotlinx.coroutines.launch
 import tv.own.myowntv.R
 import tv.own.owntv.core.i18n.AppLocale
 import tv.own.owntv.core.i18n.LocaleStore
-import tv.own.owntv.core.model.SourceType
 
 /**
- * Tiny embedded HTTP listener behind the Remote add-source flow. It serves a mobile-friendly,
- * OwnTV-themed form (Xtream / M3U / Stalker) that any device on the same Wi-Fi can open.
+ * Tiny embedded HTTP listener behind the Remote companion flows: backup upload/download, background
+ * image upload, and the local-sync endpoint set. Pages are mobile-friendly, OwnTV-themed, and any
+ * device on the same Wi-Fi can open them. Remote add/edit-source pages are gone — the app has one
+ * built-in provider and nothing to type into a web form.
  *
  * ## Security model
  * The QR encodes only the server URL — never the PIN. Opening it shows a PIN-entry gate; the visitor
- * types the 6-digit PIN shown on the TV. Only then is the form served (with the PIN baked into its
- * submit endpoints). Direct POSTs to `/xtream|/m3u|/stalker` must also carry the PIN (`?pin=` or the
- * `X-Companion-Pin` header) or receive 401. So a stray device on the network cannot push a source.
+ * types the 6-digit PIN shown on the TV. Only then is the page served (with the PIN baked into its
+ * submit endpoints). Direct POSTs must also carry the PIN (`?pin=` or the `X-Companion-Pin` header)
+ * or receive 401. So a stray device on the network cannot push anything.
  *
- * The remote browser only fills the form; it never starts the import. Submitted details are surfaced via
- * [start]'s onPayload callback, which the host uses to pre-fill Add Source on the TV.
- *
- * Everything HTTP happens off the main thread on [Dispatchers.IO]. Passwords/MAC are never logged.
+ * Everything HTTP happens off the main thread on [Dispatchers.IO]. Passwords are never logged.
  */
 class CompanionHttpServer(
     private val context: Context,
@@ -74,14 +72,10 @@ class CompanionHttpServer(
     /** Bundled Lora TTF served at `/lora.ttf` so the web form matches the app's popup font offline. */
     @Volatile private var fontBytes: ByteArray? = null
 
-    /** Which page/endpoint set is live for the current session (add-source vs. backup upload). */
-    @Volatile private var mode: CompanionMode = CompanionMode.ADD_SOURCE
-
-    /** What the [CompanionMode.EDIT_SOURCE] page shows; its type is the only one accepted. */
-    @Volatile private var editPrefill: CompanionPayload? = null
+    /** Which page/endpoint set is live for the current session (backup/image upload, download, sync). */
+    @Volatile private var mode: CompanionMode = CompanionMode.BACKUP_RESTORE
 
     /** Session callbacks — set on [start], only the one matching [mode] ever fires. */
-    @Volatile private var onPayload: (CompanionPayload) -> Unit = {}
     @Volatile private var onBackup: (String) -> Unit = {}
     @Volatile private var onImage: (bytes: ByteArray, extension: String) -> Unit = { _, _ -> }
 
@@ -105,18 +99,15 @@ class CompanionHttpServer(
 
     /**
      * Bind [port] and start accepting. [pin] gates the pages and POST endpoints. [fontBytes], when
-     * provided, is served at `/lora.ttf`. [mode] selects the served page (add-source form or backup
-     * upload); [onPayload] receives an add-source submission, [onBackup] the raw JSON of an uploaded
-     * backup. Returns the LAN URLs to show on the TV. Throws on bind failure (the caller maps that to
-     * [CompanionServerState.Failed]).
+     * provided, is served at `/lora.ttf`. [mode] selects the served page and accepted endpoints;
+     * [onBackup] receives the raw body of an uploaded backup. Returns the LAN URLs to show on the TV.
+     * Throws on bind failure (the caller maps that to [CompanionServerState.Failed]).
      */
     fun start(
         port: Int,
         pin: String,
         fontBytes: ByteArray?,
-        mode: CompanionMode = CompanionMode.ADD_SOURCE,
-        editPrefill: CompanionPayload? = null,
-        onPayload: (CompanionPayload) -> Unit = {},
+        mode: CompanionMode = CompanionMode.BACKUP_RESTORE,
         onBackup: (String) -> Unit = {},
         onImage: (bytes: ByteArray, extension: String) -> Unit = { _, _ -> },
         downloadFile: File? = null,
@@ -132,8 +123,6 @@ class CompanionHttpServer(
         failedPins.set(0)
         this.fontBytes = fontBytes
         this.mode = mode
-        this.editPrefill = editPrefill
-        this.onPayload = onPayload
         this.onBackup = onBackup
         this.onImage = onImage
         this.downloadFile = downloadFile
@@ -153,8 +142,6 @@ class CompanionHttpServer(
     fun stop() {
         running.set(false)
         pin = ""
-        editPrefill = null
-        onPayload = {}
         onBackup = {}
         onImage = { _, _ -> }
         onLocked = {}
@@ -362,27 +349,6 @@ class CompanionHttpServer(
                 return sendHtml(socket, 200, CompanionHtml.imageSentPage(pageContext, pin))
             }
 
-            // Source submissions — PIN required (query or header), else 401.
-            if (method == "POST" && (path == "/xtream" || path == "/m3u" || path == "/stalker")) {
-                val headerPin = headers["x-companion-pin"].orEmpty()
-                if (!requirePin(queryPin.ifBlank { headerPin })) return sendText(socket, 401, localized(R.string.companion_error_unauthorized))
-                val fallback = when (path) {
-                    "/stalker" -> SourceType.STALKER
-                    "/m3u" -> SourceType.M3U
-                    else -> SourceType.XTREAM
-                }
-                val body = CompanionHttpProtocol.readBody(input, headers, CompanionHttpProtocol.maxBodyBytes(path))
-                    ?: return sendText(socket, 413, localized(R.string.companion_error_body_too_large))
-                // Editing: any field may be empty (it keeps the current value), and only the edited
-                // playlist's own type is accepted — a playlist cannot change its type.
-                val edit = editPrefill.takeIf { mode == CompanionMode.EDIT_SOURCE }
-                val payload = CompanionHttpProtocol.parsePayload(headers["content-type"], body, fallback, requireFields = edit == null)
-                    ?.takeIf { edit == null || it.type == edit.type }
-                    ?: return sendText(socket, 400, localized(R.string.companion_error_missing_fields))
-                onPayload(payload)
-                return sendHtml(socket, 200, if (edit != null) CompanionHtml.editSavedPage(pageContext, edit, pin) else CompanionHtml.savedPage(pageContext, payload, pin))
-            }
-
             sendText(socket, 404, localized(R.string.companion_error_not_found))
         }
     }
@@ -450,8 +416,6 @@ class CompanionHttpServer(
 
     /** The page served after a valid PIN, for the current [mode]. */
     private fun authedPage(context: Context): String = when (mode) {
-        CompanionMode.ADD_SOURCE -> CompanionHtml.formPage(context, pin)
-        CompanionMode.EDIT_SOURCE -> editPrefill?.let { CompanionHtml.editPage(context, pin, it) } ?: CompanionHtml.pinPage(context, null)
         CompanionMode.BACKUP_RESTORE -> CompanionHtml.backupUploadPage(context, pin)
         CompanionMode.BACKUP_DOWNLOAD -> CompanionHtml.backupDownloadPage(context, pin)
         CompanionMode.IMAGE_UPLOAD -> CompanionHtml.imageUploadPage(context, pin)

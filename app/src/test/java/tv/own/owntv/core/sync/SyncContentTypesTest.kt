@@ -12,7 +12,7 @@ class SyncContentTypesTest {
 
     @Test
     fun `effectiveFor intersects the request with what the playlist has enabled`() {
-        val on = SourceEntity(name = "m3u", type = SourceType.M3U, url = "http://x", syncLive = true)
+        val on = SourceEntity(name = "rutube", type = SourceType.RUTUBE, url = "http://x", syncLive = true)
         val effective = SyncContentTypes().effectiveFor(on)
         assertEquals(SyncContentTypes(live = true), effective)
         assertTrue(effective.isCompleteFor(SyncContentTypes.enabledFor(on)))

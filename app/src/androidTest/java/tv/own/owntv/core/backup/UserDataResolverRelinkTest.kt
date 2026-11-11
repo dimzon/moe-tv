@@ -53,7 +53,7 @@ class UserDataResolverRelinkTest {
             db = db,
         )
         sourceId = db.sourceDao().insert(
-            SourceEntity(name = "Portal", type = SourceType.XTREAM, url = "https://portal.test", username = "user"),
+            SourceEntity(name = "RuTube", type = SourceType.RUTUBE, url = "https://rutube.test"),
         )
         clearPending()
     }
@@ -98,8 +98,8 @@ class UserDataResolverRelinkTest {
     }
 
     /**
-     * Providers that expose no stable id at all (plain M3U) fall back to the name. Same guarantee,
-     * weaker key — worth pinning, because the fallback is what most M3U users actually rely on.
+     * Providers that expose no stable remote id fall back to the name. Same guarantee, weaker key
+     * — worth pinning, because the fallback is what a name-only provider relies on.
      */
     @Test
     fun favoriteFollowsAChannelByNameWhenTheProviderHasNoRemoteId() = runBlocking {

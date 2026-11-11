@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -94,7 +92,6 @@ import tv.own.owntv.core.content.ProgrammeSearchResult
 import tv.own.owntv.core.content.SearchResults
 import tv.own.owntv.core.database.dao.ChannelSearchResult
 import tv.own.owntv.core.database.entity.ChannelEntity
-import tv.own.owntv.core.epg.displayLogoUrl
 import tv.own.myowntv.features.live.LivePlate
 import tv.own.myowntv.features.live.LiveStagePane
 import tv.own.myowntv.features.live.LiveViewModel
@@ -102,9 +99,7 @@ import tv.own.owntv.core.live.ProviderTags
 import tv.own.myowntv.features.settings.dotSeparator
 import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.format.localizedInteger
-import tv.own.myowntv.ui.stage.PlaylistMark
 import tv.own.myowntv.ui.stage.StageKeyHints
-import tv.own.myowntv.ui.stage.StagePlaylistMark
 import tv.own.myowntv.ui.stage.StageRow
 import tv.own.myowntv.ui.stage.StageSurface
 import tv.own.myowntv.ui.stage.StageTab
@@ -177,7 +172,6 @@ fun SearchScreen(
     val intent by vm.intent.collectAsStateWithLifecycle()
     val recent by vm.recentSearches.collectAsStateWithLifecycle()
     val kinds by vm.kinds.collectAsStateWithLifecycle()
-    val marks by vm.playlistMarks.collectAsStateWithLifecycle()
     val nowPlaying by liveVm.nowPlaying.collectAsStateWithLifecycle()
     val nowNext by liveVm.nowNext.collectAsStateWithLifecycle()
     val livePreviewSetting by liveVm.livePreviewEnabled.collectAsStateWithLifecycle()
@@ -396,9 +390,9 @@ fun SearchScreen(
                                 nowPlaying[ch.id],
                             ).joinToString(sep)
                             SearchRow(
-                                title = name.name, line = AnnotatedString(line), tags = name.tags, mark = marks[ch.sourceId],
+                                title = name.name, line = AnnotatedString(line), tags = name.tags,
                                 onClick = { goTo(e) },
-                                leading = { LivePlate(ch.displayLogoUrl, 76.mpx, 54.mpx) },
+                                leading = { LivePlate(ch.logoUrl, 76.mpx, 54.mpx) },
                                 modifier = rowModifier,
                             )
                         }
@@ -411,9 +405,9 @@ fun SearchScreen(
                                     ProviderTags.parse(ch.name).name + sep +
                                         stringResource(R.string.content_live_time_range_plain, formatTime(p.startMs), formatTime(p.stopMs)),
                                 ),
-                                tags = emptyList(), mark = marks[ch.sourceId],
+                                tags = emptyList(),
                                 onClick = { goTo(e) },
-                                leading = { LivePlate(ch.displayLogoUrl, 76.mpx, 54.mpx) },
+                                leading = { LivePlate(ch.logoUrl, 76.mpx, 54.mpx) },
                                 modifier = rowModifier,
                             )
                         }
@@ -503,13 +497,12 @@ private fun GroupHeading(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-/** `.srow`: 84 high, 18 padding and gap; art, title 21/700, a 16 px muted line, then tags and the playlist mark. Focused = FX. */
+/** `.srow`: 84 high, 18 padding and gap; art, title 21/700, a 16 px muted line, then tags. Focused = FX. */
 @Composable
 private fun SearchRow(
     title: String,
     line: AnnotatedString,
     tags: List<String>,
-    mark: PlaylistMark?,
     onClick: () -> Unit,
     leading: @Composable () -> Unit,
     modifier: Modifier = Modifier,
@@ -524,7 +517,6 @@ private fun SearchRow(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.mpx), verticalAlignment = Alignment.CenterVertically) {
             tags.forEach { StageTag(it) }
-            mark?.let { StagePlaylistMark(it) }
         }
     }
 }

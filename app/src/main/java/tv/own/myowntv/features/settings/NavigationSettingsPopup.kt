@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -198,7 +196,6 @@ fun NavigationSettingsPopup(
 private val MenuSections = listOf(
     MainSection.HOME to MyOwnTVIcon.HOME,
     MainSection.LIVE_TV to MyOwnTVIcon.LIVE_TV,
-    MainSection.SPORTS to MyOwnTVIcon.SPORTS,
     MainSection.EPG to MyOwnTVIcon.EPG,
 )
 

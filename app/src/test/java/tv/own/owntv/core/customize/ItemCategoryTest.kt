@@ -9,7 +9,7 @@ import org.junit.Test
 class ItemCategoryTest {
 
     private val lockedKey = "1:adult"
-    private val sports = 1L
+    private val movies = 1L
     private val adult = 3L
 
     /** The browse view of a section after [withLocks], with the sealed folder resolved to its id. */
@@ -34,7 +34,7 @@ class ItemCategoryTest {
     fun `while a lock is closed a found item follows its category and an unresolved one is sealed`() {
         val c = section(locked = setOf(lockedKey))
         assertTrue(c.decide(ItemCategory.Found(adult)))
-        assertFalse(c.decide(ItemCategory.Found(sports)))
+        assertFalse(c.decide(ItemCategory.Found(movies)))
         assertFalse(c.decide(ItemCategory.Found(null)))
         assertTrue(c.decide(ItemCategory.Unresolved))
     }
@@ -43,7 +43,7 @@ class ItemCategoryTest {
     fun `once every lock is open everything shows as before`() {
         val c = section(locked = setOf(lockedKey), unlocked = setOf(lockedKey))
         assertFalse(c.decide(ItemCategory.Found(adult)))
-        assertFalse(c.decide(ItemCategory.Found(sports)))
+        assertFalse(c.decide(ItemCategory.Found(movies)))
         assertFalse(c.decide(ItemCategory.Unresolved))
     }
 
@@ -51,7 +51,7 @@ class ItemCategoryTest {
     fun `an unresolved item counts a closed lock of any section`() {
         val noLocksHere = section(locked = emptySet())
         assertTrue(noLocksHere.sealsItem(ItemCategory.Unresolved, anySealed = true))
-        assertFalse(noLocksHere.sealsItem(ItemCategory.Found(sports), anySealed = true))
+        assertFalse(noLocksHere.sealsItem(ItemCategory.Found(movies), anySealed = true))
     }
 
     @Test

@@ -1,6 +1,5 @@
 package tv.own.owntv.core.di
 
-import kotlinx.coroutines.flow.map
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import org.koin.android.ext.koin.androidContext
@@ -11,8 +10,6 @@ import tv.own.owntv.core.backup.UserDataResolver
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.network.ConnectivityObserver
 import tv.own.owntv.core.network.HttpClient
-import tv.own.owntv.core.parser.M3uParser
-import tv.own.owntv.core.parser.XtreamClient
 import tv.own.owntv.core.repository.EpgRepository
 import tv.own.owntv.core.repository.SourceRepository
 import tv.own.owntv.core.update.UpdateManager
@@ -108,79 +105,16 @@ val dataModule = module {
     // Which locked category a file the player is on belongs to, for the relock.
     single { tv.own.owntv.core.categorylock.PlayingFileCategory() }
     single { CustomizationStore(androidContext(), get()) }
-    single { tv.own.owntv.core.epg.EpgSourceStore(androidContext()) }
+    // RuTube's stream resolver: it alone decides whether a playback URL needs a playback session
+    // (needsResolve = RuTube) and how captions resolve.
+    single { tv.own.owntv.core.stalker.StreamUrlResolver(get()) }
     // Per-channel "watched without a picture" memory, for the mobile audio-only mode.
     single { tv.own.owntv.core.player.AudioOnlyStore(androidContext(), get()) }
     // Per-item zoom/volume the player remembers (playbackPrefsDao, settings).
     single { tv.own.owntv.core.player.PlaybackPrefsStore(dao = get(), settings = get(), quirks = get()) }
     single { tv.own.owntv.core.player.ExternalPlayerLauncher(androidContext()) }
-    // store, sourceDao, epgRepository
-    single { tv.own.owntv.core.epg.EpgMigration(get(), get(), get()) }
-    single { M3uParser() }
-    single { XtreamClient(get()) }
-    // Stalker portal: protocol client on the shared OkHttpClient + in-memory sessions.
-    single { tv.own.owntv.core.stalker.StalkerClient(get()) }
-    single { tv.own.owntv.core.stalker.StalkerAuthManager(get()) }
-    single { tv.own.owntv.core.stalker.StreamUrlResolver(get(), get(), get()) }
-    // The portal's own guide — the only EPG a Stalker portal that publishes no XMLTV has.
-    single { tv.own.owntv.core.stalker.StalkerEpgLoader(get(), get()) }
-    // http, xtreamClient, stalkerAuth — the Test button behind each saved playlist row.
-    single { tv.own.owntv.core.repository.SourceTester(get(), get(), get()) }
-    // Measuring how many streams a provider really allows, for the ones that never say.
-    single { tv.own.owntv.core.live.ConnectionProbe(get()) }
-    single { tv.own.owntv.core.live.ProbeChannelSource(get(), get(), get(), get(), get()) }
-    single { tv.own.owntv.core.live.ConnectionLimits(get(), get(), get(), get()) }
     single { WeatherRepository(get(), get()) }
-    // Sports Hub: ESPN straight from the device on the shared client (no Worker, no key). Lazy like
-    // everything here — none of it exists, let alone fetches, until a sports screen asks (startup zero-work).
-    single<tv.own.owntv.core.sports.SportsSource> { tv.own.owntv.core.sports.EspnSportsSource(get()) }
-    single { tv.own.owntv.core.sports.SportsRefreshPolicy() }
-    single { tv.own.owntv.core.sports.SportsGate(get()) }
-    single {
-        val settings = get<tv.own.owntv.core.settings.SettingsRepository>()
-        tv.own.owntv.core.sports.SportsRepository(
-            source = get(),
-            policy = get(),
-            // The active profile's follow list (every catalogue league with "All sports").
-            followed = settings.activeSportsConfig.map { it.followedLeagues() },
-            liveRefreshSeconds = settings.activeSportsConfig.map { it.liveRefreshSeconds },
-            autoRebuild = settings.activeSportsConfig.map { it.autoRebuild },
-            dataDir = androidContext().filesDir,
-            scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default),
-        ).also { repository ->
-            // Goal alerts re-arm from every board built — and so start only with the repository, never at launch.
-            get<tv.own.owntv.core.sports.MatchAlertScheduler>()
-                .follow(repository.board, settings.activeSportsConfig)
-        }
-    }
-    single {
-        val settings = get<tv.own.owntv.core.settings.SettingsRepository>()
-        tv.own.owntv.core.sports.SportsCalendar(
-            source = get(),
-            gate = get(),
-            board = get<tv.own.owntv.core.sports.SportsRepository>().board,
-            followed = settings.activeSportsConfig.map { it.followedLeagues() },
-            refreshDays = settings.activeSportsConfig.map { it.calendarRefreshDays },
-            dataDir = androidContext().filesDir,
-            scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default),
-        )
-    }
-    single { tv.own.owntv.core.sports.SportsTeams(get(), get(), get()) }
-    // "Where is it live": the database reads (Search's own channel ↔ guide mapping) and the cached ranking.
-    single<tv.own.owntv.core.sports.WatchData> {
-        // epgDao, channelDao, categoryDao, sourceDao, customize, settings (profileDao is gone with the profiles)
-        tv.own.owntv.core.sports.RoomWatchData(get(), get(), get(), get(), get(), get())
-    }
-    single { tv.own.owntv.core.sports.WatchReader(get()) }
-    single { tv.own.owntv.core.sports.SportOnChannels(get()) }
-    single { tv.own.owntv.core.sports.SportsActivityTracker() }
-    // Goal alerts (phone): state file in filesDir so a cache clear cannot drop a match being watched.
-    single { tv.own.owntv.core.sports.MatchNotifications(androidContext(), get()) }
-    single {
-        tv.own.owntv.core.sports.MatchAlertScheduler(androidContext(), get(), java.io.File(androidContext().filesDir, "sports"))
-    }
-    single { tv.own.owntv.core.sports.SportsAlertsSetup(androidContext(), get(), get(), get(), get(), get()) }
-    // Remote (companion) add-source LAN server — one shared instance for Setup + Settings.
+    // Remote (companion) LAN server — one shared instance for the Settings screens that host it.
     single { tv.own.owntv.core.companion.CompanionController(androidContext(), get()) }
     // Local sync between two OwnTV devices on the same Wi-Fi. The payload is a
     // backup container, the listener is the companion server, and the merge is the restore path —
@@ -235,7 +169,6 @@ val dataModule = module {
             channelDao = get(),
             db = get(),
             bulkInsertHelper = get(),
-            epgSourceStore = get(),
         )
     }
     // context, channelDao, favoriteDao, historyDao, contentOrderDao, customCategoryDao,
@@ -246,27 +179,17 @@ val dataModule = module {
     single { tv.own.owntv.core.backup.UserDataWriter(get(), get(), get(), get(), get()) }
     // sourceDao, syncManager, userDataResolver, channelDao, categoryDao, playbackQuirkDao, playbackPrefsDao
     single { SourceRepository(get(), get(), get(), get(), get(), playbackQuirkDao = get(), playbackPrefsDao = get()) }
-    // sourceDao, stalkerAuthManager, catalogSyncScheduler, importFinalizer
-    single { tv.own.owntv.core.repository.SourceEditor(get(), get(), get(), get()) }
     // settings, sourceRepository, channelDao
     single { tv.own.owntv.core.nav.NavVisibility(get(), get(), get()) }
     single {
         SyncManager(
-            context = androidContext(),
             sourceDao = get(),
             categoryDao = get(),
             channelDao = get(),
-            xtream = get(),
-            m3u = get(),
-            http = get(),
             bulkInsertHelper = get(),
-            stalkerClient = get(),
-            stalkerAuth = get(),
             activityTracker = get(),
             customize = get(),
             settings = get(),
-            connectionLimits = get(),
-            catalogSyncScheduler = get(),
             rutubeApi = get(),
         )
     }
@@ -276,25 +199,17 @@ val dataModule = module {
     // Same idea for EPG: EpgSyncWorker reports started/progress/finished here so the pill also reflects
     // guide/EPG downloads (manual resync from Settings, auto startup refresh, …).
     single { tv.own.owntv.core.sync.EpgActivityTracker() }
-    // epgDao, httpClient, xtreamClient, channelDao, customize, settings, context, db, bulkInsertHelper
+    // epgDao, channelDao, db, rutubeApi — the one provider's guide, written by RuTubeEpgSyncer.
     single {
         EpgRepository(
             epgDao = get(),
-            http = get(),
-            xtream = get(),
             channelDao = get(),
-            customize = get(),
-            settings = get(),
-            context = androidContext(),
             db = get(),
-            bulkInsertHelper = get(),
-            sourceDao = get(),
-            stalkerEpg = get(),
             rutube = get(),
         )
     }
-    // channelDao, categoryDao, sourceDao, customize, settings (profileDao is gone with the profiles)
-    single { tv.own.owntv.core.live.ChannelVersions(get(), get(), get(), get(), get()) }
+    // channelDao, categoryDao, sourceDao, customize (settings is gone: no active-playlist filter)
+    single { tv.own.owntv.core.live.ChannelVersions(get(), get(), get(), get()) }
     // Who currently holds a stream on which playlist. Multiview tiles and the main playback spend the
     // same provider connections, so both count against one register.
     single { tv.own.owntv.core.live.OpenStreamRegistry() }
@@ -305,12 +220,12 @@ val dataModule = module {
     // re-arms, whether or not BOOT_COMPLETED arrived.
     single { tv.own.owntv.core.reminder.ReminderScheduler(androidContext(), get()) }
     single(createdAtStart = true) { tv.own.owntv.core.reminder.ReminderManager(get(), get()) }
-    // sourceDao, settings, customizationStore, userDataResolver, epgSourceStore,
+    // sourceDao, settings, customizationStore, userDataResolver,
     // db, backgroundsDir (the folder ingestBackgroundImage writes to — the .own container carries the
-    // wallpaper). Profiles and avatars are gone with the live-only redesign.
+    // wallpaper). Sources are not backed up any more: the one RuTube row is recreated on demand.
     single {
         BackupManager(
-            get(), get(), get(), get(), get(), get(),
+            get(), get(), get(), get(), get(),
             java.io.File(androidContext().filesDir, "backgrounds"),
         )
     }
@@ -318,11 +233,11 @@ val dataModule = module {
     single { UpdateManager(androidContext(), get(), get()) }
     single { CatalogSyncScheduler(androidContext()) }
     single { EpgSyncScheduler(androidContext()) }
-    // settings, sourceRepository, catalogSyncScheduler, epgSyncScheduler, epgSourceStore,
-    // epgDao, importFinalizer — the Auto refresh settings, run on start and resume.
-    single { tv.own.owntv.core.sync.AutoRefresh(get(), get(), get(), get(), get(), get(), get()) }
-    // sourceDao, sourceRepository, backup, settings, connectivity, importFinalizer,
-    // catalogSyncScheduler, stalkerAuth, xtreamClient, context — onboarding: add a
-    // source, sync it, undo it when it fails. Factory, not single: each wizard run owns its own state machine.
-    factory { tv.own.owntv.core.setup.SourceImporter(get(), get(), get(), get(), get(), get(), get(), get(), get(), androidContext()) }
+    // settings, sourceRepository, catalogSyncScheduler, importFinalizer — the Auto refresh
+    // settings, run on start and resume.
+    single { tv.own.owntv.core.sync.AutoRefresh(get(), get(), get(), get()) }
+    // sourceDao, sourceRepository, backup, connectivity, importFinalizer,
+    // catalogSyncScheduler — onboarding: ensure the built-in RuTube source, sync it, undo on
+    // failure. Factory, not single: each wizard run owns its own state machine.
+    factory { tv.own.owntv.core.setup.SourceImporter(get(), get(), get(), get(), get(), get()) }
 }

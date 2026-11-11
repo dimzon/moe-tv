@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -119,7 +117,6 @@ private val PIN_PAGES = setOf(MoreItem.LOCAL_SYNC)
  */
 @Composable
 fun MoreScreen(
-    playlistLabel: String,
     onOpenSettings: (group: Int?, search: Boolean) -> Unit,
     /** ▶ / OK on a Favourites or History row: the same path Home uses, straight to the channel. */
     onPlayChannel: (Long) -> Unit,

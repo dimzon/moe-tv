@@ -18,7 +18,7 @@ class RedactUrlTest {
     }
 
     @Test
-    fun `typed Xtream paths are masked`() {
+    fun `typed credential paths are masked`() {
         assertEquals("http://panel.invalid:8080/live/•••/•••/123.ts", redact("http://panel.invalid:8080/live/alice/s3cret/123.ts"))
         assertEquals("http://panel.invalid/movie/•••/•••/55.mkv", redact("http://panel.invalid/movie/alice/s3cret/55.mkv"))
         assertEquals(
@@ -43,7 +43,7 @@ class RedactUrlTest {
     }
 
     @Test
-    fun `a Stalker MAC in the query is masked`() {
+    fun `a MAC in the query is masked`() {
         val out = redact("http://portal.invalid/play/live.php?mac=00:1A:79:AA:BB:CC&stream=1&play_token=abc")
         assertFalse(out, out.contains("00:1A:79"))
         assertEquals("http://portal.invalid/play/live.php?mac=***&stream=1&play_token=***", out)

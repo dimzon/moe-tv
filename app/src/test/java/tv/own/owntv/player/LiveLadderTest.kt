@@ -54,7 +54,7 @@ class LiveLadderTest {
 
     @Test
     fun `with no HLS alternative the ladder is the plain attempt it always was`() {
-        // "Prefer HLS" off, a Stalker portal cmd, or a URL already `.m3u8`: there is no second format
+        // No HLS preference, a portal cmd, or a URL already `.m3u8`: there is no second format
         // to try, and a rung the tune code would silently turn into the `.ts` one anyway would cost a
         // duplicate attempt before the error.
         val ladder = ladderFor("http://f.test/live/1.ts", hasHls = false)

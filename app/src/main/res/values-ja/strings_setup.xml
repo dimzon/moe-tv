@@ -35,121 +35,23 @@
     <string name="setup_setup_choice_description">新しく始めるか、バックアップファイルまたは別の端末からプロフィール、プレイリスト、お気に入りを復元します。</string>
     <string name="setup_new_profile">新しいプロフィール</string>
     <string name="setup_create_profile_add_sources">プロフィールを作成してソースを追加</string>
-    <string name="setup_import_profiles_playlists">ファイルからプロフィールとプレイリストをインポート</string>
     <string name="setup_sync_device">別の端末から</string>
     <string name="setup_sync_device_description">Wi-Fi 経由でもう一方の OwnTV 端末からすべてをコピーします</string>
-    <string name="setup_add_playlist">プレイリストを追加</string>
-    <string name="setup_add_playlist_description">このプロフィールにソースを追加するか、後でセットアップします。</string>
-    <string name="setup_existing">既存</string>
-    <string name="setup_use_other_profile_playlists">別のプロフィールのプレイリストを使用</string>
     <string name="setup_import">インポート</string>
-    <string name="setup_restore_backup_file">バックアップファイルから復元</string>
-    <string name="setup_skip_for_now">今はスキップ</string>
-    <string name="setup_use_existing_playlists">既存のプレイリストを使用</string>
-    <string name="setup_pick_playlists">このプロフィールに追加するプレイリストを選択してください。</string>
-    <plurals name="setup_add_selected_playlists">
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g>件を追加</item>
-    </plurals>
-    <string name="setup_restoring">復元中…</string>
-    <string name="setup_wrong_backup_password">バックアップのパスワードが違います</string>
-    <string name="setup_enter_backup_password">バックアップのパスワードを入力</string>
-    <string name="setup_password_mismatch_sealed">パスワードが一致しません。このバックアップは暗号化されているため、作成時のパスワードがないと開けません。</string>
-    <string name="setup_password_mismatch">パスワードが一致しません。もう一度試すか、スキップして保存済みパスワード以外をすべて復元してください。</string>
-    <string name="setup_backup_encrypted_prompt">このバックアップは暗号化されています。開いて復元するには、バックアップのパスワードを入力してください。</string>
-    <string name="setup_backup_passwords_encrypted_prompt">このバックアップ内のパスワードは暗号化されています。復元するにはバックアップのパスワードを入力するか、スキップしてそれ以外をすべて復元し、後でパスワードを再入力してください。</string>
-    <string name="setup_backup_password">バックアップのパスワード</string>
-    <string name="setup_skip_no_passwords">スキップ（パスワードなし）</string>
     <string name="setup_restore">復元</string>
     <string name="setup_restore_failed">復元に失敗しました</string>
     <string name="setup_backup_read_failed">バックアップファイルを読み取れませんでした</string>
-    <string name="setup_invalid_mac">無効なMACアドレスです。AA:BB:CC:DD:EE:FFの形式を使用してください</string>
-    <string name="setup_pick_backup_file">復元するバックアップファイルを選択</string>
-    <string name="setup_restore_a_backup">バックアップを復元</string>
-    <string name="setup_restore_choice_description">同じ Wi-Fi にあるブラウザー付きの任意の機器からリモートでバックアップを送るか、この機器にあるバックアップファイルを選びます。</string>
-    <string name="setup_upload_from_wifi_device">Wi-Fi上のデバイスからアップロード</string>
-    <string name="setup_local_file">ローカルファイル</string>
-    <string name="setup_pick_backup_local">このデバイス上のバックアップファイルを選択</string>
     <string name="setup_run_in_background">バックグラウンドで実行</string>
     <string name="setup_importing_catalog">カタログをインポート中…</string>
     <string name="setup_preparing_catalog">カタログを準備中</string>
     <string name="setup_watching_during_import">残りのカタログを読み込んでいる間も、すぐに視聴を開始できます。</string>
     <string name="setup_all_set">準備完了！</string>
-    <plurals name="setup_restored_items">
-        <item quantity="other"><xliff:g id="items">%1$d</xliff:g>件を復元しました。コンテンツを読み込むにはソースを再同期してください。</item>
-    </plurals>
-    <string name="setup_passwords_omitted">保存済みのパスワードは後で再入力してください。</string>
-    <string name="setup_need_password">パスワードが保存されていないため、まだ読み込まれていません：<xliff:g id="names">%1$s</xliff:g>。設定でプレイリストを開き、パスワードを入力してください。</string>
-    <string name="setup_name_numbered"><xliff:g id="name">%1$s</xliff:g> <xliff:g id="number">%2$d</xliff:g></string>
-    <plurals name="setup_skipped_sources">
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g>件のソースは、このバージョンでプレイリスト形式がサポートされていないためスキップされました。</item>
-    </plurals>
     <string name="setup_continue">続行</string>
     <string name="setup_import_failed">インポートに失敗しました</string>
     <string name="setup_try_again_caps">もう一度試す</string>
     <string name="setup_opening">起動中…</string>
-    <string name="setup_add_source">ソースを追加</string>
-    <string name="setup_edit_source">ソースを編集</string>
-    <string name="setup_edit_from_phone">別の端末から編集</string>
-    <string name="setup_edit_source_description">このソースの詳細を更新するか、自動更新設定を変更します。</string>
-    <string name="setup_byo_source_description">OwnTVはプレーヤーです。ご自身のXtream、M3U、またはStalkerソースを追加してください。</string>
-    <string name="setup_xtream">Xtream</string>
-    <string name="setup_m3u">M3U / M3U8</string>
-    <string name="setup_stalker_mac">Stalker（MAC）</string>
-    <string name="setup_source_name_optional">名前（任意）</string>
-    <string name="setup_default_iptv">マイIPTV</string>
-    <string name="setup_name_default_playlist">マイプレイリスト</string>
-    <string name="setup_default_portal">マイポータル</string>
-    <string name="setup_default_profile">プロフィール</string>
-    <string name="setup_server_url">サーバーURL</string>
-    <string name="setup_server_example">http://host:port</string>
-    <string name="setup_username">ユーザー名</string>
-    <string name="setup_password">パスワード</string>
-    <string name="setup_password_keep">パスワード（現在のままにする場合は空欄）</string>
-    <string name="setup_playlist_url_local_file">プレイリストURLまたはローカルファイル</string>
-    <string name="setup_playlist_example">http://…/プレイリスト.m3u</string>
     <string name="setup_playlist_file_unavailable">プレイリストファイルを開けませんでした。移動されている可能性があるため、もう一度選択してください。</string>
     <string name="setup_playlist_path_unsupported">このローカルプレイリストのパスはサポートされていません。</string>
-    <string name="setup_local_file_choose">ローカルの.m3u / .m3u8ファイルを選択…</string>
-    <string name="setup_local_file_prefix">ローカルファイル：<xliff:g id="name">%1$s</xliff:g></string>
-    <string name="setup_portal_url">ポータルURL</string>
-    <string name="setup_portal_example">http://host:port/c/</string>
-    <string name="setup_mac_address">MACアドレス</string>
-    <string name="setup_mac_example">00:1A:79:AA:BB:CC</string>
-    <string name="setup_mac_invalid">12文字で入力してください（例：00:1A:79:AA:BB:CC）</string>
-    <string name="setup_device_model_preset">デバイスモデルのプリセット（User-Agent）…</string>
-    <string name="setup_testing">テスト中…</string>
-    <string name="setup_test_connection">接続をテスト</string>
-    <string name="setup_user_agent_optional">User-Agent（任意）</string>
-    <string name="setup_user_agent_example">例：VLC/3.0.20 LibVLC/3.0.20</string>
-    <string name="setup_referer_optional">Referer（任意）</string>
-    <string name="setup_referer_example">例：https://example.com/</string>
-    <string name="setup_auto_refresh">自動更新</string>
-    <string name="setup_auto_refresh_description">オフ、起動時、またはデータが古い場合</string>
-    <string name="setup_default_playlist">デフォルトのプレイリスト</string>
-    <string name="setup_default_playlist_description">アプリ全体でこのプレイリストのみを表示します。すべてのプレイリストを表示するにはオフにしてください。トップバーからいつでも変更できます。</string>
-    <string name="setup_what_to_sync">同期する項目</string>
-    <string name="setup_sync_off_editing">オフにしたセクションは非表示のままになり、取得されません。セクションを再びオンにすると、キャッシュ済みの行がすぐに表示されます。</string>
-    <string name="setup_sync_choices">［今すぐ］は最初にインポート・［後で］はバックグラウンドで同期・［オフ］は取得も表示もしません。</string>
-    <string name="setup_live_tv">ライブTV</string>
-    <string name="setup_channels_categories">チャンネルとカテゴリ</string>
-    <string name="setup_movies">映画</string>
-    <string name="setup_vod_movie_catalog">VOD映画カタログ</string>
-    <string name="setup_series">シリーズ</string>
-    <string name="setup_tv_series_catalog">TVシリーズカタログ</string>
-    <string name="setup_start_import">インポートを開始</string>
-    <string name="setup_update_source_save">保存</string>
-    <string name="setup_pick_playlist_file">プレイリストファイル（.m3u / .m3u8）を選択</string>
-    <string name="setup_device_model_preset_title">デバイスモデルのプリセット</string>
-    <string name="setup_auto_refresh_title">自動更新</string>
-    <string name="setup_on">オン</string>
-    <string name="setup_now">今すぐ</string>
-    <string name="setup_later">後で</string>
-    <string name="setup_off">オフ</string>
-    <string name="setup_default_mag">デフォルト（MAG200）</string>
-    <string name="setup_mag250">MAG250</string>
-    <string name="setup_mag254">MAG254</string>
-    <string name="setup_mag270">MAG270</string>
-    <string name="setup_mag420">MAG420</string>
     <string name="companion_pin_page_title">OwnTV — PINを入力</string>
     <string name="companion_pin_heading">PINを入力</string>
     <string name="companion_pin_description">続行するには、TVに表示されている6桁のPINを入力してください。</string>
@@ -217,35 +119,6 @@
     <string name="companion_error_image_too_large">画像が大きすぎます。</string>
     <string name="companion_error_invalid_image">有効な画像アップロードではありません。</string>
     <string name="companion_error_missing_fields">必須項目が入力されていません。</string>
-    <string name="setup_invalid_locale">このバックアップには、現在のアプリのバージョンでサポートされていない言語が含まれていました。復元には成功しましたが、現在の言語は変更されませんでした。</string>
-    <string name="setup_prefer_hls_live_tv">ライブTVでHLSを優先</string>
-    <string name="setup_hide_new_categories">新しいカテゴリをデフォルトで非表示</string>
-    <string name="setup_hide_new_categories_description">プロフィール全体の設定です。今後の同期で追加されたカテゴリは、最初は非表示になります。［カスタマイズ］でいつでも確認できます。</string>
-    <string name="setup_prefer_hls_description">ライブTVでは、MPEG-TSよりHLS（.m3u8）を優先します。HLSが失敗した場合はMPEG-TSにフォールバックします。キャッチアップは常にMPEG-TSを使用します。</string>
-    <string name="setup_prefer_hls_description_supported">ライブTVでは、MPEG-TSよりHLS（.m3u8）を優先します。HLSが失敗した場合はMPEG-TSにフォールバックします。キャッチアップは常にMPEG-TSを使用します。プロバイダーはHLSサポートを報告しています。</string>
-    <string name="setup_prefer_hls_description_unsupported">ライブTVでは、MPEG-TSよりHLS（.m3u8）を優先します。HLSが失敗した場合はMPEG-TSにフォールバックします。キャッチアップは常にMPEG-TSを使用します。プロバイダーはHLSサポートを報告していませんが、試すことはできます。</string>
-    <string name="setup_hls_test_support">HLSサポートをテスト</string>
-    <string name="setup_hls_testing">HLSをテスト中…</string>
-    <string name="setup_hls_test_failed">テストに失敗しました: <xliff:g id="reason">%1$s</xliff:g></string>
-    <string name="setup_hls_test_provider_unreachable">プロバイダーに接続できませんでした — サーバーURL、ユーザー名、パスワードを確認してください。</string>
-    <string name="setup_hls_test_works">✓ HLSは動作します — プロバイダーがプレイリストを返しました。</string>
-    <string name="setup_hls_test_works_unadvertised">✓ HLSは動作します — プロバイダーはHLSサポートを公表していませんが、プレイリストは返しました。</string>
-    <string name="setup_hls_test_busy">完了できませんでした — 現在、アカウントの接続はすべて使用中です（HTTP <xliff:g id="status">%1$d</xliff:g>）。他でストリーミング中のものをすべて停止して、もう一度テストしてください。</string>
-    <string name="setup_hls_test_not_served">HLSは動作しませんでした — <xliff:g id="reason">%1$s</xliff:g>。この設定をオフのままにすると、ライブTVはMPEG-TSを使用します。</string>
-    <string name="setup_hls_test_reason_not_playlist">サーバーは応答したものの、プレイリストではありませんでした</string>
-    <string name="setup_hls_test_reason_no_endpoint">このチャンネルにはHLSエンドポイントがありません（HTTP <xliff:g id="status">%1$d</xliff:g>）</string>
-    <string name="setup_hls_test_inconclusive">検証できませんでした（<xliff:g id="reason">%1$s</xliff:g>）。<xliff:g id="provider_claim">%2$s</xliff:g></string>
-    <string name="setup_hls_test_reason_http">HTTP <xliff:g id="status">%1$d</xliff:g></string>
-    <string name="setup_hls_test_reason_no_answer">応答なし</string>
-    <string name="setup_hls_test_reason_no_live_channels">このプレイリストにはテストできるライブチャンネルがありません</string>
-    <string name="setup_hls_test_reason_dead_channel">テストチャンネルはMPEG-TSでも再生できなかったため、単にそのチャンネルが停止している可能性があります</string>
-    <string name="setup_hls_provider_advertises">プロバイダーはHLSサポートを公表しています。</string>
-    <string name="setup_hls_provider_does_not_advertise">プロバイダーはHLSサポートを公表していません。</string>
-    <string name="setup_stalker_advanced_identity">高度なデバイス識別</string>
-    <string name="setup_stalker_serial_number_optional">シリアル番号（任意）</string>
-    <string name="setup_stalker_device_id_optional">デバイスID（任意）</string>
-    <string name="setup_stalker_device_id2_optional">デバイスID2（任意）</string>
-    <string name="setup_stalker_signature_optional">署名（任意）</string>
     <string name="companion_error_pair_failed">この端末とペアリングできませんでした。</string>
     <string name="local_sync_browser_title">OwnTV ローカル同期</string>
     <string name="local_sync_browser_body">このアドレスは、もう一方の端末の OwnTV アプリ用です。そちらでローカル同期を開き、一覧からこの端末を選んでください。</string>
@@ -255,24 +128,12 @@
     <string name="setup_key_previous_step">前の手順</string>
     <string name="setup_welcome_title">OwnTV へようこそ</string>
     <string name="setup_welcome_sub">あなた専用の IPTV プレーヤーです。まず言語を選んでください。あとで設定から変更できます。</string>
-    <plurals name="setup_languages_all">
-        <item quantity="other">全 <xliff:g id="count">%1$d</xliff:g> 言語</item>
-    </plurals>
     <string name="setup_display_sub">このテレビでの画面と文字の大きさ。下の行が操作に合わせて変わります。</string>
-    <string name="setup_display_sub_mobile">このスマートフォンでの画面と文字の大きさ。下の行が操作に合わせて変わります。</string>
     <string name="setup_line_zoom">画面のすべて</string>
     <string name="setup_line_font">文字のみ</string>
     <string name="setup_line_app_icon">テレビのホーム画面での OwnTV の見え方</string>
-    <string name="setup_line_app_icon_mobile">ホーム画面での OwnTV の見え方</string>
-    <string name="setup_restore_card_line">ファイルから、または別の機器からリモートで</string>
     <string name="setup_device_appear">同期モードがオンの機器がここに表示されます</string>
     <string name="setup_device_address_hint">または相手の機器のアドレスを入力</string>
-    <string name="setup_profile_sub">プロフィールごとにお気に入り、履歴、ホームが別々です。あとから 設定 › プロフィール で追加できます。</string>
-    <string name="setup_avatar">アバター</string>
-    <string name="setup_avatar_line">1 つ選ぶか、頭文字のままにします</string>
     <string name="setup_create_profile">プロフィールを作成</string>
-    <string name="setup_phone_card_line">別の機器のブラウザーでフォームに入力 — いちばん速い方法</string>
     <string name="setup_importing_title"><xliff:g id="name">%1$s</xliff:g> をインポート中</string>
-    <string name="setup_add_guide">番組ガイドを追加</string>
-    <string name="setup_add_guide_line">新しくインストールした直後はガイドがありません</string>
 </resources>

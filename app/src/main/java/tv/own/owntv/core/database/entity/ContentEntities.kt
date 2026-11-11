@@ -143,14 +143,7 @@ fun ChannelEntity.playStreamUrl(source: SourceEntity?): String =
 
 /** Swaps .ts to .m3u8 if preferHls is active for an Xtream source. See [playStreamUrl] for why this is
  *  not gated on `hlsSupported`. */
-fun resolveStreamUrl(url: String, source: SourceEntity?): String {
-    if (source != null && source.type == tv.own.owntv.core.model.SourceType.XTREAM && source.preferHls) {
-        if (url.endsWith(".ts", ignoreCase = true)) {
-            return url.dropLast(3) + ".m3u8"
-        }
-    }
-    return url
-}
+fun resolveStreamUrl(url: String, source: SourceEntity?): String = url
 
 
 /**

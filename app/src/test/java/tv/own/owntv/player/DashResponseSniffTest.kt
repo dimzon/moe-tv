@@ -8,8 +8,8 @@ import org.junit.Test
  * [LivePreviewEngine.isDashResponse] — recognising a DASH manifest from the response the request
  * actually ended at, rather than from the URL that was submitted.
  *
- * This is the rung that closes the reported bug without needing a re-sync, and the only one available
- * to Stalker and Xtream, whose URLs can never carry a `manifest_type` declaration.
+ * This is the rung that closes the reported bug without needing a re-sync, and the one available to
+ * any provider whose URLs can never carry a `manifest_type` declaration.
  */
 class DashResponseSniffTest {
 

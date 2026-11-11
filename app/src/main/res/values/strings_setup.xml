@@ -61,85 +61,30 @@
     <string name="setup_display_size_title">Make it comfortable to read</string>
     <!-- Translators: Heading on the first-run disclaimer screen shown before the user can proceed. -->
     <string name="setup_before_you_start">Before you start</string>
-    <!-- Translators: Body text on the first-run disclaimer screen. "OwnTV", "Xtream", "M3U" are brand/protocol names that must not be translated. -->
-    <string name="setup_disclaimer">OwnTV is a media player only. It includes no channels, playlists, or content. You are responsible for adding your own legally accessible Xtream, M3U, or Stalker sources.</string>
+    <!-- Translators: Body text on the first-run disclaimer screen. "OwnTV", "RuTube" are brand/protocol names that must not be translated. -->
+    <string name="setup_disclaimer">OwnTV is a media player only. It includes no channels, playlists, or content of its own. Its single source is the built-in, legally accessible RuTube live catalogue, and you are responsible for using it lawfully.</string>
     <!-- Translators: Button on the first-run disclaimer screen to acknowledge and proceed. -->
     <string name="setup_i_understand">I Understand</string>
     <!-- Translators: Heading on the setup-choice screen (first run only) where the user chooses between a new profile or restoring a backup. -->
     <string name="setup_set_up_owntv">Set up OwnTV</string>
     <!-- Translators: Description on the setup-choice screen. -->
-    <string name="setup_setup_choice_description">Start fresh, or bring back your profiles, playlists and favorites from a backup file or another device.</string>
-    <!-- Translators: ChoiceCard title on the setup-choice screen for creating a new profile. -->
-    <string name="setup_new_profile">New profile</string>
+    <string name="setup_setup_choice_description">Start fresh with the built-in RuTube catalogue, or copy your data from another OwnTV device.</string>
+    <!-- Translators: ChoiceCard title on the setup-choice screen for a fresh setup. -->
+    <string name="setup_new_profile">Fresh start</string>
     <!-- Translators: Description text beneath the "New profile" choice card on the setup-choice screen. -->
-    <string name="setup_create_profile_add_sources">Create a profile and add sources</string>
-    <!-- Translators: Description text beneath the "Restore backup" choice card. -->
-    <string name="setup_import_profiles_playlists">Import profiles &amp; playlists from a file</string>
+    <string name="setup_create_profile_add_sources">Set up the built-in RuTube catalogue</string>
     <!-- Translators: ChoiceCard title on the setup-choice screen for copying everything from another OwnTV device on the same Wi-Fi. -->
     <string name="setup_sync_device">From another device</string>
     <!-- Translators: Description text beneath the "From another device" choice card. "OwnTV" is the app name and must not be translated. -->
     <string name="setup_sync_device_description">Copy everything from your other OwnTV device over Wi-Fi</string>
-    <!-- Translators: Heading on the "add a playlist" step of the setup wizard. -->
-    <string name="setup_add_playlist">Add a playlist</string>
-    <!-- Translators: Description on the "add a playlist" step. -->
-    <string name="setup_add_playlist_description">Add a source for this profile, or set one up later.</string>
-    <!-- Translators: ChoiceCard title for reusing playlists from another profile. Only shown when other profiles already have sources. -->
-    <string name="setup_existing">Existing</string>
-    <!-- Translators: Description beneath the "Existing" choice card. Only shown when other profiles have sources. -->
-    <string name="setup_use_other_profile_playlists">Use another profile\'s playlists</string>
     <!-- Translators: ChoiceCard title for importing from a backup file. -->
     <string name="setup_import">Import</string>
-    <!-- Translators: Description beneath the "Import" choice card on the add-playlist step. -->
-    <string name="setup_restore_backup_file">Restore from a backup file</string>
-    <!-- Translators: Button to skip adding a source and finish setup without any playlists. -->
-    <string name="setup_skip_for_now">Skip for now</string>
-    <!-- Translators: Heading on the existing-sources screen where the user picks playlists from other profiles. -->
-    <string name="setup_use_existing_playlists">Use existing playlists</string>
-    <!-- Translators: Description on the existing-sources screen. -->
-    <string name="setup_pick_playlists">Pick the playlists to add to this profile.</string>
-    <!-- Translators: Plural button label shown on the playlist-picking screen. "count" is the number of playlists selected. -->
-    <plurals name="setup_add_selected_playlists">
-        <item quantity="one">Add <xliff:g id="count">%1$d</xliff:g></item>
-        <item quantity="other">Add <xliff:g id="count">%1$d</xliff:g></item>
-    </plurals>
-    <!-- Translators: Loading status shown while the backup restore is in progress. -->
-    <string name="setup_restoring">Restoring\u2026</string>
-    <!-- Translators: Error heading on the password-prompt screen after a wrong password is entered. -->
-    <string name="setup_wrong_backup_password">Wrong backup password</string>
-    <!-- Translators: Heading on the initial backup-password prompt (before any attempt). -->
-    <string name="setup_enter_backup_password">Enter backup password</string>
-    <!-- Translators: Error description when the wrong password is entered for a fully encrypted backup. No skip option is available. -->
-    <string name="setup_password_mismatch_sealed">That password didn\'t match. This backup is encrypted \u2014 it can\'t be opened without the password it was created with.</string>
-    <!-- Translators: Error description when the wrong password is entered for a partially encrypted backup. A skip option is available. -->
-    <string name="setup_password_mismatch">That password didn\'t match. Try again, or skip to restore everything except saved passwords.</string>
-    <!-- Translators: Description on the password-prompt screen for a fully encrypted backup (first attempt). -->
-    <string name="setup_backup_encrypted_prompt">This backup is encrypted. Enter the backup password to open and restore it.</string>
-    <!-- Translators: Description on the password-prompt screen when only the passwords section is encrypted (first attempt). -->
-    <string name="setup_backup_passwords_encrypted_prompt">This backup\'s passwords are encrypted. Enter the backup password to restore them, or skip to restore everything else and re-enter passwords later.</string>
-    <!-- Translators: Text-field label for the backup password input. -->
-    <string name="setup_backup_password">Backup password</string>
-    <!-- Translators: Button to skip password entry and restore without saved passwords. Only shown for partially encrypted backups. -->
-    <string name="setup_skip_no_passwords">Skip (no passwords)</string>
     <!-- Translators: Primary button on the password-prompt screen to confirm restore with the entered password. -->
     <string name="setup_restore">Restore</string>
     <!-- Translators: Error heading on the import-progress screen when restore fails. -->
     <string name="setup_restore_failed">Restore failed</string>
     <!-- Translators: Error text when the backup file is unreadable or corrupted. -->
     <string name="setup_backup_read_failed">Couldn\'t read the backup file</string>
-    <!-- Translators: Error text when a Stalker MAC address is not in the expected format. "AA:BB:CC:DD:EE:FF" is an example format. -->
-    <string name="setup_invalid_mac">Invalid MAC address \u2014 use AA:BB:CC:DD:EE:FF</string>
-    <!-- Translators: Title of the storage browser when picking a backup file to restore. -->
-    <string name="setup_pick_backup_file">Pick a backup file to restore</string>
-    <!-- Translators: Heading on the restore-chooser screen where the user picks between Remote and Local file. -->
-    <string name="setup_restore_a_backup">Restore a backup</string>
-    <!-- Translators: Description on the restore-chooser screen. -->
-    <string name="setup_restore_choice_description">Send the backup by Remote from any device with a browser on the same Wi-Fi, or pick a backup file already on this device.</string>
-    <!-- Translators: ChoiceCard description for the "Remote" option on the restore-chooser screen. -->
-    <string name="setup_upload_from_wifi_device">Upload from a device on your Wi-Fi</string>
-    <!-- Translators: ChoiceCard title for the local-file option on the restore-chooser screen. Also used in player subtitle track options to label a locally loaded subtitle file. -->
-    <string name="setup_local_file">Local file</string>
-    <!-- Translators: Description beneath the "Local file" choice card on the restore-chooser screen. -->
-    <string name="setup_pick_backup_local">Pick a backup file on this device</string>
     <!-- Translators: Button on the import-progress screen to continue watching while the catalog loads in the background. -->
     <string name="setup_run_in_background">Run in background</string>
     <!-- Translators: Status text shown above the spinner while the catalog is being imported. -->
@@ -150,22 +95,6 @@
     <string name="setup_watching_during_import">You can start watching while the rest of the catalog loads.</string>
     <!-- Translators: Heading on the import-progress screen when import succeeds. -->
     <string name="setup_all_set">All set!</string>
-    <!-- Translators: Plural text on the import-success screen showing how many items were restored. "items" is the count. -->
-    <plurals name="setup_restored_items">
-        <item quantity="one"><xliff:g id="items">%1$d</xliff:g> item restored. Re-sync your sources to load content.</item>
-        <item quantity="other"><xliff:g id="items">%1$d</xliff:g> items restored. Re-sync your sources to load content.</item>
-    </plurals>
-    <!-- Translators: Info text shown on import success when passwords were not restored (user skipped or backup was partially encrypted). -->
-    <string name="setup_passwords_omitted">Re-enter any saved passwords afterwards.</string>
-    <!-- Translators: Shown after a restore. "names" is a comma-separated list of playlist names whose password was not in the backup; those playlists are not loaded until the password is entered in the playlist's edit form in Settings. -->
-    <string name="setup_need_password">No saved password, so not loaded yet: <xliff:g id="names">%1$s</xliff:g>. Open the playlist in Settings and enter its password.</string>
-    <!-- Translators: Name given to a new playlist when another playlist already has the same name, e.g. "My IPTV 2". "name" is the playlist name, "number" counts up from 2. -->
-    <string name="setup_name_numbered"><xliff:g id="name">%1$s</xliff:g> <xliff:g id="number">%2$d</xliff:g></string>
-    <!-- Translators: Plural warning shown on import success when some sources were skipped due to unsupported playlist types. "count" is the number of skipped sources. -->
-    <plurals name="setup_skipped_sources">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> source was skipped because this version doesn\'t support its playlist type.</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> sources were skipped because this version doesn\'t support their playlist types.</item>
-    </plurals>
     <!-- Translators: Button on the import-success screen to finish setup. -->
     <string name="setup_continue">Continue</string>
     <!-- Translators: Error heading on the import-progress screen when import fails. -->
@@ -176,137 +105,10 @@
     <!-- Translators: Loading label while the companion server is starting. -->
     <string name="setup_opening">Opening\u2026</string>
 
-    <!-- Translators: Heading on the AddSourceChooserScreen where the user picks between Remote (the remote companion) and Manual (on-device form). -->
-    <string name="setup_add_source">Add a source</string>
-    <!-- Translators: Heading on the AddSourceScreen when editing an existing source. -->
-    <string name="setup_edit_source">Edit source</string>
-    <!-- Translators: Row on the TV's Edit source screen that opens a page in a browser on a phone, tablet or computer on the same Wi-Fi, to change this playlist's details there. Matches "Send from another device". -->
-    <string name="setup_edit_from_phone">Edit from another device</string>
-    <!-- Translators: Description on the AddSourceScreen when editing an existing source. -->
-    <string name="setup_edit_source_description">Update this source\'s details, or change its auto-refresh setting.</string>
-    <!-- Translators: Description on the AddSourceScreen when adding a new source. "OwnTV", "Xtream", "M3U", "Stalker" are brand/protocol names that must not be translated. -->
-    <string name="setup_byo_source_description">OwnTV is a player \u2014 bring your own Xtream, M3U, or Stalker source.</string>
-    <!-- Translators: KindChip label for the Xtream source type selector. "Xtream" is a brand name that must not be translated. Shown on the TV form and the companion web page. -->
-    <string name="setup_xtream">Xtream</string>
-    <!-- Translators: KindChip label for the M3U/M3U8 source type selector. "M3U" and "M3U8" are file format names that must not be translated. Shown on the TV form and the companion web page. -->
-    <string name="setup_m3u">M3U / M3U8</string>
-    <!-- Translators: KindChip label for the Stalker portal source type selector. "Stalker" is a brand name that must not be translated. Only shown when Stalker support is enabled. Shown on the TV form and the companion web page. -->
-    <string name="setup_stalker_mac">Stalker (MAC)</string>
-    <!-- Translators: Text-field label for the optional source name. Shown on the TV form and the companion web page. -->
-    <string name="setup_source_name_optional">Name (optional)</string>
-    <!-- Translators: Default source name placeholder for Xtream sources when the user leaves the name blank. Used as fallback on the TV form and companion web page. -->
-    <string name="setup_default_iptv">My IPTV</string>
-    <!-- Translators: Default source name placeholder for M3U sources when the user leaves the name blank. -->
-    <string name="setup_name_default_playlist">My Playlist</string>
-    <!-- Translators: Default source name placeholder for Stalker sources when the user leaves the name blank. -->
-    <string name="setup_default_portal">My Portal</string>
-    <!-- Translators: Default profile name used when the user leaves the profile name blank during first-run setup. -->
-    <string name="setup_default_profile">Profile</string>
-    <!-- Translators: Text-field label for the Xtream server URL. Shown on the TV form and companion web page. -->
-    <string name="setup_server_url">Server URL</string>
-    <!-- Translators: Placeholder example in the Xtream server URL field. "host:port" is a generic example. -->
-    <string name="setup_server_example">http://host:port</string>
-    <!-- Translators: Text-field label for the Xtream username. Shown on the TV form and companion web page. -->
-    <string name="setup_username">Username</string>
-    <!-- Translators: Text-field label for the Xtream password (new source, not editing). Shown on the TV form and companion web page. -->
-    <string name="setup_password">Password</string>
-    <!-- Translators: Text-field label for the Xtream password when editing an existing source. Tells the user to leave blank to keep the current password. -->
-    <string name="setup_password_keep">Password (leave blank to keep)</string>
-    <!-- Translators: Text-field label for the M3U playlist URL or local file path. Shown on the TV form and companion web page. -->
-    <string name="setup_playlist_url_local_file">Playlist URL or local file</string>
-    <!-- Translators: Placeholder example in the M3U playlist URL field. The ellipsis indicates a truncated URL. -->
-    <string name="setup_playlist_example">http://\u2026/playlist.m3u</string>
     <!-- Translators: Error text when a local M3U playlist file cannot be opened. -->
     <string name="setup_playlist_file_unavailable">Couldn\'t open the playlist file. Pick it again; it may have moved.</string>
     <!-- Translators: Error text when a local playlist path uses an unsupported URI scheme. -->
     <string name="setup_playlist_path_unsupported">This local playlist path is not supported.</string>
-    <!-- Translators: Button label in the M3U source form to open the storage browser for a local playlist file. -->
-    <string name="setup_local_file_choose">Choose a local .m3u / .m3u8 file\u2026</string>
-    <!-- Translators: Label shown next to the chosen local file path in the M3U source form. "name" is the selected filename. -->
-    <string name="setup_local_file_prefix">Local file: <xliff:g id="name">%1$s</xliff:g></string>
-    <!-- Translators: Text-field label for the Stalker portal URL. -->
-    <string name="setup_portal_url">Portal URL</string>
-    <!-- Translators: Placeholder example in the Stalker portal URL field. The "/c/" suffix is typical. -->
-    <string name="setup_portal_example">http://host:port/c/</string>
-    <!-- Translators: Text-field label for the Stalker MAC address in the source form. -->
-    <string name="setup_mac_address">MAC address</string>
-    <!-- Translators: Placeholder example in the Stalker MAC address field. "00:1A:79:AA:BB:CC" is a typical MAC format. -->
-    <string name="setup_mac_example">00:1A:79:AA:BB:CC</string>
-    <!-- Translators: Error text shown when the Stalker MAC address does not match the expected format. "00:1A:79:AA:BB:CC" is an example. -->
-    <string name="setup_mac_invalid">Enter 12 characters, e.g. 00:1A:79:AA:BB:CC</string>
-    <string name="setup_stalker_advanced_identity">Advanced device identification</string>
-    <string name="setup_stalker_serial_number_optional">Serial Number (optional)</string>
-    <string name="setup_stalker_device_id_optional">Device ID (optional)</string>
-    <string name="setup_stalker_device_id2_optional">Device ID2 (optional)</string>
-    <string name="setup_stalker_signature_optional">Signature (optional)</string>
-    <!-- Translators: Button label to open a device-model preset picker for the Stalker User-Agent. -->
-    <string name="setup_device_model_preset">Device model preset (User-Agent)\u2026</string>
-    <!-- Translators: Loading status shown while the source connection is being tested. -->
-    <string name="setup_testing">Testing\u2026</string>
-    <!-- Translators: Button label on the source form to test the connection before saving. -->
-    <string name="setup_test_connection">Test connection</string>
-    <!-- Translators: Text-field label for an optional custom User-Agent string. -->
-    <string name="setup_user_agent_optional">User-Agent (optional)</string>
-    <!-- Translators: Placeholder example in the User-Agent field. "VLC/3.0.20 LibVLC/3.0.20" is a typical User-Agent. -->
-    <string name="setup_user_agent_example">e.g. VLC/3.0.20 LibVLC/3.0.20</string>
-    <!-- Translators: Text-field label for an optional HTTP Referer sent with this playlist's streams. "Referer" is the technical header name, spelled that way on purpose; keep it untranslated like User-Agent. -->
-    <string name="setup_referer_optional">Referer (optional)</string>
-    <!-- Translators: Placeholder example in the Referer field. Keep the URL as-is. -->
-    <string name="setup_referer_example">e.g. https://example.com/</string>
-    <!-- Translators: Section heading for the auto-refresh setting on the source form. -->
-    <string name="setup_auto_refresh">Auto refresh</string>
-    <!-- Translators: Description beneath the auto-refresh setting. Explains the three states: Off, on startup, or when data is stale. -->
-    <string name="setup_auto_refresh_description">Off, on startup, or when data is stale</string>
-    <!-- Translators: Toggle-row label on the source form for default playlist. -->
-    <string name="setup_default_playlist">Default playlist</string>
-    <!-- Translators: Description beneath the default-playlist toggle. Explains that turning it on shows only this playlist across the app. -->
-    <string name="setup_default_playlist_description">Show only this playlist across the app. Turn off for all playlists; change anytime from the top bar.</string>
-    <!-- Translators: Section heading for the content-sync scope settings on the source form (Live TV, Movies, Series). -->
-    <string name="setup_what_to_sync">What to sync</string>
-    <!-- Translators: Description explaining what "Off" means for sync scope sections. -->
-    <string name="setup_sync_off_editing">Off sections stay hidden and are never fetched. Turning a section back On shows cached rows immediately.</string>
-    <!-- Translators: Brief description of how sync scope choices work: Now, Later, Off. -->
-    <string name="setup_sync_choices">Now imports first \u00b7 Later syncs in the background \u00b7 Off is never fetched or shown.</string>
-    <!-- Translators: Label for the Live TV sync scope row. Shown on the source form and companion web page. -->
-    <string name="setup_live_tv">Live TV</string>
-    <!-- Translators: Description beneath the Live TV sync scope row. -->
-    <string name="setup_channels_categories">Channels and categories</string>
-    <!-- Translators: Label for the Movies sync scope row. Shown on the source form and companion web page. -->
-    <string name="setup_movies">Movies</string>
-    <!-- Translators: Description beneath the Movies sync scope row. "VOD" means Video on Demand. -->
-    <string name="setup_vod_movie_catalog">VOD movie catalog</string>
-    <!-- Translators: Label for the Series sync scope row. Shown on the source form and companion web page. -->
-    <string name="setup_series">Series</string>
-    <!-- Translators: Description beneath the Series sync scope row. -->
-    <string name="setup_tv_series_catalog">TV series catalog</string>
-    <!-- Translators: Primary button on the source form to begin importing the source catalog. Capitalized as a standalone button label. -->
-    <string name="setup_start_import">Start Import</string>
-    <!-- Translators: Button on the edit-source form to save changes. -->
-    <string name="setup_update_source_save">Save</string>
-    <!-- Translators: Title of the storage browser dialog when picking a local M3U playlist file. -->
-    <string name="setup_pick_playlist_file">Pick a playlist file (.m3u / .m3u8)</string>
-    <!-- Translators: Dialog title for the device-model preset picker. -->
-    <string name="setup_device_model_preset_title">Device model preset</string>
-    <!-- Translators: Dialog title for the auto-refresh setting on the source form. -->
-    <string name="setup_auto_refresh_title">Auto refresh</string>
-    <!-- Translators: Compact state label for the "Now" sync-scope when editing an existing source. -->
-    <string name="setup_on">On</string>
-    <!-- Translators: Sync scope choice meaning "import immediately". Shown as a cycling label in the sync scope row on the source form, and as an option in companion web page dropdowns. -->
-    <string name="setup_now">Now</string>
-    <!-- Translators: Sync scope choice meaning "sync later in background". Shown as a cycling label in the sync scope row. -->
-    <string name="setup_later">Later</string>
-    <!-- Translators: Sync scope choice meaning "never fetch or show". Shown as a cycling label in the sync scope row, and as an option in companion web page dropdowns. -->
-    <string name="setup_off">Off</string>
-    <!-- Translators: Default device model preset option for Stalker sources. "MAG200" is a hardware model name. -->
-    <string name="setup_default_mag">Default (MAG200)</string>
-    <!-- Translators: Device model preset option for Stalker sources. "MAG250" is a hardware model name. -->
-    <string name="setup_mag250">MAG250</string>
-    <!-- Translators: Device model preset option. "MAG254" is a hardware model name. -->
-    <string name="setup_mag254">MAG254</string>
-    <!-- Translators: Device model preset option. "MAG270" is a hardware model name. -->
-    <string name="setup_mag270">MAG270</string>
-    <!-- Translators: Device model preset option. "MAG420" is a hardware model name. -->
-    <string name="setup_mag420">MAG420</string>
 
 
     <!-- Companion web UI is rendered outside Compose but still resolves through Android resources. -->
@@ -446,56 +248,8 @@
     <!-- Translators: Error text on the companion page when required form fields are missing. -->
     <string name="companion_error_missing_fields">Required fields are missing.</string>
 
-    <!-- Translators: Warning shown after a successful restore when the backup contained a language the current app version does not support. The current language is kept. -->
-    <string name="setup_invalid_locale">This backup contained an unsupported app language. The restore succeeded, but your current language was kept.</string>
 
-    <!-- Translators: Toggle label for preferring HLS streams when an Xtream source offers multiple Live TV formats. -->
-    <string name="setup_prefer_hls_live_tv">Prefer HLS for Live TV</string>
-    <!-- Translators: Description of the HLS preference. HLS, .m3u8 and MPEG-TS are protocol names and stay unchanged. Catch-up is not affected by this setting. -->
-    <string name="setup_prefer_hls_description">Prioritize HLS (.m3u8) over MPEG-TS for Live TV. Falls back to MPEG-TS if HLS fails. Catch-up always uses MPEG-TS.</string>
-    <!-- Translators: HLS preference description when the provider explicitly reports HLS support. HLS, .m3u8 and MPEG-TS stay unchanged. Catch-up is not affected by this setting. -->
-    <string name="setup_prefer_hls_description_supported">Prioritize HLS (.m3u8) over MPEG-TS for Live TV. Falls back to MPEG-TS if HLS fails. Catch-up always uses MPEG-TS. Your provider reports HLS support.</string>
-    <!-- Translators: HLS preference description when the provider does not report HLS support. The user may still enable it because some providers under-report support. -->
-    <string name="setup_prefer_hls_description_unsupported">Prioritize HLS (.m3u8) over MPEG-TS for Live TV. Falls back to MPEG-TS if HLS fails. Catch-up always uses MPEG-TS. Your provider does not report HLS support — you can still try it.</string>
 
-    <!-- Translators: Button that checks whether an Xtream provider can serve HLS streams. -->
-    <string name="setup_hls_test_support">Test HLS support</string>
-    <!-- Translators: Button status while the HLS support check is running. -->
-    <string name="setup_hls_testing">Testing HLS…</string>
-    <!-- Translators: Generic HLS test failure. The placeholder is a raw system or provider error and must remain unchanged. -->
-    <string name="setup_hls_test_failed">Test failed: <xliff:g id="reason">%1$s</xliff:g></string>
-    <!-- Translators: HLS test failure shown when the provider account details could not be fetched. -->
-    <string name="setup_hls_test_provider_unreachable">Couldn’t reach the provider — check the server URL, username and password.</string>
-    <!-- Translators: Successful HLS test. Keep the check mark and HLS unchanged. -->
-    <string name="setup_hls_test_works">✓ HLS works — your provider returned a playlist.</string>
-    <!-- Translators: Successful HLS test when the provider serves HLS without advertising it. Keep the check mark and HLS unchanged. -->
-    <string name="setup_hls_test_works_unadvertised">✓ HLS works — your provider returned a playlist even though it doesn’t advertise HLS.</string>
-    <!-- Translators: HLS test could not run because all account connections were in use. The placeholder is an HTTP status code. -->
-    <string name="setup_hls_test_busy">Couldn’t finish — the account is out of connections right now (HTTP <xliff:g id="status">%1$d</xliff:g>). Stop anything else that’s streaming and test again.</string>
-    <!-- Translators: HLS test failure. The placeholder is a localized explanation such as "no HLS endpoint for this channel (HTTP 404)". -->
-    <string name="setup_hls_test_not_served">HLS didn’t work — <xliff:g id="reason">%1$s</xliff:g>. Leave this off and Live TV will use MPEG-TS.</string>
-    <!-- Translators: Reason an HLS test failed. This text is inserted into a longer sentence. -->
-    <string name="setup_hls_test_reason_not_playlist">the server answered, but not with a playlist</string>
-    <!-- Translators: Reason an HLS test failed. This text is inserted into a longer sentence. The placeholder is an HTTP status code. -->
-    <string name="setup_hls_test_reason_no_endpoint">no HLS endpoint for this channel (HTTP <xliff:g id="status">%1$d</xliff:g>)</string>
-    <!-- Translators: HLS test was inconclusive. The first placeholder is a localized or raw reason. The second is a localized sentence describing what the provider advertises. -->
-    <string name="setup_hls_test_inconclusive">Couldn’t verify (<xliff:g id="reason">%1$s</xliff:g>). <xliff:g id="provider_claim">%2$s</xliff:g></string>
-    <!-- Translators: Reason an HLS test was inconclusive. The placeholder is an HTTP status code. -->
-    <string name="setup_hls_test_reason_http">HTTP <xliff:g id="status">%1$d</xliff:g></string>
-    <!-- Translators: Reason an HLS test was inconclusive because the provider returned no account details. -->
-    <string name="setup_hls_test_reason_no_answer">no answer</string>
-    <!-- Translators: Reason an HLS test was inconclusive because the playlist has no channel that can be checked. -->
-    <string name="setup_hls_test_reason_no_live_channels">this playlist has no live channels to test</string>
-    <!-- Translators: Reason an HLS test was inconclusive because the selected test channel failed in both HLS and MPEG-TS formats. -->
-    <string name="setup_hls_test_reason_dead_channel">the test channel didn’t play over MPEG-TS either, so it may just be dead</string>
-    <!-- Translators: Provider claim shown after an inconclusive HLS test. -->
-    <string name="setup_hls_provider_advertises">Your provider does advertise HLS.</string>
-    <!-- Translators: Provider claim shown after an inconclusive HLS test. -->
-    <string name="setup_hls_provider_does_not_advertise">Your provider doesn’t advertise HLS.</string>
-    <!-- Translators: Profile-wide toggle controlling whether categories discovered by future source syncs start hidden. -->
-    <string name="setup_hide_new_categories">Hide new categories by default</string>
-    <!-- Translators: Description of the profile-wide new-category visibility toggle. Customize is the name of the customization screen. -->
-    <string name="setup_hide_new_categories_description">Profile-wide: categories that appear on future syncs start hidden. See them anytime in Customize.</string>
     <!-- Translators: Setup step name in the step dots: the display size step. -->
     <string name="setup_step_display">Display</string>
     <!-- Translators: Setup step name in the step dots: adding a playlist. -->
@@ -508,43 +262,20 @@
     <string name="setup_welcome_title">Welcome to OwnTV</string>
     <!-- Translators: Text under Welcome to OwnTV. -->
     <string name="setup_welcome_sub">Your own IPTV player. Choose a language to begin — you can change it later in Settings.</string>
-    <!-- Translators: First-run Welcome step, the Language row's line: how many languages the app offers. -->
-    <plurals name="setup_languages_all">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> language</item>
-        <item quantity="other">All <xliff:g id="count">%1$d</xliff:g> languages</item>
-    </plurals>
     <!-- Translators: Text under the display size step's title. -->
     <string name="setup_display_sub">How big the interface and its text are on this TV. The row below changes as you go.</string>
-    <!-- Translators: Phone version of setup_display_sub: first-run Display step, under the title. -->
-    <string name="setup_display_sub_mobile">How big the interface and its text are on this phone. The row below changes as you go.</string>
     <!-- Translators: Line under UI zoom in setup. -->
     <string name="setup_line_zoom">Everything on screen</string>
     <!-- Translators: Line under Font size in setup. -->
     <string name="setup_line_font">Text only</string>
     <!-- Translators: Line under App icon in setup. -->
     <string name="setup_line_app_icon">How OwnTV appears on the TV’s home screen</string>
-    <!-- Translators: Phone version of setup_line_app_icon: the App icon row's line on the first-run Display step. -->
-    <string name="setup_line_app_icon_mobile">How OwnTV appears on your home screen</string>
-    <!-- Translators: Line on the Restore a backup card in setup. -->
-    <string name="setup_restore_card_line">From a file, or by Remote from another device</string>
     <!-- Translators: Line under Searching the network in setup. -->
     <string name="setup_device_appear">Devices with Sync mode on appear here</string>
     <!-- Translators: Placeholder of the Address field when copying from another device. -->
     <string name="setup_device_address_hint">or type the other device’s address</string>
-    <!-- Translators: Text under Who's watching? when creating the first profile. -->
-    <string name="setup_profile_sub">A profile keeps its own favorites, history and Home. Add more later in Settings › Profile.</string>
-    <!-- Translators: Row title: the profile's picture. -->
-    <string name="setup_avatar">Avatar</string>
-    <!-- Translators: Line under Avatar: pick a picture or keep the name's first letter. -->
-    <string name="setup_avatar_line">Pick one, or keep the letter</string>
     <!-- Translators: Button that creates the profile and continues setup. -->
     <string name="setup_create_profile">Create profile</string>
-    <!-- Translators: Line on the From your phone card in setup. -->
-    <string name="setup_phone_card_line">Fill the form in a browser on another device — fastest</string>
     <!-- Translators: Title while a playlist imports. %1$s is the playlist's name. -->
     <string name="setup_importing_title">Importing <xliff:g id="name">%1$s</xliff:g></string>
-    <!-- Translators: Row on the last setup step: add a TV guide (EPG) source. -->
-    <string name="setup_add_guide">Add a TV guide</string>
-    <!-- Translators: Line under Add a TV guide. -->
-    <string name="setup_add_guide_line">A fresh install has no guide yet</string>
 </resources>

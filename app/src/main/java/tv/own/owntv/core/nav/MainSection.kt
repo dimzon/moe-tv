@@ -15,9 +15,6 @@ enum class MainSection(@param:StringRes val labelRes: Int) {
     SEARCH(R.string.common_nav_search),
     HOME(R.string.common_nav_home),
     LIVE_TV(R.string.common_nav_live_tv),
-
-    /** Scores need no playlist, so DYNAMIC mode always shows it, like [HOME]. */
-    SPORTS(R.string.sports_title),
     EPG(R.string.common_nav_guide),
     SETTINGS(R.string.common_nav_settings), // pinned, not part of the browse set
 
@@ -36,24 +33,22 @@ enum class MainSection(@param:StringRes val labelRes: Int) {
 
     companion object {
         /** Fixed order of the browse items (Settings is pinned separately). */
-        val browseOrder: List<MainSection> = listOf(HOME, LIVE_TV, SPORTS, EPG)
+        val browseOrder: List<MainSection> = listOf(HOME, LIVE_TV, EPG)
 
         /** All browse items — the default value, so a cold start shows a full nav rather than
          *  flickering through an empty one before the first real emission lands. */
         val allBrowse: Set<MainSection> = browseOrder.toSet()
 
-        /** STATIC-mode rule: every browse item minus the names the user hid. An unknown name is ignored,
-         *  and a section added later (Sports) shows, because no older hidden set names it. */
+        /** STATIC-mode rule: every browse item minus the names the user hid. An unknown name is ignored. */
         fun staticVisible(hidden: Set<String>): Set<MainSection> =
             allBrowse - hidden.mapNotNull { name -> runCatching { valueOf(name) }.getOrNull() }.toSet()
 
         /**
          * DYNAMIC-mode rule: which browse items show, given the active playlist's content caps.
-         * Home and Sports always; Live and Guide when there are channels.
+         * Home always; Live and Guide when there are channels.
          */
         fun dynamicVisible(hasLive: Boolean): Set<MainSection> = buildSet {
             add(HOME)
-            add(SPORTS)
             if (hasLive) { add(LIVE_TV); add(EPG) }
         }
     }

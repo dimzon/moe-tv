@@ -1082,7 +1082,7 @@
     <!-- Translators: Dialog title asking whether to sync the TV guide. -->
     <string name="settings_sync_guide_question">Sync the TV guide now?</string>
     <!-- Translators: Description of the guide sync prompt. 'source' is the EPG source name. -->
-    <string name="settings_sync_guide_description">Download the program guide (EPG) for “<xliff:g id="source">%1$s</xliff:g>”. You can also do this later in Settings → Sources &amp; guide → EPG Sources.</string>
+    <string name="settings_sync_guide_description">Download the program guide (EPG) for “<xliff:g id="source">%1$s</xliff:g>”. This also runs automatically in the background.</string>
     <!-- Translators: Button to dismiss the guide sync prompt. -->
     <string name="settings_not_now">Not now</string>
     <!-- Translators: Button to start syncing the TV guide immediately. -->

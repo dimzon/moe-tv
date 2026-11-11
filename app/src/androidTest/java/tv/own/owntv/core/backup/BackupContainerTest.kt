@@ -94,12 +94,12 @@ class BackupContainerTest {
     /** The whole point of sealing: none of the content is recoverable from the raw bytes. */
     @Test
     fun sealed_container_leaks_nothing_in_plaintext() {
-        val secret = """{"version":14,"sources":[{"url":"http://panel.example/get.php","username":"alice"}]}"""
+        val secret = """{"version":26,"settings":{"proxy_password":"s3cret-token"}}"""
         val bytes = BackupContainer.pack(BackupContainer.Payload(secret, wallpaper), passphrase = "hunter2")
 
         val raw = String(bytes, Charsets.ISO_8859_1)
-        assertTrue("container must not leak URLs", !raw.contains("panel.example"))
-        assertTrue("container must not leak usernames", !raw.contains("alice"))
+        assertTrue("container must not leak hosts", !raw.contains("proxy.example"))
+        assertTrue("container must not leak secrets", !raw.contains("s3cret-token"))
         assertTrue("container must not leak the entry list", !raw.contains("backup.json"))
     }
 

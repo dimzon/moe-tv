@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -145,8 +143,6 @@ internal val SETTING_HELP: Map<String, Int> = mapOf(
     "quick_preview_sound" to R.string.settings_help_preview_audio,
     "quick_channel_numbers" to R.string.settings_help_channel_numbers,
     "quick_check_update" to R.string.settings_help_update_startup,
-    "tab_SOURCES" to R.string.settings_help_playlists,
-    "tab_EPG" to R.string.settings_help_epg_sources,
     "epg_offset" to R.string.settings_epg_offset_root_description,
     "reminders" to R.string.settings_reminders_description,
     "reminder_lead" to R.string.settings_reminder_lead_description,

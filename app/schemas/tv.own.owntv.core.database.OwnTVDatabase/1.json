@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "38e04c5dfe645285a82eeb8839636da1",
+    "identityHash": "170641dd97889835c799e811d249f8b9",
     "entities": [
       {
         "tableName": "sources",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `url` TEXT NOT NULL, `username` TEXT, `password` TEXT, `mac` TEXT, `stalkerSerialNumber` TEXT, `stalkerDeviceId` TEXT, `stalkerDeviceId2` TEXT, `stalkerSignature` TEXT, `userAgent` TEXT, `epgUrl` TEXT, `syncLive` INTEGER NOT NULL, `syncMovies` INTEGER NOT NULL, `syncSeries` INTEGER NOT NULL, `importPortalEpg` INTEGER NOT NULL DEFAULT 1, `hlsSupported` INTEGER NOT NULL, `preferHls` INTEGER NOT NULL, `livePrerollSecs` INTEGER NOT NULL, `liveEnginePreference` TEXT, `liveLatencyMode` TEXT, `liveLatencyCustomSecs` INTEGER NOT NULL, `maxConnections` INTEGER NOT NULL, `maxConnectionsProbedAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `lastSyncAt` INTEGER, `catchupTimezone` TEXT, `catchupOffsetMin` INTEGER, `liveTuneTimeoutSecs` INTEGER, `httpReferer` TEXT, `serverTimeZone` TEXT, `cleanChannelNames` INTEGER NOT NULL DEFAULT 0, `channelNameStrip` TEXT, `ignoreConnectionLimit` INTEGER NOT NULL DEFAULT 0, `isPaid` INTEGER NOT NULL DEFAULT 0)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `url` TEXT NOT NULL, `userAgent` TEXT, `syncLive` INTEGER NOT NULL, `syncMovies` INTEGER NOT NULL, `syncSeries` INTEGER NOT NULL, `livePrerollSecs` INTEGER NOT NULL, `liveLatencyMode` TEXT, `liveLatencyCustomSecs` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `lastSyncAt` INTEGER, `liveTuneTimeoutSecs` INTEGER, `httpReferer` TEXT, `cleanChannelNames` INTEGER NOT NULL DEFAULT 0, `channelNameStrip` TEXT, `isPaid` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
           {
             "fieldPath": "id",
@@ -33,48 +33,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "username",
-            "columnName": "username",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "password",
-            "columnName": "password",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "mac",
-            "columnName": "mac",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "stalkerSerialNumber",
-            "columnName": "stalkerSerialNumber",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "stalkerDeviceId",
-            "columnName": "stalkerDeviceId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "stalkerDeviceId2",
-            "columnName": "stalkerDeviceId2",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "stalkerSignature",
-            "columnName": "stalkerSignature",
-            "affinity": "TEXT"
-          },
-          {
             "fieldPath": "userAgent",
             "columnName": "userAgent",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "epgUrl",
-            "columnName": "epgUrl",
             "affinity": "TEXT"
           },
           {
@@ -96,34 +56,10 @@
             "notNull": true
           },
           {
-            "fieldPath": "importPortalEpg",
-            "columnName": "importPortalEpg",
-            "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "1"
-          },
-          {
-            "fieldPath": "hlsSupported",
-            "columnName": "hlsSupported",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "preferHls",
-            "columnName": "preferHls",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "livePrerollSecs",
             "columnName": "livePrerollSecs",
             "affinity": "INTEGER",
             "notNull": true
-          },
-          {
-            "fieldPath": "liveEnginePreference",
-            "columnName": "liveEnginePreference",
-            "affinity": "TEXT"
           },
           {
             "fieldPath": "liveLatencyMode",
@@ -133,18 +69,6 @@
           {
             "fieldPath": "liveLatencyCustomSecs",
             "columnName": "liveLatencyCustomSecs",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "maxConnections",
-            "columnName": "maxConnections",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "maxConnectionsProbedAt",
-            "columnName": "maxConnectionsProbedAt",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -160,16 +84,6 @@
             "affinity": "INTEGER"
           },
           {
-            "fieldPath": "catchupTimezone",
-            "columnName": "catchupTimezone",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "catchupOffsetMin",
-            "columnName": "catchupOffsetMin",
-            "affinity": "INTEGER"
-          },
-          {
             "fieldPath": "liveTuneTimeoutSecs",
             "columnName": "liveTuneTimeoutSecs",
             "affinity": "INTEGER"
@@ -177,11 +91,6 @@
           {
             "fieldPath": "httpReferer",
             "columnName": "httpReferer",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "serverTimeZone",
-            "columnName": "serverTimeZone",
             "affinity": "TEXT"
           },
           {
@@ -195,13 +104,6 @@
             "fieldPath": "channelNameStrip",
             "columnName": "channelNameStrip",
             "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "ignoreConnectionLimit",
-            "columnName": "ignoreConnectionLimit",
-            "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "0"
           },
           {
             "fieldPath": "isPaid",
@@ -1382,7 +1284,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '38e04c5dfe645285a82eeb8839636da1')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '170641dd97889835c799e811d249f8b9')"
     ]
   }
 }

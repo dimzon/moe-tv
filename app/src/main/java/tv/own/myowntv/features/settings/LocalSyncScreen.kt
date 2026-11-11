@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -869,7 +867,6 @@ internal fun SyncFailure.messageRes(): Int = when (this) {
 
 /** The words the backup sections are named by, everywhere in the app. */
 internal fun BackupManager.Section.labelRes(): Int = when (this) {
-    BackupManager.Section.SOURCES -> R.string.settings_backup_section_sources
     BackupManager.Section.CUSTOMIZE -> R.string.settings_backup_section_customize
     BackupManager.Section.FAVORITES -> R.string.settings_backup_section_favorites
     BackupManager.Section.HISTORY -> R.string.settings_backup_section_history

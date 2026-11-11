@@ -1,6 +1,12 @@
 package tv.own.owntv.core.stalker
 
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.runBlocking
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Protocol
+import okhttp3.Response
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -8,198 +14,136 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.SourceType
+import tv.own.owntv.core.network.HttpClient
+import tv.own.owntv.core.sync.RutubeApi
 
 /**
- * StreamUrlResolver unit tests — focus on the routing decisions (C-2 direct-play vs create_link,
- * and C-3's "every resolve is fresh" contract) without hitting a real portal. A fake auth manager +
- * recording client let us assert which path resolve() took and what it returned.
+ * StreamUrlResolver unit tests, RuTube-only: the routing decision ([StreamUrlResolver.needsResolve]),
+ * the fresh `play/options` resolve, and the "every resolve is fresh" contract — all against a canned
+ * answer served by an OkHttp interceptor, no network.
  */
 class StreamUrlResolverTest {
 
-    private val m3uSource = SourceEntity(name = "m3u", type = SourceType.M3U, url = "http://h/p.m3u")
-    private val xtreamSource = SourceEntity(name = "xt", type = SourceType.XTREAM, url = "http://h", username = "u", password = "p")
-    private fun stalkerSource(cmd: String, mac: String = "00:1A:79:AA:BB:CC") =
-        SourceEntity(name = "stk", type = SourceType.STALKER, url = "http://portal/c/", mac = mac)
+    private val source = SourceEntity(name = "rutube", type = SourceType.RUTUBE, url = "https://rutube.test")
 
     // --- needsResolve gating ---
 
-    @Test fun needsResolve_trueForTheSourcesThatMintTheirUrlAtTuneTime() {
-        val r = resolver()
-        // Stalker stores a portal cmd; RuTube stores a rutube:// marker and asks play/options at tune time.
-        assertTrue(r.needsResolve(stalkerSource("anything")))
-        assertTrue(r.needsResolve(SourceEntity(name = "rt", type = SourceType.RUTUBE, url = "https://rutube.ru")))
-        assertFalse(r.needsResolve(m3uSource))
-        assertFalse(r.needsResolve(xtreamSource))
-        assertFalse(r.needsResolve(null))
+    @Test
+    fun needsResolve_isTrueForRutubeOnly() {
+        val r = StreamUrlResolver(null)
+        // RuTube stores a rutube:// marker and asks play/options at tune time.
+        assertTrue(r.needsResolve(source))
+        assertFalse("no source: nothing to resolve", r.needsResolve(null))
     }
 
-    // --- pass-through (M3U/Xtream are never touched) ---
+    // --- resolve ---
 
-    @Test fun resolve_m3uReturnsStoredUrlUnchanged() = runBlocking {
-        val r = resolver()
-        assertEquals("http://h/stream.ts", r.resolve(m3uSource, "http://h/stream.ts"))
+    @Test
+    fun resolve_withoutAnApiRefusesRatherThanGuessing() = runBlocking {
+        val r = StreamUrlResolver(null)
+        val e = runCatching { r.resolve(source, "rutube://7/abc123") }.exceptionOrNull()
+        assertTrue("expected a refusal", e is java.io.IOException && e.message!!.contains("not configured"))
     }
 
-    @Test fun resolve_xtreamReturnsStoredUrlUnchanged() = runBlocking {
-        val r = resolver()
-        assertEquals("http://h/live/u/p/1.ts", r.resolve(xtreamSource, "http://h/live/u/p/1.ts"))
+    @Test
+    fun resolve_mintsTheFreshPlayUrl() = runBlocking {
+        val r = StreamUrlResolver(canned().api)
+        assertEquals("https://cdn.example.test/live.m3u8", r.resolve(source, "rutube://7/abc123"))
     }
 
-    // --- Stalker direct-play (embedded URL in cmd, e.g. light-ott) ---
-
-    @Test fun resolve_stalkerDirectPlayUrlReturnsAsIsNoCreateLink() = runBlocking {
-        val client = RecordingClient()
-        val r = resolver(client = client)
-        val cmd = "ffmpeg http://host/play/live.php?mac=00:1A:79:AA:BB:CC&stream=123&play_token=x"
-        // Direct-play URL → played as-is, create_link MUST NOT be called (it blanks the stream id → 405).
-        assertEquals(
-            "http://host/play/live.php?mac=00:1A:79:AA:BB:CC&stream=123&play_token=x",
-            r.resolve(stalkerSource(cmd), cmd),
-        )
-        assertEquals("create_link must not run for a direct-play cmd", 0, client.createLinkCalls)
-    }
-
-    // --- Stalker placeholder cmd (localhost → create_link) ---
-
-    @Test fun resolve_stalkerPlaceholderCallsCreateLink() = runBlocking {
-        val client = RecordingClient(resolved = "http://realhost/play/123/index.m3u8?token=fresh")
-        val r = resolver(client = client)
-        val cmd = "ffmpeg http://localhost/ch/12345_"
-        assertEquals(
-            "http://realhost/play/123/index.m3u8?token=fresh",
-            r.resolve(stalkerSource(cmd), cmd),
-        )
-        assertEquals("placeholder cmd must resolve via create_link", 1, client.createLinkCalls)
-        assertEquals("itv", client.lastType)
-        assertEquals(cmd, client.lastCmd)
+    @Test
+    fun resolve_aMarkerWithoutAVideoIdIsRefused() = runBlocking {
+        val r = StreamUrlResolver(canned().api)
+        val e = runCatching { r.resolve(source, "rutube://7/") }.exceptionOrNull()
+        assertTrue("expected a refusal", e is java.io.IOException && e.message!!.contains("no video id"))
     }
 
     // --- C-3: every resolve is a FRESH resolve (never cached) ---
 
-    @Test fun resolve_everyCallIsFresh_createLinkRunsEachTime() = runBlocking {
-        val client = RecordingClient(resolved = "http://realhost/play/123/index.m3u8?token=fresh")
-        val r = resolver(client = client)
-        val cmd = "ffmpeg http://localhost/ch/12345_"
-        val source = stalkerSource(cmd)
-        repeat(3) { r.resolve(source, cmd) } // simulates three reconnects
-        assertEquals("reconnect must re-resolve a fresh URL each time", 3, client.createLinkCalls)
+    @Test
+    fun resolve_everyCallHitsPlayOptionsAgain() = runBlocking {
+        val canned = canned()
+        val r = StreamUrlResolver(canned.api)
+        repeat(3) {
+            assertEquals("https://cdn.example.test/live.m3u8", r.resolve(source, "rutube://7/abc123"))
+        }
+        assertEquals("reconnect must re-resolve a fresh URL each time", 3, canned.calls.get())
     }
 
-    @Test fun resolve_everyCallIsFresh_directPlayIsIdempotent() = runBlocking {
-        val client = RecordingClient()
-        val r = resolver(client = client)
-        val cmd = "http://host/play/live.php?mac=00:1A:79:AA:BB:CC&stream=123&token=x"
-        val source = stalkerSource(cmd)
-        repeat(3) { r.resolve(source, cmd) }
-        assertEquals("direct-play never needs create_link, even on reconnect", 0, client.createLinkCalls)
+    @Test
+    fun resolve_aSubscriptionChannelRefusesWithItsReason() = runBlocking {
+        val r = StreamUrlResolver(canned(code = 404, playJson = "{}").api)
+        val e = runCatching { r.resolve(source, "rutube://7/abc123") }.exceptionOrNull()
+        assertTrue("expected a refusal", e is java.io.IOException && e.message!!.contains("LOGIN_REQUIRED"))
     }
 
-    // --- Stalker with no MAC → direct (best-effort, no auth possible) ---
+    // --- captions ---
 
-    @Test fun resolve_stalkerNoMacFallsBackToDirect() = runBlocking {
-        val client = RecordingClient()
-        val r = resolver(client = client)
-        val source = SourceEntity(name = "stk", type = SourceType.STALKER, url = "http://portal/c/", mac = null)
-        val cmd = "http://localhost/ch/12345_" // placeholder, but no MAC → can't create_link
-        assertEquals("http://localhost/ch/12345_", r.resolve(source, cmd))
-        assertEquals(0, client.createLinkCalls)
+    @Test
+    fun captions_followTheSameFreshResolveAndCarryTheSidecars() = runBlocking {
+        val canned = canned()
+        val r = StreamUrlResolver(canned.api)
+        assertEquals(
+            listOf("https://pic.example.test/1.vtt"),
+            r.resolveCaptions(source, "rutube://7/abc123").map { it.file },
+        )
+        assertEquals(1, canned.calls.get())
+    }
+
+    @Test
+    fun captions_withoutAnApiAreEmpty() = runBlocking {
+        val r = StreamUrlResolver(null)
+        assertTrue(r.resolveCaptions(source, "rutube://7/abc123").isEmpty())
     }
 
     // --- ReconnectUrlProvider contract (C-3) ---
 
-    @Test fun reconnectUrlProvider_nullReturnMeansReplayAsIs() = runBlocking {
+    @Test
+    fun reconnectUrlProvider_nullReturnMeansReplayAsIs() = runBlocking {
         // The provider is the engine's "ask for a fresh URL" hook. A null return = "no fresh URL
-        // available / not an expiring-URL source" → the engine replays the stored URL. The provider
-        // for M3U/Xtream is never installed (LiveViewModel sets it only for Stalker), so this is the
-        // "absent provider" semantic the engines rely on.
+        // available" → the engine replays the stored URL. This is the "absent provider" semantic
+        // the engines rely on for sources whose URLs never expire.
         val provider = ReconnectUrlProvider { null }
         assertNull(provider.freshUrl())
     }
 
-    @Test fun reconnectUrlProvider_returnsFreshUrl() = runBlocking {
-        val r = resolver()
-        val cmd = "ffmpeg http://localhost/ch/12345_"
-        val source = stalkerSource(cmd)
-        // The provider the VM installs resolves the current cmd via the resolver.
+    @Test
+    fun reconnectUrlProvider_returnsFreshUrl() = runBlocking {
+        val r = StreamUrlResolver(canned().api)
+        // The provider the VM installs resolves the current marker via the resolver.
         val provider = ReconnectUrlProvider {
-            runCatching { r.resolve(source, cmd) }.getOrNull()
+            runCatching { r.resolve(source, "rutube://7/abc123") }.getOrNull()
         }
-        assertEquals(
-            "http://realhost/out.m3u8",
-            provider.freshUrl(),
-        )
-    }
-
-    // --- Short EPG ---
-
-    @Test fun shortEpg_returnsClientEntriesForStalkerOnly() = runBlocking {
-        val client = RecordingClient()
-        client.shortEpgEntries = listOf(
-            StalkerClient.ShortEpgEntry("News", null, 1_000L, 2_000L),
-            StalkerClient.ShortEpgEntry("Movie", "desc", 2_000L, 3_000L),
-        )
-        val r = resolver(client = client)
-        val entries = r.shortEpg(stalkerSource("unused"), "77")
-        assertEquals(2, entries.size)
-        assertEquals("News", entries[0].title)
-        assertEquals("77", client.lastShortEpgChannel)
+        assertEquals("https://cdn.example.test/live.m3u8", provider.freshUrl())
     }
 
     // --- helpers ---
 
-    /** A minimal fake auth manager that runs the block with a synthetic session (no network). */
-    private fun resolver(
-        client: RecordingClient = RecordingClient(),
-    ): StreamUrlResolver {
-        val auth = object : StalkerAuthManager(client) {
-            // Bypass the real handshake/profile; just hand the block a session whose apiBase/token the
-            // client records. The resolver only needs withAuthRetry to call the block once.
-            override suspend fun <T> withAuthRetry(
-                creds: StalkerCredentials,
-                block: suspend (StalkerSession) -> T,
-            ): T = block(
-                StalkerSession(
-                    apiBase = "http://portal/portal.php",
-                    token = "fake-token",
-                    expiresAtMs = Long.MAX_VALUE,
-                    profile = emptyMap(),
-                ),
-            )
-        }
-        return StreamUrlResolver(auth, client)
+    private class Canned(val calls: AtomicInteger, val api: RutubeApi)
+
+    /** A RutubeApi whose HTTP answers are canned by an interceptor, and which counts its requests. */
+    private fun canned(code: Int = 200, playJson: String = PLAY_READY_JSON): Canned {
+        val calls = AtomicInteger()
+        val okhttp = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                calls.incrementAndGet()
+                Response.Builder()
+                    .request(chain.request())
+                    .protocol(Protocol.HTTP_1_1)
+                    .code(code)
+                    .message("test")
+                    .body(playJson.toResponseBody("application/json".toMediaType()))
+                    .build()
+            }
+            .build()
+        return Canned(calls, RutubeApi(HttpClient(okhttp), baseUrl = "https://rutube.test"))
     }
 
-    /**
-     * A StalkerClient stand-in: records create_link invocations and returns a canned resolved URL.
-     * Inherits from StalkerClient for the type, but every override short-circuits the network.
-     */
-    private open class RecordingClient(private val resolved: String = "http://realhost/out.m3u8") :
-        StalkerClient(okhttp3.OkHttpClient()) {
-        var createLinkCalls = 0
-        var lastCmd: String? = null
-        var lastType: String? = null
-
-        // Bypass okhttp entirely (the real constructor builds a client we never use).
-        constructor() : this(resolved = "http://realhost/out.m3u8")
-
-        override suspend fun createLink(
-            apiBase: String, mac: String, token: String, userAgent: String?, cmd: String, type: String,
-        ): String {
-            createLinkCalls++
-            lastCmd = cmd
-            lastType = type
-            // stripCmdPrefix on the way out, mirroring the real client.
-            return stripCmdPrefix(resolved)
-        }
-
-        var shortEpgEntries: List<ShortEpgEntry> = emptyList()
-        var lastShortEpgChannel: String? = null
-
-        override suspend fun getShortEpg(
-            apiBase: String, mac: String, token: String, userAgent: String?, channelId: String, size: Int,
-        ): List<ShortEpgEntry> {
-            lastShortEpgChannel = channelId
-            return shortEpgEntries
-        }
+    private companion object {
+        /** The `play/options` answer the canned server serves: an HLS URL and one sidecar subtitle. */
+        const val PLAY_READY_JSON =
+            """{"live_streams":{"hls":[{"url":"https://cdn.example.test/live.m3u8"}]},
+                "captions":[{"sub_id":1,"format":"vtt","file":"https://pic.example.test/1.vtt",
+                             "langTitle":"Russian","is_autogenerated":true}]}"""
     }
 }

@@ -8,33 +8,25 @@ import org.junit.Test
 class MainSectionTest {
 
     @Test
-    fun `sports sits right after Live TV and is a browse item`() {
+    fun `the browse order is home, live and the guide`() {
         val order = MainSection.browseOrder
-        assertEquals(order.indexOf(MainSection.LIVE_TV) + 1, order.indexOf(MainSection.SPORTS))
-        assertTrue(MainSection.SPORTS.isBrowse)
-        assertTrue(MainSection.SPORTS in MainSection.allBrowse)
+        assertEquals(listOf(MainSection.HOME, MainSection.LIVE_TV, MainSection.EPG), order)
+        order.forEach { assertTrue(it.isBrowse && it in MainSection.allBrowse) }
     }
 
     @Test
-    fun `dynamic mode always shows sports, with or without a playlist`() {
-        for (live in listOf(false, true)) {
-            assertTrue(MainSection.SPORTS in MainSection.dynamicVisible(live))
-        }
-        assertEquals(setOf(MainSection.HOME, MainSection.SPORTS), MainSection.dynamicVisible(false))
-    }
-
-    @Test
-    fun `dynamic mode adds Live TV and the guide only with channels`() {
+    fun `dynamic mode always shows home, and live and the guide only with channels`() {
+        assertEquals(setOf(MainSection.HOME), MainSection.dynamicVisible(false))
         assertEquals(
-            setOf(MainSection.HOME, MainSection.SPORTS, MainSection.LIVE_TV, MainSection.EPG),
+            setOf(MainSection.HOME, MainSection.LIVE_TV, MainSection.EPG),
             MainSection.dynamicVisible(true),
         )
     }
 
     @Test
-    fun `static mode hides sports only when the user hid it`() {
-        // An existing user's hidden set never names SPORTS, so the update shows it.
-        assertTrue(MainSection.SPORTS in MainSection.staticVisible(setOf("LIVE_TV", "GONE")))
-        assertFalse(MainSection.SPORTS in MainSection.staticVisible(setOf("SPORTS")))
+    fun `static mode hides a browse item only when the user hid it`() {
+        // An existing user's hidden set never names an unknown section, so the update shows it.
+        assertTrue(MainSection.LIVE_TV in MainSection.staticVisible(setOf("GONE")))
+        assertFalse(MainSection.LIVE_TV in MainSection.staticVisible(setOf("LIVE_TV")))
     }
 }

@@ -27,8 +27,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -222,7 +220,6 @@ private fun cursorStep(progs: List<EpgProgrammeEntity>, cursor: Long, dir: Int, 
 fun EpgScreen(
     modifier: Modifier = Modifier,
     onFullscreen: () -> Unit = {},
-    onAddEpg: () -> Unit = {},
     restoreFocus: Boolean = false,
     onRestored: () -> Unit = {},
     /** Required: every live tune in the app goes through the one shared path in LiveViewModel, so a
@@ -257,7 +254,6 @@ fun EpgScreen(
     val leadMinutes by vm.reminderLeadMinutes.collectAsStateWithLifecycle()
     val railItems = liveVm.railItems.collectAsStateWithLifecycle().value.let { all -> remember(all) { all.filterNot { it.sealed } } }
     val liveSelected by liveVm.selectedKey.collectAsStateWithLifecycle()
-    val playlistMarks by liveVm.playlistMarks.collectAsStateWithLifecycle()
     val livePreviewSetting by liveVm.livePreviewEnabled.collectAsStateWithLifecycle()
     val previewChannel by liveVm.previewChannel.collectAsStateWithLifecycle()
     val previewArmed by liveVm.previewArmed.collectAsStateWithLifecycle()
@@ -612,12 +608,6 @@ fun EpgScreen(
         Box(Modifier.fillMaxWidth().weight(1f).padding(top = 18.mpx)) {
             when {
                 state.loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { OwnTVSpinner(sizeDp = 44) }
-                // No EPG feed added yet → a guide it can't fill. Point the user to EPG Sources.
-                !state.hasEpgSources && state.channels.isEmpty() -> GuideEmpty(
-                    title = stringResource(R.string.content_epg_empty),
-                    body = stringResource(R.string.content_epg_add_description),
-                    action = stringResource(R.string.content_epg_add), onAction = onAddEpg,
-                )
                 // The guide's channel ids aren't the playlist's: Auto-match pairs them by name, so offer it
                 // right here rather than leave the button in the toolbar for someone to find.
                 state.channels.isEmpty() && state.message == EpgMessage.MismatchedIds -> GuideEmpty(
@@ -652,7 +642,6 @@ fun EpgScreen(
                                     vm = vm,
                                     channel = channel,
                                     name = rowName(channel),
-                                    dot = playlistMarks[channel.sourceId]?.shownColor,
                                     labelWidth = labelW,
                                     numberWidth = numberWidth,
                                     windowStart = state.windowStart,
@@ -837,7 +826,6 @@ fun EpgScreen(
         )
     }
     if (review.isNotEmpty()) {
-        val includeLogos by vm.includeGuideLogos.collectAsStateWithLifecycle()
         val settingsVm: tv.own.myowntv.features.settings.SettingsViewModel = koinViewModel()
         val chNavEnabled by settingsVm.chNavEnabled.collectAsStateWithLifecycle()
         val chNavUpSkip by settingsVm.chNavUpSkip.collectAsStateWithLifecycle()
@@ -845,8 +833,6 @@ fun EpgScreen(
         GuideReviewPopup(
             suggestions = review,
             matchedCount = (matchSummary as? EpgMatchSummary.AutoMatched)?.applied,
-            includeLogos = includeLogos,
-            onIncludeLogos = vm::setIncludeGuideLogos,
             onAccept = vm::acceptSuggestion,
             onSkip = vm::dismissSuggestion,
             onAcceptAll = vm::acceptAllSuggestions,
@@ -869,8 +855,7 @@ private fun GuideRow(
     vm: EpgViewModel,
     channel: ChannelEntity,
     name: String,
-    dot: Color?,
-    labelWidth: androidx.compose.ui.unit.Dp,
+        labelWidth: androidx.compose.ui.unit.Dp,
     numberWidth: androidx.compose.ui.unit.Dp,
     windowStart: Long,
     windowEnd: Long,
@@ -906,7 +891,7 @@ private fun GuideRow(
     LaunchedEffect(focused, cursorTime, programmes) { if (focused) onShow(programmeAt(programmes, cursorTime)) }
     val rowSelected = focused && !cellMode
     Row(Modifier.fillMaxWidth().height(GuideGridDefaults.RowHeight), verticalAlignment = Alignment.CenterVertically) {
-        GuideChannelLabel(channel, name, dot, selected = selectedRow, numberWidth = numberWidth, modifier = Modifier.width(labelWidth))
+        GuideChannelLabel(channel, name, selected = selectedRow, numberWidth = numberWidth, modifier = Modifier.width(labelWidth))
         Box(
             Modifier
                 .weight(1f)

@@ -14,8 +14,6 @@ import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.matchName
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.repository.activeProfileSources
-import tv.own.owntv.core.settings.SettingsRepository
-import tv.own.owntv.core.sports.ChannelFacets
 
 /**
  * One version of a live channel: the same channel in another quality, category or playlist. [name] is
@@ -89,7 +87,6 @@ class ChannelVersions(
     private val categoryDao: CategoryDao,
     private val sourceDao: SourceDao,
     private val customize: CustomizationStore,
-    private val settings: SettingsRepository,
 ) {
     private class Cached(val fingerprint: String, val versions: List<ChannelVersion>)
 
@@ -99,7 +96,7 @@ class ChannelVersions(
 
     /** Every version of [channel], [channel] itself included, best first. */
     suspend fun of(channel: ChannelEntity): List<ChannelVersion> = withContext(Dispatchers.IO) {
-        val sources = activeProfileSources(settings, sourceDao).first()
+        val sources = activeProfileSources(sourceDao).first()
         val ids = sources.liveSourceIds
         // observeVisible: a locked category the PIN has not opened counts as hidden, as in every list.
         val cust = customize.observeVisible(MediaType.LIVE).first()

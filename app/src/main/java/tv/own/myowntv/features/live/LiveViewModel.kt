@@ -29,8 +29,6 @@ import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
 import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
@@ -188,7 +186,7 @@ class LiveViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     /** The "#123" the player shows under the channel name, in the top bar and on the channel card.
-     *  Gating it here rather than at each call site means every playback path — ExoPlayer, Stalker —
+     *  Gating it here rather than at each call site means every playback path —
      *  is covered by the one check, and a null simply omits the line as it did before numbers existed. */
     private fun channelNumberLabel(channel: ChannelEntity): String? =
         channel.number?.takeIf { showChannelNumbers.value }?.let { "#$it" }
@@ -200,11 +198,11 @@ class LiveViewModel(
 
     // Observe the sources REACTIVELY so adding/removing a playlist refreshes Live TV
     // immediately (it used to be read once at startup, so a new playlist showed nothing until restart).
-    // Full sources by id — lets the synchronous play() paths tell a Stalker source (needs play-time
-    // create_link resolution) from M3U/Xtream (final URL already stored) without a DB round-trip.
+    // Full sources by id — lets the synchronous play() paths tell a source whose URL still has to
+    // be resolved at play time from one whose final URL is already stored, without a DB round-trip.
     private var sourceById: Map<Long, tv.own.owntv.core.database.entity.SourceEntity> = emptyMap()
 
-    private val ctx: StateFlow<Ctx> = activeProfileSources(settings, sourceDao)
+    private val ctx: StateFlow<Ctx> = activeProfileSources(sourceDao)
         .map { aps ->
             sourceById = aps.sources.associateBy { it.id }
             val liveIds = aps.liveSourceIds
@@ -215,22 +213,6 @@ class LiveViewModel(
         }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, Ctx(emptyList(), emptyMap()))
-
-    /** Empty for zero/one active Live source so single-playlist layouts stay unchanged. */
-    val providerNames: StateFlow<Map<Long, String>> = ctx
-        .map { c -> c.sourceNames.takeIf { it.size > 1 } ?: emptyMap() }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
-
-    /**
-     * The Stage playlist mark per source, coloured by the playlist's position in the
-     * source list — the order the playlist switcher uses. Empty with one playlist, like [providerNames].
-     */
-    val playlistMarks: StateFlow<Map<Long, tv.own.myowntv.ui.stage.PlaylistMark>> = activeProfileSources(settings, sourceDao)
-        .map { aps ->
-            if (aps.liveSourceIds.size < 2) emptyMap()
-            else aps.sources.withIndex().associate { (i, s) -> s.id to tv.own.myowntv.ui.stage.PlaylistMark.of(s.name, i) }
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     private val folderContextKeys: StateFlow<Map<Long, String>> = ctx
         .flatMapLatest { c ->
@@ -546,11 +528,8 @@ class LiveViewModel(
     fun setEpgMatch(channel: ChannelEntity, epgChannelId: String?) {
         viewModelScope.launch {
             customize.setEpgMatch(MediaType.LIVE, CustomizeKeys.channel(channel), epgChannelId)
-            // The matched id may have no stored programmes yet (bulk sync only keeps ids in use) —
-            // top it up from the cached XMLTV, then drop the channel's stale now/next and re-fetch,
-            // so the details pane reflects the new match immediately instead of after a restart.
-            val id = epgChannelId?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
-            if (id != null) runCatching { epgRepository.storeProgrammesForIdsFromCache(setOf(id)) }
+            // Drop the channel's stale now/next and re-fetch, so the details pane reflects the new
+            // match immediately instead of after a restart. The bulk sync refills stored rows.
             epgReader.invalidate(channel.id)
             epgRefresh.value++
         }
@@ -873,7 +852,7 @@ class LiveViewModel(
 
 
     /**
-     * Live routing, the fallback ladder, the Stalker reconnect link and the preview pane's engine —
+     * Live routing, the fallback ladder, the re-login link for an expired session and the preview pane's engine —
      * core's, the same code the phone runs. What stays here is the television's own: which channel is
      * on screen, the zap list, history and the HUD state.
      */
@@ -904,7 +883,7 @@ class LiveViewModel(
         if (channel.isPaid) return // no stream without the package; don't spend a request per focus step
         if (channel.categoryId != null && channel.categoryId in hiddenCategoryIds.value) return
         // Core keeps the preview off a promoted full-screen stream, re-mutes on a re-focus instead of
-        // reloading, mints a Stalker link, and holds back on a one-session panel while full screen
+        // reloading, mints a fresh play link, and holds back on a one-session panel while full screen
         // holds the stream.
         live.preview(channel, muted = !livePreviewAudio.value)
     }
@@ -935,7 +914,7 @@ class LiveViewModel(
      *
      * Deliberately routed through here rather than built in the grid: which URL a channel actually
      * plays is not a property of the channel row. It is the playlist's pre-buffer override, its live
-     * latency, its User-Agent, the channel's own headers and DRM, and — for Stalker — a `cmd` that
+     * latency, its User-Agent, the channel's own headers and DRM, and — when the stored URL is a portal command — a `cmd` that
      * has to be resolved to a link per play. All of that already lives here, and a second copy in the
      * grid would drift the first time one of them changed.
      */
@@ -1089,7 +1068,7 @@ class LiveViewModel(
             if (catId != null) {
                 channelDao.snapshotByCategoryManual(catId, folderContextKeys.value[catId] ?: "", sortMode.value == SettingsRepository.SortMode.ALPHA, ZAP_LIST_LIMIT)
             } else {
-                // No category on this row (hand-made M3U entries) — fall back to All Channels.
+                // No category on this row (an entry imported without one) — fall back to All Channels.
                 channelDao.snapshotAll(ctx.value.sourceIds.ifEmpty { listOf(-1L) }, ZAP_LIST_LIMIT)
             }
         }
@@ -1230,9 +1209,9 @@ class LiveViewModel(
      * CH+/- step: show the channel at once, open the stream once the user stops moving.
      *
      * Holding the channel key steps roughly every 170 ms, and every step used to open a stream —
-     * thirteen opens in 3.6 s on a real remote. Providers answer that as abuse: a one-session Xtream
-     * panel locks the account for ~2 minutes (HTTP 458, every channel refused until it clears), and a
-     * Stalker portal returns 429 for the duration of the burst. Neither is a playback problem, and no
+     * thirteen opens in 3.6 s on a real remote. Providers answer that as abuse: a one-session panel
+     * locks the account for ~2 minutes (HTTP 458, every channel refused until it clears), and a
+     * portal API returns 429 for the duration of the burst. Neither is a playback problem, and no
      * fallback ladder can help, because the stream the user actually wants is refused too.
      *
      * So the *decision* stays instant — the channel changes on screen, history and the zap anchor move,
@@ -1250,9 +1229,8 @@ class LiveViewModel(
         tuned(channel)
         val now = android.os.SystemClock.elapsedRealtime()
         val delayMs = zapTuneDelayMs(lastZapPressMs, now)
-        // Logged only: single-connection panels follow the same rule (see ZAP_ISOLATED_PRESS_MS).
-        val singleConnection = sourceById[channel.sourceId]?.maxConnections == 1 ||
-            tv.own.owntv.player.LiveStreamQuirks.isSingleSession(channel.streamUrl)
+        // Logged only: single-session hosts follow the same rule (see ZAP_ISOLATED_PRESS_MS).
+        val singleConnection = tv.own.owntv.player.LiveStreamQuirks.isSingleSession(channel.streamUrl)
         tv.own.owntv.player.LiveDiagnosticsLog.event(
             "zap: tune wait ${delayMs}ms — ${zapWaitReason(lastZapPressMs, now, singleConnection)}",
         )
@@ -1423,7 +1401,7 @@ class LiveViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     /** Hand [channel] to an external app (VLC, MX Player). Used by the Live TV long-press menu, and by
-     *  [playChannel] when Live TV's external-player default is on. Stalker channels store a portal
+     *  [playChannel] when Live TV's external-player default is on. Some channels store a portal
      *  cmd rather than a URL, so it's resolved first — an external app can't mint one. */
     fun playExternal(channel: ChannelEntity) {
         if (rejectSubscription(channel)) return
@@ -1433,7 +1411,7 @@ class LiveViewModel(
             val url = if (streamUrlResolver.needsResolve(source)) {
                 withContext(Dispatchers.IO) {
                     runCatching { streamUrlResolver.resolve(source!!, channel.streamUrl) }
-                        .onFailure { Log.w(TAG, "stalker resolve failed channelId=${channel.id}", it) }
+                        .onFailure { Log.w(TAG, "play-link resolve failed channelId=${channel.id}", it) }
                         .getOrNull()
                 } ?: return@launch
             } else {
@@ -1494,7 +1472,7 @@ class LiveViewModel(
     private suspend fun getSource(sourceId: Long): tv.own.owntv.core.database.entity.SourceEntity? =
         sourceById[sourceId] ?: sourceDao.getById(sourceId)
 
-    /** Internal playback: the canonical ExoPlayer / Stalker / history side-effects for a
+    /** Internal playback: the canonical ExoPlayer / history side-effects for a
      *  channel. Direct-tune's background rebuild path calls this without cancelling the rebuild
      *  so the in-flight rebuild it owns isn't killed by its own play. */
     private suspend fun playChannel(channel: ChannelEntity) {

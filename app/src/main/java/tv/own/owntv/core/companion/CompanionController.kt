@@ -16,18 +16,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withTimeoutOrNull
 import tv.own.myowntv.R
-import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.i18n.LocaleStore
 
 /**
  * Owns the Remote companion HTTP listener for the app's lifetime. Registered as a Koin `single` so
- * the Setup and Settings screens share one server instead of each carrying duplicate networking code.
+ * the Settings screens share one server instead of each carrying duplicate networking code.
  *
- * The remote browser only fills the Add Source form; it never starts the import. Each submission is exposed two
- * ways:
- *  - [payloads] — a live event stream, used by the Remote screen to know when to hand off; and
- *  - [lastPayload] — the retained latest value, so the Manual form (which subscribes *after* the
- *    hand-off navigation) still sees it. A replay-0 SharedFlow alone would drop it in that window.
+ * The remote pages are the backup restore/download pair and the background-image upload; local sync
+ * between two OwnTV devices rides the same listener without a web page. Remote add/edit-source pages
+ * are gone — the app has one built-in provider and nothing to type into a web form.
+ *
+ * Uploaded backups and images are saved to the cache and emitted on [backups]/[images] for the
+ * corresponding screens.
  *
  * [start]/[stop] are safe to call from the UI thread; the server does its I/O on its own dispatcher.
  */
@@ -38,12 +38,6 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
 
     private val _state = MutableStateFlow<CompanionServerState>(CompanionServerState.Idle)
     val state: StateFlow<CompanionServerState> = _state.asStateFlow()
-
-    private val _payloads = MutableSharedFlow<CompanionPayload>(extraBufferCapacity = 8)
-    val payloads: SharedFlow<CompanionPayload> = _payloads.asSharedFlow()
-
-    private val _lastPayload = MutableStateFlow<CompanionPayload?>(null)
-    val lastPayload: StateFlow<CompanionPayload?> = _lastPayload.asStateFlow()
 
     /** Backup files uploaded from the remote device in [startForBackupRestore] mode, saved to cache and emitted here. */
     private val _backups = MutableSharedFlow<File>(extraBufferCapacity = 4)
@@ -56,10 +50,7 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
     private val _images = MutableSharedFlow<File>(extraBufferCapacity = 4)
     val images: SharedFlow<File> = _images.asSharedFlow()
 
-    /** The playlist [startForSourceEdit] is editing; a submission's empty fields are filled from it. */
-    @Volatile private var editing: SourceEntity? = null
-
-    /** A fresh 6-digit PIN per [start], so a leaked code is short-lived. */
+    /** A fresh 6-digit PIN per [startForBackupRestore], so a leaked code is short-lived. */
     @Volatile private var currentPin: String = ""
 
     /**
@@ -141,17 +132,6 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
             .getOrNull()
     }
 
-    /** Starts the add-source companion server (the original Remote add-source flow). */
-    fun start(port: Int) = startInternal(port, CompanionMode.ADD_SOURCE)
-
-    /**
-     * Starts the companion server to edit [source] from a browser. The page shows only what
-     * [CompanionSourceEdit.prefill] allows; a submission arrives on [payloads] / [lastPayload] already
-     * merged with [source], ready to pre-fill the TV's edit form.
-     */
-    fun startForSourceEdit(port: Int, source: SourceEntity) =
-        startInternal(port, CompanionMode.EDIT_SOURCE, editSource = source)
-
     /** Starts the companion server in backup-restore mode: the remote device uploads a backup JSON, emitted on [backups]. */
     fun startForBackupRestore(port: Int) = startInternal(port, CompanionMode.BACKUP_RESTORE)
 
@@ -198,9 +178,7 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
         onPair: (name: String, address: String, deviceId: String) -> String? = { _, _, _ -> null },
         pairedSecrets: () -> Map<String, String> = { emptyMap() },
         onAutoSyncAsk: suspend (deviceId: String, request: org.json.JSONObject) -> org.json.JSONObject = { _, _ -> org.json.JSONObject() },
-        editSource: SourceEntity? = null,
     ) {
-        editing = editSource
         if (port !in 1..65535) {
             _state.value = CompanionServerState.Failed(CompanionFailure.InvalidPort)
             return
@@ -208,22 +186,11 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
         _state.value = CompanionServerState.Starting
         try {
             currentPin = generatePin()
-            _lastPayload.value = null
             val urls = server.start(
                 port = port,
                 pin = currentPin,
                 fontBytes = loraBytes,
                 mode = mode,
-                editPrefill = editSource?.let(CompanionSourceEdit::prefill),
-                onPayload = { raw ->
-                    // An uploaded playlist becomes a real file on the TV before the payload goes any
-                    // further, so what the Add Source form receives is an ordinary local path.
-                    val saved = savePlaylistUpload(raw)
-                    val payload = editing?.let { CompanionSourceEdit.merge(it, saved) } ?: saved
-                    Log.d(TAG, "Received ${payload.type} payload '${payload.name.ifBlank { "(unnamed)" }}' — forwarding to UI")
-                    _lastPayload.value = payload
-                    _payloads.tryEmit(payload)
-                },
                 onBackup = ::onBackupUploaded,
                 onImage = ::onImageUploaded,
                 downloadFile = downloadFile,
@@ -278,48 +245,6 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
             .onFailure { Log.w(TAG, "Failed to persist uploaded backup", it) }
     }
 
-    /**
-     * Writes a playlist uploaded through the companion page into the app's own storage and returns
-     * the payload with `server` pointing at it. Anything else passes through untouched.
-     *
-     * `filesDir`, not `cacheDir`: the remote browser only *fills* the form — the TV user presses Start Import
-     * later, possibly much later, and the system may evict a cache file in between. The saved path is
-     * absolute, which is exactly what `M3uSyncer` already recognises as a local playlist.
-     *
-     * On a write failure the payload is returned unchanged, so the TV shows an empty URL box rather
-     * than a path to a file that is not there.
-     */
-    private fun savePlaylistUpload(payload: CompanionPayload): CompanionPayload {
-        if (payload.playlistContent.isBlank()) return payload
-        return runCatching {
-            val dir = File(appContext.filesDir, PLAYLIST_UPLOAD_DIR).apply { mkdirs() }
-            // Keep only the newest few: a playlist can be megabytes, and every upload that was never
-            // imported would otherwise sit here forever.
-            dir.listFiles().orEmpty().sortedByDescending { it.lastModified() }
-                .drop(MAX_KEPT_UPLOADS - 1).forEach { it.delete() }
-            val file = File(dir, safePlaylistName(payload.playlistFileName))
-            file.writeText(payload.playlistContent)
-            Log.d(TAG, "Saved uploaded playlist (${file.length()} bytes) → ${file.name}")
-            payload.copy(server = file.absolutePath, playlistContent = "")
-        }.getOrElse {
-            Log.w(TAG, "Failed to save uploaded playlist", it)
-            payload.copy(playlistContent = "")
-        }
-    }
-
-    /**
-     * A filename safe to write: the upload names the file, and the name arrives from a browser. Only
-     * the last path segment is kept and only safe characters survive it, so `../../databases/owntv`
-     * cannot escape the upload directory.
-     */
-    private fun safePlaylistName(raw: String): String {
-        val base = raw.substringAfterLast('/').substringAfterLast('\\')
-            .filter { it.isLetterOrDigit() || it == '.' || it == '-' || it == '_' }
-            .trimStart('.')
-            .takeLast(64)
-        return if (base.length > 4 && base.contains('.')) base else "playlist-${System.currentTimeMillis()}.m3u"
-    }
-
     /** Persists an uploaded background image to a cache file and emits it for the settings UI to ingest. */
     private fun onImageUploaded(bytes: ByteArray, extension: String) {
         runCatching {
@@ -335,13 +260,7 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
         server.stop()
         cancelAutoSyncRequests()
         currentPin = ""
-        editing = null
         _state.value = CompanionServerState.Idle
-    }
-
-    /** Clears [lastPayload] after the Manual Add Source form consumed it for pre-fill. */
-    fun consumePayload() {
-        _lastPayload.value = null
     }
 
     /** Permanent teardown for the app-wide singleton. */
@@ -360,10 +279,6 @@ class CompanionController(context: Context, localeStore: LocaleStore) {
 
     private companion object {
         const val TAG = "CompanionController"
-
-        /** Under `filesDir`, so an upload survives until the TV user actually imports it. */
-        const val PLAYLIST_UPLOAD_DIR = "companion-playlists"
-        const val MAX_KEPT_UPLOADS = 5
 
         /**
          * How long the person here has to answer an auto-sync request. Shorter than the client's

@@ -17,7 +17,7 @@ class CategoryLockRulesTest {
     private fun cat(id: Long, name: String) =
         CategoryEntity(id = id, sourceId = 1, mediaType = MediaType.LIVE, name = name, remoteId = "r$id")
 
-    private val cats = listOf(cat(1, "Sports"), cat(2, "News"), cat(3, "Adult"))
+    private val cats = listOf(cat(1, "Music"), cat(2, "News"), cat(3, "Adult"))
     private fun keyOf(id: Long) = CustomizeKeys.category(cats.first { it.id == id })
 
     private val locked = SectionCustomizations(lockedCategories = setOf(keyOf(3)))
@@ -55,7 +55,7 @@ class CategoryLockRulesTest {
     fun `the rail keeps a sealed category, marked, and still drops real hides`() {
         val c = locked.copy(hiddenCategories = setOf(keyOf(2))).withLocks(hasPin = true, unlocked = emptySet())
         val rows = cats.railCategories(c)
-        assertEquals(listOf("Sports", "Adult"), rows.map { it.displayName })
+        assertEquals(listOf("Music", "Adult"), rows.map { it.displayName })
         val adult = rows.single { it.key == keyOf(3) }
         assertTrue(adult.locked && adult.sealed)
         val opened = cats.railCategories(locked.withLocks(hasPin = true, unlocked = setOf(keyOf(3))))

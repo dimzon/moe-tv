@@ -122,8 +122,7 @@ class AutoSyncAgreementTest {
     }
 
     @Test
-    fun `playlists and settings are off by default`() {
-        assertFalse(Section.SOURCES in AutoSyncAgreement.DEFAULT_SECTIONS)
+    fun `settings are off by default, favorites on`() {
         assertFalse(Section.SETTINGS in AutoSyncAgreement.DEFAULT_SECTIONS)
         assertTrue(Section.FAVORITES in AutoSyncAgreement.DEFAULT_SECTIONS)
     }
@@ -131,7 +130,7 @@ class AutoSyncAgreementTest {
     @Test
     fun `each side lets in only its own sections, and only what the file carries`() {
         val mine = setOf(Section.FAVORITES, Section.HISTORY)
-        val file = setOf(Section.FAVORITES, Section.SOURCES, Section.SETTINGS)
+        val file = setOf(Section.FAVORITES, Section.SETTINGS)
         assertEquals(setOf(Section.FAVORITES), AutoSyncAgreement.allowedIn(mine, file))
         assertEquals(emptySet<Section>(), AutoSyncAgreement.allowedIn(emptySet(), file))
     }

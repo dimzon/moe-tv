@@ -47,20 +47,13 @@ fun compactCount(res: Resources, value: Int): String {
 fun SyncProgressDisplay.primaryText(res: Resources): String = when (phase) {
     SyncProgressPhase.PREPARING -> res.getString(R.string.sync_progress_preparing)
     SyncProgressPhase.CONNECTING -> res.getString(R.string.sync_progress_connecting)
-    // Said plainly, with the position in it: this runs before a single row is written and can take
-    // two minutes, and a silent spinner for that long reads as a hung app.
-    SyncProgressPhase.MEASURING_CONNECTIONS -> res.getString(
-        R.string.settings_sources_probe_running,
-        counts?.measuringStream ?: 1,
-        counts?.measuringOf ?: 1,
-    )
     SyncProgressPhase.SYNCING ->
         counts?.displayText(res).orEmpty().ifBlank { res.getString(R.string.sync_progress_preparing) }
 }
 
 fun SyncProgressDisplay.detailText(res: Resources): String = when (phase) {
     SyncProgressPhase.SYNCING -> res.getString(R.string.sync_progress_syncing)
-    SyncProgressPhase.MEASURING_CONNECTIONS, SyncProgressPhase.PREPARING, SyncProgressPhase.CONNECTING ->
+    SyncProgressPhase.PREPARING, SyncProgressPhase.CONNECTING ->
         res.getString(R.string.sync_progress_connecting)
 }
 
@@ -82,15 +75,6 @@ fun List<SyncWarning>.warningText(res: Resources): String? {
             } else {
                 res.getString(R.string.sync_warning_phase_error, warning.labelText(res), warning.message)
             }
-            // Two sentences, not one with a number in it: what the user can act on is
-            // whether anything is actually missing, not how many items arrived before the cut.
-            is SyncWarningKind.BULK_TRUNCATED -> res.getString(
-                if (kind.recovered) {
-                    R.string.sync_warning_bulk_truncated
-                } else {
-                    R.string.sync_warning_bulk_truncated_partial
-                },
-            )
             is SyncWarningKind.CATALOG_SHRINK -> res.getQuantityString(
                 R.plurals.sync_warning_catalog_shrink,
                 kind.stored,

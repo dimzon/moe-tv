@@ -21,15 +21,11 @@ import tv.own.owntv.core.menu.*
 import tv.own.owntv.core.model.*
 import tv.own.owntv.core.nav.*
 import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
 import tv.own.owntv.core.player.*
 import tv.own.owntv.core.reminder.*
 import tv.own.owntv.core.repository.*
 import tv.own.owntv.core.settings.*
 import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.sports.*
-import tv.own.owntv.core.sports.model.*
-import tv.own.owntv.core.stalker.*
 import tv.own.owntv.core.storage.*
 import tv.own.owntv.core.sync.*
 import tv.own.owntv.core.sync.local.*
@@ -151,10 +147,10 @@ fun LiveEpgCard(
                     overflow = TextOverflow.Ellipsis,
                 )
                 // What the programme actually IS, not just what it is called. The guide carries this
-                // for both stored XMLTV rows and the providers' own short-EPG replies, and until now
-                // the only place it surfaced was the Guide screen — so anyone watching live could read
-                // a title and nothing else. Two lines: enough to tell an episode apart, short enough
-                // that the card stays a strip across the top of the picture.
+                // for every stored programme row, and until now the only place it surfaced was the
+                // Guide screen — so anyone watching live could read a title and nothing else. Two
+                // lines: enough to tell an episode apart, short enough that the card stays a strip
+                // across the top of the picture.
                 entry.description?.takeIf { it.isNotBlank() }?.let { synopsis ->
                     Text(
                         synopsis,

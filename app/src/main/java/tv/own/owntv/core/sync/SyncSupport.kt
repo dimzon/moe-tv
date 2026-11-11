@@ -26,11 +26,10 @@ import tv.own.owntv.core.settings.SettingsRepository
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Shared building blocks for the per-source-type syncers ([XtreamSyncer], [M3uSyncer], later
- * StalkerSyncer): the chunked streaming inserter with cross-pass dedupe, the hash-diffed stable
- * upsert / fresh insert pair, category refresh + stable upsert, and stale-row pruning. Extracted
- * from SyncManager so each syncer stays focused on its own protocol flow while any fix to the
- * shared machinery lands once.
+ * Shared building blocks for the source syncer ([RuTubeSyncer]): the chunked streaming inserter
+ * with cross-pass dedupe, the hash-diffed stable upsert / fresh insert pair, category refresh +
+ * stable upsert, and stale-row pruning. Extracted from SyncManager so the syncer stays focused on
+ * its own protocol flow while any fix to the shared machinery lands once.
  */
 internal class SyncSupport(
     private val categoryDao: CategoryDao,
@@ -52,7 +51,6 @@ internal class SyncSupport(
         remoteIdsForSource = { channelDao.remoteIdsForSource(it) },
         deleteByRemoteIds = { src, ids -> channelDao.deleteByRemoteIds(src, ids) },
         loadHashes = { channelDao.contentHashesForSource(it) },
-        remoteIdsInCategories = { src, cats -> channelDao.remoteIdsInCategories(src, cats) },
     )
 
     /**
@@ -194,26 +192,6 @@ internal class SyncSupport(
         }
     }
 
-    suspend fun categoryRemoteIds(sourceId: Long, type: MediaType): Set<String> =
-        categoryDao.remoteIdsForSource(sourceId, type).toSet()
-
-    suspend fun categoryIdsByRemoteId(sourceId: Long, type: MediaType, remoteIds: List<String>): Map<String, Long> =
-        existingCategoriesByRemoteId(sourceId, type, remoteIds).mapValues { it.value.id }
-
-    /**
-     * The [type] category with [remoteId], created when there is none yet with the name and position
-     * of the category [likeId] — the same portal category, seen from the other tab. Null when [likeId]
-     * is gone too; the rows then land in that tab's "All" only.
-     */
-    suspend fun ensureCategoryLike(sourceId: Long, type: MediaType, remoteId: String, likeId: Long?): Long? {
-        existingCategoriesByRemoteId(sourceId, type, listOf(remoteId))[remoteId]?.let { return it.id }
-        val like = likeId?.let { categoryDao.getById(it) } ?: return null
-        val id = categoryDao.insertAll(
-            listOf(CategoryEntity(sourceId = sourceId, mediaType = type, name = like.name, remoteId = remoteId, sortOrder = like.sortOrder)),
-        ).firstOrNull() ?: -1L
-        return if (id > 0) id else existingCategoriesByRemoteId(sourceId, type, listOf(remoteId))[remoteId]?.id
-    }
-
     private suspend fun existingCategoriesByRemoteId(sourceId: Long, type: MediaType, remoteIds: List<String>): Map<String, CategoryEntity> =
         remoteIds.distinct().chunked(QUERY_CHUNK).flatMap { categoryDao.findByRemoteIds(sourceId, type, it) }
             .mapNotNull { category -> category.remoteId?.let { it to category } }
@@ -261,10 +239,8 @@ internal class SyncSupport(
         )
     }
 
-    /** Applies the "hide new categories" preference (same across sections) to categories just
-     *  discovered on a resync. Non-private: M3uSyncer discovers categories incrementally during the
-     *  stream, so it applies this itself at end-of-parse instead of going through [refreshCategories]. */
-    suspend fun applyHideNewCategoriesDefault(type: MediaType, newRows: List<CategoryEntity>) {
+    /** Applies the "hide new categories" preference to categories just discovered on a resync. */
+    private suspend fun applyHideNewCategoriesDefault(type: MediaType, newRows: List<CategoryEntity>) {
         if (newRows.isEmpty() || !settings.hideNewCategoriesDefault().first()) return
         customize.setCategoriesHidden(type, newRows.map { CustomizeKeys.category(it) }, hidden = true)
     }
@@ -360,7 +336,7 @@ internal class SyncSupport(
         // concurrency cancels the writer along with this scope, so nothing is left waiting on it. A
         // throw from the *writer* (a database failure) cancels the scope the other way round and the
         // producer's send unblocks — which is what keeps a broken insert surfacing as a failed phase
-        // (and, for Xtream, a drop to the per-category fallback) rather than as a hang.
+        // rather than as a hang.
         val result = producer { item ->
             buffer.add(item)
             if (buffer.size >= chunkSize) {
@@ -570,9 +546,7 @@ internal class SyncSupport(
 
         fun shouldPrune(stored: Int, stale: Int, force: Boolean): Boolean =
             force || stored <= PRUNE_MIN_ROWS || stale <= stored * PRUNE_MAX_SHRINK
-        const val CATEGORY_REQUEST_DELAY_MS = 150L // pace per-category fallback requests (avoid HTTP 429)
         private const val SLOW_INSERT_LOG_MS = 250L
-        val IgnoreByteProgress: (Long, Long?) -> Unit = { _, _ -> }
 
         /** [SyncStatsCollector.processedCounts] keys aggregating category changes across all phases,
          *  for the sync-complete summary — not shown at all when a fresh source makes every category "new". */
@@ -604,12 +578,6 @@ internal data class ContentAdapter<T>(
     val remoteIdsForSource: suspend (Long) -> List<String>,
     val deleteByRemoteIds: suspend (Long, List<String>) -> Unit,
     val loadHashes: suspend (Long) -> List<ContentHashProjection>,
-    /** Re-sync delta check (paged catalogs): current per-category item counts; null = not supported. */
-    val countsByCategory: (suspend (sourceId: Long) -> Map<Long, Int>)? = null,
-    /** RemoteIds of one category's existing rows — protects a delta-skipped category from pruning. */
-    val remoteIdsForCategory: (suspend (sourceId: Long, categoryId: Long) -> List<String>)? = null,
-    /** RemoteIds across a set of categories — the prune scope after a per-category fallback. */
-    val remoteIdsInCategories: (suspend (sourceId: Long, categoryIds: List<Long>) -> List<String>)? = null,
 )
 
 /** What the DB already holds for one remote id: local row id, content hash, and provider position. */
@@ -672,30 +640,6 @@ internal data class UpsertStats(
     val movedScattered: Int = 0,
 )
 
-/**
- * Result of an Xtream per-category fallback pass. [succeededCategoryRemoteIds] are the
- * categories whose list was fetched *completely* — a truncated, failed, skipped or never-reached
- * category is absent, so its rows are left alone. Top-level (not nested in XtreamSyncer) so
- * [pruneScope] can be unit tested.
- */
-internal class FallbackOutcome(
-    val succeededCategoryRemoteIds: List<String>,
-    val aborted: Boolean,
-    val stoppedEarly: Boolean,
-    val attempted: Int,
-) {
-    val complete: Boolean get() = !aborted && !stoppedEarly && succeededCategoryRemoteIds.size == attempted
-
-    /**
-     * Local category ids a prune may touch: only the fully-fetched categories, mapped through the
-     * refresh's remoteId→id table. Empty means prune nothing. Rows with no category are never in
-     * scope by construction — a per-category request can't return them, so a source-wide prune here
-     * would delete every uncategorized item.
-     */
-    fun pruneScope(idsByRemoteId: Map<String, Long>): List<Long> =
-        succeededCategoryRemoteIds.mapNotNull(idsByRemoteId::get).distinct()
-}
-
 internal data class CategoryRefresh(
     val idsByRemoteId: Map<String, Long>,
     val seenRemoteIds: Set<String>,
@@ -738,7 +682,6 @@ internal class SyncStatsCollector(val sourceId: Long) {
     val processedCounts = java.util.concurrent.ConcurrentHashMap<String, Int>()
     val phaseErrors = java.util.concurrent.ConcurrentHashMap<String, String>()
     private val warningFacts = java.util.concurrent.CopyOnWriteArrayList<SyncWarning>()
-    @Volatile var usedFallback = false
 
     /**
      * Set by a user-requested "force clean sync": bypasses the catalog-shrink prune guard so a
@@ -758,6 +701,5 @@ internal class SyncStatsCollector(val sourceId: Long) {
         phaseTiming = phaseTiming.toMap(),
         processedCounts = processedCounts.toMap(),
         phaseErrors = phaseErrors.toMap(),
-        usedFallback = usedFallback,
     )
 }

@@ -319,13 +319,11 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val ACCENT_CUSTOM = stringPreferencesKey("accent_custom")
         val FOCUS_HIGHLIGHT = stringPreferencesKey("focus_highlight_color")
         val FOCUS_HIGHLIGHT_WIDTH = intPreferencesKey("focus_highlight_width")
-        val DEFAULT_SOURCE = longPreferencesKey("default_source_id")
-        // The one user's startup landing, Home layout and Sports settings (plain keys; the app has
+        // The one user's startup landing and Home layout (plain keys; the app has
         // no profiles, so these are simply *the* values).
         val STARTUP_MODE = stringPreferencesKey("startup_mode")
         val STARTUP_CHANNEL = stringPreferencesKey("startup_channel")
         val HOME_CONFIG = stringPreferencesKey("home_config")
-        val SPORTS_CONFIG = stringPreferencesKey("sports_config")
         val HIDE_NEW_CATEGORIES = booleanPreferencesKey("hide_new_categories")
         val REFRESH_SOURCE_IDS = stringSetPreferencesKey("refresh_source_ids")
         // Per-source auto-refresh selections (JSON maps: { "<sourceId>": "<EnumName>" }). Replace the
@@ -666,20 +664,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         context.dataStore.edit { prefs ->
             val next = transform(HomeConfig.fromJson(prefs[Keys.HOME_CONFIG]))
             if (next == HomeConfig()) prefs.remove(Keys.HOME_CONFIG) else prefs[Keys.HOME_CONFIG] = next.toJson().toString()
-        }
-    }
-
-    // --- Sports: one blob, like Home's (see [tv.own.owntv.core.sports.SportsConfig]). ---
-    fun sportsConfig(): Flow<tv.own.owntv.core.sports.SportsConfig> =
-        parsedFlow(Keys.SPORTS_CONFIG) { tv.own.owntv.core.sports.SportsConfig.fromJson(it) }
-
-    /** The sports settings. (Named for the old per-profile flow the shell used to follow; now simply the one value.) */
-    val activeSportsConfig: Flow<tv.own.owntv.core.sports.SportsConfig> = sportsConfig()
-
-    suspend fun updateSportsConfig(transform: (tv.own.owntv.core.sports.SportsConfig) -> tv.own.owntv.core.sports.SportsConfig) {
-        context.dataStore.edit { prefs ->
-            val next = transform(tv.own.owntv.core.sports.SportsConfig.fromJson(prefs[Keys.SPORTS_CONFIG]))
-            if (next == tv.own.owntv.core.sports.SportsConfig()) prefs.remove(Keys.SPORTS_CONFIG) else prefs[Keys.SPORTS_CONFIG] = next.toJson().toString()
         }
     }
 
@@ -1683,21 +1667,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             }.toMap()
         }
 
-    /**
-     * EPG sources whose own `<icon src>` channel logos should replace the playlist's logos. Per source,
-     * so one feed can supply logos while another only supplies programmes. Missing ids default to off.
-     */
-    val epgUseLogos: Flow<Set<Long>> = parsedFlow(Keys.EPG_USE_LOGOS) { raw ->
-        parseRefreshMap(raw)
-            .filterValues { it.toBoolean() }
-            .keys.mapNotNullTo(LinkedHashSet()) { it.toLongOrNull() }
-    }
-
-    suspend fun setEpgUseLogos(sourceId: Long, enabled: Boolean) {
-        context.dataStore.edit { prefs ->
-            prefs[Keys.EPG_USE_LOGOS] = writeRefreshMap(readRefreshMap(prefs[Keys.EPG_USE_LOGOS]), sourceId, enabled.toString())
-        }
-    }
 
     suspend fun setPlaylistAutoRefresh(sourceId: Long, refresh: PlaylistRefresh) {
         context.dataStore.edit { prefs ->
@@ -2009,13 +1978,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     suspend fun setAndroidTvHomeEnabled(enabled: Boolean) {
         context.dataStore.edit { it[Keys.ANDROID_TV_HOME] = enabled }
-    }
-
-    /** The source shown as "active" in the sidebar; -1 = none chosen (fall back to the first source). */
-    val defaultSourceId: Flow<Long> = prefsFlow { it[Keys.DEFAULT_SOURCE] ?: -1L }
-
-    suspend fun setDefaultSource(id: Long) {
-        context.dataStore.edit { it[Keys.DEFAULT_SOURCE] = id }
     }
 
     val themeMode: Flow<ThemeMode> = prefsFlow { prefs ->
@@ -2391,10 +2353,10 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             Keys.PREF_AUDIO_LANG, Keys.PREF_SUB_LANG, Keys.SORT_LIVE, Keys.SORT_GUIDE, Keys.ANIMATION_LEVEL, Keys.GUIDE_VIEW,
             Keys.LIVE_LAYOUT, Keys.LIVE_VIEW, Keys.REMINDER_MODE, Keys.PLAYER_HOLD_OK, Keys.PLAYER_SHORT_OK,
             Keys.WEATHER_LOCATION, Keys.RECENT_SEARCHES,
-            // The one user's startup landing, Home layout and Sports blob ride with settings now that
+            // The one user's startup landing and Home layout ride with settings now that
             // they are plain keys rather than per-profile maps. A restored startup target is checked
             // against the surviving sources after the SOURCES section lands (repairSpecificStartupChannel).
-            Keys.STARTUP_MODE, Keys.STARTUP_CHANNEL, Keys.HOME_CONFIG, Keys.SPORTS_CONFIG,
+            Keys.STARTUP_MODE, Keys.STARTUP_CHANNEL, Keys.HOME_CONFIG,
             Keys.CLOCK_TIME_COLOR, Keys.CLOCK_DATE_COLOR, Keys.CLOCK_WEATHER_COLOR,
             // Global proxy — non-secret fields only. The proxy password (Keys.PROXY_PASS) is NEVER part of
             // this whitelist; it is handled separately by BackupManager (encrypted or omitted).
@@ -2672,7 +2634,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
     }
 
     // --- Backup repair after the SOURCES section lands (startup_mode/startup_channel/home_config/
-    //     sports_config now ride with "settings" as plain keys; per-profile section maps are gone) ---
+    //     now ride with "settings" as plain keys; per-profile section maps are gone) ---
 
     /**
      * A restored SPECIFIC_CHANNEL must never point at a source that did not survive the restore.
@@ -2690,94 +2652,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
                 prefs[Keys.STARTUP_CHANNEL] = channel.copy(itemId = -1L).toJson().toString()
             }
         }
-    }
-
-    // --- Backup: per-source auto-refresh maps (ride with the SOURCES section, since source/EPG ids
-    //     are preserved on restore). Exported as the raw { "<id>": "<EnumName>" } JSON maps. ---
-
-    /** Exports the per-source playlist auto-refresh map as { "<sourceId>": "<mode>" }. */
-    suspend fun exportPlaylistAutoRefresh(): org.json.JSONObject =
-        context.dataStore.data.first()[Keys.PLAYLIST_AUTO_REFRESH]
-            ?.let { runCatching { org.json.JSONObject(it) }.getOrNull() } ?: org.json.JSONObject()
-
-    /** Exports the per-EPG-source auto-refresh map as { "<epgSourceId>": "<mode>" }. */
-    suspend fun exportEpgAutoRefresh(): org.json.JSONObject =
-        context.dataStore.data.first()[Keys.EPG_AUTO_REFRESH]
-            ?.let { runCatching { org.json.JSONObject(it) }.getOrNull() } ?: org.json.JSONObject()
-
-    /**
-     * Restores the playlist auto-refresh map. Ids not in [existingSourceIds] are dropped; unknown
-     * enum values fall back to OFF. Replaces the whole map (SOURCES restore wipes+recreates sources,
-     * so pre-restore selections refer to deleted ids). Also marks the legacy refresh migration done
-     * so it can never clobber the restored selections.
-     */
-    suspend fun importPlaylistAutoRefresh(o: org.json.JSONObject, existingSourceIds: Set<Long>) {
-        // parse() also carries a backup written before the fixed 24h/48h/7-day entries were replaced
-        // over to the equivalent day count, so restoring an old device does not silently reset it to Off.
-        val cleaned = sanitizeRefreshMap(o, existingSourceIds) { PlaylistRefresh.parse(it).serialize() }
-        context.dataStore.edit { prefs ->
-            // Merge-restore: keep the device's existing per-source choices, backup entries win per key.
-            val merged = parseRefreshMap(prefs[Keys.PLAYLIST_AUTO_REFRESH]) + cleaned
-            prefs[Keys.PLAYLIST_AUTO_REFRESH] = org.json.JSONObject(merged as Map<*, *>).toString()
-            prefs[Keys.REFRESH_MIGRATED] = true
-        }
-    }
-
-    /** Restores the EPG auto-refresh map; same semantics as [importPlaylistAutoRefresh]. */
-    suspend fun importEpgAutoRefresh(o: org.json.JSONObject, existingEpgSourceIds: Set<Long>) {
-        // Round-trips "MANUAL:10" as well as the bare enum names older backups carry, because
-        // [EpgRefresh.parse] accepts both and re-serializes whatever it understood.
-        val cleaned = sanitizeRefreshMap(o, existingEpgSourceIds) { EpgRefresh.parse(it).serialize() }
-        context.dataStore.edit { prefs ->
-            val merged = parseRefreshMap(prefs[Keys.EPG_AUTO_REFRESH]) + cleaned
-            prefs[Keys.EPG_AUTO_REFRESH] = org.json.JSONObject(merged as Map<*, *>).toString()
-        }
-    }
-
-    /** Exports the per-EPG-source "use this feed's logos" map as { "<epgSourceId>": "true" }. */
-    suspend fun exportEpgUseLogos(): org.json.JSONObject =
-        context.dataStore.data.first()[Keys.EPG_USE_LOGOS]
-            ?.let { runCatching { org.json.JSONObject(it) }.getOrNull() } ?: org.json.JSONObject()
-
-    /** Restores the EPG logo-preference map; same merge semantics as [importEpgAutoRefresh]. */
-    suspend fun importEpgUseLogos(o: org.json.JSONObject, existingEpgSourceIds: Set<Long>) {
-        val cleaned = sanitizeRefreshMap(o, existingEpgSourceIds) { it.toBoolean().toString() }
-        context.dataStore.edit { prefs ->
-            val merged = parseRefreshMap(prefs[Keys.EPG_USE_LOGOS]) + cleaned
-            prefs[Keys.EPG_USE_LOGOS] = org.json.JSONObject(merged as Map<*, *>).toString()
-        }
-    }
-
-    private fun parseRefreshMap(raw: String?): Map<String, String> {
-        val o = raw?.let { runCatching { org.json.JSONObject(it) }.getOrNull() } ?: return emptyMap()
-        val out = LinkedHashMap<String, String>()
-        o.keys().forEach { k -> out[k] = o.optString(k) }
-        return out
-    }
-
-    private inline fun sanitizeRefreshMap(
-        o: org.json.JSONObject,
-        existingIds: Set<Long>,
-        sanitize: (String) -> String,
-    ): Map<String, String> {
-        val out = LinkedHashMap<String, String>()
-        o.keys().forEach { key ->
-            val id = key.toLongOrNull() ?: return@forEach
-            if (id !in existingIds) return@forEach
-            out[key] = sanitize(o.optString(key))
-        }
-        return out
-    }
-
-    // --- Backup: default source (SOURCES section — ids are preserved on restore) ---
-
-    /** Currently selected default source id, or null when none chosen. */
-    suspend fun currentDefaultSourceId(): Long? =
-        context.dataStore.data.first()[Keys.DEFAULT_SOURCE]?.takeIf { it > 0 }
-
-    /** Restores the default source only when that id survived the restore. */
-    suspend fun importDefaultSource(id: Long, existingSourceIds: Set<Long>) {
-        if (id in existingSourceIds) setDefaultSource(id)
     }
 
     // --- Backup: proxy password (handled out-of-band by BackupManager: encrypted or omitted) ---

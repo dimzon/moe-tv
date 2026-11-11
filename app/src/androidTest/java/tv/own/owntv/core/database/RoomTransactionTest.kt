@@ -37,8 +37,8 @@ class RoomTransactionTest {
     @Test
     fun aTransactionCommitsItsWrites() = runBlocking {
         db.transaction {
-            db.sourceDao().insert(SourceEntity(name = "Primary", type = SourceType.XTREAM, url = "https://a.test"))
-            db.sourceDao().insert(SourceEntity(name = "Junior", type = SourceType.XTREAM, url = "https://b.test"))
+            db.sourceDao().insert(SourceEntity(name = "Primary", type = SourceType.RUTUBE, url = "https://a.test"))
+            db.sourceDao().insert(SourceEntity(name = "Junior", type = SourceType.RUTUBE, url = "https://b.test"))
         }
 
         assertEquals(2, db.sourceDao().getAllOnce().size)
@@ -52,7 +52,7 @@ class RoomTransactionTest {
     fun aFailureRollsTheWholeBlockBack() = runBlocking {
         runCatching {
             db.transaction {
-                db.sourceDao().insert(SourceEntity(name = "Primary", type = SourceType.XTREAM, url = "https://a.test"))
+                db.sourceDao().insert(SourceEntity(name = "Primary", type = SourceType.RUTUBE, url = "https://a.test"))
                 error("boom")
             }
         }

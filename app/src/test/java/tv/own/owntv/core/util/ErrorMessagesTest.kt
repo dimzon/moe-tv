@@ -2,8 +2,6 @@ package tv.own.owntv.core.util
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import tv.own.owntv.core.repository.EpgRepository
-import tv.own.owntv.core.stalker.StalkerEpgLoader
 
 class ErrorMessagesTest {
     @Test
@@ -14,37 +12,11 @@ class ErrorMessagesTest {
         )
     }
 
-    /**
-     * Both guide sources that can answer perfectly and carry nothing. Before this, the portal's
-     * message fell through to [FriendlySyncFailure.Unknown] and was shown as raw English in every
-     * language, and the XMLTV one had no message at all so the row showed no error whatsoever.
-     */
     @Test
-    fun `a guide that answered with nothing is classified rather than shown raw`() {
-        assertEquals(
-            FriendlySyncFailure.GuideEmpty,
-            classifySyncFailure(StalkerEpgLoader.PortalHasNoGuideException().message, online = true),
-        )
-        assertEquals(
-            FriendlySyncFailure.GuideEmpty,
-            classifySyncFailure(EpgRepository.NoProgrammesInWindowException().message, online = true),
-        )
-    }
-
-    /** A guide with programmes for other channels than the playlists' is not "empty, try later". */
-    @Test
-    fun `a guide that matches no playlist channel is told apart from an empty one`() {
-        assertEquals(
-            FriendlySyncFailure.GuideMatchesNoChannel,
-            classifySyncFailure(EpgRepository.GuideMatchesNoChannelException().message, online = true),
-        )
-    }
-
-    @Test
-    fun `a panel answering 513 refused the login`() {
+    fun `a provider answering 513 refused the login`() {
         assertEquals(
             FriendlySyncFailure.AuthenticationRejected,
-            classifySyncFailure("HTTP 513 for http://panel.test/player_api.php?username=***&password=***", online = true),
+            classifySyncFailure("HTTP 513 for http://provider.test/api?username=***&password=***", online = true),
         )
     }
 
