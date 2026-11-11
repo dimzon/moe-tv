@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_bg">#FF170A2E</color>
+    <color name="brand_bg_top">#FF3A1050</color>
+    <color name="brand_primary">#FFE0457B</color>
+    <color name="brand_accent">#FFFFC978</color>
+    <color name="brand_cyan">#FFFFB25C</color>
+    <color name="brand_ink">#FFFFF3EC</color>
+    <color name="splash_background">#FF170A2E</color>
+    <color name="splash_icon_background">#FF3A1050</color>
+</resources>

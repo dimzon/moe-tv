@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<defs>
+ <linearGradient id="body" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#56EEFA"/><stop offset="1" stop-color="#1A58D0"/></linearGradient>
+ <linearGradient id="stand" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4AE8F8"/><stop offset="1" stop-color="#1A5CCE"/></linearGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A2852"/><stop offset="1" stop-color="#030A1A"/></linearGradient>
+ <clipPath id="screenClip"><rect x="130" y="210" width="740" height="460" rx="24"/></clipPath>
+</defs>
+<g transform="translate(0 76)">
+ <!-- антенна «рожки» -->
+ <rect x="456" y="104" width="88" height="66" rx="14" fill="#1A58D0"/>
+ <g stroke="#040E22" stroke-width="30" stroke-linecap="round" fill="none">
+  <path d="M500 140L285 22M500 140L715 22"/>
+ </g>
+ <g stroke="#47C9F0" stroke-width="21" stroke-linecap="round" fill="none">
+  <path d="M500 140L285 22M500 140L715 22"/>
+ </g>
+ <circle cx="285" cy="22" r="25" fill="#040E22"/>
+ <circle cx="285" cy="22" r="18" fill="#48DEFF"/>
+ <circle cx="715" cy="22" r="25" fill="#040E22"/>
+ <circle cx="715" cy="22" r="18" fill="#48DEFF"/>
+ <circle cx="500" cy="140" r="28" fill="#1A58D0"/>
+ <circle cx="500" cy="140" r="13" fill="#48DEFF" opacity=".92"/>
+ <!-- подставка -->
+ <rect x="452" y="700" width="96" height="92" rx="14" fill="#1D4FA8"/>
+ <rect x="326" y="776" width="348" height="42" rx="21" fill="url(#stand)"/>
+ <!-- корпус -->
+ <rect x="70" y="150" width="860" height="580" rx="58" fill="url(#body)" stroke="#FFFFFF" stroke-opacity=".3" stroke-width="5"/>
+ <rect x="108" y="188" width="784" height="504" rx="38" fill="#040E22"/>
+ <g clip-path="url(#screenClip)">
+  <rect x="130" y="210" width="740" height="460" fill="url(#glass)"/>
+  <g stroke="#82E4FF" stroke-opacity=".38" stroke-width="2.6">
+   <path d="M253 210V610M377 210V610M500 210V610M623 210V610M747 210V610"/>
+   <path d="M130 310H870M130 410H870M130 510H870"/>
+  </g>
+  <g stroke="#D2F6FF" stroke-opacity=".6" stroke-width="3.2"><path d="M500 210V610M130 410H870"/></g>
+  <circle cx="500" cy="410" r="88" fill="none" stroke="#F0FCFF" stroke-opacity=".85" stroke-width="5"/>
+  <circle cx="500" cy="410" r="9" fill="#5AE8FF"/>
+  <g stroke="#FFFFFF" stroke-opacity=".78" stroke-width="5" fill="none">
+   <path d="M130 244V210H164M836 210H870V244M130 576V610H164M836 610H870V576"/>
+  </g>
+  <rect x="246" y="302" width="15" height="15" fill="#FF60B2" opacity=".75"/>
+  <rect x="739" y="502" width="15" height="15" fill="#FFD648" opacity=".75"/>
+  <rect x="130" y="608" width="740" height="4" fill="#020A1A"/>
+  <g opacity=".94">
+   <rect x="130" y="612" width="105.7" height="58" fill="#F0F6FF"/>
+   <rect x="235.7" y="612" width="105.7" height="58" fill="#FFD23F"/>
+   <rect x="341.4" y="612" width="105.7" height="58" fill="#35D6E8"/>
+   <rect x="447.1" y="612" width="105.7" height="58" fill="#3BD77A"/>
+   <rect x="552.9" y="612" width="105.7" height="58" fill="#E853B6"/>
+   <rect x="658.6" y="612" width="105.7" height="58" fill="#F2494B"/>
+   <rect x="764.3" y="612" width="105.7" height="58" fill="#2E63F6"/>
+  </g>
+  <polygon points="130,210 463,210 130,463" fill="#FFFFFF" opacity=".05"/>
+ </g>
+ <rect x="130" y="210" width="740" height="460" rx="24" fill="none" stroke="#00030F" stroke-opacity=".4" stroke-width="3"/>
+ <rect x="474" y="694" width="52" height="12" rx="6" fill="#6EF0FF" opacity=".82"/>
+</g>
+</svg>

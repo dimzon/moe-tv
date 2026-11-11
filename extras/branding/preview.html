@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>МОЁ ТВ — брендинг Android TV</title>
+<style>
+ :root{--ink:#12203a;--muted:#5c6b85;--line:#dfe6f0;--accent:#0b63c9}
+ *{box-sizing:border-box} body{margin:0;background:#f4f7fc;color:var(--ink);
+  font:15px/1.5 "Segoe UI",Arial,sans-serif;padding:44px}
+ .wrap{max-width:1120px;margin:0 auto}
+ h1{margin:0 0 4px;font-size:30px;letter-spacing:-.5px} .sub{color:var(--muted);margin-bottom:32px}
+ h2{font-size:15px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);margin:36px 0 14px}
+ .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;
+  box-shadow:0 8px 30px rgba(20,45,90,.06)}
+ .tv{background:radial-gradient(120% 120% at 15% 20%,#123b7d,#050b1e 70%);border-radius:0;
+  padding:34px;position:relative;overflow:hidden}
+ .tv:before{content:"";position:absolute;inset:0;background-image:linear-gradient(#ffffff08 1px,transparent 1px),
+  linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:64px 64px}
+ .tv>*{position:relative}
+ /* Плитка Android TV: строго прямоугольная, без скруглений и объёма */
+ .banner{width:min(100%,760px);border-radius:0;display:block;box-shadow:none}
+ .lbl{color:#a9c7ee;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px}
+ .row{display:flex;flex-wrap:wrap;gap:38px;align-items:flex-end;margin-top:24px}
+ .cell{text-align:center;color:#a9c7ee;font-size:12px}
+ .cell img{display:block;margin:0 auto 10px;filter:drop-shadow(0 10px 18px rgba(0,0,0,.45))}
+ .sizes{display:flex;gap:18px;align-items:flex-end;justify-content:center}
+ .swatches{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+ .sw{width:88px;height:64px;border-radius:10px;border:1px solid #e3e9f2;padding:8px;
+  font-size:10px;color:#fff;display:flex;align-items:flex-end;font-family:Consolas,monospace}
+ .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+ code{background:#eef3fa;padding:2px 6px;border-radius:5px;font-size:12px}
+ footer{color:var(--muted);font-size:13px;margin-top:34px;border-top:1px solid var(--line);padding-top:18px}
+</style></head><body><div class="wrap">
+<h1>МОЁ ТВ</h1><div class="sub">Брендинг приложения для Android TV · телевизор с настроечной сеткой и антенной-«рожками»</div>
+
+<h2>Баннер на главном экране</h2>
+<div class="card"><div class="tv">
+ <div class="lbl">Android TV · home screen · плоская плитка без скруглений</div>
+ <img class="banner" src="master/tv_banner.png" alt="Баннер МОЁ ТВ">
+ <div class="row">
+  <div class="cell"><div class="sizes">
+   <img src="master/ic_launcher.png" width="96" height="96" alt="">
+   <img src="master/ic_launcher.png" width="64" height="64" alt="">
+   <img src="master/ic_launcher.png" width="48" height="48" alt="">
+  </div>квадратная · 96 / 64 / 48 px</div>
+  <div class="cell"><div class="sizes">
+   <img src="master/ic_launcher_round.png" width="96" height="96" alt="">
+   <img src="master/ic_launcher_round.png" width="64" height="64" alt="">
+   <img src="master/ic_launcher_round.png" width="48" height="48" alt="">
+  </div>круглая · 96 / 64 / 48 px</div>
+ </div>
+</div></div>
+
+<h2>Мастер-файлы</h2>
+<div class="card grid">
+ <div class="cell" style="color:var(--ink)"><img src="master/ic_launcher.png" width="150" height="150" style="border-radius:22px"><br>
+  <b>ic_launcher.png</b><br><code>512 × 512</code></div>
+ <div class="cell" style="color:var(--ink)"><img src="master/ic_launcher_round.png" width="150" height="150"><br>
+  <b>ic_launcher_round.png</b><br><code>512 × 512</code></div>
+ <div class="cell" style="color:var(--ink)"><img src="master/ic_launcher_foreground.png" width="150" height="150" style="background:#0d2b60;border-radius:16px"><br>
+  <b>foreground</b><br><code>адаптивная иконка</code></div>
+ <div class="cell" style="color:var(--ink)"><img src="master/play_store_512.png" width="150" height="150" style="border-radius:16px"><br>
+  <b>play_store_512.png</b><br><code>листинг Google Play</code></div>
+</div>
+
+<h2>Палитра</h2>
+<div class="card"><div class="swatches">
+ <div class="sw" style="background:#061029">#061029</div>
+ <div class="sw" style="background:#0C2C69">#0C2C69</div>
+ <div class="sw" style="background:#1F60D8">#1F60D8</div>
+ <div class="sw" style="background:#3ADEEF">#3ADEEF</div>
+ <div class="sw" style="background:#48DEFF">#48DEFF</div>
+ <div class="sw" style="background:#FFD23F">#FFD23F</div>
+ <div class="sw" style="background:#E853B6">#E853B6</div>
+ <div class="sw" style="background:#F0F6FF;color:#12203a">#F0F6FF</div>
+</div></div>
+<footer>Полный комплект Android: <code>android_res/</code> — готовый <code>res/</code> (108dp-слои, все плотности баннера,
+векторные drawable, темы, splash), <code>android_extra/</code> — манифест и ассеты Google Play,
+<code>android_variants/&lt;схема&gt;/res/</code> — такое же дерево для каждой из 12 схем.
+Вектор знака: <code>mark.svg</code> и <code>android_res/drawable/tv_mark.xml</code>.
+Пересборка: <code>python build_brand.py &amp;&amp; python build_variants.py &amp;&amp; python build_android.py</code>.</footer>
+</div></body></html>
