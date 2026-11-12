@@ -481,6 +481,9 @@ fun SettingsScreen(
             chip = stringResource(if (updateCheckOnStart) R.string.common_on else R.string.common_off),
             chipTone = if (updateCheckOnStart) TileTone.PRIMARY else TileTone.SECONDARY,
             onClick = { settingsVm.setUpdateCheckOnStart(!updateCheckOnStart) },
+            // Locked off: update checking is force-disabled (SettingsRepository) — the app is
+            // sideloaded apartment-only, there is nothing to check against. Greyed, non-interactive.
+            enabled = false,
         ),
         // The guide's own settings (one RuTube source fills it, so there are no source lists above
         // it any more): the guide-wide offset, reminders and how far ahead the guide is stored.
@@ -703,6 +706,8 @@ fun SettingsScreen(
             chip = if (updateCheckOnStart) stringResource(R.string.common_on) else stringResource(R.string.common_off),
             chipTone = if (updateCheckOnStart) TileTone.PRIMARY else TileTone.SECONDARY,
             onClick = { settingsVm.setUpdateCheckOnStart(!updateCheckOnStart) },
+            // Locked off with the quick toggle above — same force-disabled update check.
+            enabled = false,
         ),
         RootRow(
             tabRowKey(SettingsTab.NETWORK), TileTone.SECONDARY, MyOwnTVIcon.NETWORK,
@@ -2026,6 +2031,8 @@ internal data class RootRow(
     /** ◀ ▶ on a stepper or segmented value. */
     val onStep: ((Int) -> Unit)? = null,
     val onClick: () -> Unit,
+    /** A locked row: drawn greyed and non-interactive (no focus, no click). Default on. */
+    val enabled: Boolean = true,
 ) : RootItem {
     /**
      * Honest chevrons: the arrow promises another screen, so only the rows that open one carry it.
@@ -2093,6 +2100,7 @@ private fun RootRowStage(
         onLongClick = onLongClick,
         onStep = extra?.onStep ?: item.onStep,
         pinned = pinned,
+        enabled = item.enabled,
         help = settingHelp(item.key, words.title, item.desc, value, extra?.choices ?: item.choices, chosen = extra?.chosen ?: -1, recommended = extra?.recommended ?: item.recommended).let { h ->
             val hints = (extra?.hints ?: h.hints).map { if (inQuick && it.second == pin) it.first to unpin else it }
             h.copy(text = extra?.help ?: h.text, hints = hints, extra = extra?.extra)
