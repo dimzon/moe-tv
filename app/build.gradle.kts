@@ -29,6 +29,20 @@ plugins {
     alias(libs.plugins.baselineprofile)
 }
 
+// Build number auto-increments on every build. The last-used value lives in a git-ignored
+// `versioncode.txt` at the repo root; this build uses (stored + 1), and the `bumpVersionCode` task
+// writes that value back after the build, so the next build is one higher. Reading the file through
+// a provider keeps the configuration cache honest (a changed file re-runs configuration); the write
+// happens at execution time, which the cache permits. CI can pin an exact number with VERSION_CODE
+// (from the git tag), which wins over the counter. versionName resets to a clean 1.0; CI overrides
+// with VERSION_NAME.
+val versionCodeFile = rootProject.layout.projectDirectory.file("versioncode.txt")
+val storedVersionCode = providers.fileContents(versionCodeFile).asText
+    .map { it.trim().toIntOrNull() ?: 0 }
+    .orElse(0)
+val resolvedVersionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: (storedVersionCode.get() + 1)
+val resolvedVersionName = System.getenv("VERSION_NAME") ?: "1.0"
+
 android {
     namespace = "tv.own.myowntv"
     compileSdk {
@@ -47,15 +61,10 @@ android {
         applicationId = "com.github.dimzon.owntv"
         minSdk = 26
         targetSdk = 36
-        // CI injects these from the git tag (see .github/workflows/android.yml) so releases never
-        // need a manual edit here. The fallbacks are only used for local/debug builds — pinned HIGH
-        // (99999, mirroring versionName 99.99.99) so a local/debug APK is always "newer" than any
-        // published release and installs straight over it (no INSTALL_FAILED_VERSION_DOWNGRADE).
-        versionCode = (System.getenv("VERSION_CODE") ?: "99999").toInt()
-        // CI injects VERSION_NAME from the git tag for releases. The fallback is only ever used by
-        // LOCAL builds (i.e. debug), so we pin it to 99.99.99 — that way a dev build is always "newer"
-        // than any published release and the in-app updater never offers an "update" while developing.
-        versionName = System.getenv("VERSION_NAME") ?: "99.99.99"
+        // versionCode / versionName come from the top-level vals above (auto-incrementing build
+        // number, reset to 1.0; CI can pin VERSION_CODE / VERSION_NAME).
+        versionCode = resolvedVersionCode
+        versionName = resolvedVersionName
 
         // Opt-in local diagnostic APKs keep the rolling playback trace enabled even when they are
         // release-signed (so they can update an installed production build without changing its data).
@@ -112,6 +121,12 @@ android {
             dimension = "abi"
             ndk { abiFilters += listOf("x86_64") }
         }
+        // All ABIs in one APK — for measuring the full multi-platform footprint (and for a single
+        // sideload-anywhere build). The split flavors stay the shipping default; this is opt-in.
+        create("universal") {
+            dimension = "abi"
+            ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64") }
+        }
     }
 
     // Release signing: env vars first (that is how CI injects the GitHub secrets), then Gradle
@@ -128,20 +143,30 @@ android {
     // release (`adb install -r`) and upgrade/migration testing works with real data.
     // When neither source is configured — fork CI, or a fresh clone — nothing here applies and
     // builds still succeed, just unsigned.
-    // Third source: the standalone out-of-repo properties file, loaded above defaultConfig.
-    fun signingValue(env: String, property: String): String? =
+    // Fourth source (the local default): a git-ignored `keystore.properties` at the repo root, the
+    // same convention SmartRuTube uses — storeFile/storePassword/keyAlias/keyPassword. storeFile is
+    // resolved relative to the repo root, so `./gradlew assembleStandardRelease` is signed out of the
+    // box on a dev machine with no env dance. env / gradle-property / the out-of-repo file still win
+    // (that is how CI injects the GitHub secrets).
+    val keystorePropsFile = rootProject.file("keystore.properties")
+    val keystoreProps = Properties().apply {
+        if (keystorePropsFile.exists()) keystorePropsFile.inputStream().use { load(it) }
+    }
+    fun signingValue(env: String, property: String, ksKey: String): String? =
         System.getenv(env)
             ?: providers.gradleProperty(property).orNull
             ?: localSigningProps.getProperty(property)
+            ?: keystoreProps.getProperty(ksKey)
 
-    val releaseKeystore = signingValue("KEYSTORE_FILE", "owntv.keystoreFile")
+    val releaseKeystore = signingValue("KEYSTORE_FILE", "owntv.keystoreFile", "storeFile")
     signingConfigs {
         if (releaseKeystore != null) {
             create("release") {
-                storeFile = file(releaseKeystore)
-                storePassword = signingValue("KEYSTORE_PASSWORD", "owntv.keystorePassword")
-                keyAlias = signingValue("KEY_ALIAS", "owntv.keyAlias")
-                keyPassword = signingValue("KEY_PASSWORD", "owntv.keyPassword")
+                // keystore.properties storeFile is repo-root-relative; env/props paths are absolute.
+                storeFile = rootProject.file(releaseKeystore)
+                storePassword = signingValue("KEYSTORE_PASSWORD", "owntv.keystorePassword", "storePassword")
+                keyAlias = signingValue("KEY_ALIAS", "owntv.keyAlias", "keyAlias")
+                keyPassword = signingValue("KEY_PASSWORD", "owntv.keyPassword", "keyPassword")
             }
         }
     }
@@ -351,6 +376,20 @@ val verifyI18nLiterals = tasks.register<VerifyI18nLiterals>("verifyI18nLiterals"
 // preBuild fronts every variant, so debug compile checks and release assembles are both covered.
 // Inputs are declared above, so an unchanged source tree makes this UP-TO-DATE and free.
 tasks.named("preBuild") { dependsOn(verifyI18nLiterals) }
+
+// Records the versionCode this build used into versioncode.txt, so the next build's (stored + 1) is
+// one higher — the "increments on every build" behaviour. Values are captured as task-local inputs
+// (no project access at execution), keeping the configuration cache happy. Skipped when CI pins
+// VERSION_CODE. Runs once per invocation even when several assemble* tasks are built together.
+val bumpVersionCode = tasks.register("bumpVersionCode") {
+    description = "Write the used versionCode back so the next build increments it."
+    val used = resolvedVersionCode
+    val file = versionCodeFile.asFile
+    doLast {
+        if (System.getenv("VERSION_CODE") == null) file.writeText(used.toString())
+    }
+}
+tasks.matching { it.name.startsWith("assemble") }.configureEach { finalizedBy(bumpVersionCode) }
 
 dependencies {
     // The engine (database, sync, parsers, EPG, playback) used to be a separate :core/:player-core

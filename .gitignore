@@ -57,3 +57,6 @@ replay_pid*.log
 
 # Local-only archive (old detailed changelogs etc.), never committed
 /archive/
+
+# Auto-incrementing local build counter (see app/build.gradle.kts bumpVersionCode)
+versioncode.txt
