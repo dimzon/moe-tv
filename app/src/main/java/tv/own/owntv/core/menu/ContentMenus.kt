@@ -50,7 +50,6 @@ private val LIVE_ACTIONS = listOf(
     MenuActionRef("rename", R.string.content_rename),
     MenuActionRef("hide", R.string.content_hide_channel),
     MenuActionRef("remove_history", R.string.content_remove_history),
-    MenuActionRef("match_epg", R.string.content_match_epg),
     MenuActionRef("epg_offset", R.string.content_epg_time_offset),
     MenuActionRef("move", R.string.content_move),
     MenuActionRef("move_to_category", R.string.content_move_to_category),

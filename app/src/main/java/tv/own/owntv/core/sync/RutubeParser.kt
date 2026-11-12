@@ -145,6 +145,21 @@ object RutubeParser {
         return optString(name, null)?.takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) }
     }
 
+    /**
+     * Ask RuTube's CDN (`pic.rtbcdn.ru`) for a pre-scaled image instead of the original 1920px
+     * picture — the same `?size=<tier>&picture_type=…` trick SmartRuTube's `RuTubeImageUrlHelper`
+     * uses (s=193, m=480, l=640, xl=800, xxl=1280 px). `l` (640) is plenty for the largest logo tile
+     * yet a fraction of the original's weight. Any non-CDN URL (a third-party feed, an iframe) is
+     * returned unchanged; a URL that already carries a query gets `&…` appended, not `?…`.
+     */
+    private fun rutubeLogoUrl(url: String?): String? {
+        if (url == null) return null
+        val cdn = "pic.rtbcdn.ru/"
+        if (!(url.startsWith("https://$cdn") || url.startsWith("http://$cdn"))) return url
+        val sep = if (url.contains('?')) '&' else '?'
+        return "$url${sep}size=l&picture_type=ios"
+    }
+
     private fun parseChannel(obj: JSONObject?): RutubeChannel? {
         if (obj == null) return null
         val videoId = obj.str("id") ?: return null
@@ -169,8 +184,11 @@ object RutubeParser {
             videoId = videoId,
             name = name,
             title = obj.str("title"),
-            logoUrl = author?.str("avatar_url")
-                ?: obj.str("thumbnail_url"),
+            // Prefer the live programme's cover (thumbnail_url) over the channel's own avatar: for
+            // film/series channels it is the on-air artwork (richer — what SmartRuTube shows), the
+            // avatar is the fallback. The RuTube CDN resize param keeps it small and crisp instead of
+            // the 1920px original.
+            logoUrl = rutubeLogoUrl(obj.str("thumbnail_url") ?: author?.str("avatar_url")),
             categoryIds = categoryIds,
             orderNumber = obj.optInt("order_number", Int.MIN_VALUE).takeIf { it != Int.MIN_VALUE },
             isPaid = obj.optBoolean("is_paid", false) || hasSubscription,

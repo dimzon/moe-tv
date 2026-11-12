@@ -1143,7 +1143,6 @@ private fun ChannelContextMenu(
     val focus = remember { androidx.compose.ui.focus.FocusRequester() }
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
     androidx.activity.compose.BackHandler { onDismiss() }
-    val matchValue = if (epgMatchManual) stringResource(R.string.settings_manual) else stringResource(R.string.settings_auto)
     val offsetValue = epgShiftMinutes?.let { liveEpgShiftLabel(it) } ?: stringResource(R.string.content_epg_offset_global_short)
     // Group ids = the four groups, in their order.
     val watch = 0; val chan = 1; val guide = 2; val organise = 3; val details = 4
@@ -1159,7 +1158,6 @@ private fun ChannelContextMenu(
         add(MenuAction("rename", stringResource(R.string.content_rename), MyOwnTVIcon.PENCIL, group = chan, onClick = onRename))
         add(MenuAction("hide", stringResource(R.string.content_hide_channel), MyOwnTVIcon.EYE_OFF, group = chan, onClick = onHide))
         if (isHistory) add(MenuAction("remove_history", stringResource(R.string.content_remove_history), MyOwnTVIcon.HISTORY, group = chan, onClick = onRemoveFromHistory))
-        add(MenuAction("match_epg", stringResource(R.string.content_match_epg), MyOwnTVIcon.EPG, group = guide, onClick = onMatchEpg))
         add(MenuAction("epg_offset", stringResource(R.string.content_epg_time_offset), MyOwnTVIcon.CLOCK, group = guide, onClick = onEpgOffset))
         if (canMove) {
             add(MenuAction("move", stringResource(R.string.content_move), MyOwnTVIcon.MOVE, group = organise, onClick = onMove))
@@ -1169,7 +1167,7 @@ private fun ChannelContextMenu(
             add(MenuAction("remove_from_category", stringResource(R.string.content_remove_from_category), MyOwnTVIcon.CLOSE, group = organise, onClick = onRemoveFromCategory))
         }
     }
-    val values = mapOf("match_epg" to matchValue, "epg_offset" to offsetValue)
+    val values = mapOf("epg_offset" to offsetValue)
     val groupLabels = listOf(
         stringResource(R.string.content_menu_group_watch),
         stringResource(R.string.content_menu_group_channel),
