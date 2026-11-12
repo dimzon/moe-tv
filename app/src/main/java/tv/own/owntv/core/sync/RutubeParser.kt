@@ -162,7 +162,12 @@ object RutubeParser {
 
     private fun parseChannel(obj: JSONObject?): RutubeChannel? {
         if (obj == null) return null
-        val videoId = obj.str("id") ?: return null
+        // The 16-byte hex videoId is the channel's natural key — it becomes channels.remoteId,
+        // epgChannelId and the channel_category link. Normalise case once here so every consumer
+        // stores/compares the identical lowercase string under BINARY collation (a mixed-case id
+        // would silently miss its own FK/join). RuTube already returns lowercase; this makes it a
+        // guarantee, not luck.
+        val videoId = obj.str("id")?.trim()?.lowercase()?.takeIf { it.isNotEmpty() } ?: return null
         val author = obj.optJSONObject("author")
         val name = author?.str("name")
             ?: obj.str("title")

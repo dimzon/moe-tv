@@ -38,6 +38,7 @@ internal class RuTubeSyncer(
     private val rutube: RutubeApi,
     private val bulkInsertHelper: BulkInsertHelper,
     private val support: SyncSupport,
+    private val channelCategoryDao: tv.own.owntv.core.database.ChannelCategoryDao,
 ) {
     suspend fun sync(s: SourceEntity, progress: SyncCounters, stats: SyncStatsCollector) =
         coroutineScope {
@@ -143,9 +144,39 @@ internal class RuTubeSyncer(
                 support.pruneCategories(s.id, MediaType.LIVE, categoryRefresh.seenRemoteIds, label, stats)
             }
         }
+        // Rebuild the many-to-many link (redesign §2): every genre in broadcast_category[], not just
+        // the primary bucket. Keyed by the channel's hex videoId (= channels.remoteId), so a re-sync's
+        // clear-then-insert never orphans a membership. Runs after the channels are committed.
+        rebuildChannelCategories(s.id, channels, catMap)
         progress.update(SyncPhase.LIVE, total[0])
         stats.processedCounts["channels"] = total[0]
         Log.i(TAG, "$label phase end sourceId=${s.id} unique=${total[0]} ruTube")
+    }
+
+    /**
+     * Fills `channel_category` from each channel's full `broadcast_category[]` (redesign §2). The old
+     * model kept only a single "primary" category on the channel; this records every genre it airs in,
+     * keyed by the hex videoId so it survives a re-sync's id churn. Only channels present in the DB are
+     * linked — the FK targets `channels.remoteId`, so a row for a filtered/broken channel would be
+     * rejected. RuTube category 1 ("all live") is the Everything mirror, never a real bucket.
+     */
+    private suspend fun rebuildChannelCategories(
+        sourceId: Long,
+        channels: List<RutubeChannel>,
+        catMap: Map<String, Long>,
+    ) {
+        channelCategoryDao.clearForSource(sourceId)
+        val present = channelCategoryDao.presentHexIds(sourceId).toSet()
+        val rows = ArrayList<tv.own.owntv.core.database.ChannelCategoryEntity>()
+        for (ch in channels) {
+            if (ch.videoId !in present) continue
+            for (rc in ch.categoryIds) {
+                if (rc == 1) continue
+                val dbCat = catMap[rc.toString()] ?: continue
+                rows += tv.own.owntv.core.database.ChannelCategoryEntity(channelHexId = ch.videoId, categoryId = dbCat)
+            }
+        }
+        if (rows.isNotEmpty()) channelCategoryDao.insertAll(rows)
     }
 
     internal companion object {

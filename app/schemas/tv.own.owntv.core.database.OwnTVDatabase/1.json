@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "5923250f57e7a2ab0ebeb64a483d89ab",
+    "identityHash": "34db015c6f01e1c7c5845e1ff2819975",
     "entities": [
       {
         "tableName": "sources",
@@ -378,6 +378,15 @@
             "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_channels_sourceId_remoteId` ON `${TABLE_NAME}` (`sourceId`, `remoteId`)"
           },
           {
+            "name": "index_channels_remoteId",
+            "unique": true,
+            "columnNames": [
+              "remoteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_channels_remoteId` ON `${TABLE_NAME}` (`remoteId`)"
+          },
+          {
             "name": "index_channels_sourceId_name",
             "unique": false,
             "columnNames": [
@@ -445,6 +454,75 @@
           {
             "table": "categories",
             "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "categoryId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "channel_category",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`channelHexId` TEXT NOT NULL, `categoryId` INTEGER NOT NULL, PRIMARY KEY(`channelHexId`, `categoryId`), FOREIGN KEY(`channelHexId`) REFERENCES `channels`(`remoteId`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`categoryId`) REFERENCES `categories`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "channelHexId",
+            "columnName": "channelHexId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoryId",
+            "columnName": "categoryId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "channelHexId",
+            "categoryId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_channel_category_categoryId",
+            "unique": false,
+            "columnNames": [
+              "categoryId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_channel_category_categoryId` ON `${TABLE_NAME}` (`categoryId`)"
+          },
+          {
+            "name": "index_channel_category_channelHexId",
+            "unique": false,
+            "columnNames": [
+              "channelHexId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_channel_category_channelHexId` ON `${TABLE_NAME}` (`channelHexId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "channels",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "channelHexId"
+            ],
+            "referencedColumns": [
+              "remoteId"
+            ]
+          },
+          {
+            "table": "categories",
+            "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
               "categoryId"
@@ -1303,7 +1381,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5923250f57e7a2ab0ebeb64a483d89ab')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '34db015c6f01e1c7c5845e1ff2819975')"
     ]
   }
 }

@@ -38,6 +38,8 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
         // Content
         CategoryEntity::class,
         ChannelEntity::class,
+        // Many-to-many: a channel belongs to every RuTube genre it is broadcast in (redesign §2).
+        ChannelCategoryEntity::class,
         // User data
         FavoriteEntity::class,
         WatchHistoryEntity::class,
@@ -73,6 +75,7 @@ abstract class OwnTVDatabase : RoomDatabase() {
     abstract fun sourceDao(): SourceDao
     abstract fun categoryDao(): CategoryDao
     abstract fun channelDao(): ChannelDao
+    abstract fun channelCategoryDao(): ChannelCategoryDao
     abstract fun favoriteDao(): FavoriteDao
     abstract fun historyDao(): HistoryDao
     abstract fun contentOrderDao(): ContentOrderDao

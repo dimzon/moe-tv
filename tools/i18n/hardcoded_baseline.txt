@@ -94,6 +94,16 @@
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	^$wrapped(?![\\p{L}\\p{N}])
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	^(?:\\|?[A-Za-z]{2,4}\\s*\\||\\[[A-Za-z]{2,4}]|\\([A-Za-z]{2,4}\\))
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	{2,}
+1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	(SELECT remoteId FROM channels WHERE sourceId = :sourceId AND remoteId IS NOT NULL)
+1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	DELETE FROM channel_category WHERE channelHexId IN
+1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	SELECT EXISTS(SELECT 1 FROM channel_category WHERE channelHexId = :hexId AND categoryId = :categoryId)
+1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	SELECT categoryId FROM channel_category WHERE channelHexId = :hexId
+1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	SELECT remoteId FROM channels WHERE sourceId = :sourceId AND remoteId IS NOT NULL
+3	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	categoryId
+3	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	channelHexId
+1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	channel_category
+1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	id
+1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	remoteId
 1	app/src/main/java/tv/own/owntv/core/database/ManualOrdering.kt	\0
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	+ (SELECT COUNT(*) FROM content_order WHERE mediaType = 'LIVE')
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	+ (SELECT COUNT(*) FROM custom_category_members WHERE mediaType = 'LIVE')
@@ -225,6 +235,7 @@
 1	app/src/main/java/tv/own/owntv/core/database/dao/TvProviderProgramDao.kt	DELETE FROM tv_provider_programs WHERE surface = :surface AND mediaType = :mediaType AND groupId = :groupId
 1	app/src/main/java/tv/own/owntv/core/database/dao/TvProviderProgramDao.kt	SELECT * FROM tv_provider_programs ORDER BY surface ASC, lastPublishedAt DESC
 2	app/src/main/java/tv/own/owntv/core/database/dao/TvProviderProgramDao.kt	SELECT * FROM tv_provider_programs WHERE surface = :surface
+1	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	remoteId
 1	app/src/main/java/tv/own/owntv/core/database/entity/ReminderEntity.kt	0
 2	app/src/main/java/tv/own/owntv/core/database/entity/SourceEntities.kt	0
 1	app/src/main/java/tv/own/owntv/core/database/entity/SourceEntities.kt	sources

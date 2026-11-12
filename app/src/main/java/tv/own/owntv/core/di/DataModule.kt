@@ -188,6 +188,7 @@ val dataModule = module {
             sourceDao = get(),
             categoryDao = get(),
             channelDao = get(),
+            channelCategoryDao = get(),
             bulkInsertHelper = get(),
             activityTracker = get(),
             customize = get(),

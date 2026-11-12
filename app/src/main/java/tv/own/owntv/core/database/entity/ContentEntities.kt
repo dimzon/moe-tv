@@ -49,6 +49,10 @@ data class CategoryEntity(
     indices = [
         Index("epgChannelId"),
         Index(value = ["sourceId", "remoteId"], unique = true),
+        // Single-column unique on the natural hex key: the `channel_category` FK references
+        // channels.remoteId (redesign §2 M:N link), and SQLite needs a unique constraint on the
+        // parent column. RuTube video ids are globally unique, so this holds across the one source.
+        Index(value = ["remoteId"], unique = true),
         // Composite grid read-indices (v6): A–Z order (ORDER BY name) and playlist/provider order
         // (ORDER BY sortOrder, name), for both the whole-source list and per-category. Mirrors movies/series
         // so all three browse grids (Live/Movies/Series) are index-served in either sort.
