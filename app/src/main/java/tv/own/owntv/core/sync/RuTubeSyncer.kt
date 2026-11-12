@@ -39,6 +39,7 @@ internal class RuTubeSyncer(
     private val support: SyncSupport,
     private val channelCategoryDao: tv.own.owntv.core.database.ChannelCategoryDao,
     private val channelRenameDao: tv.own.owntv.core.database.ChannelRenameDao,
+    private val renameSeeds: Map<String, String>,
 ) {
     suspend fun sync(s: SourceEntity, progress: SyncCounters, stats: SyncStatsCollector) =
         coroutineScope {
@@ -67,9 +68,9 @@ internal class RuTubeSyncer(
         // both ends — to the fresh rows below, and to already-stored rows by the apply pass after
         // the commit, so a dictionary change reaches a channel whose content did not change.
         channelRenameDao.replaceAll(
-            ChannelRenameSeeds.map.map { (hex, name) -> tv.own.owntv.core.database.ChannelRenameEntity(remoteId = hex, name = name) },
+            renameSeeds.map { (hex, name) -> tv.own.owntv.core.database.ChannelRenameEntity(remoteId = hex, name = name) },
         )
-        val renames = ChannelRenameSeeds.map
+        val renames = renameSeeds
         val rawCategories = rutube.categories()
         if (channels.isEmpty()) {
             throw IllegalStateException("RuTube returned no live channels — refusing to wipe the catalogue")
@@ -84,11 +85,8 @@ internal class RuTubeSyncer(
         val categoryRefresh = support.refreshCategories(s, MediaType.LIVE, xtCats, stats)
         val catMap = categoryRefresh.idsByRemoteId // "4" -> db row id
 
-        // The curated prefixes/tails (ChannelRenameSeeds) come off BEFORE disambiguation, so the
-        // duplicate grouping sees the names the user will actually see.
-        val cleanedChannels = channels.associate { it.videoId to ChannelRenameSeeds.cleanProviderName(it.name) }
         // Disambiguation needs the full list first (duplicate author-name groups).
-        val duplicateNames = cleanedChannels.values.groupBy { it }.filterValues { it.size > 1 }.keys
+        val duplicateNames = channels.groupBy { it.name }.filterValues { it.size > 1 }.keys
         val sortedChannels = channels.sortedWith(
             compareBy<RutubeChannel> { it.orderNumber?.takeIf { n -> n != 999 } ?: Int.MAX_VALUE }
                 .thenBy { it.name },
@@ -96,12 +94,11 @@ internal class RuTubeSyncer(
 
         var order = 0
         val entities = sortedChannels.map { ch ->
-            val baseName = cleanedChannels[ch.videoId] ?: ch.name
-            val displayName = if (baseName in duplicateNames) {
+            val displayName = if (ch.name in duplicateNames) {
                 val cleaned = cleanTitle(ch.title)
-                if (cleaned != null) "%s · %s".format(baseName, cleaned) else baseName
+                if (cleaned != null) "%s · %s".format(ch.name, cleaned) else ch.name
             } else {
-                baseName
+                ch.name
             }
             ChannelEntity(
                 sourceId = s.id,

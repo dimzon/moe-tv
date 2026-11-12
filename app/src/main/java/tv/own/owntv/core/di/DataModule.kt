@@ -197,6 +197,7 @@ val dataModule = module {
             customize = get(),
             settings = get(),
             rutubeApi = get(),
+            renameSeeds = tv.own.owntv.core.sync.ChannelRenameSeeds.load(androidContext()),
         )
     }
     single { tv.own.owntv.core.sync.RuTubeEpgSyncer(get(), get()) }

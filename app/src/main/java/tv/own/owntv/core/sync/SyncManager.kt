@@ -30,9 +30,10 @@ class SyncManager(
     customize: CustomizationStore,
     settings: SettingsRepository,
     private val rutubeApi: tv.own.owntv.core.sync.RutubeApi? = null,
+    renameSeeds: Map<String, String> = emptyMap(),
 ) {
     private val support = SyncSupport(categoryDao, channelDao, sourceDao, customize, settings)
-    private val rutubeSyncer = rutubeApi?.let { RuTubeSyncer(it, bulkInsertHelper, support, channelCategoryDao, channelRenameDao) }
+    private val rutubeSyncer = rutubeApi?.let { RuTubeSyncer(it, bulkInsertHelper, support, channelCategoryDao, channelRenameDao, renameSeeds) }
     /** Late-bound EPG syncer, created by DataModule after EpgRepository exists. */
     var rutubeEpgSyncer: RuTubeEpgSyncer? = null
 
