@@ -171,10 +171,16 @@ class MoreCountsViewModel(
 
     private fun ids(c: ActiveProfileSources, type: MediaType) = c.sourceIdsFor(type).ifEmpty { listOf(-1L) }
 
+    /** A channel is sealed only when every one of its categories is (M:N). Null/empty membership → not sealed. */
+    private fun sealedAllCats(sealed: Sealed, type: MediaType, channel: tv.own.owntv.core.database.entity.ChannelEntity): Boolean {
+        val cats = tv.own.owntv.core.database.ChannelMembership.catsOf(channel) ?: return false
+        return cats.isNotEmpty() && cats.all { sealed.holds(type, it) }
+    }
+
     private suspend fun loadFavourites(c: ActiveProfileSources, sealed: Sealed): FavouriteLists {
         val key = ContentOrderEntity.FAV_CONTEXT
         val live = channelDao.snapshotFavoritesManual(key, ids(c, MediaType.LIVE), LIST_LIMIT)
-            .filterNot { sealed.holds(MediaType.LIVE, it.categoryId) }
+            .filterNot { sealedAllCats(sealed, MediaType.LIVE, it) }
         val now = System.currentTimeMillis()
         val onNow = if (live.isEmpty()) emptyMap() else guide.onNow(
             channels = live,
@@ -189,7 +195,7 @@ class MoreCountsViewModel(
 
     private suspend fun loadHistory(c: ActiveProfileSources, sealed: Sealed): HistoryLists {
         val live = channelDao.recentlyWatchedWithTimestampFiltered(ids(c, MediaType.LIVE), LIST_LIMIT).first()
-            .filterNot { sealed.holds(MediaType.LIVE, it.channel.categoryId) }.map {
+            .filterNot { sealedAllCats(sealed, MediaType.LIVE, it.channel) }.map {
             HistoryEntry(it.channel.id, it.channel.name, it.channel, it.watchedAt)
         }
         return HistoryLists(live)

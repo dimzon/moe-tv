@@ -1223,7 +1223,7 @@ fun MyOwnTVShell(
                   tv.own.myowntv.features.shell.components.CategoryBrowserOverlay(
                       railItems = browserRailItems,
                       railCounts = browserRailCounts,
-                      currentKey = grid.tiles.getOrNull(tile)?.channel?.categoryId?.let { tv.own.owntv.core.live.LiveKey.Folder(it) },
+                      currentKey = grid.tiles.getOrNull(tile)?.channel?.let { c -> tv.own.owntv.core.database.ChannelMembership.primaryCat(c) }?.let { tv.own.owntv.core.live.LiveKey.Folder(it) },
                       onSelect = { key -> liveVm.loadChannelsForCategory(key) },
                       onDismiss = { liveVm.hideCategoryBrowser(); multiviewPickFor = null },
                       modifier = Modifier.fillMaxSize(),

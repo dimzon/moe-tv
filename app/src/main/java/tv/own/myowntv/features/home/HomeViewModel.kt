@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
@@ -174,7 +175,7 @@ class HomeViewModel(
         cust: SectionCustomizations,
     ): ContinueTarget? = when (h.mediaType) {
         MediaType.LIVE -> channelDao.getById(h.itemId)?.let { c ->
-            if (customize.sealsCategory(c.categoryId)) return@let null
+            if (!tv.own.owntv.core.database.ChannelMembership.allExcluded(c, customize.sealedCategoryIds(MediaType.LIVE).first())) return@let null
             ContinueTarget(ContinueKind.LIVE, cust.displayName(c), ContinueAction.LAST_CHANNEL, channelId = c.id)
         }
         else -> null

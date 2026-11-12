@@ -112,7 +112,7 @@ class ChannelVersions(
         val categoryNames = categories.associate { it.id to it.name }
         val playlistNames = sources.sources.associate { it.id to it.name }
         fun visible(ch: ChannelEntity) =
-            CustomizeKeys.channel(ch) !in cust.hiddenItems && (ch.categoryId == null || ch.categoryId !in hiddenCats)
+            CustomizeKeys.channel(ch) !in cust.hiddenItems && tv.own.owntv.core.database.ChannelMembership.visible(ch, hiddenCats)
 
         val facets = ChannelFacets.of(channel.matchName)
         val guide = epgKeyOf(channel, cust)
@@ -133,7 +133,7 @@ class ChannelVersions(
                     name = ProviderTags.parse(shown).name,
                     tags = parsed.tags,
                     qualityRank = ChannelFacets.of(ch.matchName).qualityRank,
-                    categoryName = ch.categoryId?.let { categoryNames[it] }?.let { ProviderTags.parse(it).name },
+                    categoryName = tv.own.owntv.core.database.ChannelMembership.primaryCat(ch)?.let { categoryNames[it] }?.let { ProviderTags.parse(it).name },
                     playlistName = playlistNames[ch.sourceId],
                 )
             }

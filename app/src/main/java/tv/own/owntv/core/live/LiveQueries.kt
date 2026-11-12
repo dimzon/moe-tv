@@ -99,8 +99,8 @@ fun liveCountFlow(
  * locked category is stricter: its channels stay out of every list until the PIN opens it.
  */
 fun isChannelVisible(ch: ChannelEntity, cust: SectionCustomizations, hiddenCats: Set<Long>, key: LiveKey? = null): Boolean =
-    CustomizeKeys.channel(ch) !in cust.hiddenItems && !cust.sealsItemIn(ch.categoryId) && !cust.seals(key) &&
-        (!hiddenCategoryApplies(key) || ch.categoryId == null || ch.categoryId !in hiddenCats)
+    CustomizeKeys.channel(ch) !in cust.hiddenItems && !tv.own.owntv.core.database.ChannelMembership.allExcluded(ch, cust.sealedCategoryIds) && !cust.seals(key) &&
+        (!hiddenCategoryApplies(key) || tv.own.owntv.core.database.ChannelMembership.visible(ch, hiddenCats))
 
 /** Whether a hidden provider category filters the list shown for [key] (see [isChannelVisible]). */
 fun hiddenCategoryApplies(key: LiveKey?): Boolean =

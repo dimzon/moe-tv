@@ -400,7 +400,7 @@ class SettingsViewModel(
         return channelDao.searchList(query.trim(), sourceIds, 500)
             .asSequence()
             .filter { tv.own.owntv.core.customize.CustomizeKeys.channel(it) !in customizations.hiddenItems }
-            .filter { it.categoryId == null || it.categoryId !in hiddenCategoryIds }
+            .filter { tv.own.owntv.core.database.ChannelMembership.visible(it, hiddenCategoryIds) }
             .take(300)
             .toList()
     }

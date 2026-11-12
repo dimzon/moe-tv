@@ -98,7 +98,7 @@
 1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	DELETE FROM channel_category WHERE channelHexId IN
 1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	SELECT EXISTS(SELECT 1 FROM channel_category WHERE channelHexId = :hexId AND categoryId = :categoryId)
 1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	SELECT categoryId FROM channel_category WHERE channelHexId = :hexId
-1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	SELECT channelHexId, categoryId FROM channel_category
+2	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	SELECT channelHexId, categoryId FROM channel_category
 1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	SELECT remoteId FROM channels WHERE sourceId = :sourceId AND remoteId IS NOT NULL
 3	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	categoryId
 3	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	channelHexId

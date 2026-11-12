@@ -18,6 +18,18 @@ fun <T : Any> Flow<T?>.whileSealed(sealedCategoryIds: Flow<Set<Long>>, categoryO
         .filterNotNull()
 
 /**
+ * [whileSealed] for items whose membership is many-to-many (live channels): an item is sealed only
+ * when every one of its categories is, and one holding no category is never sealed — the same rule
+ * [tv.own.owntv.core.database.ChannelMembership.allExcluded] applies.
+ */
+fun <T : Any> Flow<T?>.whileAllSealed(sealedCategoryIds: Flow<Set<Long>>, categoriesOf: (T) -> Set<Long>): Flow<T> =
+    combine(this, sealedCategoryIds) { item, sealed ->
+        val cats = item?.let(categoriesOf).orEmpty()
+        item?.takeIf { cats.isNotEmpty() && cats.all(sealed::contains) }
+    }
+        .filterNotNull()
+
+/**
  * Empties [selection] while it holds an item of a sealed category, so a VOD hero, details card or show
  * page stops showing a locked title. A selection that moved on in the meantime is kept.
  */

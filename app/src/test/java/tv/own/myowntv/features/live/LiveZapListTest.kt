@@ -71,6 +71,12 @@ class LiveZapListTest {
         streamUrl = "http://x/$id.ts", remoteId = "$id",
     )
 
+    /** The junction snapshot the M:N sealing rule reads, seeded from each channel's category. */
+    private fun List<ChannelEntity>.withMembership() = also {
+        ChannelMembership.snapshot = ChannelMembership.snapshot +
+            this.mapNotNull { ch -> ch.remoteId?.let { hex -> ch.categoryId?.let { hex to setOf(it) } } }.toMap()
+    }
+
     private class Harness(
         val category: List<ChannelEntity> = emptyList(),
         val window: List<ChannelEntity> = emptyList(),
@@ -147,7 +153,7 @@ class LiveZapListTest {
 
     @Test
     fun `re-arming the same category while zapping inside it does not reload`() {
-        val h = Harness(category = list)
+        val h = Harness(category = list.withMembership())
         h.zap.armFor(channel(2))
         h.await("the first load") { h.zap.channels.value.isNotEmpty() }
         // The list already contains this channel and the category matches, so nothing is reloaded —
@@ -309,7 +315,7 @@ class LiveZapListTest {
     @Test
     fun `a relock takes the sealed folder's channels out of the list`() {
         val h = Harness()
-        val mixed = list.mapIndexed { i, ch -> if (i % 2 == 0) ch.copy(categoryId = 20) else ch }
+        val mixed = list.mapIndexed { i, ch -> if (i % 2 == 0) ch.copy(categoryId = 20) else ch }.withMembership()
         h.zap.armFromBrowse(mixed, title = "Favorites", key = LiveKey.Favorites, categoryId = null)
         h.zap.dropCategories(setOf(20))
         assertEquals(listOf(2L, 4L), h.zap.channels.value.map { it.id })
@@ -321,7 +327,7 @@ class LiveZapListTest {
 
     @Test
     fun `a load that started before a relock publishes without the sealed folder`() {
-        val h = Harness(category = list.mapIndexed { i, ch -> if (i < 2) ch.copy(categoryId = 20) else ch })
+        val h = Harness(category = list.mapIndexed { i, ch -> if (i < 2) ch.copy(categoryId = 20) else ch }.withMembership())
         h.releaseArming = true
         h.zap.armFor(list[4])
         h.zap.dropCategories(setOf(20))
@@ -344,7 +350,7 @@ class LiveZapListTest {
     @Test
     fun `a relock that seals the whole list leaves nothing to zap`() {
         val h = Harness()
-        h.zap.armFromBrowse(list, title = null, key = null, categoryId = 10)
+        h.zap.armFromBrowse(list.withMembership(), title = null, key = null, categoryId = 10)
         h.zap.dropCategories(setOf(10))
         assertEquals(emptyList<ChannelEntity>(), h.zap.channels.value)
         assertFalse(h.zap.canZap.value)

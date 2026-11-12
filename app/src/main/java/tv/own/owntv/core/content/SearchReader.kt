@@ -96,7 +96,7 @@ class SearchReader(
                     )
                     .filter {
                         CustomizeKeys.channel(it.channel) !in custLive.hiddenItems &&
-                            (it.channel.categoryId == null || it.channel.categoryId !in hiddenLiveCats)
+                            tv.own.owntv.core.database.ChannelMembership.visible(it.channel, hiddenLiveCats)
                     }
                     .map { row ->
                         custLive.itemNames[CustomizeKeys.channel(row.channel)]
@@ -143,7 +143,7 @@ class SearchReader(
         val globalShift = settings.epgOffsetMinutes.first()
         return candidates
             .distinctBy { it.id }
-            .filter { CustomizeKeys.channel(it) !in cust.hiddenItems && (it.categoryId == null || it.categoryId !in hiddenCats) }
+            .filter { CustomizeKeys.channel(it) !in cust.hiddenItems && tv.own.owntv.core.database.ChannelMembership.visible(it, hiddenCats) }
             .sortedWith(compareBy({ liveSourceIds.indexOf(it.sourceId) }, { it.sortOrder }))
             .flatMap { ch ->
                 val key = epgKeyOf(ch, cust) ?: return@flatMap emptyList()
@@ -171,12 +171,12 @@ class SearchReader(
         return when (intent) {
             SearchIntent.CONTINUE -> SearchResults(
                 channels = channelDao.recentlyWatched(limit).first()
-                    .filter { it.sourceId in sources.liveSourceIds && !live.sealsItemIn(it.categoryId) }
+                    .filter { it.sourceId in sources.liveSourceIds && tv.own.owntv.core.database.ChannelMembership.allExcluded(it, live.sealedCategoryIds) }
                     .map { ChannelSearchResult(it, null) },
             )
             SearchIntent.CHANNELS -> SearchResults(
                 channels = channelDao.favoritesListAlpha().first()
-                    .filter { it.sourceId in sources.liveSourceIds && !live.sealsItemIn(it.categoryId) }
+                    .filter { it.sourceId in sources.liveSourceIds && tv.own.owntv.core.database.ChannelMembership.allExcluded(it, live.sealedCategoryIds) }
                     .take(limit)
                     .map { ChannelSearchResult(it, null) },
             )

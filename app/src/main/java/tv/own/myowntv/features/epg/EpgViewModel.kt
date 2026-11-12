@@ -780,9 +780,9 @@ class EpgViewModel(
         // the main thread (#3/#5) so a 50k-channel playlist never freezes the UI building the guide list.
         val channels = withContext(Dispatchers.Default) {
             val auto = rawChannels
-                .filter { CustomizeKeys.channel(it) !in cust.hiddenItems && it.categoryId !in cust.sealedCategoryIds }
+                .filter { CustomizeKeys.channel(it) !in cust.hiddenItems && tv.own.owntv.core.database.ChannelMembership.allExcluded(it, cust.sealedCategoryIds) }
                 .filter {
-                    memberIds != null || it.categoryId == null || it.categoryId !in hiddenCatIds
+                    memberIds != null || tv.own.owntv.core.database.ChannelMembership.visible(it, hiddenCatIds)
                 }
                 .map { ch -> cust.itemNames[CustomizeKeys.channel(ch)]?.let { ch.copy(name = it) } ?: ch }
             val matched = applyEpgMatches(auto, cust, playlistIds, q)
@@ -802,7 +802,7 @@ class EpgViewModel(
                 when (filter) {
                     null, tv.own.owntv.core.live.LiveKey.All -> sorted
                     is tv.own.owntv.core.live.LiveKey.Folder -> sorted.filter { ch ->
-                        ch.categoryId == filter.id && (folderKey == null || cust.movedFromOrigin[CustomizeKeys.channel(ch)] != folderKey)
+                        tv.own.owntv.core.database.ChannelMembership.holds(ch, filter.id) && (folderKey == null || cust.movedFromOrigin[CustomizeKeys.channel(ch)] != folderKey)
                     }
                     else -> sorted.filter { it.id in memberIds.orEmpty() }
                 }

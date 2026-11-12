@@ -165,6 +165,8 @@ val dataModule = module {
     single { tv.own.owntv.core.sync.work.LocalAutoSyncScheduler(androidContext()) }
     single { tv.own.owntv.core.sync.work.LocalAutoSyncStarter(androidContext(), get(), get(), get()) }
     single { BulkInsertHelper(get()) }
+    // Live `hex → categories` map from channel_category, for the M:N visibility filters (redesign §2).
+    single { tv.own.owntv.core.database.ChannelMembershipStore(get()) }
     single {
         tv.own.owntv.core.sync.ImportFinalizer(
             channelDao = get(),

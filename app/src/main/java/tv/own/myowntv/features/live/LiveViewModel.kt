@@ -91,7 +91,7 @@ import tv.own.owntv.core.customize.SectionCustomizations
 import tv.own.owntv.core.customize.sealsItemIn
 import tv.own.owntv.core.categorylock.lockAwareCountsByContexts
 import tv.own.owntv.core.categorylock.visibleOnceRead
-import tv.own.owntv.core.categorylock.whileSealed
+import tv.own.owntv.core.categorylock.whileAllSealed
 import tv.own.owntv.core.customize.CategoryMove
 import tv.own.owntv.core.customize.CategoryRailEditor
 import tv.own.owntv.core.customize.railCategories
@@ -327,14 +327,14 @@ class LiveViewModel(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /**
-     * The focused channel's REAL category name — resolved from its `categoryId`, NOT from whatever rail
-     * item the user is currently browsing (Favorites / History / All are browse contexts, not the
-     * channel's actual category). Null when the channel has no category or it can't be resolved.
-     * Drives the category chip + genre-dot in the preview pane's metadata row.
+     * The focused channel's REAL primary category name — resolved from its membership's first
+     * category, NOT from whatever rail item the user is currently browsing (Favorites / History /
+     * All are browse contexts, not the channel's own categories). Null when the channel has no
+     * category or it can't be resolved. Drives the category chip + genre-dot in the preview pane.
      */
     val previewCategoryName: StateFlow<String?> = _previewChannel
         .mapLatest { ch ->
-            val id = ch?.categoryId ?: return@mapLatest null
+            val id = ch?.let(tv.own.owntv.core.database.ChannelMembership::primaryCat) ?: return@mapLatest null
             delay(150) // a quick scroll cancels this before the lookup runs
             categoryDao.getById(id)?.name
         }
@@ -675,8 +675,9 @@ class LiveViewModel(
     val recentlyWatched: StateFlow<List<ChannelEntity>> = channelDao.recentlyWatched(20)
         .combine(custResolved.filterNotNull()) { list, cs ->
             list.filter {
-                CustomizeKeys.channel(it) !in cs.cust.hiddenItems && !cs.cust.sealsItemIn(it.categoryId) &&
-                    (it.categoryId == null || it.categoryId !in cs.hiddenCats)
+                CustomizeKeys.channel(it) !in cs.cust.hiddenItems &&
+                    !tv.own.owntv.core.database.ChannelMembership.allExcluded(it, cs.cust.sealedCategoryIds) &&
+                    tv.own.owntv.core.database.ChannelMembership.visible(it, cs.hiddenCats)
             }
                 .map { ch -> cs.cust.itemNames[CustomizeKeys.channel(ch)]?.let { ch.copy(name = it) } ?: ch }
         }
@@ -797,7 +798,7 @@ class LiveViewModel(
             if (!settings.rememberLastLive.first() || miniPlaying != null || _previewChannel.value != null) return@launch
             val saved = settings.lastLiveChannelId.first().takeIf { it > 0 }
                 ?.let { channelDao.getById(it) }
-                ?.takeIf { !customize.sealsCategory(it.categoryId) }
+                ?.takeIf { !tv.own.owntv.core.database.ChannelMembership.allExcluded(it, customize.sealedCategoryIds(MediaType.LIVE).first()) }
             if (saved != null && _previewChannel.value == null) _previewChannel.value = saved
         }
     }
@@ -827,7 +828,7 @@ class LiveViewModel(
         viewModelScope.launch {
             val c = ctx.value
             val sort = settings.sortLive.first()
-            val folder = channel.categoryId?.let { LiveKey.Folder(it) }
+            val folder = channel.let(tv.own.owntv.core.database.ChannelMembership::primaryCat)?.let { LiveKey.Folder(it) }
             val inRail = folder != null &&
                 kotlinx.coroutines.withTimeoutOrNull(2_000) { railItems.first { list -> list.any { it.key == folder } } } != null
             for (key in listOfNotNull(folder.takeIf { inRail }, fallbackKey(railItems.value)).distinct()) {
@@ -844,7 +845,7 @@ class LiveViewModel(
     /** The rail entry [channel] lives in: its own category, or the landing list when that category is
      *  not in the rail — never a hidden All, which would only be moved off again a moment later. */
     suspend fun railKeyOf(channel: ChannelEntity): LiveKey {
-        val folder = channel.categoryId?.let { LiveKey.Folder(it) } ?: return fallbackKey(railItems.value)
+        val folder = channel.let(tv.own.owntv.core.database.ChannelMembership::primaryCat)?.let { LiveKey.Folder(it) } ?: return fallbackKey(railItems.value)
         val inRail = kotlinx.coroutines.withTimeoutOrNull(2_000) { railItems.first { list -> list.any { it.key == folder } } } != null
         return if (inRail) folder else fallbackKey(railItems.value)
     }
@@ -885,7 +886,7 @@ class LiveViewModel(
         // must still open full screen.
         _paneChannel.value = channel
         if (channel.isPaid) return // no stream without the package; don't spend a request per focus step
-        if (channel.categoryId != null && channel.categoryId in hiddenCategoryIds.value) return
+        if (!tv.own.owntv.core.database.ChannelMembership.visible(channel, hiddenCategoryIds.value)) return
         // Core keeps the preview off a promoted full-screen stream, re-mutes on a re-focus instead of
         // reloading, mints a fresh play link, and holds back on a one-session panel while full screen
         // holds the stream.
@@ -929,7 +930,8 @@ class LiveViewModel(
     // The ordered channel list the player zaps within (CH+/CH-, D-pad up/down) and shows in the
     // left-hand overlay. This is playback CONTEXT: the Favorites/History/All/folder/custom rail that
     // launched the channel, or a provider category explicitly selected in the in-player browser.
-    // `channel.categoryId` remains metadata and is used only when a caller has no browse context.
+    // The channel's primary category remains metadata and is used only when a caller has no browse
+    // context.
     //
     // Which list is armed, where CH± lands and which background rebuild may publish all live in
     // [LiveZapList]. What stays here is the querying: the loaders below, because the hide/rename rules
@@ -979,7 +981,10 @@ class LiveViewModel(
 
     /** ◀ from the in-player channel list: categories beside the list CH± zaps in, on its category. */
     fun openChannelBrowser() {
-        peek.start(zapList.channels.value, zapList.key.value ?: playingChannel?.categoryId?.let { LiveKey.Folder(it) })
+        peek.start(
+            zapList.channels.value,
+            zapList.key.value ?: playingChannel?.let(tv.own.owntv.core.database.ChannelMembership::primaryCat)?.let { LiveKey.Folder(it) },
+        )
         _showCategoryBrowser.value = true
     }
 
@@ -1042,7 +1047,7 @@ class LiveViewModel(
         val cust = custom.value
         val hiddenCats = hiddenCategoryIds.value
         return raw
-            .filter { CustomizeKeys.channel(it) !in cust.hiddenItems && (it.categoryId == null || it.categoryId !in hiddenCats) }
+            .filter { CustomizeKeys.channel(it) !in cust.hiddenItems && tv.own.owntv.core.database.ChannelMembership.visible(it, hiddenCats) }
             .map { ch -> cust.itemNames[CustomizeKeys.channel(ch)]?.let { ch.copy(name = it) } ?: ch }
     }
 
@@ -1067,7 +1072,7 @@ class LiveViewModel(
     /** [channel]'s own provider category, with the same hide/rename treatment the browsing lists get,
      *  so the in-player overlay matches what the user sees everywhere else. */
     private suspend fun channelsAroundChannel(channel: ChannelEntity): List<ChannelEntity> {
-        val catId = channel.categoryId
+        val catId = tv.own.owntv.core.database.ChannelMembership.primaryCat(channel)
         val raw = withContext(Dispatchers.IO) {
             if (catId != null) {
                 channelDao.snapshotByCategoryManual(catId, folderContextKeys.value[catId] ?: "", sortMode.value == SettingsRepository.SortMode.ALPHA, ZAP_LIST_LIMIT)
@@ -1079,7 +1084,7 @@ class LiveViewModel(
         val cust = custom.value
         val hiddenCats = hiddenCategoryIds.value
         return raw
-            .filter { CustomizeKeys.channel(it) !in cust.hiddenItems && (it.categoryId == null || it.categoryId !in hiddenCats) }
+            .filter { CustomizeKeys.channel(it) !in cust.hiddenItems && tv.own.owntv.core.database.ChannelMembership.visible(it, hiddenCats) }
             .map { ch -> cust.itemNames[CustomizeKeys.channel(ch)]?.let { ch.copy(name = it) } ?: ch }
     }
 
@@ -1089,7 +1094,7 @@ class LiveViewModel(
         val cust = custom.value
         val hiddenCats = hiddenCategoryIds.value
         return channelDao.recentlyWatchedWithTimestamp(limit).first()
-            .filter { (ch) -> CustomizeKeys.channel(ch) !in cust.hiddenItems && (ch.categoryId == null || ch.categoryId !in hiddenCats) }
+            .filter { (ch) -> CustomizeKeys.channel(ch) !in cust.hiddenItems && tv.own.owntv.core.database.ChannelMembership.visible(ch, hiddenCats) }
             .map { e -> cust.itemNames[CustomizeKeys.channel(e.channel)]?.let { e.copy(channel = e.channel.copy(name = it)) } ?: e }
     }
 
@@ -1099,8 +1104,12 @@ class LiveViewModel(
     // Declared HERE, below previewEngine: viewModelScope is Main.immediate, so this collector
     // starts inline during construction and must not touch a property initialized further down the class.
     init {
-        // The previewed channel's category was just locked: its picture and its info pane go.
-        viewModelScope.launch { _previewChannel.whileSealed(sealedCategoryIds) { it.categoryId }.collect { if (_previewChannel.value?.id == it.id) stopPreview() } }
+        // Every category of the previewed channel was just locked: its picture and its info pane go.
+        viewModelScope.launch {
+            _previewChannel
+                .whileAllSealed(sealedCategoryIds) { tv.own.owntv.core.database.ChannelMembership.catsOf(it).orEmpty() }
+                .collect { if (_previewChannel.value?.id == it.id) stopPreview() }
+        }
         viewModelScope.launch {
             livePreviewAudio.collect { on ->
                 if (!live.liveOnExo.value && previewEngine.currentUrl != null) previewEngine.setMuted(!on)
@@ -1137,7 +1146,7 @@ class LiveViewModel(
         return kotlinx.coroutines.coroutineScope {
             launch { customize.observeHasLocks().first() }
             channelDao.recentlyWatched(1).first().firstOrNull()
-        }?.takeIf { !customize.sealsCategory(it.categoryId) }
+        }?.takeIf { !tv.own.owntv.core.database.ChannelMembership.allExcluded(it, customize.sealedCategoryIds(MediaType.LIVE).first()) }
     }
 
     /**
@@ -1384,7 +1393,7 @@ class LiveViewModel(
         val half = ZAP_WINDOW_HALF
         val afterRaw: List<ChannelEntity>
         val beforeRaw: List<ChannelEntity>
-        val categoryId = channel.categoryId
+        val categoryId = tv.own.owntv.core.database.ChannelMembership.primaryCat(channel)
         if (categoryId != null) {
             afterRaw = channelDao.channelsAfterCategory(categoryId, channel.sortOrder, channel.id, half)
             beforeRaw = channelDao.channelsBeforeCategory(categoryId, channel.sortOrder, channel.id, half)
@@ -1410,7 +1419,7 @@ class LiveViewModel(
     fun playExternal(channel: ChannelEntity) {
         if (rejectSubscription(channel)) return
         viewModelScope.launch {
-            if (customize.sealsCategory(channel.categoryId)) return@launch
+            if (tv.own.owntv.core.database.ChannelMembership.allExcluded(channel, customize.sealedCategoryIds(MediaType.LIVE).first())) return@launch
             val source = withContext(Dispatchers.IO) { sourceDao.getById(channel.sourceId) }
             val url = if (streamUrlResolver.needsResolve(source)) {
                 withContext(Dispatchers.IO) {
@@ -1481,7 +1490,7 @@ class LiveViewModel(
      *  so the in-flight rebuild it owns isn't killed by its own play. */
     private suspend fun playChannel(channel: ChannelEntity) {
         if (rejectSubscription(channel)) return
-        if (customize.sealsCategory(channel.categoryId)) return
+        if (tv.own.owntv.core.database.ChannelMembership.allExcluded(channel, customize.sealedCategoryIds(MediaType.LIVE).first())) return
         // Live TV set to play externally: hand the channel over instead of tuning an in-app engine.
         // History is still recorded, so the channel shows up in History/Recently watched either way.
         // A protected channel stays in-app whatever this setting says: no standard intent extra
@@ -1519,7 +1528,9 @@ class LiveViewModel(
      *  playback browse/zap context instead of replacing it with provider-category metadata. A channel in
      *  a locked category, or one that is gone, does not open: false. */
     suspend fun ensurePlayingByIdAsync(channelId: Long, zapChannels: List<ChannelEntity> = emptyList()): Boolean {
-        val channel = channelDao.getById(channelId)?.takeUnless { customize.sealsCategory(it.categoryId) } ?: return false
+        val channel = channelDao.getById(channelId)
+            ?.takeUnless { tv.own.owntv.core.database.ChannelMembership.allExcluded(it, customize.sealedCategoryIds(MediaType.LIVE).first()) }
+            ?: return false
         if (rejectSubscription(channel)) return false
         if (zapChannels.isEmpty()) {
             // A single Home "continue watching" tile has no browse rail of its own.

@@ -141,7 +141,7 @@ class LiveZapList(
     fun dropCategories(categoryIds: Set<Long>) {
         sealedNow = categoryIds
         if (categoryIds.isEmpty()) return
-        val sealed = { channel: ChannelEntity -> channel.categoryId in categoryIds }
+        val sealed = { channel: ChannelEntity -> tv.own.owntv.core.database.ChannelMembership.allExcluded(channel, categoryIds) }
         if (pending?.previousList?.any(sealed) == true) pending = null
         if (list.any(sealed)) replace(list)
     }
@@ -151,13 +151,13 @@ class LiveZapList(
     /** Rebuild from [channel]'s own provider category. A no-op while zapping inside the same category
      *  (the list is already right), so CH+/CH− stays a pure in-memory step. */
     fun armFor(channel: ChannelEntity) {
-        if (armed && channel.categoryId == categoryId && list.any { it.id == channel.id }) return
+        if (armed && tv.own.owntv.core.database.ChannelMembership.primaryCat(channel) == categoryId && list.any { it.id == channel.id }) return
         loadJob?.cancel()
         loadJob = scope.launch {
             publish(
                 loaded = loadForChannel(channel),
-                categoryId = channel.categoryId,
-                title = channel.categoryId?.let { categoryName(it) }?.takeIf { it.isNotBlank() },
+                categoryId = tv.own.owntv.core.database.ChannelMembership.primaryCat(channel),
+                title = tv.own.owntv.core.database.ChannelMembership.primaryCat(channel)?.let { categoryName(it) }?.takeIf { it.isNotBlank() },
                 key = null,
             )
         }
@@ -224,7 +224,7 @@ class LiveZapList(
 
     /** Publish a list without touching the context around it — the guarded rebuild's landing point. */
     private fun replace(loaded: List<ChannelEntity>) {
-        val open = if (sealedNow.isEmpty()) loaded else loaded.filterNot { it.categoryId in sealedNow }
+        val open = if (sealedNow.isEmpty()) loaded else loaded.filterNot { tv.own.owntv.core.database.ChannelMembership.allExcluded(it, sealedNow) }
         list = open
         _channels.value = open
         _canZap.value = open.size > 1

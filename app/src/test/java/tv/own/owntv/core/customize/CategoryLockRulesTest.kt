@@ -5,6 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import tv.own.owntv.core.database.ChannelMembership
 import tv.own.owntv.core.database.entity.CategoryEntity
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.live.LiveKey
@@ -77,6 +78,7 @@ class CategoryLockRulesTest {
     @Test
     fun `a sealed channel is kept out of Favorites and History too, unlike a hidden one`() {
         val ch = ChannelEntity(sourceId = 1, categoryId = 3, name = "X", streamUrl = "http://x/1.ts", remoteId = "c1")
+        ChannelMembership.snapshot = mapOf("c1" to setOf(3L))
         val hidden = SectionCustomizations(hiddenCategories = setOf(keyOf(3)))
         assertTrue(isChannelVisible(ch, hidden, setOf(3L), LiveKey.Favorites))
         val sealed = hidden.copy(sealedCategories = setOf(keyOf(3)), sealedCategoryIds = setOf(3L))

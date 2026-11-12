@@ -68,10 +68,10 @@ internal fun SealedPlaybackEffect(
         shellVm.sealedPlayback = SealedPlaybackGuard(
             playing = {
                 PlayingCategories(
-                    live = liveVm.previewChannel.value?.categoryId,
+                    live = liveVm.previewChannel.value?.let { tv.own.owntv.core.database.ChannelMembership.primaryCat(it) },
                     liveInPlayer = inPlayer(),
                     vod = null,
-                    tiles = grid()?.tiles?.map { it.channel?.categoryId }.orEmpty(),
+                    tiles = grid()?.tiles?.map { it.channel?.let { c -> tv.own.owntv.core.database.ChannelMembership.primaryCat(c) } }.orEmpty(),
                 )
             },
             stopLive = { shown, _ ->
@@ -81,7 +81,7 @@ internal fun SealedPlaybackEffect(
             },
             stopVod = {},
             stopTiles = { sealed ->
-                grid()?.let { state -> sealedTileIndices(state.tiles.map { it.channel?.categoryId }, sealed).forEach(state::clear) }
+                grid()?.let { state -> sealedTileIndices(state.tiles.map { it.channel?.let { c -> tv.own.owntv.core.database.ChannelMembership.primaryCat(c) } }, sealed).forEach(state::clear) }
             },
         )
         onDispose { shellVm.sealedPlayback = null }

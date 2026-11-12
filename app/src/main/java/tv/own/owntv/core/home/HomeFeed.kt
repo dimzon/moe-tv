@@ -185,7 +185,7 @@ class HomeFeedReader(
     }
 
     private fun isChannelHidden(ch: ChannelEntity, h: HiddenState): Boolean =
-        CustomizeKeys.channel(ch) in h.live.hiddenItems || (ch.categoryId != null && ch.categoryId in h.liveCats)
+        CustomizeKeys.channel(ch) in h.live.hiddenItems || tv.own.owntv.core.database.ChannelMembership.allExcluded(ch, h.liveCats)
 
     private suspend fun buildHeroItems(
         liveChannels: List<ChannelWithWatchedAt>,

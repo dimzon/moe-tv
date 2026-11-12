@@ -111,12 +111,12 @@ class LiveCategoryPeek(private val scope: CoroutineScope) {
         val key = _key.value
         if (key is LiveKey.Folder && key.id in sealed) {
             cancelLoad()
-            _channels.value = zapChannels.filterNot { it.categoryId in sealed }
+            _channels.value = zapChannels.filterNot { tv.own.owntv.core.database.ChannelMembership.allExcluded(it, sealed) }
             _key.value = zapKey
             return
         }
         val list = _channels.value
-        if (list.any { it.categoryId in sealed }) _channels.value = list.filterNot { it.categoryId in sealed }
+        if (list.any { tv.own.owntv.core.database.ChannelMembership.allExcluded(it, sealed) }) _channels.value = list.filterNot { tv.own.owntv.core.database.ChannelMembership.allExcluded(it, sealed) }
     }
 
     private fun cancelLoad() {

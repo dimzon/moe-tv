@@ -62,6 +62,12 @@ class LiveCategoryPeekTest {
         streamUrl = "http://x/$id.ts", remoteId = "$id",
     )
 
+    /** The junction snapshot the M:N sealing rule reads, seeded from each channel's category. */
+    private fun List<ChannelEntity>.withMembership() = also {
+        ChannelMembership.snapshot = ChannelMembership.snapshot +
+            this.mapNotNull { ch -> ch.remoteId?.let { hex -> ch.categoryId?.let { hex to setOf(it) } } }.toMap()
+    }
+
     private val zap = listOf(channel(1), channel(2))
     private val news = LiveKey.Folder(20)
     private val sport = LiveKey.Folder(30)
@@ -128,7 +134,7 @@ class LiveCategoryPeekTest {
     fun `a shown folder locked while open goes back to the CH± list`() {
         val p = peek()
         p.start(zap, LiveKey.Folder(10))
-        p.load(news) { listOf(channel(5, 20)) }
+        p.load(news) { listOf(channel(5, 20)).withMembership() }
         p.dropCategories(setOf(20))
         assertEquals(zap, p.channels.value)
         assertEquals(LiveKey.Folder(10), p.key.value)
@@ -138,7 +144,7 @@ class LiveCategoryPeekTest {
     fun `a mixed list loses only the locked folder's channels`() {
         val p = peek()
         p.start(zap, null)
-        p.load(LiveKey.Favorites) { listOf(channel(5, 20), channel(6, 30)) }
+        p.load(LiveKey.Favorites) { listOf(channel(5, 20), channel(6, 30)).withMembership() }
         p.dropCategories(setOf(20))
         assertEquals(listOf(6L), p.channels.value.map { it.id })
         assertEquals(LiveKey.Favorites, p.key.value)

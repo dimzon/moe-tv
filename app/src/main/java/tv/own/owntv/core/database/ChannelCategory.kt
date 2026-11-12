@@ -66,6 +66,11 @@ interface ChannelCategoryDao {
     @Query("SELECT channelHexId, categoryId FROM channel_category")
     suspend fun allMemberships(): List<ChannelCategoryEntity>
 
+    /** Reactive view of the whole link table — the membership store observes this to keep a
+     *  `hexId → categories` map current for the in-memory visibility filters. */
+    @Query("SELECT channelHexId, categoryId FROM channel_category")
+    fun observeAll(): kotlinx.coroutines.flow.Flow<List<ChannelCategoryEntity>>
+
     /**
      * Whether a channel (by hex id) is a member of [categoryId] — the junction replacement for the
      * old `channels.categoryId = :categoryId` equality. The category-lock / hidden / EPG-folder checks

@@ -68,7 +68,7 @@ internal fun rememberDueReminder(): ReminderEntity? {
     val channels = koinInject<ChannelDao>()
     val due = remember(reminders, customize, channels) {
         reminders.due.firstUnsealed(customize.sealedCategoryIds(MediaType.LIVE)) {
-            channels.getById(it)?.categoryId
+            channels.getById(it)?.let { c -> tv.own.owntv.core.database.ChannelMembership.primaryCat(c) }
         }
     }
     val reminder by due.collectAsStateWithLifecycle(null)
