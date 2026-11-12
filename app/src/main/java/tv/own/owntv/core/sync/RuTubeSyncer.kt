@@ -38,6 +38,7 @@ internal class RuTubeSyncer(
     private val bulkInsertHelper: BulkInsertHelper,
     private val support: SyncSupport,
     private val channelCategoryDao: tv.own.owntv.core.database.ChannelCategoryDao,
+    private val channelRenameDao: tv.own.owntv.core.database.ChannelRenameDao,
 ) {
     suspend fun sync(s: SourceEntity, progress: SyncCounters, stats: SyncStatsCollector) =
         coroutineScope {
@@ -62,6 +63,13 @@ internal class RuTubeSyncer(
         val channels = allChannels
             .filterNot { it.isPaid }
             .filterNot { it.videoId in KNOWN_BROKEN_IDS }
+        // The shipped rename dictionary (hex videoId → name): mirrored wholesale, then applied at
+        // both ends — to the fresh rows below, and to already-stored rows by the apply pass after
+        // the commit, so a dictionary change reaches a channel whose content did not change.
+        channelRenameDao.replaceAll(
+            ChannelRenameSeeds.map.map { (hex, name) -> tv.own.owntv.core.database.ChannelRenameEntity(remoteId = hex, name = name) },
+        )
+        val renames = ChannelRenameSeeds.map
         val rawCategories = rutube.categories()
         if (channels.isEmpty()) {
             throw IllegalStateException("RuTube returned no live channels — refusing to wipe the catalogue")
@@ -93,7 +101,8 @@ internal class RuTubeSyncer(
             }
             ChannelEntity(
                 sourceId = s.id,
-                name = displayName,
+                // A curated rename wins over the provider's name and the disambiguation suffix.
+                name = renames[ch.videoId] ?: displayName,
                 logoUrl = ch.logoUrl,
                 // Marker — resolved at tune time; never handed to a player as a URL.
                 streamUrl = "rutube://${s.id}/${ch.videoId}",
@@ -143,6 +152,10 @@ internal class RuTubeSyncer(
         // the primary bucket. Keyed by the channel's hex videoId (= channels.remoteId), so a re-sync's
         // clear-then-insert never orphans a membership. Runs after the channels are committed.
         rebuildChannelCategories(s.id, channels, catMap)
+        // Rewrite the stored names of rows the dictionary covers — a no-op for the fresh rows the
+        // upsert already renamed, the fix for rows whose content hash was untouched, and an inert
+        // pass over orphans (no FK, a deleted channel's rename just waits).
+        channelRenameDao.applyToChannels()
         progress.update(SyncPhase.LIVE, total[0])
         stats.processedCounts["channels"] = total[0]
         Log.i(TAG, "$label phase end sourceId=${s.id} unique=${total[0]} ruTube")

@@ -105,6 +105,11 @@
 1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	channel_category
 1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	id
 1	app/src/main/java/tv/own/owntv/core/database/ChannelCategory.kt	remoteId
+1	app/src/main/java/tv/own/owntv/core/database/ChannelRename.kt	DELETE FROM channel_rename
+1	app/src/main/java/tv/own/owntv/core/database/ChannelRename.kt	SELECT * FROM channel_rename
+1	app/src/main/java/tv/own/owntv/core/database/ChannelRename.kt	UPDATE channels SET name = (SELECT r.name FROM channel_rename r WHERE r.remoteId = channels.remoteId)
+1	app/src/main/java/tv/own/owntv/core/database/ChannelRename.kt	WHERE remoteId IN (SELECT remoteId FROM channel_rename)
+1	app/src/main/java/tv/own/owntv/core/database/ChannelRename.kt	channel_rename
 1	app/src/main/java/tv/own/owntv/core/database/ManualOrdering.kt	\0
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	+ (SELECT COUNT(*) FROM content_order WHERE mediaType = 'LIVE')
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	+ (SELECT COUNT(*) FROM custom_category_members WHERE mediaType = 'LIVE')

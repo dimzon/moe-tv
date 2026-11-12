@@ -40,6 +40,8 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
         ChannelEntity::class,
         // Many-to-many: a channel belongs to every RuTube genre it is broadcast in (redesign §2).
         ChannelCategoryEntity::class,
+        // Curated renames (hex videoId → name), no FK — survives re-syncs and deletions (redesign §2).
+        ChannelRenameEntity::class,
         // User data
         FavoriteEntity::class,
         WatchHistoryEntity::class,
@@ -63,11 +65,12 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
     // migration history (1 → 57) was dropped with them — migrating the old tables toward a schema
     // that no longer has a `profiles` table vouched for nothing. There are zero installed
     // instances, so the database is simply recreated (see DatabaseModule's
-    // fallbackToDestructiveMigration). v2 drops `channels.categoryId` — the M:N junction
-    // `channel_category` owns channel↔category membership now (redesign §2), and the
-    // in-memory visibility rules read ChannelMembership's snapshot. The old per-version log
+    // fallbackToDestructiveMigration). v2 dropped `channels.categoryId` — the M:N junction
+    // `channel_category` owns channel↔category membership, and the in-memory visibility rules
+    // read ChannelMembership's snapshot. v3 adds `channel_rename` — curated hex→name renames
+    // without an FK, mirrored from ChannelRenameSeeds on every sync. The old per-version log
     // lives in git history and in CHANGELOG.md.
-    version = 2,
+    version = 3,
 
     exportSchema = true,
 )
@@ -78,6 +81,7 @@ abstract class OwnTVDatabase : RoomDatabase() {
     abstract fun categoryDao(): CategoryDao
     abstract fun channelDao(): ChannelDao
     abstract fun channelCategoryDao(): ChannelCategoryDao
+    abstract fun channelRenameDao(): ChannelRenameDao
     abstract fun favoriteDao(): FavoriteDao
     abstract fun historyDao(): HistoryDao
     abstract fun contentOrderDao(): ContentOrderDao
