@@ -26,7 +26,6 @@ import java.time.ZoneId
  * (or by the built-in source helper) — the marker must never reach the player.
  *
  * Channel naming follows TVTube's live-tested rules:
- *  - category priority [CATEGORY_PRIORITY] (Federal and News first);
  *  - a broadcaster whose name is unique keeps the author name;
  *  - duplicated broadcaster names disambiguate by the cleaned live title
  *    (strip "Прямой эфир" / "Прямая трансляция" / "Прямое включение" prefixes).
@@ -92,12 +91,8 @@ internal class RuTubeSyncer(
             } else {
                 ch.name
             }
-            val primaryCategoryId = ch.categoryIds
-                .filter { it != 1 }
-                .minWithOrNull(compareBy<Int> { CATEGORY_PRIORITY.indexOf(it).takeIf { i -> i >= 0 } ?: Int.MAX_VALUE })
             ChannelEntity(
                 sourceId = s.id,
-                categoryId = primaryCategoryId?.let { catMap[it.toString()] },
                 name = displayName,
                 logoUrl = ch.logoUrl,
                 // Marker — resolved at tune time; never handed to a player as a URL.
@@ -181,9 +176,6 @@ internal class RuTubeSyncer(
 
     internal companion object {
         private const val TAG = SyncSupport.TAG
-
-        /** RuTube category ids in primary-bucket order (Federal and News first). */
-        val CATEGORY_PRIORITY = listOf(4, 3, 9, 5, 6, 7, 15, 8, 10, 2, 11, 14, 12, 1)
 
         /**
          * Channels whose stream is confirmed broken upstream, so they are not inserted at all.

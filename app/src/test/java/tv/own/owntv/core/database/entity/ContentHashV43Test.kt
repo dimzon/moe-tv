@@ -44,7 +44,7 @@ class ContentHashV43Test {
     fun `a channel with neither v43 field hashes exactly as the base`() {
         val plain = channel()
         val expectedBase = java.util.Objects.hash(
-            plain.sourceId, plain.categoryId, plain.name, plain.logoUrl, plain.streamUrl,
+            plain.sourceId, plain.name, plain.logoUrl, plain.streamUrl,
             plain.epgChannelId, plain.number, plain.remoteId, plain.catchup, plain.catchupDays,
             plain.catchupSource,
         )
@@ -57,7 +57,7 @@ class ContentHashV43Test {
     fun `a channel with only the older optional fields is unchanged by v43`() {
         val withDrm = channel(drmConfig = """{"scheme":"widevine","license":"https://h/k"}""")
         val base = java.util.Objects.hash(
-            withDrm.sourceId, withDrm.categoryId, withDrm.name, withDrm.logoUrl, withDrm.streamUrl,
+            withDrm.sourceId, withDrm.name, withDrm.logoUrl, withDrm.streamUrl,
             withDrm.epgChannelId, withDrm.number, withDrm.remoteId, withDrm.catchup,
             withDrm.catchupDays, withDrm.catchupSource,
         )

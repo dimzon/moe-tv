@@ -57,15 +57,14 @@ import tv.own.owntv.core.live.LiveKey
  */
 class LiveCategoryPeekTest {
 
-    private fun channel(id: Long, category: Long = 10) = ChannelEntity(
-        id = id, sourceId = 1, categoryId = category, name = "Ch $id",
+    private fun channel(id: Long) = ChannelEntity(
+        id = id, sourceId = 1, name = "Ch $id",
         streamUrl = "http://x/$id.ts", remoteId = "$id",
     )
 
-    /** The junction snapshot the M:N sealing rule reads, seeded from each channel's category. */
-    private fun List<ChannelEntity>.withMembership() = also {
-        ChannelMembership.snapshot = ChannelMembership.snapshot +
-            this.mapNotNull { ch -> ch.remoteId?.let { hex -> ch.categoryId?.let { hex to setOf(it) } } }.toMap()
+    /** The junction snapshot the M:N sealing rule reads, seeded per test (hex → its category ids). */
+    private fun seedMembership(membership: Map<String, Set<Long>>) {
+        ChannelMembership.snapshot = membership
     }
 
     private val zap = listOf(channel(1), channel(2))
@@ -88,7 +87,7 @@ class LiveCategoryPeekTest {
         val gate = CompletableDeferred<List<ChannelEntity>>()
         p.load(news) { gate.await() }
         assertEquals(zap, p.channels.value) // nothing changes before the load lands
-        gate.complete(listOf(channel(5, 20)))
+        gate.complete(listOf(channel(5)))
         assertEquals(listOf(5L), p.channels.value.map { it.id })
         assertEquals(news, p.key.value)
     }
@@ -100,8 +99,8 @@ class LiveCategoryPeekTest {
         val slow = CompletableDeferred<List<ChannelEntity>>()
         // An older load that ignores cancellation, as a database read already under way would.
         p.load(news) { withContext(NonCancellable) { slow.await() } }
-        p.load(sport) { listOf(channel(7, 30)) }
-        slow.complete(listOf(channel(5, 20)))
+        p.load(sport) { listOf(channel(7)) }
+        slow.complete(listOf(channel(5)))
         assertEquals(listOf(7L), p.channels.value.map { it.id })
         assertEquals(sport, p.key.value)
     }
@@ -121,12 +120,12 @@ class LiveCategoryPeekTest {
         p.start(zap, null)
         assertEquals(2L, p.entryChannel(playingId = 2))
         p.rememberFocus(1)
-        p.load(news) { listOf(channel(5, 20), channel(6, 20)) }
+        p.load(news) { listOf(channel(5), channel(6)) }
         assertEquals(2L, p.entryChannel(playingId = 2))
         p.rememberFocus(6)
         p.start(zap, null)
         assertEquals(1L, p.entryChannel(playingId = 2))
-        p.load(news) { listOf(channel(5, 20), channel(6, 20)) }
+        p.load(news) { listOf(channel(5), channel(6)) }
         assertEquals(6L, p.entryChannel(playingId = 2))
     }
 
@@ -134,7 +133,8 @@ class LiveCategoryPeekTest {
     fun `a shown folder locked while open goes back to the CH± list`() {
         val p = peek()
         p.start(zap, LiveKey.Folder(10))
-        p.load(news) { listOf(channel(5, 20)).withMembership() }
+        seedMembership(mapOf("5" to setOf(20L)))
+        p.load(news) { listOf(channel(5)) }
         p.dropCategories(setOf(20))
         assertEquals(zap, p.channels.value)
         assertEquals(LiveKey.Folder(10), p.key.value)
@@ -144,7 +144,8 @@ class LiveCategoryPeekTest {
     fun `a mixed list loses only the locked folder's channels`() {
         val p = peek()
         p.start(zap, null)
-        p.load(LiveKey.Favorites) { listOf(channel(5, 20), channel(6, 30)).withMembership() }
+        seedMembership(mapOf("5" to setOf(20L), "6" to setOf(30L)))
+        p.load(LiveKey.Favorites) { listOf(channel(5), channel(6)) }
         p.dropCategories(setOf(20))
         assertEquals(listOf(6L), p.channels.value.map { it.id })
         assertEquals(LiveKey.Favorites, p.key.value)

@@ -42,10 +42,9 @@ data class CategoryEntity(
     tableName = "channels",
     foreignKeys = [
         ForeignKey(entity = SourceEntity::class, parentColumns = ["id"], childColumns = ["sourceId"], onDelete = ForeignKey.CASCADE),
-        ForeignKey(entity = CategoryEntity::class, parentColumns = ["id"], childColumns = ["categoryId"], onDelete = ForeignKey.SET_NULL),
     ],
-    // No single-column (sourceId) or (categoryId) index (v52): the composites below start with the
-    // same column and serve every query, and each extra index is one more B-tree every write updates.
+    // No single-column (sourceId) index (v52): the composites below start with the same column
+    // and serve every query, and each extra index is one more B-tree every write updates.
     indices = [
         Index("epgChannelId"),
         Index(value = ["sourceId", "remoteId"], unique = true),
@@ -54,12 +53,11 @@ data class CategoryEntity(
         // parent column. RuTube video ids are globally unique, so this holds across the one source.
         Index(value = ["remoteId"], unique = true),
         // Composite grid read-indices (v6): A–Z order (ORDER BY name) and playlist/provider order
-        // (ORDER BY sortOrder, name), for both the whole-source list and per-category. Mirrors movies/series
+        // (ORDER BY sortOrder, name) for the whole-source list. Per-category reads go through the
+        // `channel_category` junction (redesign §2). Mirrors movies/series
         // so all three browse grids (Live/Movies/Series) are index-served in either sort.
         Index(value = ["sourceId", "name"]),
-        Index(value = ["categoryId", "name"]),
         Index(value = ["sourceId", "sortOrder", "name"]),
-        Index(value = ["categoryId", "sortOrder", "name"]),
         Index(value = ["sourceId", "number"]),
     ],
 )
@@ -67,7 +65,6 @@ data class CategoryEntity(
 data class ChannelEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val sourceId: Long,
-    val categoryId: Long? = null,
     val name: String,
     val logoUrl: String? = null,
     val streamUrl: String,
@@ -173,7 +170,7 @@ data class ContentHashProjection(
  */
 fun ChannelEntity.computeContentHash(): Int {
     val base = Objects.hash(
-        sourceId, categoryId, name, logoUrl, streamUrl,
+        sourceId, name, logoUrl, streamUrl,
         epgChannelId, number, remoteId, catchup, catchupDays, catchupSource,
     )
     val withV43 = if (catchupType == null && httpHeaders == null && drmConfig == null &&

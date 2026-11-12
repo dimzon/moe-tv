@@ -76,6 +76,6 @@ class ChannelNameCleanupSyncTest {
         // providerName is folded in only when set, so upgrading does not rewrite every channel.
         val raw = channel("News One")
         assertEquals(raw.copy(providerName = null).computeContentHash(), raw.computeContentHash())
-        assertEquals(java.util.Objects.hash(7L, null, "News One", null, "https://example.com/1.ts", null, null, "key-1", false, 0, null), raw.computeContentHash())
+        assertEquals(java.util.Objects.hash(7L, "News One", null, "https://example.com/1.ts", null, null, "key-1", false, 0, null), raw.computeContentHash())
     }
 }

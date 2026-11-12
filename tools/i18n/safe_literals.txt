@@ -1187,8 +1187,6 @@
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/BulkInsertHelper.kt	series_fts
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	,
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	?
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_channels_categoryId_name` ON `channels` (`categoryId`, `name`)
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_channels_categoryId_sortOrder_name` ON `channels` (`categoryId`, `sortOrder`, `name`)
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_channels_epgChannelId` ON `channels` (`epgChannelId`)
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_channels_sourceId_name` ON `channels` (`sourceId`, `name`)
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_channels_sourceId_number` ON `channels` (`sourceId`, `number`)
@@ -1362,15 +1360,14 @@
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/TvProviderProgramDao.kt	AND mediaType = :mediaType AND groupId = :groupId LIMIT 1
 3	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	0
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	categories
-3	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	categoryId
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	channels
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	epgChannelId
-3	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	id
+2	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	id
 2	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	mediaType
-4	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	name
+2	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	name
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	number
 2	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	remoteId
-2	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	sortOrder
+1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	sortOrder
 9	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	sourceId
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/EpgEntities.kt	0
 3	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/EpgEntities.kt	epgChannelId

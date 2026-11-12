@@ -63,9 +63,11 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
     // migration history (1 → 57) was dropped with them — migrating the old tables toward a schema
     // that no longer has a `profiles` table vouched for nothing. There are zero installed
     // instances, so the database is simply recreated (see DatabaseModule's
-    // fallbackToDestructiveMigration). The old per-version log lives in git history and in
-    // CHANGELOG.md.
-    version = 1,
+    // fallbackToDestructiveMigration). v2 drops `channels.categoryId` — the M:N junction
+    // `channel_category` owns channel↔category membership now (redesign §2), and the
+    // in-memory visibility rules read ChannelMembership's snapshot. The old per-version log
+    // lives in git history and in CHANGELOG.md.
+    version = 2,
 
     exportSchema = true,
 )
@@ -102,9 +104,7 @@ abstract class OwnTVDatabase : RoomDatabase() {
             "channels" to listOf(
                 "CREATE INDEX IF NOT EXISTS `index_channels_epgChannelId` ON `channels` (`epgChannelId`)",
                 "CREATE INDEX IF NOT EXISTS `index_channels_sourceId_name` ON `channels` (`sourceId`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_channels_categoryId_name` ON `channels` (`categoryId`, `name`)",
                 "CREATE INDEX IF NOT EXISTS `index_channels_sourceId_sortOrder_name` ON `channels` (`sourceId`, `sortOrder`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_channels_categoryId_sortOrder_name` ON `channels` (`categoryId`, `sortOrder`, `name`)",
                 "CREATE INDEX IF NOT EXISTS `index_channels_sourceId_number` ON `channels` (`sourceId`, `number`)",
             ),
             "epg_programmes" to listOf(

@@ -67,14 +67,13 @@ import tv.own.owntv.core.live.LiveKey
 class LiveZapListTest {
 
     private fun channel(id: Long) = ChannelEntity(
-        id = id, sourceId = 1, categoryId = 10, name = "Ch $id",
+        id = id, sourceId = 1, name = "Ch $id",
         streamUrl = "http://x/$id.ts", remoteId = "$id",
     )
 
-    /** The junction snapshot the M:N sealing rule reads, seeded from each channel's category. */
-    private fun List<ChannelEntity>.withMembership() = also {
-        ChannelMembership.snapshot = ChannelMembership.snapshot +
-            this.mapNotNull { ch -> ch.remoteId?.let { hex -> ch.categoryId?.let { hex to setOf(it) } } }.toMap()
+    /** The junction snapshot the M:N sealing rule reads, seeded per test (hex → its category ids). */
+    private fun seedMembership(membership: Map<String, Set<Long>>) {
+        ChannelMembership.snapshot = membership
     }
 
     private class Harness(
@@ -114,7 +113,7 @@ class LiveZapListTest {
         fun stop() = scope.cancel()
     }
 
-    private val list = (1L..5L).map { ChannelEntity(id = it, sourceId = 1, categoryId = 10, name = "Ch $it", streamUrl = "http://x/$it.ts", remoteId = "$it") }
+    private val list = (1L..5L).map { ChannelEntity(id = it, sourceId = 1, name = "Ch $it", streamUrl = "http://x/$it.ts", remoteId = "$it") }
 
     @Test
     fun `arming from a browse rail keeps that rail as the context`() {
@@ -153,7 +152,8 @@ class LiveZapListTest {
 
     @Test
     fun `re-arming the same category while zapping inside it does not reload`() {
-        val h = Harness(category = list.withMembership())
+        val h = Harness(category = list)
+        seedMembership(mapOf("2" to setOf(10L)))
         h.zap.armFor(channel(2))
         h.await("the first load") { h.zap.channels.value.isNotEmpty() }
         // The list already contains this channel and the category matches, so nothing is reloaded —
@@ -315,8 +315,13 @@ class LiveZapListTest {
     @Test
     fun `a relock takes the sealed folder's channels out of the list`() {
         val h = Harness()
-        val mixed = list.mapIndexed { i, ch -> if (i % 2 == 0) ch.copy(categoryId = 20) else ch }.withMembership()
-        h.zap.armFromBrowse(mixed, title = "Favorites", key = LiveKey.Favorites, categoryId = null)
+        seedMembership(
+            mapOf(
+                "1" to setOf(20L), "3" to setOf(20L), "5" to setOf(20L),
+                "2" to setOf(10L), "4" to setOf(10L),
+            ),
+        )
+        h.zap.armFromBrowse(list, title = "Favorites", key = LiveKey.Favorites, categoryId = null)
         h.zap.dropCategories(setOf(20))
         assertEquals(listOf(2L, 4L), h.zap.channels.value.map { it.id })
         h.playing = 2
@@ -327,7 +332,13 @@ class LiveZapListTest {
 
     @Test
     fun `a load that started before a relock publishes without the sealed folder`() {
-        val h = Harness(category = list.mapIndexed { i, ch -> if (i < 2) ch.copy(categoryId = 20) else ch }.withMembership())
+        val h = Harness(category = list)
+        seedMembership(
+            mapOf(
+                "1" to setOf(20L), "2" to setOf(20L),
+                "3" to setOf(10L), "4" to setOf(10L), "5" to setOf(10L),
+            ),
+        )
         h.releaseArming = true
         h.zap.armFor(list[4])
         h.zap.dropCategories(setOf(20))
@@ -350,7 +361,8 @@ class LiveZapListTest {
     @Test
     fun `a relock that seals the whole list leaves nothing to zap`() {
         val h = Harness()
-        h.zap.armFromBrowse(list.withMembership(), title = null, key = null, categoryId = 10)
+        seedMembership((1L..5L).associate { "$it" to setOf(10L) })
+        h.zap.armFromBrowse(list, title = null, key = null, categoryId = 10)
         h.zap.dropCategories(setOf(10))
         assertEquals(emptyList<ChannelEntity>(), h.zap.channels.value)
         assertFalse(h.zap.canZap.value)

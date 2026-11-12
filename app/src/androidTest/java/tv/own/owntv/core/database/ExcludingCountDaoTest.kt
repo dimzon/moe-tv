@@ -55,10 +55,17 @@ class ExcludingCountDaoTest {
     @After
     fun tearDown() = db.close()
 
-    private fun channel(id: Long, categoryId: Long?, catchup: Boolean = false) = ChannelEntity(
-        id = id, sourceId = source, categoryId = categoryId, name = "Ch $id",
-        streamUrl = "http://test/$id.ts", remoteId = "$id", catchup = catchup,
-    )
+    /** Membership is many-to-many now: [categoryId] goes into the junction, not the channel row. */
+    private suspend fun channel(id: Long, categoryId: Long?, catchup: Boolean = false): ChannelEntity {
+        val row = ChannelEntity(
+            id = id, sourceId = source, name = "Ch $id",
+            streamUrl = "http://test/$id.ts", remoteId = "ch$id", catchup = catchup,
+        )
+        if (categoryId != null) {
+            db.channelCategoryDao().insertAll(listOf(ChannelCategoryEntity(channelHexId = row.remoteId!!, categoryId = categoryId)))
+        }
+        return row
+    }
 
     @Test
     fun channelCountsDropOnlyTheExcludedCategory() = runBlocking {

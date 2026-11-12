@@ -387,18 +387,21 @@ class ChannelDaoBoundedWindowTest {
         sourceId: Long,
         channels: List<ChannelSpec>,
     ) {
-        dao.upsertAll(
-            channels.map { spec ->
-                ChannelEntity(
-                    id = spec.id,
-                    sourceId = sourceId,
-                    categoryId = categoryId,
-                    name = spec.name,
-                    streamUrl = "https://example.test/${spec.id}",
-                    number = spec.number,
-                    sortOrder = spec.sortOrder,
-                )
-            },
+        val rows = channels.map { spec ->
+            ChannelEntity(
+                id = spec.id,
+                sourceId = sourceId,
+                name = spec.name,
+                streamUrl = "https://example.test/${spec.id}",
+                number = spec.number,
+                sortOrder = spec.sortOrder,
+                // The junction's natural key: per-category membership lives in channel_category.
+                remoteId = "ch${spec.id}",
+            )
+        }
+        dao.upsertAll(rows)
+        db.channelCategoryDao().insertAll(
+            rows.map { ChannelCategoryEntity(channelHexId = it.remoteId!!, categoryId = categoryId) },
         )
     }
 
