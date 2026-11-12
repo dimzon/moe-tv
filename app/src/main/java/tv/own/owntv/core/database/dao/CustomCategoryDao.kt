@@ -100,7 +100,8 @@ interface CustomCategoryDao {
         "SELECT contextKey, COUNT(*) AS count FROM custom_category_members " +
             "WHERE mediaType = :type AND contextKey IN (:contextKeys) AND " +
             "itemId IN (SELECT id FROM channels WHERE sourceId IN (:sourceIds) " +
-            "AND (categoryId IS NULL OR categoryId NOT IN (:excluded))) " +
+            "AND (remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId NOT IN (:excluded)) " +
+            "OR remoteId NOT IN (SELECT channelHexId FROM channel_category))) " +
             "GROUP BY contextKey",
     )
     fun observeCountsByContextsExcluding(
@@ -190,7 +191,8 @@ interface CustomCategoryDao {
             "JOIN channels c ON m.mediaType = 'LIVE' AND m.itemId = c.id " +
             "WHERE m.mediaType = :type AND m.contextKey = :contextKey " +
             "AND c.sourceId IN (:sourceIds) " +
-            "AND (c.categoryId IS NULL OR c.categoryId NOT IN (:excluded))",
+            "AND (c.remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId NOT IN (:excluded)) " +
+            "OR c.remoteId NOT IN (SELECT channelHexId FROM channel_category))",
     )
     fun countMembersExcluding(type: MediaType, contextKey: String, sourceIds: List<Long>, excluded: List<Long>): Flow<Int>
 

@@ -59,6 +59,14 @@ interface ChannelCategoryDao {
     suspend fun categoriesOf(hexId: String): List<Long>
 
     /**
+     * Every membership as (hexId, categoryId) rows — the whole link table. At ~250 channels this is
+     * a few hundred rows, loaded once to build a `hexId → categories` map so the visibility filters
+     * (hidden / sealed) can ask "is any of this channel's categories visible" without a query per row.
+     */
+    @Query("SELECT channelHexId, categoryId FROM channel_category")
+    suspend fun allMemberships(): List<ChannelCategoryEntity>
+
+    /**
      * Whether a channel (by hex id) is a member of [categoryId] — the junction replacement for the
      * old `channels.categoryId = :categoryId` equality. The category-lock / hidden / EPG-folder checks
      * must now ask "is this channel in this category", not "is this its category".
