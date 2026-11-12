@@ -153,6 +153,9 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
         // user can export from Settings, instead of being lost with the process.
         tv.own.owntv.core.util.CrashRecorder.diagnostics = { tv.own.owntv.player.LiveDiagnosticsLog.snapshot() }
         tv.own.owntv.core.util.CrashRecorder.install(this)
+        // A crash from a previous run is mailed to the maintainer through FormSubmit (subject = name +
+        // version), on a daemon thread so the launch path never waits on the network. Once per crash.
+        tv.own.owntv.core.util.CrashUploader.uploadPending(this)
         // Core learns a panel's session limit while syncing; the engine is what acts on it. Registered
         // before Koin so the very first source flow already reaches the player (see LiveSessionLimit).
         tv.own.owntv.core.player.LiveSessionLimit.report = tv.own.owntv.player.LiveStreamQuirks::rememberSessionLimit

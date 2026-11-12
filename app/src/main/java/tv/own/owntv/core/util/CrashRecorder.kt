@@ -47,13 +47,20 @@ object CrashRecorder {
 
     /** The recorded crash, or null when the app has never gone down on this device. */
     fun read(context: Context): String? =
-        runCatching { file(context).takeIf { it.exists() }?.readText()?.takeIf { it.isNotBlank() } }.getOrNull()
+        runCatching { crashFile(context).takeIf { it.exists() }?.readText()?.takeIf { it.isNotBlank() } }.getOrNull()
+
+    /** The on-disk crash file — also the source [CrashUploader] sends and the export reads. */
+    fun crashFile(context: Context): File =
+        File(File(context.applicationContext.filesDir, "diagnostics"), FILE_NAME)
 
     private fun write(context: Context, thread: Thread, error: Throwable) {
         val stamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
             .format(java.util.Date())
+        val appName = runCatching {
+            context.packageManager.getApplicationLabel(context.applicationInfo).toString()
+        }.getOrDefault("МОЁ ТВ")
         val text = buildString {
-            appendLine("OwnTV ${CoreBuildInfo.versionName} (${CoreBuildInfo.versionCode})")
+            appendLine("$appName ${CoreBuildInfo.versionName} (${CoreBuildInfo.versionCode})")
             appendLine("${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
             appendLine("Crashed $stamp on thread \"${thread.name}\"")
             appendLine()
@@ -64,11 +71,8 @@ object CrashRecorder {
                 appendLine(live)
             }
         }
-        val f = file(context)
+        val f = crashFile(context)
         f.parentFile?.mkdirs()
         f.writeText(text)
     }
-
-    private fun file(context: Context): File =
-        File(File(context.filesDir, "diagnostics"), FILE_NAME)
 }

@@ -410,8 +410,41 @@
 2	app/src/main/java/tv/own/owntv/core/sync/local/DeviceIdentity.kt	id
 2	app/src/main/java/tv/own/owntv/core/sync/local/DeviceIdentity.kt	name
 1	app/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	EPG sync failed sourceId=${source.id} reason=$reason message=$rawMessage
+1	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	$appName ${CoreBuildInfo.versionName} (${CoreBuildInfo.versionCode})
 1	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})
 1	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	--- live diagnostics leading up to the crash ---
+1	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	МОЁ ТВ
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	$name ${CoreBuildInfo.versionName} (${CoreBuildInfo.versionCode}) crash
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	${crash.length()}:${crash.lastModified()}
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	...[truncated]
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	.uploaded
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	Accept
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	Content-Type
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	MOETV/
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	Origin
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	OwnTV-CrashUploader
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	POST
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	Referer
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	User-Agent
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	_captcha
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	_subject
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	_template
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	application/json
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	application/json; charset=utf-8
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	crash report uploaded
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	crash upload failed: ${t.message}
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	crash upload rejected: $code $response
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	crash upload skipped: ${it.message}
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	crash-upload
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	false
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	https://formsubmit.co/ajax/44e36d25fc0b0a147876d92d6807267f
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	https://github.com
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	https://github.com/ahXN00/OwnTV
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	report
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	success
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	table
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	true
+1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	МОЁ ТВ
 1	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	audio decoder: $decoderName (init ${initializationDurationMs}ms)
 1	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	body="$failureText"
 1	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	buffering=${_buffering.value} reconnect=${tune.retryCount}/$MAX_RECONNECTS
