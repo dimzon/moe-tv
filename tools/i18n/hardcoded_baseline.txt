@@ -261,6 +261,7 @@
 1	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	0
 2	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	contextKey
 1	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	custom_category_members
+1	app/src/main/java/tv/own/owntv/core/launcher/LauncherDeepLink.kt	moetv
 1	app/src/main/java/tv/own/owntv/core/launcher/LauncherDeepLink.kt	moetv://open/live
 1	app/src/main/java/tv/own/owntv/core/launcher/LauncherDeepLink.kt	moetv://play/live
 1	app/src/main/java/tv/own/owntv/core/live/ChannelFacets.kt	\0

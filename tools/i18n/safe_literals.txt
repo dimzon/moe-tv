@@ -1641,7 +1641,6 @@
 2	protocol	app/src/main/java/tv/own/owntv/core/launcher/LauncherDeepLink.kt	live
 2	uri	app/src/main/java/tv/own/owntv/core/launcher/LauncherDeepLink.kt	name
 1	protocol	app/src/main/java/tv/own/owntv/core/launcher/LauncherDeepLink.kt	open
-1	protocol	app/src/main/java/tv/own/owntv/core/launcher/LauncherDeepLink.kt	owntv
 1	protocol	app/src/main/java/tv/own/owntv/core/launcher/LauncherDeepLink.kt	play
 2	uri	app/src/main/java/tv/own/owntv/core/launcher/LauncherDeepLink.kt	remoteId
 2	uri	app/src/main/java/tv/own/owntv/core/launcher/LauncherDeepLink.kt	sourceId

@@ -27,7 +27,7 @@ sealed interface LauncherDeepLink {
 
     companion object {
         fun parse(uri: Uri?): LauncherDeepLink? {
-            if (uri == null || uri.scheme != "owntv") return null
+            if (uri == null || uri.scheme != "moetv") return null
             return when (uri.host) {
                 "open" -> when (uri.pathSegments.firstOrNull()) {
                     "live" -> OpenLiveSection
