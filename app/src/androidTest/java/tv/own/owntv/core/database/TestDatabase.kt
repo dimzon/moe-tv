@@ -2,7 +2,7 @@ package tv.own.owntv.core.database
 
 import android.content.Context
 import androidx.room.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.driver.AndroidSQLiteDriver
 import androidx.test.platform.app.InstrumentationRegistry
 
 /**
@@ -11,15 +11,16 @@ import androidx.test.platform.app.InstrumentationRegistry
  * **The `setDriver` call is the point of this function.** A builder without one leaves Room in
  * compatibility mode, where the Support path still exists and `androidx.room.withTransaction` works
  * — so a test can pass against behaviour production cannot reach. That is exactly how the
- * `withTransaction` breakage shipped in core-1.0.48: `DatabaseModule` configures
- * `BundledSQLiteDriver`, every test opened a compat-mode database instead, and nothing in the build
- * ever ran the two against each other. Open test databases through here, not through
+ * `withTransaction` breakage shipped in core-1.0.48: `DatabaseModule` configures a driver, every test
+ * opened a compat-mode database instead, and nothing in the build ever ran the two against each
+ * other. `DatabaseModule` now uses `AndroidSQLiteDriver` (the system SQLite, the bundled engine is
+ * gone), so tests use the same. Open test databases through here, not through
  * `Room.inMemoryDatabaseBuilder` directly.
  */
 fun ownTVTestDatabase(
     context: Context = InstrumentationRegistry.getInstrumentation().targetContext,
 ): OwnTVDatabase =
     Room.inMemoryDatabaseBuilder(context, OwnTVDatabase::class.java)
-        .setDriver(BundledSQLiteDriver())
+        .setDriver(AndroidSQLiteDriver())
         .allowMainThreadQueries()
         .build()

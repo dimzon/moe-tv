@@ -2,6 +2,7 @@ package tv.own.owntv.core.database.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import tv.own.owntv.core.database.entity.UserDataTombstoneEntity
 
 /**
@@ -17,11 +18,26 @@ interface TombstoneDao {
      * would drop back to an older timestamp if two devices exchanged tombstones out of order, and an
      * older tombstone loses to a re-add that happened in between — so the newest wins here too.
      */
+    // The old single-statement upsert (`ON CONFLICT … DO UPDATE SET deletedAt = MAX(…)`) needs SQLite
+    // 3.24, which the system SQLite lacks on Android 8/9/10. Two statements give the identical
+    // "newest wins" result everywhere: raise an existing row only when the new one is later, then
+    // insert only when absent. A row already newer than :deletedAt is left untouched by both.
     @Query(
-        "INSERT INTO user_data_tombstones (kind, identity, deletedAt) VALUES (:kind, :identity, :deletedAt) " +
-            "ON CONFLICT(kind, identity) DO UPDATE SET deletedAt = MAX(deletedAt, :deletedAt)",
+        "UPDATE user_data_tombstones SET deletedAt = :deletedAt " +
+            "WHERE kind = :kind AND identity = :identity AND deletedAt < :deletedAt",
     )
-    suspend fun record(kind: String, identity: String, deletedAt: Long)
+    suspend fun bumpIfNewer(kind: String, identity: String, deletedAt: Long)
+
+    @Query(
+        "INSERT OR IGNORE INTO user_data_tombstones (kind, identity, deletedAt) VALUES (:kind, :identity, :deletedAt)",
+    )
+    suspend fun insertIfAbsent(kind: String, identity: String, deletedAt: Long)
+
+    @Transaction
+    suspend fun record(kind: String, identity: String, deletedAt: Long) {
+        bumpIfNewer(kind, identity, deletedAt)
+        insertIfAbsent(kind, identity, deletedAt)
+    }
 
     /** When this row was deleted, or null if it never was. Gates a merge insert of the same record. */
     @Query("SELECT deletedAt FROM user_data_tombstones WHERE kind = :kind AND identity = :identity")

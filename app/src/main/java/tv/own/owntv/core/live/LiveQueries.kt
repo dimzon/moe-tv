@@ -6,6 +6,7 @@ import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.customize.SectionCustomizations
 import tv.own.owntv.core.customize.seals
 import tv.own.owntv.core.customize.sealsItemIn
+import tv.own.owntv.core.database.ManualOrderPagingSource
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.CustomCategoryDao
 import tv.own.owntv.core.database.entity.ChannelEntity
@@ -40,7 +41,7 @@ fun livePagingSource(
             LiveKey.All -> if (playlist) channelDao.pagingAllOriginal(ids) else channelDao.pagingAll(ids)
             LiveKey.Favorites -> channelDao.pagingFavoritesManual(ContentOrderEntity.FAV_CONTEXT, ids)
             LiveKey.History -> channelDao.pagingHistory(ids)
-            is LiveKey.Custom -> customCategoryDao.pagingChannels(key.id, ids, alpha = !playlist)
+            is LiveKey.Custom -> ManualOrderPagingSource({ customCategoryDao.baseChannelsManual(key.id, ids) }, alpha = !playlist)
             is LiveKey.Folder -> {
                 val ctxKey = contextKey(key.id) ?: ""
                 // Fast path: no manual order in this folder → the plain indexed query has
@@ -48,7 +49,7 @@ fun livePagingSource(
                 if (!hasManualOrder(ctxKey)) {
                     if (playlist) channelDao.pagingByCategory(key.id) else channelDao.pagingByCategoryAlpha(key.id)
                 } else {
-                    channelDao.pagingByCategoryManual(key.id, ctxKey, alpha = !playlist)
+                    ManualOrderPagingSource({ channelDao.baseByCategoryManual(key.id, ctxKey) }, alpha = !playlist)
                 }
             }
         }

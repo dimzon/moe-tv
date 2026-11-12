@@ -483,6 +483,10 @@ class LiveViewModel(
         // Rebuild the pager when a folder gains/loses manual order: the fast-path plain
         // PagingSource doesn't observe content_order, so the switch must recreate it.
         .combine(orderedContexts) { args, _ -> args }
+        // …and whenever the manual order actually changes: the Kotlin-sorted ManualOrderPagingSource
+        // has no self-invalidation (Room's @Query source used to observe content_order itself), so a
+        // reorder must recreate it. observeManualVersion re-emits on any channels/content_order/member write.
+        .combine(channelDao.observeManualVersion()) { args, _ -> args }
         .flatMapLatest { (key, c, query, sort, cs) ->
             // Customizations are applied to each fresh PagingData inside the pager chain — a PagingData
             // that the UI already collected must never be re-transformed (Paging forbids re-collection,

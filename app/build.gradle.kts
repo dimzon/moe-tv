@@ -403,9 +403,10 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
     ksp(libs.androidx.room.compiler)
-    // The SQLiteDriver API + the engine shipped inside the APK (migrations are written against it).
+    // The SQLiteDriver API on the platform engine (AndroidSQLiteDriver). The bundled engine
+    // (sqlite-bundled / libsqliteJni.so) is gone — the two version-gated queries it was needed for
+    // were rewritten version-independent (see DatabaseModule).
     implementation(libs.androidx.sqlite)
-    implementation(libs.androidx.sqlite.bundled)
     implementation(libs.androidx.sqlite.framework)
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)

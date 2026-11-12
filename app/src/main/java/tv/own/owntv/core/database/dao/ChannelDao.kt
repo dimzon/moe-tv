@@ -9,6 +9,8 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import tv.own.owntv.core.database.ManualOrderRow
+import tv.own.owntv.core.database.ManualOrdering
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.ChannelNumberProjection
 import tv.own.owntv.core.database.entity.ContentHashProjection
@@ -274,18 +276,31 @@ interface ChannelDao {
 
     // --- Manual order (Move) — LEFT JOIN content_order; a row with a saved position keeps it, the rest
     //     follow A–Z or the provider/playlist order around it. ---
-    /** Moved rows keep their saved position; the rest follow [alpha] (A–Z) or the playlist order
-     *  around them — the same rule as `placePinned` for categories. */
+    /** The manual-order inputs for one folder: each channel with its saved position (null = never
+     *  moved) and membership position (0 here). The ordering itself is computed in Kotlin
+     *  ([tv.own.owntv.core.database.ManualOrdering]) — the old `slots` CTE needed a window function,
+     *  which the system SQLite lacks below 3.25. Browse pages it with
+     *  [tv.own.owntv.core.database.ManualOrderPagingSource]; the Move session uses [snapshotByCategoryManual]. */
     @Query(
-            "WITH base AS (SELECT c.id AS id, c.sortOrder AS so, c.name AS nm, 0 AS mp, o.position AS pos " +
-            "FROM channels c " +
-            "LEFT JOIN content_order o ON o.itemId = c.id AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey " +
-            "WHERE c.categoryId = :categoryId), " +
-            "slots AS (SELECT id, pos - (ROW_NUMBER() OVER (ORDER BY pos, id) - 1) AS slot, 0 AS grp, pos AS tie FROM base WHERE pos IS NOT NULL " +
-            "UNION ALL SELECT id, ROW_NUMBER() OVER (ORDER BY CASE WHEN :alpha THEN nm END, mp, so, nm) - 1 AS slot, 1 AS grp, 0 AS tie FROM base WHERE pos IS NULL) " +
-            "SELECT c.* FROM channels c INNER JOIN slots sl ON sl.id = c.id ORDER BY sl.slot, sl.grp, sl.tie",
+        "SELECT c.*, o.position AS pos, 0 AS mp FROM channels c " +
+        "LEFT JOIN content_order o ON o.itemId = c.id AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey " +
+        "WHERE c.categoryId = :categoryId",
     )
-    fun pagingByCategoryManual(categoryId: Long, contextKey: String, alpha: Boolean): PagingSource<Int, ChannelEntity>
+    suspend fun baseByCategoryManual(categoryId: Long, contextKey: String): List<ManualOrderRow>
+
+    /**
+     * A tick that re-emits on any write to the tables the manual order reads (channels, content_order,
+     * custom_category_members). Room's @Query PagingSource used to invalidate itself on those writes;
+     * the Kotlin-sorted [tv.own.owntv.core.database.ManualOrderPagingSource] has no such hook, so the
+     * browse Pager combines this flow to rebuild the source when the order changes. The value is never
+     * read — only its emissions matter.
+     */
+    @Query(
+        "SELECT (SELECT COUNT(*) FROM channels) " +
+        "+ (SELECT COUNT(*) FROM content_order WHERE mediaType = 'LIVE') " +
+        "+ (SELECT COUNT(*) FROM custom_category_members WHERE mediaType = 'LIVE')",
+    )
+    fun observeManualVersion(): Flow<Int>
 
 
     @Query(
@@ -297,18 +312,9 @@ interface ChannelDao {
     )
     fun pagingFavoritesManual(contextKey: String, sourceIds: List<Long>): PagingSource<Int, ChannelEntity>
 
-    /** Bounded snapshot of a folder in manual order, for the Move session's in-memory reorder. Moved rows keep their saved position; the rest follow
-     *  [alpha] (A–Z) or the playlist order around them. */
-    @Query(
-            "WITH base AS (SELECT c.id AS id, c.sortOrder AS so, c.name AS nm, 0 AS mp, o.position AS pos " +
-            "FROM channels c " +
-            "LEFT JOIN content_order o ON o.itemId = c.id AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey " +
-            "WHERE c.categoryId = :categoryId), " +
-            "slots AS (SELECT id, pos - (ROW_NUMBER() OVER (ORDER BY pos, id) - 1) AS slot, 0 AS grp, pos AS tie FROM base WHERE pos IS NOT NULL " +
-            "UNION ALL SELECT id, ROW_NUMBER() OVER (ORDER BY CASE WHEN :alpha THEN nm END, mp, so, nm) - 1 AS slot, 1 AS grp, 0 AS tie FROM base WHERE pos IS NULL) " +
-            "SELECT c.* FROM channels c INNER JOIN slots sl ON sl.id = c.id ORDER BY sl.slot, sl.grp, sl.tie LIMIT :limit",
-    )
-    suspend fun snapshotByCategoryManual(categoryId: Long, contextKey: String, alpha: Boolean, limit: Int): List<ChannelEntity>
+    /** Bounded snapshot of a folder in manual order, for the Move session's in-memory reorder. */
+    suspend fun snapshotByCategoryManual(categoryId: Long, contextKey: String, alpha: Boolean, limit: Int): List<ChannelEntity> =
+        ManualOrdering.order(baseByCategoryManual(categoryId, contextKey), alpha).take(limit)
 
     /** Bounded snapshot across all the playlists, in provider order — the in-player zap /
      *  channel-list fallback for a channel that has no category of its own. */

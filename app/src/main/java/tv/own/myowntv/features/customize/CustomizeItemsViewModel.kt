@@ -175,7 +175,10 @@ class CustomizeItemsViewModel(
     /** Paged items in this category, with customizations applied (display names, hidden state). */
     private val allItems: Flow<PagingData<CustomizeItemRow>> = combine(_catInfo, hasOrder, customizeForItems) { ci, ordered, cust ->
         Triple(ci, ordered, cust)
-    }.flatMapLatest { (ci, ordered, cust) ->
+        // Rebuild when the manual order changes: the Kotlin-sorted ManualOrderPagingSource has no
+        // self-invalidation (Room's @Query source used to observe content_order itself).
+    }.combine(channelDao.observeManualVersion()) { t, _ -> t }
+    .flatMapLatest { (ci, ordered, cust) ->
         if (ci == null) flowOf(PagingData.empty())
         else {
             Pager(PagingConfig(pageSize = 60)) { pagingSource(ci.categoryId, ci, ordered) }
@@ -315,9 +318,13 @@ class CustomizeItemsViewModel(
      *  so [ordered] doesn't matter there. Channels only. */
     private fun pagingSource(categoryId: Long?, info: CatInfo, ordered: Boolean): PagingSource<Int, *> =
         if (info.isCustom) {
-            customCategoryDao.pagingChannels(info.contextKey, info.sourceIds, alpha = false)
+            tv.own.owntv.core.database.ManualOrderPagingSource(
+                { customCategoryDao.baseChannelsManual(info.contextKey, info.sourceIds) }, alpha = false,
+            )
         } else if (ordered) {
-            channelDao.pagingByCategoryManual(categoryId!!, info.contextKey, alpha = false)
+            tv.own.owntv.core.database.ManualOrderPagingSource(
+                { channelDao.baseByCategoryManual(categoryId!!, info.contextKey) }, alpha = false,
+            )
         } else {
             channelDao.pagingByCategory(categoryId!!)
         }

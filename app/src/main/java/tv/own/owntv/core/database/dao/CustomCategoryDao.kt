@@ -7,6 +7,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import tv.own.owntv.core.database.ManualOrderRow
+import tv.own.owntv.core.database.ManualOrdering
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.CustomCategoryMemberEntity
 import tv.own.owntv.core.model.MediaType
@@ -166,15 +168,12 @@ interface CustomCategoryDao {
      * row keeps its saved position in either order.
      */
     @Query(
-            "WITH base AS (SELECT c.id AS id, c.sortOrder AS so, c.name AS nm, m.position AS mp, o.position AS pos " +
-            "FROM channels c INNER JOIN custom_category_members m ON m.itemId = c.id AND m.mediaType = 'LIVE' AND m.contextKey = :contextKey " +
-            "LEFT JOIN content_order o ON o.itemId = c.id AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey " +
-            "WHERE c.sourceId IN (:sourceIds)), " +
-            "slots AS (SELECT id, pos - (ROW_NUMBER() OVER (ORDER BY pos, id) - 1) AS slot, 0 AS grp, pos AS tie FROM base WHERE pos IS NOT NULL " +
-            "UNION ALL SELECT id, ROW_NUMBER() OVER (ORDER BY CASE WHEN :alpha THEN nm END, mp, so, nm) - 1 AS slot, 1 AS grp, 0 AS tie FROM base WHERE pos IS NULL) " +
-            "SELECT c.* FROM channels c INNER JOIN slots sl ON sl.id = c.id ORDER BY sl.slot, sl.grp, sl.tie",
+        "SELECT c.*, o.position AS pos, m.position AS mp FROM channels c " +
+        "INNER JOIN custom_category_members m ON m.itemId = c.id AND m.mediaType = 'LIVE' AND m.contextKey = :contextKey " +
+        "LEFT JOIN content_order o ON o.itemId = c.id AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey " +
+        "WHERE c.sourceId IN (:sourceIds)",
     )
-    fun pagingChannels(contextKey: String, sourceIds: List<Long>, alpha: Boolean): PagingSource<Int, ChannelEntity>
+    suspend fun baseChannelsManual(contextKey: String, sourceIds: List<Long>): List<ManualOrderRow>
 
     /** Live count of a custom category's in-scope items — the rail count badge. Live-only. */
     @Query(
@@ -202,16 +201,8 @@ interface CustomCategoryDao {
     suspend fun itemIds(type: MediaType, contextKey: String): List<Long>
 
     /** Bounded snapshot of a custom category in rail order — the Move session's in-memory reorder. */
-    @Query(
-            "WITH base AS (SELECT c.id AS id, c.sortOrder AS so, c.name AS nm, m.position AS mp, o.position AS pos " +
-            "FROM channels c INNER JOIN custom_category_members m ON m.itemId = c.id AND m.mediaType = 'LIVE' AND m.contextKey = :contextKey " +
-            "LEFT JOIN content_order o ON o.itemId = c.id AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey " +
-            "WHERE c.sourceId IN (:sourceIds)), " +
-            "slots AS (SELECT id, pos - (ROW_NUMBER() OVER (ORDER BY pos, id) - 1) AS slot, 0 AS grp, pos AS tie FROM base WHERE pos IS NOT NULL " +
-            "UNION ALL SELECT id, ROW_NUMBER() OVER (ORDER BY CASE WHEN :alpha THEN nm END, mp, so, nm) - 1 AS slot, 1 AS grp, 0 AS tie FROM base WHERE pos IS NULL) " +
-            "SELECT c.* FROM channels c INNER JOIN slots sl ON sl.id = c.id ORDER BY sl.slot, sl.grp, sl.tie LIMIT :limit",
-    )
-    suspend fun snapshotChannels(contextKey: String, sourceIds: List<Long>, alpha: Boolean, limit: Int): List<ChannelEntity>
+    suspend fun snapshotChannels(contextKey: String, sourceIds: List<Long>, alpha: Boolean, limit: Int): List<ChannelEntity> =
+        ManualOrdering.order(baseChannelsManual(contextKey, sourceIds), alpha).take(limit)
 
     /** In-category search (mirrors ChannelDao.searchInCategory), for custom categories. */
     @Query(

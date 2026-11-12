@@ -121,9 +121,8 @@ androidx-room-paging = { group = "androidx.room", name = "room-paging", version.
 androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
-# The SQLiteDriver API + bundled engine (Room's driver path; migrations are written against it).
+# The SQLiteDriver API on the platform engine (AndroidSQLiteDriver); the bundled engine is dropped.
 androidx-sqlite = { group = "androidx.sqlite", name = "sqlite", version.ref = "sqlite" }
-androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 androidx-sqlite-framework = { group = "androidx.sqlite", name = "sqlite-framework", version.ref = "sqlite" }
 # Storage Access Framework wrapper for user-chosen download folders.
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentFile" }

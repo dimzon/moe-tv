@@ -3,7 +3,7 @@ package tv.own.owntv.core.di
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.SQLiteConnection
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.driver.AndroidSQLiteDriver
 import androidx.sqlite.execSQL
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
@@ -17,17 +17,12 @@ val databaseModule = module {
     single {
         Room.databaseBuilder(androidContext(), OwnTVDatabase::class.java, OwnTVDatabase.NAME)
             .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
-            // The engine swap: SQLite ships inside the APK. Moving to the driver API and swapping the
-            // engine are deliberately separate, so this stays one line.
-            //
-            // What it buys: minSdk 26 means an Android 8 device runs SQLite 3.18, which has no
-            // UPSERT (3.24), no window functions (3.25), no UPDATE…FROM (3.33) and no RETURNING
-            // (3.35). Bundling the engine makes those available on every device instead of none,
-            // and the DAOs use them.
-            //
-            // Revert path, if 3.x ever misbehaves on a specific device: change this to
-            // AndroidSQLiteDriver(). Nothing else in the codebase knows the difference.
-            .setDriver(BundledSQLiteDriver())
+            // The system SQLite, not the engine bundled in the APK — this drops libsqliteJni.so
+            // (~2.6 MB). minSdk 26 means an Android 8 device runs SQLite 3.18, which has no UPSERT
+            // (3.24) or window functions (3.25); the two places that used them were rewritten to be
+            // version-independent (the manual-order sort moved to Kotlin — see ManualOrdering — and
+            // the tombstone upsert to UPDATE + INSERT OR IGNORE). So the platform engine suffices.
+            .setDriver(AndroidSQLiteDriver())
             // Redesign period, zero installed apps: the schema was reset to v1 without migrations,
             // so any pre-existing database (dev builds) is simply dropped and recreated.
             // DELETE THIS LINE before a public release — a wipe-on-mismatch fallback silently
