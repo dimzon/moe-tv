@@ -107,25 +107,40 @@
 1	app/src/main/java/tv/own/owntv/core/database/ManualOrdering.kt	\0
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	+ (SELECT COUNT(*) FROM content_order WHERE mediaType = 'LIVE')
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	+ (SELECT COUNT(*) FROM custom_category_members WHERE mediaType = 'LIVE')
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	AND (remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId NOT IN (:excludedCategoryIds))
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	AND LOWER(TRIM(epgChannelId)) = LOWER(TRIM(:epgChannelId)) LIMIT 1
+2	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	FROM channels c
+2	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	JOIN categories cat ON cat.id = cc.categoryId WHERE cc.channelHexId = c.remoteId) AS categoryName
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	JOIN channels c ON c.remoteId = cc.channelHexId
 3	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	LEFT JOIN content_order o ON o.itemId = c.id AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	OR remoteId NOT IN (SELECT channelHexId FROM channel_category))
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY LOWER(c.name) ASC, c.id ASC
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY f.addedAt DESC
 2	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY h.watchedAt DESC LIMIT :limit
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT (SELECT COUNT(*) FROM channels)
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE epgChannelId IS NOT NULL AND epgChannelId != ''
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) AND (sortOrder < :beforeSortOrder OR (sortOrder = :beforeSortOrder AND id < :beforeId)) ORDER BY sortOrder DESC, id DESC LIMIT :limit
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) AND (sortOrder > :afterSortOrder OR (sortOrder = :afterSortOrder AND id > :afterId)) ORDER BY sortOrder ASC, id ASC LIMIT :limit
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) AND name LIKE '%' || :query || '%' ORDER BY sortOrder ASC, name ASC
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY name ASC
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY sortOrder ASC, name ASC
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId)
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM favorites f INNER JOIN channels c ON c.id = f.itemId
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM watch_history h INNER JOIN channels c ON c.id = h.itemId
+2	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT c.*, (SELECT GROUP_CONCAT(cat.name, ' · ') FROM channel_category cc
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT c.*, o.position AS pos, 0 AS mp FROM channels c
-1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.categoryId = :categoryId
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT cc.categoryId AS categoryId, COUNT(*) AS itemCount FROM channel_category cc
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT remoteId FROM channels WHERE sourceId = :sourceId AND remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId IN (:categoryIds)) AND remoteId IS NOT NULL
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId)
 3	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.sourceId IN (:sourceIds)
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.sourceId IN (:sourceIds) AND c.name LIKE '%' || :query || '%' ORDER BY f.addedAt DESC
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.sourceId IN (:sourceIds) AND c.name LIKE '%' || :query || '%' ORDER BY h.watchedAt DESC
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.sourceId IN (:sourceIds) GROUP BY cc.categoryId
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.sourceId IN (:sourceIds) ORDER BY h.watchedAt DESC
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE f.mediaType = 'LIVE' AND c.sourceId IN (:sourceIds)
-1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE f.mediaType = 'LIVE' AND c.sourceId IN (:sourceIds) AND (c.categoryId IS NULL OR c.categoryId NOT IN (:excluded))
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE f.mediaType = 'LIVE' AND c.sourceId IN (:sourceIds) AND (c.remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId NOT IN (:excluded)) OR c.remoteId NOT IN (SELECT channelHexId FROM channel_category))
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE h.mediaType = 'LIVE' AND c.sourceId IN (:sourceIds)
-1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE h.mediaType = 'LIVE' AND c.sourceId IN (:sourceIds) AND (c.categoryId IS NULL OR c.categoryId NOT IN (:excluded))
+1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE h.mediaType = 'LIVE' AND c.sourceId IN (:sourceIds) AND (c.remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId NOT IN (:excluded)) OR c.remoteId NOT IN (SELECT channelHexId FROM channel_category))
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	AND itemId NOT IN (SELECT id FROM channels)
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	AND updatedAt <= :at
 1	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	DELETE FROM content_order

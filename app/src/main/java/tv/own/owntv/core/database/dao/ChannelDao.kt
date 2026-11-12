@@ -176,7 +176,7 @@ interface ChannelDao {
     suspend fun anyRemoteId(sourceId: Long): String?
 
     /** Prune scope for the per-category sync fallback. */
-    @Query("SELECT remoteId FROM channels WHERE sourceId = :sourceId AND categoryId IN (:categoryIds) AND remoteId IS NOT NULL")
+    @Query("SELECT remoteId FROM channels WHERE sourceId = :sourceId AND remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId IN (:categoryIds)) AND remoteId IS NOT NULL")
     suspend fun remoteIdsInCategories(sourceId: Long, categoryIds: List<Long>): List<String>
 
     @Query("SELECT remoteId, id, contentHash, sortOrder FROM channels WHERE sourceId = :sourceId AND remoteId IS NOT NULL")
@@ -243,11 +243,11 @@ interface ChannelDao {
     /** Bounded window of channels in provider order AFTER [afterSortOrder]/[afterId] within a category.
      *  Combined with [channelsBeforeCategory] to build a neighbourhood around a tuned channel.
      *  Ordered by (sortOrder, id) to match the cursor predicate — avoids mismatch when sortOrder ties. */
-    @Query("SELECT * FROM channels WHERE categoryId = :categoryId AND (sortOrder > :afterSortOrder OR (sortOrder = :afterSortOrder AND id > :afterId)) ORDER BY sortOrder ASC, id ASC LIMIT :limit")
+    @Query("SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) AND (sortOrder > :afterSortOrder OR (sortOrder = :afterSortOrder AND id > :afterId)) ORDER BY sortOrder ASC, id ASC LIMIT :limit")
     suspend fun channelsAfterCategory(categoryId: Long, afterSortOrder: Int, afterId: Long, limit: Int): List<ChannelEntity>
 
     /** Bounded window of channels in provider order BEFORE [beforeSortOrder]/[beforeId] within a category. */
-    @Query("SELECT * FROM channels WHERE categoryId = :categoryId AND (sortOrder < :beforeSortOrder OR (sortOrder = :beforeSortOrder AND id < :beforeId)) ORDER BY sortOrder DESC, id DESC LIMIT :limit")
+    @Query("SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) AND (sortOrder < :beforeSortOrder OR (sortOrder = :beforeSortOrder AND id < :beforeId)) ORDER BY sortOrder DESC, id DESC LIMIT :limit")
     suspend fun channelsBeforeCategory(categoryId: Long, beforeSortOrder: Int, beforeId: Long, limit: Int): List<ChannelEntity>
 
     /** Bounded window of channels in provider order AFTER [afterSortOrder]/[afterId] within a source. */
@@ -262,10 +262,10 @@ interface ChannelDao {
     suspend fun deleteByRemoteIds(sourceId: Long, remoteIds: List<String>)
 
     // --- Browsing (each list has a playlist-order and an A–Z variant; the sort chip picks one) ---
-    @Query("SELECT * FROM channels WHERE categoryId = :categoryId ORDER BY sortOrder ASC, name ASC")
+    @Query("SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY sortOrder ASC, name ASC")
     fun pagingByCategory(categoryId: Long): PagingSource<Int, ChannelEntity>
 
-    @Query("SELECT * FROM channels WHERE categoryId = :categoryId ORDER BY name ASC")
+    @Query("SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY name ASC")
     fun pagingByCategoryAlpha(categoryId: Long): PagingSource<Int, ChannelEntity>
 
     @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) ORDER BY name ASC")
@@ -284,7 +284,7 @@ interface ChannelDao {
     @Query(
         "SELECT c.*, o.position AS pos, 0 AS mp FROM channels c " +
         "LEFT JOIN content_order o ON o.itemId = c.id AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey " +
-        "WHERE c.categoryId = :categoryId",
+        "WHERE c.remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId)",
     )
     suspend fun baseByCategoryManual(categoryId: Long, contextKey: String): List<ManualOrderRow>
 
@@ -332,13 +332,14 @@ interface ChannelDao {
     suspend fun snapshotFavoritesManual(contextKey: String, sourceIds: List<Long>, limit: Int): List<ChannelEntity>
 
     // --- Counts ---
-    @Query("SELECT COUNT(*) FROM channels WHERE categoryId = :categoryId")
+    @Query("SELECT COUNT(*) FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId)")
     fun countByCategory(categoryId: Long): Flow<Int>
 
     /** [countByCategory] for every category of [sourceIds] at once — the counts beside each Live TV group. */
     @Query(
-        "SELECT categoryId, COUNT(*) AS itemCount FROM channels " +
-            "WHERE sourceId IN (:sourceIds) AND categoryId IS NOT NULL GROUP BY categoryId",
+        "SELECT cc.categoryId AS categoryId, COUNT(*) AS itemCount FROM channel_category cc " +
+            "JOIN channels c ON c.remoteId = cc.channelHexId " +
+            "WHERE c.sourceId IN (:sourceIds) GROUP BY cc.categoryId",
     )
     fun observeCountsByCategory(sourceIds: List<Long>): Flow<List<CategoryItemCount>>
 
@@ -348,7 +349,8 @@ interface ChannelDao {
     /** "All Channels" count with hidden categories excluded (matches the filtered ALL list). */
     @Query(
         "SELECT COUNT(*) FROM channels WHERE sourceId IN (:sourceIds) " +
-            "AND (categoryId IS NULL OR categoryId NOT IN (:excludedCategoryIds))",
+            "AND (remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId NOT IN (:excludedCategoryIds)) " +
+            "OR remoteId NOT IN (SELECT channelHexId FROM channel_category))",
     )
     fun countAllExcluding(sourceIds: List<Long>, excludedCategoryIds: List<Long>): Flow<Int>
 
@@ -366,7 +368,7 @@ interface ChannelDao {
     @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND name LIKE '%' || :query || '%' ORDER BY name ASC")
     fun searchAll(query: String, sourceIds: List<Long>): PagingSource<Int, ChannelEntity>
 
-    @Query("SELECT * FROM channels WHERE categoryId = :categoryId AND name LIKE '%' || :query || '%' ORDER BY sortOrder ASC, name ASC")
+    @Query("SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) AND name LIKE '%' || :query || '%' ORDER BY sortOrder ASC, name ASC")
     fun searchInCategory(query: String, categoryId: Long): PagingSource<Int, ChannelEntity>
 
     /** Bounded list for global search (across all the sources). */
@@ -376,8 +378,9 @@ interface ChannelDao {
     /** Global search with the channel's category name joined in — lets results show "category · #number"
      *  so near-identical feeds (e.g. several "ABC") are distinguishable. */
     @Query(
-        "SELECT c.*, cat.name AS categoryName FROM channels c " +
-            "LEFT JOIN categories cat ON c.categoryId = cat.id " +
+        "SELECT c.*, (SELECT GROUP_CONCAT(cat.name, ' · ') FROM channel_category cc " +
+            "JOIN categories cat ON cat.id = cc.categoryId WHERE cc.channelHexId = c.remoteId) AS categoryName " +
+            "FROM channels c " +
             "WHERE c.sourceId IN (:sourceIds) AND c.name LIKE '%' || :query || '%' " +
             "ORDER BY c.name ASC LIMIT :limit",
     )
@@ -385,8 +388,9 @@ interface ChannelDao {
 
     /** FTS-backed variant of [searchListDetailed] for global as-you-type search. */
     @Query(
-        "SELECT c.*, cat.name AS categoryName FROM channels c " +
-            "LEFT JOIN categories cat ON c.categoryId = cat.id " +
+        "SELECT c.*, (SELECT GROUP_CONCAT(cat.name, ' · ') FROM channel_category cc " +
+            "JOIN categories cat ON cat.id = cc.categoryId WHERE cc.channelHexId = c.remoteId) AS categoryName " +
+            "FROM channels c " +
             "WHERE c.sourceId IN (:sourceIds) " +
             "AND c.id IN (SELECT rowid FROM channels_fts WHERE channels_fts MATCH :ftsQuery) " +
             "ORDER BY c.name ASC LIMIT :limit",
@@ -438,14 +442,14 @@ interface ChannelDao {
     /** [countFavorites] without the channels filed under [excluded] (locked categories). */
     @Query(
         "SELECT COUNT(*) FROM favorites f INNER JOIN channels c ON c.id = f.itemId " +
-            "WHERE f.mediaType = 'LIVE' AND c.sourceId IN (:sourceIds) AND (c.categoryId IS NULL OR c.categoryId NOT IN (:excluded))",
+            "WHERE f.mediaType = 'LIVE' AND c.sourceId IN (:sourceIds) AND (c.remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId NOT IN (:excluded)) OR c.remoteId NOT IN (SELECT channelHexId FROM channel_category))",
     )
     fun countFavoritesExcluding(sourceIds: List<Long>, excluded: List<Long>): Flow<Int>
 
     /** [countHistory] without the channels filed under [excluded] (locked categories). */
     @Query(
         "SELECT COUNT(*) FROM watch_history h INNER JOIN channels c ON c.id = h.itemId " +
-            "WHERE h.mediaType = 'LIVE' AND c.sourceId IN (:sourceIds) AND (c.categoryId IS NULL OR c.categoryId NOT IN (:excluded))",
+            "WHERE h.mediaType = 'LIVE' AND c.sourceId IN (:sourceIds) AND (c.remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId NOT IN (:excluded)) OR c.remoteId NOT IN (SELECT channelHexId FROM channel_category))",
     )
     fun countHistoryExcluding(sourceIds: List<Long>, excluded: List<Long>): Flow<Int>
 
