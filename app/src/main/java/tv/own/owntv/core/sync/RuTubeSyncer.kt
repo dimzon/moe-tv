@@ -84,8 +84,11 @@ internal class RuTubeSyncer(
         val categoryRefresh = support.refreshCategories(s, MediaType.LIVE, xtCats, stats)
         val catMap = categoryRefresh.idsByRemoteId // "4" -> db row id
 
+        // The curated prefixes/tails (ChannelRenameSeeds) come off BEFORE disambiguation, so the
+        // duplicate grouping sees the names the user will actually see.
+        val cleanedChannels = channels.associate { it.videoId to ChannelRenameSeeds.cleanProviderName(it.name) }
         // Disambiguation needs the full list first (duplicate author-name groups).
-        val duplicateNames = channels.groupBy { it.name }.filterValues { it.size > 1 }.keys
+        val duplicateNames = cleanedChannels.values.groupBy { it }.filterValues { it.size > 1 }.keys
         val sortedChannels = channels.sortedWith(
             compareBy<RutubeChannel> { it.orderNumber?.takeIf { n -> n != 999 } ?: Int.MAX_VALUE }
                 .thenBy { it.name },
@@ -93,11 +96,12 @@ internal class RuTubeSyncer(
 
         var order = 0
         val entities = sortedChannels.map { ch ->
-            val displayName = if (ch.name in duplicateNames) {
+            val baseName = cleanedChannels[ch.videoId] ?: ch.name
+            val displayName = if (baseName in duplicateNames) {
                 val cleaned = cleanTitle(ch.title)
-                if (cleaned != null) "%s · %s".format(ch.name, cleaned) else ch.name
+                if (cleaned != null) "%s · %s".format(baseName, cleaned) else baseName
             } else {
-                ch.name
+                baseName
             }
             ChannelEntity(
                 sourceId = s.id,

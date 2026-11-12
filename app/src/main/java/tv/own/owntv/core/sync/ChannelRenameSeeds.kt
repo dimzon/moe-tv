@@ -12,4 +12,31 @@ package tv.own.owntv.core.sync
  */
 object ChannelRenameSeeds {
     val map: Map<String, String> = emptyMap()
+
+    /** Author prefixes stripped from the provider name before any naming (see [cleanProviderName]). */
+    val trimPrefixes = listOf(
+        "Телеканалы мира онлайн · ",
+        "Mobotix Webcams Russia · ",
+        "ТВОЙ КИНОТЕАТР | MOVIE TIME CINEMA · ",
+    )
+
+    /** Advertising tails stripped the same way. */
+    val trimSuffixes = listOf(
+        " | КРУГЛОСУТОЧНЫЙ ПРЯМОЙ ЭФИР",
+    )
+
+    /**
+     * Strips the curated prefixes/tails from the provider's channel name. A name that is nothing
+     * but a prefix keeps the original — an empty display name would be worse than a long one.
+     */
+    fun cleanProviderName(raw: String): String {
+        var name = raw
+        for (prefix in trimPrefixes) {
+            if (name.startsWith(prefix)) name = name.removePrefix(prefix)
+        }
+        for (suffix in trimSuffixes) {
+            if (name.endsWith(suffix)) name = name.removeSuffix(suffix)
+        }
+        return name.ifBlank { raw }
+    }
 }
