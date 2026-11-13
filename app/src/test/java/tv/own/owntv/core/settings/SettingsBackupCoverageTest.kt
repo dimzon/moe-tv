@@ -29,6 +29,8 @@ class SettingsBackupCoverageTest {
         "last_backup_at", "last_backup_bytes", "last_backup_encrypted", "last_backup_path",
         // When this device last asked for an update: restoring it elsewhere would claim a check that never ran.
         "last_update_check_at",
+        // When this catalogue last synced here: a fact about this device, not a choice.
+        "source_last_sync_at",
         // A Room channel id — meaningless after the next sync.
         "last_live_channel",
         // Backed up in their own BackupManager blocks, remapped to this device's playlist.

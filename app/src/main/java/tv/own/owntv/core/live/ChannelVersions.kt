@@ -9,7 +9,6 @@ import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.matchName
 import tv.own.owntv.core.model.MediaType
@@ -82,7 +81,6 @@ object ChannelVersionRules {
 class ChannelVersions(
     private val channelDao: ChannelDao,
     private val categoryDao: CategoryDao,
-    private val sourceDao: SourceDao,
     private val customize: CustomizationStore,
 ) {
     private class Cached(val fingerprint: String, val versions: List<ChannelVersion>)

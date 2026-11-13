@@ -72,7 +72,6 @@ import kotlinx.coroutines.sync.withLock
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.ContentOrderDao
 import tv.own.owntv.core.database.dao.CustomCategoryDao
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.customize.BulkRenameSession
 import tv.own.owntv.core.customize.MoveKind
@@ -102,7 +101,6 @@ data class CustomizeItemRow(
  */
 class CustomizeItemsViewModel(
     private val settings: SettingsRepository,
-    private val sourceDao: SourceDao,
     private val channelDao: ChannelDao,
     private val contentOrderDao: ContentOrderDao,
     private val customCategoryDao: CustomCategoryDao,
@@ -114,7 +112,7 @@ class CustomizeItemsViewModel(
         fun sourceIdsFor(type: MediaType): List<Long> = ActiveProfileSources(sources).sourceIdsFor(type)
     }
 
-    private val ctx: StateFlow<Ctx> = activeProfileSources(sourceDao)
+    private val ctx: StateFlow<Ctx> = activeProfileSources()
         .map { aps -> Ctx(aps.sources) }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, Ctx(emptyList()))

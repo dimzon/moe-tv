@@ -78,9 +78,6 @@
 3	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	stopMs
 2	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	title
 1	app/src/main/java/tv/own/owntv/core/companion/CompanionHtml.kt	:root{ color-scheme: dark; --bg:#040E0B; --panel:#12191700; --card:#1B211F; --card-2:#252B29; --line:#3F4945; --text:#DEE4E1; --muted:#BFC9C4; --accent:#8CEE2B; --accent-ink:#123A06; --danger:#FFB4AB; } @font-face{ font-family:'Lora'; font-style:normal; font-weight:400 700; src:url('/lora.ttf') format('truetype'); font-display:swap; } *{box-sizing:border-box} body{ margin:0; color:var(--text); font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; background: radial-gradient(1200px 520px at 12% -12%, rgba(140,238,43,0.10) 0%, transparent 60%), radial-gradient(900px 460px at 100% 0%, rgba(140,238,43,0.06) 0%, transparent 62%), var(--bg); min-height:100vh; } h1,h2,.brand{font-family:'Lora',Georgia,'Noto Sans',system-ui,sans-serif; font-weight:700; letter-spacing:.2px} main{max-width:760px; margin:0 auto; padding:28px 20px 56px} .brandrow{display:flex; align-items:center; gap:12px; margin-bottom:22px} .dot{width:34px; height:34px; border-radius:10px; background:#52DBC8; display:grid; place-items:center; color:#003730} .dot svg{width:18px; height:18px} .brand{font-size:20px; color:var(--text)} .card{background:var(--card); border:1px solid var(--line); border-radius:20px; padding:26px 22px; box-shadow:0 24px 60px rgba(0,0,0,.45)} h1{margin:0 0 8px; font-size:24px} p{line-height:1.55; color:var(--muted); margin:0 0 16px} form{display:grid; gap:14px} label{display:grid; gap:6px; font-size:14px; color:var(--text)} input,select{border:1px solid var(--line); border-radius:12px; padding:13px 14px; background:#0C1311; color:var(--text); font-size:16px; width:100%} input:focus,select:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(140,238,43,.20)} button.go{border:0; border-radius:12px; padding:15px 16px; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:16px; cursor:pointer; margin-top:4px} .pin{font-family:'Lora',Georgia,'Noto Sans',system-ui,sans-serif; font-size:34px; letter-spacing:12px; text-align:center; padding:16px; caret-color:var(--accent)} .err{color:var(--danger); font-size:14px; margin:0 0 12px} .hint{font-size:13px; color:var(--muted); margin-top:6px} a{color:var(--accent)}
-1	app/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	${CustomizeKeys.CUSTOM_PREFIX}${UUID.randomUUID()}
-1	app/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	cust_${type.name}
-1	app/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	custom:
 6	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	\0
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	${EDGE_SEPARATORS}\\z
 1	app/src/main/java/tv/own/owntv/core/customize/RenameRules.kt	(?:[\\x{2190}-\\x{21FF}\\x{2300}-\\x{23FF}\\x{25A0}-\\x{25FF}\\x{2600}-\\x{27BF}
@@ -110,8 +107,6 @@
 1	app/src/main/java/tv/own/owntv/core/database/ChannelRename.kt	WHERE remoteId IN (SELECT remoteId FROM channel_rename)
 1	app/src/main/java/tv/own/owntv/core/database/ChannelRename.kt	channel_rename
 1	app/src/main/java/tv/own/owntv/core/database/ManualOrdering.kt	\0
-1	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	ORDER BY categories.sortOrder ASC, categories.name ASC
-1	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	SELECT categories.* FROM categories WHERE categories.mediaType = :type
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	+ (SELECT COUNT(*) FROM content_order WHERE mediaType = 'LIVE')
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	+ (SELECT COUNT(*) FROM custom_category_members WHERE mediaType = 'LIVE')
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	AND (sortOrder < :beforeSortOrder OR (sortOrder = :beforeSortOrder AND remoteId < :beforeRemoteId))
@@ -226,9 +221,6 @@
 1	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	itemId IN (SELECT remoteId FROM channels
 1	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	itemId IN (SELECT remoteId FROM channels)
 1	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	mediaType != 'LIVE' OR itemId NOT IN (SELECT remoteId FROM channels))
-1	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	FROM epg_programmes WHERE epgChannelId = :epgKey
-1	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	FROM epg_programmes WHERE epgChannelId IN (:epgKeys)
-1	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT COUNT(*) FROM epg_programmes
 1	app/src/main/java/tv/own/owntv/core/database/dao/FavoriteDao.kt	DELETE FROM favorites
 1	app/src/main/java/tv/own/owntv/core/database/dao/FavoriteDao.kt	DELETE FROM favorites WHERE mediaType != 'LIVE' OR itemId NOT IN (SELECT remoteId FROM channels)
 1	app/src/main/java/tv/own/owntv/core/database/dao/FavoriteDao.kt	DELETE FROM favorites WHERE mediaType = :type AND itemId = :itemId
@@ -263,7 +255,6 @@
 1	app/src/main/java/tv/own/owntv/core/database/dao/ReminderDao.kt	AND updatedAt <= :at
 1	app/src/main/java/tv/own/owntv/core/database/dao/ReminderDao.kt	DELETE FROM programme_reminders WHERE epgChannelId = :epgChannelId AND startMs = :startMs
 1	app/src/main/java/tv/own/owntv/core/database/dao/ReminderDao.kt	SELECT * FROM programme_reminders WHERE epgChannelId = :epgChannelId AND startMs = :startMs LIMIT 1
-1	app/src/main/java/tv/own/owntv/core/database/dao/SourceDao.kt	UPDATE sources SET liveLatencyMode = :mode, liveLatencyCustomSecs = :customSecs WHERE id = :id
 1	app/src/main/java/tv/own/owntv/core/database/dao/TombstoneDao.kt	DELETE FROM user_data_tombstones
 1	app/src/main/java/tv/own/owntv/core/database/dao/TombstoneDao.kt	INSERT OR IGNORE INTO user_data_tombstones (kind, identity, deletedAt) VALUES (:kind, :identity, :deletedAt)
 1	app/src/main/java/tv/own/owntv/core/database/dao/TombstoneDao.kt	SELECT deletedAt FROM user_data_tombstones WHERE kind = :kind AND identity = :identity
@@ -275,9 +266,6 @@
 2	app/src/main/java/tv/own/owntv/core/database/dao/TvProviderProgramDao.kt	SELECT * FROM tv_provider_programs WHERE surface = :surface
 1	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	rutube://$remoteId
 1	app/src/main/java/tv/own/owntv/core/database/entity/ReminderEntity.kt	0
-2	app/src/main/java/tv/own/owntv/core/database/entity/SourceEntities.kt	0
-1	app/src/main/java/tv/own/owntv/core/database/entity/SourceEntities.kt	sources
-1	app/src/main/java/tv/own/owntv/core/database/entity/SourceEntities.kt	type
 1	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	0
 2	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	contextKey
 1	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	custom_category_members

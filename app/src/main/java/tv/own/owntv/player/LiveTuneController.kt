@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.database.entity.playStreamUrl
@@ -548,7 +547,6 @@ class LiveTuneController(
     class CoreHost(
         private val context: Context,
         private val settings: SettingsRepository,
-        private val sourceDao: SourceDao,
         private val resolver: StreamUrlResolver,
         private val label: (ChannelEntity) -> String? = { null },
         private val sourceLookup: (suspend (Long) -> SourceEntity?)? = null,
@@ -556,7 +554,7 @@ class LiveTuneController(
         private val downloadHolds: (Long) -> Boolean = { false },
     ) : Host {
         override suspend fun sourceOf(sourceId: Long): SourceEntity? =
-            sourceLookup?.invoke(sourceId) ?: sourceDao.getById(sourceId)
+            sourceLookup?.invoke(sourceId) ?: tv.own.owntv.core.repository.BuiltInSource.current
 
         override fun needsResolve(source: SourceEntity?): Boolean = resolver.needsResolve(source)
 

@@ -731,7 +731,7 @@ private fun GuideReviewRow(
 /** A reminder's line: "Starts in 5 min · 20:05 – 21:40 · Sky Cinema Family" (the prompt, and Notify only's message). */
 @Composable
 internal fun reminderEyebrow(reminder: tv.own.owntv.core.database.entity.ReminderEntity): String = programmeEyebrow(
-    EpgProgrammeEntity(sourceId = 0, epgChannelId = "", startMs = reminder.startMs, stopMs = reminder.stopMs, title = reminder.title),
+    EpgProgrammeEntity(epgChannelId = "", startMs = reminder.startMs, stopMs = reminder.stopMs, title = reminder.title),
     reminder.channelName,
     System.currentTimeMillis(),
 )

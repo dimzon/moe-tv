@@ -22,12 +22,10 @@ class KoinWorkerFactory : WorkerFactory() {
                 koin.get(),
                 koin.get(),
                 koin.get(),
-                koin.get(),
             )
             CatalogSyncWorker::class.java.name -> CatalogSyncWorker(
                 appContext,
                 workerParameters,
-                koin.get(),
                 koin.get(),
                 koin.get(),
                 koin.get(),

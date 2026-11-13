@@ -64,7 +64,6 @@ import tv.own.owntv.core.customize.SectionCustomizations
 import tv.own.owntv.core.customize.sealsItemIn
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.ContentOrderDao
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.live.GuideReader
@@ -123,7 +122,6 @@ class MoreCountsViewModel(
     private val guide: GuideReader,
     private val customize: CustomizationStore,
     private val settings: SettingsRepository,
-    sourceDao: SourceDao,
     localSync: LocalSyncManager,
 ) : ViewModel() {
 
@@ -140,7 +138,7 @@ class MoreCountsViewModel(
     val lastUpdateCheckAt: StateFlow<Long?> = settings.lastUpdateCheckAt
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    private val ctx: StateFlow<ActiveProfileSources> = activeProfileSources(sourceDao)
+    private val ctx: StateFlow<ActiveProfileSources> = activeProfileSources()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ActiveProfileSources(emptyList()))
 
     val favorites: StateFlow<TypeCounts> = counts(favorites = true)

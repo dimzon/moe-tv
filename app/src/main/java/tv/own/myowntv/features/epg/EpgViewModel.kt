@@ -73,7 +73,6 @@ import kotlinx.coroutines.withContext
 import tv.own.owntv.core.customize.SectionCustomizations
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.EpgDao
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.epg.EpgAutoMatcher
 import tv.own.owntv.core.epg.GuideCandidate
 import tv.own.owntv.core.epg.GuideCandidates
@@ -128,7 +127,6 @@ class EpgViewModel(
     private val epgRepository: EpgRepository,
     private val connectivity: ConnectivityObserver,
     private val customize: CustomizationStore,
-    private val sourceDao: SourceDao,
     private val favoriteDao: tv.own.owntv.core.database.dao.FavoriteDao,
     private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
     private val categoryDao: tv.own.owntv.core.database.dao.CategoryDao,
@@ -157,7 +155,7 @@ class EpgViewModel(
     /** Every windowed guide read this screen makes. The caches around it stay here — what to keep
      *  depends on how the grid scrolls, which is the screen's business, not core's. */
     private val guideReader =
-        tv.own.owntv.core.live.GuideReader(epgDao, sourceDao, liveEpgReader)
+        tv.own.owntv.core.live.GuideReader(epgDao, liveEpgReader)
 
     // The user's customizations — shared by the Guide picker, guide rows, and manual EPG match.
     // It must be initialized before guideCategories (Kotlin property initializers run top-to-bottom).
@@ -333,12 +331,7 @@ class EpgViewModel(
         // while the grid is on screen had no way to show itself. Room reports every write to the
         // programme table, so this waits for the writes to stop rather than reloading per batch, and
         // `load()`'s own stored-count guard means a settled sync that changed nothing costs nothing.
-        sourceRepository.observeSources()
-            .map { sources -> sources.map { it.id } }
-            .distinctUntilChanged()
-            .flatMapLatest { ids ->
-                if (ids.isEmpty()) flowOf(0) else combine(ids.map { epgDao.countForSource(it) }) { it.sum() }
-            }
+        epgDao.countFlow()
             // A big feed writes for minutes, one batch every few seconds; the debounce alone rebuilt the
             // whole grid (≈2 s of database work) every time a pause crossed it, all through the sync.
             // So nothing reloads while a feed is still syncing — the change is picked up when it ends.
@@ -593,7 +586,7 @@ class EpgViewModel(
             try {
                 // The playlist(s) the guide is showing (the top-right choice): with a 400-channel
                 // playlist picked, scoring the whole catalogue would waste the run.
-                val playlistIds = activeSourceIds(sourceDao, MediaType.LIVE)
+                val playlistIds = activeSourceIds(MediaType.LIVE)
                 if (playlistIds.isEmpty()) { _matchSummary.value = EpgMatchSummary.AddPlaylist; return@launch }
                 val cust = customize.observe(MediaType.LIVE).first()
 
@@ -717,11 +710,6 @@ class EpgViewModel(
         // is already populated — keep the existing list on screen and refresh it silently, so opening the
         // Guide menu is instant instead of flashing a spinner and re-rendering from scratch every time.
         if (_state.value.channels.isEmpty()) _state.value = _state.value.copy(loading = true, message = null)
-        if (sourceDao.observeAll().first().none { it.syncLive }) {
-            _state.value = EpgUiState(loading = false, message = EpgMessage.AddPlaylist)
-            return
-        }
-
         val now = System.currentTimeMillis()
         val nowAligned = now - (now % HALF_HOUR_MS) // align to the half hour
         // Always retain two recent hours so the centered "now" marker has programmes on its left.

@@ -13,7 +13,6 @@ import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.database.BulkInsertHelper
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.CategoryEntity
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.SourceEntity
@@ -31,7 +30,6 @@ import kotlin.coroutines.CoroutineContext
 internal class SyncSupport(
     private val categoryDao: CategoryDao,
     private val channelDao: ChannelDao,
-    val sourceDao: SourceDao,
     private val customize: CustomizationStore,
     private val settings: SettingsRepository,
 ) {
@@ -73,14 +71,14 @@ internal class SyncSupport(
         return false
     }
 
-    suspend fun pruneCategories(sourceId: Long, type: MediaType, seenRemoteIds: Set<String>, label: String, stats: SyncStatsCollector) {
+    suspend fun pruneCategories(type: MediaType, seenRemoteIds: Set<String>, label: String, stats: SyncStatsCollector) {
         val start = SystemClock.elapsedRealtime()
-        val existing = categoryDao.remoteIdsForSource(sourceId, type)
+        val existing = categoryDao.remoteIds(type)
         val stale = existing.filterNot(seenRemoteIds::contains)
         if (!pruneAllowed("$label categories", existing.size, stale.size, stats)) return
-        stale.chunked(QUERY_CHUNK).forEach { categoryDao.deleteByRemoteIds(sourceId, type, it) }
+        stale.chunked(QUERY_CHUNK).forEach { categoryDao.deleteByRemoteIds(type, it) }
         if (stale.isNotEmpty()) stats.processedCounts.merge(CATEGORIES_REMOVED_KEY, stale.size, Int::plus)
-        Log.i(TAG, "$label category prune sourceId=$sourceId type=$type stale=${stale.size} ms=${SystemClock.elapsedRealtime() - start}")
+        Log.i(TAG, "$label category prune type=$type stale=${stale.size} ms=${SystemClock.elapsedRealtime() - start}")
     }
 
     suspend fun pruneRemoteIds(
@@ -113,12 +111,11 @@ internal class SyncSupport(
         val freshSource = s.lastSyncAt == null
         Log.d(TAG, "refreshCategories start sourceId=${s.id} type=$type count=${parsed.size}")
         val uniqueCategories = parsed.distinctBy { it.id }
-        val existing = existingCategoriesByRemoteId(s.id, type, uniqueCategories.map { it.id })
+        val existing = existingCategoriesByRemoteId(type, uniqueCategories.map { it.id })
         // sortOrder = provider index, so the rail follows the provider's category order.
         val entities = uniqueCategories.mapIndexed { i, c ->
             CategoryEntity(
                 id = existing[c.id]?.id ?: 0,
-                sourceId = s.id,
                 mediaType = type,
                 name = c.name,
                 remoteId = c.id,
@@ -126,7 +123,7 @@ internal class SyncSupport(
             )
         }
         val upsertStart = SystemClock.elapsedRealtime()
-        val upsert = upsertCategoriesStable(s.id, type, entities, existing)
+        val upsert = upsertCategoriesStable(type, entities, existing)
         Log.d(
             TAG,
             "refreshCategories upsert sourceId=${s.id} type=$type rows=${entities.size} " +
@@ -147,15 +144,14 @@ internal class SyncSupport(
         }
     }
 
-    private suspend fun existingCategoriesByRemoteId(sourceId: Long, type: MediaType, remoteIds: List<String>): Map<String, CategoryEntity> =
-        remoteIds.distinct().chunked(QUERY_CHUNK).flatMap { categoryDao.findByRemoteIds(sourceId, type, it) }
+    private suspend fun existingCategoriesByRemoteId(type: MediaType, remoteIds: List<String>): Map<String, CategoryEntity> =
+        remoteIds.distinct().chunked(QUERY_CHUNK).flatMap { categoryDao.findByRemoteIds(type, it) }
             .mapNotNull { category -> category.remoteId?.let { it to category } }
             .toMap()
 
     private class CategoryUpsert(val stats: UpsertStats, val idsByRemoteId: Map<String, Long>, val newRows: List<CategoryEntity>)
 
     private suspend fun upsertCategoriesStable(
-        sourceId: Long,
         type: MediaType,
         rows: List<CategoryEntity>,
         existingByRemoteId: Map<String, CategoryEntity>,
@@ -184,7 +180,7 @@ internal class SyncSupport(
             // IGNOREd conflicts return −1 (shouldn't happen — inserts were pre-checked by remoteId);
             // heal by re-fetching just those rows rather than everything.
             if (missed.isNotEmpty()) {
-                existingCategoriesByRemoteId(sourceId, type, missed).forEach { (rid, cat) -> ids[rid] = cat.id }
+                existingCategoriesByRemoteId(type, missed).forEach { (rid, cat) -> ids[rid] = cat.id }
             }
         }
         return CategoryUpsert(

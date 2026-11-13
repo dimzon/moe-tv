@@ -158,7 +158,6 @@ class LiveEpgReader(
         val rows = providerEntries(channel, shift).orEmpty().map {
             EpgProgrammeEntity(
                 id = -it.startMs,
-                sourceId = channel.sourceId,
                 epgChannelId = key,
                 startMs = it.startMs,
                 stopMs = it.stopMs,

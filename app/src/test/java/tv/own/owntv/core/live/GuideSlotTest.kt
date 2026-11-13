@@ -8,7 +8,7 @@ import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 class GuideSlotTest {
 
     private fun p(start: Long, stop: Long, title: String) =
-        EpgProgrammeEntity(sourceId = 1, epgChannelId = "a", startMs = start, stopMs = stop, title = title)
+        EpgProgrammeEntity(epgChannelId = "a", startMs = start, stopMs = stop, title = title)
 
     private val day = listOf(p(0, 100, "A"), p(100, 200, "B"), p(250, 300, "C"))
 

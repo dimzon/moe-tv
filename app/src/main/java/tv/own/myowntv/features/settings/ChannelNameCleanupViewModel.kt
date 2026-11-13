@@ -44,12 +44,15 @@ import tv.own.owntv.player.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.SourceEntity
+import tv.own.owntv.core.settings.SettingsRepository
 
-/** Saves a playlist's "Clean channel names" option ([SourceEntity.cleanChannelNames]). */
+/**
+ * Saves the "Clean channel names" option. It used to live on the source row; schema v5 moved it to
+ * Settings, so with one source the option is global.
+ */
 class ChannelNameCleanupViewModel(
-    private val sourceDao: SourceDao,
+    private val settings: SettingsRepository,
 ) : ViewModel() {
 
     /**
@@ -62,7 +65,7 @@ class ChannelNameCleanupViewModel(
         if (enabled == source.cleanChannelNames && strip == source.channelNameStrip) return
         val namesChange = enabled || source.cleanChannelNames
         viewModelScope.launch {
-            sourceDao.updateChannelNameCleanup(source.id, enabled, strip)
+            settings.setChannelNameCleanup(enabled, strip)
             if (namesChange) onNeedsResync(source.copy(cleanChannelNames = enabled, channelNameStrip = strip))
         }
     }

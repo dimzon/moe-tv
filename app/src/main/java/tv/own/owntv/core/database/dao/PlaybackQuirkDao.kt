@@ -34,16 +34,16 @@ interface PlaybackQuirkDao {
 
     /** Only a sound-only item is recorded; false forgets it. */
     @Transaction
-    suspend fun setAudioOnly(contentKey: String, sourceId: Long, mediaType: String, audioOnly: Boolean) {
-        if (audioOnly) insertIfMissing(PlaybackQuirkEntity(contentKey, sourceId, mediaType))
+    suspend fun setAudioOnly(contentKey: String, mediaType: String, audioOnly: Boolean) {
+        if (audioOnly) insertIfMissing(PlaybackQuirkEntity(contentKey = contentKey, mediaType = mediaType))
         updateAudioOnly(contentKey, audioOnly.takeIf { it }, System.currentTimeMillis())
         if (!audioOnly) dropEmptyRows()
     }
 
     /** [audioDelayMs] null forgets it and returns the item to the global setting. */
     @Transaction
-    suspend fun setAudioDelay(contentKey: String, sourceId: Long, mediaType: String, audioDelayMs: Int?) {
-        if (audioDelayMs != null) insertIfMissing(PlaybackQuirkEntity(contentKey, sourceId, mediaType))
+    suspend fun setAudioDelay(contentKey: String, mediaType: String, audioDelayMs: Int?) {
+        if (audioDelayMs != null) insertIfMissing(PlaybackQuirkEntity(contentKey = contentKey, mediaType = mediaType))
         updateAudioDelay(contentKey, audioDelayMs, System.currentTimeMillis())
         if (audioDelayMs == null) dropEmptyRows()
     }
@@ -62,10 +62,6 @@ interface PlaybackQuirkDao {
 
     @Query("SELECT COUNT(*) FROM playback_quirks WHERE audioDelayMs IS NOT NULL")
     fun observeAudioDelayCount(): Flow<Int>
-
-    /** A deleted playlist takes what was remembered for its items with it. */
-    @Query("DELETE FROM playback_quirks WHERE sourceId = :sourceId")
-    suspend fun deleteBySource(sourceId: Long)
 
     /** Everything, for Backup & Restore. */
     @Query("SELECT * FROM playback_quirks")

@@ -184,14 +184,6 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
                 GlobalContext.get().get<tv.own.owntv.core.settings.SettingsRepository>().applyStageDefaults()
             }
         }
-        // The channels row carries no sourceId any more; the few "whose is this channel?" reads
-        // (playback's source lookup, sorters) answer from the one source's row id. Read once,
-        // behind the UI — a single indexed lookup, not work the launch path waits on.
-        appScope.launch {
-            runCatching {
-                tv.own.owntv.core.repository.BuiltInSource.current(GlobalContext.get().get())
-            }
-        }
         // Local auto-sync: the paired-only listener and the moments a pass is tried (OwnTV to the
         // front or the back, the network back). Core owns what that means; no hourly check on a TV.
         runCatching { GlobalContext.get().get<tv.own.owntv.core.sync.work.LocalAutoSyncStarter>().start(periodic = false) }

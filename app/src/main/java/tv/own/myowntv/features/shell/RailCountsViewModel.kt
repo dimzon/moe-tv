@@ -53,7 +53,6 @@ import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.HistoryDao
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.nav.MainSection
 import tv.own.owntv.core.categorylock.lockAwareCount
@@ -74,20 +73,16 @@ data class RailDetails(
 @OptIn(ExperimentalCoroutinesApi::class)
 class RailCountsViewModel(
     channelDao: ChannelDao,
-    sourceDao: SourceDao,
     historyDao: HistoryDao,
     categoryDao: CategoryDao,
     customize: CustomizationStore,
 ) : ViewModel() {
 
     val counts: StateFlow<Map<MainSection, Int>> =
-        sourceDao.observeAll()
-        .flatMapLatest {
-            lockAwareCount(customize.sealedCategoryIds(MediaType.LIVE), { channelDao.countAll() }) {
-                channelDao.countAllExcluding(it)
-            }.map { live -> mapOf(MainSection.LIVE_TV to live) }
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+        lockAwareCount(customize.sealedCategoryIds(MediaType.LIVE), { channelDao.countAll() }) {
+            channelDao.countAllExcluding(it)
+        }.map { live -> mapOf(MainSection.LIVE_TV to live) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     val details: StateFlow<RailDetails> =
         combine(

@@ -9,7 +9,6 @@ import tv.own.owntv.core.database.BulkInsertHelper
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.customize.CustomizationStore
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.SourceType
 import tv.own.owntv.core.settings.SettingsRepository
@@ -20,7 +19,6 @@ import tv.own.owntv.core.settings.SettingsRepository
  * pruning) lives in [SyncSupport].
  */
 class SyncManager(
-    private val sourceDao: SourceDao,
     categoryDao: CategoryDao,
     channelDao: ChannelDao,
     channelCategoryDao: tv.own.owntv.core.database.ChannelCategoryDao,
@@ -28,11 +26,11 @@ class SyncManager(
     bulkInsertHelper: BulkInsertHelper,
     private val activityTracker: SyncActivityTracker,
     customize: CustomizationStore,
-    settings: SettingsRepository,
+    private val settings: SettingsRepository,
     private val rutubeApi: tv.own.owntv.core.sync.RutubeApi? = null,
     renameSeeds: Map<String, String> = emptyMap(),
 ) {
-    private val support = SyncSupport(categoryDao, channelDao, sourceDao, customize, settings)
+    private val support = SyncSupport(categoryDao, channelDao, customize, settings)
     private val rutubeSyncer = rutubeApi?.let { RuTubeSyncer(it, bulkInsertHelper, support, channelCategoryDao, channelRenameDao, renameSeeds) }
     /** Late-bound EPG syncer, created by DataModule after EpgRepository exists. */
     var rutubeEpgSyncer: RuTubeEpgSyncer? = null
@@ -92,7 +90,7 @@ class SyncManager(
                     // live-only passes from never marking synced.
                     if (effective.isCompleteFor(target)) {
                         val markStartedAt = SystemClock.elapsedRealtime()
-                        sourceDao.markSynced(source.id, System.currentTimeMillis())
+                        settings.markSourceSynced(System.currentTimeMillis())
                         Log.d(TAG, "markSynced sourceId=${source.id} ms=${SystemClock.elapsedRealtime() - markStartedAt}")
                     }
                     progress.completeAll()

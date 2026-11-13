@@ -18,7 +18,7 @@ class SearchKindTest {
         categoryName = null,
     )
     private val programme = ProgrammeSearchResult(
-        programme = EpgProgrammeEntity(sourceId = 1, epgChannelId = "bbc1", startMs = 0, stopMs = 1, title = "News"),
+        programme = EpgProgrammeEntity(epgChannelId = "bbc1", startMs = 0, stopMs = 1, title = "News"),
         channel = bbcOne,
     )
 

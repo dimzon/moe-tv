@@ -8,7 +8,6 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import androidx.work.ForegroundInfo
 import kotlinx.coroutines.CancellationException
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.i18n.LocaleStore
 import tv.own.owntv.core.network.ConnectivityObserver
 import tv.own.owntv.core.repository.EpgRepository
@@ -25,7 +24,6 @@ class EpgSyncWorker(
     context: Context,
     params: WorkerParameters,
     private val epgRepository: EpgRepository,
-    private val sourceDao: SourceDao,
     private val connectivity: ConnectivityObserver,
     private val activityTracker: EpgActivityTracker,
     private val localeStore: LocaleStore,
@@ -51,10 +49,8 @@ class EpgSyncWorker(
         val reason = inputData.getString(KEY_REASON) ?: "unknown"
         if (sourceId == Long.MIN_VALUE) return Result.failure()
 
-        val source = sourceDao.getById(sourceId) ?: run {
-            Log.i(TAG, "Skipping stale EPG sync sourceId=$sourceId reason=$reason")
-            return Result.success()
-        }
+        // One built-in source: the DTO needs no row lookup, so a stale source id can't skip the run.
+        val source = tv.own.owntv.core.repository.BuiltInSource.current
 
         // An automatic refresh never runs under playback: it waits until playback stops
         // (WorkManager restarts it later if the wait outlives the job's time limit).

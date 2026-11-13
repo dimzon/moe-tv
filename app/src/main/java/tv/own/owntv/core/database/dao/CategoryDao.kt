@@ -31,19 +31,18 @@ interface CategoryDao {
     @Query("SELECT * FROM categories WHERE id = :id")
     suspend fun getById(id: Long): CategoryEntity?
 
-    @Query("SELECT COUNT(*) FROM categories WHERE sourceId IN (:sourceIds) AND mediaType = :type")
-    fun count(sourceIds: List<Long>, type: MediaType): Flow<Int>
+    @Query("SELECT COUNT(*) FROM categories WHERE mediaType = :type")
+    fun count(type: MediaType): Flow<Int>
 
-    @Query("DELETE FROM categories WHERE sourceId = :sourceId AND mediaType = :type")
-    suspend fun clear(sourceId: Long, type: MediaType)
+    @Query("DELETE FROM categories WHERE mediaType = :type")
+    suspend fun clear(type: MediaType)
 
-    @Query("SELECT * FROM categories WHERE sourceId = :sourceId AND mediaType = :type AND remoteId IN (:remoteIds)")
-    suspend fun findByRemoteIds(sourceId: Long, type: MediaType, remoteIds: List<String>): List<CategoryEntity>
+    @Query("SELECT * FROM categories WHERE mediaType = :type AND remoteId IN (:remoteIds)")
+    suspend fun findByRemoteIds(type: MediaType, remoteIds: List<String>): List<CategoryEntity>
 
-    @Query("SELECT remoteId FROM categories WHERE sourceId = :sourceId AND mediaType = :type AND remoteId IS NOT NULL")
-    suspend fun remoteIdsForSource(sourceId: Long, type: MediaType): List<String>
+    @Query("SELECT remoteId FROM categories WHERE mediaType = :type AND remoteId IS NOT NULL")
+    suspend fun remoteIds(type: MediaType): List<String>
 
-    @Query("DELETE FROM categories WHERE sourceId = :sourceId AND mediaType = :type AND remoteId IN (:remoteIds)")
-    suspend fun deleteByRemoteIds(sourceId: Long, type: MediaType, remoteIds: List<String>)
-
+    @Query("DELETE FROM categories WHERE mediaType = :type AND remoteId IN (:remoteIds)")
+    suspend fun deleteByRemoteIds(type: MediaType, remoteIds: List<String>)
 }

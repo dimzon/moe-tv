@@ -63,5 +63,5 @@ class AudioOnlyStore(
     }
 
     private suspend fun write(contentKey: String, audioOnly: Boolean) =
-        dao.setAudioOnly(contentKey, sourceIdOfContentKey(contentKey), mediaTypeOfContentKey(contentKey) ?: "LIVE", audioOnly)
+        dao.setAudioOnly(contentKey, mediaTypeOfContentKey(contentKey) ?: "LIVE", audioOnly)
 }

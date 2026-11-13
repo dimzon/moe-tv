@@ -61,7 +61,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tv.own.owntv.player.AudioOutputPolicy
 import tv.own.owntv.core.player.SurroundMode
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.repository.SourceRepository
 import tv.own.owntv.core.settings.ChNavLimits
@@ -76,7 +75,6 @@ import tv.own.owntv.core.theme.UiZoom
 
 /** Device-wide settings: personalization, playback, network, and the single RuTube source's overrides. */
 class SettingsViewModel(
-    private val sourceDao: SourceDao,
     private val sourceRepository: SourceRepository,
     private val settings: SettingsRepository,
     private val channelDao: tv.own.owntv.core.database.dao.ChannelDao,
@@ -619,20 +617,27 @@ class SettingsViewModel(
         viewModelScope.launch { settings.setLiveTuneTimeoutSecs(secs) }
     }
 
-    /** Per-playlist override of the above. `-1` = follow the global value. */
+    /**
+     * The old "per-playlist override" of the above. With one built-in source its overrides ARE the
+     * global settings (schema v5), so this writes the global value: `-1` = back to Off.
+     */
     fun setSourcePreroll(sourceId: Long, secs: Int) {
-        viewModelScope.launch { sourceDao.updateLivePreroll(sourceId, secs) }
+        viewModelScope.launch { settings.setLivePrerollSecs(if (secs < 0) 0 else secs) }
     }
 
-
-    /** Per-playlist "Give up after" override in seconds (0 = never); `null` = follow the global setting. */
+    /** One source: `null` = its "follow global" sentinel → the global default budget. */
     fun setSourceTuneTimeout(sourceId: Long, secs: Int?) {
-        viewModelScope.launch { sourceDao.updateLiveTuneTimeout(sourceId, secs) }
+        viewModelScope.launch {
+            settings.setLiveTuneTimeoutSecs(secs ?: tv.own.owntv.core.player.PlaybackDefaults.LIVE_TUNE_BUDGET_SECS)
+        }
     }
 
-    /** Per-playlist Live latency override; `null` mode = follow the global setting. */
+    /** One source: `null` mode = back to the default preset, which is what "follow global" means. */
     fun setSourceLiveLatency(sourceId: Long, mode: String?, customSecs: Int) {
-        viewModelScope.launch { sourceDao.updateLiveLatency(sourceId, mode, customSecs) }
+        viewModelScope.launch {
+            settings.setLiveLatencyMode(mode ?: tv.own.owntv.core.settings.LiveLatency.DEFAULT.name)
+            settings.setLiveLatencyCustomSecs(customSecs)
+        }
     }
 
     val animationLevel: StateFlow<tv.own.owntv.core.theme.AnimationLevel> =

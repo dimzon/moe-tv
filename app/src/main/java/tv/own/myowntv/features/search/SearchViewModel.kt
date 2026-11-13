@@ -60,7 +60,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.content.SearchIntent
 import tv.own.owntv.core.content.SearchKind
 import tv.own.owntv.core.content.SearchReader
@@ -80,7 +79,6 @@ import tv.own.owntv.core.settings.SettingsRepository
  * channels and programmes out of it.
  */
 class SearchViewModel(
-    private val sourceDao: SourceDao,
     private val settings: SettingsRepository,
     private val searchReader: SearchReader,
 ) : ViewModel() {
@@ -88,7 +86,7 @@ class SearchViewModel(
     // Observe the sources reactively so adding/removing a playlist refreshes Search
     // immediately (was read once at startup, so a new playlist showed nothing until app restart).
     // Per-section Off flags split the id sets so an Off section never surfaces in results.
-    private val ctx: StateFlow<ActiveProfileSources> = activeProfileSources(sourceDao)
+    private val ctx: StateFlow<ActiveProfileSources> = activeProfileSources()
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, ActiveProfileSources(emptyList()))
 

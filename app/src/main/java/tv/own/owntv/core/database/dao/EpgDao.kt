@@ -12,7 +12,10 @@ import tv.own.owntv.core.database.entity.EpgChannelName
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeText
 
-/** EPG storage + now/next lookups. Programmes are kept to a rolling window and pruned. */
+/**
+ * EPG storage + now/next lookups. Programmes are kept to a rolling window and pruned.
+ * Schema v5 dropped `sourceId`: one guide store, one catalogue.
+ */
 @Dao
 interface EpgDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -21,18 +24,19 @@ interface EpgDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertProgrammes(programmes: List<EpgProgrammeEntity>)
 
-    @Query("DELETE FROM epg_programmes WHERE sourceId = :sourceId")
-    suspend fun clearSource(sourceId: Long)
+    /** Drop every stored programme (the guide store is single). */
+    @Query("DELETE FROM epg_programmes")
+    suspend fun clearProgrammes()
 
     /** Hash snapshot for one channel — an indexed prefix query on the natural key, loaded lazily per channel. */
-    @Query("SELECT id, epgChannelId, startMs, contentHash FROM epg_programmes WHERE sourceId = :sourceId AND epgChannelId = :epgChannelId")
-    suspend fun epgHashesForChannel(sourceId: Long, epgChannelId: String): List<EpgHashProjection>
+    @Query("SELECT id, epgChannelId, startMs, contentHash FROM epg_programmes WHERE epgChannelId = :epgChannelId")
+    suspend fun epgHashesForChannel(epgChannelId: String): List<EpgHashProjection>
 
     @Query("DELETE FROM epg_programmes WHERE id IN (:ids)")
     suspend fun deleteProgrammesByIds(ids: List<Long>)
 
-    @Query("DELETE FROM epg_programmes WHERE sourceId = :sourceId AND epgChannelId IN (:epgChannelIds)")
-    suspend fun deleteProgrammesForChannels(sourceId: Long, epgChannelIds: List<String>)
+    @Query("DELETE FROM epg_programmes WHERE epgChannelId IN (:epgChannelIds)")
+    suspend fun deleteProgrammesForChannels(epgChannelIds: List<String>)
 
     /** Drop programmes that have already finished, to bound storage. */
     @Query("DELETE FROM epg_programmes WHERE stopMs < :before")
@@ -42,18 +46,16 @@ interface EpgDao {
     @Query("DELETE FROM epg_programmes WHERE startMs > :after")
     suspend fun pruneFuture(after: Long)
 
-    /** Rows of one store outside the window a full re-crawl just served — i.e. ones it did not replace.
-     *  Used by the Stalker portal guide, where the portal's answer is the whole truth for that store. */
-    @Query("DELETE FROM epg_programmes WHERE sourceId = :sourceId AND (stopMs <= :from OR startMs >= :to)")
-    suspend fun pruneOutsideWindow(sourceId: Long, from: Long, to: Long)
+    /** Rows outside the window a full re-crawl just served — i.e. ones it did not replace. */
+    @Query("DELETE FROM epg_programmes WHERE (stopMs <= :from OR startMs >= :to)")
+    suspend fun pruneOutsideWindow(from: Long, to: Long)
 
     /**
-     * Drop programmes for one EPG channel id only within the given sources. Used by the cache re-fill so
-     * we delete only what we're about to repopulate — a source whose cache isn't fresh keeps its data
-     * instead of being wiped and left empty (which would drop the channel out of the guide).
+     * Drop programmes for one EPG channel id. Used by a re-fill so only what is about to be
+     * repopulated is deleted — an empty answer would otherwise leave the channel blank.
      */
-    @Query("DELETE FROM epg_programmes WHERE epgChannelId = :epgChannelId AND sourceId IN (:sourceIds)")
-    suspend fun clearChannelForSources(epgChannelId: String, sourceIds: List<Long>)
+    @Query("DELETE FROM epg_programmes WHERE epgChannelId = :epgChannelId")
+    suspend fun clearChannel(epgChannelId: String)
 
     /** The most recently FINISHED programme on a channel (the "Before" slot in the player overlay). */
     @Query("SELECT * FROM epg_programmes WHERE epgChannelId = :epgChannelId AND stopMs <= :now ORDER BY stopMs DESC LIMIT 1")
@@ -70,23 +72,9 @@ interface EpgDao {
 
     // --- Guide reads: keyed by epgChannelId ALONE ------------------------------------------------
     //
-    // None of the four queries below filters by sourceId, and that is the fix for a bug that outlived
-    // two attempts at it. A channel's guide is identified by its `epgChannelId`; which playlist or EPG
-    // feed happened to deliver a row is not part of that identity. Filtering on it meant that a row
-    // whose source had since been deleted, or re-added and given a new id, became invisible — while
-    // `upcoming` above, which never filtered, still found it. So the preview pane showed a
-    // full guide and the grid and the channel row beside it stayed blank, permanently, for every
-    // affected channel.
-    //
-    // The list had already been widened once (playlists PLUS EPG feeds) after the same class of report.
-    // Widening it a third time would only move the boundary; removing it is what makes all three reads
-    // answer identically. Two feeds carrying one channel now both come back, which is what
-    // [tv.own.owntv.core.epg.GuidePriority] settles: the feed higher in the EPG Sources list wins, and
-    // [tv.own.owntv.core.epg.EpgDedupe] collapses what is left.
-
-    // `programmesInWindowPage` used to live here — the keyset-paged read behind GuideReader.window().
-    // Both are gone. It could never use an index: keysetting on `id` walks the table in rowid order,
-    // so drawing eight rows examined every programme in the database. See the note in GuideReader.
+    // A channel's guide is identified by its `epgChannelId`; which feed happened to deliver a row is
+    // not part of that identity. Schema v5 removes the column outright, so these can no longer drift
+    // apart from the now/next reads above.
 
     // Every windowed read below carries `startMs > :from - 86400000` as well as the obvious
     // `stopMs > :from`. Without it there is no lower bound on startMs, so SQLite cannot seek into the
@@ -116,7 +104,7 @@ interface EpgDao {
 
     /** Lightweight version for Guide row rendering; avoids CursorWindow pressure from descriptions. */
     @Query(
-        "SELECT id, sourceId, epgChannelId, startMs, stopMs, title, NULL AS description, 0 AS contentHash, " +
+        "SELECT id, epgChannelId, startMs, stopMs, title, NULL AS description, 0 AS contentHash, " +
             "NULL AS categories, NULL AS year, NULL AS rating, NULL AS lengthMin, NULL AS episode " +
             "FROM epg_programmes WHERE epgChannelId = :epgKey " +
             "AND startMs > :from - 86400000 AND stopMs > :from AND startMs < :to ORDER BY startMs ASC",
@@ -125,7 +113,7 @@ interface EpgDao {
 
     /** Lightweight rows for several Home On Now channels at once. */
     @Query(
-        "SELECT id, sourceId, epgChannelId, startMs, stopMs, title, NULL AS description, 0 AS contentHash, " +
+        "SELECT id, epgChannelId, startMs, stopMs, title, NULL AS description, 0 AS contentHash, " +
             "NULL AS categories, NULL AS year, NULL AS rating, NULL AS lengthMin, NULL AS episode " +
             "FROM epg_programmes WHERE epgChannelId IN (:epgKeys) " +
             "AND startMs > :from - 86400000 AND stopMs > :from AND startMs < :to ORDER BY epgChannelId ASC, startMs ASC",
@@ -138,7 +126,7 @@ interface EpgDao {
      * index rather than the whole guide.
      */
     @Query(
-        "SELECT id, sourceId, epgChannelId, startMs, stopMs, title, NULL AS description, 0 AS contentHash, " +
+        "SELECT id, epgChannelId, startMs, stopMs, title, NULL AS description, 0 AS contentHash, " +
             "NULL AS categories, NULL AS year, NULL AS rating, NULL AS lengthMin, NULL AS episode " +
             "FROM epg_programmes WHERE startMs > :from - 86400000 AND startMs < :to AND stopMs > :from " +
             "AND title LIKE '%' || :query || '%' ORDER BY startMs ASC LIMIT :limit",
@@ -153,36 +141,31 @@ interface EpgDao {
     @Query("SELECT COUNT(*) FROM epg_programmes")
     suspend fun countForSources(): Int
 
+    /** Live programme count — drives the guide status line. */
+    @Query("SELECT COUNT(*) FROM epg_programmes")
+    fun countFlow(): Flow<Int>
+
     /** Current/upcoming programmes for one (normalized) EPG channel id — 0 means the feed has nothing
      *  scheduled from now on, so a freshly-matched channel would show an empty guide row. */
     @Query("SELECT COUNT(*) FROM epg_programmes WHERE epgChannelId = :epgChannelId AND stopMs > :now")
     suspend fun countUpcomingForChannel(epgChannelId: String, now: Long): Int
 
-
-    /** Live programme count for one source — drives the EPG status shown on the source row. */
-    @Query("SELECT COUNT(*) FROM epg_programmes WHERE sourceId = :sourceId")
-    fun countForSource(sourceId: Long): Flow<Int>
-
     /** How many distinct channels actually have guide data (for the Guide's status line). */
-    @Query("SELECT COUNT(DISTINCT epgChannelId) FROM epg_programmes WHERE sourceId IN (:sourceIds)")
-    suspend fun countGuideChannels(sourceIds: List<Long>): Int
+    @Query("SELECT COUNT(DISTINCT epgChannelId) FROM epg_programmes")
+    suspend fun countGuideChannels(): Int
 
     // --- Guide candidates: also keyed by epgChannelId alone -------------------------------------
     //
     // The two queries below are the picker's and auto-match's half of the same decision the block
     // above records, and they are read together by [tv.own.owntv.core.epg.GuideCandidates].
-    //
-    // Neither filters by sourceId. The guide reads stopped doing so; these did not, which left the
-    // grid drawing programmes for channels the picker would not list — reported, correctly, as "EPG
-    // matching stopped working". Neither is enough on its own either: `epg_channels` is empty for a
-    // feed that carries `<programme>` without `<channel>`, and `epg_programmes` has no display name,
-    // so a candidate list needs both.
+    // `epg_channels` is empty for a feed that carries `<programme>` without `<channel>`, and
+    // `epg_programmes` has no display name, so a candidate list needs both.
     //
     // No ORDER BY. The caller ranks by name similarity, which is the order that matters, and an
     // `ORDER BY displayName` here would make [limit] truncate the end of the alphabet — silently
     // losing every candidate from some letter onwards.
 
-    /** Every named guide channel across every feed. Duplicates are expected: two feeds, one channel. */
+    /** Every named guide channel. Duplicates are possible: two names for one id. */
     @Query("SELECT epgChannelId, displayName, normName, normId FROM epg_channels LIMIT :limit")
     suspend fun guideChannelNames(limit: Int): List<EpgChannelName>
 
@@ -191,23 +174,19 @@ interface EpgDao {
     suspend fun guideProgrammeChannelIds(limit: Int): List<String>
 
     /**
-     * Channel `<icon src>` logos from the EPG sources the user enabled "Use this guide's logos" on.
-     * Only rows with an icon are returned, so a feed without icons costs nothing. Ids are already
-     * stored normalized (trim+lowercase), which is the key the override map is looked up by.
+     * Channel `<icon src>` logos from the guide. Only rows with an icon are returned, so a feed
+     * without icons costs nothing. Ids are already stored normalized (trim+lowercase), which is the
+     * key the override map is looked up by.
      */
-    @Query("SELECT epgChannelId, iconUrl FROM epg_channels WHERE sourceId IN (:sourceIds) AND iconUrl IS NOT NULL AND iconUrl != ''")
-    fun observeChannelIcons(sourceIds: List<Long>): Flow<List<EpgChannelIcon>>
+    @Query("SELECT epgChannelId, iconUrl FROM epg_channels WHERE iconUrl IS NOT NULL AND iconUrl != ''")
+    fun observeChannelIcons(): Flow<List<EpgChannelIcon>>
 
-    /** The EPG sources that carry an icon for any of [epgChannelIds] (normalized ids). */
-    @Query("SELECT DISTINCT sourceId FROM epg_channels WHERE epgChannelId IN (:epgChannelIds) AND iconUrl IS NOT NULL AND iconUrl != ''")
-    suspend fun sourcesWithIconsFor(epgChannelIds: List<String>): List<Long>
+    @Query("SELECT epgChannelId FROM epg_channels")
+    suspend fun epgChannelIds(): List<String>
 
-    @Query("SELECT epgChannelId FROM epg_channels WHERE sourceId = :sourceId")
-    suspend fun epgChannelIdsForSource(sourceId: Long): List<String>
+    @Query("DELETE FROM epg_channels WHERE epgChannelId IN (:epgChannelIds)")
+    suspend fun deleteChannelsByEpgIds(epgChannelIds: List<String>)
 
-    @Query("DELETE FROM epg_channels WHERE sourceId = :sourceId AND epgChannelId IN (:epgChannelIds)")
-    suspend fun deleteChannelsByEpgIds(sourceId: Long, epgChannelIds: List<String>)
-
-    @Query("DELETE FROM epg_channels WHERE sourceId = :sourceId")
-    suspend fun clearChannelsForSource(sourceId: Long)
+    @Query("DELETE FROM epg_channels")
+    suspend fun clearChannels()
 }

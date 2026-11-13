@@ -9,7 +9,7 @@ import tv.own.owntv.core.parser.XtEpgEntry
 class ScheduleEntryTest {
 
     private val stored = EpgProgrammeEntity(
-        id = 42, sourceId = 1, epgChannelId = "news.example", startMs = 1_000, stopMs = 61_000,
+        id = 42, epgChannelId = "news.example", startMs = 1_000, stopMs = 61_000,
         title = "News", description = "Headlines",
     )
 

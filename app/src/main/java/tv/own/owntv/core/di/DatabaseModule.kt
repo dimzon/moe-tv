@@ -92,7 +92,6 @@ val databaseModule = module {
             .build()
     }
 
-    single { get<OwnTVDatabase>().sourceDao() }
     single { get<OwnTVDatabase>().categoryDao() }
     single { get<OwnTVDatabase>().channelDao() }
     single { get<OwnTVDatabase>().channelCategoryDao() }

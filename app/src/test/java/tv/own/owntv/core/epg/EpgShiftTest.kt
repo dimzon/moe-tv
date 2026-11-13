@@ -20,7 +20,7 @@ class EpgShiftTest {
     private val key = CustomizeKeys.channel(channel)
 
     private fun programme(startMs: Long, stopMs: Long) = EpgProgrammeEntity(
-        sourceId = 7, epgChannelId = "cbs", startMs = startMs, stopMs = stopMs, title = "News",
+        epgChannelId = "cbs", startMs = startMs, stopMs = stopMs, title = "News",
     )
 
     @Test

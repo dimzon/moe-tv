@@ -181,13 +181,12 @@ val dataModule = module {
     // the sync matrix's "give" flags) and does the delete in the same transaction.
     // db, favoriteDao, historyDao, customCategoryDao, userData, settings
     single { tv.own.owntv.core.backup.UserDataWriter(get(), get(), get(), get(), get(), get()) }
-    // sourceDao, syncManager, userDataResolver, channelDao, categoryDao, playbackQuirkDao, playbackPrefsDao
-    single { SourceRepository(get(), get(), get(), get(), get(), playbackQuirkDao = get(), playbackPrefsDao = get()) }
+    // settings, syncManager, userDataResolver, channelDao, categoryDao (the DTO adapter, no DAO)
+    single { SourceRepository(get(), get(), get(), get(), get()) }
     // settings, sourceRepository, channelDao
     single { tv.own.owntv.core.nav.NavVisibility(get(), get(), get()) }
     single {
         SyncManager(
-            sourceDao = get(),
             categoryDao = get(),
             channelDao = get(),
             channelCategoryDao = get(),
@@ -215,8 +214,8 @@ val dataModule = module {
             rutube = get(),
         )
     }
-    // channelDao, categoryDao, sourceDao, customize (settings is gone: no active-playlist filter)
-    single { tv.own.owntv.core.live.ChannelVersions(get(), get(), get(), get()) }
+    // channelDao, categoryDao, customize (settings is gone: no active-playlist filter)
+    single { tv.own.owntv.core.live.ChannelVersions(get(), get(), get()) }
     // Who currently holds a stream on which playlist. Multiview tiles and the main playback spend the
     // same provider connections, so both count against one register.
     single { tv.own.owntv.core.live.OpenStreamRegistry() }
@@ -242,8 +241,8 @@ val dataModule = module {
     // settings, sourceRepository, catalogSyncScheduler, importFinalizer — the Auto refresh
     // settings, run on start and resume.
     single { tv.own.owntv.core.sync.AutoRefresh(get(), get(), get(), get()) }
-    // sourceDao, sourceRepository, backup, connectivity, importFinalizer,
-    // catalogSyncScheduler — onboarding: ensure the built-in RuTube source, sync it, undo on
-    // failure. Factory, not single: each wizard run owns its own state machine.
-    factory { tv.own.owntv.core.setup.SourceImporter(get(), get(), get(), get(), get(), get()) }
+    // sourceRepository, backup, connectivity, importFinalizer, catalogSyncScheduler — onboarding:
+    // attach the built-in RuTube source (a DTO now), sync it, undo on failure. Factory, not single:
+    // each wizard run owns its own state machine.
+    factory { tv.own.owntv.core.setup.SourceImporter(get(), get(), get(), get(), get()) }
 }

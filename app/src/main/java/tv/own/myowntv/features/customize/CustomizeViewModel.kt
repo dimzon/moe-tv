@@ -70,7 +70,6 @@ import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ContentOrderDao
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.database.dao.CustomCategoryDao
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.repository.ActiveProfileSources
 import tv.own.owntv.core.repository.activeProfileSources
@@ -109,7 +108,6 @@ enum class CustomizeVisibilityFilter {
  */
 class CustomizeViewModel(
     private val settings: SettingsRepository,
-    private val sourceDao: SourceDao,
     private val categoryDao: CategoryDao,
     private val customCategoryDao: CustomCategoryDao,
     private val contentOrderDao: ContentOrderDao,
@@ -127,7 +125,7 @@ class CustomizeViewModel(
     // Observe the sources reactively so a catalog change refreshes the customize lists
     // immediately. Goes through activeProfileSources (like the Browse screens). Per-section Off
     // flags also hide that source's categories for the selected section.
-    private val ctx: StateFlow<Ctx> = activeProfileSources(sourceDao)
+    private val ctx: StateFlow<Ctx> = activeProfileSources()
         .map { aps -> Ctx(aps.sources) }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, Ctx(emptyList()))

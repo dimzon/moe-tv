@@ -67,7 +67,6 @@ import kotlinx.coroutines.withContext
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.customize.SectionCustomizations
 import tv.own.owntv.core.database.dao.ChannelDao
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.home.GuideSliceState
 import tv.own.owntv.core.home.HeroItem
@@ -125,7 +124,6 @@ data class ContinueTarget(
 class HomeViewModel(
     private val feed: HomeFeedReader,
     private val channelDao: ChannelDao,
-    private val sourceDao: SourceDao,
     private val settings: SettingsRepository,
     private val heroPreviewEngine: HeroPreviewEngine,
     private val historyDao: tv.own.owntv.core.database.dao.HistoryDao,
@@ -222,9 +220,8 @@ class HomeViewModel(
      * fine.
      */
     suspend fun startPreview(hero: HomeHeroCard) {
-        val source = withContext(Dispatchers.IO) {
-            runCatching { sourceDao.getById(hero.channel.sourceId) }.getOrNull()
-        }
+        // One built-in source: its identity and UA are the hardcoded singleton DTO.
+        val source = tv.own.owntv.core.repository.BuiltInSource.current
         heroPreviewEngine.play(
             hero.channel.streamUrl, 0L, source?.userAgent,
             tv.own.owntv.core.settings.SourceOverrides.headersWithReferer(hero.channel.httpHeaders, source),

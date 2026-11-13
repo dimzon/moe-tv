@@ -101,7 +101,6 @@ import tv.own.owntv.core.database.dao.ContentOrderDao
 import tv.own.owntv.core.database.dao.CustomCategoryDao
 import tv.own.owntv.core.database.dao.FavoriteDao
 import tv.own.owntv.core.database.dao.HistoryDao
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
@@ -132,7 +131,6 @@ class LiveViewModel(
     private val favoriteDao: FavoriteDao,
     private val historyDao: HistoryDao,
     private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
-    private val sourceDao: SourceDao,
     private val settings: SettingsRepository,
     private val customize: CustomizationStore,
     private val epgDao: tv.own.owntv.core.database.dao.EpgDao,
@@ -202,7 +200,7 @@ class LiveViewModel(
     // be resolved at play time from one whose final URL is already stored, without a DB round-trip.
     private var sourceById: Map<Long, tv.own.owntv.core.database.entity.SourceEntity> = emptyMap()
 
-    private val ctx: StateFlow<Ctx> = activeProfileSources(sourceDao)
+    private val ctx: StateFlow<Ctx> = activeProfileSources()
         .map { aps ->
             sourceById = aps.sources.associateBy { it.id }
             val liveIds = aps.liveSourceIds
@@ -233,18 +231,6 @@ class LiveViewModel(
     private val _selected = MutableStateFlow<LiveKey>(LiveKey.All)
     val selectedKey: StateFlow<LiveKey> = _selected.asStateFlow()
 
-    // A playlist switch can leave a category of the previous playlist selected. The rail no longer lists
-    // it, so the heading fell back to the rail's first row while the titles kept coming from that old
-    // category. Back to All whenever the selected folder is not on one of the playlists now shown.
-    init {
-        viewModelScope.launch {
-            ctx.map { it.sourceIds }.distinctUntilChanged().drop(1).collect { ids ->
-                val key = _selected.value as? LiveKey.Folder ?: return@collect
-                val sourceId = categoryDao.getById(key.id)?.sourceId
-                if (sourceId == null || sourceId !in ids) _selected.value = LiveKey.All
-            }
-        }
-    }
 
     private val _search = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _search.asStateFlow()
@@ -453,16 +439,10 @@ class LiveViewModel(
                     cust,
                     alphabetical = sort == SettingsRepository.SortMode.ALPHA,
                 )
-                val multiSourceNames = c.sourceNames.takeIf { it.size > 1 }.orEmpty()
-                val categoriesById = cats.associateBy { it.id }
                 c to defaultRail.filter { builtIns.shows(it.key) } + folders.map { e ->
                     LiveRailItem(
                         key = e.categoryId?.let { LiveKey.Folder(it) } ?: LiveKey.Custom(e.customId!!),
                         title = e.displayName, locked = e.locked, sealed = e.sealed,
-                        providerName = e.categoryId
-                            ?.let(categoriesById::get)
-                            ?.sourceId
-                            ?.let(multiSourceNames::get),
                     )
                 }
             }
@@ -767,18 +747,13 @@ class LiveViewModel(
         viewModelScope.launch {
             reconcileHiddenSelection(railItems, defaultRail, settings.liveBuiltIns, _selected) { lockedKey != null }
         }
-        // Another playlist can leave the selection on a folder the new playlists do not have:
-        // its channels stayed listed under a wrong name. Such a folder falls back to All channels, or with All hidden to the new list's first category.
+        // One source, so a folder can only disappear if the provider dropped it: fall back to All
+        // instead of leaving the selection on a category the rail no longer lists.
         viewModelScope.launch {
-            ctx.map { it.sourceIds }.distinctUntilChanged().drop(1).collect { ids ->
-                suspend fun gone(key: LiveKey?) = key is LiveKey.Folder && categoryDao.getById(key.id)?.sourceId !in ids
-                if (gone(previousKey)) previousKey = LiveKey.All
-                val stale = _selected.value
-                if (lockedKey == null && gone(stale)) {
-                    val next = fallbackAfterSwitch(railItems, defaultRail, stale)
-                    // Don't overwrite a pick the user made while the new rail was loading.
-                    if (lockedKey == null && _selected.value == stale) _selected.value = next
-                }
+            val stale = _selected.value
+            if (lockedKey == null && stale is LiveKey.Folder && categoryDao.getById(stale.id) == null) {
+                val next = fallbackAfterSwitch(railItems, defaultRail, stale)
+                if (_selected.value == stale) _selected.value = next
             }
         }
         // Persist the last focused/interacted channel (debounced), and restore it once at startup so opening
@@ -866,7 +841,6 @@ class LiveViewModel(
         host = tv.own.owntv.player.LiveTuneController.CoreHost(
             context = appContext,
             settings = settings,
-            sourceDao = sourceDao,
             resolver = streamUrlResolver,
             label = ::channelNumberLabel,
             // The warm playlist map, so a preview on a focus step never waits on the database.
@@ -911,7 +885,8 @@ class LiveViewModel(
     }
 
     /** The playlist a channel came from, so a caller can ask what it allows (Multiview's tile budget). */
-    fun sourceOf(channel: ChannelEntity): SourceEntity? = sourceById[channel.sourceId]
+    fun sourceOf(channel: ChannelEntity): SourceEntity? =
+        sourceById[channel.sourceId] ?: tv.own.owntv.core.repository.BuiltInSource.current
 
     /**
      * Tune [channel] into a Multiview tile's own engine.
@@ -1155,9 +1130,6 @@ class LiveViewModel(
      * Customize policy on top (hidden channel/category, sealed folder).
      */
     suspend fun resolveLauncherChannel(link: tv.own.owntv.core.launcher.LauncherDeepLink.Live): ChannelEntity? {
-        val liveIds = sourceDao.observeAll().first()
-            .filter { it.syncLive }.map { it.id }.toSet()
-        if (liveIds.isEmpty()) return null
         val channel = when {
             !link.remoteId.isNullOrBlank() -> channelDao.findByRemote(link.remoteId)
             !link.name.isNullOrBlank() -> channelDao.findByName(link.name)
@@ -1413,7 +1385,7 @@ class LiveViewModel(
         if (rejectSubscription(channel)) return
         viewModelScope.launch {
             if (tv.own.owntv.core.database.ChannelMembership.allExcluded(channel, customize.sealedCategoryIds(MediaType.LIVE).first())) return@launch
-            val source = withContext(Dispatchers.IO) { sourceDao.getById(channel.sourceId) }
+            val source = tv.own.owntv.core.repository.BuiltInSource.current
             val url = if (streamUrlResolver.needsResolve(source)) {
                 withContext(Dispatchers.IO) {
                     runCatching { streamUrlResolver.resolve(source!!, channel.streamUrl) }
@@ -1476,7 +1448,7 @@ class LiveViewModel(
     }
 
     private suspend fun getSource(sourceId: Long): tv.own.owntv.core.database.entity.SourceEntity? =
-        sourceById[sourceId] ?: sourceDao.getById(sourceId)
+        sourceById[sourceId] ?: tv.own.owntv.core.repository.BuiltInSource.current
 
     /** Internal playback: the canonical ExoPlayer / history side-effects for a
      *  channel. Direct-tune's background rebuild path calls this without cancelling the rebuild

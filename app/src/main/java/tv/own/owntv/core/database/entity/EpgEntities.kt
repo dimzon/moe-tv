@@ -9,22 +9,19 @@ import java.util.Objects
 
 /**
  * EPG channel descriptor (XMLTV `<channel>` or an Xtream epg id). Channels link to it via their
- * `epgChannelId`.
+ * `epgChannelId`. Schema v5 dropped `sourceId`: one guide store, one catalogue.
  */
-// NOTE: no foreign key to sources. EPG also comes from standalone EPG sources (stored in DataStore
-// with negative ids that don't exist in the sources table), so a sourceId FK would reject them.
-// EPG rows are cleared explicitly when a source/EPG-source is removed.
+// NOTE: no foreign key — the sources table is gone (schema v5). EPG rows are cleared explicitly
+// when the guide is dropped or rewritten.
 @Entity(
     tableName = "epg_channels",
     indices = [
-        Index("sourceId"),
-        Index(value = ["sourceId", "epgChannelId"], unique = true),
+        Index(value = ["epgChannelId"], unique = true),
         Index("normName"),
     ],
 )
 data class EpgChannelEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val sourceId: Long,
     val epgChannelId: String,
     val displayName: String? = null,
     /** The feed's own `<icon src>` logo, used instead of the provider logo when the user turns
@@ -54,19 +51,15 @@ data class EpgChannelEntity(
 @Entity(
     tableName = "epg_programmes",
     indices = [
-        Index(value = ["epgChannelId", "startMs"]),
+        Index(value = ["epgChannelId", "startMs"], unique = true, name = "index_epg_programmes_natural_key"),
         Index("stopMs"),
         // Time-bounded reads (a rail, an "on now" list) seek a range of start times rather than
         // walking the table. Without it a bounded window still examined every row in the database.
         Index(value = ["startMs", "stopMs"]),
-        // Also serves every read by source, or by source and channel: no separate index for either
-        // (v50 dropped both — each costs every guide write, on a TV several milliseconds a row).
-        Index(value = ["sourceId", "epgChannelId", "startMs"], unique = true, name = "index_epg_programmes_natural_key"),
     ],
 )
 data class EpgProgrammeEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val sourceId: Long,
     val epgChannelId: String,
     val startMs: Long,
     val stopMs: Long,

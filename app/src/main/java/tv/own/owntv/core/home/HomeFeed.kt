@@ -13,7 +13,6 @@ import tv.own.owntv.core.customize.SectionCustomizations
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.ChannelWithWatchedAt
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.live.GuideReader
@@ -21,7 +20,6 @@ import tv.own.owntv.core.model.HomeConfig
 import tv.own.owntv.core.model.HomeLiveRowMode
 import tv.own.owntv.core.model.HomeRow
 import tv.own.owntv.core.model.MediaType
-import tv.own.owntv.core.repository.activeSourceIds
 import tv.own.owntv.core.settings.SettingsRepository
 
 /** The item behind the big card at the top of Home — the last thing worth carrying on with. */
@@ -95,20 +93,15 @@ class HomeFeedReader(
     private val channelDao: ChannelDao,
     private val categoryDao: CategoryDao,
     private val customize: CustomizationStore,
-    private val sourceDao: SourceDao,
     private val settings: SettingsRepository,
     private val guide: GuideReader,
 ) {
     suspend fun load(): HomeFeed = withContext(Dispatchers.IO) {
         coroutineScope {
             val configAsync = async { settings.homeConfig().first() }
-            // syncLive scope only (no active-playlist filter any more): Home rails never show Off sections.
-            val liveIdsAsync = async { activeSourceIds(sourceDao, MediaType.LIVE).toSet() }
-            val allIdsAsync = async { sourceDao.allSourceIds().toSet() }
             val favouritesAsync = async { channelDao.favoritesListAlpha().first() }
 
             val config = configAsync.await()
-            val liveIds = liveIdsAsync.await()
 
             // Hidden items / hidden categories never surface on Home either.
             val hidden = hiddenState()
@@ -118,7 +111,6 @@ class HomeFeedReader(
             val liveWithTs = recentLiveAsync.await().filterNot { isChannelHidden(it.channel, hidden) }
             val live = liveWithTs.map { it.channel }
             val favLive = favouritesAsync.await()
-                .filter { c -> c.sourceId in liveIds }
                 .filterNot { isChannelHidden(it, hidden) }
             val heroItems = buildHeroItems(liveWithTs, config)
             // The two guide slices read different channel sets and never depend on each other.

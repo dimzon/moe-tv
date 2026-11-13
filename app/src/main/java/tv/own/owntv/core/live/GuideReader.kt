@@ -6,7 +6,6 @@ import kotlinx.coroutines.withContext
 import tv.own.owntv.core.CorePerf
 import tv.own.owntv.core.customize.SectionCustomizations
 import tv.own.owntv.core.database.dao.EpgDao
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.epg.EpgShift
@@ -32,7 +31,6 @@ private const val KEY_CHUNK = 400
  */
 class GuideReader(
     private val epgDao: EpgDao,
-    private val sourceDao: SourceDao,
     /**
      * The second guide. [row] falls back to its provider fetch when the stored table has nothing for
      * a channel in the window, so the grid shows what the preview pane has always shown.
@@ -40,12 +38,11 @@ class GuideReader(
     private val liveEpgReader: LiveEpgReader,
 ) {
     /**
-     * Every playlist plus every EPG feed. Guide rows are keyed by epg id and routinely live under a
-     * different source than the channel showing them — one playlist's `xmltv.php` covering another's
-     * lineup — so narrowing this to the channels' own sources loses rows that are really there.
+     * The one guide store's id. Kept as a list because the callers still pass it into the
+     * visibility/count plumbing that used to be multi-source; there is exactly one source now.
      */
     suspend fun guideSourceIds(): List<Long> = withContext(Dispatchers.IO) {
-        sourceDao.allSourceIds()
+        listOf(tv.own.owntv.core.database.SingleSource.id)
     }
 
     // A `window(from, to)` used to live here: it paged the WHOLE guide window into one ArrayList and

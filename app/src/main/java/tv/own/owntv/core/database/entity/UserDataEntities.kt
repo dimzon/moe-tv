@@ -92,7 +92,6 @@ data class ContentOrderEntity(
 @Entity(
     tableName = "playback_prefs",
     primaryKeys = ["contentKey"],
-    indices = [Index("sourceId")],
 )
 data class PlaybackPrefsEntity(
     /** [tv.own.owntv.core.player.contentKey] result, or the stream URL when the row has none. */
@@ -110,11 +109,6 @@ data class PlaybackPrefsEntity(
      */
     val audioDelayMs: Int? = null,
     val updatedAt: Long = System.currentTimeMillis(),
-    /**
-     * The playlist [contentKey] belongs to, so deleting a playlist deletes its rows.
-     * `-1` = unknown — a legacy stream-URL key, or a row written before v44.
-     */
-    @androidx.room.ColumnInfo(defaultValue = "-1") val sourceId: Long = -1,
     /** The audio track language last chosen here; null = follow the preference. */
     val audioLang: String? = null,
     /** The subtitle track language last chosen here; `""` = subtitles off. */
@@ -128,16 +122,13 @@ data class PlaybackPrefsEntity(
  *
  * Keyed by [tv.own.owntv.core.player.contentKey] like every per-item store. The per-stream engine
  * pin it also used to carry is gone with the second engine (v56); what is left is the audio-only
- * choice and the lip-sync correction. [sourceId] lets a playlist's rows go with it.
+ * choice and the lip-sync correction. Schema v5 dropped `sourceId` — there is one source.
  */
 @Entity(
     tableName = "playback_quirks",
-    indices = [Index("sourceId")],
 )
 data class PlaybackQuirkEntity(
     @PrimaryKey val contentKey: String,
-    /** `-1` = unknown (a legacy stream-URL key). */
-    val sourceId: Long,
     /**
      * `LIVE`, `MOVIE` or `EPISODE` — the kind of item, recorded by whoever wrote the row. The key
      * alone cannot say: an item with no provider id is keyed by its stream URL. Live rows are what

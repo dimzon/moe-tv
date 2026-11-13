@@ -30,7 +30,7 @@ object CustomizeKeys {
     const val CUSTOM_PREFIX = "custom:"
 
     fun isCustom(key: String): Boolean = key.startsWith(CUSTOM_PREFIX)
-    fun category(c: CategoryEntity): String = "${c.sourceId}:${c.remoteId ?: c.name}"
+    fun category(c: CategoryEntity): String = "${tv.own.owntv.core.database.SingleSource.id}:${c.remoteId ?: c.name}"
     fun channel(ch: ChannelEntity): String = "${ch.sourceId}:${ch.remoteId ?: ch.name}"
 
     /** The part of an item key after the source id: the provider's own id, or the name as a fallback. */

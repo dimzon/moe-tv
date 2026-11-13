@@ -64,7 +64,6 @@ class AdultCategoryClassifierTest {
 
     private fun category(id: Long, name: String) = CategoryEntity(
         id = id,
-        sourceId = 10,
         mediaType = MediaType.MOVIE,
         name = name,
     )

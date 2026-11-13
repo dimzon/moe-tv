@@ -14,7 +14,6 @@ import tv.own.owntv.core.database.dao.HistoryDao
 import tv.own.owntv.core.database.dao.PlaybackPrefsDao
 import tv.own.owntv.core.database.dao.TvProviderProgramDao
 import tv.own.owntv.core.database.dao.TombstoneDao
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.CategoryEntity
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.ChannelFtsEntity
@@ -25,7 +24,6 @@ import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
 import tv.own.owntv.core.database.entity.PlaybackPrefsEntity
 import tv.own.owntv.core.database.entity.PlaybackQuirkEntity
-import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.database.entity.UserDataTombstoneEntity
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
 import tv.own.owntv.core.database.entity.TvProviderProgramEntity
@@ -33,8 +31,6 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
 
 @Database(
     entities = [
-        // Sources
-        SourceEntity::class,
         // Content
         CategoryEntity::class,
         ChannelEntity::class,
@@ -71,16 +67,17 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
     // without an FK, mirrored from ChannelRenameSeeds on every sync. v4 slims `channels` to the
     // natural key: remoteId IS the PK and the wide row (row id, sourceId, stream marker, EPG id,
     // catch-up/DRM/headers/hash) is gone — one built-in source publishes only what it has, the
-    // removed fields live on as code-level synonyms over remoteId. The old per-version log
-    // lives in git history and in CHANGELOG.md.
-    version = 4,
+    // removed fields live on as code-level synonyms over remoteId. v5 removes the `sources` table:
+    // the one built-in source is a hardcoded DTO (BuiltInSource), its user-adjustable values are
+    // global Settings, and every `sourceId` column (categories, EPG, playback prefs/quirks) is gone.
+    // The old per-version log lives in git history and in CHANGELOG.md.
+    version = 5,
 
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
 /** Room entry point; its generated `_Impl` is loaded by name and retained by release keep rules. */
 abstract class OwnTVDatabase : RoomDatabase() {
-    abstract fun sourceDao(): SourceDao
     abstract fun categoryDao(): CategoryDao
     abstract fun channelDao(): ChannelDao
     abstract fun channelCategoryDao(): ChannelCategoryDao
@@ -119,7 +116,6 @@ abstract class OwnTVDatabase : RoomDatabase() {
                 "CREATE INDEX IF NOT EXISTS `index_epg_programmes_startMs_stopMs` ON `epg_programmes` (`startMs`, `stopMs`)",
             ),
             "epg_channels" to listOf(
-                "CREATE INDEX IF NOT EXISTS `index_epg_channels_sourceId` ON `epg_channels` (`sourceId`)",
                 "CREATE INDEX IF NOT EXISTS `index_epg_channels_normName` ON `epg_channels` (`normName`)",
             ),
         )

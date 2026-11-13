@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import tv.own.owntv.core.backup.BackupManager
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.network.ConnectivityObserver
 import tv.own.owntv.core.repository.SourceRepository
@@ -37,7 +36,6 @@ import java.io.File
  * Cancelling the caller's job cancels the import and runs the same cleanup.
  */
 class SourceImporter(
-    private val sourceDao: SourceDao,
     private val sourceRepository: SourceRepository,
     private val backup: BackupManager,
     private val connectivity: ConnectivityObserver,
@@ -116,7 +114,7 @@ class SourceImporter(
                 is SyncResult.Success -> {
                     // Just the catalogue — the guide is a separate prompt (Settings → EPG).
                     val counts = importFinalizer.finalize(source, deferIndexes = freshSync)
-                    val syncedSource = sourceDao.getById(source.id) ?: source
+                    val syncedSource = sourceRepository.currentSource()
                     if (freshSync) catalogSyncScheduler.enqueueContentIndexBuild(reason = "fresh_add")
                     _state.value = ImportState.Success(
                         counts = counts,
@@ -148,7 +146,7 @@ class SourceImporter(
      * The playlist already on this device, for a "use an existing playlist" step: the source is
      * global, so there is nothing to link — the step only re-syncs it.
      */
-    suspend fun availableExistingSources(): List<SourceEntity> = sourceDao.getAllOnce()
+    suspend fun availableExistingSources(): List<SourceEntity> = listOf(sourceRepository.currentSource())
 
     /**
      * Re-sync the existing source so its catalog is fresh — exactly like adding a brand-new one.
@@ -158,7 +156,7 @@ class SourceImporter(
         _state.value = ImportState.Running
         _progress.value = null
         try {
-            val sources = sourceDao.getAllOnce().filter { it.id in sourceIds }
+            val sources = listOf(sourceRepository.currentSource()).filter { it.id in sourceIds }
             var total = SyncCounts(0, 0)
             var failure: String? = null
             val warnings = mutableListOf<SyncWarning>()
@@ -264,15 +262,14 @@ class SourceImporter(
         )
 
     private suspend fun syncRestoredSources() {
-        sourceDao.getAllOnce().forEach { source ->
-            val counts = importFinalizer.contentCounts(source.id)
-            if (counts.channels > 0) return@forEach
-            catalogSyncScheduler.enqueueSync(
-                source.id,
-                reason = "restore",
-                contentTypes = tv.own.owntv.core.sync.SyncContentTypes.enabledOf(source),
-            )
-        }
+        val source = sourceRepository.currentSource()
+        val counts = importFinalizer.contentCounts(source.id)
+        if (counts.channels > 0) return
+        catalogSyncScheduler.enqueueSync(
+            source.id,
+            reason = "restore",
+            contentTypes = tv.own.owntv.core.sync.SyncContentTypes.enabledOf(source),
+        )
     }
 
     fun reset() {
@@ -296,7 +293,7 @@ class SourceImporter(
             // leave the app with no way back except another full setup). Wipe only the partial
             // content (a never-synced source re-syncs via insertFresh, which assumes empty tables —
             // leftovers would duplicate).
-            runCatching { sourceRepository.clearSourceContent(source.id) }
+            runCatching { sourceRepository.clearSourceContent() }
         }
     }
 }

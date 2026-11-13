@@ -110,7 +110,6 @@ val appModule = module {
             get(), // favoriteDao
             get(), // historyDao
             get(), // userDataWriter
-            get(), // sourceDao
             get(), // settings
             get(), // customize
             get(), // epgDao
@@ -131,7 +130,6 @@ val appModule = module {
     // runtime. Profiles are gone: no profileDao argument any more.
     viewModel {
         SettingsViewModel(
-            sourceDao = get(),
             sourceRepository = get(),
             settings = get(),
             channelDao = get(),
@@ -159,7 +157,6 @@ val appModule = module {
             get(), // epgRepository
             get(), // connectivity
             get(), // customize
-            get(), // sourceDao
             get(), // favoriteDao
             get(), // userDataWriter
             get(), // categoryDao

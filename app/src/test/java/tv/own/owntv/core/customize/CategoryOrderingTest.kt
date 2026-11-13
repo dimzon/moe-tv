@@ -14,7 +14,7 @@ import tv.own.owntv.core.model.MediaType
 class CategoryOrderingTest {
 
     private fun cat(id: Long, name: String) =
-        CategoryEntity(id = id, sourceId = 1, mediaType = MediaType.LIVE, name = name, remoteId = "r$id")
+        CategoryEntity(id = id, mediaType = MediaType.LIVE, name = name, remoteId = "r$id")
 
     private val cats = listOf(cat(1, "Music"), cat(2, "News"), cat(3, "Adult"), cat(4, "Movies"))
 

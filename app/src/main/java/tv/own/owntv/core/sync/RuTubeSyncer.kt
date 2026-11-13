@@ -43,8 +43,6 @@ internal class RuTubeSyncer(
 ) {
     suspend fun sync(s: SourceEntity, progress: SyncCounters, stats: SyncStatsCollector) =
         coroutineScope {
-            // The channel row carries no sourceId; whoever syncs is THE source for this process.
-            tv.own.owntv.core.database.SingleSource.id = s.id
             syncLive(s, progress, stats)
         }
 
@@ -133,13 +131,13 @@ internal class RuTubeSyncer(
             }
             if (!freshSource) {
                 support.pruneChannels(label, remoteIds, stats)
-                support.pruneCategories(s.id, MediaType.LIVE, categoryRefresh.seenRemoteIds, label, stats)
+                support.pruneCategories(MediaType.LIVE, categoryRefresh.seenRemoteIds, label, stats)
             }
         }
         // Rebuild the many-to-many link (redesign §2): every genre in broadcast_category[], not just
         // the primary bucket. Keyed by the channel's hex videoId (= channels.remoteId), so a re-sync's
         // clear-then-insert never orphans a membership. Runs after the channels are committed.
-        rebuildChannelCategories(s.id, channels, catMap)
+        rebuildChannelCategories(channels, catMap)
         // Rewrite the stored names of rows the dictionary covers — a no-op for the fresh rows the
         // upsert already renamed, the fix for rows whose content hash was untouched, and an inert
         // pass over orphans (no FK, a deleted channel's rename just waits).
@@ -157,7 +155,6 @@ internal class RuTubeSyncer(
      * rejected. RuTube category 1 ("all live") is the Everything mirror, never a real bucket.
      */
     private suspend fun rebuildChannelCategories(
-        sourceId: Long,
         channels: List<RutubeChannel>,
         catMap: Map<String, Long>,
     ) {
@@ -283,13 +280,13 @@ class RuTubeEpgSyncer(
     /** How far out the full grid is fetched, in days. */
     var guideDays: Int = 7
 
-    suspend fun sync(sourceId: Long, channelIds: List<String>): EpgSyncSummary {
+    suspend fun sync(channelIds: List<String>): EpgSyncSummary {
         var briefOk = 0
         var briefFail = 0
         runCatching {
             val brief = rutube.briefSchedules()
             // Write brief programmes as EpgChannelEntity + EpgProgrammeEntity.
-            writeBrief(sourceId, brief)
+            writeBrief(brief)
             briefOk = brief.size
         }.onFailure { e -> briefFail++; Log.w(TAG, "RuTube brief seed failed: ${e.message}") }
 
@@ -325,7 +322,7 @@ class RuTubeEpgSyncer(
                                     continue
                                 }
                                 if (programmes.isNotEmpty()) {
-                                    val written = writeChannel(sourceId, videoId, programmes)
+                                    val written = writeChannel(videoId, programmes)
                                     programmesWritten += written
                                 }
                             }
@@ -337,7 +334,7 @@ class RuTubeEpgSyncer(
             jobs.forEach { it.await() }
         }
         // Prune old programmes (> 2 days back) for this source.
-        pruneOld(sourceId)
+        pruneOld()
         return EpgSyncSummary(
             briefOk = briefOk,
             briefFail = briefFail,
@@ -347,11 +344,10 @@ class RuTubeEpgSyncer(
         )
     }
 
-    private suspend fun writeBrief(sourceId: Long, brief: Map<String, List<RutubeProgramme>>) {
+    private suspend fun writeBrief(brief: Map<String, List<RutubeProgramme>>) {
         // EpgChannelEntity rows for every channel in the brief map (has a schedule).
         val channels = brief.keys.map { videoId ->
             tv.own.owntv.core.database.entity.EpgChannelEntity(
-                sourceId = sourceId,
                 epgChannelId = videoId,
                 displayName = null,
             )
@@ -363,7 +359,6 @@ class RuTubeEpgSyncer(
         val programmes = brief.flatMap { (videoId, programmes) ->
             programmes.map { p ->
                 tv.own.owntv.core.database.entity.EpgProgrammeEntity(
-                    sourceId = sourceId,
                     epgChannelId = videoId,
                     startMs = p.startUtcMillis,
                     stopMs = p.endUtcMillis,
@@ -376,10 +371,9 @@ class RuTubeEpgSyncer(
         programmes.chunked(500).forEach { epgDao.upsertProgrammes(it) }
     }
 
-    private suspend fun writeChannel(sourceId: Long, videoId: String, programmes: List<RutubeProgramme>): Int {
+    private suspend fun writeChannel(videoId: String, programmes: List<RutubeProgramme>): Int {
         val rows = programmes.map { p ->
             tv.own.owntv.core.database.entity.EpgProgrammeEntity(
-                sourceId = sourceId,
                 epgChannelId = videoId,
                 startMs = p.startUtcMillis,
                 stopMs = p.endUtcMillis,
@@ -392,7 +386,7 @@ class RuTubeEpgSyncer(
         return rows.size
     }
 
-    private suspend fun pruneOld(sourceId: Long) {
+    private suspend fun pruneOld() {
         // 2-day-old cutoff, in millis.
         val cutoff = System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000L
         // EpgDao.prune deletes globally; for a single-source app this is equivalent.

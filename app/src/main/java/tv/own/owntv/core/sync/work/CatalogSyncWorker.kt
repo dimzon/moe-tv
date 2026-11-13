@@ -7,7 +7,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.network.ConnectivityObserver
 import tv.own.owntv.core.util.isTransientSyncError
 import tv.own.owntv.core.repository.SourceRepository
@@ -21,7 +20,6 @@ class CatalogSyncWorker(
     context: Context,
     params: WorkerParameters,
     private val sourceRepository: SourceRepository,
-    private val sourceDao: SourceDao,
     private val importFinalizer: ImportFinalizer,
     private val catalogSyncScheduler: CatalogSyncScheduler,
     private val connectivity: ConnectivityObserver,
@@ -47,10 +45,8 @@ class CatalogSyncWorker(
         // work data (not persisted anywhere) so it applies to exactly this run.
         val forcePrune = inputData.getBoolean(KEY_FORCE_PRUNE, false)
 
-        val source = sourceRepository.getById(sourceId) ?: run {
-            Log.w(TAG, "Source $sourceId not found — skipping ($reason)")
-            return Result.failure()
-        }
+        // One built-in source: the DTO is always available, no row lookup can fail.
+        val source = sourceRepository.currentSource()
         // An automatic refresh never runs under a film or channel: it waits until playback stops
         // (WorkManager restarts it later if the wait outlives the job's time limit).
         if (reason == tv.own.owntv.core.sync.AutoRefresh.REASON && watchSession.watching.value.isNotEmpty()) {
@@ -88,7 +84,7 @@ class CatalogSyncWorker(
                 // Remainder of a staged initial sync: stamp lastSyncAt once priority+remainder together
                 // cover the enabled catalog (SyncManager alone won't — each pass is incomplete).
                 if (completesInitialSync) {
-                    sourceDao.markSynced(source.id, System.currentTimeMillis())
+                    settings.markSourceSynced(System.currentTimeMillis())
                     Log.i(TAG, "Staged initial sync complete — markSynced sourceId=${source.id}")
                 }
                 val finalizeStartedAt = SystemClock.elapsedRealtime()

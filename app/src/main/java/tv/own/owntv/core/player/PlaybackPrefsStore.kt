@@ -34,12 +34,10 @@ class PlaybackPrefsStore(
         markDone = {},
         copy = {
             runCatching {
-                dao.fillSourceIds()
                 val moved = dao.legacyAudioDelays()
                 moved.forEach { row ->
                     quirks.setAudioDelay(
                         row.contentKey,
-                        sourceIdOfContentKey(row.contentKey),
                         mediaTypeOfContentKey(row.contentKey) ?: "LIVE",
                         row.audioDelayMs,
                     )
@@ -79,7 +77,7 @@ class PlaybackPrefsStore(
     suspend fun rememberAudioDelay(contentKey: String, audioDelayMs: Int?) {
         runCatching {
             copy.ensure()
-            quirks.setAudioDelay(contentKey, sourceIdOfContentKey(contentKey), mediaTypeOfContentKey(contentKey) ?: "LIVE", audioDelayMs)
+            quirks.setAudioDelay(contentKey, mediaTypeOfContentKey(contentKey) ?: "LIVE", audioDelayMs)
         }
     }
 

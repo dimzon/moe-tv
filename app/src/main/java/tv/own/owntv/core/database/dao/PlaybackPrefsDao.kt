@@ -57,28 +57,14 @@ interface PlaybackPrefsDao {
     }
 
     /**
-     * A new row for [contentKey], knowing its playlist. Every setter copies an existing row rather than
-     * rebuilding it, so a zoom change can never clear the volume, the playlist or the track choices.
+     * A new row for [contentKey]. Every setter copies an existing row rather than rebuilding it, so a
+     * zoom change can never clear the volume or the track choices.
      */
-    private fun fresh(contentKey: String) = PlaybackPrefsEntity(
-        contentKey = contentKey,
-        sourceId = tv.own.owntv.core.player.sourceIdOfContentKey(contentKey),
-    )
-
-    /** Every row written before its `sourceId` column existed learns it from its key. */
-    @Query(
-        "UPDATE playback_prefs SET sourceId = CAST(substr(contentKey, 1, instr(contentKey, ':') - 1) AS INTEGER) " +
-            "WHERE sourceId = -1 AND contentKey GLOB '[0-9]*:*'",
-    )
-    suspend fun fillSourceIds()
+    private fun fresh(contentKey: String) = PlaybackPrefsEntity(contentKey = contentKey)
 
     /** The per-item audio delays, oldest first, for the move to `playback_quirks`. */
     @Query("SELECT * FROM playback_prefs WHERE audioDelayMs IS NOT NULL ORDER BY updatedAt ASC")
     suspend fun legacyAudioDelays(): List<PlaybackPrefsEntity>
-
-    /** A deleted playlist takes its items' zoom, volume and track memory with it. */
-    @Query("DELETE FROM playback_prefs WHERE sourceId = :sourceId")
-    suspend fun deleteBySource(sourceId: Long)
 
     /** Everything, for Backup & Restore. */
     @Query("SELECT * FROM playback_prefs")

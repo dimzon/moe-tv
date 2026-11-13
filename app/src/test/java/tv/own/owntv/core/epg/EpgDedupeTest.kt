@@ -5,9 +5,10 @@ import org.junit.Test
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 
 /**
- * The case that produced this: a channel carried by two EPG feeds. The unique index cannot stop it —
- * the rows differ in `sourceId` and, because two feeds rarely agree to the minute, in `startMs` too —
- * so the guide drew one block on top of another and Next/Later named the same film twice.
+ * A channel's guide can still contain the same broadcast twice — a feed that names one channel twice,
+ * or an overlapping crawl — and because the copies rarely agree to the minute, so the guide drew one
+ * block on top of another and Next/Later named the same film twice. Schema v5 removed `sourceId`; the
+ * collapse is the same operation it always was, on a single store.
  */
 class EpgDedupeTest {
 
@@ -16,10 +17,8 @@ class EpgDedupeTest {
         start: Long,
         stop: Long,
         title: String,
-        sourceId: Long = 1,
     ) = EpgProgrammeEntity(
         id = id,
-        sourceId = sourceId,
         epgChannelId = "sky.cinema",
         startMs = start,
         stopMs = stop,
@@ -30,8 +29,8 @@ class EpgDedupeTest {
 
     @Test
     fun `the real case - two feeds, same film, edges a few minutes apart`() {
-        val a = row(1, 22 * h + 4 * 60_000, 24 * h + 16 * 60_000, "Snow White and the Huntsman", sourceId = 1)
-        val b = row(2, 22 * h + 10 * 60_000, 24 * h + 15 * 60_000, "Snow White and the Huntsman", sourceId = 2)
+        val a = row(1, 22 * h + 4 * 60_000, 24 * h + 16 * 60_000, "Snow White and the Huntsman")
+        val b = row(2, 22 * h + 10 * 60_000, 24 * h + 15 * 60_000, "Snow White and the Huntsman")
         val out = EpgDedupe.collapse(listOf(a, b))
         assertEquals(1, out.size)
         // The wider span wins: a block drawn from it leaves no gap either side.
@@ -40,8 +39,8 @@ class EpgDedupeTest {
 
     @Test
     fun `an exact duplicate collapses to one`() {
-        val a = row(1, 0, 2 * h, "Brothers Grimm", sourceId = 1)
-        val b = row(2, 0, 2 * h, "Brothers Grimm", sourceId = 2)
+        val a = row(1, 0, 2 * h, "Brothers Grimm")
+        val b = row(2, 0, 2 * h, "Brothers Grimm")
         assertEquals(1, EpgDedupe.collapse(listOf(a, b)).size)
     }
 

@@ -16,7 +16,7 @@ class EpgMatchResolverTest {
 
     @Test
     fun `the exact key always wins`() {
-        val resolver = EpgMatchResolver(mapOf("0:bbc1" to "bbc.one.uk", "7:bbc1" to "bbc.one.hd"))
+        val resolver = EpgMatchResolver(mapOf("1:bbc1" to "bbc.one.uk", "7:bbc1" to "bbc.one.hd"))
 
         // Both tiers could answer, and they disagree — but tier 1 is never in doubt.
         assertEquals("bbc.one.uk", resolver.epgIdFor(channel(remoteId = "bbc1")))

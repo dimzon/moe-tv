@@ -70,7 +70,7 @@ class EpgRepository(
         val keys = channelDao.allEpgChannelIds()
         if (keys.isEmpty()) return 0
         onProgress(keys.size, 0)
-        val summary = tv.own.owntv.core.sync.RuTubeEpgSyncer(api, epgDao).sync(source.id, keys)
+        val summary = tv.own.owntv.core.sync.RuTubeEpgSyncer(api, epgDao).sync(keys)
         onProgress(summary.channelsWithGuide, summary.programmesWritten)
         return summary.programmesWritten
     }
@@ -78,9 +78,9 @@ class EpgRepository(
     /** Whether the source can have a guide at all. RuTube always can — its API is the feed. */
     fun hasGuide(source: SourceEntity): Boolean = source.type == tv.own.owntv.core.model.SourceType.RUTUBE
 
-    /** Drop a source's stored programmes and guide-channel rows. */
-    suspend fun clear(storeId: Long) = withContext(Dispatchers.IO) {
-        epgDao.clearSource(storeId)
-        epgDao.clearChannelsForSource(storeId)
+    /** Drop the stored programmes and guide-channel rows. */
+    suspend fun clear() = withContext(Dispatchers.IO) {
+        epgDao.clearProgrammes()
+        epgDao.clearChannels()
     }
 }

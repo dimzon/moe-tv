@@ -3,10 +3,13 @@ package tv.own.owntv.core.repository
 import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import tv.own.owntv.core.database.dao.SourceDao
+import kotlinx.coroutines.flow.map
 import tv.own.owntv.core.database.entity.SourceEntity
+import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.sync.ImportStage
 import tv.own.owntv.core.sync.SyncContentTypes
 import tv.own.owntv.core.sync.SyncManager
@@ -17,47 +20,38 @@ import tv.own.owntv.core.sync.SyncResult
  * playlist screen drive this; the actual parsing/inserting lives in [SyncManager].
  */
 class SourceRepository(
-    private val sourceDao: SourceDao,
+    private val settings: SettingsRepository,
     private val syncManager: SyncManager,
     private val userData: tv.own.owntv.core.backup.UserDataResolver,
     private val channelDao: tv.own.owntv.core.database.dao.ChannelDao,
     private val categoryDao: tv.own.owntv.core.database.dao.CategoryDao,
-    private val playbackQuirkDao: tv.own.owntv.core.database.dao.PlaybackQuirkDao,
-    private val playbackPrefsDao: tv.own.owntv.core.database.dao.PlaybackPrefsDao,
 ) {
-    fun observeSources(): Flow<List<SourceEntity>> = sourceDao.observeAll()
+    /**
+     * The one built-in source as a DTO snapshot: hardcoded identity plus the current Settings
+     * values. A Flow because those settings are user-editable; it always emits exactly one element.
+     */
+    fun observeSources(): Flow<List<SourceEntity>> = settings.sourcePreferences
+        .map { listOf(BuiltInSource.snapshot(it)) }
+        .distinctUntilChanged()
 
-    suspend fun getById(id: Long): SourceEntity? = sourceDao.getById(id)
+    /** One-shot [observeSources] for imperative paths (workers, the importer, AutoRefresh). */
+    suspend fun currentSource(): SourceEntity =
+        BuiltInSource.snapshot(settings.sourcePreferences.first())
+
+    /** The wizard's "attach the built-in source": now just the identity DTO. */
+    suspend fun ensureRutube(): SourceEntity = currentSource()
+
+    suspend fun rutubeSource(): SourceEntity = currentSource()
 
     /**
-     * The one built-in RuTube source, shared by everyone. Idempotent: returns the
-     * existing row or creates it.
+     * Wipe the imported catalog (channels + their categories) but keep user data. Used when a
+     * backgrounded first import fails: keeping the partial content would duplicate rows on the next
+     * sync (a never-synced source takes the fresh-import path, which assumes empty tables).
+     * Content before categories — same order the syncers clear in.
      */
-    suspend fun ensureRutube(): SourceEntity = BuiltInSource.ensure(sourceDao)
-
-    suspend fun rutubeSource(): SourceEntity? = sourceDao.rutubeSource()
-
-    /**
-     * Deletes the playlist and everything remembered for its items: engine pins,
-     * sound-only marks, audio delays, and the zoom, volume and track choices. Those rows
-     * are keyed by content, not by a foreign key, so without this they outlived the playlist forever.
-     */
-    suspend fun deleteSource(source: SourceEntity) {
-        sourceDao.delete(source)
-        runCatching { playbackQuirkDao.deleteBySource(source.id) }
-        runCatching { playbackPrefsDao.deleteBySource(source.id) }
-    }
-
-    /**
-     * Wipe a source's imported content (channels + their categories) but KEEP the
-     * source row and its credentials. Used when a backgrounded first import fails: deleting the
-     * source would make the user's playlist silently vanish, while keeping the partial content
-     * would duplicate rows on the next sync (a never-synced source takes the insertFresh path,
-     * which assumes empty tables). Content before categories — same order the syncers clear in.
-     */
-    suspend fun clearSourceContent(sourceId: Long) {
+    suspend fun clearSourceContent() {
         channelDao.deleteByRemoteIds(channelDao.remoteIdsForSource())
-        categoryDao.clear(sourceId, tv.own.owntv.core.model.MediaType.LIVE)
+        categoryDao.clear(tv.own.owntv.core.model.MediaType.LIVE)
     }
 
     /**

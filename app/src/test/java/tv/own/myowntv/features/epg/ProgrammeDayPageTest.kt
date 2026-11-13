@@ -49,7 +49,7 @@ import tv.own.owntv.core.parser.EpgDetails
 class ProgrammeDayPageTest {
 
     private fun prog(start: Long, stop: Long, id: Long = 0) =
-        EpgProgrammeEntity(id = id, sourceId = 1, epgChannelId = "c", startMs = start, stopMs = stop, title = "P$start")
+        EpgProgrammeEntity(id = id, epgChannelId = "c", startMs = start, stopMs = stop, title = "P$start")
 
     private val day = listOf(prog(0, 100), prog(100, 200), prog(200, 300), prog(300, 400))
 
