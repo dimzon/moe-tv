@@ -13,7 +13,6 @@ import tv.own.owntv.core.database.ManualOrderRow
 import tv.own.owntv.core.database.ManualOrdering
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.ChannelNumberProjection
-import tv.own.owntv.core.database.entity.GuideChannelName
 
 /** One category's current channel count for a source (re-sync delta check). */
 data class CategoryItemCount(val categoryId: Long, val itemCount: Int)
@@ -62,10 +61,6 @@ interface ChannelDao {
     @Query("SELECT * FROM channels WHERE remoteId IN (:epgKeys)")
     suspend fun byEpgKeys(epgKeys: List<String>): List<ChannelEntity>
 
-    /** Channels a stored manual guide match may name, by its key's tail: the provider id, or the name. */
-    @Query("SELECT * FROM channels WHERE remoteId IN (:tails) OR name IN (:tails)")
-    suspend fun byRemoteIdsOrNames(tails: List<String>): List<ChannelEntity>
-
     /** Every channel — drives bulk EPG auto-matching. */
     @Query("SELECT * FROM channels ORDER BY sortOrder ASC, name ASC LIMIT :limit")
     suspend fun allForSources(limit: Int): List<ChannelEntity>
@@ -74,14 +69,6 @@ interface ChannelDao {
      *  use, used to filter the bulk EPG sync down from the whole feed. */
     @Query("SELECT DISTINCT remoteId FROM channels")
     suspend fun allEpgChannelIds(): List<String>
-
-    /**
-     * Every channel as a guide candidate: its guide key (== remoteId) and the name the user sees.
-     * The "Match EPG" picker and auto-match read this instead of a separate guide-channel table —
-     * with one source the guide key IS the catalogue key, so names come from the catalogue.
-     */
-    @Query("SELECT remoteId AS epgChannelId, name AS displayName FROM channels LIMIT :limit")
-    suspend fun guideChannelNames(limit: Int): List<GuideChannelName>
 
     /**
      * Channels that actually HAVE programmes in the window — so the guide never wastes its row limit
@@ -102,40 +89,14 @@ interface ChannelDao {
     )
     suspend fun channelsForGuide(query: String, limit: Int): List<ChannelEntity>
 
-    /** Channels matching these remoteIds — to resolve smart-matched channels in bulk. */
-    @Query("SELECT * FROM channels WHERE remoteId IN (:remoteIds)")
-    suspend fun findByRemoteIds(remoteIds: List<String>): List<ChannelEntity>
-
     @Query("SELECT remoteId FROM channels")
     suspend fun remoteIdsForSource(): List<String>
-
-    /** Any one channel — the "Test HLS support" probe needs a channel to ask about. */
-    @Query("SELECT remoteId FROM channels LIMIT 1")
-    suspend fun anyRemoteId(): String?
-
-    /** Prune scope for the per-category sync fallback. */
-    @Query("SELECT remoteId FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId IN (:categoryIds))")
-    suspend fun remoteIdsInCategories(categoryIds: List<Long>): List<String>
-
-    /**
-     * Write only the position of a row whose content did not change. The whole point is what it
-     * does *not* touch — one measured resync had 1,397 real changes producing 255,775 pointless
-     * rewrites when the update wrote every column.
-     */
-    @Query("UPDATE channels SET sortOrder = :sortOrder WHERE remoteId = :remoteId")
-    suspend fun setSortOrder(remoteId: String, sortOrder: Int)
-
-    /** One transaction for the whole batch; without it each statement pays its own commit. */
-    @Transaction
-    suspend fun applyPositionMoves(remoteIds: List<String>, sortOrders: List<Int>) {
-        for (i in remoteIds.indices) setSortOrder(remoteIds[i], sortOrders[i])
-    }
 
     /** Every channel in playlist order, with its number — what `PlaylistNumbering` works from. */
     @Query("SELECT remoteId, sortOrder, number FROM channels ORDER BY sortOrder ASC")
     suspend fun numbersForSource(): List<ChannelNumberProjection>
 
-    /** Sets only the number, for the same reason [setSortOrder] sets only the position. */
+    /** Sets only the number — the position is written alone for the same reason. */
     @Query("UPDATE channels SET number = :number WHERE remoteId = :remoteId")
     suspend fun setNumber(remoteId: String, number: Int?)
 

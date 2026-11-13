@@ -375,7 +375,7 @@ private fun OpenProgramme(
     val actions = guideProgrammeActions(
         vm, channel, p, now,
         onWatch = onWatch,
-        onPickEpg = {}, onEpgOffset = {}, autoMatch = false,
+        onEpgOffset = {},
     )
     val buttons = pageActions(time).map { kind ->
         when (kind) {

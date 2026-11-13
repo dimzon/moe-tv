@@ -303,7 +303,6 @@ internal fun BottomBar(
     onInfo: (() -> Unit)? = null, infoOn: Boolean = false, onReport: (() -> Unit)? = null,
     favorite: Boolean = false, onToggleFavorite: (() -> Unit)? = null,
     onPreviousChannel: (() -> Unit)? = null,
-    hasSources: Boolean = false,
     onOpenDialog: (HudDialog) -> Unit, onPip: (() -> Unit)?, onAudioMode: (() -> Unit)?,
     onMultiview: (() -> Unit)? = null, modifier: Modifier = Modifier,
 ) {
@@ -345,9 +344,6 @@ internal fun BottomBar(
                         }
                         // The same channel in another quality, category or playlist; the
                         // list is read when it opens.
-                        PlayerControl.SOURCES -> if (hasSources) {
-                            CtrlButton(MyOwnTVIcon.PLAYLIST, label = stringResource(R.string.player_tool_sources)) { onOpenDialog(HudDialog.SOURCES) }
-                        }
                         // Belongs to the tools cluster, or to controls the live-only player never
                         // routes here; `clusterFor` does not hand them to this loop.
                         PlayerControl.BRIGHTNESS, PlayerControl.CHANNEL_LIST,
@@ -421,7 +417,6 @@ internal fun BottomBar(
                         PlayerControl.GO_LIVE, PlayerControl.VOLUME, PlayerControl.BRIGHTNESS,
                         PlayerControl.SUBTITLES, PlayerControl.AUDIO,
                         PlayerControl.FAVOURITE, PlayerControl.PREVIOUS_CHANNEL,
-                        PlayerControl.SOURCES,
                         PlayerControl.CHANNEL_LIST,
                         -> Unit
                     }

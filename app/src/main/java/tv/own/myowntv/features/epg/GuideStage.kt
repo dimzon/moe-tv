@@ -356,17 +356,14 @@ internal class GuideProgrammeActions(
     val onWatchChannel: () -> Unit,
     val isFavorite: Boolean,
     val onFavorite: () -> Unit,
-    val onPickEpg: (() -> Unit)?,
-    /** Auto-match this one channel by name; its result opens in the review popup. */
-    val onAutoMatch: (() -> Unit)?,
     val epgOffsetValue: String?,
     val onEpgOffset: (() -> Unit)?,
 )
 
 /**
  * What [p] on [ch] can do at [now], through the guide's view model: Remind me until it starts, Watch
- * the channel, favourite it, and give it a guide. The TV Guide and Live TV's schedule both build
- * their menu from this, so the two never disagree.
+ * the channel, favourite it, and shift its guide by a per-channel offset. The TV Guide and Live TV's
+ * schedule both build their menu from this, so the two never disagree.
  */
 @Composable
 internal fun guideProgrammeActions(
@@ -375,10 +372,7 @@ internal fun guideProgrammeActions(
     p: EpgProgrammeEntity,
     now: Long,
     onWatch: () -> Unit,
-    onPickEpg: () -> Unit,
     onEpgOffset: () -> Unit,
-    /** Only where the review popup is on screen to show the result (the guide, not Live TV's list). */
-    autoMatch: Boolean = true,
 ): GuideProgrammeActions {
     val reminderRows by vm.reminderRows.collectAsStateWithLifecycle()
     val favoriteIds by vm.favoriteChannelIds.collectAsStateWithLifecycle()
@@ -388,8 +382,6 @@ internal fun guideProgrammeActions(
         onWatchChannel = onWatch,
         isFavorite = ch.id in favoriteIds,
         onFavorite = { vm.toggleFavoriteChannel(ch) },
-        onPickEpg = onPickEpg,
-        onAutoMatch = if (autoMatch) ({ vm.autoMatchOne(ch) }) else null,
         epgOffsetValue = vm.currentEpgShift(ch)?.let { tv.own.myowntv.features.live.liveEpgShiftLabel(it) }
             ?: stringResource(R.string.content_epg_offset_global_short),
         onEpgOffset = onEpgOffset,
@@ -399,7 +391,7 @@ internal fun guideProgrammeActions(
 /**
  * ☰ Programme options, 560 wide at the right: "Wish" + "20:05 – 21:40 · 259 Sky Cinema Family";
  * DETAILS Program details (focused first) · NEW Remind me (5 min before) · WATCH Watch channel ·
- * CHANNEL favourite, Pick EPG manually, EPG time offset (Global). Also Live TV's ▶ Schedule → OK menu.
+ * CHANNEL favourite, EPG time offset (Global). Also Live TV's ▶ Schedule → OK menu.
  */
 @Composable
 internal fun GuideProgrammeMenu(title: String, subtitle: String, actions: GuideProgrammeActions, leadMinutes: Int, onDetails: () -> Unit, onDismiss: () -> Unit) {
@@ -434,12 +426,6 @@ internal fun GuideProgrammeMenu(title: String, subtitle: String, actions: GuideP
             icon = MyOwnTVIcon.FAVORITE,
             onClick = { actions.onFavorite(); onDismiss() },
         )
-        if (actions.onAutoMatch != null) {
-            StageMenuItem(text = stringResource(R.string.content_epg_match_button), icon = MyOwnTVIcon.SPARKLE, onClick = { onDismiss(); actions.onAutoMatch.invoke() })
-        }
-        if (actions.onPickEpg != null) {
-            StageMenuItem(text = stringResource(R.string.content_epg_pick_manually), icon = MyOwnTVIcon.EPG, onClick = { onDismiss(); actions.onPickEpg.invoke() })
-        }
         if (actions.onEpgOffset != null) {
             StageMenuItem(
                 text = stringResource(R.string.content_epg_time_offset), icon = MyOwnTVIcon.CLOCK, value = actions.epgOffsetValue,
@@ -497,8 +483,6 @@ internal fun GuideChannelMenu(
     epgOffsetValue: String,
     onWatch: () -> Unit,
     onFavorite: () -> Unit,
-    onAutoMatch: () -> Unit,
-    onPickEpg: () -> Unit,
     onEpgOffset: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -517,8 +501,6 @@ internal fun GuideChannelMenu(
             text = stringResource(if (isFavorite) R.string.content_epg_remove_favourite else R.string.content_epg_add_favourite),
             icon = MyOwnTVIcon.FAVORITE, onClick = { onFavorite(); onDismiss() },
         )
-        StageMenuItem(text = stringResource(R.string.content_epg_match_button), icon = MyOwnTVIcon.SPARKLE, onClick = { onDismiss(); onAutoMatch() })
-        StageMenuItem(text = stringResource(R.string.content_epg_pick_manually), icon = MyOwnTVIcon.EPG, onClick = { onDismiss(); onPickEpg() })
         StageMenuItem(text = stringResource(R.string.content_epg_time_offset), icon = MyOwnTVIcon.CLOCK, value = epgOffsetValue, onClick = { onDismiss(); onEpgOffset() })
     }
 }
@@ -579,157 +561,6 @@ internal fun localMidnight(ms: Long): Long = java.util.Calendar.getInstance().ap
     set(java.util.Calendar.SECOND, 0); set(java.util.Calendar.MILLISECOND, 0)
 }.timeInMillis
 
-/**
- * The Auto-match review: a glass popup 1080 wide — "Auto-match EPG · 41 channels matched",
- * "Review 3 matches", the explanation, one row per unsure match (plate, channel, →, feed name and its
- * score, Accept, Skip; the row holding focus is FX), then Skip all · Accept all · Done. Guide logos
- * stay a switch at the left of the footer.
- */
-@Composable
-internal fun GuideReviewPopup(
-    suggestions: List<EpgViewModel.EpgMatchSuggestion>,
-    matchedCount: Int?,
-    onAccept: (EpgViewModel.EpgMatchSuggestion) -> Unit,
-    onSkip: (EpgViewModel.EpgMatchSuggestion) -> Unit,
-    onAcceptAll: () -> Unit,
-    onSkipAll: () -> Unit,
-    onDone: () -> Unit,
-    /** CH+/− paging, as every long list in the app: skip by the user's counts, long press to the ends. */
-    chNavEnabled: Boolean,
-    chNavUpSkip: Int,
-    chNavDownSkip: Int,
-) {
-    val a = stageAccent
-    BackHandler { onDone() }
-    val rowFocus = remember { HashMap<Int, FocusRequester>() }
-    fun acceptFocus(i: Int) = rowFocus.getOrPut(i) { FocusRequester() }
-    val bulkFocus = remember { FocusRequester() }
-    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
-    var focusedRow by remember { mutableStateOf(0) }
-    var listFocused by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { kotlinx.coroutines.delay(60); runCatching { acceptFocus(0).requestFocus() } }
-    MyOwnTVPopup(onDismissRequest = onDone, stageLayout = true) {
-        BoxWithConstraints(Modifier.fillMaxSize().background(StageColors.Scrim)) {
-            Column(
-                Modifier
-                    .padding(start = maxWidth * (420f / 1920f), top = 150.mpx, bottom = 24.mpx)
-                    .width(1080.mpx)
-                    .stageGlass(30.mpx, overContent = true)
-                    .padding(30.mpx)
-                    .trapAllFocusExit()
-                    .focusGroup(),
-            ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.mpx), verticalAlignment = Alignment.CenterVertically) {
-                    MyOwnTVIcon(MyOwnTVIcon.SPARKLE, a.accent, Modifier.size(18.mpx))
-                    Text(
-                        listOfNotNull(
-                            stringResource(R.string.content_epg_match_button),
-                            matchedCount?.let { pluralStringResource(R.plurals.content_epg_channels_matched, it, it) },
-                        ).joinToString(" · "),
-                        style = stageText(18, 700, 0.02.em), color = a.accent, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                Text(
-                    pluralStringResource(R.plurals.content_epg_review_count, suggestions.size, suggestions.size),
-                    style = stageText(38, 800), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = 8.mpx, bottom = 6.mpx),
-                )
-                Text(
-                    stringResource(R.string.content_epg_review_description),
-                    style = stageText(18, 400), color = StageColors.Muted,
-                    modifier = Modifier.padding(bottom = 18.mpx),
-                )
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = (78 * 5).mpx)
-                        .onFocusChanged { listFocused = it.hasFocus }
-                        .then(
-                            Modifier.chNavPaging(
-                                enabled = chNavEnabled,
-                                upSkip = chNavUpSkip,
-                                downSkip = chNavDownSkip,
-                                isFocused = { listFocused },
-                                lastIndex = { suggestions.lastIndex },
-                                currentTargetIndex = { focusedRow },
-                                onJumpToIndex = { i -> scope.jumpLazyListTo(listState, i) { acceptFocus(i).requestFocus() } },
-                            ),
-                        ),
-                ) {
-                    itemsIndexed(suggestions, key = { _, s -> s.channel.id }) { index, s ->
-                        GuideReviewRow(
-                            s, onAccept = { onAccept(s) }, onSkip = { onSkip(s) },
-                            acceptFocus = acceptFocus(index), bulkFocus = bulkFocus,
-                            onFocused = { focusedRow = index },
-                        )
-                    }
-                }
-                Row(
-                    Modifier.fillMaxWidth().padding(top = 22.mpx),
-                    horizontalArrangement = Arrangement.spacedBy(12.mpx),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                                        Spacer(Modifier.weight(1f))
-                    // Bulk actions only make sense for a multi-channel run; a single auto-match shows just accept / skip.
-                    if (suggestions.size > 1) {
-                        StageButton(stringResource(R.string.content_epg_skip_all), onClick = onSkipAll, height = 56.mpx, textSize = 19)
-                        StageButton(stringResource(R.string.content_epg_accept_all), onClick = onAcceptAll, height = 56.mpx, textSize = 19, modifier = Modifier.focusRequester(bulkFocus))
-                    }
-                    StageButton(
-                        stringResource(R.string.common_done), onClick = onDone, height = 56.mpx, textSize = 19, tinted = true,
-                        modifier = if (suggestions.size > 1) Modifier else Modifier.focusRequester(bulkFocus),
-                    )
-                }
-            }
-        }
-    }
-}
-
-/** `.rv`: 78 high, radius 18, the whole row drawn FX while its Accept or Skip has focus. */
-@Composable
-private fun GuideReviewRow(
-    s: EpgViewModel.EpgMatchSuggestion,
-    onAccept: () -> Unit,
-    onSkip: () -> Unit,
-    acceptFocus: FocusRequester,
-    bulkFocus: FocusRequester,
-    onFocused: () -> Unit,
-) {
-    var hasFocus by remember { mutableStateOf(false) }
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .height(78.mpx)
-            .onFocusChanged { hasFocus = it.hasFocus; if (it.hasFocus) onFocused() }
-            .then(if (hasFocus) Modifier.stageFocusLook(StageFocus.FX, 18.mpx) else Modifier)
-            .padding(horizontal = 14.mpx),
-        horizontalArrangement = Arrangement.spacedBy(16.mpx),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        LivePlate(s.channel.logoUrl, 70.mpx, 50.mpx)
-        Text(s.channel.name, style = stageText(20, 700), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(300.mpx))
-        Text("→", style = stageText(22, 400), color = StageColors.Dim)
-        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.mpx), verticalAlignment = Alignment.CenterVertically) {
-            Text(s.epgName ?: s.epgChannelId, style = stageText(18, 400), color = stageTone(Color(0xFFD3DCD8), StageColors.Body), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-            Text(
-                stringResource(R.string.common_percent, (s.score * 100).toInt()),
-                style = stageText(15, 800), color = LocalStagePalette.current.chipWarnText, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.background(LocalStagePalette.current.chipWarnFill, RoundedCornerShape(8.mpx))
-.padding(horizontal = 9.mpx, vertical = 4.mpx),
-            )
-        }
-        StageTool(text = stringResource(R.string.content_epg_accept), icon = MyOwnTVIcon.CHECK, onClick = onAccept, modifier = Modifier.focusRequester(acceptFocus))
-        // ▶ from any row's Skip reaches Accept all (Done for a single match): no scrolling past thousands of rows.
-        StageTool(
-            text = stringResource(R.string.content_epg_skip), icon = MyOwnTVIcon.CLOSE, onClick = onSkip,
-            modifier = Modifier.focusProperties { right = bulkFocus },
-        )
-    }
-}
-
-/** A reminder's line: "Starts in 5 min · 20:05 – 21:40 · Sky Cinema Family" (the prompt, and Notify only's message). */
 @Composable
 internal fun reminderEyebrow(reminder: tv.own.owntv.core.database.entity.ReminderEntity): String = programmeEyebrow(
     EpgProgrammeEntity(epgChannelId = "", startMs = reminder.startMs, stopMs = reminder.stopMs, title = reminder.title),

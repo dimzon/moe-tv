@@ -46,12 +46,9 @@ import tv.own.owntv.player.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
@@ -73,35 +70,20 @@ import kotlinx.coroutines.withContext
 import tv.own.owntv.core.customize.SectionCustomizations
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.EpgDao
-import tv.own.owntv.core.epg.EpgAutoMatcher
-import tv.own.owntv.core.epg.GuideCandidate
-import tv.own.owntv.core.epg.GuideCandidates
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.model.MediaType
-import tv.own.owntv.core.network.ConnectivityObserver
 import tv.own.owntv.core.repository.EpgRepository
-import tv.own.owntv.core.repository.SourceRepository
-import tv.own.owntv.core.repository.activeSourceIds
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.settings.GuideWidthShares
 
 sealed interface EpgMessage {
-    data object AddPlaylist : EpgMessage
     data class NoChannelsForQuery(val query: String) : EpgMessage
     data object MismatchedIds : EpgMessage
 }
 
-sealed interface EpgMatchSummary {
-    data object MatchedNoProgrammes : EpgMatchSummary
-    data object AddPlaylist : EpgMatchSummary
-    data object NoData : EpgMatchSummary
-    data class AutoMatched(val applied: Int, val review: Int) : EpgMatchSummary
-    data object AllMatched : EpgMatchSummary
-    data class NoMatch(val channelName: String) : EpgMatchSummary
-}
 
 data class EpgUiState(
     /** All channels with guide data in the window; each row loads its own programmes lazily. */
@@ -121,11 +103,9 @@ data class EpgUiState(
  */
 class EpgViewModel(
     private val settings: SettingsRepository,
-    private val sourceRepository: SourceRepository,
     private val channelDao: ChannelDao,
     private val epgDao: EpgDao,
     private val epgRepository: EpgRepository,
-    private val connectivity: ConnectivityObserver,
     private val customize: CustomizationStore,
     private val favoriteDao: tv.own.owntv.core.database.dao.FavoriteDao,
     private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
@@ -142,12 +122,6 @@ class EpgViewModel(
     private val _categoryQuery = kotlinx.coroutines.flow.MutableStateFlow("")
     val categoryQuery: kotlinx.coroutines.flow.StateFlow<String> = _categoryQuery
     fun setCategoryQuery(query: String) { _categoryQuery.value = query }
-
-    /** The one candidate set the picker and both auto-match paths read — see [GuideCandidates]. */
-    private val guideCandidates = GuideCandidates(channelDao, epgDao)
-
-    /** The match scan itself — core's, so the television, the phone and the single-channel run agree. */
-    private val autoMatcher = EpgAutoMatcher(channelDao, guideCandidates)
 
     /** Every windowed guide read this screen makes. The caches around it stay here — what to keep
      *  depends on how the grid scrolls, which is the screen's business, not core's. */
@@ -447,9 +421,6 @@ class EpgViewModel(
         }
     }
 
-    /** The channel's current manual EPG match (or null if auto-matched). */
-    fun currentEpgMatch(channel: ChannelEntity): String? = custom.value.epgMatchResolver.epgIdFor(channel)
-
     /** The channel's own guide shift in minutes, or null when it follows the global offset. */
     fun currentEpgShift(channel: ChannelEntity): Int? =
         tv.own.owntv.core.epg.EpgShift.overrideFor(custom.value, channel)
@@ -472,201 +443,8 @@ class EpgViewModel(
         }
     }
 
-    /**
-     * Save a whole run's matches in ONE write. Each [CustomizationStore.setEpgMatch] re-reads, rewrites
-     * and re-saves the entire customisation, so a lineup of a few thousand matches made that
-     * many writes of an ever-growing list — minutes on a television, with the Guide still saying
-     * "Matching…" until the last one landed. Same ids, same normalisation, one write.
-     */
-    private suspend fun saveEpgMatches(matches: Collection<Pair<String, String>>) {
-        val clean = matches.mapNotNull { (key, epgId) ->
-            epgId.trim().lowercase().takeIf { it.isNotEmpty() }?.let { key to it }
-        }.toMap()
-        if (clean.isEmpty()) return
-        customize.update(MediaType.LIVE) { it.copy(epgMatches = it.epgMatches + clean) }
-    }
-
-    /** Set/clear a channel's manual EPG match (null clears → auto-match), then reload the guide. */
-    fun setEpgMatch(channel: ChannelEntity, epgChannelId: String?) {
-        viewModelScope.launch {
-            customize.setEpgMatch(MediaType.LIVE, CustomizeKeys.channel(channel), epgChannelId)
-            if (epgChannelId != null) fillMatchedInBackground(listOf(epgChannelId)) else load()
-        }
-    }
-
-    /** Fill in matched channels' programmes from the stored guide (no network) and refresh the guide — in the
-     *  BACKGROUND so the match action/spinner returns instantly and doesn't wait on a full cache re-parse. */
-    private fun fillMatchedInBackground(epgIds: Collection<String>) {
-        viewModelScope.launch {
-            val ids = epgIds.map { it.trim().lowercase() }.filterTo(HashSet()) { it.isNotBlank() }
-            if (ids.isEmpty()) return@launch
-            // The bulk sync already stores every catalogue channel's programmes; a manual match only
-            // repoints a channel at an id that is (almost always) already stored — re-read, no network.
-            load()
-            // Single-channel match (manual pick / review Accept / single auto-match): if the feed has no
-            // current-or-upcoming programmes for it, its guide row will be empty even though the match
-            // succeeded — say so, instead of leaving the user staring at a blank row (the provider simply
-            // hasn't published a current schedule for that channel).
-            if (ids.size == 1) {
-                val upcoming = runCatching { epgDao.countUpcomingForChannel(ids.first(), System.currentTimeMillis()) }.getOrDefault(1)
-                if (upcoming == 0) {
-                    _matchSummary.value = EpgMatchSummary.MatchedNoProgrammes
-                }
-            }
-        }
-    }
-
-
     private suspend fun refreshAllEpgFromNetwork() {
         runCatching { epgRepository.refresh() }
-    }
-
-    // ---- Smart EPG matching: scan channels with no working guide and match them by name ----
-
-    /** A proposed EPG match for a channel that didn't auto-resolve confidently enough to apply. */
-    data class EpgMatchSuggestion(
-        val channel: ChannelEntity,
-        val epgChannelId: String,
-        val epgName: String?,
-        val score: Double,
-    )
-
-    private val _matching = MutableStateFlow(false)
-    val matching: StateFlow<Boolean> = _matching.asStateFlow()
-
-    /** Low-confidence suggestions awaiting the user's accept/skip (high-confidence ones auto-apply). */
-    private val _review = MutableStateFlow<List<EpgMatchSuggestion>>(emptyList())
-    val review: StateFlow<List<EpgMatchSuggestion>> = _review.asStateFlow()
-
-    /** Guide ids the current run applied on its own, before the review window opened. */
-    private var runApplied: List<String> = emptyList()
-
-    private suspend fun openReview(suggestions: List<EpgMatchSuggestion>) {
-        _review.value = suggestions
-    }
-
-    /** One-line outcome of the last auto-match run, shown as a transient banner. */
-    private val _matchSummary = MutableStateFlow<EpgMatchSummary?>(null)
-    val matchSummary: StateFlow<EpgMatchSummary?> = _matchSummary.asStateFlow()
-
-    /**
-     * The outcome of a bulk run, once, as it finishes — for the shell to say when the Guide is not on
-     * screen. A run outlives leaving the Guide, and its review waits in [review] for the Guide to come
-     * back, but nothing said so: someone who pressed Auto-match and went to watch a channel never knew
-     * there was a review waiting, or that the run had finished at all.
-     */
-    private val _matchFinished = MutableSharedFlow<EpgMatchSummary>(extraBufferCapacity = 1)
-    val matchFinished: SharedFlow<EpgMatchSummary> = _matchFinished.asSharedFlow()
-
-    private fun finishRun(summary: EpgMatchSummary) {
-        _matchSummary.value = summary
-        _matchFinished.tryEmit(summary)
-    }
-
-    /**
-     * Scan every channel that has no working guide (no manual match and its tvg-id isn't in the EPG
-     * feed), match it by name, auto-apply high-confidence hits and queue the rest for review.
-     */
-    fun autoMatchEpg() {
-        if (_matching.value) return
-        viewModelScope.launch {
-            _matching.value = true
-            try {
-                // The playlist(s) the guide is showing (the top-right choice): with a 400-channel
-                // playlist picked, scoring the whole catalogue would waste the run.
-                val playlistIds = activeSourceIds(MediaType.LIVE)
-                if (playlistIds.isEmpty()) { _matchSummary.value = EpgMatchSummary.AddPlaylist; return@launch }
-                val cust = customize.observe(MediaType.LIVE).first()
-
-                val outcome = autoMatcher.run(cust, playlistIds)
-                if (!outcome.hadCandidates) { finishRun(EpgMatchSummary.NoData); return@launch }
-
-                // Persist the confident hits — in one write, see [saveEpgMatches].
-                saveEpgMatches(outcome.applied)
-
-                runApplied = outcome.applied.map { it.second }
-                openReview(outcome.review.map {
-                    EpgMatchSuggestion(it.channel, it.epgChannelId, it.displayName, it.score)
-                })
-                val applied = outcome.applied.size
-                finishRun(when {
-                    applied == 0 && outcome.review.isEmpty() -> EpgMatchSummary.AllMatched
-                    // Everything found pointed at a guide channel with nothing scheduled. Saying
-                    // "matched" here would be a success message for a row that stays blank.
-                    applied == 0 && outcome.withheldForNoProgrammes == outcome.review.size ->
-                        EpgMatchSummary.MatchedNoProgrammes
-                    else -> EpgMatchSummary.AutoMatched(applied, outcome.review.size)
-                })
-                if (applied > 0) fillMatchedInBackground(outcome.applied.map { it.second }) // off the spinner
-            } finally {
-                _matching.value = false
-            }
-        }
-    }
-
-    /**
-     * Auto-match a SINGLE channel by name (Guide long-press → "Auto-match"). Surfaces the best candidate
-     * in the same review dialog (one entry, so no accept/skip-all) for the user to accept or skip, rather
-     * than applying silently — or reports none found.
-     */
-    fun autoMatchOne(channel: ChannelEntity) {
-        if (_matching.value) return
-        viewModelScope.launch {
-            _matching.value = true
-            try {
-                val best = autoMatcher.one(channel)
-                if (best == null) {
-                    _matchSummary.value = EpgMatchSummary.NoMatch(channel.name)
-                } else {
-                    // Show it in the review dialog (accept/skip) instead of applying silently. acceptSuggestion
-                    // persists the match + fills the guide; dismissSuggestion just drops it.
-                    runApplied = emptyList()
-                    openReview(listOf(EpgMatchSuggestion(channel, best.epgChannelId, best.displayName, best.score)))
-                    // Say so up front when the winner's guide channel is empty, instead of letting the
-                    // user accept it and find a blank row.
-                    if (!best.hasProgrammes) _matchSummary.value = EpgMatchSummary.MatchedNoProgrammes
-                }
-            } finally {
-                _matching.value = false
-            }
-        }
-    }
-
-    /** Accept a reviewed suggestion → persist the match and drop it from the review list. */
-    fun acceptSuggestion(s: EpgMatchSuggestion) {
-        viewModelScope.launch {
-            customize.setEpgMatch(MediaType.LIVE, CustomizeKeys.channel(s.channel), s.epgChannelId)
-            _review.value = _review.value.filterNot { it.channel.id == s.channel.id }
-            fillMatchedInBackground(listOf(s.epgChannelId))
-        }
-    }
-
-    /** Skip a suggestion without matching it (just remove it from the review list). */
-    fun dismissSuggestion(s: EpgMatchSuggestion) {
-        _review.value = _review.value.filterNot { it.channel.id == s.channel.id }
-    }
-
-    /** Accept every remaining suggestion at once, then clear the review list and reload the guide. */
-    fun acceptAllSuggestions() {
-        val all = _review.value
-        if (all.isEmpty()) return
-        viewModelScope.launch {
-            saveEpgMatches(all.map { CustomizeKeys.channel(it.channel) to it.epgChannelId })
-            _review.value = emptyList()
-            fillMatchedInBackground(all.map { it.epgChannelId })
-        }
-    }
-
-    /** The one-line outcome beside Auto-match EPG goes after a while. */
-    fun clearSummary() {
-        _matchSummary.value = null
-    }
-
-    /** Close the review list / clear the summary banner. */
-    fun clearReview() {
-        // Closing the window still honours the tick for the matches the run applied on its own.
-        _review.value = emptyList()
-        _matchSummary.value = null
     }
 
     // A guide-local `zap(delta)` used to live here, stepping the guide list and calling the deleted
@@ -757,7 +535,7 @@ class EpgViewModel(
                     memberIds != null || tv.own.owntv.core.database.ChannelMembership.visible(it, hiddenCatIds)
                 }
                 .map { ch -> cust.itemNames[CustomizeKeys.channel(ch)]?.let { ch.copy(name = it) } ?: ch }
-            val matched = applyEpgMatches(auto, cust, q)
+            val matched = auto
             // The Order menu: Provider (also the old stored LIVE_TV value), A–Z,
             // Favourites first (and the legacy CATCHUP value, no longer offered in the menu).
             // The last two only float those channels to the top.
@@ -836,56 +614,6 @@ class EpgViewModel(
         // the full window in one query, so the history is simply there when the row is drawn.
     }
 
-    /** Apply per-channel manual EPG overrides to the auto-matched guide list. */
-    private suspend fun applyEpgMatches(
-        auto: List<ChannelEntity>,
-        cust: tv.own.owntv.core.customize.SectionCustomizations,
-        query: String,
-    ): List<ChannelEntity> {
-        val matches = cust.epgMatches
-        if (matches.isEmpty()) return auto
-        val resolver = cust.epgMatchResolver
-        val byKey = auto.associateBy { CustomizeKeys.channel(it) }
-        // Override the epg id of channels already in the list. Through the resolver, so a match made
-        // before the playlist was deleted and re-added still applies under the channel's new key.
-        // The manual match rides the customize key (the resolver reads it); nothing to copy onto the row.
-        val overridden = auto.toMutableList()
-        // Add matched channels that didn't auto-appear. Resolve them with ONE bulk query (all channels keyed
-        // by their customize key) instead of two DB lookups per match — the old per-match resolveChannel was a
-        // query-storm that dominated guide load time once a lot of channels had been smart-matched.
-        val missingKeys = matches.keys.filter { it !in cust.hiddenItems }
-        if (missingKeys.isNotEmpty()) {
-            // Resolve only the matched channels (their key's tail is the remoteId) in one
-            // query, instead of loading the entire channel table — that table-load was seconds on big lists.
-            // In batches: SQLite rejects a statement with more than 999 bound parameters on older
-            // Android, and someone who has matched a thousand channels by hand would otherwise crash
-            // the app on every guide load. Still one query per batch, not the two per match this
-            // replaced.
-            //
-            // Grouped by the key's TAIL rather than the whole key: the stored key carries the source id
-            // the match was made under, which is not the one the channel has after a re-import. Only an
-            // unambiguous tail is used — two playlists carrying one provider id must not pick one.
-            val remoteIds = missingKeys.mapNotNull { CustomizeKeys.tailOf(it).takeIf { r -> r.isNotEmpty() } }.distinct()
-            val resolved = remoteIds.chunked(QUERY_CHUNK)
-                .flatMap { channelDao.findByRemoteIds(it) }
-                .groupBy { it.remoteId }
-            for (key in missingKeys) {
-                val epgId = matches[key] ?: continue
-                val ch = resolved[CustomizeKeys.tailOf(key)]?.singleOrNull() ?: continue
-                if (CustomizeKeys.channel(ch) in byKey) continue // already in the list, already overridden
-                val name = cust.itemNames[key] ?: ch.name
-                if (query.isNotBlank() && !name.contains(query, ignoreCase = true)) continue
-                overridden.add(ch.copy(name = name))
-            }
-        }
-        return overridden
-    }
-
-    /** Guide channels for the manual "Match EPG" picker, ranked so ones resembling [channelName]
-     *  come first. The candidate set is core's and is filtered by no source — see [GuideCandidates]. */
-    suspend fun availableEpgChannels(channelName: String, query: String): List<GuideCandidate> =
-        guideCandidates.forPicker(channelName, query)
-
     companion object {
         // A sync writes the guide in batches, so every batch is reported. This must be longer than
         // the gap between two batch writes, or it coalesces nothing and the grid reloads per batch —
@@ -906,9 +634,5 @@ class EpgViewModel(
         private const val DAY_MS = 24L * 60 * 60 * 1000
         // Generous safety bound only (rows load lazily, so this is about the channel list itself).
         private const val MAX_CHANNELS = 20_000
-        // Cap the candidate set the bulk matcher scans against (keeps the O(channels×candidates) scan bounded).
-        // Bound values sent to a single `IN (...)`. SQLite's parameter ceiling is 999 on older
-        // Android; core chunks its own bulk lookups at the same size.
-        private const val QUERY_CHUNK = 500
     }
 }

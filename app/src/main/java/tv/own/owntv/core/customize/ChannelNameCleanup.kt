@@ -9,9 +9,7 @@ import java.util.concurrent.ConcurrentHashMap
  * The per-playlist "Clean channel names" option ([SourceEntity.cleanChannelNames]).
  *
  * Applied at sync time, so every screen, search and the sort order see the clean name without a
- * per-row lookup. The provider's own name is kept in [ChannelEntity.providerName] whenever the
- * cleanup changed it: guide matching reads that one ([ChannelEntity.matchName]), so a cleaner
- * name never makes the guide worse. Nothing keyed on a channel moves either: the M3U stable key is
+ * per-row lookup. Nothing keyed on a channel moves: the M3U stable key is
  * built from the raw entry name before this runs, and Xtream/Stalker key on the provider's id.
  * Turning the option off re-syncs the raw names, and the changed name re-upserts the row.
  *

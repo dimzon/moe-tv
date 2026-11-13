@@ -135,18 +135,14 @@ class SearchReader(
         if (rows.isEmpty()) return emptyList()
         val byKey = rows.groupBy { it.epgChannelId }
         val keys = byKey.keys.toList()
-        val matchedTails = cust.epgMatches
-            .filterValues { it.trim().lowercase() in byKey }
-            .keys.map { CustomizeKeys.tailOf(it) }.filter { it.isNotEmpty() }.distinct()
-        val candidates = keys.chunked(KEY_CHUNK).flatMap { channelDao.byEpgKeys(it) } +
-            matchedTails.chunked(KEY_CHUNK).flatMap { channelDao.byRemoteIdsOrNames(it) }
+        val candidates = keys.chunked(KEY_CHUNK).flatMap { channelDao.byEpgKeys(it) }
         val globalShift = settings.epgOffsetMinutes.first()
         return candidates
             .distinctBy { it.id }
             .filter { CustomizeKeys.channel(it) !in cust.hiddenItems && tv.own.owntv.core.database.ChannelMembership.visible(it, hiddenCats) }
             .sortedWith(compareBy({ liveSourceIds.indexOf(it.sourceId) }, { it.sortOrder }))
             .flatMap { ch ->
-                val key = epgKeyOf(ch, cust) ?: return@flatMap emptyList()
+                val key = epgKeyOf(ch) ?: return@flatMap emptyList()
                 val shift = EpgShift.minutesFor(cust, ch, globalShift)
                 val named = cust.itemNames[CustomizeKeys.channel(ch)]?.let { ch.copy(name = it) } ?: ch
                 EpgShift.apply(EpgDedupe.collapse(byKey[key].orEmpty()), shift)

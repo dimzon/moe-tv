@@ -177,7 +177,6 @@ fun MyOwnTVShell(
     // One-shot: set when leaving the player so the returning browse screen re-focuses the item you played.
     var restoreFocus by remember { mutableStateOf(false) }
     var searchReturn by remember { mutableStateOf<MainSection?>(null) }
-    val channelVersions = koinInject<tv.own.owntv.core.live.ChannelVersions>()
     // Docked mini-player size (% of screen width) + position, configurable in Settings and from the
     // mini-player's own controls. Read straight from settings so both entry points stay in sync.
     val settingsRepo = koinInject<tv.own.owntv.core.settings.SettingsRepository>()
@@ -1349,11 +1348,6 @@ fun MyOwnTVShell(
                             tv.own.myowntv.features.shell.components.LiveEpgCard(epg = epg)
                         }
                     } else null,
-                    // The channel's other versions, read when the button is pressed; a pick is an
-                    // ordinary tune, the same as picking it in the channel list.
-                    sources = previewChannel?.takeIf { isTunedLive }?.let { ch ->
-                        tv.own.myowntv.player.HudSources(load = { channelVersions.of(ch) }, playingId = ch.id, onPick = liveVm::ensurePlaying)
-                    },
                     modifier = Modifier.fillMaxSize(),
                 )
                 tv.own.myowntv.ui.components.InAppToast(shellToast)
@@ -1467,28 +1461,6 @@ fun MyOwnTVShell(
         ExitDialog(onConfirm = onExitApp, onDismiss = { showExit = false })
     }
 
-    // A Guide auto-match keeps running when the Guide is left, and its review waits there for the
-    // Guide to come back — but finishing off the Guide said nothing at all. Say how it went, here
-    // because this layer is on screen everywhere, the player included. Not on the Guide itself:
-    // there the line beside the button, or the review window, already says it.
-    val epgMatchToast = tv.own.myowntv.ui.components.rememberInAppToast()
-    val shellLiveView by liveVm.liveView.collectAsStateWithLifecycle()
-    val guideOnScreen = playerMode != PlayerMode.FULLSCREEN && multiview == null &&
-        (selectedSection == MainSection.EPG ||
-            (selectedSection == MainSection.LIVE_TV && shellLiveView == tv.own.owntv.core.settings.SettingsRepository.LiveView.GUIDE))
-    val currentGuideOnScreen by rememberUpdatedState(guideOnScreen)
-    var finishedMatch by remember { mutableStateOf<tv.own.myowntv.features.epg.EpgMatchSummary?>(null) }
-    LaunchedEffect(epgVm) {
-        epgVm.matchFinished.collect { if (!currentGuideOnScreen) finishedMatch = it }
-    }
-    finishedMatch?.let { summary ->
-        val text = tv.own.myowntv.features.epg.epgMatchSummaryText(summary)
-        LaunchedEffect(summary) {
-            epgMatchToast.show(text, durationMs = EPG_MATCH_TOAST_MS)
-            finishedMatch = null
-        }
-    }
-    tv.own.myowntv.ui.components.InAppToast(epgMatchToast)
 
     // Automatic update check (GitHub Releases) shortly after launch, once per session: a small
         // top-right status card shows "Checking… / up to date" (auto-hides) or stays with
@@ -1546,7 +1518,6 @@ fun MyOwnTVShell(
 }
 
 /** Long enough to read "Auto-matched 12 channels. 40 channels need review." from the sofa. */
-private const val EPG_MATCH_TOAST_MS = 6_000L
 
 /** The line under a rail item at Size = Extra wide; real data only, so most items can have none. */
 @Composable

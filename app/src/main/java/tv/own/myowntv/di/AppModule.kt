@@ -149,11 +149,9 @@ val appModule = module {
     viewModel {
         EpgViewModel(
             get(), // settings
-            get(), // sourceRepository
             get(), // channelDao
             get(), // epgDao
             get(), // epgRepository
-            get(), // connectivity
             get(), // customize
             get(), // favoriteDao
             get(), // userDataWriter

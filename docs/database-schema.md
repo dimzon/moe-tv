@@ -443,11 +443,9 @@ CREATE TABLE IF NOT EXISTS `playback_quirks` (
 Схема v8 удалила `epg_channels`. При одном источнике guide-id канала — это его hex `remoteId`
 (`ChannelEntity.epgChannelId` — геттер `remoteId`), поэтому отдельный реестр гида только дублировал
 каталог, причём **худшими** именами: сырыми `author.name` до словаря `channel_rename` и до
-дизамбигуации дублей. Теперь:
-
-- имена и логотипы гид берёт из `channels` (`ChannelDao.guideChannelNames`);
-- наличие программ — из `epg_programmes` (`EpgDao.guideProgrammeChannelIds`);
-- обе половины сводит `GuideCandidates` — общий источник для пикера «Match EPG» и авто-матча.
+дизамбигуации дублей. Отдельной таблицы имён гида и ручного/авто-матчинга канала к гиду больше нет:
+читать гид можно только по `remoteId` самого канала. Имена/логотипы для списков берутся из
+`channels`, наличие программ — из `epg_programmes`.
 
 FK нет ни у одной EPG-таблицы.
 
@@ -497,7 +495,8 @@ CREATE INDEX IF NOT EXISTS `index_epg_programmes_startMs_stopMs`
 для горизонта «сколько дней телепрограммы хранить»; в текущем коде вызов не подключён (настройка
 пока только сужает окно отображения в `EpgViewModel`).
 
-Привязка «канал → epgChannelId» **в БД не хранится** — это `epgMatches` в DataStore (см. §8).
+Привязки «канал → epgChannelId» **не существует** ни в БД, ни в DataStore: гид читается по
+`remoteId` канала.
 
 ---
 
@@ -534,7 +533,6 @@ CREATE INDEX IF NOT EXISTS `index_epg_programmes_startMs_stopMs`
 |---|---|---|
 | Скрытые/переименованные/переупорядоченные категории и элементы, замки категорий | JSON `cust_LIVE` (`SectionCustomizations`) | переживает пересинк по stable-keys |
 | Определения пользовательских категорий (имя, порядок) | JSON в том же `cust_*` | — |
-| `epgMatches` — ручные/авто-привязки канал → `epgChannelId` | map stable-key → epg id + `EpgMatchResolver` (3 уровня: точный ключ → tail по любому источнику → нормализованное имя) | бэкап уже экспортирует map; перенос в Room отвергнут |
 | Параметры единственного источника: пре-буфер, задержка эфира, «give up after», чистка имён | глобальные ключи `live_preroll_secs`, `live_latency_*`, `live_tune_timeout_secs`, `channel_cleanup_*` | это пользовательские настройки, а не данные каталога |
 | `lastSyncAt` каталога | `source_last_sync_at` | факт о устройстве; им живут fresh-import и автообновление |
 | Признак «стартовый канал», последний канал, настройки | `LAST_LIVE_CHANNEL`, `StartupChannelRef` JSON и пр. | настройки, не данные |

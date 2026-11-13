@@ -72,16 +72,6 @@ class PlayerControlsTest {
     }
 
     @Test
-    fun `sources follows previous channel, in the media cluster, on both apps`() {
-        // The other-versions list sits right after the channel-history tools.
-        listOf(true, false).forEach { tv ->
-            val media = PlayerControl.clusterFor(tv, ControlCluster.MEDIA)
-            val i = media.indexOf(PlayerControl.PREVIOUS_CHANNEL)
-            assertEquals(PlayerControl.SOURCES, media[i + 1])
-        }
-    }
-
-    @Test
     fun `brightness never reaches a television`() {
         // A television's brightness is the television's; nothing the app does to its own window
         // would change it.
@@ -116,7 +106,6 @@ class PlayerControlsTest {
                 PlayerControl.AUDIO,
                 PlayerControl.FAVOURITE,
                 PlayerControl.PREVIOUS_CHANNEL,
-                PlayerControl.SOURCES,
                 PlayerControl.ASPECT,
                 PlayerControl.QUALITY,
                 PlayerControl.MINI_PLAYER,

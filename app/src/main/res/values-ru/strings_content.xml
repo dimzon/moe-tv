@@ -123,13 +123,6 @@
     <string name="content_remove_history">Удалить из истории</string>
     <string name="content_no_channels_here">Здесь нет каналов.</string>
     <string name="content_no_channels_found">По запросу «<xliff:g id="query">%1$s</xliff:g>» каналы не найдены</string>
-    <string name="content_match_epg">Сопоставить EPG</string>
-    <string name="content_epg_match_prompt">Выберите канал программы передач для «<xliff:g id="channel">%1$s</xliff:g>».</string>
-    <string name="content_epg_match_prompt_current">Выберите канал программы передач для «<xliff:g id="channel">%1$s</xliff:g>». Текущее сопоставление: <xliff:g id="match">%2$s</xliff:g></string>
-    <string name="content_search_guide_channels">Поиск каналов программы передач…</string>
-    <string name="content_no_epg_data">Данных EPG пока нет — добавьте источник EPG в настройках.</string>
-    <string name="content_no_guide_channels">Нет каналов программы передач, соответствующих запросу «<xliff:g id="query">%1$s</xliff:g>».</string>
-    <string name="content_clear_match">Удалить сопоставление</string>
     <string name="content_live_time_range_plain"><xliff:g id="start">%1$s</xliff:g> – <xliff:g id="stop">%2$s</xliff:g></string>
     <string name="content_category_favorites">Избранное</string>
     <string name="content_category_history">История</string>
@@ -165,35 +158,9 @@
     <string name="content_downloads_reason_with_code"><xliff:g id="reason">%1$s</xliff:g> (HTTP <xliff:g id="code">%2$d</xliff:g>)</string>
     <string name="content_epg_create_profile">Создайте профиль, чтобы увидеть программу передач.</string>
     <string name="content_epg_filter_hides_all">Текущий фильтр скрывает все каналы. Измените сортировку, чтобы увидеть телепрограмму.</string>
-    <string name="content_epg_add_playlist">Добавьте плейлист, чтобы увидеть программу передач.</string>
     <string name="content_epg_no_channels_query">По запросу «<xliff:g id="query">%1$s</xliff:g>» каналы программы передач не найдены.</string>
     <string name="content_epg_mismatched_ids">Данные программы передач сохранены, но идентификаторы её каналов не совпадают с идентификаторами EPG ваших каналов — возможно, этот источник EPG предназначен для другого набора каналов поставщика.</string>
-    <string name="content_epg_matched_no_programmes">Сопоставление выполнено, но в источнике EPG пока нет текущих телепередач для этого канала программы передач.</string>
-    <string name="content_epg_add_playlist_first">Сначала добавьте плейлист.</string>
-    <string name="content_epg_no_match_data">Пока нет данных EPG для сопоставления.</string>
-    <string name="content_epg_all_matched">Все каналы уже сопоставлены.</string>
-    <string name="content_epg_no_match">Для «<xliff:g id="channel">%1$s</xliff:g>» не найдено соответствие EPG — попробуйте выбрать его вручную.</string>
-    <plurals name="content_epg_auto_matched_applied">
-        <item quantity="one">Автоматически сопоставлен <xliff:g id="applied">%1$d</xliff:g> канал.</item>
-        <item quantity="few">Автоматически сопоставлено <xliff:g id="applied">%1$d</xliff:g> канала.</item>
-        <item quantity="many">Автоматически сопоставлено <xliff:g id="applied">%1$d</xliff:g> каналов.</item>
-        <item quantity="other">Автоматически сопоставлено <xliff:g id="applied">%1$d</xliff:g> каналов.</item>
-    </plurals>
-    <plurals name="content_epg_auto_matched_review">
-        <item quantity="one"><xliff:g id="review">%1$d</xliff:g> канал требует проверки.</item>
-        <item quantity="few"><xliff:g id="review">%1$d</xliff:g> канала требуют проверки.</item>
-        <item quantity="many"><xliff:g id="review">%1$d</xliff:g> каналов требуют проверки.</item>
-        <item quantity="other"><xliff:g id="review">%1$d</xliff:g> каналов требуют проверки.</item>
-    </plurals>
-    <string name="content_epg_auto_matched"><xliff:g id="applied">%1$s</xliff:g> <xliff:g id="review">%2$s</xliff:g></string>
-    <plurals name="content_epg_auto_matched_no_review">
-        <item quantity="one">Автоматически сопоставлен <xliff:g id="applied">%1$d</xliff:g> канал.</item>
-        <item quantity="few">Автоматически сопоставлено <xliff:g id="applied">%1$d</xliff:g> канала.</item>
-        <item quantity="many">Автоматически сопоставлено <xliff:g id="applied">%1$d</xliff:g> каналов.</item>
-        <item quantity="other">Автоматически сопоставлено <xliff:g id="applied">%1$d</xliff:g> каналов.</item>
-    </plurals>
     <string name="content_epg_title">Программа передач</string>
-    <string name="content_epg_matching">Сопоставление…</string>
     <string name="content_epg_empty">EPG не добавлен.</string>
     <string name="content_epg_no_guide">Нет программы передач.</string>
     <string name="content_epg_no_programme">На это время телепередач нет.</string>
@@ -204,18 +171,11 @@
     <string name="content_epg_add_favourite">Добавить в избранное</string>
     <string name="content_epg_remove_favourite">Удалить из избранного</string>
     <string name="content_epg_jump_now">К текущему времени</string>
-    <string name="content_epg_review_description">Эти каналы были сопоставлены по названию, но соответствие оказалось недостаточно точным. Примите правильные варианты, а остальные пропустите.</string>
-    <string name="content_epg_accept">Принять</string>
-    <string name="content_epg_accept_all">Принять все</string>
-    <string name="content_epg_skip">Пропустить</string>
-    <string name="content_epg_skip_all">Пропустить все</string>
-    <string name="content_epg_pick_manually">Выбрать канал EPG вручную</string>
     <string name="content_epg_time_range"><xliff:g id="start">%1$s</xliff:g> – <xliff:g id="end">%2$s</xliff:g></string>
     <string name="content_epg_all">Все</string>
     <string name="content_epg_sort_alpha">А–Я</string>
     <string name="content_epg_sort_provider">Поставщик</string>
     <string name="content_epg_sort_favorites">Избранное</string>
-    <string name="content_epg_match_button">Автосопоставление EPG</string>
     <string name="content_epg_channel_score">→ <xliff:g id="name">%1$s</xliff:g> · <xliff:g id="percent">%2$d</xliff:g>%%</string>
     <string name="content_epg_bits_separator">" · "</string>
     <string name="content_epg_watch_channel">Смотреть канал</string>
@@ -265,18 +225,6 @@
     <string name="content_menu_group_new">Новое</string>
     <string name="content_reminder_set">Напоминание установлено</string>
     <string name="content_live_list_view">Вид списка</string>
-    <plurals name="content_epg_channels_matched">
-        <item quantity="one">Сопоставлен <xliff:g id="count">%1$d</xliff:g> канал</item>
-        <item quantity="few">Сопоставлено <xliff:g id="count">%1$d</xliff:g> канала</item>
-        <item quantity="many">Сопоставлено <xliff:g id="count">%1$d</xliff:g> каналов</item>
-        <item quantity="other">Сопоставлено <xliff:g id="count">%1$d</xliff:g> каналов</item>
-    </plurals>
-    <plurals name="content_epg_review_count">
-        <item quantity="one">Проверить <xliff:g id="count">%1$d</xliff:g> сопоставление</item>
-        <item quantity="few">Проверить <xliff:g id="count">%1$d</xliff:g> сопоставления</item>
-        <item quantity="many">Проверить <xliff:g id="count">%1$d</xliff:g> сопоставлений</item>
-        <item quantity="other">Проверить <xliff:g id="count">%1$d</xliff:g> сопоставлений</item>
-    </plurals>
     <string name="content_key_browse">Обзор</string>
     <string name="content_key_channels">Каналы</string>
     <string name="content_key_programmes">Передачи</string>

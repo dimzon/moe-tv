@@ -133,18 +133,7 @@ private const val TRACK_POLL_TRIES = 20
  *  Counted from the stall, which itself only starts once the buffer (~10s) has run dry. */
 private const val RECONNECT_NOTICE_AFTER_MS = 10_000L
 
-internal enum class HudDialog { NONE, AUDIO, SUBS, ZOOM, QUALITY, VOLUME, SLEEP_TIMER, SOURCES }
-
-/**
- * "Sources": the other versions of the live channel playing ([tv.own.owntv.core.live.ChannelVersions]).
- * [load] is read as the list opens, never on a zap; [playingId] marks the one on screen; [onPick]
- * tunes the pick through Live TV's normal tune.
- */
-class HudSources(
-    val load: suspend () -> List<tv.own.owntv.core.live.ChannelVersion>,
-    val playingId: String,
-    val onPick: (tv.own.owntv.core.database.entity.ChannelEntity) -> Unit,
-)
+internal enum class HudDialog { NONE, AUDIO, SUBS, ZOOM, QUALITY, VOLUME, SLEEP_TIMER }
 
 /** What the top-left channel OSD shows for direct tune: the digits being typed, the channel a number
  *  resolved to, or a failure message. All three render as the same card as the channel OSD. */
@@ -199,7 +188,6 @@ fun PlayerHud(
     // When the programme on air ends, read as the sleep timer opens. Null = no "End of programme".
     sleepProgrammeEndMs: (() -> Long?)? = null,
     // Live only: the Sources button and its list. Null hides the button.
-    sources: HudSources? = null,
     modifier: Modifier = Modifier,
 ) {
     // This HUD serves the one live engine: there is no position, duration or playback speed to read —
@@ -617,7 +605,6 @@ fun PlayerHud(
                     player = player,
                     volume = volume, audioCount = audioCount, subCount = subCount, zoomMode = zoomMode,
                     onPreviousChannel = onPreviousChannel,
-                    hasSources = sources != null,
                     onInfo = { showInfo = !showInfo }, infoOn = showInfo,
                     onReport = {
                         val meta = player.currentMeta.value
@@ -789,9 +776,6 @@ fun PlayerHud(
             QualityDialog(heights, pick, onSelect = { player.selectVideoQuality(it); dialog = HudDialog.NONE }, onDismiss = { dialog = HudDialog.NONE })
         }
         HudDialog.VOLUME -> VolumeDialog(player, onDismiss = { dialog = HudDialog.NONE })
-        HudDialog.SOURCES -> sources?.let { s ->
-            SourcesDialog(s, onDismiss = { dialog = HudDialog.NONE })
-        } ?: run { dialog = HudDialog.NONE }
         HudDialog.SLEEP_TIMER -> SleepTimerDialog(
             timer = org.koin.compose.koinInject(),
             programmeEndMs = remember { sleepProgrammeEndMs?.invoke() },

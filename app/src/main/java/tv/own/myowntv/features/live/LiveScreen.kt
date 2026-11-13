@@ -258,7 +258,6 @@ fun LiveScreen(
     var channelPaneFocused by remember { mutableStateOf(false) }
     var railPaneFocused by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf<ChannelEntity?>(null) }
-    var matchingEpg by remember { mutableStateOf<ChannelEntity?>(null) }
     var offsettingEpg by remember { mutableStateOf<ChannelEntity?>(null) }
     var contextChannel by remember { mutableStateOf<ChannelEntity?>(null) } // long-press quick menu
     // Multiview: whether the menu offers it at all, how many tiles the grid has, and the confirmation
@@ -352,9 +351,9 @@ fun LiveScreen(
         if (opened) { contextMenuOpen = true; return@LaunchedEffect }
         if (!contextMenuOpen) return@LaunchedEffect
         contextMenuOpen = false
-        // A follow-up dialog (rename / match EPG / move) grabs focus itself — only restore
+        // A follow-up dialog (rename / EPG offset / move) grabs focus itself — only restore
         // for plain closes (Cancel, Favourite, Hide, Close). Those dialogs restore on their own close.
-        if (renaming != null || matchingEpg != null || offsettingEpg != null || enteringMoveMode ||
+        if (renaming != null || offsettingEpg != null || enteringMoveMode ||
             moveItem != null || creatingCategory
         ) return@LaunchedEffect
         restoreToContextRow()
@@ -390,23 +389,6 @@ fun LiveScreen(
         if (!reorderWasOpen) return@LaunchedEffect
         reorderWasOpen = false
         restoreToContextRow()
-    }
-    // The Match EPG dialog grabbed focus while open — when it closes (pick/clear/dismiss), put focus
-    // back on the channel it was opened for instead of letting it fall to the nav panel.
-    var matchEpgWasOpen by remember { mutableStateOf(false) }
-    LaunchedEffect(matchingEpg) {
-        if (matchingEpg != null) { matchEpgWasOpen = true; return@LaunchedEffect }
-        if (!matchEpgWasOpen) return@LaunchedEffect
-        matchEpgWasOpen = false
-        restoreToContextRow()
-        // Picking a match rewrites customizations, which recreates the pager on its own schedule —
-        // the rebuilt rows land a moment later and yank focus off the row we just restored, and the
-        // exact timing varies with list size. Re-assert the target row briefly instead of racing a
-        // single load-state transition.
-        repeat(5) {
-            delay(200)
-            restoreToContextRow()
-        }
     }
     // Same for the EPG-offset dialog: it owns focus while open, so hand it back to the channel row.
     var epgOffsetWasOpen by remember { mutableStateOf(false) }
@@ -954,17 +936,6 @@ fun LiveScreen(
         )
     }
 
-    matchingEpg?.let { ch ->
-        EpgMatchDialog(
-            channelName = ch.name,
-            currentMatch = vm.currentEpgMatch(ch),
-            loadChannels = { q -> vm.availableEpgChannels(ch.name, q) },
-            onPick = { epgId -> vm.setEpgMatch(ch, epgId); matchingEpg = null },
-            onClear = { vm.setEpgMatch(ch, null); matchingEpg = null },
-            onDismiss = { matchingEpg = null },
-        )
-    }
-
     offsettingEpg?.let { ch ->
         EpgOffsetDialog(
             channelName = ch.name,
@@ -982,14 +953,12 @@ fun LiveScreen(
             title = ch.name,
             subtitle = listOfNotNull(headerLabel, vm.sourceNameOf(ch.sourceId)).joinToString(" · "),
             isFavorite = favoriteIds.contains(ch.id),
-            epgMatchManual = vm.currentEpgMatch(ch) != null,
             epgShiftMinutes = vm.currentEpgShift(ch),
             canMove = selectedKey is LiveKey.Folder || selectedKey is LiveKey.Custom || selectedKey == LiveKey.Favorites,
             isHistory = selectedKey == LiveKey.History,
             onToggleFavorite = { vm.toggleFavorite(ch); contextChannel = null },
             onRename = { renaming = ch; contextChannel = null },
             onHide = { vm.hideChannel(ch); contextChannel = null },
-            onMatchEpg = { matchingEpg = ch; contextChannel = null },
             onEpgOffset = { offsettingEpg = ch; contextChannel = null },
             onDetails = { programmeDetails = ch; contextChannel = null },
             onPlayExternal = { vm.playExternal(ch); contextChannel = null },
@@ -1107,8 +1076,8 @@ fun LiveScreen(
 /**
  * ☰ Channel options: the Stage options menu, 540 wide over the stage, above the scrim. Header
  * = the logo plate, "256 · Sky Cinema Premieren" and "category · playlist"; the actions in the groups
- * WATCH · CHANNEL · GUIDE DATA · ORGANISE with their values (Match EPG "Auto",
- * EPG time offset "Global"). The order and visibility are the user's (Settings › Long-press menus ›
+ * WATCH · CHANNEL · GUIDE DATA · ORGANISE with their values (EPG time offset "Global"). The order
+ * and visibility are the user's (Settings › Long-press menus ›
  * Live TV); in the shipped order a group label is drawn wherever the group changes, in the user's own
  * order there are none.
  */
@@ -1120,12 +1089,10 @@ private fun ChannelContextMenu(
     isFavorite: Boolean,
     canMove: Boolean,
     isHistory: Boolean,
-    epgMatchManual: Boolean,
     epgShiftMinutes: Int?,
     onToggleFavorite: () -> Unit,
     onRename: () -> Unit,
     onHide: () -> Unit,
-    onMatchEpg: () -> Unit,
     onEpgOffset: () -> Unit,
     onPlayExternal: () -> Unit,
     // Null unless Multiview is switched on: keep this channel for the grid.
@@ -1207,90 +1174,6 @@ private fun ChannelContextMenu(
                         onClick = action.onClick,
                         modifier = if (index == 0) Modifier.focusRequester(focus) else Modifier,
                     )
-                }
-            }
-        }
-    }
-}
-
-/** Manual EPG matching: pick which guide channel this channel uses (search across all EPG feeds).
- *  Shared with the Guide screen (long-press a channel → Match EPG). */
-@Composable
-internal fun EpgMatchDialog(
-    channelName: String,
-    currentMatch: String?,
-    loadChannels: suspend (String) -> List<tv.own.owntv.core.epg.GuideCandidate>,
-    onPick: (String) -> Unit,
-    onClear: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var query by remember { mutableStateOf("") }
-    val results by androidx.compose.runtime.produceState<List<tv.own.owntv.core.epg.GuideCandidate>?>(initialValue = null, query) {
-        kotlinx.coroutines.delay(250)
-        value = runCatching { loadChannels(query) }.getOrDefault(emptyList())
-    }
-    androidx.activity.compose.BackHandler { onDismiss() }
-
-    // Pull focus into the dialog once the list first arrives (first result, else the search bar).
-    // One-shot, so later search-driven reloads don't steal focus from the field while typing.
-    val firstItemFocus = remember { FocusRequester() }
-    val searchFocus = remember { FocusRequester() }
-    var didInitialFocus by remember { mutableStateOf(false) }
-    LaunchedEffect(results) {
-        if (didInitialFocus || results == null) return@LaunchedEffect
-        didInitialFocus = true
-        kotlinx.coroutines.delay(60)
-        if (results!!.isNotEmpty()) runCatching { firstItemFocus.requestFocus() }
-        else runCatching { searchFocus.requestFocus() }
-    }
-
-    // The Stage picker: a menu panel over the scrim, focus trapped inside, the list capped so Close stays reachable.
-    tv.own.myowntv.ui.components.MyOwnTVPopup(onDismissRequest = onDismiss, stageLayout = true) {
-        androidx.compose.foundation.layout.Box(
-            Modifier.fillMaxSize().background(tv.own.myowntv.ui.theme.StageColors.Scrim),
-            contentAlignment = Alignment.Center,
-        ) {
-            tv.own.myowntv.ui.stage.StageMenu(Modifier.width(640.mpx).trapAllFocusExit().focusGroup()) {
-                tv.own.myowntv.ui.stage.StageMenuHeader(
-                    title = stringResource(R.string.content_match_epg),
-                    subtitle = if (currentMatch != null) {
-                        stringResource(R.string.content_epg_match_prompt_current, channelName, currentMatch)
-                    } else {
-                        stringResource(R.string.content_epg_match_prompt, channelName)
-                    },
-                )
-                tv.own.myowntv.ui.stage.StageSearchField(
-                    query = query, onQueryChange = { query = it },
-                    placeholder = stringResource(R.string.content_search_guide_channels).trimEnd('…'),
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.mpx).focusRequester(searchFocus),
-                )
-                Spacer(Modifier.height(12.mpx))
-                val list = results
-                when {
-                    list == null -> androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth().height(120.mpx), contentAlignment = Alignment.Center) { OwnTVSpinner(sizeDp = 24) }
-                    list.isEmpty() -> Text(
-                        if (query.isBlank()) stringResource(R.string.content_no_epg_data) else stringResource(R.string.content_no_guide_channels, query),
-                        style = tv.own.myowntv.ui.theme.stageText(18, 500), color = tv.own.myowntv.ui.theme.StageColors.Muted,
-                        modifier = Modifier.padding(horizontal = 14.mpx, vertical = 12.mpx),
-                    )
-                    else -> LazyColumn(Modifier.fillMaxWidth().height(400.mpx)) {
-                        items(list, key = { it.epgChannelId }) { epg ->
-                            tv.own.myowntv.ui.stage.StageMenuItem(
-                                text = epg.displayName ?: epg.epgChannelId,
-                                value = epg.epgChannelId.takeIf { epg.displayName != null },
-                                checked = epg.epgChannelId == currentMatch,
-                                onClick = { onPick(epg.epgChannelId) },
-                                modifier = if (epg == list.first()) Modifier.focusRequester(firstItemFocus) else Modifier,
-                            )
-                        }
-                    }
-                }
-                Row(
-                    Modifier.fillMaxWidth().padding(top = 14.mpx),
-                    horizontalArrangement = Arrangement.spacedBy(12.mpx, Alignment.End),
-                ) {
-                    if (currentMatch != null) tv.own.myowntv.ui.stage.StageButton(stringResource(R.string.content_clear_match), onClick = onClear, height = 56.mpx, textSize = 19)
-                    tv.own.myowntv.ui.stage.StageButton(stringResource(R.string.content_close), onClick = onDismiss, height = 56.mpx, textSize = 19, tinted = true)
                 }
             }
         }

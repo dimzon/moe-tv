@@ -18,7 +18,6 @@ internal object CustomizationJson {
                 // An older "catOrder" list held every category of the rail, so nothing could follow the
                 // sort chip; it is dropped and only moves made from now on keep a position.
                 categoryPositions = o.optJSONObject("catPos").toIntMap(),
-                epgMatches = o.optJSONObject("epgMatch").toStringMap(),
                 epgShifts = o.optJSONObject("epgShift").toStringMap(),
                 customCategories = o.optJSONArray("customCats").toCustomCategories(),
                 movedFromOrigin = o.optJSONObject("movedFrom").toStringMap(),
@@ -33,7 +32,6 @@ internal object CustomizationJson {
         put("catNames", JSONObject(c.categoryNames as Map<*, *>))
         put("itemNames", JSONObject(c.itemNames as Map<*, *>))
         put("catPos", JSONObject(c.categoryPositions as Map<*, *>))
-        put("epgMatch", JSONObject(c.epgMatches as Map<*, *>))
         put("epgShift", JSONObject(c.epgShifts as Map<*, *>))
         put("movedFrom", JSONObject(c.movedFromOrigin as Map<*, *>))
         put("lockedCats", JSONArray(c.lockedCategories.toList()))

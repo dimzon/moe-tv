@@ -58,7 +58,7 @@ class LiveEpgReader(private val epgDao: EpgDao) {
             cache[ch.id]?.takeIf { now - it.at < CACHE_TTL_MS }?.let { return@withContext it.data }
 
             // The bulk guide via the effective EPG id (manual match overrides the channel's own id).
-            val epgKey = (cust.epgMatchResolver.epgIdFor(ch) ?: ch.epgChannelId)?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
+            val epgKey = ch.epgChannelId.trim().lowercase().takeIf { it.isNotEmpty() }
             // Guide shift (global or per-channel): the stored rows keep the feed's own clock, so we look
             // up the SHIFTED "now" and move what comes back — display and catch-up then agree.
             val shift = EpgShift.minutesFor(cust, ch, globalShiftMinutes)
@@ -115,8 +115,7 @@ class LiveEpgReader(private val epgDao: EpgDao) {
         // Shifted channels look up a different instant, so the batch is grouped by shift — with no
         // offsets configured (the normal case) that's still exactly one query group.
         val channelKeys = channels.mapNotNull { ch ->
-            val key = (cust.epgMatchResolver.epgIdFor(ch) ?: ch.epgChannelId)
-                ?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
+            val key = ch.epgChannelId.trim().lowercase().takeIf { it.isNotEmpty() }
             if (key != null) Triple(ch.id, key, EpgShift.minutesFor(cust, ch, globalShiftMinutes)) else null
         }
         if (channelKeys.isEmpty()) return@withContext emptyMap()
@@ -182,8 +181,8 @@ class LiveEpgReader(private val epgDao: EpgDao) {
         cust: SectionCustomizations,
         globalShiftMinutes: Int,
     ): EpgNowNext? = withContext(Dispatchers.IO) {
-        val epgKey = (cust.epgMatchResolver.epgIdFor(ch) ?: ch.epgChannelId)
-            ?.trim()?.lowercase()?.takeIf { it.isNotEmpty() } ?: return@withContext null
+        val epgKey = ch.epgChannelId.trim().lowercase().takeIf { it.isNotEmpty() }
+            ?: return@withContext null
         // Same shift dance as [nowNext]: stored rows keep the feed's own clock, so look up the shifted
         // instant and move what comes back, or the card would disagree with the archive it describes.
         val shift = EpgShift.minutesFor(cust, ch, globalShiftMinutes)

@@ -213,8 +213,6 @@ val dataModule = module {
             rutube = get(),
         )
     }
-    // channelDao, categoryDao, customize (settings is gone: no active-playlist filter)
-    single { tv.own.owntv.core.live.ChannelVersions(get(), get(), get()) }
     // Who currently holds a stream on which playlist. Multiview tiles and the main playback spend the
     // same provider connections, so both count against one register.
     single { tv.own.owntv.core.live.OpenStreamRegistry() }

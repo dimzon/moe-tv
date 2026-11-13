@@ -367,20 +367,20 @@ private fun BulkRuleBuilderDialog(session: BulkRenameSession) {
     }
 }
 
-/** Review modeled on EpgMatchReviewDialog: left rows, right centred bulk column. */
+/** Rename review: left rows, right centred bulk column. */
 @Composable
 private fun BulkReviewDialog(session: BulkRenameSession) {
     val rows = session.preview.collectAsStateWithLifecycle().value
     BackHandler { session.done() }
     // Focus lands on the first APPLICABLE row (an unchanged first row has no buttons); if nothing
-    // can be applied, it lands on "Apply all" instead. Mirrors EpgMatchReviewDialog's first-row focus.
+    // can be applied, it lands on "Apply all" instead. The first applicable row takes focus.
     val firstChanged = rows.indexOfFirst { !it.unchanged }
     val firstApplyFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) { kotlinx.coroutines.delay(60); runCatching { firstApplyFocus.requestFocus() } }
 
     // Popup(focusable=true) creates a hard focus boundary — applying/declining removes rows from the
     // LazyColumn, but focus stays inside instead of escaping to the screen behind (same pattern and
-    // reason as EpgMatchReviewDialog).
+    // reason: the review owns focus until it closes).
     tv.own.myowntv.ui.stage.StagePopup(
         onDismiss = { session.done() },
         title = stringResource(R.string.settings_bulk_rename_review),

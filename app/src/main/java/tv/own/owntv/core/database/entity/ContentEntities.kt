@@ -74,9 +74,6 @@ data class ChannelEntity(
     val isPaid: Boolean get() = false
 }
 
-/** The name guide matching compares: the provider's own, not the cleaned display name. */
-val ChannelEntity.matchName: String get() = providerName ?: name
-
 /**
  * The stream URL to tune: the channel's own `.ts`, swapped to `.m3u8` when the playlist's "Prefer HLS"
  * is on for an Xtream source.

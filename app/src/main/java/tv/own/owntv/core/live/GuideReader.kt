@@ -75,7 +75,7 @@ class GuideReader(private val epgDao: EpgDao) {
         withText: Boolean = false,
     ): List<EpgProgrammeEntity> = withContext(Dispatchers.IO) {
         val startedAt = SystemClock.elapsedRealtime()
-        val epgKey = epgKeyOf(channel, cust)
+        val epgKey = epgKeyOf(channel)
         val shift = EpgShift.minutesFor(cust, channel, globalShiftMinutes)
         val read: suspend (String, Long, Long) -> List<EpgProgrammeEntity> =
             if (withText) epgDao::programmesForChannel else epgDao::programmeSummariesForChannel
@@ -111,7 +111,7 @@ class GuideReader(private val epgDao: EpgDao) {
     ): Map<String, List<EpgProgrammeEntity>> = withContext(Dispatchers.IO) {
         if (channels.isEmpty()) return@withContext emptyMap()
         val keyed = channels.mapNotNull { ch ->
-            epgKeyOf(ch, cust)?.let { key -> Triple(ch.id, key, EpgShift.minutesFor(cust, ch, globalShiftMinutes)) }
+            epgKeyOf(ch)?.let { key -> Triple(ch.id, key, EpgShift.minutesFor(cust, ch, globalShiftMinutes)) }
         }
         if (keyed.isEmpty()) return@withContext emptyMap()
         val startedAt = SystemClock.elapsedRealtime()
@@ -175,10 +175,9 @@ class GuideReader(private val epgDao: EpgDao) {
 
 }
 
-/** The guide id this channel really reads from: a manual match wins over the channel's own. */
-internal fun epgKeyOf(channel: ChannelEntity, cust: SectionCustomizations): String? =
-    (cust.epgMatchResolver.epgIdFor(channel) ?: channel.epgChannelId)
-        ?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
+/** The guide id this channel reads from: its own hex key, the only guide id there is. */
+internal fun epgKeyOf(channel: ChannelEntity): String? =
+    channel.epgChannelId.trim().lowercase().takeIf { it.isNotEmpty() }
 
 /** What is on at [atMs] in one channel's programmes (sorted by start), and what follows; null when neither. */
 internal fun guideSlotAt(list: List<EpgProgrammeEntity>, atMs: Long): GuideSlot? {

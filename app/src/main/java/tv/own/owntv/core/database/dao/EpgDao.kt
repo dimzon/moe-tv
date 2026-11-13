@@ -109,17 +109,4 @@ interface EpgDao {
     @Query("SELECT COUNT(*) FROM epg_programmes")
     fun countFlow(): Flow<Int>
 
-    /** Current/upcoming programmes for one (normalized) EPG channel id — 0 means the feed has nothing
-     *  scheduled from now on, so a freshly-matched channel would show an empty guide row. */
-    @Query("SELECT COUNT(*) FROM epg_programmes WHERE epgChannelId = :epgChannelId AND stopMs > :now")
-    suspend fun countUpcomingForChannel(epgChannelId: String, now: Long): Int
-
-    // --- Guide candidates: the programmes half ------------------------------------------------
-    //
-    // The other half is the catalogue itself: `ChannelDao.guideChannelNames` supplies every
-    // channel's id and name, and the two are read together by [tv.own.owntv.core.epg.GuideCandidates].
-
-    /** Every guide id that actually has programmes stored — including ids no channel names. */
-    @Query("SELECT DISTINCT epgChannelId FROM epg_programmes LIMIT :limit")
-    suspend fun guideProgrammeChannelIds(limit: Int): List<String>
 }

@@ -204,20 +204,6 @@
     <string name="content_no_channels_here">No channels here.</string>
     <!-- Translators: Empty-state message when a channel search returns no results. "query" is the user\'s search text. -->
     <string name="content_no_channels_found">No channels found for \u201c<xliff:g id="query">%1$s</xliff:g>\u201d</string>
-    <!-- Translators: Opens and labels the channel EPG matching flow. -->
-    <string name="content_match_epg">Match EPG</string>
-    <!-- Translators: Prompt in the EPG match dialog. "channel" is the channel name to match. -->
-    <string name="content_epg_match_prompt">Pick the guide channel for \u201c<xliff:g id="channel">%1$s</xliff:g>\u201d.</string>
-    <!-- Translators: Prompt in the EPG match dialog showing the current match. "match" is the current guide channel name. -->
-    <string name="content_epg_match_prompt_current">Pick the guide channel for \u201c<xliff:g id="channel">%1$s</xliff:g>\u201d. Current: <xliff:g id="match">%2$s</xliff:g></string>
-    <!-- Translators: Search hint text in the EPG channel matcher. -->
-    <string name="content_search_guide_channels">Search guide channels\u2026</string>
-    <!-- Translators: Empty-state message when no EPG source is configured. Directs to Settings. -->
-    <string name="content_no_epg_data">No EPG data yet \u2014 add an EPG source in Settings.</string>
-    <!-- Translators: Empty-state message when the EPG channel search returns no results. "query" is the search text. -->
-    <string name="content_no_guide_channels">No guide channels match \u201c<xliff:g id="query">%1$s</xliff:g>\u201d.</string>
-    <!-- Translators: Button to clear the current EPG match for a channel. -->
-    <string name="content_clear_match">Clear match</string>
     <!-- Translators: Time range display on the EPG timeline. "start" and "stop" are times. The en-dash is a range indicator. -->
     <string name="content_live_time_range_plain"><xliff:g id="start">%1$s</xliff:g> \u2013 <xliff:g id="stop">%2$s</xliff:g></string>
     <!-- Translators: Predefined category name for the Favorites list. -->
@@ -291,43 +277,12 @@
     <string name="content_epg_create_profile">Create a profile to see the guide.</string>
     <!-- Translators: Shown in the TV Guide when every channel is hidden by the chosen sort/filter (e.g. Favourites) rather than because there is no guide data. -->
     <string name="content_epg_filter_hides_all">Every channel is hidden by the current filter. Change the sort to see the guide.</string>
-    <!-- Translators: Empty-state message on the EPG screen when no playlist is configured. Directs the user to add one. -->
-    <string name="content_epg_add_playlist">Add a playlist to see the guide.</string>
     <!-- Translators: Empty-state message when the EPG channel search returns no results. "query" is the search text. -->
     <string name="content_epg_no_channels_query">No guide channels found for \u201c<xliff:g id="query">%1$s</xliff:g>\u201d.</string>
     <!-- Translators: Warning message when EPG data exists but channel IDs don\'t match. -->
     <string name="content_epg_mismatched_ids">Guide data is stored, but its channel ids don\'t match your channels\' EPG ids \u2014 this EPG feed may belong to a different provider lineup.</string>
-    <!-- Translators: Status message when a channel is matched to EPG but no programmes are in the feed yet. -->
-    <string name="content_epg_matched_no_programmes">Matched \u2014 but this guide channel has no current programs in the EPG feed yet.</string>
-    <!-- Translators: Empty-state message when no playlist is configured for EPG matching. -->
-    <string name="content_epg_add_playlist_first">Add a playlist first.</string>
-    <!-- Translators: Empty-state message when no EPG data is available for matching. -->
-    <string name="content_epg_no_match_data">No EPG data to match against yet.</string>
-    <!-- Translators: Status message when all channels are already matched to EPG. -->
-    <string name="content_epg_all_matched">Everything\'s already matched.</string>
-    <!-- Translators: Status message when no EPG match is found for a channel. "channel" is the channel name. Directs the user to pick manually. -->
-    <string name="content_epg_no_match">No EPG match found for \u201c<xliff:g id="channel">%1$s</xliff:g>\u201d \u2014 try picking manually.</string>
-    <!-- Translators: Plural auto-match result for successfully matched channels. "applied" is the count. -->
-    <plurals name="content_epg_auto_matched_applied">
-        <item quantity="one">Auto-matched <xliff:g id="applied">%1$d</xliff:g> channel.</item>
-        <item quantity="other">Auto-matched <xliff:g id="applied">%1$d</xliff:g> channels.</item>
-    </plurals>
-    <!-- Translators: Plural auto-match result for channels needing manual review. "review" is the count. -->
-    <plurals name="content_epg_auto_matched_review">
-        <item quantity="one"><xliff:g id="review">%1$d</xliff:g> channel needs review.</item>
-        <item quantity="other"><xliff:g id="review">%1$d</xliff:g> channels need review.</item>
-    </plurals>
-    <!-- Translators: Composite auto-match display. "applied" and "review" are complete independently pluralized sentences; reorder them without changing their grammar. -->
-    <string name="content_epg_auto_matched"><xliff:g id="applied">%1$s</xliff:g> <xliff:g id="review">%2$s</xliff:g></string>
-    <!-- Translators: Plural auto-match result when all matched channels need no review. "applied" is the count. -->
-    <plurals name="content_epg_auto_matched_no_review">
-        <item quantity="one">Auto-matched <xliff:g id="applied">%1$d</xliff:g> channel.</item>
-        <item quantity="other">Auto-matched <xliff:g id="applied">%1$d</xliff:g> channels.</item>
-    </plurals>
     <!-- Translators: Screen title for the TV Guide / EPG screen. -->
     <string name="content_epg_title">TV Guide</string>
-    <!-- Translators: Loading status shown while EPG matching is in progress. -->
-    <string name="content_epg_matching">Matching\u2026</string>
     <!-- Translators: Empty-state message when no EPG source has been added. -->
     <string name="content_epg_empty">No EPG added.</string>
     <!-- Translators: Status message when no guide data is available for a channel. -->
@@ -348,18 +303,6 @@
     <string name="content_epg_remove_favourite">Remove from favorites</string>
     <!-- Translators: Button in the EPG screen to jump to the current time. -->
     <string name="content_epg_jump_now">Jump to Now</string>
-    <!-- Translators: Description in the EPG review dialog explaining what to do with uncertain matches. -->
-    <string name="content_epg_review_description">These channels were matched by name but weren\'t a confident fit. Accept the right ones; skip the rest.</string>
-    <!-- Translators: Button to accept an EPG match in the review dialog. -->
-    <string name="content_epg_accept">Accept</string>
-    <!-- Translators: Button to accept all EPG matches in the review dialog. -->
-    <string name="content_epg_accept_all">Accept all</string>
-    <!-- Translators: Button to skip an EPG match in the review dialog. -->
-    <string name="content_epg_skip">Skip</string>
-    <!-- Translators: Button to skip all EPG matches in the review dialog. -->
-    <string name="content_epg_skip_all">Skip all</string>
-    <!-- Translators: Button to manually pick an EPG guide channel for a channel. -->
-    <string name="content_epg_pick_manually">Pick EPG manually</string>
     <!-- Translators: Time range display in the EPG programme info. "start" and "end" are times. The en-dash is a range indicator. -->
     <string name="content_epg_time_range"><xliff:g id="start">%1$s</xliff:g> \u2013 <xliff:g id="end">%2$s</xliff:g></string>
     <!-- Translators: Filter option to show all categories in the EPG. -->
@@ -370,8 +313,6 @@
     <string name="content_epg_sort_provider">Provider</string>
     <!-- Translators: Sort option to sort EPG channels by favorites. -->
     <string name="content_epg_sort_favorites">Favorites</string>
-    <!-- Translators: Button to trigger EPG auto-matching. -->
-    <string name="content_epg_match_button">Auto-match EPG</string>
     <!-- Translators: EPG auto-match suggestion row. "name" is the suggested guide channel; "percent" is the match confidence percentage. -->
     <string name="content_epg_channel_score">\u2192 <xliff:g id="name">%1$s</xliff:g> \u00b7 <xliff:g id="percent">%2$d</xliff:g>%%</string>
     <!-- Translators: Visible middle-dot separator between EPG metadata segments. -->
@@ -456,16 +397,6 @@
     <string name="content_reminder_set">Reminder set</string>
     <!-- Translators: Live TV button that switches from the guide grid back to the channel list. -->
     <string name="content_live_list_view">List view</string>
-    <!-- Translators: After Auto-match EPG: how many channels were matched on their own. Shown after "Auto-match EPG ·". -->
-    <plurals name="content_epg_channels_matched">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> channel matched</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> channels matched</item>
-    </plurals>
-    <!-- Translators: Title of the Auto-match EPG review: how many unsure matches wait for Accept or Skip. -->
-    <plurals name="content_epg_review_count">
-        <item quantity="one">Review <xliff:g id="count">%1$d</xliff:g> match</item>
-        <item quantity="other">Review <xliff:g id="count">%1$d</xliff:g> matches</item>
-    </plurals>
     <!-- Translators: Remote-key hint in the TV Guide: OK steps into a channel row to go through its programmes. Short verb. -->
     <string name="content_key_browse">Browse</string>
     <!-- Translators: Remote-key hint in the TV Guide: the key moves between channels. Short noun. -->

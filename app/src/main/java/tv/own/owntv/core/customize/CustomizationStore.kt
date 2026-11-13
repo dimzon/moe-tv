@@ -12,9 +12,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.util.UUID
 import tv.own.owntv.core.database.entity.CategoryEntity
-import tv.own.owntv.core.epg.EpgMatcher
 import tv.own.owntv.core.database.entity.ChannelEntity
-import tv.own.owntv.core.database.entity.matchName
 import tv.own.owntv.core.model.MediaType
 
 private val Context.customizeStore: DataStore<Preferences> by preferencesDataStore(name = "owntv_customizations")
@@ -32,70 +30,6 @@ object CustomizeKeys {
     fun isCustom(key: String): Boolean = key.startsWith(CUSTOM_PREFIX)
     fun category(c: CategoryEntity): String = "${tv.own.owntv.core.database.SingleSource.id}:${c.remoteId ?: c.name}"
     fun channel(ch: ChannelEntity): String = "${ch.sourceId}:${ch.remoteId ?: ch.name}"
-
-    /** The part of an item key after the source id: the provider's own id, or the name as a fallback. */
-    fun tailOf(key: String): String = key.substringAfter(':', "")
-}
-
-/**
- * Finds a channel's manual EPG match even after its key has changed underneath it.
- *
- * Item keys are `"<sourceId>:<remoteId>"`, and `sourceId` is a local row id, not anything the
- * provider knows. Delete a playlist and add it back — after a URL change, after a failed import was
- * cleaned up, after any re-import — and every channel returns with a *new* source id. The matches
- * are all still stored, pointing at keys nothing resolves any more, so every hand-made and
- * auto-applied match silently stops working. It reads exactly like "EPG matching broke".
- *
- * Three tiers, tried in order, and the first is always preferred:
- *
- *  1. the exact key — today's behaviour, unchanged;
- *  2. the same provider id under **any** source, which is what survives a re-added playlist;
- *  3. the same normalised name, for channels whose provider gives them no id at all.
- *
- * Tiers 2 and 3 apply **only when unambiguous**. If two stored matches share a tail or a name but
- * point at different guide channels, neither is used — a wrong guide on a channel is worse than no
- * guide, and the user can always match it again by hand.
- *
- * Deliberately not a schema change. Moving `epgMatches` into a Room table was considered and
- * rejected: the DataStore map is already exported and restored correctly by the backup, and this
- * reaches the same result with none of the migration risk.
- */
-class EpgMatchResolver(private val matches: Map<String, String>) {
-
-    /** Provider id → guide id, for ids that are unambiguous across every source. */
-    private val byTail: Map<String, String> by lazy { unambiguous { CustomizeKeys.tailOf(it) } }
-
-    /** Normalised tail → guide id. Answers for channels keyed by name because they have no id. */
-    private val byName: Map<String, String> by lazy {
-        unambiguous { EpgMatcher.normalizeForEpg(CustomizeKeys.tailOf(it)) }
-    }
-
-    /** The guide id this channel's stored match points at, or null if it has none. */
-    fun epgIdFor(channel: ChannelEntity): String? {
-        if (matches.isEmpty()) return null
-        val key = CustomizeKeys.channel(channel)
-        matches[key]?.let { return it }
-        byTail[CustomizeKeys.tailOf(key)]?.let { return it }
-        return byName[EpgMatcher.normalizeForEpg(channel.matchName)]
-    }
-
-    /** Groups the stored matches by [keyOf], keeping only groups that agree on one guide id. */
-    private inline fun unambiguous(keyOf: (String) -> String): Map<String, String> {
-        val grouped = HashMap<String, String?>(matches.size)
-        for ((key, epgId) in matches) {
-            val group = keyOf(key)
-            if (group.isEmpty()) continue
-            if (group in grouped) {
-                // Seen before: agreeing entries are harmless, disagreeing ones poison the group.
-                if (grouped[group] != epgId) grouped[group] = null
-            } else {
-                grouped[group] = epgId
-            }
-        }
-        val result = HashMap<String, String>(grouped.size)
-        for ((group, epgId) in grouped) if (epgId != null) result[group] = epgId
-        return result
-    }
 }
 
 /**
@@ -121,8 +55,6 @@ data class SectionCustomizations(
     /** Categories moved by hand: key → the position they were put at. They keep it in every sort;
      *  the rest follow the sort chip around them (see [placePinned]). */
     val categoryPositions: Map<String, Int> = emptyMap(),
-    /** Manual EPG match: item key → the EPG channel id to use (overrides the channel's own epg id). */
-    val epgMatches: Map<String, String> = emptyMap(),
     /** Per-channel EPG time shift: item key → minutes to move the guide by (as a string, so it
      *  shares the JSON map helpers). Overrides the global offset; needed when East/West feeds of the
      *  same network share one guide and only one of them is on the guide's clock. */
@@ -146,21 +78,12 @@ data class SectionCustomizations(
     /** Derived, never stored: DB ids of the provider folders among [sealedCategories]. */
     val sealedCategoryIds: Set<Long> = emptySet(),
 ) {
-    /**
-     * The match lookup for this snapshot, built once and reused.
-     *
-     * Lazy and outside the constructor on purpose: it is derived state, so it stays out of `equals`,
-     * `hashCode` and `copy`, and the guide's per-channel reads must not each rebuild it — a lineup of
-     * five thousand channels asks this question five thousand times per load.
-     */
-    val epgMatchResolver: EpgMatchResolver by lazy { EpgMatchResolver(epgMatches) }
-
     /** The name the user gave this item in Customize, else the provider's. */
     fun displayName(ch: ChannelEntity): String = itemNames[CustomizeKeys.channel(ch)] ?: ch.name
 
     val isEmpty: Boolean
         get() = hiddenCategories.isEmpty() && hiddenItems.isEmpty() && categoryNames.isEmpty() &&
-            itemNames.isEmpty() && categoryPositions.isEmpty() && epgMatches.isEmpty() &&
+            itemNames.isEmpty() && categoryPositions.isEmpty() &&
             epgShifts.isEmpty() && customCategories.isEmpty() && movedFromOrigin.isEmpty() &&
             lockedCategories.isEmpty()
 }
@@ -256,13 +179,6 @@ class CustomizationStore(private val context: Context, private val locks: Catego
     suspend fun saveCategoryMove(type: MediaType, onScreen: List<String>, carried: Collection<String>) =
         update(type) {
             it.copy(categoryPositions = mergeCategoryPositions(it.categoryPositions, onScreen, carried.toSet()))
-        }
-
-    /** Manually map an item to an EPG channel id (null/blank clears the override → auto-match). */
-    suspend fun setEpgMatch(type: MediaType, itemKey: String, epgChannelId: String?) =
-        update(type) {
-            val key = epgChannelId?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
-            it.copy(epgMatches = if (key == null) it.epgMatches - itemKey else it.epgMatches + (itemKey to key))
         }
 
     /** Shift this channel's guide by [minutes]; null clears the override → the global EPG offset.

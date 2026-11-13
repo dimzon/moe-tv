@@ -285,9 +285,6 @@ class LiveViewModel(
      *  [LiveEpgReader]. The shift it applies is passed in at each call, so this view model stays the
      *  single place that knows a customization changed. */
 
-    /** The same candidate set the Guide's picker uses — filtered by no source. */
-    private val guideCandidates = tv.own.owntv.core.epg.GuideCandidates(channelDao, epgDao)
-
     /** Bumped when a channel's EPG mapping changes so [nowNext] reloads for the same focused channel. */
     private val epgRefresh = MutableStateFlow(0)
 
@@ -507,17 +504,6 @@ class LiveViewModel(
         }
     }
 
-    /** Manually map a channel to an EPG channel id (null clears the override → auto-match). */
-    fun setEpgMatch(channel: ChannelEntity, epgChannelId: String?) {
-        viewModelScope.launch {
-            customize.setEpgMatch(MediaType.LIVE, CustomizeKeys.channel(channel), epgChannelId)
-            // Drop the channel's stale now/next and re-fetch, so the details pane reflects the new
-            // match immediately instead of after a restart. The bulk sync refills stored rows.
-            epgReader.invalidate(channel.id)
-            epgRefresh.value++
-        }
-    }
-
     /** Hide a category by its rail key (undo via Settings → Customize). */
     fun hideCategory(key: LiveKey) {
         viewModelScope.launch {
@@ -583,9 +569,6 @@ class LiveViewModel(
         _categoryMoveState.value = null
     }
 
-    /** The current manual EPG id for a channel, or null if auto-matched. */
-    fun currentEpgMatch(channel: ChannelEntity): String? = custom.value.epgMatchResolver.epgIdFor(channel)
-
     /** Shift this channel's guide by [minutes] (null → follow the global EPG offset). */
     fun setEpgShift(channel: ChannelEntity, minutes: Int?) {
         viewModelScope.launch {
@@ -607,11 +590,6 @@ class LiveViewModel(
 
     /** The playlist's name, for the channel menu's "category · playlist" line. */
     fun sourceNameOf(sourceId: Long): String? = sourceById[sourceId]?.name
-
-    /** Distinct EPG channels for the "Match EPG" picker (across the playlists + EPG feeds),
-     *  ranked so guide channels resembling [channelName] come first instead of a plain A-Z list. */
-    suspend fun availableEpgChannels(channelName: String, query: String): List<tv.own.owntv.core.epg.GuideCandidate> =
-        guideCandidates.forPicker(channelName, query)
 
     /** List view or Guide view: what Live TV shows, and so what it opens in next time. */
     val liveView: StateFlow<SettingsRepository.LiveView> = settings.liveView

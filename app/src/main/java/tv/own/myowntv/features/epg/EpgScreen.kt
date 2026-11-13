@@ -127,28 +127,8 @@ import tv.own.myowntv.ui.theme.stageText
 
 @Composable
 private fun epgMessageText(message: EpgMessage): String = when (message) {
-    EpgMessage.AddPlaylist -> stringResource(R.string.content_epg_add_playlist)
     is EpgMessage.NoChannelsForQuery -> stringResource(R.string.content_epg_no_channels_query, message.query)
     EpgMessage.MismatchedIds -> stringResource(R.string.content_epg_mismatched_ids)
-}
-
-/** The one line an auto-match outcome reads as — beside the Guide's button, and in the shell's toast off it. */
-@Composable
-internal fun epgMatchSummaryText(summary: EpgMatchSummary): String = when (summary) {
-    EpgMatchSummary.MatchedNoProgrammes -> stringResource(R.string.content_epg_matched_no_programmes)
-    EpgMatchSummary.AddPlaylist -> stringResource(R.string.content_epg_add_playlist_first)
-    EpgMatchSummary.NoData -> stringResource(R.string.content_epg_no_match_data)
-    EpgMatchSummary.AllMatched -> stringResource(R.string.content_epg_all_matched)
-    is EpgMatchSummary.NoMatch -> stringResource(R.string.content_epg_no_match, summary.channelName)
-    is EpgMatchSummary.AutoMatched -> if (summary.review > 0) {
-        stringResource(
-            R.string.content_epg_auto_matched,
-            pluralStringResource(R.plurals.content_epg_auto_matched_applied, summary.applied, summary.applied),
-            pluralStringResource(R.plurals.content_epg_auto_matched_review, summary.review, summary.review),
-        )
-    } else {
-        pluralStringResource(R.plurals.content_epg_auto_matched_no_review, summary.applied, summary.applied)
-    }
 }
 
 /** The programme on at [time] in a row, or null in a stretch with nothing on. */
@@ -244,9 +224,6 @@ fun EpgScreen(
         }
     }
     val query by vm.query.collectAsStateWithLifecycle()
-    val matching by vm.matching.collectAsStateWithLifecycle()
-    val review by vm.review.collectAsStateWithLifecycle()
-    val matchSummary by vm.matchSummary.collectAsStateWithLifecycle()
     val sortGuide by vm.sortGuide.collectAsStateWithLifecycle()
     val categoryFilter by vm.categoryFilter.collectAsStateWithLifecycle()
     val guideWidthShares by vm.guideWidthShares.collectAsStateWithLifecycle()
@@ -409,7 +386,6 @@ fun EpgScreen(
     var menuFor by remember { mutableStateOf<Pair<ChannelEntity, EpgProgrammeEntity>?>(null) }
     var detailsFor by remember { mutableStateOf<Pair<ChannelEntity, EpgProgrammeEntity>?>(null) }
     var channelMenuFor by remember { mutableStateOf<ChannelEntity?>(null) }
-    var matchingChannel by remember { mutableStateOf<ChannelEntity?>(null) }
     var offsetChannel by remember { mutableStateOf<ChannelEntity?>(null) }
     var orderOpen by remember { mutableStateOf(false) }
     var dayOpen by remember { mutableStateOf(false) }
@@ -420,8 +396,8 @@ fun EpgScreen(
     var searchHadFocus by remember { mutableStateOf(false) }
     // Where focus goes back to when an overlay closes: the control or button that opened it.
     var returnTo by remember { mutableStateOf<(() -> Unit)?>(null) }
-    val anyOverlay = menuFor != null || detailsFor != null || channelMenuFor != null || matchingChannel != null ||
-        offsetChannel != null || orderOpen || dayOpen || review.isNotEmpty()
+    val anyOverlay = menuFor != null || detailsFor != null || channelMenuFor != null ||
+        offsetChannel != null || orderOpen || dayOpen
     var hadOverlay by remember { mutableStateOf(false) }
     LaunchedEffect(anyOverlay) {
         if (anyOverlay) { hadOverlay = true; return@LaunchedEffect }
@@ -432,10 +408,6 @@ fun EpgScreen(
     }
     // Leaving the grid (not for one of its own menus) goes back to the row stage.
     LaunchedEffect(gridHasFocus, anyOverlay) { if (!gridHasFocus && !anyOverlay) inCellMode = false }
-    // The one-line outcome beside Auto-match EPG goes after a while (the review, when there is one, says it instead).
-    LaunchedEffect(matchSummary, review.isEmpty()) {
-        if (matchSummary != null && review.isEmpty()) { delay(8_000); vm.clearSummary() }
-    }
 
     val channelsNow = state.channels
     val watch: (ChannelEntity) -> Unit = { ch -> vm.noteChannelTuned(ch); onPlayChannel(ch, channelsNow) }
@@ -447,7 +419,6 @@ fun EpgScreen(
     fun actionsFor(ch: ChannelEntity, p: EpgProgrammeEntity): GuideProgrammeActions = guideProgrammeActions(
         vm, ch, p, liveNow,
         onWatch = { watch(ch) },
-        onPickEpg = { matchingChannel = ch },
         onEpgOffset = { offsetChannel = ch },
     )
 
@@ -587,21 +558,6 @@ fun EpgScreen(
             }
             if (liveMode) StageTool(text = stringResource(R.string.content_live_list_view), icon = MyOwnTVIcon.LIST, onClick = onListView)
             Spacer(Modifier.weight(1f))
-            matchSummary?.takeIf { review.isEmpty() }?.let {
-                Text(
-                    epgMatchSummaryText(it), style = stageText(16, 600), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    // A capped width, not a weight: a second weight split the line and moved Auto-match off the edge.
-                    modifier = Modifier.widthIn(max = 620.mpx), textAlign = TextAlign.End,
-                )
-            }
-            if (matching) {
-                Row(horizontalArrangement = Arrangement.spacedBy(9.mpx), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 16.mpx)) {
-                    OwnTVSpinner(sizeDp = 18)
-                    Text(stringResource(R.string.content_epg_matching), style = stageText(18, 700), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-            } else {
-                StageTool(text = stringResource(R.string.content_epg_match_button), icon = MyOwnTVIcon.SPARKLE, onClick = vm::autoMatchEpg)
-            }
         }
 
         // The grid: ruler at 518, rows from 566.
@@ -613,7 +569,6 @@ fun EpgScreen(
                 state.channels.isEmpty() && state.message == EpgMessage.MismatchedIds -> GuideEmpty(
                     title = stringResource(R.string.content_epg_no_guide),
                     body = epgMessageText(EpgMessage.MismatchedIds),
-                    action = stringResource(R.string.content_epg_match_button), actionIcon = MyOwnTVIcon.SPARKLE, onAction = vm::autoMatchEpg,
                 )
                 state.channels.isEmpty() -> GuideEmpty(title = state.message?.let { epgMessageText(it) } ?: stringResource(R.string.content_epg_no_guide))
                 else -> {
@@ -785,8 +740,6 @@ fun EpgScreen(
             epgOffsetValue = vm.currentEpgShift(ch)?.let { liveEpgShiftLabel(it) } ?: stringResource(R.string.content_epg_offset_global_short),
             onWatch = { watch(ch) },
             onFavorite = { vm.toggleFavoriteChannel(ch) },
-            onAutoMatch = { vm.autoMatchOne(ch) },
-            onPickEpg = { matchingChannel = ch },
             onEpgOffset = { offsetChannel = ch },
             onDismiss = { channelMenuFor = null },
         )
@@ -815,34 +768,7 @@ fun EpgScreen(
             onDismiss = { offsetChannel = null },
         )
     }
-    matchingChannel?.let { channel ->
-        tv.own.myowntv.features.live.EpgMatchDialog(
-            channelName = channel.name,
-            currentMatch = vm.currentEpgMatch(channel),
-            loadChannels = { vm.availableEpgChannels(channel.name, it) },
-            onPick = { vm.setEpgMatch(channel, it); matchingChannel = null },
-            onClear = { vm.setEpgMatch(channel, null); matchingChannel = null },
-            onDismiss = { matchingChannel = null },
-        )
-    }
-    if (review.isNotEmpty()) {
-        val settingsVm: tv.own.myowntv.features.settings.SettingsViewModel = koinViewModel()
-        val chNavEnabled by settingsVm.chNavEnabled.collectAsStateWithLifecycle()
-        val chNavUpSkip by settingsVm.chNavUpSkip.collectAsStateWithLifecycle()
-        val chNavDownSkip by settingsVm.chNavDownSkip.collectAsStateWithLifecycle()
-        GuideReviewPopup(
-            suggestions = review,
-            matchedCount = (matchSummary as? EpgMatchSummary.AutoMatched)?.applied,
-            onAccept = vm::acceptSuggestion,
-            onSkip = vm::dismissSuggestion,
-            onAcceptAll = vm::acceptAllSuggestions,
-            onSkipAll = vm::clearReview,
-            onDone = vm::clearReview,
-            chNavEnabled = chNavEnabled,
-            chNavUpSkip = chNavUpSkip,
-            chNavDownSkip = chNavDownSkip,
-        )
-    }
+
 }
 
 /**

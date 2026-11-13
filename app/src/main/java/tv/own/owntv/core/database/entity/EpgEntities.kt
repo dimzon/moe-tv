@@ -43,9 +43,3 @@ data class EpgProgrammeEntity(
 ) {
     val details: EpgDetails get() = EpgDetails(category, ageRating, subtitle)
 }
-
-/** One catalogue channel as the "Match EPG" picker sees it. */
-data class GuideChannelName(
-    val epgChannelId: String,
-    val displayName: String?,
-)
