@@ -186,7 +186,6 @@
     <string name="content_epg_add_favourite">Føj til favoritter</string>
     <string name="content_epg_remove_favourite">Fjern fra favoritter</string>
     <string name="content_epg_jump_now">Gå til nu</string>
-    <string name="content_epg_include_logos">Medtag guidens logoer</string>
     <string name="content_epg_review_description">Disse kanaler blev matchet efter navn, men matchet var ikke sikkert. Acceptér de rigtige, og spring resten over.</string>
     <string name="content_epg_accept">Acceptér</string>
     <string name="content_epg_accept_all">Acceptér alle</string>

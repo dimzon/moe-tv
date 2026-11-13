@@ -348,7 +348,6 @@
     <string name="settings_group_summary_quick">যে সুইচগুলো আপনি সবচেয়ে বেশি ব্যবহার করেন</string>
     <string name="settings_group_sound_subtitles">সাউন্ড ও সাবটাইটেল</string>
     <string name="settings_group_watching_recording">দেখা ও রেকর্ডিং</string>
-    <string name="settings_search_guide_logos">নির্দেশিকার চ্যানেল লোগো</string>
     <string name="settings_search_keywords_profiles">দর্শক শিশু মোড PIN লক অ্যাকাউন্ট</string>
     <string name="settings_search_keywords_playlists">m3u xtream উৎস সিঙ্ক যোগ অপসারণ</string>
     <string name="settings_search_keywords_epg">xmltv নির্দেশিকা ফিড অনুষ্ঠান</string>
@@ -721,8 +720,6 @@
     <string name="settings_epg_sources_save_sync">সংরক্ষণ করে সিঙ্ক করুন</string>
     <string name="settings_epg_sources_fill_playlist">প্লেলিস্ট থেকে পূরণ করুন</string>
     <string name="settings_epg_sources_none_playlist">আপনার কোনো প্লেলিস্টেই EPG URL নেই।</string>
-    <string name="settings_epg_sources_use_logos">এই নির্দেশিকার চ্যানেল লোগো ব্যবহার করুন</string>
-    <string name="settings_epg_sources_logos_description">আপনার প্লেলিস্টের বদলে এই XMLTV ফিডের লোগো দেখান। এই ফিডে যেসব চ্যানেলের লোগো নেই, সেগুলোতে প্লেলিস্টের লোগোই থাকবে।</string>
     <string name="settings_epg_sources_name">নাম</string>
     <string name="settings_epg_sources_url">XMLTV URL</string>
     <string name="settings_epg_sources_portal_guide">পোর্টাল থেকে গাইড</string>
@@ -1554,7 +1551,6 @@
     <string name="settings_help_playlist_url">আপনার .m3u বা .m3u8 তালিকার ঠিকানা।</string>
     <string name="settings_line_fill_from_playlist">প্লেলিস্টের দেওয়া গাইড ঠিকানা ব্যবহার করুন</string>
     <string name="settings_line_epg_auto_refresh">গাইড হালনাগাদ রাখুন</string>
-    <string name="settings_line_epg_logos">প্লেলিস্টের লোগোর বদলে</string>
     <string name="settings_help_epg_name">গাইড তালিকায় এবং EPG নিজে বাছুন-এ দেখায়।</string>
     <string name="settings_glass_bg_title">গ্লাস ও ব্যাকগ্রাউন্ড</string>
     <string name="settings_line_glass_bg">ব্যাকগ্রাউন্ড, ছবির রূপ, গ্লাস</string>

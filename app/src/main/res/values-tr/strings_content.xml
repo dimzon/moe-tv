@@ -186,7 +186,6 @@
     <string name="content_epg_add_favourite">Favorilere ekle</string>
     <string name="content_epg_remove_favourite">Favorilerden kaldır</string>
     <string name="content_epg_jump_now">Şimdiye git</string>
-    <string name="content_epg_include_logos">Rehber logolarını dahil et</string>
     <string name="content_epg_review_description">Bu kanallar ada göre eşleştirildi ancak eşleşmeler yeterince kesin değil. Doğru olanları kabul edin, kalanları atlayın.</string>
     <string name="content_epg_accept">Kabul et</string>
     <string name="content_epg_accept_all">Tümünü kabul et</string>

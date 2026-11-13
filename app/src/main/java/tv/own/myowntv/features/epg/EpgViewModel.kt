@@ -131,9 +131,6 @@ class EpgViewModel(
     private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
     private val categoryDao: tv.own.owntv.core.database.dao.CategoryDao,
     private val customCategoryDao: tv.own.owntv.core.database.dao.CustomCategoryDao,
-    /** The provider-guide half of a row, for channels whose stored guide stops short — the app-wide
-     *  reader Live TV uses too, so both screens share one cache. */
-    private val liveEpgReader: tv.own.owntv.core.live.LiveEpgReader,
     /** Which guide feeds are syncing right now: the grid waits for them instead of reloading per batch. */
     private val epgActivity: tv.own.owntv.core.sync.EpgActivityTracker,
     /** "Recently watched" in the category list reads the same history Live TV does. */
@@ -147,7 +144,7 @@ class EpgViewModel(
     fun setCategoryQuery(query: String) { _categoryQuery.value = query }
 
     /** The one candidate set the picker and both auto-match paths read — see [GuideCandidates]. */
-    private val guideCandidates = GuideCandidates(epgDao)
+    private val guideCandidates = GuideCandidates(channelDao, epgDao)
 
     /** The match scan itself — core's, so the television, the phone and the single-channel run agree. */
     private val autoMatcher = EpgAutoMatcher(channelDao, guideCandidates)
@@ -155,7 +152,7 @@ class EpgViewModel(
     /** Every windowed guide read this screen makes. The caches around it stay here — what to keep
      *  depends on how the grid scrolls, which is the screen's business, not core's. */
     private val guideReader =
-        tv.own.owntv.core.live.GuideReader(epgDao, liveEpgReader)
+        tv.own.owntv.core.live.GuideReader(epgDao)
 
     // The user's customizations — shared by the Guide picker, guide rows, and manual EPG match.
     // It must be initialized before guideCategories (Kotlin property initializers run top-to-bottom).
@@ -521,7 +518,7 @@ class EpgViewModel(
 
 
     private suspend fun refreshAllEpgFromNetwork() {
-        sourceRepository.observeSources().first().forEach { runCatching { epgRepository.refresh(it) } }
+        runCatching { epgRepository.refresh() }
     }
 
     // ---- Smart EPG matching: scan channels with no working guide and match them by name ----
@@ -540,15 +537,6 @@ class EpgViewModel(
     /** Low-confidence suggestions awaiting the user's accept/skip (high-confidence ones auto-apply). */
     private val _review = MutableStateFlow<List<EpgMatchSuggestion>>(emptyList())
     val review: StateFlow<List<EpgMatchSuggestion>> = _review.asStateFlow()
-
-    /**
-     * The review window's "Include guide logos" tick. Starts ticked when some EPG source already has
-     * "Use this guide's logos" on; while ticked, every match this run makes also turns that option on for
-     * the EPG sources that carry a logo for it.
-     */
-
-    fun setIncludeGuideLogos(include: Boolean) {
-    }
 
     /** Guide ids the current run applied on its own, before the review window opened. */
     private var runApplied: List<String> = emptyList()
@@ -792,7 +780,7 @@ class EpgViewModel(
                 }
             }
         }
-        val stored = epgDao.countForSources()
+        val stored = epgDao.countAll()
 
 
         // Per-row programmes are loaded in ONE batched query and grouped into rowCache here, instead of
@@ -821,14 +809,11 @@ class EpgViewModel(
             _cacheRevision.value++
         }
 
-        // A guide that synced its channels but no programmes: none of its channel ids are the playlist's,
-        // so the sync kept nothing. That is a mismatch Auto-match can fix (its candidates are these same
-        // guide channels), not an empty guide; a first sync still running has nothing stored yet either,
-        // and the sync pill already says so.
-        val unmatchedGuide = stored == 0 && epgActivity.active.value.isEmpty() &&
-            epgDao.guideChannelNames(1).isNotEmpty()
+        // A first sync still running has nothing stored yet; the sync pill already says so.
+        // (The old "guide synced channels but no programmes" case is gone with epg_channels: the
+        // syncer only writes programmes now, so stored == 0 simply means no guide data yet.)
         val message = when {
-            stored == 0 && !unmatchedGuide -> null // nothing synced yet; the first RuTube sync fills the grid
+            stored == 0 -> null
             channels.isEmpty() && q.isNotBlank() -> EpgMessage.NoChannelsForQuery(q)
             channels.isEmpty() -> EpgMessage.MismatchedIds
             else -> null

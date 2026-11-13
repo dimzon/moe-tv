@@ -15,9 +15,6 @@ import org.junit.runner.RunWith
 import tv.own.owntv.core.database.OwnTVDatabase
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
-import tv.own.owntv.core.database.entity.SourceEntity
-import tv.own.owntv.core.model.MediaType
-import tv.own.owntv.core.model.SourceType
 
 /**
  * The user data follows its channel across a re-sync **by construction** now: the key is the
@@ -35,8 +32,6 @@ class UserDataResolverRelinkTest {
     private lateinit var db: OwnTVDatabase
     private lateinit var resolver: UserDataResolver
 
-    private var sourceId = 0L
-
     @Before
     fun setUp() = runBlocking {
         db = ownTVTestDatabase()
@@ -49,9 +44,6 @@ class UserDataResolverRelinkTest {
             customCategoryDao = db.customCategoryDao(),
             tombstoneDao = db.tombstoneDao(),
             db = db,
-        )
-        sourceId = db.sourceDao().insert(
-            SourceEntity(name = "RuTube", type = SourceType.RUTUBE, url = "https://rutube.test"),
         )
         clearPending()
     }
@@ -74,7 +66,7 @@ class UserDataResolverRelinkTest {
     @Test
     fun favoriteSurvivesAResyncBecauseTheKeyIsTheProvidersHexId() = runBlocking {
         val key = insertChannel(remoteId = "m-1", name = "BBC One")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = key, addedAt = 500))
+        db.favoriteDao().add(FavoriteEntity(itemId = key, addedAt = 500))
 
         // The sync: REPLACE by PK — same channel, same key, new row.
         db.channelDao().upsertAll(listOf(ChannelEntity(remoteId = key, name = "BBC One HD")))
@@ -89,7 +81,7 @@ class UserDataResolverRelinkTest {
     @Test
     fun afterSyncKeepsTheRowWhileTheChannelExists() = runBlocking {
         val key = insertChannel(remoteId = "m-2", name = "Still Here")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = key, addedAt = 1))
+        db.favoriteDao().add(FavoriteEntity(itemId = key, addedAt = 1))
 
         resolver.afterSync(purge = true)
 
@@ -104,7 +96,7 @@ class UserDataResolverRelinkTest {
     @Test
     fun purgeFalseKeepsAnOrphanedRowSoAFailedSyncCannotDeleteFavorites() = runBlocking {
         val key = insertChannel(remoteId = "m-3", name = "Interrupted")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = key, addedAt = 1))
+        db.favoriteDao().add(FavoriteEntity(itemId = key, addedAt = 1))
         db.channelDao().deleteByRemoteIds(listOf(key))
 
         resolver.afterSync(purge = false)
@@ -116,7 +108,7 @@ class UserDataResolverRelinkTest {
     @Test
     fun purgeTrueDropsTheOrphanedRowAfterASuccessfulSync() = runBlocking {
         val key = insertChannel(remoteId = "m-4", name = "Gone For Good")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = key, addedAt = 1))
+        db.favoriteDao().add(FavoriteEntity(itemId = key, addedAt = 1))
         db.channelDao().deleteByRemoteIds(listOf(key))
 
         resolver.afterSync(purge = true)
@@ -130,13 +122,13 @@ class UserDataResolverRelinkTest {
     @Test
     fun purgeSnapshotOrphanDeletesOnlyOnceTheContentRowHasGone() = runBlocking {
         val key = insertChannel(remoteId = "m-9", name = "Purge Me")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = key, addedAt = 1))
+        db.favoriteDao().add(FavoriteEntity(itemId = key, addedAt = 1))
 
-        db.favoriteDao().purgeSnapshotOrphan(MediaType.LIVE, key)
+        db.favoriteDao().purgeSnapshotOrphan(key)
         assertEquals("the channel is still there — nothing to purge", 1, db.favoriteDao().getAllOnce().size)
 
         db.channelDao().deleteByRemoteIds(listOf(key))
-        db.favoriteDao().purgeSnapshotOrphan(MediaType.LIVE, key)
+        db.favoriteDao().purgeSnapshotOrphan(key)
         assertEquals("the channel is gone — the favorite must go with it", 0, db.favoriteDao().getAllOnce().size)
     }
 

@@ -12,10 +12,7 @@ import tv.own.owntv.core.database.entity.CategoryEntity
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.CustomCategoryMemberEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
-import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
-import tv.own.owntv.core.model.MediaType
-import tv.own.owntv.core.model.SourceType
 
 /**
  * The lock-aware counts against a real database: an item in an excluded (locked) category drops out,
@@ -26,43 +23,33 @@ import tv.own.owntv.core.model.SourceType
 class ExcludingCountDaoTest {
 
     private lateinit var db: OwnTVDatabase
-    private var source = 0L
     private var locked = 0L
     private var open = 0L
 
     @Before
     fun setUp() = runBlocking {
         db = ownTVTestDatabase()
-        source = db.sourceDao().insert(SourceEntity(name = "Test", type = SourceType.RUTUBE, url = "https://test"))
         val (a, b) = db.categoryDao().insertAll(
             listOf(
-                CategoryEntity(sourceId = source, mediaType = MediaType.LIVE, name = "Locked"),
-                CategoryEntity(sourceId = source, mediaType = MediaType.LIVE, name = "Open"),
+                CategoryEntity(name = "Locked"),
+                CategoryEntity(name = "Open"),
             ),
         )
         locked = a
         open = b
-        db.channelDao().insertAll(
+        // Channels first: the junction has FKs to both the catalogue and the category.
+        db.channelDao().insertAll((1..4).map { ChannelEntity(remoteId = "ch$it", name = "Ch $it") })
+        db.channelCategoryDao().insertAll(
             listOf(
-                channel(1, locked),
-                channel(2, locked),
-                channel(3, open),
-                channel(4, null),
+                ChannelCategoryEntity(channelHexId = "ch1", categoryId = locked),
+                ChannelCategoryEntity(channelHexId = "ch2", categoryId = locked),
+                ChannelCategoryEntity(channelHexId = "ch3", categoryId = open),
             ),
         )
     }
 
     @After
     fun tearDown() = db.close()
-
-    /** Membership is many-to-many now: [categoryId] goes into the junction, not the channel row. */
-    private suspend fun channel(id: Long, categoryId: Long?): ChannelEntity {
-        val row = ChannelEntity(remoteId = "ch$id", name = "Ch $id")
-        if (categoryId != null) {
-            db.channelCategoryDao().insertAll(listOf(ChannelCategoryEntity(channelHexId = row.remoteId, categoryId = categoryId)))
-        }
-        return row
-    }
 
     @Test
     fun channelCountsDropOnlyTheExcludedCategory() = runBlocking {
@@ -74,8 +61,8 @@ class ExcludingCountDaoTest {
     @Test
     fun favoritesAndHistoryKeepUncategorisedItemsAndSkipOrphans() = runBlocking {
         listOf("ch1", "ch3", "ch4", ORPHAN).forEach {
-            db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = it))
-            db.historyDao().record(WatchHistoryEntity(mediaType = MediaType.LIVE, itemId = it))
+            db.favoriteDao().add(FavoriteEntity(itemId = it))
+            db.historyDao().record(WatchHistoryEntity(itemId = it))
         }
         val channels = db.channelDao()
         assertEquals(2, channels.countFavoritesExcluding(listOf(locked)).first())
@@ -96,25 +83,25 @@ class ExcludingCountDaoTest {
         custom.insertAll(
             listOf("ch1", "ch3", "ch4", ORPHAN).mapIndexed { i, id -> member(FIRST, id, i) } + member(SECOND, "ch2", 0),
         )
-        assertEquals(2, custom.countMembersExcluding(MediaType.LIVE, FIRST, listOf(locked)).first())
+        assertEquals(2, custom.countMembersExcluding(FIRST, listOf(locked)).first())
         assertEquals(
-            custom.countMembers(MediaType.LIVE, FIRST).first(),
-            custom.countMembersExcluding(MediaType.LIVE, FIRST, emptyList()).first(),
+            custom.countMembers(FIRST).first(),
+            custom.countMembersExcluding(FIRST, emptyList()).first(),
         )
         val contexts = listOf(FIRST, SECOND)
         assertEquals(
             mapOf(FIRST to 2),
-            custom.observeCountsByContextsExcluding(MediaType.LIVE, contexts, listOf(locked))
+            custom.observeCountsByContextsExcluding(contexts, listOf(locked))
                 .first().associate { it.contextKey to it.count },
         )
         assertEquals(
-            custom.observeCountsByContexts(MediaType.LIVE, contexts).first().toSet(),
-            custom.observeCountsByContextsExcluding(MediaType.LIVE, contexts, emptyList()).first().toSet(),
+            custom.observeCountsByContexts(contexts).first().toSet(),
+            custom.observeCountsByContextsExcluding(contexts, emptyList()).first().toSet(),
         )
     }
 
     private fun member(context: String, itemId: String, position: Int) = CustomCategoryMemberEntity(
-        mediaType = MediaType.LIVE, contextKey = context, itemId = itemId, position = position,
+        contextKey = context, itemId = itemId, position = position,
     )
 
     private companion object {

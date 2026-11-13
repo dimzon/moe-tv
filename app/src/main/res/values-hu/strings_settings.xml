@@ -391,7 +391,6 @@
     <string name="settings_group_summary_quick">A leggyakrabban használt kapcsolóid</string>
     <string name="settings_group_sound_subtitles">Hang és felirat</string>
     <string name="settings_group_watching_recording">Nézés és felvétel</string>
-    <string name="settings_search_guide_logos">Műsorújság csatornalogói</string>
     <string name="settings_search_keywords_profiles">nézők gyerekmód pin zár fiók</string>
     <string name="settings_search_keywords_playlists">m3u xtream forrás szinkronizálás hozzáadás eltávolítás</string>
     <string name="settings_search_keywords_epg">xmltv műsorújság forrás program</string>
@@ -760,8 +759,6 @@
     <string name="settings_epg_sources_save_sync">Mentés és szinkronizálás</string>
     <string name="settings_epg_sources_fill_playlist">Kitöltés lejátszási listából</string>
     <string name="settings_epg_sources_none_playlist">Egyik lejátszási listád sem ad meg EPG-URL-t.</string>
-    <string name="settings_epg_sources_use_logos">Ennek a műsorújságnak a csatornalogói</string>
-    <string name="settings_epg_sources_logos_description">A logók megjelenítése ebből az XMLTV-forrásból a lejátszási listád logói helyett. Azok a csatornák, amikhez ez a forrás nem ad logót, megtartják a lejátszási listáét.</string>
     <string name="settings_epg_sources_name">Név</string>
     <string name="settings_epg_sources_url">XMLTV URL</string>
     <string name="settings_epg_sources_portal_guide">Műsorújság a portálról</string>
@@ -1554,7 +1551,6 @@
     <string name="settings_help_playlist_url">A .m3u vagy .m3u8 listád címe.</string>
     <string name="settings_line_fill_from_playlist">A lejátszási lista által megadott műsorújság-cím használata</string>
     <string name="settings_line_epg_auto_refresh">Naprakészen tartja a műsorújságot</string>
-    <string name="settings_line_epg_logos">A lejátszási lista logói helyett</string>
     <string name="settings_help_epg_name">Megjelenik a műsorújság-listában és az EPG kézi választásánál.</string>
     <string name="settings_glass_bg_title">Üveg és háttér</string>
     <string name="settings_line_glass_bg">Háttér, képhatás, üveg</string>

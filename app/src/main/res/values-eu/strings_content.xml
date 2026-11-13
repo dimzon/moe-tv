@@ -154,7 +154,6 @@
     <string name="content_epg_add_favourite">Gehitu gogokoetara</string>
     <string name="content_epg_remove_favourite">Kendu gogokoetatik</string>
     <string name="content_epg_jump_now">Joan Orain atalera</string>
-    <string name="content_epg_include_logos">Sartu gidaren logoak</string>
     <string name="content_epg_review_description">Kanal hauek izenaren bidez parekatu dira, baina ez dira bat etortze fidagarria. Onartu zuzenak; saltatu gainerakoak.</string>
     <string name="content_epg_accept">Onartu</string>
     <string name="content_epg_accept_all">Onartu guztiak</string>

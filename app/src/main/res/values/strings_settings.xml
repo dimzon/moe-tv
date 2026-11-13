@@ -751,8 +751,6 @@
     <string name="settings_group_sound_subtitles">Sound &amp; subtitles</string>
     <!-- Translators: Settings group name: skip steps, resume, multiview, mini-player and recording. -->
     <string name="settings_group_watching_recording">Watching &amp; recording</string>
-    <!-- Translators: Settings search result label for the Guide channel logos setting. -->
-    <string name="settings_search_guide_logos">Guide channel logos</string>
     <!-- Translators: Hidden keyword bag used by Settings search for the Profiles page. Translate these as individual terms a user might type; this is not a grammatical sentence and is not displayed as prose. -->
     <string name="settings_search_keywords_profiles">viewers kids mode pin lock account</string>
     <!-- Translators: Hidden keyword bag for the Playlists settings page. Translate as individual search terms. -->
@@ -1483,10 +1481,6 @@
     <string name="settings_epg_sources_fill_playlist">Fill from playlist</string>
     <!-- Translators: Status text when no playlists provide an EPG URL. -->
     <string name="settings_epg_sources_none_playlist">None of your playlists provide an EPG URL.</string>
-    <!-- Translators: Toggle label to use channel logos from this EPG feed. -->
-    <string name="settings_epg_sources_use_logos">Use this guide\'s channel logos</string>
-    <!-- Translators: Description of the EPG logos setting. 'XMLTV' is a format name. -->
-    <string name="settings_epg_sources_logos_description">Show logos from this XMLTV feed instead of your playlist\'s. Channels this feed has no logo for keep the playlist one.</string>
     <!-- Translators: Text-field label for the EPG source name. -->
     <string name="settings_epg_sources_name">Name</string>
     <!-- Translators: Text-field label for the EPG XMLTV URL. -->
@@ -2964,8 +2958,6 @@
     <string name="settings_line_fill_from_playlist">Use the guide address your playlist gives</string>
     <!-- Translators: Line under Auto refresh on the Add EPG form. -->
     <string name="settings_line_epg_auto_refresh">Keep the guide up to date</string>
-    <!-- Translators: Line under Use this guide's channel logos: the guide's logos instead of the playlist's. -->
-    <string name="settings_line_epg_logos">Instead of the playlist’s</string>
     <!-- Translators: Panel text for the guide's Name field (followed by the field help). -->
     <string name="settings_help_epg_name">Shown in the guide list and in Pick EPG manually.</string>
     <!-- Translators: Title of the Glass & background page and its Appearance row. -->

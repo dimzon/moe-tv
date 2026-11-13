@@ -205,12 +205,11 @@ val dataModule = module {
     // Same idea for EPG: EpgSyncWorker reports started/progress/finished here so the pill also reflects
     // guide/EPG downloads (manual resync from Settings, auto startup refresh, …).
     single { tv.own.owntv.core.sync.EpgActivityTracker() }
-    // epgDao, channelDao, db, rutubeApi — the one provider's guide, written by RuTubeEpgSyncer.
+    // epgDao, channelDao, rutubeApi — the one provider's guide, written by RuTubeEpgSyncer.
     single {
         EpgRepository(
             epgDao = get(),
             channelDao = get(),
-            db = get(),
             rutube = get(),
         )
     }

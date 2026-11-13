@@ -7,8 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import tv.own.owntv.core.database.entity.SourceEntity
-import tv.own.owntv.core.model.SourceType
+import tv.own.owntv.core.database.entity.ChannelEntity
 
 /**
  * [transaction] against the engine the app ships, because the predecessor it replaced could not run
@@ -37,11 +36,11 @@ class RoomTransactionTest {
     @Test
     fun aTransactionCommitsItsWrites() = runBlocking {
         db.transaction {
-            db.sourceDao().insert(SourceEntity(name = "Primary", type = SourceType.RUTUBE, url = "https://a.test"))
-            db.sourceDao().insert(SourceEntity(name = "Junior", type = SourceType.RUTUBE, url = "https://b.test"))
+            db.channelDao().upsertAll(listOf(ChannelEntity(remoteId = "a", name = "Primary")))
+            db.channelDao().upsertAll(listOf(ChannelEntity(remoteId = "b", name = "Junior")))
         }
 
-        assertEquals(2, db.sourceDao().getAllOnce().size)
+        assertEquals(2, db.channelDao().snapshotAll(10).size)
     }
 
     /**
@@ -52,11 +51,11 @@ class RoomTransactionTest {
     fun aFailureRollsTheWholeBlockBack() = runBlocking {
         runCatching {
             db.transaction {
-                db.sourceDao().insert(SourceEntity(name = "Primary", type = SourceType.RUTUBE, url = "https://a.test"))
+                db.channelDao().upsertAll(listOf(ChannelEntity(remoteId = "a", name = "Primary")))
                 error("boom")
             }
         }
 
-        assertEquals(0, db.sourceDao().getAllOnce().size)
+        assertEquals(0, db.channelDao().snapshotAll(10).size)
     }
 }

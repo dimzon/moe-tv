@@ -177,7 +177,6 @@
     <string name="content_epg_add_favourite">즐겨찾기에 추가</string>
     <string name="content_epg_remove_favourite">즐겨찾기에서 삭제</string>
     <string name="content_epg_jump_now">현재 시간으로 이동</string>
-    <string name="content_epg_include_logos">가이드 로고 포함</string>
     <string name="content_epg_review_description">이 채널들은 이름을 기준으로 연결되었지만 일치 확률이 높지 않습니다. 올바른 항목은 수락하고 나머지는 건너뛰세요.</string>
     <string name="content_epg_accept">수락</string>
     <string name="content_epg_accept_all">모두 수락</string>

@@ -356,7 +356,6 @@
     <string name="settings_group_summary_quick">المفاتيح التي تستخدمها أكثر</string>
     <string name="settings_group_sound_subtitles">الصوت والترجمة</string>
     <string name="settings_group_watching_recording">المشاهدة والتسجيل</string>
-    <string name="settings_search_guide_logos">شعارات القنوات في الدليل</string>
     <string name="settings_search_keywords_profiles">مشاهدون أطفال وضع قفل PIN حساب</string>
     <string name="settings_search_keywords_playlists">M3U Xtream مصدر مزامنة إضافة إزالة</string>
     <string name="settings_search_keywords_epg">XMLTV دليل موجز برنامج</string>
@@ -749,8 +748,6 @@
     <string name="settings_epg_sources_save_sync">حفظ ومزامنة</string>
     <string name="settings_epg_sources_fill_playlist">التعبئة من قائمة تشغيل</string>
     <string name="settings_epg_sources_none_playlist">لا توفر أي من قوائم التشغيل لديك عنوان URL لدليل البرامج الإلكتروني.</string>
-    <string name="settings_epg_sources_use_logos">استخدام شعارات القنوات من هذا الدليل</string>
-    <string name="settings_epg_sources_logos_description">اعرض الشعارات من تغذية XMLTV هذه بدلًا من شعارات قائمة التشغيل. وتحتفظ القنوات التي لا تحتوي هذه التغذية على شعار لها بشعار قائمة التشغيل.</string>
     <string name="settings_epg_sources_name">الاسم</string>
     <string name="settings_epg_sources_url">عنوان URL لـ XMLTV</string>
     <string name="settings_epg_sources_portal_guide">الدليل من البوابة</string>
@@ -1678,7 +1675,6 @@
     <string name="settings_help_playlist_url">عنوان قائمة .m3u أو .m3u8 الخاصة بك.</string>
     <string name="settings_line_fill_from_playlist">استخدام عنوان الدليل الذي تقدمه قائمتك</string>
     <string name="settings_line_epg_auto_refresh">إبقاء الدليل محدّثًا</string>
-    <string name="settings_line_epg_logos">بدلًا من شعارات القائمة</string>
     <string name="settings_help_epg_name">يظهر في قائمة الأدلة وفي اختيار EPG يدويًا.</string>
     <string name="settings_glass_bg_title">الزجاج والخلفية</string>
     <string name="settings_line_glass_bg">الخلفية، مظهر الصورة، الزجاج</string>

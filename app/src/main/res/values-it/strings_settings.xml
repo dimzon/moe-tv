@@ -350,7 +350,6 @@
     <string name="settings_group_summary_quick">Gli interruttori che usi di più</string>
     <string name="settings_group_sound_subtitles">Audio e sottotitoli</string>
     <string name="settings_group_watching_recording">Visione e registrazione</string>
-    <string name="settings_search_guide_logos">Loghi dei canali nella guida</string>
     <string name="settings_search_keywords_profiles">spettatori bambini modalità blocco PIN account</string>
     <string name="settings_search_keywords_playlists">M3U Xtream fonte sincronizzazione aggiungi rimuovi</string>
     <string name="settings_search_keywords_epg">XMLTV guida feed programma</string>
@@ -728,8 +727,6 @@
     <string name="settings_epg_sources_save_sync">Salva e sincronizza</string>
     <string name="settings_epg_sources_fill_playlist">Compila dalla playlist</string>
     <string name="settings_epg_sources_none_playlist">Nessuna delle tue playlist fornisce un URL EPG.</string>
-    <string name="settings_epg_sources_use_logos">Usa i loghi dei canali di questa guida</string>
-    <string name="settings_epg_sources_logos_description">Mostra i loghi di questo feed XMLTV anziché quelli della playlist. I canali per i quali il feed non dispone di un logo mantengono quello della playlist.</string>
     <string name="settings_epg_sources_name">Nome</string>
     <string name="settings_epg_sources_url">URL XMLTV</string>
     <string name="settings_epg_sources_portal_guide">Guida dal portale</string>
@@ -1585,7 +1582,6 @@
     <string name="settings_help_playlist_url">L’indirizzo della tua lista .m3u o .m3u8.</string>
     <string name="settings_line_fill_from_playlist">Usa l’indirizzo della guida fornito dalla playlist</string>
     <string name="settings_line_epg_auto_refresh">Mantieni la guida aggiornata</string>
-    <string name="settings_line_epg_logos">Al posto di quelli della playlist</string>
     <string name="settings_help_epg_name">Mostrato nell’elenco delle guide e in Scegli EPG manualmente.</string>
     <string name="settings_glass_bg_title">Vetro e sfondo</string>
     <string name="settings_line_glass_bg">Sfondo, resa dell’immagine, vetro</string>

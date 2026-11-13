@@ -177,7 +177,6 @@
     <string name="content_epg_add_favourite">加入我的最愛</string>
     <string name="content_epg_remove_favourite">從我的最愛中移除</string>
     <string name="content_epg_jump_now">跳至目前時間</string>
-    <string name="content_epg_include_logos">包含節目表台標</string>
     <string name="content_epg_review_description">這些頻道已依名稱配對，但相符程度不夠確定。接受正確的配對，並略過其餘項目。</string>
     <string name="content_epg_accept">接受</string>
     <string name="content_epg_accept_all">全部接受</string>

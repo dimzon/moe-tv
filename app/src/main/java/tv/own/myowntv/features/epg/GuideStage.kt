@@ -203,12 +203,13 @@ internal fun programmeEyebrow(p: EpgProgrammeEntity, channelName: String?, now: 
     return listOfNotNull(lead, range, length, channelName?.takeIf { it.isNotBlank() }).joinToString(" · ")
 }
 
-/** The details line: "Animation · Family · 2023 · FSK 0 · 95 min" — only what the feed provides. */
+/** The details line: "Сериал · Сезон 2 Серия 17 · 16+ · 95 min" — only what the feed provides. */
 @Composable
 internal fun programmeDetailsLine(p: EpgProgrammeEntity): String? {
     val d = p.details
-    val length = d.lengthMin?.let { stringResource(R.string.player_duration_minutes, it) }
-    return (d.categoryList + listOfNotNull(d.episode, d.year?.toString(), d.rating, length))
+    val length = ((p.stopMs - p.startMs) / 60_000L).toInt().takeIf { it > 0 }
+        ?.let { stringResource(R.string.player_duration_minutes, it) }
+    return (d.categoryList + listOfNotNull(d.subtitle, d.ageRating, length))
         .takeIf { it.isNotEmpty() }?.joinToString(" · ")
 }
 

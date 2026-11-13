@@ -186,7 +186,6 @@
     <string name="content_epg_add_favourite">Hozzáadás a kedvencekhez</string>
     <string name="content_epg_remove_favourite">Eltávolítás a kedvencekből</string>
     <string name="content_epg_jump_now">Ugrás a mosthoz</string>
-    <string name="content_epg_include_logos">Műsorújság-logók használata</string>
     <string name="content_epg_review_description">Ezeket a csatornákat a nevük alapján párosítottuk, de az egyezés nem volt egyértelmű. Fogadd el a helyeseket, a többit hagyd ki.</string>
     <string name="content_epg_accept">Elfogadás</string>
     <string name="content_epg_accept_all">Összes elfogadása</string>

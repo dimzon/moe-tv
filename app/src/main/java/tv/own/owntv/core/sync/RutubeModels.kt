@@ -18,6 +18,8 @@ data class RutubeProgramme(
     val subtitle: String? = null,
     val description: String? = null,
     val category: String? = null,
+    /** Age restriction as the feed writes it ("16+", "12+", "0+"); `age_rating` in the mobile payload. */
+    val ageRating: String? = null,
     val startUtcMillis: Long,
     val endUtcMillis: Long,
     val iconUrl: String? = null,

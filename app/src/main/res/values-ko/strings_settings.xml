@@ -346,7 +346,6 @@
     <string name="settings_group_summary_quick">가장 자주 쓰는 전환 항목</string>
     <string name="settings_group_sound_subtitles">사운드 및 자막</string>
     <string name="settings_group_watching_recording">시청 및 녹화</string>
-    <string name="settings_search_guide_logos">편성표 채널 로고</string>
     <string name="settings_search_keywords_profiles">시청자 어린이 모드 PIN 잠금 계정</string>
     <string name="settings_search_keywords_playlists">M3U Xtream 소스 동기화 추가 삭제</string>
     <string name="settings_search_keywords_epg">XMLTV 편성표 피드 프로그램</string>
@@ -714,8 +713,6 @@
     <string name="settings_epg_sources_save_sync">저장 및 동기화</string>
     <string name="settings_epg_sources_fill_playlist">플레이리스트에서 입력</string>
     <string name="settings_epg_sources_none_playlist">EPG URL을 제공하는 플레이리스트가 없습니다.</string>
-    <string name="settings_epg_sources_use_logos">이 편성표의 채널 로고 사용</string>
-    <string name="settings_epg_sources_logos_description">플레이리스트의 로고 대신 이 XMLTV 피드의 로고를 표시합니다. 이 피드에 로고가 없는 채널은 플레이리스트의 로고를 유지합니다.</string>
     <string name="settings_epg_sources_name">이름</string>
     <string name="settings_epg_sources_url">XMLTV URL</string>
     <string name="settings_epg_sources_portal_guide">포털 편성표</string>
@@ -1523,7 +1520,6 @@
     <string name="settings_help_playlist_url">.m3u 또는 .m3u8 목록의 주소입니다.</string>
     <string name="settings_line_fill_from_playlist">재생목록이 제공하는 가이드 주소 사용</string>
     <string name="settings_line_epg_auto_refresh">가이드를 최신 상태로 유지</string>
-    <string name="settings_line_epg_logos">재생목록 로고 대신</string>
     <string name="settings_help_epg_name">가이드 목록과 EPG 수동 선택에 표시됩니다.</string>
     <string name="settings_glass_bg_title">유리 및 배경</string>
     <string name="settings_line_glass_bg">배경, 사진 모습, 유리</string>

@@ -186,7 +186,6 @@
     <string name="content_epg_add_favourite">পছন্দেরগুলোতে যোগ করুন</string>
     <string name="content_epg_remove_favourite">পছন্দেরগুলো থেকে সরান</string>
     <string name="content_epg_jump_now">এখনকার সময়ে যান</string>
-    <string name="content_epg_include_logos">গাইডের লোগো অন্তর্ভুক্ত করুন</string>
     <string name="content_epg_review_description">এই চ্যানেলগুলো নাম দিয়ে মেলানো হয়েছে, কিন্তু মিল সম্পর্কে যথেষ্ট নিশ্চয়তা ছিল না। সঠিকগুলো গ্রহণ করুন; বাকিগুলো এড়িয়ে যান।</string>
     <string name="content_epg_accept">গ্রহণ করুন</string>
     <string name="content_epg_accept_all">সব গ্রহণ করুন</string>

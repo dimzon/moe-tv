@@ -40,24 +40,22 @@ import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
 
 import kotlinx.coroutines.CancellationException
-import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.repository.EpgRepository
 import tv.own.owntv.core.util.classifySyncFailure
 
 /**
  * Shared semi-auto EPG sync used by both onboarding and Settings. The RuTube guide is not an XMLTV
  * feed: it comes from the API and is written straight into the guide tables
- * ([EpgRepository.refreshRutube]), so there is no EPG source row and no feed download — this just
+ * ([EpgRepository.refresh]), so there is no EPG source row and no feed download — this just
  * runs the refresh while reporting a live programme count through [setState].
  */
 suspend fun runSemiAutoEpgSync(
-    source: SourceEntity,
     epgRepository: EpgRepository,
     setState: (EpgSyncUi) -> Unit,
 ) {
     setState(EpgSyncUi.Syncing(0))
     try {
-        epgRepository.refresh(source) { _, count -> setState(EpgSyncUi.Syncing(count)) }
+        epgRepository.refresh { _, count -> setState(EpgSyncUi.Syncing(count)) }
         setState(EpgSyncUi.Done)
     } catch (c: CancellationException) {
         throw c

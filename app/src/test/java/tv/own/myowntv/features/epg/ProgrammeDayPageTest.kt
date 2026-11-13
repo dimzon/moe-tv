@@ -55,9 +55,9 @@ class ProgrammeDayPageTest {
 
     @Test
     fun `facts in order, categories are tags not facts`() {
-        val d = EpgDetails(categories = "Drama", year = 2023, rating = "FSK 12", lengthMin = 95, episode = "S2 E5")
-        assertEquals(listOf("S2 E5", "2023", "FSK 12", "95 min"), programmeFacts(d, "95 min"))
-        assertEquals(emptyList<String>(), programmeFacts(EpgDetails.NONE, null))
+        val d = EpgDetails(category = "Drama", ageRating = "16+", subtitle = "Сезон 2 Серия 17")
+        assertEquals(listOf("Сезон 2 Серия 17", "16+", "95 min"), programmeFacts(d, "95 min"))
+        assertEquals(emptyList<String>(), programmeFacts(EpgDetails(), null))
     }
 
     @Test

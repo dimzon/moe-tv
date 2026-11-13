@@ -348,7 +348,6 @@
     <string name="settings_group_summary_quick">वे टॉगल जिन्हें आप सबसे ज़्यादा इस्तेमाल करते हैं</string>
     <string name="settings_group_sound_subtitles">साउंड और सबटाइटल</string>
     <string name="settings_group_watching_recording">देखना और रिकॉर्डिंग</string>
-    <string name="settings_search_guide_logos">गाइड के चैनल लोगो</string>
     <string name="settings_search_keywords_profiles">दर्शक बच्चे मोड PIN लॉक खाता</string>
     <string name="settings_search_keywords_playlists">M3U Xtream स्रोत सिंक जोड़ें हटाएँ</string>
     <string name="settings_search_keywords_epg">XMLTV गाइड फ़ीड कार्यक्रम</string>
@@ -721,8 +720,6 @@
     <string name="settings_epg_sources_save_sync">सहेजें और सिंक करें</string>
     <string name="settings_epg_sources_fill_playlist">प्लेलिस्ट से भरें</string>
     <string name="settings_epg_sources_none_playlist">आपकी किसी भी प्लेलिस्ट में EPG URL उपलब्ध नहीं है।</string>
-    <string name="settings_epg_sources_use_logos">इस गाइड के चैनल लोगो इस्तेमाल करें</string>
-    <string name="settings_epg_sources_logos_description">अपनी प्लेलिस्ट के बजाय इस XMLTV फ़ीड के लोगो दिखाएँ। जिन चैनल के लिए इस फ़ीड में लोगो नहीं है, वे प्लेलिस्ट वाला लोगो बनाए रखते हैं।</string>
     <string name="settings_epg_sources_name">नाम</string>
     <string name="settings_epg_sources_url">XMLTV URL</string>
     <string name="settings_epg_sources_portal_guide">पोर्टल से गाइड</string>
@@ -1554,7 +1551,6 @@
     <string name="settings_help_playlist_url">आपकी .m3u या .m3u8 सूची का पता।</string>
     <string name="settings_line_fill_from_playlist">प्लेलिस्ट से मिला गाइड पता इस्तेमाल करें</string>
     <string name="settings_line_epg_auto_refresh">गाइड को अप-टू-डेट रखें</string>
-    <string name="settings_line_epg_logos">प्लेलिस्ट के लोगो की जगह</string>
     <string name="settings_help_epg_name">गाइड सूची और EPG खुद चुनें में दिखता है।</string>
     <string name="settings_glass_bg_title">ग्लास और बैकग्राउंड</string>
     <string name="settings_line_glass_bg">बैकग्राउंड, तस्वीर का रूप, ग्लास</string>

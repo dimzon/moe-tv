@@ -281,14 +281,12 @@ class RuTubeEpgSyncer(
     var guideDays: Int = 7
 
     suspend fun sync(channelIds: List<String>): EpgSyncSummary {
-        var briefOk = 0
-        var briefFail = 0
         runCatching {
             val brief = rutube.briefSchedules()
-            // Write brief programmes as EpgChannelEntity + EpgProgrammeEntity.
+            // Write brief programmes now/next; the full grid replaces them with the same rows plus
+            // category/artwork the brief does not carry.
             writeBrief(brief)
-            briefOk = brief.size
-        }.onFailure { e -> briefFail++; Log.w(TAG, "RuTube brief seed failed: ${e.message}") }
+        }.onFailure { e -> Log.w(TAG, "RuTube brief seed failed: ${e.message}") }
 
         var channelsWithGuide = 0
         var programmesWritten = 0
@@ -336,26 +334,12 @@ class RuTubeEpgSyncer(
         // Prune old programmes (> 2 days back) for this source.
         pruneOld()
         return EpgSyncSummary(
-            briefOk = briefOk,
-            briefFail = briefFail,
             channelsWithGuide = channelsWithGuide,
-            channelsTotal = channelIds.size,
             programmesWritten = programmesWritten,
         )
     }
 
     private suspend fun writeBrief(brief: Map<String, List<RutubeProgramme>>) {
-        // EpgChannelEntity rows for every channel in the brief map (has a schedule).
-        val channels = brief.keys.map { videoId ->
-            tv.own.owntv.core.database.entity.EpgChannelEntity(
-                epgChannelId = videoId,
-                displayName = null,
-            )
-        }
-        if (channels.isNotEmpty()) {
-            // Upsert in chunks to keep Room happy.
-            channels.chunked(500).forEach { epgDao.upsertChannels(it) }
-        }
         val programmes = brief.flatMap { (videoId, programmes) ->
             programmes.map { p ->
                 tv.own.owntv.core.database.entity.EpgProgrammeEntity(
@@ -363,8 +347,9 @@ class RuTubeEpgSyncer(
                     startMs = p.startUtcMillis,
                     stopMs = p.endUtcMillis,
                     title = p.title,
+                    subtitle = p.subtitle,
                     description = p.description,
-                    contentHash = 0,
+                    ageRating = p.ageRating,
                 )
             }
         }
@@ -378,8 +363,11 @@ class RuTubeEpgSyncer(
                 startMs = p.startUtcMillis,
                 stopMs = p.endUtcMillis,
                 title = p.title,
+                subtitle = p.subtitle,
                 description = p.description,
-                contentHash = 0,
+                category = p.category,
+                ageRating = p.ageRating,
+                iconUrl = p.iconUrl,
             )
         }
         rows.chunked(500).forEach { epgDao.upsertProgrammes(it) }
@@ -401,9 +389,6 @@ class RuTubeEpgSyncer(
 }
 
 data class EpgSyncSummary(
-    val briefOk: Int,
-    val briefFail: Int,
     val channelsWithGuide: Int,
-    val channelsTotal: Int,
     val programmesWritten: Int,
 )

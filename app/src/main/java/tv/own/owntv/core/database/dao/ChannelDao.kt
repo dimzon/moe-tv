@@ -13,6 +13,7 @@ import tv.own.owntv.core.database.ManualOrderRow
 import tv.own.owntv.core.database.ManualOrdering
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.ChannelNumberProjection
+import tv.own.owntv.core.database.entity.GuideChannelName
 
 /** One category's current channel count for a source (re-sync delta check). */
 data class CategoryItemCount(val categoryId: Long, val itemCount: Int)
@@ -57,14 +58,6 @@ interface ChannelDao {
     @Query("SELECT * FROM channels WHERE name = :name LIMIT 1")
     suspend fun findByName(name: String): ChannelEntity?
 
-    /**
-     * Any channel whose guide key is [epgChannelId] — the reminder-remap lookup: a synced reminder's
-     * identity is (epgChannelId, startMs), and its stored key is re-derived from the guide id on
-     * apply (no channel → skip).
-     */
-    @Query("SELECT * FROM channels WHERE remoteId = :epgChannelId LIMIT 1")
-    suspend fun findByEpgChannelId(epgChannelId: String): ChannelEntity?
-
     /** Channels whose own guide id is one of [epgKeys] — Search's "On TV". */
     @Query("SELECT * FROM channels WHERE remoteId IN (:epgKeys)")
     suspend fun byEpgKeys(epgKeys: List<String>): List<ChannelEntity>
@@ -72,10 +65,6 @@ interface ChannelDao {
     /** Channels a stored manual guide match may name, by its key's tail: the provider id, or the name. */
     @Query("SELECT * FROM channels WHERE remoteId IN (:tails) OR name IN (:tails)")
     suspend fun byRemoteIdsOrNames(tails: List<String>): List<ChannelEntity>
-
-    /** Every channel — the guide grid lists all of them; RuTube publishes a guide id for each. */
-    @Query("SELECT * FROM channels ORDER BY number ASC, name ASC LIMIT :limit")
-    suspend fun channelsForGuide(limit: Int): List<ChannelEntity>
 
     /** Every channel — drives bulk EPG auto-matching. */
     @Query("SELECT * FROM channels ORDER BY sortOrder ASC, name ASC LIMIT :limit")
@@ -87,19 +76,12 @@ interface ChannelDao {
     suspend fun allEpgChannelIds(): List<String>
 
     /**
-     * Guide keys of channels that currently have **no** guide data at all.
-     *
-     * A guide sync filters the feed to the channels the user owns, and that set is snapshotted once
-     * when it starts — so a catalog sync running at the same time (or any later one that adds
-     * channels) leaves those channels' programmes permanently missing until the user re-syncs EPG by
-     * hand. This finds exactly the channels in that hole, so they can be topped up from the cached
-     * feed without another download.
+     * Every channel as a guide candidate: its guide key (== remoteId) and the name the user sees.
+     * The "Match EPG" picker and auto-match read this instead of a separate guide-channel table —
+     * with one source the guide key IS the catalogue key, so names come from the catalogue.
      */
-    @Query(
-        "SELECT DISTINCT remoteId FROM channels " +
-            "WHERE remoteId NOT IN (SELECT DISTINCT epgChannelId FROM epg_programmes)",
-    )
-    suspend fun epgChannelIdsWithoutProgrammes(): List<String>
+    @Query("SELECT remoteId AS epgChannelId, name AS displayName FROM channels LIMIT :limit")
+    suspend fun guideChannelNames(limit: Int): List<GuideChannelName>
 
     /**
      * Channels that actually HAVE programmes in the window — so the guide never wastes its row limit

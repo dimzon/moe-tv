@@ -350,7 +350,6 @@
     <string name="settings_group_summary_quick">Los interruptores que más usas</string>
     <string name="settings_group_sound_subtitles">Sonido y subtítulos</string>
     <string name="settings_group_watching_recording">Reproducción y grabación</string>
-    <string name="settings_search_guide_logos">Logos de canales de la guía</string>
     <string name="settings_search_keywords_profiles">espectadores niños modo infantil PIN bloqueo cuenta</string>
     <string name="settings_search_keywords_playlists">M3U Xtream fuente sincronizar agregar eliminar</string>
     <string name="settings_search_keywords_epg">XMLTV guía fuente programa</string>
@@ -728,8 +727,6 @@
     <string name="settings_epg_sources_save_sync">Guardar y sincronizar</string>
     <string name="settings_epg_sources_fill_playlist">Completar desde una lista de reproducción</string>
     <string name="settings_epg_sources_none_playlist">Ninguna de tus listas de reproducción proporciona una URL de EPG.</string>
-    <string name="settings_epg_sources_use_logos">Usar los logotipos de canales de esta guía</string>
-    <string name="settings_epg_sources_logos_description">Muestra los logotipos de esta fuente XMLTV en lugar de los de tu lista de reproducción. Los canales para los que esta fuente no tenga un logotipo conservarán el de la lista de reproducción.</string>
     <string name="settings_epg_sources_name">Nombre</string>
     <string name="settings_epg_sources_url">URL de XMLTV</string>
     <string name="settings_epg_sources_portal_guide">Guía del portal</string>
@@ -1585,7 +1582,6 @@
     <string name="settings_help_playlist_url">La dirección de tu lista .m3u o .m3u8.</string>
     <string name="settings_line_fill_from_playlist">Usar la dirección de guía que da tu lista</string>
     <string name="settings_line_epg_auto_refresh">Mantener la guía actualizada</string>
-    <string name="settings_line_epg_logos">En lugar de los de la lista</string>
     <string name="settings_help_epg_name">Se muestra en la lista de guías y en Elegir EPG manualmente.</string>
     <string name="settings_glass_bg_title">Cristal y fondo</string>
     <string name="settings_line_glass_bg">Fondo, aspecto de la imagen, cristal</string>

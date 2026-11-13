@@ -82,10 +82,8 @@ import tv.own.myowntv.features.shell.ShellViewModel
 val appModule = module {
     viewModelOf(::ShellViewModel)
     // Home's rails are core's, shared with the phone app; the view model only decorates them.
-    // LiveEpgReader is registered because GuideReader now needs one: a guide row whose stored data
-    // has run out falls back to the provider's short-EPG, which is this reader's to fetch. One
-    // instance, so the grid, the Live rows and the preview pane share its cache instead of each
-    // asking the provider the same question.
+    // LiveEpgReader keeps the preview pane's now/next cache; the guide grid reads the stored table
+    // directly. One instance, so the Live rows and the preview pane share the cache.
     singleOf(::LiveEpgReader)
     singleOf(::GuideReader)
     singleOf(::SearchReader)
@@ -161,7 +159,6 @@ val appModule = module {
             get(), // userDataWriter
             get(), // categoryDao
             get(), // customCategoryDao
-            get(), // liveEpgReader
             get(), // epgActivity
             get(), // historyDao
             get(), // reminderManager

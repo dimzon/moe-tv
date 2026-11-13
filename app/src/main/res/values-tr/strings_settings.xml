@@ -348,7 +348,6 @@
     <string name="settings_group_summary_quick">En sık kullandığınız anahtarlar</string>
     <string name="settings_group_sound_subtitles">Ses ve altyazılar</string>
     <string name="settings_group_watching_recording">İzleme ve kayıt</string>
-    <string name="settings_search_guide_logos">Rehber kanal logoları</string>
     <string name="settings_search_keywords_profiles">izleyiciler çocuk modu PIN kilidi hesap</string>
     <string name="settings_search_keywords_playlists">M3U Xtream kaynak eşitleme ekle kaldır</string>
     <string name="settings_search_keywords_epg">XMLTV rehber akış program</string>
@@ -721,8 +720,6 @@
     <string name="settings_epg_sources_save_sync">Kaydet ve eşitle</string>
     <string name="settings_epg_sources_fill_playlist">Oynatma listesinden doldur</string>
     <string name="settings_epg_sources_none_playlist">Oynatma listelerinizin hiçbiri EPG URL\'si sağlamıyor.</string>
-    <string name="settings_epg_sources_use_logos">Bu rehberin kanal logolarını kullan</string>
-    <string name="settings_epg_sources_logos_description">Oynatma listenizin logoları yerine bu XMLTV akışındaki logoları gösterin. Bu akışta logosu olmayan kanallar oynatma listesindeki logoyu kullanmaya devam eder.</string>
     <string name="settings_epg_sources_name">Ad</string>
     <string name="settings_epg_sources_url">XMLTV URL\'si</string>
     <string name="settings_epg_sources_portal_guide">Portaldan yayın rehberi</string>
@@ -1554,7 +1551,6 @@
     <string name="settings_help_playlist_url">.m3u veya .m3u8 listenizin adresi.</string>
     <string name="settings_line_fill_from_playlist">Listenizin verdiği rehber adresini kullan</string>
     <string name="settings_line_epg_auto_refresh">Rehberi güncel tut</string>
-    <string name="settings_line_epg_logos">Listedekilerin yerine</string>
     <string name="settings_help_epg_name">Rehber listesinde ve EPG’yi elle seç bölümünde görünür.</string>
     <string name="settings_glass_bg_title">Cam ve arka plan</string>
     <string name="settings_line_glass_bg">Arka plan, resim görünümü, cam</string>

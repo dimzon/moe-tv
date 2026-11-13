@@ -1,52 +1,19 @@
 package tv.own.owntv.core.database.entity
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import tv.own.owntv.core.parser.EpgDetails
-import java.util.Objects
-
-/**
- * EPG channel descriptor (XMLTV `<channel>` or an Xtream epg id). Channels link to it via their
- * `epgChannelId`. Schema v5 dropped `sourceId`: one guide store, one catalogue.
- */
-// NOTE: no foreign key — the sources table is gone (schema v5). EPG rows are cleared explicitly
-// when the guide is dropped or rewritten.
-@Entity(
-    tableName = "epg_channels",
-    indices = [
-        Index(value = ["epgChannelId"], unique = true),
-        Index("normName"),
-    ],
-)
-data class EpgChannelEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val epgChannelId: String,
-    val displayName: String? = null,
-    /** The feed's own `<icon src>` logo, used instead of the provider logo when the user turns
-     *  Settings → EPG Sources → "Use this guide's channel logos" on for this feed. Null when the feed
-     *  carries no usable icon. */
-    val iconUrl: String? = null,
-    /**
-     * [displayName] and [epgChannelId] through `EpgMatcher.normalizeForEpg`, stored at sync time.
-     *
-     * The matcher normalizes both of these for every candidate, on every keystroke in the "Match EPG"
-     * search and again for every run of auto-match — an NFKC pass plus four regex passes each, across
-     * thousands of rows, recomputed to the same answer every time. The feed only changes when it is
-     * synced, so this is computed there instead.
-     *
-     * **Both are nullable on purpose.** A row written before this existed, or by any path that has
-     * not been taught to fill them, must degrade to normalizing on the fly rather than dropping the
-     * channel out of the picker. Every reader treats null as "not known yet", never as "empty".
-     */
-    val normName: String? = null,
-    val normId: String? = null,
-)
 
 /**
  * A single programme (now/next & guide). Bounded to a rolling window (≈ now → +48h) by the EPG
  * engine, which prunes old rows. Indexed on `(epgChannelId, startMs)` for fast now/next lookups.
+ *
+ * The columns are exactly what RuTube publishes for a broadcast: the times and the title are
+ * always there; [subtitle], [description], [category], [ageRating] and [iconUrl] only when the
+ * feed carries them. Anything the feed does not send is null — the screens show what is there.
+ *
+ * `epgChannelId` is the channel's hex videoId: with one source the guide key IS the catalogue key.
  */
 @Entity(
     tableName = "epg_programmes",
@@ -64,57 +31,21 @@ data class EpgProgrammeEntity(
     val startMs: Long,
     val stopMs: Long,
     val title: String,
+    /** The broadcast's own second line — often the episode ("Сезон 2 Серия 17", "Выпуск 3"). */
+    val subtitle: String? = null,
     val description: String? = null,
-    @ColumnInfo(defaultValue = "0") val contentHash: Int = 0,
-    // The details line (v47), from XMLTV only; null when the feed does not carry it.
-    // See tv.own.owntv.core.parser.EpgDetails — [categories] is joined by its separator.
-    val categories: String? = null,
-    val year: Int? = null,
-    val rating: String? = null,
-    val lengthMin: Int? = null,
-    val episode: String? = null,
+    /** The one genre RuTube files the programme under (`ext_categories[0].name`). */
+    val category: String? = null,
+    /** Age restriction exactly as the feed writes it ("16+", "12+", "0+"). */
+    val ageRating: String? = null,
+    /** `preview_picture_url` — the programme's 600×450 artwork. */
+    val iconUrl: String? = null,
 ) {
-    val details: EpgDetails get() = EpgDetails(categories, year, rating, lengthMin, episode)
+    val details: EpgDetails get() = EpgDetails(category, ageRating, subtitle)
 }
 
-/** A programme row carrying the feed's [details]. */
-fun EpgProgrammeEntity.withDetails(details: EpgDetails): EpgProgrammeEntity = if (details == EpgDetails.NONE) this else copy(
-    categories = details.categories,
-    year = details.year,
-    rating = details.rating,
-    lengthMin = details.lengthMin,
-    episode = details.episode,
-)
-
-/** Projection for the "Use this guide's channel logos" override: one EPG channel id → its feed icon. */
-data class EpgChannelIcon(
-    val epgChannelId: String,
-    val iconUrl: String,
-)
-
-/**
- * Projection for the "Match EPG" candidate list: one feed's name for one guide channel, with the
- * normalized forms the matcher works in. Both may be null on a row written before v41 or by a path
- * that does not fill them — the reader normalizes on the fly for those.
- */
-data class EpgChannelName(
+/** One catalogue channel as the "Match EPG" picker sees it. */
+data class GuideChannelName(
     val epgChannelId: String,
     val displayName: String?,
-    val normName: String?,
-    val normId: String?,
 )
-
-/** One programme's synopsis, read only for the programmes the title alone did not match. */
-data class EpgProgrammeText(val id: Long, val description: String?)
-
-data class EpgHashProjection(
-    val id: Long,
-    val epgChannelId: String,
-    val startMs: Long,
-    val contentHash: Int,
-)
-
-// The details are part of the hash, so a feed that starts sending them (or the first sync after v47)
-// rewrites the rows instead of skipping them as unchanged.
-fun EpgProgrammeEntity.computeContentHash(): Int =
-    Objects.hash(title, description, stopMs, categories, year, rating, lengthMin, episode)

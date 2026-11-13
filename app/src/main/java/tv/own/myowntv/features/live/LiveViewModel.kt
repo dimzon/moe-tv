@@ -286,7 +286,7 @@ class LiveViewModel(
      *  single place that knows a customization changed. */
 
     /** The same candidate set the Guide's picker uses — filtered by no source. */
-    private val guideCandidates = tv.own.owntv.core.epg.GuideCandidates(epgDao)
+    private val guideCandidates = tv.own.owntv.core.epg.GuideCandidates(channelDao, epgDao)
 
     /** Bumped when a channel's EPG mapping changes so [nowNext] reloads for the same focused channel. */
     private val epgRefresh = MutableStateFlow(0)

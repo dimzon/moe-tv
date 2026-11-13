@@ -10,8 +10,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import tv.own.owntv.core.database.OwnTVDatabase
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
-import tv.own.owntv.core.database.entity.SourceEntity
-import tv.own.owntv.core.model.SourceType
 
 /**
  * Which finished programmes survive a sync.
@@ -32,8 +30,6 @@ class EpgRetentionTest {
     @Before
     fun setUp() {
         db = ownTVTestDatabase()
-        // Programmes must belong to a real playlist row (epg_programmes.sourceId is a foreign key).
-        runBlocking { db.sourceDao().insert(SourceEntity(id = 1, name = "RuTube", type = SourceType.RUTUBE, url = "https://rutube.test")) }
     }
 
     @After
@@ -85,10 +81,9 @@ class EpgRetentionTest {
         assertEquals(1, countAll())
     }
 
-    private suspend fun countAll(): Int = db.epgDao().countForSources()
+    private suspend fun countAll(): Int = db.epgDao().countAll()
 
     private fun programme(epgChannelId: String, startMs: Long, stopMs: Long) = EpgProgrammeEntity(
-        sourceId = 1,
         epgChannelId = epgChannelId,
         startMs = startMs,
         stopMs = stopMs,

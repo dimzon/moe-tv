@@ -17,11 +17,8 @@ import org.junit.runner.RunWith
 import tv.own.owntv.core.database.OwnTVDatabase
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
-import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
 import tv.own.owntv.core.i18n.LocaleStore
-import tv.own.owntv.core.model.MediaType
-import tv.own.owntv.core.model.SourceType
 import tv.own.owntv.core.settings.SettingsRepository
 
 /**
@@ -43,8 +40,6 @@ class UserDataTombstoneTest {
     private lateinit var db: OwnTVDatabase
     private lateinit var resolver: UserDataResolver
     private lateinit var writer: UserDataWriter
-
-    private var sourceId = 0L
 
     // The `: Unit` is load-bearing: without it Kotlin infers the last expression's type, JUnit
     // rejects the class with "Method setUp() should be void", and the whole suite never runs.
@@ -75,9 +70,6 @@ class UserDataTombstoneTest {
             userData = resolver,
             settings = settings,
         )
-        sourceId = db.sourceDao().insert(
-            SourceEntity(name = "RuTube", type = SourceType.RUTUBE, url = "https://rutube.test"),
-        )
         context.pendingStore.edit { it.remove(PENDING_KEY) }
     }
 
@@ -91,9 +83,9 @@ class UserDataTombstoneTest {
     @Test
     fun removingAFavoriteRecordsADeletionThatTravels() = runBlocking {
         val channelId = insertChannel("m-1", "BBC One")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
+        db.favoriteDao().add(FavoriteEntity(itemId = channelId, addedAt = 100))
 
-        writer.removeFavorite(MediaType.LIVE, channelId)
+        writer.removeFavorite(channelId)
 
         assertEquals(0, db.favoriteDao().getAllOnce().size)
         val exported = resolver.exportTombstones(setOf("fav"))
@@ -108,8 +100,8 @@ class UserDataTombstoneTest {
     @Test
     fun anIncomingFavoriteOlderThanTheDeletionIsNotReinstated() = runBlocking {
         val channelId = insertChannel("m-1", "BBC One")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
-        writer.removeFavorite(MediaType.LIVE, channelId)
+        db.favoriteDao().add(FavoriteEntity(itemId = channelId, addedAt = 100))
+        writer.removeFavorite(channelId)
 
         // What the other device sends: the same favorite, as it was before the deletion.
         resolver.importAll(incomingFavorites(channelId, at = 100))
@@ -128,8 +120,8 @@ class UserDataTombstoneTest {
     @Test
     fun aRestoreReinstatesWhatADeletionWouldHaveRefused() = runBlocking {
         val channelId = insertChannel("m-1", "BBC One")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
-        writer.removeFavorite(MediaType.LIVE, channelId)
+        db.favoriteDao().add(FavoriteEntity(itemId = channelId, addedAt = 100))
+        writer.removeFavorite(channelId)
 
         resolver.clearDeletions()
         val refused = resolver.importAll(incomingFavorites(channelId, at = 100))
@@ -145,8 +137,8 @@ class UserDataTombstoneTest {
     @Test
     fun aRestoreLeavesNoMarkerForTheNextSyncToActOn() = runBlocking {
         val channelId = insertChannel("m-1", "BBC One")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
-        writer.removeFavorite(MediaType.LIVE, channelId)
+        db.favoriteDao().add(FavoriteEntity(itemId = channelId, addedAt = 100))
+        writer.removeFavorite(channelId)
         resolver.clearDeletions()
         resolver.importAll(incomingFavorites(channelId, at = 100))
 
@@ -160,8 +152,8 @@ class UserDataTombstoneTest {
     @Test
     fun aMergeStillRefusesAndReportsTheCount() = runBlocking {
         val channelId = insertChannel("m-1", "BBC One")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
-        writer.removeFavorite(MediaType.LIVE, channelId)
+        db.favoriteDao().add(FavoriteEntity(itemId = channelId, addedAt = 100))
+        writer.removeFavorite(channelId)
 
         val refused = resolver.importAll(incomingFavorites(channelId, at = 100))
 
@@ -173,8 +165,8 @@ class UserDataTombstoneTest {
     @Test
     fun anIncomingFavoriteNewerThanTheDeletionIsApplied() = runBlocking {
         val channelId = insertChannel("m-1", "BBC One")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
-        writer.removeFavorite(MediaType.LIVE, channelId)
+        db.favoriteDao().add(FavoriteEntity(itemId = channelId, addedAt = 100))
+        writer.removeFavorite(channelId)
 
         resolver.importAll(incomingFavorites(channelId, at = System.currentTimeMillis() + 60_000))
 
@@ -185,7 +177,7 @@ class UserDataTombstoneTest {
     @Test
     fun anIncomingDeletionRemovesTheLocalRow() = runBlocking {
         val channelId = insertChannel("m-1", "BBC One")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
+        db.favoriteDao().add(FavoriteEntity(itemId = channelId, addedAt = 100))
 
         val applied = resolver.applyTombstones(incomingDeletion(channelId, at = 200))
 
@@ -197,7 +189,7 @@ class UserDataTombstoneTest {
     @Test
     fun anIncomingDeletionOlderThanTheLocalRowLeavesItAlone() = runBlocking {
         val channelId = insertChannel("m-1", "BBC One")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = channelId, addedAt = 500))
+        db.favoriteDao().add(FavoriteEntity(itemId = channelId, addedAt = 500))
 
         resolver.applyTombstones(incomingDeletion(channelId, at = 200))
 
@@ -217,8 +209,8 @@ class UserDataTombstoneTest {
     @Test
     fun aDeletionStillMatchesAfterAResyncRewritesTheCatalogue() = runBlocking {
         val key = insertChannel("m-1", "BBC One")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = key, addedAt = 100))
-        writer.removeFavorite(MediaType.LIVE, key)
+        db.favoriteDao().add(FavoriteEntity(itemId = key, addedAt = 100))
+        writer.removeFavorite(key)
 
         db.channelDao().deleteByRemoteIds(listOf(key))
         val returned = insertChannel("m-1", "BBC One")
@@ -237,7 +229,7 @@ class UserDataTombstoneTest {
 
         assertTrue("a favorite this device does not have is new", resolver.wouldAdd("fav", incoming))
 
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = channelId, addedAt = 100))
+        db.favoriteDao().add(FavoriteEntity(itemId = channelId, addedAt = 100))
         assertFalse("one it already has is not", resolver.wouldAdd("fav", incomingFavorites(channelId, at = 100).getJSONObject(0)))
 
         val deletion = incomingDeletion(channelId, at = 200).getJSONObject(0)
@@ -250,7 +242,9 @@ class UserDataTombstoneTest {
     @Test
     fun watchHistoryNeverMovesBackwards() = runBlocking {
         val channelId = insertChannel("m-1", "BBC One")
-        db.historyDao().record(WatchHistoryEntity(mediaType = MediaType.LIVE, itemId = channelId, watchedAt = 500))
+        // `insert`, not `record`: record stamps this device's id into the composite key, while the
+        // imported copy carries no `dev` — two rows for one item would make `single()` ambiguous.
+        db.historyDao().insert(WatchHistoryEntity(itemId = channelId, watchedAt = 500))
 
         resolver.importAll(incomingHistory(channelId, at = 100))
         assertEquals("history was aged by a sync", 500L, db.historyDao().getAllOnce().single().watchedAt)
@@ -260,12 +254,12 @@ class UserDataTombstoneTest {
     }
 
     private suspend fun incomingHistory(itemId: String, at: Long): JSONArray {
-        val record = resolver.identityOf(MediaType.LIVE, itemId)!!
+        val record = resolver.identityOf(itemId)!!
         return JSONArray().put(record.put("kind", "his").put("at", at))
     }
 
     private suspend fun incomingFavorites(itemId: String, at: Long): JSONArray {
-        val record = resolver.identityOf(MediaType.LIVE, itemId)!!
+        val record = resolver.identityOf(itemId)!!
         return JSONArray().put(record.put("kind", "fav").put("at", at))
     }
 

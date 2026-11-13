@@ -10,16 +10,15 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import tv.own.owntv.core.database.entity.EpgChannelEntity
+import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.epg.GuideCandidates
 
 /**
- * The two candidate queries, against a real database.
+ * The candidate queries, against a real database.
  *
- * What is being proved is a *negative*: that neither query filters by source. The unit tests cover
- * the merge; only a database can show that a row belonging to a source that no longer exists still
- * comes back, which is the condition behind the "no guide channels match" report.
+ * The catalogue supplies names and the guide supplies presence; neither source alone is enough, and
+ * only a database can show both halves coming back together.
  */
 @RunWith(AndroidJUnit4::class)
 class GuideCandidateDaoTest {
@@ -30,21 +29,16 @@ class GuideCandidateDaoTest {
     @Before
     fun setUp() {
         db = ownTVTestDatabase()
-        candidates = GuideCandidates(db.epgDao())
+        candidates = GuideCandidates(db.channelDao(), db.epgDao())
     }
 
     @After
     fun tearDown() = db.close()
 
     @Test
-    fun rowsUnderAnUnreferencedSourceAreStillCandidates() = runBlocking {
-        // Source 4242 is in no source table — exactly what a deleted-and-re-added playlist, or a
-        // standalone EPG feed, leaves behind. The old query filtered these out while the guide kept
-        // drawing their programmes.
-        db.epgDao().upsertChannels(
-            listOf(EpgChannelEntity(sourceId = 4242, epgChannelId = "bbc1", displayName = "BBC One")),
-        )
-        db.epgDao().upsertProgrammes(listOf(programme(sourceId = 4242, epgChannelId = "bbc1")))
+    fun aCatalogueChannelWithProgrammesIsOneNamedCandidate() = runBlocking {
+        db.channelDao().upsertAll(listOf(ChannelEntity(remoteId = "bbc1", name = "BBC One")))
+        db.epgDao().upsertProgrammes(listOf(programme("bbc1")))
 
         val all = candidates.all()
 
@@ -55,10 +49,9 @@ class GuideCandidateDaoTest {
     }
 
     @Test
-    fun aFeedWithProgrammesButNoChannelEntriesIsStillPickable() = runBlocking {
-        // <programme> without <channel>. epg_channels stays empty, so the old picker showed nothing
-        // at all while the guide grid was full.
-        db.epgDao().upsertProgrammes(listOf(programme(sourceId = 7, epgChannelId = "itv1")))
+    fun aFeedWithProgrammesButNoChannelEntryIsStillPickable() = runBlocking {
+        // A guide row can outlive its catalogue channel (a deleted channel, a re-sync in flight).
+        db.epgDao().upsertProgrammes(listOf(programme("itv1")))
 
         val all = candidates.all()
 
@@ -69,43 +62,21 @@ class GuideCandidateDaoTest {
 
     @Test
     fun aNamedChannelWithNoProgrammesComesBackFlagged() = runBlocking {
-        db.epgDao().upsertChannels(
-            listOf(EpgChannelEntity(sourceId = 7, epgChannelId = "sky1", displayName = "Sky One")),
-        )
+        db.channelDao().upsertAll(listOf(ChannelEntity(remoteId = "sky1", name = "Sky One")))
 
         val all = candidates.all()
 
         assertEquals(listOf("sky1"), all.map { it.epgChannelId })
+        assertEquals("Sky One", all.single().displayName)
         assertFalse(all.single().hasProgrammes)
     }
 
     @Test
-    fun twoFeedsCarryingOneChannelProduceOneCandidate() = runBlocking {
-        db.epgDao().upsertChannels(
-            listOf(
-                EpgChannelEntity(sourceId = 1, epgChannelId = "bbc1", displayName = "BBC1"),
-                EpgChannelEntity(sourceId = 2, epgChannelId = "bbc1", displayName = "BBC One HD"),
-            ),
-        )
-        db.epgDao().upsertProgrammes(
-            listOf(
-                programme(sourceId = 1, epgChannelId = "bbc1"),
-                programme(sourceId = 2, epgChannelId = "bbc1", startMs = 2_000),
-            ),
-        )
-
-        val all = candidates.all()
-
-        assertEquals(1, all.size)
-        assertEquals("BBC One HD", all.single().displayName)
-    }
-
-    @Test
     fun theSearchFindsAChannelByNameAndById() = runBlocking {
-        db.epgDao().upsertChannels(
+        db.channelDao().upsertAll(
             listOf(
-                EpgChannelEntity(sourceId = 1, epgChannelId = "bbc.one.uk", displayName = "BBC One"),
-                EpgChannelEntity(sourceId = 1, epgChannelId = "itv.one.uk", displayName = "ITV1"),
+                ChannelEntity(remoteId = "bbc.one.uk", name = "BBC One"),
+                ChannelEntity(remoteId = "itv.one.uk", name = "ITV1"),
             ),
         )
 
@@ -114,12 +85,7 @@ class GuideCandidateDaoTest {
         assertTrue(candidates.forPicker("BBC One", "nothing-matches-this").isEmpty())
     }
 
-    private fun programme(
-        sourceId: Long,
-        epgChannelId: String,
-        startMs: Long = 1_000,
-    ) = EpgProgrammeEntity(
-        sourceId = sourceId,
+    private fun programme(epgChannelId: String, startMs: Long = 1_000) = EpgProgrammeEntity(
         epgChannelId = epgChannelId,
         startMs = startMs,
         stopMs = startMs + 1_000,

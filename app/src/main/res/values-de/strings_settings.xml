@@ -348,7 +348,6 @@
     <string name="settings_group_summary_quick">Die Schalter, die Sie am häufigsten brauchen</string>
     <string name="settings_group_sound_subtitles">Ton und Untertitel</string>
     <string name="settings_group_watching_recording">Wiedergabe und Aufnahme</string>
-    <string name="settings_search_guide_logos">Senderlogos der Programmübersicht</string>
     <string name="settings_search_keywords_profiles">Zuschauer Kinder Modus PIN Sperre Konto</string>
     <string name="settings_search_keywords_playlists">m3u xtream Quelle synchronisieren hinzufügen entfernen</string>
     <string name="settings_search_keywords_epg">xmltv Programmübersicht Programmdaten Sendung</string>
@@ -721,8 +720,6 @@
     <string name="settings_epg_sources_save_sync">Speichern und synchronisieren</string>
     <string name="settings_epg_sources_fill_playlist">Aus Wiedergabeliste übernehmen</string>
     <string name="settings_epg_sources_none_playlist">Keine deiner Wiedergabelisten stellt eine EPG-URL bereit.</string>
-    <string name="settings_epg_sources_use_logos">Senderlogos dieser Programmübersicht verwenden</string>
-    <string name="settings_epg_sources_logos_description">Logos aus diesem XMLTV-Feed statt aus deiner Wiedergabeliste anzeigen. Für Sender, für die dieser Feed kein Logo enthält, wird weiterhin das Logo der Wiedergabeliste verwendet.</string>
     <string name="settings_epg_sources_name">Name</string>
     <string name="settings_epg_sources_url">XMLTV-URL</string>
     <string name="settings_epg_sources_portal_guide">Programm vom Portal</string>
@@ -1554,7 +1551,6 @@
     <string name="settings_help_playlist_url">Die Adresse Ihrer .m3u- oder .m3u8-Liste.</string>
     <string name="settings_line_fill_from_playlist">Die Guide-Adresse Ihrer Playlist verwenden</string>
     <string name="settings_line_epg_auto_refresh">Den Guide aktuell halten</string>
-    <string name="settings_line_epg_logos">Statt der Logos der Playlist</string>
     <string name="settings_help_epg_name">Erscheint in der Guide-Liste und unter EPG manuell wählen.</string>
     <string name="settings_glass_bg_title">Glas &amp; Hintergrund</string>
     <string name="settings_line_glass_bg">Hintergrund, Bildwirkung, Glas</string>

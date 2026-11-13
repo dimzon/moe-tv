@@ -186,7 +186,6 @@
     <string name="content_epg_add_favourite">Toevoegen aan favorieten</string>
     <string name="content_epg_remove_favourite">Uit favorieten verwijderen</string>
     <string name="content_epg_jump_now">Naar nu</string>
-    <string name="content_epg_include_logos">Gidslogo’s meenemen</string>
     <string name="content_epg_review_description">Deze zenders zijn op naam gekoppeld, maar de overeenkomst was niet overtuigend. Accepteer de juiste en sla de rest over.</string>
     <string name="content_epg_accept">Accepteren</string>
     <string name="content_epg_accept_all">Alles accepteren</string>

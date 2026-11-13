@@ -75,9 +75,9 @@ class SetupViewModel(
     private var importJob: Job? = null
 
     fun syncPendingEpg() {
-        val src = pendingEpgSource ?: return
+        if (pendingEpgSource == null) return
         viewModelScope.launch {
-            tv.own.myowntv.features.settings.runSemiAutoEpgSync(src, epgRepository) { _epgSync.value = it }
+            tv.own.myowntv.features.settings.runSemiAutoEpgSync(epgRepository) { _epgSync.value = it }
         }
     }
 
@@ -107,7 +107,7 @@ class SetupViewModel(
             block()
             val done = importer.state.value as? SourceImporter.ImportState.Success ?: return@launch
             val source = done.source ?: return@launch
-            if (!importer.backgroundHandoff && epgRepository.hasGuide(source)) {
+            if (!importer.backgroundHandoff) {
                 pendingEpgSource = source
                 _epgSync.value = tv.own.myowntv.features.settings.EpgSyncUi.Ask(source.name)
             }

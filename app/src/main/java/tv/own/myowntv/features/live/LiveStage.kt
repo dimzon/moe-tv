@@ -253,15 +253,16 @@ internal fun progressOf(p: XtEpgEntry): Float {
     return ((System.currentTimeMillis() - p.startMs).toFloat() / span).coerceIn(0f, 1f)
 }
 
-/** "18:45 – 20:30 · Horror · 2026 · FSK 16": the time range, then only the details the feed carries. */
+/** "18:45 – 20:30 · Сериал · 16+ · 95 min": the time range, then only the details the feed carries. */
 @Composable
 private fun detailsLine(now: XtEpgEntry, details: EpgDetails?): String {
     val formatTime = rememberSystemTimeFormatter()
-    val length = details?.lengthMin?.let { stringResource(R.string.player_duration_minutes, it) }
+    val length = ((now.stopMs - now.startMs) / 60_000L).toInt().takeIf { it > 0 }
+        ?.let { stringResource(R.string.player_duration_minutes, it) }
     return (
         listOf(stringResource(R.string.content_live_time_range_plain, formatTime(now.startMs), formatTime(now.stopMs))) +
             details?.categoryList.orEmpty() +
-            listOfNotNull(details?.year?.toString(), details?.rating, length)
+            listOfNotNull(details?.subtitle, details?.ageRating, length)
         ).joinToString(" · ")
 }
 

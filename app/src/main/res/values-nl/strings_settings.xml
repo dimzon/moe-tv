@@ -348,7 +348,6 @@
     <string name="settings_group_summary_quick">De schakelaars die je het vaakst gebruikt</string>
     <string name="settings_group_sound_subtitles">Geluid en ondertitels</string>
     <string name="settings_group_watching_recording">Kijken en opnemen</string>
-    <string name="settings_search_guide_logos">Zenderlogo\'s in de gids</string>
     <string name="settings_search_keywords_profiles">kijkers kinderen kindermodus PIN-vergrendeling account</string>
     <string name="settings_search_keywords_playlists">M3U Xtream bron synchroniseren toevoegen verwijderen</string>
     <string name="settings_search_keywords_epg">XMLTV gids feed programma</string>
@@ -721,8 +720,6 @@
     <string name="settings_epg_sources_save_sync">Opslaan en synchroniseren</string>
     <string name="settings_epg_sources_fill_playlist">Invullen vanuit afspeellijst</string>
     <string name="settings_epg_sources_none_playlist">Geen van uw afspeellijsten bevat een EPG-URL.</string>
-    <string name="settings_epg_sources_use_logos">Zenderlogo\'s uit deze gids gebruiken</string>
-    <string name="settings_epg_sources_logos_description">Toon logo\'s uit deze XMLTV-feed in plaats van die uit uw afspeellijst. Zenders waarvoor deze feed geen logo bevat, behouden het logo uit de afspeellijst.</string>
     <string name="settings_epg_sources_name">Naam</string>
     <string name="settings_epg_sources_url">XMLTV-URL</string>
     <string name="settings_epg_sources_portal_guide">Gids van de portal</string>
@@ -1554,7 +1551,6 @@
     <string name="settings_help_playlist_url">Het adres van je .m3u- of .m3u8-lijst.</string>
     <string name="settings_line_fill_from_playlist">Gebruik het gidsadres dat je playlist geeft</string>
     <string name="settings_line_epg_auto_refresh">Houd de gids actueel</string>
-    <string name="settings_line_epg_logos">In plaats van die van de playlist</string>
     <string name="settings_help_epg_name">Getoond in de gidsenlijst en bij EPG handmatig kiezen.</string>
     <string name="settings_glass_bg_title">Glas &amp; achtergrond</string>
     <string name="settings_line_glass_bg">Achtergrond, beeldstijl, glas</string>

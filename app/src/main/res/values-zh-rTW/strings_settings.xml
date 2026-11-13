@@ -346,7 +346,6 @@
     <string name="settings_group_summary_quick">最常用的開關</string>
     <string name="settings_group_sound_subtitles">聲音和字幕</string>
     <string name="settings_group_watching_recording">觀看與錄影</string>
-    <string name="settings_search_guide_logos">節目表頻道標誌</string>
     <string name="settings_search_keywords_profiles">觀看者 兒童模式 PIN 鎖定 帳戶</string>
     <string name="settings_search_keywords_playlists">M3U Xtream 來源 同步 新增 移除</string>
     <string name="settings_search_keywords_epg">XMLTV 節目表 來源 節目</string>
@@ -714,8 +713,6 @@
     <string name="settings_epg_sources_save_sync">儲存並同步</string>
     <string name="settings_epg_sources_fill_playlist">從播放清單填入</string>
     <string name="settings_epg_sources_none_playlist">您的播放清單都未提供電子節目表網址。</string>
-    <string name="settings_epg_sources_use_logos">使用此節目表的頻道標誌</string>
-    <string name="settings_epg_sources_logos_description">顯示此 XMLTV 資料來源中的標誌，而非播放清單中的標誌。若此資料來源未提供某個頻道的標誌，該頻道會繼續使用播放清單中的標誌。</string>
     <string name="settings_epg_sources_name">名稱</string>
     <string name="settings_epg_sources_url">XMLTV 網址</string>
     <string name="settings_epg_sources_portal_guide">來自入口網站的節目表</string>
@@ -1523,7 +1520,6 @@
     <string name="settings_help_playlist_url">你的 .m3u 或 .m3u8 清單位址。</string>
     <string name="settings_line_fill_from_playlist">使用播放清單提供的節目表位址</string>
     <string name="settings_line_epg_auto_refresh">讓節目表保持最新</string>
-    <string name="settings_line_epg_logos">取代播放清單的台標</string>
     <string name="settings_help_epg_name">顯示在節目表清單和「手動選擇 EPG」中。</string>
     <string name="settings_glass_bg_title">玻璃與背景</string>
     <string name="settings_line_glass_bg">背景、圖片效果、玻璃</string>

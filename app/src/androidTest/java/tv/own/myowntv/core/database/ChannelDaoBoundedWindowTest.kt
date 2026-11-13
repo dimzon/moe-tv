@@ -55,8 +55,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.entity.ChannelEntity
-import tv.own.owntv.core.model.MediaType
-import tv.own.owntv.core.model.SourceType
 
 /**
  * Behavioral tests for the bounded window queries added for direct-tune's zap-list rebuild.
@@ -75,20 +73,6 @@ class ChannelDaoBoundedWindowTest {
             .allowMainThreadQueries()
             .build()
         dao = db.channelDao()
-        runBlocking {
-            db.sourceDao().seedSources(
-                listOf(
-                    SourceSeed(id = 10, name = "Provider A"),
-                    SourceSeed(id = 20, name = "Provider B"),
-                ),
-            )
-            db.categoryDao().seedCategories(
-                listOf(
-                    CategorySeed(id = 100, sourceId = 10, mediaType = MediaType.LIVE, name = "Live", sortOrder = 0),
-                    CategorySeed(id = 200, sourceId = 10, mediaType = MediaType.LIVE, name = "Live", sortOrder = 0),
-                ),
-            )
-        }
     }
 
     @After
@@ -97,7 +81,7 @@ class ChannelDaoBoundedWindowTest {
     }
 
     @Test
-    fun findByNumber_returnsAllMatchingChannels_acrossSources() = runBlocking {
+    fun findByNumber_returnsAllMatchingChannels_acrossCategories() = runBlocking {
         seedCategory(
             categoryId = 100,
             channels = listOf(
@@ -146,30 +130,6 @@ class ChannelDaoBoundedWindowTest {
 
         val results = dao.findByNumber(7)
         assertEquals(listOf("ch2", "ch3", "ch1", "ch4"), results.map { it.id })
-    }
-
-    /**
-     * Two sources with the same provider number → current-source wins. The resolver relies on
-     * findByNumber returning the current-source row first when both sources are queried.
-     */
-    @Test
-    fun findByNumber_crossSource_currentSourceWins() = runBlocking {
-        seedCategory(
-            categoryId = 100,
-            channels = listOf(
-                ChannelSpec(id = 1L, name = "SourceA-Ch42", number = 42, sortOrder = 0),
-            ),
-        )
-        seedCategory(
-            categoryId = 200,
-            channels = listOf(
-                ChannelSpec(id = 2L, name = "SourceB-Ch42", number = 42, sortOrder = 0),
-            ),
-        )
-
-        // Querying both together: source 10 (current) comes first.
-        val both = dao.findByNumber(42)
-        assertEquals(listOf("ch1", "ch2"), both.map { it.id })
     }
 
     @Test
@@ -335,33 +295,6 @@ class ChannelDaoBoundedWindowTest {
         assertNull(tv.own.myowntv.player.resolveDirectTuneCandidate(candidates, setOf("ch1", "ch2")))
     }
 
-    /**
-     * Cross-source fallback integration: when the current source has no match, the other active
-     * sources are queried and the resolver applies the same uniqueness/zap-context policy.
-     */
-    @Test
-    fun resolveDirectTune_crossSource_fallbackPicksUniqueMatch() = runBlocking {
-        seedCategory(
-            categoryId = 100,
-            channels = listOf(
-                ChannelSpec(id = 1L, name = "SourceA-Other", number = 99, sortOrder = 0),
-            ),
-        )
-        seedCategory(
-            categoryId = 200,
-            channels = listOf(
-                ChannelSpec(id = 2L, name = "SourceB-Ch42", number = 42, sortOrder = 0),
-            ),
-        )
-
-        // Current source (10) has no match → fallback to source 20 → unique match.
-        val currentCandidates = dao.findByNumber(42)
-        val fallbackCandidates = dao.findByNumber(42)
-            .map { it.id }
-        assertEquals(emptyList<ChannelEntity>(), currentCandidates)
-        assertEquals(2L, tv.own.myowntv.player.resolveDirectTuneCandidate(fallbackCandidates, emptySet()))
-    }
-
     // --- helpers ---
 
     private suspend fun seedCategory(
@@ -378,33 +311,12 @@ class ChannelDaoBoundedWindowTest {
             )
         }
         dao.upsertAll(rows)
+        // The junction has FKs to both the catalogue and the category, so the category must exist.
+        db.categoryDao().upsertAll(listOf(CategoryEntity(id = categoryId, name = "Cat $categoryId")))
         db.channelCategoryDao().insertAll(
-            rows.map { ChannelCategoryEntity(channelHexId = it.remoteId!!, categoryId = categoryId) },
+            rows.map { ChannelCategoryEntity(channelHexId = it.remoteId, categoryId = categoryId) },
         )
     }
 
     private data class ChannelSpec(val id: Long, val name: String, val number: Int, val sortOrder: Int)
-}
-
-// Tiny helpers so the test stays readable (avoid pulling in every DAO surface).
-private suspend fun tv.own.owntv.core.database.dao.SourceDao.seedSources(seed: List<SourceSeed>) {
-    for (s in seed) insert(s.toEntity())
-}
-
-private data class SourceSeed(val id: Long, val name: String) {
-    fun toEntity() = tv.own.owntv.core.database.entity.SourceEntity(
-        id = id, name = name, type = SourceType.RUTUBE, url = "https://example.test/$id",
-    )
-}
-
-private suspend fun tv.own.owntv.core.database.dao.CategoryDao.seedCategories(seed: List<CategorySeed>) {
-    upsertAll(seed.map { it.toEntity() })
-}
-
-private data class CategorySeed(
-    val id: Long, val sourceId: Long, val mediaType: MediaType, val name: String, val sortOrder: Int,
-) {
-    fun toEntity() = tv.own.owntv.core.database.entity.CategoryEntity(
-        id = id, sourceId = sourceId, mediaType = mediaType, name = name, sortOrder = sortOrder,
-    )
 }

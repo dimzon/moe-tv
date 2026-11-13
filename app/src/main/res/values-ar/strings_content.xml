@@ -222,7 +222,6 @@
     <string name="content_epg_add_favourite">إضافة إلى المفضّلة</string>
     <string name="content_epg_remove_favourite">إزالة من المفضّلة</string>
     <string name="content_epg_jump_now">الانتقال إلى الآن</string>
-    <string name="content_epg_include_logos">تضمين شعارات الدليل</string>
     <string name="content_epg_review_description">تمت مطابقة هذه القنوات بالاسم، لكن التطابق لم يكن مؤكدًا. اقبل المطابقات الصحيحة وتخطَّ البقية.</string>
     <string name="content_epg_accept">قبول</string>
     <string name="content_epg_accept_all">قبول الكل</string>

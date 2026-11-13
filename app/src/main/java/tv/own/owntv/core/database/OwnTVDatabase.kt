@@ -19,7 +19,6 @@ import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.ChannelFtsEntity
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.database.entity.CustomCategoryMemberEntity
-import tv.own.owntv.core.database.entity.EpgChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
 import tv.own.owntv.core.database.entity.PlaybackPrefsEntity
@@ -52,7 +51,6 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
         // Android TV home-screen bookkeeping
         TvProviderProgramEntity::class,
         // EPG
-        EpgChannelEntity::class,
         EpgProgrammeEntity::class,
         // FTS (search)
         ChannelFtsEntity::class,
@@ -74,8 +72,12 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
     // live-only), watch_history is keyed (itemId, deviceId) with no surrogate id, reminders drop the
     // stored channelName/epgChannelId, and the legacy playback_prefs.audioDelayMs column is gone.
     // v7 drops favorites.id — the hex itemId is the primary key.
+    // v8 slims epg_programmes to what RuTube publishes: subtitle/category/ageRating/iconUrl in,
+    // year/episode/lengthMin/contentHash out (the hash-diff machinery went with XMLTV), and
+    // epg_channels is gone — with one source the guide key IS channels.remoteId, so the table only
+    // duplicated the catalogue with worse (pre-rename, pre-disambiguation) names.
     // The old per-version log lives in git history and in CHANGELOG.md.
-    version = 7,
+    version = 8,
 
     exportSchema = true,
 )
@@ -118,9 +120,6 @@ abstract class OwnTVDatabase : RoomDatabase() {
                 "CREATE INDEX IF NOT EXISTS `index_epg_programmes_epgChannelId_startMs` ON `epg_programmes` (`epgChannelId`, `startMs`)",
                 "CREATE INDEX IF NOT EXISTS `index_epg_programmes_stopMs` ON `epg_programmes` (`stopMs`)",
                 "CREATE INDEX IF NOT EXISTS `index_epg_programmes_startMs_stopMs` ON `epg_programmes` (`startMs`, `stopMs`)",
-            ),
-            "epg_channels" to listOf(
-                "CREATE INDEX IF NOT EXISTS `index_epg_channels_normName` ON `epg_channels` (`normName`)",
             ),
         )
 

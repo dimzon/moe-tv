@@ -9,8 +9,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import tv.own.owntv.core.database.entity.ChannelEntity
-import tv.own.owntv.core.model.SourceType
-import tv.own.owntv.core.database.entity.SourceEntity
 
 /**
  * The curated-rename contract: the hex-keyed dictionary renames a channel with no FK attached, so
@@ -21,12 +19,10 @@ import tv.own.owntv.core.database.entity.SourceEntity
 class ChannelRenameDaoTest {
 
     private lateinit var db: OwnTVDatabase
-    private var source = 0L
 
     @Before
     fun setUp() = runBlocking {
         db = ownTVTestDatabase()
-        source = db.sourceDao().insert(SourceEntity(name = "Test", type = SourceType.RUTUBE, url = "https://test"))
     }
 
     @After

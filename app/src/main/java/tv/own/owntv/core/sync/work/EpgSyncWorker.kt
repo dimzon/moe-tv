@@ -16,7 +16,7 @@ import tv.own.owntv.core.util.isTransientSyncError
 
 /**
  * The WorkManager entry for the guide refresh. RuTube is the only source, so this runs the RuTube
- * EPG refresh ([EpgRepository.refreshRutube]) — the API-driven grid written straight into the
+ * EPG refresh ([EpgRepository.refresh]) — the API-driven grid written straight into the
  * shared EPG tables by [tv.own.owntv.core.sync.RuTubeEpgSyncer]. The old XMLTV-feed branch over a
  * standalone EPG-source store is gone with that system.
  */
@@ -72,7 +72,7 @@ class EpgSyncWorker(
             .onFailure { Log.i(TAG, "EPG sync stays in the background: ${it.message}") }
 
         try {
-            val programmes = epgRepository.refreshRutube(source) { channels, count ->
+            val programmes = epgRepository.refresh { channels, count ->
                 progress.publish(channels, count)
             }
             progress.flush()

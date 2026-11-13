@@ -348,7 +348,6 @@
     <string name="settings_group_summary_quick">നിങ്ങൾ ഏറ്റവും കൂടുതൽ ഉപയോഗിക്കുന്ന ടോഗിളുകൾ</string>
     <string name="settings_group_sound_subtitles">ശബ്ദവും സബ്‌ടൈറ്റിലുകളും</string>
     <string name="settings_group_watching_recording">കാണലും റെക്കോർഡിംഗും</string>
-    <string name="settings_search_guide_logos">ഗൈഡിലെ ചാനൽ ലോഗോകൾ</string>
     <string name="settings_search_keywords_profiles">കാണുന്നവർ കുട്ടികളുടെ മോഡ് PIN ലോക്ക് അക്കൗണ്ട്</string>
     <string name="settings_search_keywords_playlists">M3U Xtream ഉറവിടം സമന്വയിപ്പിക്കൽ ചേർക്കുക നീക്കംചെയ്യുക</string>
     <string name="settings_search_keywords_epg">XMLTV ഗൈഡ് ഫീഡ് പരിപാടി</string>
@@ -721,8 +720,6 @@
     <string name="settings_epg_sources_save_sync">സംരക്ഷിച്ച് സമന്വയിപ്പിക്കുക</string>
     <string name="settings_epg_sources_fill_playlist">പ്ലേലിസ്റ്റിൽ നിന്ന് പൂരിപ്പിക്കുക</string>
     <string name="settings_epg_sources_none_playlist">നിങ്ങളുടെ പ്ലേലിസ്റ്റുകളിലൊന്നും EPG URL നൽകുന്നില്ല.</string>
-    <string name="settings_epg_sources_use_logos">ഈ ഗൈഡിലെ ചാനൽ ലോഗോകൾ ഉപയോഗിക്കുക</string>
-    <string name="settings_epg_sources_logos_description">നിങ്ങളുടെ പ്ലേലിസ്റ്റിലുള്ളവയ്ക്ക് പകരം ഈ XMLTV ഫീഡിലെ ലോഗോകൾ കാണിക്കുക. ഈ ഫീഡിൽ ലോഗോ ഇല്ലാത്ത ചാനലുകൾ പ്ലേലിസ്റ്റിലെ ലോഗോ നിലനിർത്തും.</string>
     <string name="settings_epg_sources_name">പേര്</string>
     <string name="settings_epg_sources_url">XMLTV URL</string>
     <string name="settings_epg_sources_portal_guide">പോർട്ടലിൽ നിന്നുള്ള ഗൈഡ്</string>
@@ -1554,7 +1551,6 @@
     <string name="settings_help_playlist_url">നിങ്ങളുടെ .m3u അല്ലെങ്കിൽ .m3u8 ലിസ്റ്റിന്റെ വിലാസം.</string>
     <string name="settings_line_fill_from_playlist">പ്ലേലിസ്റ്റ് നൽകുന്ന ഗൈഡ് വിലാസം ഉപയോഗിക്കുക</string>
     <string name="settings_line_epg_auto_refresh">ഗൈഡ് പുതുക്കി നിലനിർത്തുക</string>
-    <string name="settings_line_epg_logos">പ്ലേലിസ്റ്റിലെ ലോഗോകൾക്ക് പകരം</string>
     <string name="settings_help_epg_name">ഗൈഡ് ലിസ്റ്റിലും EPG സ്വയം തിരഞ്ഞെടുക്കുക എന്നതിലും കാണിക്കുന്നു.</string>
     <string name="settings_glass_bg_title">ഗ്ലാസും പശ്ചാത്തലവും</string>
     <string name="settings_line_glass_bg">പശ്ചാത്തലം, ചിത്രത്തിന്റെ രൂപം, ഗ്ലാസ്</string>

@@ -352,7 +352,6 @@
     <string name="settings_group_summary_quick">Переключатели, которые нужны чаще всего</string>
     <string name="settings_group_sound_subtitles">Звук и субтитры</string>
     <string name="settings_group_watching_recording">Просмотр и запись</string>
-    <string name="settings_search_guide_logos">Логотипы каналов в программе передач</string>
     <string name="settings_search_keywords_profiles">зрители дети детский режим PIN блокировка учётная запись</string>
     <string name="settings_search_keywords_playlists">M3U Xtream источник синхронизация добавить удалить</string>
     <string name="settings_search_keywords_epg">XMLTV программа передач лента телепередача</string>
@@ -735,8 +734,6 @@
     <string name="settings_epg_sources_save_sync">Сохранить и синхронизировать</string>
     <string name="settings_epg_sources_fill_playlist">Заполнить из плейлиста</string>
     <string name="settings_epg_sources_none_playlist">Ни в одном из ваших плейлистов нет URL EPG.</string>
-    <string name="settings_epg_sources_use_logos">Использовать логотипы каналов из этой программы передач</string>
-    <string name="settings_epg_sources_logos_description">Показывать логотипы из этого источника XMLTV вместо логотипов из плейлиста. Если в источнике нет логотипа канала, сохраняется логотип из плейлиста.</string>
     <string name="settings_epg_sources_name">Название</string>
     <string name="settings_epg_sources_url">URL XMLTV</string>
     <string name="settings_epg_sources_portal_guide">Телепрограмма с портала</string>
@@ -1626,7 +1623,6 @@
     <string name="settings_help_playlist_url">Адрес вашего списка .m3u или .m3u8.</string>
     <string name="settings_line_fill_from_playlist">Использовать адрес гида из плейлиста</string>
     <string name="settings_line_epg_auto_refresh">Поддерживать гид в актуальном виде</string>
-    <string name="settings_line_epg_logos">Вместо логотипов плейлиста</string>
     <string name="settings_help_epg_name">Показывается в списке гидов и в «Выбрать EPG вручную».</string>
     <string name="settings_glass_bg_title">Стекло и фон</string>
     <string name="settings_line_glass_bg">Фон, вид картинки, стекло</string>

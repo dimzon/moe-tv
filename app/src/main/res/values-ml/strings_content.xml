@@ -186,7 +186,6 @@
     <string name="content_epg_add_favourite">പ്രിയപ്പെട്ടവയിലേക്ക് ചേർക്കുക</string>
     <string name="content_epg_remove_favourite">പ്രിയപ്പെട്ടവയിൽ നിന്ന് നീക്കുക</string>
     <string name="content_epg_jump_now">ഇപ്പോഴത്തെ സമയത്തിലേക്ക് പോകുക</string>
-    <string name="content_epg_include_logos">ഗൈഡ് ലോഗോകൾ ഉൾപ്പെടുത്തുക</string>
     <string name="content_epg_review_description">ഈ ചാനലുകൾ പേരനുസരിച്ച് പൊരുത്തപ്പെടുത്തിയെങ്കിലും പൊരുത്തം ഉറപ്പുള്ളതായിരുന്നില്ല. ശരിയായവ സ്വീകരിക്കുക; ശേഷിക്കുന്നവ ഒഴിവാക്കുക.</string>
     <string name="content_epg_accept">സ്വീകരിക്കുക</string>
     <string name="content_epg_accept_all">എല്ലാം സ്വീകരിക്കുക</string>

@@ -352,7 +352,6 @@
     <string name="settings_group_summary_quick">Přepínače, které používáte nejčastěji</string>
     <string name="settings_group_sound_subtitles">Zvuk a titulky</string>
     <string name="settings_group_watching_recording">Sledování a nahrávání</string>
-    <string name="settings_search_guide_logos">Loga kanálů v TV programu</string>
     <string name="settings_search_keywords_profiles">diváci děti dětský režim PIN zámek účet</string>
     <string name="settings_search_keywords_playlists">M3U Xtream zdroj synchronizace přidat odebrat</string>
     <string name="settings_search_keywords_epg">XMLTV TV program zdroj pořad</string>
@@ -735,8 +734,6 @@
     <string name="settings_epg_sources_save_sync">Uložit a synchronizovat</string>
     <string name="settings_epg_sources_fill_playlist">Vyplnit z playlistu</string>
     <string name="settings_epg_sources_none_playlist">Žádný z vašich playlistů neposkytuje adresu URL EPG.</string>
-    <string name="settings_epg_sources_use_logos">Používat loga kanálů z tohoto TV programu</string>
-    <string name="settings_epg_sources_logos_description">Zobrazovat loga z tohoto zdroje XMLTV namísto log z playlistu. Kanály, pro které tento zdroj nemá logo, si ponechají logo z playlistu.</string>
     <string name="settings_epg_sources_name">Název</string>
     <string name="settings_epg_sources_url">Adresa URL XMLTV</string>
     <string name="settings_epg_sources_portal_guide">Program z portálu</string>
@@ -1616,7 +1613,6 @@
     <string name="settings_help_playlist_url">Adresa vašeho seznamu .m3u nebo .m3u8.</string>
     <string name="settings_line_fill_from_playlist">Použít adresu průvodce z playlistu</string>
     <string name="settings_line_epg_auto_refresh">Udržovat průvodce aktuální</string>
-    <string name="settings_line_epg_logos">Místo log z playlistu</string>
     <string name="settings_help_epg_name">Zobrazí se v seznamu průvodců a v Vybrat EPG ručně.</string>
     <string name="settings_glass_bg_title">Sklo a pozadí</string>
     <string name="settings_line_glass_bg">Pozadí, vzhled obrázku, sklo</string>

@@ -142,7 +142,7 @@ object RutubeParser {
      */
     private fun JSONObject.str(name: String): String? {
         if (!has(name) || isNull(name)) return null
-        return optString(name, null)?.takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) }
+        return optString(name, null)?.trim()?.takeIf { it.isNotEmpty() && !it.equals("null", ignoreCase = true) }
     }
 
     /**
@@ -210,6 +210,7 @@ object RutubeParser {
             title = title,
             subtitle = obj.str("subtitle"),
             description = obj.str("description"),
+            ageRating = obj.str("ageRating"),
             startUtcMillis = start,
             endUtcMillis = stop,
         )
@@ -235,6 +236,8 @@ object RutubeParser {
             subtitle = obj.str("subtitle"),
             description = obj.str("description"),
             category = category,
+            // Pangolin spells it `ageRating`; the mobile schedule spells it `age_rating`.
+            ageRating = obj.str("ageRating") ?: obj.str("age_rating"),
             startUtcMillis = start,
             endUtcMillis = stop,
             iconUrl = obj.str("preview_picture_url"),

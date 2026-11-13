@@ -98,9 +98,9 @@ import tv.own.myowntv.ui.theme.mpxSp
 import tv.own.myowntv.ui.theme.stageAccent
 import tv.own.myowntv.ui.theme.stageText
 
-/** The facts line of a programme: "S2 E5 · 2023 · FSK 12 · 95 min" — only what the feed carries. */
+/** The facts line of a programme: "Сезон 2 Серия 17 · 16+ · 95 min" — only what the feed carries. */
 internal fun programmeFacts(d: EpgDetails, lengthText: String?): List<String> =
-    listOfNotNull(d.episode, d.year?.toString(), d.rating, lengthText)
+    listOfNotNull(d.subtitle, d.ageRating, lengthText)
 
 /** Where a programme sits against the clock: its group on the page and the actions it offers. */
 internal enum class ProgrammeTime { PAST, NOW, LATER }
@@ -396,7 +396,8 @@ private fun OpenProgramme(
     // The stored copy carries the synopsis and details; the times stay this row's (they carry the EPG offset).
     val full by produceState<EpgProgrammeEntity?>(null, p.id) { value = if (p.description == null && p.id > 0) vm.programmeFull(p.id) else null }
     val shown = full?.copy(startMs = p.startMs, stopMs = p.stopMs) ?: p
-    val length = shown.details.lengthMin?.let { stringResource(R.string.player_duration_minutes, it) }
+    val length = ((shown.stopMs - shown.startMs) / 60_000L).toInt().takeIf { it > 0 }
+        ?.let { stringResource(R.string.player_duration_minutes, it) }
     val facts = listOfNotNull(
         stringResource(R.string.content_live_now).takeIf { time == ProgrammeTime.NOW },
         stringResource(R.string.content_live_time_range_plain, formatTime(shown.startMs), formatTime(shown.stopMs)),

@@ -348,8 +348,6 @@
     <string name="content_epg_remove_favourite">Remove from favorites</string>
     <!-- Translators: Button in the EPG screen to jump to the current time. -->
     <string name="content_epg_jump_now">Jump to Now</string>
-    <!-- Translators: A switch in the Review EPG matches window. When on, the channels matched there also show the logo of the guide channel they were matched to. -->
-    <string name="content_epg_include_logos">Include guide logos</string>
     <!-- Translators: Description in the EPG review dialog explaining what to do with uncertain matches. -->
     <string name="content_epg_review_description">These channels were matched by name but weren\'t a confident fit. Accept the right ones; skip the rest.</string>
     <!-- Translators: Button to accept an EPG match in the review dialog. -->

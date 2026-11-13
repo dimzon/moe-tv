@@ -407,7 +407,6 @@
     <string name="settings_group_summary_quick">Gehien erabiltzen dituzun etengailuak</string>
     <string name="settings_group_sound_subtitles">Soinua &amp; azpitituluak</string>
     <string name="settings_group_watching_recording">Ikusi eta grabatu</string>
-    <string name="settings_search_guide_logos">Gida-kanalen logoak</string>
     <string name="settings_search_keywords_profiles">ikusleak haurren modua pin blokeoa kontua viewers kids mode pin lock account</string>
     <string name="settings_search_keywords_playlists">m3u xtream iturburua sinkronizatu gehitu kendu source sync add remove</string>
     <string name="settings_search_keywords_epg">xmltv gida jarioa programa guide feed program</string>
@@ -805,8 +804,6 @@
     <string name="settings_epg_sources_save_sync">Gorde eta sinkronizatu</string>
     <string name="settings_epg_sources_fill_playlist">Bete erreprodukzio-zerrendatik</string>
     <string name="settings_epg_sources_none_playlist">Zure erreprodukzio-zerrendetako batek ere ez du EPG URLrik eskaintzen.</string>
-    <string name="settings_epg_sources_use_logos">Erabili gida honen kanal-logoak</string>
-    <string name="settings_epg_sources_logos_description">Erakutsi XMLTV jario honetako logoak zure erreprodukzio-zerrendakoen ordez. Jario honek logorik ez duen kanalek erreprodukzio-zerrendakoa mantentzen dute.</string>
     <string name="settings_epg_sources_name">Izena</string>
     <string name="settings_epg_sources_url">XMLTV URLa</string>
     <string name="settings_epg_sources_portal_guide">Atariko gida</string>
@@ -1646,7 +1643,6 @@
     <string name="settings_help_playlist_url">Zure .m3u edo .m3u8 zerrendaren helbidea.</string>
     <string name="settings_line_fill_from_playlist">Erabili zure erreprodukzio-zerrendak ematen duen gida-helbidea</string>
     <string name="settings_line_epg_auto_refresh">Mantendu gida eguneratuta</string>
-    <string name="settings_line_epg_logos">Erreprodukzio-zerrendakoaren ordez</string>
     <string name="settings_help_epg_name">Gida-zerrendan eta Aukeratu EPGa eskuz atalean erakusten da.</string>
     <string name="settings_glass_bg_title">Beira &amp; atzealdea</string>
     <string name="settings_line_glass_bg">Atzealdea, irudiaren itxura, beira</string>

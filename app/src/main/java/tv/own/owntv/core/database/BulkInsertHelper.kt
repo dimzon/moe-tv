@@ -173,7 +173,7 @@ class BulkInsertHelper(
         // Deriving the set makes that combination impossible to express.
         internal val KNOWN_TABLES: Set<String> get() = OwnTVDatabase.EXPECTED_NON_UNIQUE_INDEXES.keys
         // Deliberately wider than KNOWN_TABLES: these are analyzed but never bulk-dropped.
-        private val KNOWN_ANALYZE_TABLES: Set<String> get() = KNOWN_TABLES + setOf("categories", "epg_channels")
+        private val KNOWN_ANALYZE_TABLES: Set<String> get() = KNOWN_TABLES + setOf("categories")
         private val KNOWN_FTS = setOf("channels_fts", "movies_fts", "series_fts")
 
         // One app-wide lock for bulk-mode state + index/FTS DDL — held only for the short state

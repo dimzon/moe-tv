@@ -204,7 +204,6 @@
     <string name="content_epg_add_favourite">Добавить в избранное</string>
     <string name="content_epg_remove_favourite">Удалить из избранного</string>
     <string name="content_epg_jump_now">К текущему времени</string>
-    <string name="content_epg_include_logos">Использовать логотипы из гида</string>
     <string name="content_epg_review_description">Эти каналы были сопоставлены по названию, но соответствие оказалось недостаточно точным. Примите правильные варианты, а остальные пропустите.</string>
     <string name="content_epg_accept">Принять</string>
     <string name="content_epg_accept_all">Принять все</string>

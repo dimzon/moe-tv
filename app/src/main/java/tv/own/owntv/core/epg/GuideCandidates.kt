@@ -4,8 +4,9 @@ import android.os.SystemClock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tv.own.owntv.core.CorePerf
+import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.EpgDao
-import tv.own.owntv.core.database.entity.EpgChannelName
+import tv.own.owntv.core.database.entity.GuideChannelName
 
 /**
  * One guide channel the user can be offered: what the "Match EPG" picker lists, and what auto-match
@@ -40,29 +41,30 @@ data class GuideCandidate(
  * answered differently: the grid drew programmes for a channel the picker then refused to list, and
  * that reads to a user as "matching is broken". This is the other half of that fix.
  *
- * **It looks at `epg_programmes` as well as `epg_channels`.** A feed is not required to carry
- * `<channel>` entries at all; plenty carry only `<programme>`. Reading the channel table alone made
- * every one of those invisible to the picker while their programmes sat in the database being drawn
- * by the guide.
+ * **It looks at `epg_programmes` as well as `channels`.** A channel's guide key is its catalogue
+ * id, so the catalogue supplies names; `epg_programmes` is what proves a guide exists behind an id.
+ * Reading either table alone loses a case: a channel with no programmes yet, or programme rows for
+ * an id no channel names.
  *
- * Takes only an [EpgDao] — no source store, no settings — because after the two points above there is
- * nothing else to take. That is also what makes it constructible from either app without ceremony.
+ * Takes only the two DAOs it reads — no source store, no settings — because after the point above
+ * there is nothing else to take. That is also what makes it constructible from either app without
+ * ceremony.
  */
-class GuideCandidates(private val epgDao: EpgDao) {
+class GuideCandidates(
+    private val channelDao: ChannelDao,
+    private val epgDao: EpgDao,
+) {
 
     /**
      * Every guide channel, at most [limit] of each underlying table.
      *
-     * The merge runs in Kotlin rather than SQL so the display name can be chosen properly: the same
-     * channel is routinely named by two feeds, and `GROUP BY` hands back an arbitrary one of them.
-     * The longest non-blank name wins, which is stable and is almost always the informative one
-     * ("BBC One HD" over "BBC1"). The sets involved are a few thousand rows, so this runs in memory;
-     * that is measured, not assumed — see the
-     * `guide_candidates` line.
+     * The merge runs in Kotlin rather than SQL so the two sources can be combined without `GROUP BY`
+     * arbitrating which name survives. The sets involved are a few hundred rows, so this runs in
+     * memory; that is measured, not assumed — see the `guide_candidates` line.
      */
     suspend fun all(limit: Int = MAX_CANDIDATES): List<GuideCandidate> = withContext(Dispatchers.IO) {
         val startedAt = SystemClock.elapsedRealtime()
-        val named = epgDao.guideChannelNames(limit)
+        val named = channelDao.guideChannelNames(limit)
         val withProgrammes = epgDao.guideProgrammeChannelIds(limit)
         val queriedAt = SystemClock.elapsedRealtime()
         val candidates = merge(named, withProgrammes)
@@ -121,51 +123,35 @@ class GuideCandidates(private val epgDao: EpgDao) {
 
     companion object {
         /**
-         * The two table reads combined into one candidate list — pure, so it is tested on the JVM
-         * rather than only through a database.
+         * The two reads combined into one candidate list — pure, so it is tested on the JVM rather
+         * than only through a database.
          *
-         * Three rules, each of which was a defect before it was one:
+         * Two rules, each of which was a defect before it was one:
          * - an id known only to `epg_programmes` is still a candidate, with no name;
-         * - an id known only to `epg_channels` is still a candidate, flagged as having no programmes;
-         * - where several feeds name one channel, the longest non-blank name wins, so the answer does
-         *   not depend on which feed was synced last.
+         * - a channel known only to the catalogue is still a candidate, flagged as having no programmes.
          */
         internal fun merge(
-            named: List<EpgChannelName>,
+            named: List<GuideChannelName>,
             withProgrammes: List<String>,
         ): List<GuideCandidate> {
             val programmeIds = withProgrammes.toHashSet()
-            val bestName = HashMap<String, String>(named.size)
+            val displayNames = HashMap<String, String>(named.size)
             for (row in named) {
                 val name = row.displayName?.trim().orEmpty()
-                if (name.isEmpty()) continue
-                val current = bestName[row.epgChannelId]
-                if (current == null || name.length > current.length) bestName[row.epgChannelId] = name
-            }
-            // The stored normalized name that belongs to the display name actually chosen. A row
-            // written before v41 carries none, so it is computed here instead — never dropped.
-            val storedNormName = HashMap<String, String>(named.size)
-            val storedNormId = HashMap<String, String>(named.size)
-            for (row in named) {
-                row.normId?.takeIf { it.isNotEmpty() }?.let { storedNormId.putIfAbsent(row.epgChannelId, it) }
-                val name = row.displayName?.trim().orEmpty()
-                if (name.isNotEmpty() && name == bestName[row.epgChannelId]) {
-                    row.normName?.let { storedNormName[row.epgChannelId] = it }
-                }
+                if (name.isNotEmpty()) displayNames[row.epgChannelId] = name
             }
 
             val ids = LinkedHashSet<String>(named.size + withProgrammes.size)
             named.forEach { ids.add(it.epgChannelId) }
             ids.addAll(withProgrammes)
             return ids.map { id ->
-                val displayName = bestName[id]
+                val displayName = displayNames[id]
                 GuideCandidate(
                     epgChannelId = id,
                     displayName = displayName,
                     hasProgrammes = id in programmeIds,
-                    normName = storedNormName[id]
-                        ?: displayName?.let(EpgMatcher::normalizeForEpg).orEmpty(),
-                    normId = storedNormId[id] ?: EpgMatcher.normalizeForEpg(id),
+                    normName = displayName?.let(EpgMatcher::normalizeForEpg).orEmpty(),
+                    normId = EpgMatcher.normalizeForEpg(id),
                 )
             }
         }

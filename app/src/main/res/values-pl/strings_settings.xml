@@ -352,7 +352,6 @@
     <string name="settings_group_summary_quick">Przełączniki, których używasz najczęściej</string>
     <string name="settings_group_sound_subtitles">Dźwięk i napisy</string>
     <string name="settings_group_watching_recording">Oglądanie i nagrywanie</string>
-    <string name="settings_search_guide_logos">Logo kanałów w przewodniku</string>
     <string name="settings_search_keywords_profiles">widzowie dzieci tryb PIN blokada konto</string>
     <string name="settings_search_keywords_playlists">M3U Xtream źródło synchronizacja dodaj usuń</string>
     <string name="settings_search_keywords_epg">XMLTV przewodnik źródło program</string>
@@ -735,8 +734,6 @@
     <string name="settings_epg_sources_save_sync">Zapisz i synchronizuj</string>
     <string name="settings_epg_sources_fill_playlist">Uzupełnij z listy odtwarzania</string>
     <string name="settings_epg_sources_none_playlist">Żadna z Twoich list odtwarzania nie zawiera adresu URL EPG.</string>
-    <string name="settings_epg_sources_use_logos">Używaj logo kanałów z tego przewodnika</string>
-    <string name="settings_epg_sources_logos_description">Pokazuj logo z tego źródła XMLTV zamiast logo z listy odtwarzania. Kanały bez logo w tym źródle zachowają logo z listy odtwarzania.</string>
     <string name="settings_epg_sources_name">Nazwa</string>
     <string name="settings_epg_sources_url">Adres URL XMLTV</string>
     <string name="settings_epg_sources_portal_guide">Program z portalu</string>
@@ -1616,7 +1613,6 @@
     <string name="settings_help_playlist_url">Adres Twojej listy .m3u lub .m3u8.</string>
     <string name="settings_line_fill_from_playlist">Użyj adresu przewodnika z playlisty</string>
     <string name="settings_line_epg_auto_refresh">Utrzymuj przewodnik na bieżąco</string>
-    <string name="settings_line_epg_logos">Zamiast logo z playlisty</string>
     <string name="settings_help_epg_name">Widoczna na liście przewodników i w Wybierz EPG ręcznie.</string>
     <string name="settings_glass_bg_title">Szkło i tło</string>
     <string name="settings_line_glass_bg">Tło, wygląd obrazu, szkło</string>

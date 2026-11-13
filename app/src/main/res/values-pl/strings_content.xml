@@ -204,7 +204,6 @@
     <string name="content_epg_add_favourite">Dodaj do ulubionych</string>
     <string name="content_epg_remove_favourite">Usuń z ulubionych</string>
     <string name="content_epg_jump_now">Przejdź do teraz</string>
-    <string name="content_epg_include_logos">Uwzględnij logo z przewodnika</string>
     <string name="content_epg_review_description">Te kanały dopasowano według nazwy, ale dopasowanie nie było wystarczająco pewne. Zaakceptuj właściwe, a pozostałe pomiń.</string>
     <string name="content_epg_accept">Zaakceptuj</string>
     <string name="content_epg_accept_all">Zaakceptuj wszystkie</string>

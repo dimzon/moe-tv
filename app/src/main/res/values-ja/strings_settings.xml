@@ -346,7 +346,6 @@
     <string name="settings_group_summary_quick">よく使う切り替え</string>
     <string name="settings_group_sound_subtitles">音声と字幕</string>
     <string name="settings_group_watching_recording">視聴と録画</string>
-    <string name="settings_search_guide_logos">番組表のチャンネルロゴ</string>
     <string name="settings_search_keywords_profiles">視聴者 子どもモード PINロック アカウント</string>
     <string name="settings_search_keywords_playlists">M3U Xtream ソース 同期 追加 削除</string>
     <string name="settings_search_keywords_epg">XMLTV 番組表 フィード 番組</string>
@@ -714,8 +713,6 @@
     <string name="settings_epg_sources_save_sync">保存して同期</string>
     <string name="settings_epg_sources_fill_playlist">プレイリストから入力</string>
     <string name="settings_epg_sources_none_playlist">EPG URLを提供するプレイリストがありません。</string>
-    <string name="settings_epg_sources_use_logos">この番組表のチャンネルロゴを使用</string>
-    <string name="settings_epg_sources_logos_description">プレイリストのロゴの代わりに、このXMLTVフィードのロゴを表示します。このフィードにロゴがないチャンネルでは、プレイリストのロゴが維持されます。</string>
     <string name="settings_epg_sources_name">名前</string>
     <string name="settings_epg_sources_url">XMLTV URL</string>
     <string name="settings_epg_sources_portal_guide">ポータルの番組表</string>
@@ -1523,7 +1520,6 @@
     <string name="settings_help_playlist_url">.m3u または .m3u8 リストのアドレス。</string>
     <string name="settings_line_fill_from_playlist">プレイリストのガイドアドレスを使う</string>
     <string name="settings_line_epg_auto_refresh">ガイドを最新に保つ</string>
-    <string name="settings_line_epg_logos">プレイリストのロゴの代わりに</string>
     <string name="settings_help_epg_name">ガイド一覧と「EPG を手動で選ぶ」に表示されます。</string>
     <string name="settings_glass_bg_title">ガラスと背景</string>
     <string name="settings_line_glass_bg">背景、画像の見え方、ガラス</string>

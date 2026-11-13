@@ -195,7 +195,6 @@
     <string name="content_epg_add_favourite">Agregar a favoritos</string>
     <string name="content_epg_remove_favourite">Eliminar de favoritos</string>
     <string name="content_epg_jump_now">Ir a Ahora</string>
-    <string name="content_epg_include_logos">Incluir logotipos de la guía</string>
     <string name="content_epg_review_description">Estos canales se vincularon por nombre, pero la coincidencia no fue suficientemente precisa. Acepta los correctos y omite el resto.</string>
     <string name="content_epg_accept">Aceptar</string>
     <string name="content_epg_accept_all">Aceptar todo</string>

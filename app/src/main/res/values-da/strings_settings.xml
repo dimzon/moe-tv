@@ -348,7 +348,6 @@
     <string name="settings_group_summary_quick">De kontakter du bruger mest</string>
     <string name="settings_group_sound_subtitles">Lyd og undertekster</string>
     <string name="settings_group_watching_recording">Afspilning og optagelse</string>
-    <string name="settings_search_guide_logos">Kanallogoer i programguiden</string>
     <string name="settings_search_keywords_profiles">seere børn børnetilstand PIN-lås konto</string>
     <string name="settings_search_keywords_playlists">M3U Xtream kilde synkroniser tilføj fjern</string>
     <string name="settings_search_keywords_epg">XMLTV guide feed program</string>
@@ -721,8 +720,6 @@
     <string name="settings_epg_sources_save_sync">Gem og synkroniser</string>
     <string name="settings_epg_sources_fill_playlist">Udfyld fra afspilningsliste</string>
     <string name="settings_epg_sources_none_playlist">Ingen af dine afspilningslister indeholder en EPG-URL.</string>
-    <string name="settings_epg_sources_use_logos">Brug denne guides kanallogoer</string>
-    <string name="settings_epg_sources_logos_description">Vis logoer fra dette XMLTV-feed i stedet for dem fra din afspilningsliste. Kanaler, som dette feed ikke har et logo til, beholder logoet fra afspilningslisten.</string>
     <string name="settings_epg_sources_name">Navn</string>
     <string name="settings_epg_sources_url">XMLTV-URL</string>
     <string name="settings_epg_sources_portal_guide">Guide fra portalen</string>
@@ -1554,7 +1551,6 @@
     <string name="settings_help_playlist_url">Adressen på din .m3u- eller .m3u8-liste.</string>
     <string name="settings_line_fill_from_playlist">Brug guideadressen fra din playliste</string>
     <string name="settings_line_epg_auto_refresh">Hold guiden opdateret</string>
-    <string name="settings_line_epg_logos">I stedet for playlistens</string>
     <string name="settings_help_epg_name">Vises i guidelisten og i Vælg EPG manuelt.</string>
     <string name="settings_glass_bg_title">Glas og baggrund</string>
     <string name="settings_line_glass_bg">Baggrund, billedudseende, glas</string>

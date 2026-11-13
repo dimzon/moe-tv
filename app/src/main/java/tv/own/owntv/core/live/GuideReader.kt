@@ -29,14 +29,7 @@ private const val KEY_CHUNK = 400
  * the caller's business. The guide shift is passed in for the same reason [LiveEpgReader] takes it —
  * the caller is the one place that knows a customization changed.
  */
-class GuideReader(
-    private val epgDao: EpgDao,
-    /**
-     * The second guide. [row] falls back to its provider fetch when the stored table has nothing for
-     * a channel in the window, so the grid shows what the preview pane has always shown.
-     */
-    private val liveEpgReader: LiveEpgReader,
-) {
+class GuideReader(private val epgDao: EpgDao) {
     /**
      * The one guide store's id. Kept as a list because the callers still pass it into the
      * visibility/count plumbing that used to be multi-source; there is exactly one source now.
@@ -92,31 +85,13 @@ class GuideReader(
             else -> read(epgKey, EpgShift.toStored(from, shift), EpgShift.toStored(to, shift))
                 .map { EpgShift.apply(it, shift) }
         }
-        if (stored.isNotEmpty()) {
-            return@withContext stored.also { collapsed ->
-                CorePerf.log {
-                    "guide_row source=stored channelId=${channel.id} key=$epgKey shift=$shift " +
-                        "rows=${stored.size} collapsed=${collapsed.size} " +
-                        "totalMs=${SystemClock.elapsedRealtime() - startedAt}"
-                }
+        stored.also { collapsed ->
+            CorePerf.log {
+                "guide_row source=stored channelId=${channel.id} key=$epgKey shift=$shift " +
+                    "rows=${stored.size} collapsed=${collapsed.size} " +
+                    "totalMs=${SystemClock.elapsedRealtime() - startedAt}"
             }
         }
-        // Nothing stored for this channel in this window. That is not the same as nothing being on:
-        // the bulk guide can simply stop — a feed that ends at midnight leaves today's daytime blank —
-        // and the provider's own short-EPG endpoint answers for exactly that gap. It is what the
-        // preview pane has always fallen back to, and the grid drawing a row of nothing beside a
-        // preview listing programmes is the contradiction this removes.
-        //
-        // Only the part of it inside the asked-for window is returned, so a row never draws outside
-        // the time it was asked about.
-        liveEpgReader.providerProgrammes(channel, cust, globalShiftMinutes)
-            .filter { it.stopMs > from && it.startMs < to }
-            .also { rows ->
-                CorePerf.log {
-                    "guide_row source=provider channelId=${channel.id} key=$epgKey shift=$shift " +
-                        "rows=${rows.size} totalMs=${SystemClock.elapsedRealtime() - startedAt}"
-                }
-            }
     }
 
     /**
@@ -185,24 +160,11 @@ class GuideReader(
         globalShiftMinutes: Int,
         atMs: Long,
         lookAheadMs: Long,
-        /**
-         * Ask the provider's short guide for the channels the stored guide cannot answer — what [row]
-         * does for a grid row. Only for a caller passing the handful of channels on screen (the phone's
-         * On now list): it is one request per unanswered channel, cached as [row]'s are.
-         */
-        providerFallback: Boolean = false,
     ): Map<String, GuideSlot> {
         val rows = slice(channels, cust, globalShiftMinutes, atMs, atMs + lookAheadMs)
         val result = HashMap<String, GuideSlot>(rows.size)
         for ((channelId, list) in rows) {
             guideSlotAt(list, atMs)?.let { result[channelId] = it }
-        }
-        if (providerFallback) {
-            for (channel in channels) {
-                if (channel.id in result) continue
-                val provider = liveEpgReader.providerProgrammes(channel, cust, globalShiftMinutes)
-                guideSlotAt(provider, atMs)?.let { result[channel.id] = it }
-            }
         }
         return result
     }

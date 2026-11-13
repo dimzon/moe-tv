@@ -186,7 +186,6 @@
     <string name="content_epg_add_favourite">Zu Favoriten hinzufügen</string>
     <string name="content_epg_remove_favourite">Aus Favoriten entfernen</string>
     <string name="content_epg_jump_now">Zu Jetzt springen</string>
-    <string name="content_epg_include_logos">Logos aus dem Programmführer übernehmen</string>
     <string name="content_epg_review_description">Diese Sender wurden anhand ihres Namens zugeordnet, die Übereinstimmung war jedoch nicht eindeutig. Akzeptiere die richtigen und überspringe die übrigen.</string>
     <string name="content_epg_accept">Akzeptieren</string>
     <string name="content_epg_accept_all">Alle akzeptieren</string>

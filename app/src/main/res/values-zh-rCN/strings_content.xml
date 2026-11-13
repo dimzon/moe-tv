@@ -177,7 +177,6 @@
     <string name="content_epg_add_favourite">添加到收藏夹</string>
     <string name="content_epg_remove_favourite">从收藏夹中移除</string>
     <string name="content_epg_jump_now">跳转到现在</string>
-    <string name="content_epg_include_logos">包含节目指南台标</string>
     <string name="content_epg_review_description">这些频道已按名称匹配，但匹配度不够可靠。接受正确的匹配，跳过其余匹配。</string>
     <string name="content_epg_accept">接受</string>
     <string name="content_epg_accept_all">全部接受</string>

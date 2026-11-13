@@ -348,7 +348,6 @@
     <string name="settings_group_summary_quick">Reglagen du använder mest</string>
     <string name="settings_group_sound_subtitles">Ljud och undertexter</string>
     <string name="settings_group_watching_recording">Uppspelning och inspelning</string>
-    <string name="settings_search_guide_logos">Kanallogotyper i programguiden</string>
     <string name="settings_search_keywords_profiles">tittare barnläge PIN-lås konto</string>
     <string name="settings_search_keywords_playlists">m3u xtream källa synkronisering lägg till ta bort</string>
     <string name="settings_search_keywords_epg">xmltv programguide flöde program</string>
@@ -721,8 +720,6 @@
     <string name="settings_epg_sources_save_sync">Spara och synkronisera</string>
     <string name="settings_epg_sources_fill_playlist">Fyll i från spellista</string>
     <string name="settings_epg_sources_none_playlist">Ingen av dina spellistor tillhandahåller en EPG-webbadress.</string>
-    <string name="settings_epg_sources_use_logos">Använd den här guidens kanallogotyper</string>
-    <string name="settings_epg_sources_logos_description">Visa logotyper från detta XMLTV-flöde i stället för från spellistan. Kanaler som saknar en logotyp i flödet behåller spellistans logotyp.</string>
     <string name="settings_epg_sources_name">Namn</string>
     <string name="settings_epg_sources_url">XMLTV-webbadress</string>
     <string name="settings_epg_sources_portal_guide">Guide från portalen</string>
@@ -1554,7 +1551,6 @@
     <string name="settings_help_playlist_url">Adressen till din .m3u- eller .m3u8-lista.</string>
     <string name="settings_line_fill_from_playlist">Använd guideadressen som spellistan anger</string>
     <string name="settings_line_epg_auto_refresh">Håll guiden uppdaterad</string>
-    <string name="settings_line_epg_logos">I stället för spellistans</string>
     <string name="settings_help_epg_name">Visas i guidelistan och i Välj EPG manuellt.</string>
     <string name="settings_glass_bg_title">Glas och bakgrund</string>
     <string name="settings_line_glass_bg">Bakgrund, bildstil, glas</string>

@@ -17,7 +17,7 @@ data class SyncCounts(val channels: Int, val epg: Int = 0)
 /**
  * Runs after a playlist syncs: returns the per-type content counts for the success message. EPG is
  * NOT auto-created/synced here — the RuTube guide arrives through its own refresh path
- * ([EpgRepository.refreshRutube] / [RuTubeEpgSyncer]), user- or schedule-initiated, never as a
+ * ([EpgRepository.refresh] / [RuTubeEpgSyncer]), user- or schedule-initiated, never as a
  * side effect of a catalogue sync.
  */
 class ImportFinalizer(
@@ -48,7 +48,7 @@ class ImportFinalizer(
      * Ensure the channel grid read-indices exist and the planner statistics are fresh.
      * Fresh imports may drop the non-unique content indices to speed up bulk inserts, so this rebuilds the
      * single-column and composite read paths, then refreshes `sqlite_stat1` with ANALYZE so SQLite keeps
-     * choosing them instead of reverting to a full-table sort. Mirrors `EpgRepository.ensureEpgIndexes`.
+     * choosing them instead of reverting to a full-table sort.
      * Called inline for normal re-syncs and from the deferred background worker for first-ever imports.
      */
     suspend fun ensureContentIndexes() = withContext(Dispatchers.IO) {
