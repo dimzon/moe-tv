@@ -1,6 +1,8 @@
 # MyOwnTV — Changelog
 
-> MyOwnTV 0.1.0 — independent fork of [OwnTV](https://github.com/ahXN00/OwnTV) (upstream history squashed), reworked so the channel list and programme guide come from **RuTube's public API** instead of Xtream/M3U/Stalker providers. The history below describes the upstream import point.
+> MyOwnTV / МОЁ ТВ 0.1.0 — a **substantially modified derivative** of [OwnTV](https://github.com/ahXN00/OwnTV) (© ahXN00 and the OwnTV contributors, GPL-3.0-only) and [OwnTV_Core](https://github.com/ahXN00/OwnTV_Core) (GPL-3.0-only). Upstream `main` snapshot imported **2026-11-09** as root commit `214719f`, history squashed; **modified since that date by Dmitry Alexandrov, © 2026**. Reworked so the channel list and programme guide come from **RuTube's public API** instead of Xtream/M3U/Stalker providers; mpv, VOD, profiles and backups removed; rebranded. Full attribution: [NOTICE](NOTICE); dependency licenses: [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+>
+> The release history below describes the **upstream import point** (up to v5.2.1), not this fork: its feature and community-PR credits belong to the original OwnTV project. See [docs/attribution-checklist.md](docs/attribution-checklist.md).
 
 > Release notes: two parts per version — New features (by name) and Fixes. This file feeds the GitHub release body and the in-app update dialog.
 >

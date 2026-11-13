@@ -30,8 +30,47 @@ playlist, login or setup screen needed.
 > RuTube's publicly listed live streams. You are responsible for what you watch and for
 > complying with the laws and rights that apply to you.
 
-Open source, GPLv3, built with the help of AI. **Android TV only** — leanback launcher,
-D-pad first.
+Open source, **GPL-3.0-only**, built with the help of AI. **Android TV only** — leanback launcher,
+D-pad first. **This is a derivative work**, not the original OwnTV — see below.
+
+---
+
+## 🧬 Origins & attribution
+
+**MyOwnTV / МОЁ ТВ is a substantially modified version of
+[OwnTV](https://github.com/ahXN00/OwnTV)** by **ahXN00 and the OwnTV contributors**, licensed
+under the **GNU General Public License v3.0 only** (`GPL-3.0-only`). The upstream `main` snapshot
+was imported on **2026-11-09** (just after upstream v5.2.1, 2026-10-21) as this repository's root
+commit `214719f`; upstream history was squashed at the fork point.
+
+It also incorporates source from **[OwnTV_Core](https://github.com/ahXN00/OwnTV_Core)**
+(likewise `GPL-3.0-only`), folded into `app/src/main/java/tv/own/owntv/**`: the database, sync,
+parsers, EPG and playback engine, **plus the translated UI strings** (upstream shipped 26 locales;
+this fork currently packages English and Russian). The docs,
+i18n tooling, upstream brand assets in `extras/brand/` and the reference Workers in
+`extras/worker/` are upstream-derived too. Full legal notice: [NOTICE](NOTICE).
+
+> **Modified since 2026-11-09 by Dmitry Alexandrov (dimzon).** Copyright (C) 2026 Dmitry
+> Alexandrov for the modifications and additions; the original portions remain © ahXN00 and the
+> OwnTV contributors. This is the prominent modification notice required by GPLv3 §5(a).
+
+What changed:
+
+- **RuTube-only live TV** — the channel catalogue and week-long programme guide now come from
+  RuTube's public API; Xtream / M3U / Stalker providers and their source model are gone.
+- **One playback engine** — the mpv / libmpv / FFmpeg engine was removed; playback is
+  ExoPlayer (Media3) only. VOD (movies/series), catch-up, downloads, profiles and the file-backup
+  UI were dropped; the live-only database schema was rebuilt repeatedly.
+- **Rebrand** — МОЁ ТВ wordmark, launcher icons/banner, `applicationId com.github.dimzon.owntv`
+  and `moetv://` deep links; the new brand kit lives in `extras/branding/`.
+- Some upstream settings screens, strings and reference Worker code remain in the tree even
+  though the features behind them are gone.
+
+MyOwnTV / МОЁ ТВ is **not affiliated with, endorsed by, sponsored by or connected to** the
+original OwnTV project, ahXN00 or its contributors. "OwnTV" is used here only to identify the
+work this one derives from. The complete list of links and texts still pointing at the upstream
+project (and awaiting a fork repository URL) is in
+[docs/attribution-checklist.md](docs/attribution-checklist.md).
 
 ---
 
@@ -112,15 +151,37 @@ the project's player-only positioning and match the existing code style.
 
 ## 🙏 Credits
 
+### 🌍 Translations
+
+The locale resources retained here (currently English and Russian) derive from upstream's 26
+translations, the work of volunteer translators on
+[Hosted Weblate](https://hosted.weblate.org/projects/owntv/), which hosts libre software free of
+charge. The strings themselves originate in
+[OwnTV_Core](https://github.com/ahXN00/OwnTV_Core). Thank you to Weblate and to every translator.
+
 ### 🎨 Brand
 
 The lowercase **owntv** wordmark was designed for OwnTV by [@m3th0d93](https://github.com/m3th0d93)
-in [issue #227](https://github.com/ahXN00/OwnTV/issues/227).
+in [issue #227](https://github.com/ahXN00/OwnTV/issues/227); the upstream brand assets in
+`extras/brand/` remain © their authors. The **МОЁ ТВ** brand kit in `extras/branding/` is this
+fork's own work.
 
 ### ▶️ Playback
 
-- **[Media3 / ExoPlayer](https://github.com/androidx/media)** — the playback engine for Live TV
-  and HLS.
+- **[Media3 / ExoPlayer](https://github.com/androidx/media)** — the only playback engine, for
+  Live TV and HLS (Apache-2.0).
+- **mpv / libmpv / FFmpeg** powered the second engine in upstream OwnTV; **they are no longer
+  shipped** by this fork. The historical credits are preserved in [NOTICE](NOTICE) and
+  [CHANGELOG.md](CHANGELOG.md).
+
+### 🛰️ Third-party services
+
+- **TMDB** — *"This product uses the TMDB API but is not endorsed or certified by TMDB."*
+  Metadata and trailers are provided by [TMDB](https://www.themoviedb.org/); the retained
+  upstream Worker reference is in `extras/worker/tmdb/`.
+- **OpenSubtitles** — *"This product uses the OpenSubtitles API but is not endorsed or certified
+  by OpenSubtitles."* ([opensubtitles.com](https://www.opensubtitles.com/)); the Worker reference
+  is in `extras/worker/opensub/`.
 
 ### 🧩 Built with
 
@@ -130,24 +191,42 @@ in [issue #227](https://github.com/ahXN00/OwnTV/issues/227).
 [OkHttp](https://square.github.io/okhttp/) ·
 [Coil](https://coil-kt.github.io/coil/) ·
 [ZXing](https://github.com/zxing/zxing) — and the wider Kotlin / AndroidX open-source ecosystem.
+Thank you to all their maintainers. Every license, copyright notice and bundled asset is listed
+in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
 ## ⚖️ Legal
 
 MyOwnTV is a media **player** only, and an unofficial client: it is not affiliated with,
-endorsed by or connected to RuTube (ООО «Руформ») or to any other service. “RuTube” and
-other names and logos belong to their owners and are used only to describe compatibility.
-It ships with no channels of its own and does not endorse or facilitate access to unauthorized
-streams.
+endorsed by or connected to RuTube (ООО «Руформ»), to the original
+[OwnTV](https://github.com/ahXN00/OwnTV) project, or to any other service. "RuTube", "OwnTV",
+"TMDB", "OpenSubtitles" and other names and logos belong to their owners and are used only to
+describe origin and compatibility. It ships with no channels of its own and does not endorse or
+facilitate access to unauthorized streams.
 
 ## 📄 License
 
-Released under the **GNU General Public License v3.0 (GPLv3)** — see [LICENSE](LICENSE).
+**GNU General Public License, version 3 only (`GPL-3.0-only`)** — see [LICENSE](LICENSE)
+(unmodified GPLv3 text), [NOTICE](NOTICE) (attribution and modification notice) and
+[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
-In short: you're free to use, study, modify, and redistribute MyOwnTV, including commercially —
-but any redistributed version (including forks and commercial products built on it) must also
-be licensed under GPLv3 and its source made available.
+This is a **modified version of OwnTV**, changed since **2026-11-09** (GPLv3 §5(a)). As required
+by §5(c), the entire derivative work — upstream portions and this fork's additions alike — is
+licensed under GPLv3. No additional terms under §7 are added. Upstream published GPLv3 without
+an "or later" clause, so no later version is offered here.
+
+In short: you're free to use, study, modify and redistribute MyOwnTV, including commercially —
+but any redistributed version (including forks and commercial products built on it) must also be
+licensed under GPLv3, keep all copyright and attribution notices intact, and make its complete
+Corresponding Source available (§6). **There is NO WARRANTY** — see §§15–16 of [LICENSE](LICENSE).
+
+**Corresponding Source:** the complete source tree from which your copy was built, including
+`LICENSE`, `NOTICE`, `THIRD_PARTY_LICENSES.md`, the OFL font license texts and the Gradle build
+scripts. No public repository is configured for this fork yet; if you received a binary-only
+build, request the source from whoever distributed it. Before publishing an APK, see the
+[attribution checklist](docs/attribution-checklist.md).
 
 ---
 
-<sub>MyOwnTV is an open-source, player-only project, built with the help of AI. Based on
-OwnTV by its upstream maintainers.</sub>
+<sub>MyOwnTV / МОЁ ТВ — open-source, player-only, built with the help of AI. A substantially
+modified derivative of OwnTV (© ahXN00 and the OwnTV contributors, GPL-3.0-only); modifications
+© 2026 Dmitry Alexandrov, GPL-3.0-only.</sub>

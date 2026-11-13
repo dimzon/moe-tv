@@ -1,0 +1,159 @@
+MyOwnTV / МОЁ ТВ — Android TV live-TV player
+NOTICE — attribution, copyright and modification notice
+
+SPDX-License-Identifier: GPL-3.0-only
+
+This NOTICE accompanies LICENSE. It is informational: it adds no terms, no
+restrictions and no "additional terms" within the meaning of GPLv3 section 7.
+The GNU General Public License v3 text in LICENSE is reproduced verbatim and
+MUST NOT be modified.
+
+
+1. Copyright and origin
+-----------------------
+
+Original work:
+
+  OwnTV — https://github.com/ahXN00/OwnTV
+  (c) ahXN00 and the OwnTV contributors.
+  Licensed under the GNU General Public License, version 3 only
+  (GPL-3.0-only). The upstream repository publishes no named copyright
+  holder and no "or later" clause; this notice identifies the project and
+  its maintainers without asserting anything further.
+
+  OwnTV_Core — https://github.com/ahXN00/OwnTV_Core
+  (c) ahXN00 and the OwnTV contributors. GPL-3.0-only.
+  Its sources are folded into app/src/main/java/tv/own/owntv/** — the
+  database, sync, parsers, EPG and playback engine — together with the
+  translated UI strings and the i18n tooling. Upstream shipped 26
+  translations; this fork currently packages only English and Russian
+  (en, ru), the rest remaining available in the upstream resource trees.
+
+  Upstream-derived material also remains in docs/, extras/USER_GUIDE.md,
+  extras/OwnTV_Master_Product_Brief.md, extras/brand/, extras/worker/,
+  tools/i18n/ and the historical release notes in CHANGELOG.md.
+
+Modifications and additions:
+
+  Copyright (C) 2026 Dmitry Alexandrov (dimzon) <dimzon541@gmail.com>
+
+
+2. Notice of modification (GPLv3 section 5(a))
+----------------------------------------------
+
+THIS IS A SUBSTANTIALLY MODIFIED VERSION OF OwnTV. It has been modified
+since 2026-11-09 by Dmitry Alexandrov. Relevant dates:
+
+  * 2026-10-21 — upstream v5.2.1, the last tagged release before the fork.
+  * 2026-11-09 — snapshot of upstream main imported as this repository's
+    root commit 214719f ("MyOwnTV: initial import (based on OwnTV, upstream
+    history squashed)"). Upstream history is NOT part of this repository.
+  * 2026-11-09 — present — all subsequent changes are this fork's own.
+
+Principal changes: the app became a live-TV-only client of RuTube's public
+catalogue and programme guide; the Xtream/M3U/Stalker source model, the
+mpv/libmpv playback engine, VOD (movies/series), downloads, profiles and the
+file-backup UI were removed; the database schema was repeatedly rebuilt; the
+app was rebranded to МОЁ ТВ with a new applicationId, launcher assets and
+moetv:// deep links; the brand kit in extras/branding/ was added.
+
+This fork is NOT affiliated with, endorsed by, sponsored by or connected to
+the original OwnTV project, ahXN00, or its contributors. "OwnTV" is used
+solely to identify the work from which this one is derived.
+
+
+3. License of the whole work (GPLv3 sections 5(b) and 5(c))
+-----------------------------------------------------------
+
+The entire derivative work — original upstream portions and this fork's
+modifications alike — is released under the GNU General Public License,
+version 3 only (GPL-3.0-only), as required by GPLv3 section 5(c). No part of
+it is available under any other license by virtue of this NOTICE. No
+additional terms under GPLv3 section 7 are imposed by this fork.
+
+You are free to use, study, modify and redistribute this program, including
+commercially, under GPLv3; any redistributed version must likewise be
+licensed under GPLv3 with its complete Corresponding Source made available.
+
+THIS PROGRAM IS DISTRIBUTED WITHOUT ANY WARRANTY, to the extent permitted by
+applicable law — see GPLv3 sections 15 and 16 in LICENSE. A copy of the
+license must accompany every copy; it is also available at
+https://www.gnu.org/licenses/gpl-3.0.html
+
+All copyright, license and attribution notices from the upstream work and
+from third-party components must be kept intact in any redistribution.
+
+
+4. Corresponding Source (GPLv3 section 6)
+-----------------------------------------
+
+The Corresponding Source for a binary (APK) build is the complete source
+tree that produced it, including this NOTICE, LICENSE,
+THIRD_PARTY_LICENSES.md, the OFL font license texts in
+extras/font-licenses/, the Gradle build scripts and all resources.
+
+No public source repository is configured for this fork at the time of
+writing. Accordingly: the source is the tree from which your copy was
+obtained; if you received a binary-only build, the party that conveyed it
+must provide the Corresponding Source (or a valid written offer) under
+GPLv3 section 6. Before publishing any APK, configure the fork's own source
+repository URL and ship these notice files with the release — see
+docs/attribution-checklist.md.
+
+
+5. Credits retained from the upstream project
+--------------------------------------------
+
+  * Brand: the lowercase "owntv" wordmark was designed for OwnTV by
+    @m3th0d93 (https://github.com/m3th0d93) in issue #227
+    (https://github.com/ahXN00/OwnTV/issues/227). The МОЁ ТВ brand kit in
+    extras/branding/ is this fork's own work.
+  * Translations: the locale resources retained here (currently English and
+    Russian) are derived from the 26 translations contributed by volunteer
+    translators on Hosted Weblate (https://hosted.weblate.org/projects/owntv/),
+    which hosts libre projects free of charge. Thank you to Weblate and to
+    every translator. The strings originate in OwnTV_Core.
+  * TMDB: "This product uses the TMDB API but is not endorsed or certified
+    by TMDB." Movie/series metadata and trailers are provided by TMDB
+    (https://www.themoviedb.org/).
+  * OpenSubtitles: "This product uses the OpenSubtitles API but is not
+    endorsed or certified by OpenSubtitles." (https://www.opensubtitles.com/)
+    The upstream reference Workers live in extras/worker/.
+  * mpv / libmpv / FFmpeg: these were part of upstream OwnTV but are NO
+    LONGER SHIPPED by this fork (removed in commits ac5cc39 and 933cc94).
+    The historical credits are preserved in CHANGELOG.md; no mpv/FFmpeg
+    binaries or sources are distributed here.
+  * Community contributions credited in CHANGELOG.md (PR numbers, @handles)
+    belong to the upstream project's history, not to this fork.
+
+
+6. Third-party components
+-------------------------
+
+Licenses and notices for the Gradle dependencies, the bundled SIL OFL 1.1
+fonts, the ISRG Root X2 trust anchor and the third-party logos are listed
+in THIRD_PARTY_LICENSES.md. The full Apache License 2.0 text is in
+LICENSES/Apache-2.0.txt; the OFL 1.1 texts are in extras/font-licenses/.
+
+
+7. Trademarks and no endorsement
+--------------------------------
+
+OwnTV, МОЁ ТВ, RuTube, TMDB, OpenSubtitles, Weblate, Telegram, Android TV,
+ExoPlayer and all other names and logos are the property of their
+respective owners and are used only to describe origin and compatibility.
+No endorsement or affiliation is implied. RuTube's publicly listed live
+streams are played by this app; it ships no channels, playlists,
+subscriptions or streams of its own.
+
+
+8. Interactive legal notices
+----------------------------
+
+GPLv3 section 5(d) requires "Appropriate Legal Notices" in interactive
+user interfaces where the original Program displayed them; upstream's
+About screen showed only a short license label. As a matter of good
+practice and unambiguous compliance, More > About should display the
+copyright notice, this modification notice, the no-warranty statement,
+the GPLv3 license and how to view a copy of it. The exact pending changes
+are recorded in docs/attribution-checklist.md.
