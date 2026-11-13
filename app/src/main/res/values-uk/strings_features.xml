@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="profiles_pin">PIN</string>
+    <string name="profiles_pin_placeholder">····</string>
+    <string name="search_title">Пошук</string>
+    <string name="search_continue">Продовжити перегляд</string>
+    <string name="search_recent">Недавні пошукові запити</string>
+    <string name="search_nothing_in_list">У <xliff:g id="list">%1$s</xliff:g> поки нічого немає.</string>
+    <string name="search_jump_to">Перейти</string>
+    <string name="search_channels">Канали</string>
+    <string name="search_on_tv">Телепередачі</string>
+    <string name="search_go_to_channel">До каналу</string>
+    <string name="search_clear_recent">Очистити недавні запити</string>
+    <string name="search_field_hint">Канали і передачі</string>
+    <string name="search_voice">Голосовий пошук</string>
+    <string name="search_voice_prompt">Назвіть канал або передачу</string>
+    <string name="search_card_title">Шукайте усе у своїх плейлистах</string>
+    <string name="search_card_body">Канали з поточного плейлиста. Виберіть результат, щоб одразу перейти до нього, увімкнути його або відкрити його параметри. Передачі, які йдуть зараз або пізніше сьогодні, також можна знайти за назвою.</string>
+    <string name="search_nothing_found">Нічого не знайдено за запитом «<xliff:g id="query">%1$s</xliff:g>»</string>
+    <string name="search_nothing_found_body">Пошук виконується за назвами каналів і передач у завантаженій телепрограмі. Приховані категорії не переглядаються.</string>
+    <string name="search_query_quoted">«<xliff:g id="query">%1$s</xliff:g>»</string>
+    <plurals name="search_result_count">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> результат</item>
+        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> результати</item>
+        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> результатів</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> результатів</item>
+    </plurals>
+    <plurals name="search_all_channels">
+        <item quantity="one">Весь <xliff:g id="count">%1$d</xliff:g> канал</item>
+        <item quantity="few">Усі <xliff:g id="count">%1$d</xliff:g> канали</item>
+        <item quantity="many">Усі <xliff:g id="count">%1$d</xliff:g> каналів</item>
+        <item quantity="other">Усі <xliff:g id="count">%1$d</xliff:g> каналів</item>
+    </plurals>
+    <string name="home_no_preview">Поки немає чого показувати.</string>
+    <string name="home_no_rows">Усі ряди на головному екрані приховано.</string>
+    <string name="home_enable_rows">Увімкніть ряди в розділі «Налаштування» → «Головний екран».</string>
+    <string name="home_start_watching">Почніть дивитися, і тут з\'явиться ваша активність.</string>
+    <string name="home_continue_empty">Контент для продовження перегляду з\'явиться тут, коли буде доступна історія відтворення.</string>
+    <string name="home_last_watched_now">Останній перегляд: щойно</string>
+    <plurals name="home_last_watched_minutes">
+        <item quantity="one">Останній перегляд: <xliff:g id="count">%1$d</xliff:g> хвилину тому</item>
+        <item quantity="few">Останній перегляд: <xliff:g id="count">%1$d</xliff:g> хвилини тому</item>
+        <item quantity="many">Останній перегляд: <xliff:g id="count">%1$d</xliff:g> хвилин тому</item>
+        <item quantity="other">Останній перегляд: <xliff:g id="count">%1$d</xliff:g> хвилин тому</item>
+    </plurals>
+    <plurals name="home_last_watched_hours">
+        <item quantity="one">Останній перегляд: <xliff:g id="count">%1$d</xliff:g> годину тому</item>
+        <item quantity="few">Останній перегляд: <xliff:g id="count">%1$d</xliff:g> години тому</item>
+        <item quantity="many">Останній перегляд: <xliff:g id="count">%1$d</xliff:g> годин тому</item>
+        <item quantity="other">Останній перегляд: <xliff:g id="count">%1$d</xliff:g> годин тому</item>
+    </plurals>
+    <plurals name="home_last_watched_days">
+        <item quantity="one">Останній перегляд: <xliff:g id="count">%1$d</xliff:g> день тому</item>
+        <item quantity="few">Останній перегляд: <xliff:g id="count">%1$d</xliff:g> дні тому</item>
+        <item quantity="many">Останній перегляд: <xliff:g id="count">%1$d</xliff:g> днів тому</item>
+        <item quantity="other">Останній перегляд: <xliff:g id="count">%1$d</xliff:g> днів тому</item>
+    </plurals>
+    <string name="home_row_cards">Картки</string>
+    <string name="home_row_keep_watching">Продовжити перегляд</string>
+    <string name="home_row_recent_channels">Недавні канали</string>
+    <string name="home_row_favorite_channels">Обрані канали</string>
+    <string name="home_row_on_now">Зараз в ефірі</string>
+    <string name="home_row_hero_description">Великий ряд попереднього перегляду у верхній частині екрана</string>
+    <string name="home_row_recent_description">Канали прямого ефіру, які ви нещодавно дивилися</string>
+    <string name="home_row_favorite_description">Ваші обрані канали прямого ефіру</string>
+    <string name="update_title">Оновлення застосунку</string>
+    <string name="update_checking">Перевірка оновлень…</string>
+    <string name="update_whats_new">Що нового</string>
+    <string name="update_downloading">Завантаження оновлення… <xliff:g id="percent">%1$d</xliff:g>%%</string>
+    <string name="update_available">Доступне оновлення</string>
+    <string name="update_latest">У вас найновіша версія (v<xliff:g id="version">%1$s</xliff:g>).</string>
+    <string name="update_available_version">Доступна версія <xliff:g id="available">%1$s</xliff:g> (у вас v<xliff:g id="current">%2$s</xliff:g>).</string>
+    <string name="update_installer">Після завершення завантаження відкриється системний інсталятор.</string>
+    <string name="update_later">Пізніше</string>
+    <string name="update_now">Оновити зараз</string>
+    <string name="update_try_again">Спробувати ще раз</string>
+    <string name="update_failed_check">Не вдалося перевірити наявність оновлень.</string>
+    <string name="update_failed_check_http">Під час перевірки сервер оновлень повернув помилку HTTP <xliff:g id="code">%1$s</xliff:g>.</string>
+    <string name="update_no_compatible_apk">У випуску не знайдено пакета оновлення для цього пристрою.</string>
+    <string name="update_invalid_release_response">Сервер оновлень повернув недійсний опис випуску.</string>
+    <string name="update_failed_download">Не вдалося завантажити оновлення через збій мережевого запиту.</string>
+    <string name="update_failed_download_http">Під час завантаження оновлення отримано помилку HTTP <xliff:g id="code">%1$s</xliff:g>.</string>
+    <string name="update_empty_download">Сервер оновлень повернув порожній файл APK.</string>
+    <string name="update_install_failed">Системному інсталятору не вдалося відкрити завантажене оновлення.</string>
+    <string name="update_not_enough_space">Недостатньо вільного місця для оновлення. Звільніть близько <xliff:g id="size">%1$s</xliff:g> і повторіть спробу.</string>
+    <string name="update_damaged_download">Оновлення завантажилося не повністю. Перевірте з\'єднання та повторіть спробу.</string>
+    <string name="update_install_rejected">Системний інсталятор відхилив оновлення: <xliff:g id="reason">%1$s</xliff:g></string>
+    <string name="update_ready">МОЁ ТВ v<xliff:g id="available">%1$s</xliff:g> готова до встановлення (у вас v<xliff:g id="current">%2$s</xliff:g>).</string>
+    <string name="recovery_title">МОЁ ТВ не вдалося відкрити базу даних</string>
+    <string name="recovery_data_safe_full">Ваші профілі, плейлисти, обране та історія НЕ видалено — сталася помилка оновлення бази даних, а дані все ще перебувають на цьому пристрої.\n\nБудь ласка, повідомте про це, щоб проблему можна було усунути, і додайте наведене нижче повідомлення.</string>
+    <string name="recovery_retry">Спробувати ще раз</string>
+    <string name="recovery_backup_hint">Якщо у вас є файл резервної копії, можна скинути дані застосунку, а потім відновити їх. Під час скидання видаляється усе, що зберігається на цьому пристрої.</string>
+    <string name="recovery_confirm_reset">Підтвердження: видалити всі дані застосунку</string>
+    <string name="recovery_reset">Скинути дані застосунку (крайній захід)</string>
+    <string name="home_duration_hours_minutes"><xliff:g id="hours">%1$d</xliff:g> год <xliff:g id="minutes">%2$02d</xliff:g> хв</string>
+    <string name="home_time_left">залишилося <xliff:g id="duration">%1$s</xliff:g></string>
+    <string name="auto_start_notification_channel">Автозапуск під час пробудження</string>
+    <string name="auto_start_notification_text">МОЁ ТВ відкриється, коли телевізор прокинеться</string>
+    <string name="sports_move_instructions">▲/▼ вибір · OK взяти або покласти · Наприкінці «Зберегти»</string>
+</resources>

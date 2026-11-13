@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="content_exit_owntv">Выйсці з МОЁ ТВ?</string>
+    <string name="content_exit_confirmation">Закрыць прыкладанне?</string>
+    <string name="content_restore_incomplete_title">Аднаўленне не завершана</string>
+    <string name="content_restore_incomplete_message">Прыкладанне закрылася падчас аднаўлення <xliff:g id="description">%1$s</xliff:g>, таму частка даных магла не аднавіцца. Нічога не было выдалена — запусціце тое ж аднаўленне яшчэ раз у раздзеле «Налады → Рэзервовае капіраванне і аднаўленне», каб аднавіць астатняе.</string>
+    <string name="content_category_browser_title">Катэгорыі</string>
+    <string name="content_channel_overlay_title">Каналы</string>
+    <string name="content_live_now">У эфіры зараз</string>
+    <string name="content_live_next">У эфіры далей</string>
+    <string name="content_archive_playing">Прайграваецца</string>
+    <string name="content_archive_then">Потым</string>
+    <string name="content_clock_current">Бягучы час</string>
+    <string name="content_add_favourite">Дадаць у абранае</string>
+    <string name="content_remove_favourite">Выдаліць з абранага</string>
+    <string name="content_move">Перамясціць</string>
+    <string name="content_category_restore_playlist">Вярнуць па змаўчанні</string>
+    <string name="content_category_restore_custom">Вярнуць па змаўчанні</string>
+    <string name="content_category_restore_question">Што адбудзецца:</string>
+    <plurals name="content_category_restore_hidden">
+        <item quantity="one">Зноў паказаны <xliff:g id="count">%1$d</xliff:g> схаваны элемент</item>
+        <item quantity="few">Зноў паказаны <xliff:g id="count">%1$d</xliff:g> схаваныя элементы</item>
+        <item quantity="many">Зноў паказана <xliff:g id="count">%1$d</xliff:g> схаваных элементаў</item>
+        <item quantity="other">Зноў паказана <xliff:g id="count">%1$d</xliff:g> схаваных элементаў</item>
+    </plurals>
+    <plurals name="content_category_restore_moved">
+        <item quantity="one">Вернецца <xliff:g id="count">%1$d</xliff:g> перамешчаны элемент</item>
+        <item quantity="few">Вернуцца <xliff:g id="count">%1$d</xliff:g> перамешчаныя элементы</item>
+        <item quantity="many">Вернуцца <xliff:g id="count">%1$d</xliff:g> перамешчаных элементаў</item>
+        <item quantity="other">Вернуцца <xliff:g id="count">%1$d</xliff:g> перамешчаных элементаў</item>
+    </plurals>
+    <string name="content_category_restore_order">Ваш парадак будзе скінуты</string>
+    <string name="content_category_restore_nothing">Катэгорыя ўжо ў зыходным стане плейліста</string>
+    <string name="content_category_lock">Заблакаваць PIN-кодам</string>
+    <string name="content_category_locked_placeholder">Гэтая катэгорыя заблакавана</string>
+    <plurals name="content_category_pin_wait">
+        <item quantity="one">Занадта шмат няправільных PIN-кодаў. Паўтарыце праз <xliff:g id="count">%1$d</xliff:g> секунду</item>
+        <item quantity="few">Занадта шмат няправільных PIN-кодаў. Паўтарыце праз <xliff:g id="count">%1$d</xliff:g> секунды</item>
+        <item quantity="many">Занадта шмат няправільных PIN-кодаў. Паўтарыце праз <xliff:g id="count">%1$d</xliff:g> секунд</item>
+        <item quantity="other">Занадта шмат няправільных PIN-кодаў. Паўтарыце праз <xliff:g id="count">%1$d</xliff:g> секунд</item>
+    </plurals>
+    <string name="content_move_to_category">Перамясціць у катэгорыю…</string>
+    <string name="content_remove_from_category">Выдаліць з гэтай катэгорыі</string>
+    <string name="content_play">Прайграць</string>
+    <string name="content_close">Закрыць</string>
+    <string name="content_rename_hint">Толькі для гэтага профілю. Пакіньце поле пустым, каб вярнуць зыходную назву.</string>
+    <string name="content_provider">Пастаўшчык</string>
+    <string name="content_provider_name">Пастаўшчык: %1$s</string>
+    <string name="content_play_external_short">Прайграць у знешнім плееры</string>
+    <string name="content_rename">Перайменаваць</string>
+    <string name="content_rename_channel">Перайменаваць канал</string>
+    <string name="content_reorder_channel">Змяніць парадак канала</string>
+    <string name="content_hide_channel">Схаваць канал</string>
+    <string name="content_remove_history">Выдаліць з гісторыі</string>
+    <string name="content_no_channels_here">Тут няма каналаў.</string>
+    <string name="content_no_channels_found">Па запыце «<xliff:g id="query">%1$s</xliff:g>» каналы не знойдзены</string>
+    <string name="content_live_time_range_plain"><xliff:g id="start">%1$s</xliff:g> – <xliff:g id="stop">%2$s</xliff:g></string>
+    <string name="content_category_favorites">Абранае</string>
+    <string name="content_category_history">Гісторыя</string>
+    <string name="content_category_all_channels">Усе каналы</string>
+    <string name="content_offline_banner">Вы не ў сетцы — прайграванне і абнаўленні не будуць працаваць, пакуль злучэнне не адновіцца.</string>
+    <string name="content_all_playlists">Усе плейлісты</string>
+    <string name="content_search_categories">Пошук катэгорый…</string>
+    <string name="content_action_resume">Працягнуць</string>
+    <string name="content_action_last_channel">Апошні канал</string>
+    <string name="content_live_time_range"><xliff:g id="start">%1$s</xliff:g> – <xliff:g id="end">%2$s</xliff:g></string>
+    <string name="content_live_time_remaining"><xliff:g id="end">%1$s</xliff:g> · засталося <xliff:g id="minutes">%2$d</xliff:g> хв</string>
+    <string name="content_storage_internal">Унутранае сховішча</string>
+    <string name="content_storage_removable">Здымнае сховішча</string>
+    <string name="content_storage_app">Сховішча прыкладання (дазвол не патрабуецца)</string>
+    <string name="content_epg_no_channels_query">Па запыце «<xliff:g id="query">%1$s</xliff:g>» каналы тэлепрограмы не знойдзены.</string>
+    <string name="content_epg_mismatched_ids">Даныя тэлепрограмы захаваны, але ідэнтыфікатары яе каналаў не супадаюць з ідэнтыфікатарамі EPG вашых каналаў — магчыма, гэтая крыніца EPG прызначана для іншага набору каналаў пастаўшчыка.</string>
+    <string name="content_epg_title">Тэлепрограма</string>
+    <string name="content_epg_no_guide">Няма тэлепрограмы.</string>
+    <string name="content_epg_no_programme">На гэты час тэлеперадач няма.</string>
+    <string name="content_epg_guide_category">Катэгорыя тэлепрограмы</string>
+    <string name="content_epg_search_hint">Пошук каналаў тэлепрограмы…</string>
+    <string name="content_epg_add_favourite">Дадаць у абранае</string>
+    <string name="content_epg_remove_favourite">Выдаліць з абранага</string>
+    <string name="content_epg_sort_alpha">А–Я</string>
+    <string name="content_epg_sort_provider">Пастаўшчык</string>
+    <string name="content_epg_bits_separator">" · "</string>
+    <string name="content_epg_watch_channel">Глядзець канал</string>
+    <string name="content_epg_time_offset">Зрушэнне часу EPG</string>
+    <string name="content_epg_shift_minutes"><xliff:g id="sign">%1$s</xliff:g><xliff:g id="minutes">%2$s</xliff:g>хв</string>
+    <string name="content_epg_shift_hours"><xliff:g id="sign">%1$s</xliff:g><xliff:g id="hours">%2$s</xliff:g>г</string>
+    <string name="content_epg_shift_hours_minutes"><xliff:g id="sign">%1$s</xliff:g><xliff:g id="hours">%2$s</xliff:g>г <xliff:g id="minutes">%3$s</xliff:g>хв</string>
+    <string name="content_epg_offset_channel_description">Зрушце тэлепрограму для «<xliff:g id="channel">%1$s</xliff:g>». Выкарыстоўвайце гэта, калі ўсходняя і заходняя версіі канала маюць агульную тэлепрограму — адмоўнае зрушэнне пераносіць тэлепрограму на больш ранні час.</string>
+    <string name="content_epg_offset_following_global">Слідкуе за глобальным зрушэннем (<xliff:g id="offset">%1$s</xliff:g>)</string>
+    <string name="content_epg_offset_channel_only">Толькі гэты канал · глобальнае: <xliff:g id="offset">%1$s</xliff:g></string>
+    <string name="content_epg_offset_use_global">Выкарыстоўваць глобальнае зрушэнне</string>
+    <string name="content_preview_single_stream">Папярэдні прагляд адключаны — ваш пастаўшчык дазваляе адначасова толькі адзін паток.</string>
+    <string name="content_search_in">Пошук: <xliff:g id="name">%1$s</xliff:g></string>
+    <string name="content_live_guide_view">Выгляд тэлепрограмы</string>
+    <string name="content_key_watch">Глядзець</string>
+    <string name="content_key_options">Параметры</string>
+    <string name="content_live_groups">Групы</string>
+    <string name="content_menu_group_watch">Глядзець</string>
+    <string name="content_menu_group_channel">Канал</string>
+    <string name="content_menu_group_guide_data">Даныя тэлепрограмы</string>
+    <string name="content_menu_group_organise">Упарадкаваць</string>
+    <string name="content_epg_offset_global_short">Агульнае</string>
+    <string name="content_live_groups_country">Групы · <xliff:g id="country">%1$s</xliff:g></string>
+    <plurals name="content_live_channel_count">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> канал</item>
+        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> канала</item>
+        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> каналаў</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> каналаў</item>
+    </plurals>
+    <string name="content_category_recently_watched">Нядаўна прагледжаныя</string>
+    <string name="content_remind_me">Напомніць</string>
+    <string name="content_remind_before">за <xliff:g id="duration">%1$s</xliff:g></string>
+    <string name="content_key_hold_ok">Утрымліваць OK</string>
+    <string name="content_epg_starts_in">Пачнецца праз <xliff:g id="duration">%1$s</xliff:g></string>
+    <string name="content_epg_today">Сёння</string>
+    <string name="content_epg_tomorrow">Заўтра</string>
+    <string name="content_epg_yesterday">Учора</string>
+    <string name="content_epg_now_short">Зараз</string>
+    <string name="content_epg_sort_favorites_first">Спачатку абранае</string>
+    <string name="content_epg_order_title">Парадак каналаў</string>
+    <string name="content_epg_order_hint">У наступны раз адкрыецца таксама</string>
+    <string name="content_epg_category_hint">Той жа спіс, што ў Прамым эфіры</string>
+    <string name="content_menu_group_new">Новае</string>
+    <string name="content_reminder_set">Нагадванне ўстаноўлена</string>
+    <string name="content_live_list_view">Выгляд спіса</string>
+    <string name="content_key_browse">Агляд</string>
+    <string name="content_key_channels">Каналы</string>
+    <string name="content_key_programmes">Перадачы</string>
+    <string name="content_key_menu">Меню</string>
+    <string name="content_key_enter">Адкрыць</string>
+    <string name="content_key_select">Выбраць</string>
+    <string name="content_key_unselect">Зняць выбар</string>
+    <string name="content_key_page">Старонка</string>
+    <string name="content_history_overlay_hint">Нядаўна прагледжаныя каналы, спачатку новыя</string>
+    <string name="content_menu_group_show">Паказваць</string>
+    <string name="content_epg_show_empty">Каналы без тэлепрограмы</string>
+    <string name="content_epg_show_preview">Папярэдні прагляд відэа</string>
+    <string name="content_menu_group_details">Падрабязнасці</string>
+    <string name="content_programme_details">Пра тэлеперадачу</string>
+    <string name="content_programmes_earlier">Раней</string>
+    <string name="content_programmes_later">Пазней</string>
+</resources>

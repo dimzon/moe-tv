@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="player_zoom_fit_screen">Упісаць у экран</string>
+    <string name="player_zoom_fill_crop">Запоўніць / абрэзаць</string>
+    <string name="player_zoom_stretch">Расцягнуць</string>
+    <string name="player_zoom_original">Зыходны памер (1:1)</string>
+    <string name="player_zoom_force_16_9">Прымусова 16:9</string>
+    <string name="player_zoom_force_4_3">Прымусова 4:3</string>
+    <string name="player_mini_top_left">Уверху злева</string>
+    <string name="player_mini_top_center">Уверху па цэнтры</string>
+    <string name="player_mini_top_right">Уверху справа</string>
+    <string name="player_mini_bottom_left">Унізе злева</string>
+    <string name="player_mini_bottom_center">Унізе па цэнтры</string>
+    <string name="player_mini_bottom_right">Унізе справа</string>
+    <string name="player_channel_label">КАНАЛ</string>
+    <string name="player_go_live">Да эфіру</string>
+    <string name="player_previous_channel">Папярэдні канал</string>
+    <string name="player_tool_volume">Гучнасць</string>
+    <string name="player_tool_brightness">Яркасць</string>
+    <string name="player_tool_audio">Гук</string>
+    <string name="player_tool_subtitles">Субтытры</string>
+    <string name="player_tool_favorite">Абранае</string>
+    <string name="player_tool_aspect">Фармат</string>
+    <string name="player_tool_quality">Якасць</string>
+    <string name="player_tool_mini">Міні</string>
+    <string name="player_tool_audio_only">Толькі гук</string>
+    <string name="player_tool_info">Звесткі</string>
+    <string name="player_tool_report">Справаздача</string>
+    <string name="player_channel_not_found">Канал не знойдзены</string>
+    <string name="player_multiple_channels">Знойдзена некалькі каналаў</string>
+    <string name="player_tune_failed">Не ўдалося пераключыцца</string>
+    <string name="player_playback_error">Памылка прайгравання</string>
+    <string name="player_raw_error">памылка: <xliff:g id="error">%1$s</xliff:g></string>
+    <string name="player_audio_track">Гукавая дарожка</string>
+    <string name="player_subtitles">Субтытры</string>
+    <string name="player_no_tracks">Няма даступных дарожак.</string>
+    <string name="player_image_track"><xliff:g id="label">%1$s</xliff:g> · графічныя</string>
+    <string name="player_av_sync">Сінхранізацыя гуку і відэа</string>
+    <string name="player_av_sync_remember">Запомніць гэтую затрымку</string>
+    <string name="player_delay_zero">0 мс</string>
+    <string name="player_delay_positive">+<xliff:g id="ms">%1$d</xliff:g> мс</string>
+    <string name="player_delay_negative"><xliff:g id="ms">%1$d</xliff:g> мс</string>
+    <string name="player_volume">Гучнасць</string>
+    <string name="player_smoothness_hint">Канал губляе кадры — малюнак можа дзёргацца.</string>
+    <string name="player_unmute">Уключыць гук</string>
+    <string name="player_mute">Выключыць гук</string>
+    <string name="player_percent"><xliff:g id="value">%1$d</xliff:g>%%</string>
+    <string name="player_duration_minutes"><xliff:g id="minutes">%1$d</xliff:g> хв</string>
+    <string name="player_channel_number">#<xliff:g id="number">%1$s</xliff:g></string>
+    <string name="player_live">ЭФІР</string>
+    <string name="player_error_stream_link">Не ўдалося атрымаць спасылку на паток ад портала. Праверце злучэнне і паўтарыце спробу.</string>
+    <string name="player_error_not_streaming">Гэта відэа не падрыхтавана для патокавага прайгравання. Папросіце пастаўшчыка паўторна закадзіраваць яго з хуткім запускам або спачатку спампуйце яго.</string>
+    <string name="player_error_lost_connection">Злучэнне з гэтым каналам згублена.</string>
+    <string name="player_error_channel">Не ўдалося прайграць гэты канал.</string>
+    <string name="player_error_exo_decode">ExoPlayer не можа дэкадаваць фармат гэтага відэа на гэтай прыладзе (<xliff:g id="error">%1$s</xliff:g>).</string>
+    <string name="player_error_exo_play">ExoPlayer не ўдалося прайграць гэты паток (<xliff:g id="error">%1$s</xliff:g>).</string>
+    <string name="player_external_could_not_open">Не ўдалося адкрыць гэты паток.</string>
+    <string name="player_external_not_found">Знешні плеер не знойдзены — усталюйце VLC або MX Player.</string>
+    <string name="player_error_audio_no_video">Гук прайграецца, але відэа не ўдалося паказаць на гэтай прыладзе.</string>
+    <string name="player_error_decoder_busy">Відэадэкодэр гэтага тэлевізара заняты. Паўтарыце спробу праз некаторы час.</string>
+    <string name="player_error_no_internet">Няма падключэння да інтэрнэту. Праверце сетку і паўтарыце спробу.</string>
+    <string name="player_error_stream_unavailable">Не ўдалося прайграць гэты паток. Магчыма, крыніца не ў сетцы або выкарыстоўвае непадтрымліваны фармат. <xliff:g id="hint">%1$s</xliff:g></string>
+    <string name="player_error_account_in_use">Гэты ўліковы запіс ужо прайграе на іншай прыладзе або ў іншым прыкладанні. Спыніце прайграванне там і націсніце «Паўтарыць».</string>
+    <string name="player_error_fairplay">Гэты паток абаронены Apple FairPlay, які прылады Android не могуць прайграць. Плейліст разлічаны на прылады Apple.</string>
+    <string name="player_error_surround">Гэты гукавы выход не падтрымлівае шматканальны гук — выканана пераключэнне на стэрэа.</string>
+    <string name="player_error_hardware_fallback">Фармат гэтага патока не ўдалося дэкадаваць апаратна на гэтым тэлевізары, таму было выкарыстана праграмнае дэкадаванне, якое не спраўляецца з <xliff:g id="resolution">%1$s</xliff:g> без перагрузкі тэлевізара. Пры гэтым тэлевізар можа нармальна прайграваць іншы кантэнт у 4K; праблема звязана з фарматам менавіта гэтага патока.</string>
+    <string name="player_error_hardware_disabled">Апаратнае дэкадаванне адключана — праграмнае дэкадаванне не спраўляецца з відэа ў разрозненні <xliff:g id="resolution">%1$s</xliff:g>. Уключыце апаратнае дэкадаванне ў раздзеле «Налады → Відэаплеер».</string>
+    <string name="player_error_custom_user_agent">Магчыма, гэтаму пастаўшчыку патрабуецца ўласны User-Agent у наладах крыніцы.</string>
+    <string name="player_reason_decoder_busy">Апаратны відэадэкодэр заняты або не спраўляецца з гэтым патокам</string>
+    <string name="player_reason_decoder_transient">Часовая памылка апаратнага відэадэкодэра — паўтарыце спробу</string>
+    <string name="player_reason_unsupported_video">Дэкодэр гэтай прылады не падтрымлівае дадзены фармат або профіль відэа (напрыклад, HEVC 10-bit)</string>
+    <string name="player_reason_decoder_memory">Прыладзе не хапіла памяці для дэкодэра — паспрабуйце закрыць іншыя прыкладанні</string>
+    <string name="player_reason_drm">Памылка DRM / абароненага дэкодэра</string>
+    <string name="player_reason_http_509">Пастаўшчык заблакаваў злучэнне — адначасова запушчана занадта шмат патокаў (HTTP 509)</string>
+    <string name="player_reason_http_403">Пастаўшчык адмовіў у доступе (HTTP 403) — уліковыя даныя, падпіска або блакіроўка IP-адраса</string>
+    <string name="player_reason_http_401">Пастаўшчык адхіліў вашы даныя для ўваходу (HTTP 401)</string>
+    <string name="player_reason_http_404">Паток не знойдзены ў пастаўшчыка (HTTP 404)</string>
+    <string name="player_reason_http_400">Пастаўшчык адхіліў запыт (HTTP 400) — няправільная або састарэлая спасылка</string>
+    <string name="player_reason_ssl">SSL-сертыфікат пастаўшчыка несапраўдны або састарэлы</string>
+    <string name="player_reason_format">Фармат патока не распазнаны (пашкоджаны або няпоўны паток)</string>
+    <string name="player_reason_network">Праблема з сеткай пры падключэнні да пастаўшчыка</string>
+    <string name="player_reason_audio">Памылка гукавога выхаду — прылада не змагла прайграць гэты гукавы фармат</string>
+    <string name="player_audio_track_number">Гукавая дарожка <xliff:g id="number">%1$d</xliff:g></string>
+    <string name="player_subtitle_track_number">Субтытры <xliff:g id="number">%1$d</xliff:g></string>
+    <string name="player_metadata_separator">" · "</string>
+    <string name="player_stream_info">Інфармацыя пра паток</string>
+    <string name="player_stream_engine">Рухавік</string>
+    <string name="player_stream_format">Фармат</string>
+    <string name="player_stream_source">Крыніца</string>
+    <string name="player_stream_video">Відэа</string>
+    <string name="player_stream_hdr">HDR</string>
+    <string name="player_stream_hdr10_pq">HDR10 (PQ)</string>
+    <string name="player_stream_hlg">HLG</string>
+    <string name="player_stream_sdr">SDR</string>
+    <string name="player_stream_bitrate">Бітрэйт</string>
+    <string name="player_stream_decoder">Дэкодэр</string>
+    <string name="player_stream_audio">Аўдыё</string>
+    <string name="player_stream_buffer">Буфер</string>
+    <string name="player_stream_fps"><xliff:g id="fps">%1$.2f</xliff:g> кадр/с</string>
+    <string name="player_stream_bit_depth"><xliff:g id="bits">%1$d</xliff:g> біт</string>
+    <string name="player_stream_mbps"><xliff:g id="value">%1$s</xliff:g> Мбіт/с</string>
+    <string name="player_stream_khz"><xliff:g id="value">%1$s</xliff:g> кГц</string>
+    <string name="player_stream_kbps"><xliff:g id="value">%1$s</xliff:g> кбіт/с</string>
+    <string name="player_stream_seconds"><xliff:g id="value">%1$s</xliff:g> с у буферы</string>
+    <string name="player_audio_only_title">Толькі гук</string>
+    <string name="player_audio_only_body">Тут ёсць гук, але няма выявы. Гэта не памылка — прайграванне ідзе нармальна.</string>
+    <string name="player_audio_mono">моно</string>
+    <string name="player_audio_stereo">стэрэа</string>
+    <plurals name="player_audio_channels">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> канал</item>
+        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> канала</item>
+        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> каналаў</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> каналаў</item>
+    </plurals>
+    <plurals name="player_stream_dropped_frames">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> кадр прапушчан</item>
+        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> кадры прапушчаны</item>
+        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> кадраў прапушчана</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> кадраў прапушчана</item>
+    </plurals>
+    <string name="player_decoder_hardware">апаратны дэкодэр</string>
+    <string name="player_decoder_software">праграмны дэкодэр</string>
+    <string name="player_decoder_direct">прамы</string>
+    <string name="player_decoder_gpu">GPU</string>
+    <string name="player_reason_stereo_fallback">Пераключана на стэрэагук</string>
+    <string name="player_reason_one_session_provider">Пастаўшчык дазваляе толькі адзін сеанс адначасова</string>
+    <string name="player_reason_stream_report">Справаздача пра паток</string>
+    <string name="player_stream_audio_output">Гукавы выход</string>
+    <string name="player_stream_live_buffer">Буфер прамога эфіру</string>
+    <string name="player_stream_audio_passthrough">скразная перадача (дэкадуе тэлевізар/рэсівер)</string>
+    <string name="player_stream_audio_decoded_in_app">дэкадуецца ў прыкладанні</string>
+    <string name="player_stream_audio_pcm"><xliff:g id="channels">%1$s</xliff:g> PCM</string>
+    <string name="player_stream_multichannel_allowed">шматканальны рэжым дазволены</string>
+    <string name="player_stream_fell_back">пераход на запасны варыянт: <xliff:g id="reason">%1$s</xliff:g></string>
+    <string name="player_stream_preroll_video">папярэдняе буферызаванне <xliff:g id="seconds">%1$s</xliff:g> сек. відэа</string>
+    <string name="player_stream_preroll_off">папярэдняе буферызаванне адключана</string>
+    <string name="player_stream_depth">глыбіня <xliff:g id="seconds">%1$s</xliff:g> сек.</string>
+    <string name="player_stream_readahead">апярэджваючае чытанне <xliff:g id="seconds">%1$s</xliff:g> сек.</string>
+    <string name="player_stream_playlist_override">перазначэнне плейлістам</string>
+    <string name="player_error_hardware_format">Апаратны відэадэкодэр гэтага тэлевізара не можа дэкадаваць <xliff:g id="resolution">%1$s</xliff:g> <xliff:g id="codec">%2$s</xliff:g>. З файлам усё ў парадку, але тэлевізар не можа прайграць гэты фармат у такім разрозненні.</string>
+    <string name="player_report_saved">Справаздача пра паток захавана ў журнале прайгравання</string>
+    <string name="player_frame_rate_prompt_title">На гэтым канале магчымы рыўкі малюнка</string>
+    <string name="player_frame_rate_prompt_description">Канал прайграецца з хуткасцю <xliff:g id="fps">%1$d</xliff:g> fps, а ваш тэлевізар працуе з частатой <xliff:g id="current_hz">%2$d</xliff:g> Гц, таму не можа паказваць гэтыя кадры раўнамерна — рух выглядае крыху няроўным.\n\nАўтапераключэнне частаты кадраў пераводзіць тэлевізар на <xliff:g id="target_hz">%3$d</xliff:g> Гц, пакуль вы глядзіце, а потым вяртае назад. Некаторыя тэлевізары на імгненне гаснуць пры змене частаты; вы можаце зноў адключыць гэту функцыю ў раздзеле «Налады» → «Малюнак» → «Частата кадраў».</string>
+    <string name="player_frame_rate_turn_on">Уключыць</string>
+    <string name="player_reason_live_fallback">Прайграванне прамога эфіру пераключана на рэзервовы варыянт</string>
+    <string name="player_reason_live_no_fallback">Прайграванне прамога эфіру не ўдалося — рэзервовых варыянтаў не засталося</string>
+    <string name="player_provider_retry_after">HTTP <xliff:g id="code">%1$d</xliff:g>: <xliff:g id="reason">%2$s</xliff:g> Паўторная спроба праз <xliff:g id="seconds">%3$d</xliff:g> с.</string>
+    <string name="player_provider_busy">Пастаўшчык заняты.</string>
+    <string name="player_reconnecting">Трансляцыя перарвана. Перападключэнне…</string>
+    <string name="player_sleep_timer">Таймер сну</string>
+    <string name="player_sleep_timer_end_of_programme">Канец перадачы</string>
+    <string name="player_sleep_timer_remaining">Спыніцца праз <xliff:g id="time">%1$s</xliff:g></string>
+    <string name="player_sleep_timer_screen_off">Таксама выключаць экран</string>
+    <string name="player_sleep_timer_screen_off_explanation">Выкарыстоўваецца толькі для выключэння экрана па заканчэнні таймера і больш ні для чаго.</string>
+    <string name="player_sleep_timer_screen_off_unavailable">Гэтая прылада не дазваляе прыкладанням выключаць экран.</string>
+    <string name="player_error_cast_unsupported">Прылада, на якую вы транслюеце, не можа прайграць гэты паток. Шмат каналаў выкарыстоўваюць фармат, які яна не падтрымлівае, — уключыце яго на тэлефоне.</string>
+    <string name="multiview_button">Мультыэкран</string>
+    <string name="multiview_add_channel">Дадаць канал</string>
+    <string name="multiview_refused_single">Пастаўшчык дазваляе толькі адзін паток адначасова.</string>
+    <plurals name="multiview_refused_all_in_use">
+        <item quantity="one">Пастаўшчык дазваляе <xliff:g id="count">%1$d</xliff:g> паток адначасова, і ён заняты.</item>
+        <item quantity="few">Пастаўшчык дазваляе <xliff:g id="count">%1$d</xliff:g> патокі адначасова, і ўсе яны заняты.</item>
+        <item quantity="many">Пастаўшчык дазваляе <xliff:g id="count">%1$d</xliff:g> патокаў адначасова, і ўсе яны заняты.</item>
+        <item quantity="other">Пастаўшчык дазваляе <xliff:g id="count">%1$d</xliff:g> патокаў адначасова, і ўсе яны заняты.</item>
+    </plurals>
+    <string name="multiview_refused_reserved">Адно падключэнне заставаецца свабодным, каб вы маглі працягнуць прагляд. Змяніце гэта ў наладах, каб рабіць запіс на ўсіх падключэннях.</string>
+    <string name="multiview_decoder_exhausted">Гэты тэлевізар не можа дэкадаваць яшчэ адзін канал адначасова.</string>
+    <string name="multiview_tile_change_channel">Змяніць канал</string>
+    <string name="multiview_tile_fullscreen">На ўвесь экран</string>
+    <string name="multiview_tile_remove">Прыбраць плітку</string>
+    <string name="multiview_audio_tile">Гук ідзе з гэтай пліткі</string>
+    <string name="multiview_add_to">Дадаць у мультыэкран</string>
+    <string name="multiview_added">Захавана для мультыэкрана · <xliff:g id="count">%1$d</xliff:g> з <xliff:g id="total">%2$d</xliff:g>. Уключыце канал, каб адкрыць сетку.</string>
+    <string name="multiview_tile_sound_only">Толькі гук</string>
+    <string name="multiview_tile_show_picture">Паказаць выяву</string>
+    <string name="multiview_sound_only_note">Толькі гук — усё роўна займае адзін паток пастаўшчыка</string>
+</resources>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="common_cancel">Скасаваць</string>
+    <string name="common_back">Назад</string>
+    <string name="common_save">Захаваць</string>
+    <string name="common_edit">Змяніць</string>
+    <string name="common_delete">Выдаліць</string>
+    <string name="common_clear">Ачысціць</string>
+    <string name="common_retry">Паўтарыць</string>
+    <string name="common_create">Стварыць</string>
+    <string name="common_reset">Скінуць</string>
+    <string name="common_done">Гатова</string>
+    <string name="common_ok">OK</string>
+    <string name="common_on">Укл.</string>
+    <string name="common_off">Выкл.</string>
+    <string name="common_never">Ніколі</string>
+    <string name="common_exit">Выйсці</string>
+    <string name="common_resume">Працягнуць</string>
+    <string name="common_name">Імя</string>
+    <string name="common_proxy">Проксі</string>
+    <string name="common_search_hint">Пошук…</string>
+    <string name="common_search">Пошук</string>
+    <string name="common_nav_search">Пошук</string>
+    <string name="common_nav_home">Галоўная</string>
+    <string name="common_nav_live_tv">Прамы эфір</string>
+    <string name="common_nav_guide">Тэлепрограма</string>
+    <string name="common_nav_more">Яшчэ</string>
+    <string name="common_nav_settings">Налады</string>
+    <string name="shell_no_source">Няма крыніцы</string>
+    <string name="shell_now_playing">Зараз прайграваецца</string>
+    <string name="common_number_grouped"><xliff:g id="count">%1$,d</xliff:g></string>
+    <string name="common_percent"><xliff:g id="percent">%1$d</xliff:g>%%</string>
+    <string name="sync_error_offline">Падобна, вы не ў сетцы. Праверце злучэнне і паўтарыце спробу.</string>
+    <string name="sync_error_generic">Штосьці пайшло не так. Паўтарыце спробу.</string>
+    <string name="sync_error_timeout">Сервер занадта доўга не адказваў. Паўтарыце спробу.</string>
+    <string name="sync_error_unreachable">Не ўдалося звязацца з серверам. Праверце адрас і злучэнне.</string>
+    <string name="sync_error_connection">Не ўдалося падключыцца да сервера. Магчыма, ён недаступны або ўказаны няправільны адрас.</string>
+    <string name="sync_error_interrupted">Сервер перапыніў загрузку. Паўтарыце спробу.</string>
+    <string name="sync_error_mac">Портал адхіліў гэты MAC-адрас: праверце MAC-адрас (а таксама дату і час на тэлевізары) — магчыма, тэрмін падпіскі сцёк.</string>
+    <string name="sync_error_invalid_mac">Нядопушчальны MAC-адрас — выкарыстоўвайце фармат AA:BB:CC:DD:EE:FF</string>
+    <string name="sync_counts_separator">"  ·  "</string>
+    <string name="sync_counts_success">Сінхранізацыя паспяхова завершана</string>
+    <string name="sync_counts_synced"><xliff:g id="counts">%1$s</xliff:g> сінхранізавана</string>
+    <string name="sync_import_warnings">Імпарт выкананы з папярэджаннямі: <xliff:g id="phases">%1$s</xliff:g></string>
+    <string name="sync_warning_phase_error"><xliff:g id="phase">%1$s</xliff:g>: <xliff:g id="message">%2$s</xliff:g></string>
+    <plurals name="sync_warning_catalog_shrink">
+        <item quantity="one">Захаваны <xliff:g id="stored">%1$d</xliff:g> існуючы элемент — пры гэтым імпарце атрымана на <xliff:g id="percent">%2$d</xliff:g>%% менш элементаў. Выканайце сінхранізацыю яшчэ раз або выкарыстоўвайце прымусовую чыстую сінхранізацыю, калі пастаўшчык сапраўды выдаліў яго.</item>
+        <item quantity="few">Захаваны <xliff:g id="stored">%1$d</xliff:g> існуючыя элементы — пры гэтым імпарце атрымана на <xliff:g id="percent">%2$d</xliff:g>%% менш элементаў. Выканайце сінхранізацыю яшчэ раз або выкарыстоўвайце прымусовую чыстую сінхранізацыю, калі пастаўшчык сапраўды выдаліў іх.</item>
+        <item quantity="many">Захавана <xliff:g id="stored">%1$d</xliff:g> існуючых элементаў — пры гэтым імпарце атрымана на <xliff:g id="percent">%2$d</xliff:g>%% менш элементаў. Выканайце сінхранізацыю яшчэ раз або выкарыстоўвайце прымусовую чыстую сінхранізацыю, калі пастаўшчык сапраўды выдаліў іх.</item>
+        <item quantity="other">Захавана <xliff:g id="stored">%1$d</xliff:g> існуючых элементаў — пры гэтым імпарце атрымана на <xliff:g id="percent">%2$d</xliff:g>%% менш элементаў. Выканайце сінхранізацыю яшчэ раз або выкарыстоўвайце прымусовую чыстую сінхранізацыю, калі пастаўшчык сапраўды выдаліў іх.</item>
+    </plurals>
+    <plurals name="sync_warning_page_failures">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> старонка крыніцы не загрузілася; да наступнай сінхранізацыі частка кантэнту можа адсутнічаць.</item>
+        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> старонкі крыніцы не загрузіліся; да наступнай сінхранізацыі частка кантэнту можа адсутнічаць.</item>
+        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> старонак крыніцы не загрузілася; да наступнай сінхранізацыі частка кантэнту можа адсутнічаць.</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> старонак крыніцы не загрузілася; да наступнай сінхранізацыі частка кантэнту можа адсутнічаць.</item>
+    </plurals>
+    <string name="sync_remainder_note">Астатняя частка каталога ўсё яшчэ сінхранізуецца ў фонавым рэжыме — можна ўжо пачаць прагляд. Ход сінхранізацыі паказваецца ў невялікім чыпе ў ніжняй частцы экрана.</string>
+    <string name="sync_progress_preparing">Падрыхтоўка каталога</string>
+    <string name="sync_progress_connecting">Злучэнне з крыніцай…</string>
+    <string name="sync_progress_syncing">Сінхранізацыя каталога</string>
+    <string name="sync_status_catalog">Сінхранізацыя <xliff:g id="source">%1$s</xliff:g></string>
+    <string name="sync_status_catalog_with_counts">Сінхранізацыя <xliff:g id="source">%1$s</xliff:g> · <xliff:g id="counts">%2$s</xliff:g></string>
+    <string name="sync_status_epg">Абнаўленне тэлепрограмы · <xliff:g id="source">%1$s</xliff:g></string>
+    <string name="sync_status_epg_with_counts">Абнаўленне тэлепрограмы · <xliff:g id="source">%1$s</xliff:g> · <xliff:g id="counts">%2$s</xliff:g></string>
+    <string name="sync_status_complete">Сінхранізацыя завершана · <xliff:g id="source">%1$s</xliff:g></string>
+    <string name="sync_status_complete_with_changes">Сінхранізацыя завершана · <xliff:g id="source">%1$s</xliff:g> · <xliff:g id="changes">%2$s</xliff:g></string>
+    <string name="sync_status_failed">Памылка сінхранізацыі · <xliff:g id="source">%1$s</xliff:g>: <xliff:g id="reason">%2$s</xliff:g></string>
+    <string name="sync_status_cancelled">Сінхранізацыя скасавана · <xliff:g id="source">%1$s</xliff:g></string>
+    <string name="sync_phase_live">Прамы эфір</string>
+    <plurals name="sync_count_channels">
+        <item quantity="one"><xliff:g id="count">%1$s</xliff:g> канал</item>
+        <item quantity="few"><xliff:g id="count">%1$s</xliff:g> канала</item>
+        <item quantity="many"><xliff:g id="count">%1$s</xliff:g> каналаў</item>
+        <item quantity="other"><xliff:g id="count">%1$s</xliff:g> каналаў</item>
+    </plurals>
+    <plurals name="sync_count_epg">
+        <item quantity="one"><xliff:g id="count">%1$s</xliff:g> запіс EPG</item>
+        <item quantity="few"><xliff:g id="count">%1$s</xliff:g> запісы EPG</item>
+        <item quantity="many"><xliff:g id="count">%1$s</xliff:g> запісаў EPG</item>
+        <item quantity="other"><xliff:g id="count">%1$s</xliff:g> запісаў EPG</item>
+    </plurals>
+    <plurals name="sync_status_more">
+        <item quantity="one">+<xliff:g id="count">%1$d</xliff:g> сінхранізацыя</item>
+        <item quantity="few">+<xliff:g id="count">%1$d</xliff:g> сінхранізацыі</item>
+        <item quantity="many">+<xliff:g id="count">%1$d</xliff:g> сінхранізацый</item>
+        <item quantity="other">+<xliff:g id="count">%1$d</xliff:g> сінхранізацый</item>
+    </plurals>
+    <plurals name="sync_categories_added">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> катэгорыя дададзена</item>
+        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> катэгорыі дададзены</item>
+        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> катэгорый дададзена</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> катэгорый дададзена</item>
+    </plurals>
+    <plurals name="sync_categories_removed">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> катэгорыя выдалена</item>
+        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> катэгорыі выдалены</item>
+        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> катэгорый выдалена</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> катэгорый выдалена</item>
+    </plurals>
+    <string name="sync_error_portal">Не ўдалося звязацца з порталам. Праверце URL портала — звычайна ён заканчваецца на /c/.</string>
+    <string name="sync_error_session">Сеанс портала сцёк. Паўтарыце спробу.</string>
+    <string name="sync_error_auth">Сервер адхіліў даныя для ўваходу. Праверце імя карыстальніка і пароль.</string>
+    <string name="sync_error_not_found">На серверы нічога не знойдзена. Праверце URL.</string>
+    <string name="sync_error_server">На серверы адбылася памылка. Паўтарыце спробу пазней.</string>
+    <string name="sync_error_secure">Не ўдалося ўсталяваць абароненае злучэнне — магчыма, сертыфікат сервера несапраўдны.</string>
+    <string name="sync_error_malformed_guide">Даныя тэлепрограмы, атрыманыя ад сервера, маюць няправільны фармат. Магчыма, частка даных усё ж загрузілася — паўтарыце спробу або праверце URL EPG.</string>
+    <string name="sync_error_guide_empty">Гэтая тэлепрограма зараз пустая. Магчыма, пастаўшчык яшчэ не апублікаваў яе — паўтарыце спробу пазней.</string>
+    <string name="sync_error_guide_no_matching_channels">Ніводзін канал гэтай тэлепрограмы пакуль не супадае з каналамі вашага плейліста. Адкрыйце «Тэлепрограму» і выкарыстоўвайце «Аўтасупастаўленне EPG», каб супаставіць іх па назве.</string>
+    <string name="common_plus">+</string>
+    <string name="common_minus">–</string>
+    <string name="common_hide">Схаваць</string>
+    <string name="common_show">Паказаць</string>
+    <string name="common_qr_code_companion_url">QR-код для URL старонкі-кампаньёна</string>
+    <string name="shell_rail_detail_last">Апошні: <xliff:g id="title">%1$s</xliff:g></string>
+    <string name="shell_rail_detail_more">Налады, абранае, рэзервовая копія</string>
+    <string name="shell_now_playing_audio">Гук</string>
+    <string name="common_weather_degrees_city"><xliff:g id="temperature">%1$d</xliff:g>° <xliff:g id="city">%2$s</xliff:g></string>
+    <string name="common_dismiss">Закрыць</string>
+    <string name="live_subscription_required">%1$s: патрабуецца падпіска RuTube</string>
+</resources>

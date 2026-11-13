@@ -37,9 +37,23 @@
     "endonym": "Українська",
     "script": "Cyrl",
     "rtl": false,
-    "tier": 2,
-    "packaged": false,
-    "pickerVisible": false
+    "tier": 1,
+    "packaged": true,
+    "pickerVisible": true
+  },
+  {
+    "id": "be",
+    "languageTag": "be",
+    "resourceQualifier": "be",
+    "resourceDirectory": "values-be",
+    "weblateCode": "be",
+    "englishName": "Belarusian",
+    "endonym": "Беларуская",
+    "script": "Cyrl",
+    "rtl": false,
+    "tier": 1,
+    "packaged": true,
+    "pickerVisible": true
   },
   {
     "id": "et",
