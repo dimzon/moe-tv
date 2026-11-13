@@ -113,7 +113,6 @@ internal val SETTING_LINE: Map<String, Int> = mapOf(
     "vp_preroll_sources" to R.string.settings_line_override_playlist,
     "vp_tune_timeout" to R.string.settings_line_tune_timeout,
     "vp_tune_timeout_sources" to R.string.settings_line_override_playlist,
-    "vp_seek_step" to R.string.settings_line_seek_step,
     "vp_multiview" to R.string.settings_vp_cat_multiview_summary_mobile,
     "vp_multiview_tiles" to R.string.settings_line_tiles,
     "vp_mini" to R.string.settings_line_mini,

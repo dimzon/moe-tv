@@ -154,6 +154,10 @@ internal fun GuideVideo(
     modifier: Modifier = Modifier,
 ) {
     val previewState by previewEngine.state.collectAsStateWithLifecycle()
+    // The picture's compositing path — the same choice the full-screen player honours, so the
+    // guide preview and the player agree on whether screenshots and recordings show the video.
+    val videoSurface by org.koin.compose.koinInject<tv.own.owntv.core.settings.SettingsRepository>()
+        .videoSurfaceMode.collectAsStateWithLifecycle(initialValue = tv.own.owntv.core.settings.SettingsRepository.VideoSurface.SURFACE_VIEW)
     val playing = showVideo && previewState != tv.own.owntv.player.LivePreviewEngine.State.ERROR &&
         previewState != tv.own.owntv.player.LivePreviewEngine.State.IDLE
     val r = 28.mpx
@@ -171,7 +175,10 @@ internal fun GuideVideo(
                 MyOwnTVIcon(MyOwnTVIcon.LIVE_TV, tint = StageColors.Dim, modifier = Modifier.size(48.mpx))
             }
         }
-        if (playing) tv.own.myowntv.player.ExoPreviewSurface(engine = previewEngine, modifier = Modifier.fillMaxSize())
+        if (playing) tv.own.myowntv.player.ExoPreviewSurface(
+            engine = previewEngine, modifier = Modifier.fillMaxSize(),
+            useTextureView = videoSurface == tv.own.owntv.core.settings.SettingsRepository.VideoSurface.TEXTURE_VIEW,
+        )
         if (showVideo && previewState == tv.own.owntv.player.LivePreviewEngine.State.LOADING) OwnTVSpinner(sizeDp = 24)
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.58f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.72f))))
         Box(Modifier.fillMaxSize().drawBehind { drawInnerRing(Color.White.copy(alpha = 0.08f), 1.mpx.toPx(), r.toPx()) })

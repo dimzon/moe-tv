@@ -228,48 +228,10 @@
     <!-- Translators: Button on the recovery screen to reset all app data as a last resort. -->
     <string name="recovery_reset">Reset app data (last resort)</string>
 
-    <!-- Translators: Title of the ongoing notification shown while a live TV programme is being recorded. -->
-    <string name="recording_notification_title">Recording</string>
     <!-- Translators: Name of the notification channel for the silent notification kept while the app waits for the TV to wake up (Settings: Auto start on wake-up). -->
     <string name="auto_start_notification_channel">Auto start on wake-up</string>
     <!-- Translators: Text of the silent ongoing notification kept while the app waits for the TV to wake up. МОЁ ТВ is a brand name. -->
     <string name="auto_start_notification_text">МОЁ ТВ opens when the TV wakes up</string>
-    <!-- Translators: Shown on a recording that stopped because the storage volume was nearly full. Whatever was captured is kept and is still playable. -->
-    <string name="recording_failed_no_space">Stopped: no space left</string>
-    <!-- Translators: Shown on a recording that never started because the TV provider allows no more simultaneous streams. -->
-    <string name="recording_failed_no_connection">No free connection from your provider</string>
-    <!-- Translators: Shown on a recording that never started because another recording was already using the provider's connection at the same time. -->
-    <string name="recording_failed_clash">Another recording was using the connection</string>
-    <!-- Translators: Shown on a recording that stopped because the network connection dropped and did not come back. -->
-    <string name="recording_failed_network">The connection was lost</string>
-    <!-- Translators: Shown on a recording that captured nothing because the channel never started playing. -->
-    <string name="recording_failed_unavailable">The channel would not play</string>
-    <!-- Translators: Shown on a recording whose channel has since been removed from the user's playlist. -->
-    <string name="recording_failed_channel_gone">That channel is no longer in your playlist</string>
-    <!-- Translators: Shown on a recording that failed for a reason the app could not identify. -->
-    <string name="recording_failed_unknown">It did not record</string>
-
-    <!-- Translators: Button that starts recording a programme, or schedules it. -->
-    <string name="recording_record">Record</string>
-    <!-- Translators: Channel menu item and dialog title: record this channel between two times the user picks, even with no TV guide. -->
-    <string name="recording_schedule">Schedule recording…</string>
-    <!-- Translators: Line in the status pill while a programme is being recorded. "title" is the programme name. -->
-    <string name="recording_pill_line">Recording <xliff:g id="title">%1$s</xliff:g></string>
-    <!-- Translators: Line in the status pill while a programme on a channel locked with the PIN is being recorded; its name stays hidden until the PIN opens the category. -->
-    <string name="recording_pill_line_locked">Recording from a locked category</string>
-    <!-- Translators: Heading of the Recording group on the settings screen. -->
-    <string name="recording_settings_group">Recording</string>
-    <!-- Translators: A number of minutes, used as the value of the "start early" and "keep going after the end" settings. -->
-    <plurals name="recording_minutes">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> minute</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> minutes</item>
-    </plurals>
-    <!-- Translators: Shown on a recording that was refused because the channel is delivered as encrypted HLS, which the recorder cannot turn into a playable file. -->
-    <string name="recording_failed_encrypted">This channel is scrambled and cannot be recorded</string>
-    <!-- Translators: Shown on a recording that was refused because the channel declares DRM (Widevine/ClearKey). The second sentence exists so the user understands this is the provider's protection rather than a fault in the app, and does not report it as a bug. Keep both sentences. -->
-    <string name="recording_failed_drm">This channel is DRM-protected, so it can be watched but not recorded. The protection comes from your provider, not from МОЁ ТВ.</string>
-    <!-- Translators: Shown on a recording that was skipped because the device was on a metered (mobile data) connection and the user has turned off recording over mobile data. -->
-    <string name="recording_failed_metered">Not recorded on mobile data</string>
 
     <!-- Sports Hub: notifications (phone) -->
     <!-- Translators: Android notification channel name (Settings → Notifications) for goals and other match events of followed teams. -->

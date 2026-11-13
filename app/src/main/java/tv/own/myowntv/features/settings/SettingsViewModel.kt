@@ -407,6 +407,10 @@ class SettingsViewModel(
     val defaultZoom: StateFlow<String> = settings.defaultZoom.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "FIT")
     fun setDefaultZoom(name: String) { viewModelScope.launch { settings.setDefaultZoom(name) } }
 
+    val videoSurfaceMode: StateFlow<SettingsRepository.VideoSurface> =
+        settings.videoSurfaceMode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsRepository.VideoSurface.SURFACE_VIEW)
+    fun setVideoSurfaceMode(mode: SettingsRepository.VideoSurface) { viewModelScope.launch { settings.setVideoSurfaceMode(mode) } }
+
     // Subtitle appearance — while subtitleStyleEnabled is false the other four are inert, and
     // each of them separately does nothing until moved off its own "Default" value.
     val subtitleStyleEnabled: StateFlow<Boolean> = settings.subtitleStyleEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)

@@ -187,6 +187,9 @@ fun MyOwnTVShell(
     )
     val miniSizePct by settingsRepo.miniPlayerSizePct.collectAsStateWithLifecycle(initialValue = tv.own.owntv.core.player.MiniPlayerSize.DEFAULT)
     val miniPosName by settingsRepo.miniPlayerPosition.collectAsStateWithLifecycle(initialValue = tv.own.owntv.core.player.MiniPlayerPosition.DEFAULT.name)
+    // How the player's picture is composited — hardware plane or compatibility texture. The texture
+    // reaches screenshots/screen recordings; the plane is what 4K/HDR travel on.
+    val videoSurface by settingsRepo.videoSurfaceMode.collectAsStateWithLifecycle(initialValue = tv.own.owntv.core.settings.SettingsRepository.VideoSurface.SURFACE_VIEW)
     val ambientGlowEnabled by settingsRepo.ambientGlowEnabled.collectAsStateWithLifecycle(initialValue = false)
     val ambientGlowPulse by settingsRepo.ambientGlowPulse.collectAsStateWithLifecycle(initialValue = true)
     val shellAnimationLevel by settingsRepo.animationLevel.collectAsStateWithLifecycle(initialValue = tv.own.owntv.core.theme.AnimationLevel.FULL)
@@ -1266,6 +1269,7 @@ fun MyOwnTVShell(
             tv.own.myowntv.player.ExoPreviewSurface(
                 engine = liveVm.previewEngine, modifier = Modifier.fillMaxSize(),
                 keepAwake = true, autoFrameRate = isFull && !inPip && autoFrameRateLive,
+                useTextureView = videoSurface == tv.own.owntv.core.settings.SettingsRepository.VideoSurface.TEXTURE_VIEW,
             )
             // The channel has no video track of its own (a radio channel). Playing it is correct — but a
             // black screen with sound reads as a broken player, so name what is happening. Only ever

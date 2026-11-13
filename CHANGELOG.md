@@ -18,6 +18,7 @@
 > commit messages and in [NOTICE](NOTICE) §2.
 
 ### ✨ New features
+- **Video rendering: hardware plane (SurfaceView) or compatibility texture (TextureView)**
 - **RuTube live catalogue and week-long programme guide**
 - **Curated channel-name dictionary** (`assets/channel_renames.json`)
 - **Rebrand to МОЁ ТВ** (`moetv://` deep links, launcher assets, `extras/branding/`)
@@ -29,6 +30,7 @@
 - **VOD catalogue, trailers, downloads, catch-up, profiles and file-backup UI**
 - **TMDB and OpenSubtitles integrations, Workers, logos and API keys**
 - **EPG channel matcher, guide candidates and channel "Sources"**
+- **Settings and player texts for the removed archive, catch-up, timeshift, recordings and seek step**
 - **android-youtube-player (MIT) dependency**
 - **Translation trees other than English and Russian**
 

@@ -410,6 +410,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val DIRECT_TUNE = booleanPreferencesKey("direct_tune")
         val SURROUND_SOUND = booleanPreferencesKey("surround_sound")
         val SURROUND_MODE = stringPreferencesKey("surround_mode")
+        val VIDEO_SURFACE_MODE = stringPreferencesKey("video_surface_mode")
         val EXTERNAL_PLAYER_LIVE = booleanPreferencesKey("external_player_live")
         val DEFAULT_ZOOM = stringPreferencesKey("default_zoom")
         val DEFAULT_VOLUME = intPreferencesKey("default_volume")
@@ -1322,6 +1323,24 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             it[Keys.TUNNELED_PLAYBACK] = false
             it[Keys.TUNNELING_FAILED] = true
         }
+    }
+
+    /**
+     * How the video picture reaches the screen. [VideoSurface.SURFACE_VIEW] — the default — punches a
+     * hole in the app's window that the display hardware fills directly: 4K, HDR and the cheapest
+     * path, but a television has only so many hardware video planes, and what the hardware composes
+     * itself is exactly what a screenshot or a screen recording may miss (a GPU-less stand shows a
+     * black frame there too). [VideoSurface.TEXTURE_VIEW] draws the picture through an ordinary view
+     * in the GPU-composited hierarchy, so it always appears in captures and wherever several surfaces
+     * must show at once — at the cost of the hardware-overlay path.
+     */
+    enum class VideoSurface { SURFACE_VIEW, TEXTURE_VIEW }
+    val videoSurfaceMode: Flow<VideoSurface> = prefsFlow { prefs ->
+        prefs[Keys.VIDEO_SURFACE_MODE]?.let { runCatching { VideoSurface.valueOf(it) }.getOrNull() }
+            ?: VideoSurface.SURFACE_VIEW
+    }
+    suspend fun setVideoSurfaceMode(mode: VideoSurface) {
+        context.dataStore.edit { it[Keys.VIDEO_SURFACE_MODE] = mode.name }
     }
 
     /** Default zoom/aspect mode applied when playback starts (a `ZoomMode` name). */

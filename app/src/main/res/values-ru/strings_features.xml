@@ -127,30 +127,8 @@
     <string name="recovery_reset">Сбросить данные приложения (крайняя мера)</string>
     <string name="home_duration_hours_minutes"><xliff:g id="hours">%1$d</xliff:g> ч <xliff:g id="minutes">%2$02d</xliff:g> мин</string>
     <string name="home_time_left">осталось <xliff:g id="duration">%1$s</xliff:g></string>
-    <string name="recording_notification_title">Идёт запись</string>
     <string name="auto_start_notification_channel">Автозапуск при пробуждении</string>
     <string name="auto_start_notification_text">МОЁ ТВ откроется, когда телевизор проснётся</string>
-    <string name="recording_failed_no_space">Остановлено: нет свободного места</string>
-    <string name="recording_failed_no_connection">У провайдера нет свободных подключений</string>
-    <string name="recording_failed_clash">Подключение занимала другая запись</string>
-    <string name="recording_failed_network">Соединение потеряно</string>
-    <string name="recording_failed_unavailable">Канал не удалось воспроизвести</string>
-    <string name="recording_failed_channel_gone">Этого канала больше нет в вашем плейлисте</string>
-    <string name="recording_failed_unknown">Запись не выполнена</string>
-    <string name="recording_record">Записать</string>
-    <string name="recording_schedule">Запланировать запись…</string>
-    <string name="recording_pill_line">Идёт запись: <xliff:g id="title">%1$s</xliff:g></string>
-    <string name="recording_pill_line_locked">Запись из заблокированной категории</string>
-    <string name="recording_settings_group">Запись</string>
-    <plurals name="recording_minutes">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> минута</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> минуты</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> минут</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> минут</item>
-    </plurals>
-    <string name="recording_failed_encrypted">Этот канал зашифрован, запись невозможна</string>
-    <string name="recording_failed_drm">Этот канал защищён технологией DRM, поэтому его можно смотреть, но нельзя записывать. Защиту устанавливает ваш провайдер, а не МОЁ ТВ.</string>
-    <string name="recording_failed_metered">Не записано через мобильный интернет</string>
     <string name="sports_channel_goal_alerts">Оповещения о голах</string>
     <string name="sports_channel_live_match">Матч в эфире</string>
     <string name="sports_channel_match_reminders">Напоминания о матчах</string>

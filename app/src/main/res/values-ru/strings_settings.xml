@@ -198,14 +198,10 @@
     <string name="settings_tunneled_playback">Туннельное воспроизведение (экспериментально)</string>
     <string name="settings_tunneled_playback_description">Прямой эфир в ExoPlayer: аппаратура телевизора сама держит изображение и звук вместе, меньше нагружая процессор. Работает только на некоторых телевизорах и отключается само, если канал с ним даёт сбой. Пока оно включено, синхронизацию звука подстроить нельзя.</string>
     <string name="settings_tunneled_playback_failed">Отключено после сбоя канала с ним на этом устройстве.</string>
-    <string name="settings_catchup">Архив</string>
-    <plurals name="settings_catchup_supported">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> канал поддерживает архив · часовой пояс и плеер для воспроизведения архива</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> канала поддерживают архив · часовой пояс и плеер для воспроизведения архива</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> каналов поддерживают архив · часовой пояс и плеер для воспроизведения архива</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> каналов поддерживают архив · часовой пояс и плеер для воспроизведения архива</item>
-    </plurals>
-    <string name="settings_catchup_unavailable">В этом плейлисте нет каналов с архивом</string>
+    <string name="settings_video_surface">Отрисовка видео</string>
+    <string name="settings_video_surface_description">Как рисуется картинка на экране. Аппаратная плоскость (по умолчанию) — прямой путь: 4K, HDR и минимальная нагрузка. Совместимая текстура рисует через обычную иерархию видов: картинка попадает в снимки экрана и запись.</string>
+    <string name="settings_video_surface_hardware">Аппаратная плоскость (SurfaceView)</string>
+    <string name="settings_video_surface_texture">Совместимая текстура (TextureView)</string>
     <string name="settings_device">Устройство</string>
     <string name="settings_playback_error_log">Журнал ошибок</string>
     <string name="settings_player_zoom">Масштаб плеера</string>
@@ -257,8 +253,6 @@
     <string name="settings_no_playback_errors">Ошибки воспроизведения не зарегистрированы.</string>
     <string name="settings_live">Прямой эфир</string>
     <string name="settings_clear_log">Очистить журнал</string>
-    <string name="settings_catchup_timezone_description">Как отправляются временные метки архива. В автоматическом режиме используется часовой пояс, который сообщает сервер поставщика, а если он его не сообщает, часовой пояс устройства. Можно также выбрать Устройство или задать смещение вручную.</string>
-    <string name="settings_manual">Вручную</string>
     <string name="settings_theme_dark">Тёмная</string>
     <string name="settings_theme_light">Светлая</string>
     <string name="settings_theme_system">Как в системе</string>
@@ -293,7 +287,7 @@
     <string name="settings_group_quick">Быстрые</string>
     <string name="settings_group_summary_quick">Переключатели, которые нужны чаще всего</string>
     <string name="settings_group_sound_subtitles">Звук и субтитры</string>
-    <string name="settings_group_watching_recording">Просмотр и запись</string>
+    <string name="settings_group_watching_recording">Просмотр</string>
     <string name="settings_search_keywords_profiles">зрители дети детский режим PIN блокировка учётная запись</string>
     <string name="settings_search_keywords_playlists">M3U Xtream источник синхронизация добавить удалить</string>
     <string name="settings_search_keywords_epg">XMLTV программа передач лента телепередача</string>
@@ -317,9 +311,7 @@
     <string name="settings_search_keywords_prefer_sdr">hdr sdr стандартный динамический диапазон блёклое тёмное изображение</string>
     <string name="settings_search_keywords_afr">AFR частота обновления Гц рывки 24кадр/с 25кадр/с 50Гц 60Гц режим экрана согласование</string>
     <string name="settings_search_keywords_surround">dolby DTS 5.1 7.1 ресивер звук</string>
-    <string name="settings_search_keywords_catchup">архив часовой пояс смещение catchup внешний плеер vlc mx</string>
     <string name="settings_search_keywords_video">декодер субтитры синхронизация</string>
-    <string name="settings_search_keywords_recording">запись записать записи dvr таймер расписание сохранить прямой эфир</string>
     <string name="settings_search_keywords_subtitle_appearance">субтитры размер цвет положение прозрачность фон непрозрачность</string>
     <string name="settings_search_keywords_latency">прямой эфир буфер задержка низкая задержка секунды текущая позиция эфира</string>
     <string name="settings_search_keywords_proxy">HTTP трафик маршрут</string>
@@ -393,8 +385,6 @@
     <string name="settings_reset_saved_audio_delay_description">Выбор «Запомнить эту задержку» в плеере сохраняет синхронизацию звука для этого канала. Сброс возвращает всё к настройке выше.</string>
     <string name="settings_reset_saved_audio_delay_confirm">Сбросить сохранённую синхронизацию звука?</string>
     <string name="settings_reset_saved_audio_delay_confirm_description">Каждый канал вернётся к синхронизации звука выше. Сохранённые масштаб и громкость останутся. Отдельное значение всегда можно задать заново из плеера.</string>
-    <string name="settings_seek_step">Шаг перемотки</string>
-    <string name="settings_seek_step_description">На сколько перематывают назад и вперёд в потоке.</string>
     <string name="settings_subtitle_appearance">Внешний вид субтитров</string>
     <string name="settings_subtitle_appearance_description">Размер, цвет текста, положение на экране и прозрачность фона. Когда настройка отключена, субтитры сохраняют стандартный вид — в том числе оформление, встроенное вещателями в субтитры прямого эфира.</string>
     <string name="settings_subtitle_size">Размер субтитров</string>
@@ -413,12 +403,6 @@
     <string name="settings_live_latency_bitrate_note">На канале с очень высоким битрейтом — особенно в 4K — буфер может вместить меньше времени, чем вы задали, поскольку объём видео, который можно держать в памяти одновременно, ограничен.</string>
     <string name="settings_channel_numbers">Номера каналов</string>
     <string name="settings_channel_numbers_description">Показывать назначенный поставщиком номер канала рядом с его названием в списке прямого эфира, оверлее списка каналов и плеере, а также позволить вводить номер с пульта ДУ во время полноэкранного воспроизведения для мгновенного перехода к каналу (OK сразу включает канал, «Назад» отменяет ввод). Если настройка отключена, все номера скрываются, а цифровые кнопки игнорируются; данные не теряются, и после повторного включения номера снова появятся.</string>
-    <string name="settings_timeshift">Пауза и перемотка эфира</string>
-    <string name="settings_timeshift_description">Каналы без архива сохраняются на этом устройстве, пока вы смотрите их на весь экран, поэтому их можно поставить на паузу и перемотать. Постоянно записывает в память; не менее 1 ГБ всегда остаётся свободным.</string>
-    <string name="settings_timeshift_window">Глубина перемотки</string>
-    <string name="settings_timeshift_window_description">Насколько далеко можно перемотать канал без архива.</string>
-    <string name="settings_timeshift_resume">Продолжение сохранённого канала</string>
-    <string name="settings_timeshift_resume_description">Что происходит, когда вы возвращаетесь на канал, который сохранялся, пока вас не было.</string>
     <string name="settings_diagnostics">Диагностика</string>
     <string name="settings_measured_stats">Измеренная статистика потока</string>
     <string name="settings_measured_stats_description">Показывать текущую частоту кадров, битрейт и количество пропущенных кадров в оверлее информации о потоке (значения измеряются, пока открыт оверлей, для потоков, в которых эти данные не указаны). Отключайте только в том случае, если маломощный телевизор начинает воспроизводить видео рывками: настройка никогда не влияет на само видео, а только на диагностические показатели.</string>
@@ -469,8 +453,6 @@
     <string name="settings_low_zoom_warning_mobile">При масштабе <xliff:g id="zoom">%1$d</xliff:g>%% на экране одновременно отображается гораздо больше элементов. На устройствах с небольшим объёмом памяти это может привести к нестабильной работе или сбою приложения, особенно при больших плейлистах и объёмах данных EPG.\n\nВыберите «Отмена», чтобы оставить масштаб <xliff:g id="safe_zoom">%2$d</xliff:g>%%.</string>
     <string name="settings_low_zoom_accept">Я понимаю и принимаю риск</string>
     <string name="settings_surface_transparency"><xliff:g id="percent">%1$d</xliff:g>%%</string>
-    <string name="settings_catchup_timezone_automatic">Автоматически</string>
-    <string name="settings_catchup_timezone_device">Устройство</string>
     <string name="settings_pick_background_title">Выберите фоновое изображение</string>
     <string name="settings_theme_dialog">Тема</string>
     <string name="settings_app_startup_dialog">Запуск приложения</string>
@@ -666,12 +648,6 @@
     <string name="settings_epg_sources_delete_title">Удалить «<xliff:g id="name">%1$s</xliff:g>»?</string>
     <string name="settings_epg_sources_delete_message">Этот источник EPG и данные его программы передач будут удалены. Ваши каналы останутся.</string>
     <string name="settings_epg_sources_syncing_percent">Синхронизация: <xliff:g id="percent">%1$d</xliff:g>%%</string>
-    <plurals name="settings_epg_sources_catchup">
-        <item quantity="one">Архив доступен на <xliff:g id="count">%1$d</xliff:g> канале.</item>
-        <item quantity="few">Архив доступен на <xliff:g id="count">%1$d</xliff:g> каналах.</item>
-        <item quantity="many">Архив доступен на <xliff:g id="count">%1$d</xliff:g> каналах.</item>
-        <item quantity="other">Архив доступен на <xliff:g id="count">%1$d</xliff:g> каналах.</item>
-    </plurals>
     <string name="settings_epg_sources_error">⚠ <xliff:g id="error">%1$s</xliff:g></string>
     <string name="settings_epg_sources_auto_refresh_title">Автоматическое обновление</string>
     <string name="settings_epg_sources_auto_refresh_description">Отключено, при запуске или при устаревании данных</string>
@@ -699,9 +675,7 @@
         <item quantity="other">Она содержит <xliff:g id="programmes">%1$d</xliff:g> телепередач.</item>
     </plurals>
     <string name="settings_epg_sources_status_count"><xliff:g id="channels">%1$s</xliff:g> <xliff:g id="programmes">%2$s</xliff:g></string>
-    <string name="settings_epg_sources_status_count_with_catchup"><xliff:g id="counts">%1$s</xliff:g> <xliff:g id="catchup">%2$s</xliff:g></string>
     <string name="settings_epg_sources_status_synced">Синхронизация завершена, но в указанном временном интервале телепередачи не найдены.</string>
-    <string name="settings_epg_sources_status_synced_with_catchup"><xliff:g id="catchup">%1$s</xliff:g></string>
     <string name="settings_backup_title">Резервное копирование и восстановление</string>
     <string name="settings_backup_working">Выполнение…</string>
     <string name="settings_backup_what_backup">Что включить в резервную копию</string>
@@ -924,8 +898,6 @@
     <string name="settings_live_preroll_per_playlist_description">Переопределяет указанную выше настройку для одного плейлиста, сохраняя быстрый запуск остальных плейлистов.</string>
     <string name="settings_live_latency_per_playlist">Задержка прямого эфира для плейлиста</string>
     <string name="settings_live_latency_per_playlist_description">Переопределяет указанную выше настройку для одного плейлиста — для провайдера, которому нужен больший или меньший буфер, чем остальным.</string>
-    <string name="settings_catchup_timezone_per_playlist">Часовой пояс архива для плейлиста</string>
-    <string name="settings_catchup_timezone_per_playlist_description">Заменяет часовой пояс выше для одного плейлиста — для провайдера, чей архив идёт по другим часам.</string>
     <string name="settings_live_tune_timeout_per_playlist">Прекращать попытки через, для плейлиста</string>
     <string name="settings_live_tune_timeout_per_playlist_description">Заменяет настройку выше для одного плейлиста — для провайдера, чьи каналы долго запускаются или часто не работают.</string>
     <plurals name="settings_live_preroll_overrides">
@@ -1177,15 +1149,14 @@
     <string name="more_settings_pin_hint">Удерживайте OK на строке, чтобы закрепить её в «Быстрые»</string>
     <string name="more_settings_search">Поиск по всем настройкам</string>
     <string name="settings_card_profile">Зрители, детский режим, PIN-коды</string>
-    <string name="settings_card_sources">Плейлисты, EPG, напоминания, архив</string>
     <string name="settings_card_appearance">Тема, акцент, стекло, текст</string>
     <string name="settings_card_layout">Навигация, панели, Главная, меню</string>
     <string name="settings_card_content">Категории, субтитры</string>
     <string name="settings_card_player">Какой плеер, потоки</string>
     <string name="settings_card_picture">Декодер, HDR, масштаб, частота кадров</string>
     <string name="settings_card_sound">Громкость, объёмный звук, языки</string>
-    <string name="settings_card_live">Предпросмотр, перемотка, задержка, запуск</string>
-    <string name="settings_card_watching">Перемотка, продолжение, мультиэкран, запись</string>
+    <string name="settings_card_live">Предпросмотр, номера каналов, задержка, запуск</string>
+    <string name="settings_card_watching">Мультиэкран, мини-плеер, картинка в картинке</string>
     <string name="settings_card_app">Язык, обновления, сеть, диагностика</string>
     <string name="more_sync_description">Обменивайтесь данными с другим устройством по Wi-Fi. Ничего не покидает вашу домашнюю сеть.</string>
     <string name="more_sync_mode_description">Позволяет другим вашим устройствам найти это. Работает, пока открыта эта страница.</string>
@@ -1322,16 +1293,13 @@
     <string name="settings_key_unpin">Открепить</string>
     <string name="settings_panel_choices">Варианты</string>
     <string name="settings_panel_recommended">Рекомендуется</string>
-    <string name="settings_part_guide_catchup">Телегид и архив</string>
-    <string name="settings_vp_cat_controls_resume">Управление и продолжение</string>
+    <string name="settings_part_guide_catchup">Телегид</string>
     <string name="settings_pinned_from">Закреплено из раздела «<xliff:g id="group">%1$s</xliff:g>»</string>
     <string name="settings_check_now">Проверить</string>
     <string name="settings_line_epg_offset">Сдвинуть весь телегид, если время в источнике неверное</string>
     <string name="settings_line_reminders">Что происходит, когда наступает напоминание</string>
     <string name="settings_line_reminder_lead">Как заранее приходит напоминание</string>
     <string name="settings_line_guide_days">На сколько дней вперёд хранится телегид</string>
-    <string name="settings_line_catchup">Часовой пояс архивов просмотра</string>
-    <string name="settings_line_catchup_sources">Свой часовой пояс для одного плейлиста</string>
     <string name="settings_line_override_playlist">Своё значение для одного плейлиста</string>
     <string name="settings_line_accent">Окрашивает кнопки, выделение и акценты везде</string>
     <string name="settings_line_fonts">Один шрифт для интерфейса и окон</string>
@@ -1382,12 +1350,9 @@
     <string name="settings_title_saved_audio_sync">Сохранённая синхронизация звука</string>
     <string name="settings_line_channel_numbers">Номер провайдера рядом с названием</string>
     <string name="settings_line_live_preview">Воспроизводить выбранный канал</string>
-    <string name="settings_line_timeshift">Каналы без архива сохраняются во время просмотра</string>
-    <string name="settings_line_timeshift_window">Насколько можно отмотать назад</string>
     <string name="settings_line_latency">Насколько близко к эфиру играть</string>
     <string name="settings_line_preroll">Видео, набираемое до старта канала</string>
     <string name="settings_line_tune_timeout">Прекратить попытки и сообщить</string>
-    <string name="settings_line_seek_step">Шаг перемотки назад и вперёд в потоке</string>
     <string name="settings_line_tiles">Каждая плитка — отдельный поток</string>
     <string name="settings_line_mini">Размер и положение</string>
     <string name="settings_line_pip">Смотреть дальше в маленьком окне</string>
@@ -1397,7 +1362,6 @@
     <string name="settings_help_playlists">Добавьте плейлист по ссылке, входу Xtream, порталу Stalker или из файла, синхронизируйте заново или удалите.</string>
     <string name="settings_help_epg_sources">Добавьте источник телегида XMLTV по ссылке, обновите или удалите его. Источники заполняют телегид и строки передач в прямом эфире.</string>
     <string name="settings_help_guide_days">Сколько дней передач телегид хранит вперёд. Чем меньше дней, тем быстрее обновление и меньше база данных.</string>
-    <string name="settings_help_catchup_timezone">Архив воспроизводит передачи из хранилища провайдера. В автоматическом режиме используется часовой пояс, который сообщает провайдер, а если он его не сообщает, часы телевизора; выберите фиксированное смещение UTC, если архив всё равно начинается не вовремя. Здесь же выбирается плеер для архива.</string>
     <string name="settings_help_theme">МОЁ ТВ создан для тёмной темы. Системная следует настройке телевизора, если она есть; светлая подходит для яркой комнаты.</string>
     <string name="settings_help_accent">Окрашивает кнопки, свечение выделения, полосы прогресса и акценты везде. Выберите готовый цвет или нажмите OK, чтобы открыть палитру и ввести любой HEX-код.</string>
     <string name="settings_help_focus">Рамка вокруг выделенного элемента. Выберите её цвет и толщину, чтобы она была хорошо видна с дивана.</string>
@@ -1427,7 +1391,6 @@
     <string name="settings_help_live_preview">Выбранный канал играет в превью рядом со списком эфира, чтобы вы видели, что идёт, до открытия. Нужен макет с местом для превью.</string>
     <string name="settings_help_preview_audio">Воспроизводит звук превью вместе с изображением. Если выключить, просмотр списка будет тихим.</string>
     <string name="settings_help_preview_on_ok">Выберите, где OK на канале сначала включает его в превью, а повторное OK на том же канале открывает его на весь экран. В прямом эфире превью тогда остаётся на этом канале, пока вы листаете. Там, где это выключено, OK сразу открывает канал на весь экран, а превью следует за выделением.</string>
-    <string name="settings_help_timeshift_window">Насколько далеко назад можно отмотать паузой и перемоткой эфира на канале без архива. Чем больше, тем больше канала хранится на этом устройстве.</string>
     <string name="settings_help_mini">Маленький плеер, который продолжает показывать канал в углу, пока вы листаете. Выберите размер и угол.</string>
     <string name="settings_help_pip">Нажмите «Главная» или откройте другое приложение, пока видео идёт на весь экран или в мини-плеере, и оно продолжит играть в маленьком окне поверх остального экрана телевизора. Откройте МОЁ ТВ снова, чтобы вернуть его на весь экран; закройте окно, чтобы остановить воспроизведение. Мультиэкран остаётся в МОЁ ТВ.</string>
     <string name="settings_key_palette">Палитра</string>
@@ -1555,7 +1518,7 @@
     <string name="settings_bg_preview_note">Прямой эфир с этим фоном. Изменения видны по ходу перемещения.</string>
     <string name="settings_root_hint_mobile">Удерживайте строку, чтобы закрепить её в «Быстрые»</string>
     <string name="settings_card_layout_mobile">Навигация, Главная, списки, меню</string>
-    <string name="settings_card_watching_mobile">Перемотка, продолжение, мини-плеер, запись</string>
+    <string name="settings_card_watching_mobile">Мультиэкран, мини-плеер, картинка в картинке</string>
     <string name="settings_line_live_preview_mobile">Воспроизводить выбранный канал вверху Прямого эфира</string>
     <string name="settings_line_hw_mobile">Использовать декодер телефона</string>
     <string name="settings_line_surround_mobile">5.1 и 7.1 в том виде, как их получает телефон</string>
@@ -1601,18 +1564,12 @@
     <string name="settings_line_popup_size_mobile">Масштабировать листы и меню, не меняя текст</string>
     <string name="settings_line_animations_mobile">Выключено — быстрее на старых телефонах</string>
     <string name="settings_line_sw_decode_mobile">Выше 1080p программно, если аппаратный декодер не справился</string>
-    <string name="settings_line_rec_mobile_data_mobile">Выкл.: запись на мобильных данных пропускается</string>
     <string name="settings_line_pip_mobile">Уменьшать видео в окно при выходе из приложения</string>
     <string name="settings_line_pip_size_mobile">Насколько большим открывается плавающее окно</string>
     <string name="settings_line_pip_snap_mobile">Окно прилипает к ближайшему краю</string>
     <string name="settings_line_audio_screen_off_mobile">Не декодировать видео, которое никто не видит</string>
     <string name="settings_line_audio_per_channel_mobile">В следующий раз откроется так же</string>
-    <string name="settings_line_seek_step_mobile">Насколько перематывает одно касание назад или вперёд</string>
-    <string name="settings_line_rewind_step_mobile">Насколько перематывает одно касание на live-канале</string>
     <string name="settings_line_gesture_mobile">Насколько свайп меняет громкость, яркость или позицию</string>
-    <string name="settings_line_rec_watching_mobile">Кнопка записи в плеере</string>
-    <string name="settings_line_rec_pre_roll_mobile">Начинать раньше указанного начала</string>
-    <string name="settings_line_rec_post_roll_mobile">Продолжать после указанного конца</string>
     <string name="settings_line_sub_lang_mobile">Автоматически выбирать эту дорожку субтитров</string>
     <string name="settings_line_sub_style_mobile">Размер, шрифт, цвет, положение, фон</string>
     <string name="settings_customize_short_mobile">Настроить</string>

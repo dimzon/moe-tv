@@ -26,12 +26,8 @@
     <string name="player_mini_bottom_right">Bottom right</string>
     <!-- Translators: Label above the typed channel digits in the direct-tune OSD on the player. All caps is intentional for this OSD element. -->
     <string name="player_channel_label">CHANNEL</string>
-    <!-- Translators: Button on the player controls that jumps from the rewound archive back to the live broadcast. Keep this very short (14 characters maximum) \u2014 it sits on a small pill on the remote-driven player bar. -->
+    <!-- Translators: Label under the back-to-live button on the player control bar, shown when it has focus; also names the same action in Remote shortcuts. Keep this very short (14 characters maximum) — it sits on a small pill on the remote-driven player bar. -->
     <string name="player_go_live">Go live</string>
-    <!-- Translators: Popup title when the user returns to a live channel whose saved copy (timeshift) was kept while they were away. Buttons: common_resume and player_go_live. -->
-    <string name="player_timeshift_resume_title">Continue where you left off?</string>
-    <!-- Translators: Message of player_timeshift_resume_title. -->
-    <string name="player_timeshift_resume_message">This channel was saved while you were away.</string>
     <!-- Translators: Action that tunes back to the channel watched before the current one, like a TV remote's "last channel" button. Shown in Remote shortcuts and read out for the phone player's button. -->
     <string name="player_previous_channel">Previous channel</string>
     <!-- Translators: Phone live player button that steps to the next channel in the list being watched, wrapping round at the end. Read out by screen readers. -->
@@ -42,18 +38,12 @@
     <string name="player_tool_volume">Volume</string>
     <!-- Translators: Label under the brightness button on the phone player's control bar, and the label on the slider a vertical swipe on the left of the picture shows. Keep this very short (14 characters maximum) — it sits inside a small button. -->
     <string name="player_tool_brightness">Brightness</string>
-    <!-- Translators: Spoken label for the phone player's skip-backwards button, which jumps back by the user's own seek step. Keep this very short (16 characters maximum). -->
-    <string name="player_skip_back">Skip back</string>
-    <!-- Translators: Spoken label for the phone player's skip-forwards button, which jumps forward by the user's own seek step. Keep this very short (16 characters maximum). -->
-    <string name="player_skip_forward">Skip forward</string>
     <!-- Translators: Label under the audio-track button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->
     <string name="player_tool_audio">Audio</string>
     <!-- Translators: Label under the subtitles button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->
     <string name="player_tool_subtitles">Subtitles</string>
     <!-- Translators: Label under the favourite button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->
     <string name="player_tool_favorite">Favorite</string>
-    <!-- Translators: Label under the catch-up button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->
-    <string name="player_tool_catchup">Catch-up</string>
     <!-- Translators: Label under the playback-speed button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->
     <string name="player_tool_speed">Speed</string>
     <!-- Translators: Label under the aspect-ratio/zoom button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->

@@ -284,6 +284,10 @@ internal fun LiveStagePane(
 ) {
     val previewState by previewEngine.state.collectAsStateWithLifecycle()
     val streamChips by previewEngine.streamChips.collectAsStateWithLifecycle()
+    // The picture's compositing path — the same choice the full-screen player honours, so the
+    // preview pane and the player agree on whether screenshots and recordings show the video.
+    val videoSurface by org.koin.compose.koinInject<tv.own.owntv.core.settings.SettingsRepository>()
+        .videoSurfaceMode.collectAsStateWithLifecycle(initialValue = tv.own.owntv.core.settings.SettingsRepository.VideoSurface.SURFACE_VIEW)
     val playing = showVideo && previewState != tv.own.owntv.player.LivePreviewEngine.State.ERROR &&
         previewState != tv.own.owntv.player.LivePreviewEngine.State.IDLE
     val loading = showVideo && previewState == tv.own.owntv.player.LivePreviewEngine.State.LOADING
@@ -308,7 +312,10 @@ internal fun LiveStagePane(
                     fill = Color.Transparent,
                 ) { MyOwnTVIcon(MyOwnTVIcon.LIVE_TV, tint = StageColors.Dim, modifier = Modifier.size(56.mpx)) }
             }
-            if (playing) tv.own.myowntv.player.ExoPreviewSurface(engine = previewEngine, modifier = Modifier.fillMaxSize())
+            if (playing) tv.own.myowntv.player.ExoPreviewSurface(
+                engine = previewEngine, modifier = Modifier.fillMaxSize(),
+                useTextureView = videoSurface == tv.own.owntv.core.settings.SettingsRepository.VideoSurface.TEXTURE_VIEW,
+            )
             if (loading) OwnTVSpinner(sizeDp = 28)
             // `.shade`: black 72% at the bottom, clear by 42% up — a video-sized gradient, one pass.
             Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.58f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.72f))))

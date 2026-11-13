@@ -92,7 +92,6 @@ private const val SECTION_PICTURE = 1
 private const val SECTION_FRAME_RATE = 2
 private const val SECTION_LIVE = 4
 private const val SECTION_LIVE_TUNING = 5
-private const val SECTION_CONTROLS = 6
 private const val SECTION_MULTIVIEW = 7
 internal const val SECTION_SOUND = 8
 private const val SECTION_LANGUAGES = 9
@@ -107,7 +106,7 @@ internal enum class VideoGroup(val titleRes: Int, val parts: List<Pair<Int, List
     PICTURE(R.string.settings_vp_cat_picture, listOf(R.string.settings_vp_cat_picture to listOf(SECTION_PICTURE), R.string.settings_vp_cat_frame_rate to listOf(SECTION_FRAME_RATE))),
     SOUND(R.string.settings_group_sound_subtitles, listOf(R.string.settings_vp_section_sound to listOf(SECTION_SOUND), R.string.settings_vp_cat_languages to listOf(SECTION_LANGUAGES))),
     LIVE(R.string.settings_live_tv, listOf(R.string.settings_live_tv to listOf(SECTION_LIVE), R.string.settings_vp_cat_live_tuning to listOf(SECTION_LIVE_TUNING))),
-    WATCHING(R.string.settings_group_watching_recording, listOf(R.string.settings_vp_cat_controls_resume to listOf(SECTION_CONTROLS), R.string.settings_vp_cat_multiview to listOf(SECTION_MULTIVIEW))),
+    WATCHING(R.string.settings_group_watching_recording, listOf(R.string.settings_vp_cat_multiview to listOf(SECTION_MULTIVIEW))),
     DIAGNOSTICS(R.string.settings_group_app, listOf(R.string.settings_diagnostics to listOf(SECTION_DIAGNOSTICS))),
 }
 
@@ -136,7 +135,7 @@ internal fun videoSectionCounts(vm: SettingsViewModel): List<Int> {
     // by section id. The film rows went with Movies & Series, so the gap is what remains of them.
     return listOf(
         1,
-        6 + (if (vm.tunnelingSupported) 1 else 0),
+        7 + (if (vm.tunnelingSupported) 1 else 0),
         4,
         0,
         3 + (if (livePreview) 2 else 0),
@@ -189,6 +188,7 @@ internal val VIDEO_QUICK_ROWS: List<VideoQuickRef> = listOf(
     VideoQuickRef("vp_hdr", SECTION_PICTURE, MyOwnTVIcon.VIDEO, R.string.settings_quick_prefer_sdr, R.string.settings_prefer_sdr_description),
     VideoQuickRef("vp_max_quality", SECTION_PICTURE, MyOwnTVIcon.VIDEO, R.string.settings_max_video_quality, R.string.settings_max_video_quality_description),
     VideoQuickRef("vp_tunneled", SECTION_PICTURE, MyOwnTVIcon.VIDEO, R.string.settings_tunneled_playback, R.string.settings_tunneled_playback_description),
+    VideoQuickRef("vp_video_surface", SECTION_PICTURE, MyOwnTVIcon.VIDEO, R.string.settings_video_surface, R.string.settings_video_surface_description),
     VideoQuickRef("vp_zoom", SECTION_PICTURE, MyOwnTVIcon.ASPECT, R.string.settings_default_zoom, R.string.settings_default_zoom_description),
     VideoQuickRef("vp_reset_zoom", SECTION_PICTURE, MyOwnTVIcon.ASPECT, R.string.settings_reset_saved_zoom, R.string.settings_reset_saved_zoom_description),
     VideoQuickRef("vp_afr_live", SECTION_FRAME_RATE, MyOwnTVIcon.LIVE_TV, R.string.settings_auto_frame_rate_live, R.string.settings_auto_frame_rate_live_description),
@@ -202,7 +202,6 @@ internal val VIDEO_QUICK_ROWS: List<VideoQuickRef> = listOf(
     VideoQuickRef("vp_preroll_sources", SECTION_LIVE_TUNING, MyOwnTVIcon.LIVE_TV, R.string.settings_live_preroll_per_playlist, R.string.settings_live_preroll_per_playlist_description),
     VideoQuickRef("vp_tune_timeout", SECTION_LIVE_TUNING, MyOwnTVIcon.LIVE_TV, R.string.settings_live_tune_timeout, R.string.settings_live_tune_timeout_description),
     VideoQuickRef("vp_tune_timeout_sources", SECTION_LIVE_TUNING, MyOwnTVIcon.LIVE_TV, R.string.settings_live_tune_timeout_per_playlist, R.string.settings_live_tune_timeout_per_playlist_description),
-    VideoQuickRef("vp_seek_step", SECTION_CONTROLS, MyOwnTVIcon.FORWARD, R.string.settings_seek_step, R.string.settings_seek_step_description),
     VideoQuickRef("vp_multiview", SECTION_MULTIVIEW, MyOwnTVIcon.LIST_GRID, R.string.settings_multiview, R.string.settings_multiview_description),
     VideoQuickRef("vp_multiview_tiles", SECTION_MULTIVIEW, MyOwnTVIcon.LIST_GRID, R.string.settings_multiview_tiles_max, R.string.settings_multiview_description),
     VideoQuickRef("vp_mini", SECTION_MULTIVIEW, MyOwnTVIcon.PIP, R.string.settings_mini_player_root, R.string.settings_mini_player_root_description),
@@ -279,6 +278,10 @@ internal fun videoQuickBinding(key: String, vm: SettingsViewModel): VideoQuickBi
             val on by vm.tunneledPlayback.collectAsStateWithLifecycle()
             toggle(onOff(on), on) { vm.setTunneledPlayback(!on) }
         }
+        "vp_video_surface" -> {
+            val mode by vm.videoSurfaceMode.collectAsStateWithLifecycle()
+            link(stringResource(videoSurfaceLabel(mode)))
+        }
         "vp_multiview" -> {
             val on by vm.multiviewEnabled.collectAsStateWithLifecycle()
             toggle(onOff(on), on) { vm.setMultiviewEnabled(!on) }
@@ -314,10 +317,6 @@ internal fun videoQuickBinding(key: String, vm: SettingsViewModel): VideoQuickBi
         "vp_reset_zoom" -> {
             val count by vm.savedZoomCount.collectAsStateWithLifecycle()
             link(saved(count), count > 0)
-        }
-        "vp_seek_step" -> {
-            val secs by vm.seekStepSec.collectAsStateWithLifecycle()
-            link(stringResource(R.string.settings_live_buffer_seconds, secs))
         }
         "vp_live_preview" -> {
             val on by vm.livePreviewEnabled.collectAsStateWithLifecycle()
@@ -505,7 +504,6 @@ internal fun VideoPlayerGroupRows(
     val savedZoom by vm.savedZoomCount.collectAsStateWithLifecycle()
     val savedVolume by vm.savedVolumeCount.collectAsStateWithLifecycle()
     val savedAudioDelay by vm.savedAudioDelayCount.collectAsStateWithLifecycle()
-    val seekStep by vm.seekStepSec.collectAsStateWithLifecycle()
     val measuredStats by vm.measuredStreamStats.collectAsStateWithLifecycle()
     val detailedDiagnostics by vm.detailedDiagnostics.collectAsStateWithLifecycle()
     val directTune by vm.directTune.collectAsStateWithLifecycle()
@@ -653,6 +651,7 @@ internal fun VideoPlayerGroupRows(
     }
 
     val zoomMode = runCatching { ZoomMode.valueOf(zoom) }.getOrDefault(ZoomMode.FIT)
+    val videoSurfaceMode by vm.videoSurfaceMode.collectAsStateWithLifecycle()
 
     val counts = videoSectionCounts(vm)
     androidx.compose.runtime.CompositionLocalProvider(
@@ -728,6 +727,20 @@ internal fun VideoPlayerGroupRows(
                 onClick = { vm.setTunneledPlayback(!tunneledPlayback) },
             )
         }
+        // Where the picture itself is composited: the hardware plane, or an ordinary GPU-composited
+        // view whose content always reaches screenshots and screen recordings.
+        KeyedSettingRow(
+            quickKey = "vp_video_surface",
+            choices = SettingsRepository.VideoSurface.entries.map { stringResource(videoSurfaceLabel(it)) },
+            chosen = videoSurfaceMode.ordinal,
+            recommended = SettingsRepository.VideoSurface.SURFACE_VIEW.ordinal,
+            icon = MyOwnTVIcon.VIDEO,
+            title = stringResource(R.string.settings_video_surface),
+            desc = stringResource(R.string.settings_video_surface_description),
+            value = SettingValue.Choice(stringResource(videoSurfaceLabel(videoSurfaceMode))),
+            modifier = Modifier.focusRequester(dialogRowFocus.getValue(Dialog.VIDEO_SURFACE)),
+            onClick = { savedScroll = scrollState.value; dialog = Dialog.VIDEO_SURFACE },
+        )
         KeyedSettingRow(
             quickKey = "vp_zoom",
             choices = ZoomMode.entries.map { stringResource(it.labelRes) },
@@ -893,20 +906,6 @@ internal fun VideoPlayerGroupRows(
                 onClick = { savedScroll = scrollState.value; dialog = Dialog.LIVE_TUNE_TIMEOUT_SOURCES },
             )
         }
-                    }
-                    SECTION_CONTROLS -> {
-        KeyedSettingRow(
-            quickKey = "vp_seek_step",
-            choices = tv.own.owntv.core.settings.SeekSteps.SEEK_CHOICES.map { stringResource(R.string.settings_live_buffer_seconds, it) },
-            chosen = tv.own.owntv.core.settings.SeekSteps.SEEK_CHOICES.indexOf(seekStep),
-            recommended = tv.own.owntv.core.settings.SeekSteps.SEEK_CHOICES.indexOf(tv.own.owntv.core.settings.SeekSteps.DEFAULT_SEEK_STEP_SEC),
-            icon = MyOwnTVIcon.FORWARD,
-            title = stringResource(R.string.settings_seek_step),
-            desc = stringResource(R.string.settings_seek_step_description),
-            value = SettingValue.Choice(stringResource(R.string.settings_live_buffer_seconds, seekStep)),
-            modifier = Modifier.focusRequester(dialogRowFocus.getValue(Dialog.SEEK_STEP)),
-            onClick = { savedScroll = scrollState.value; dialog = Dialog.SEEK_STEP },
-        )
                     }
                     SECTION_MULTIVIEW -> {
         KeyedSettingRow(
@@ -1122,6 +1121,13 @@ internal fun VideoPlayerGroupRows(
             options = ZoomMode.entries.map { it.name to stringResource(it.labelRes) },
             selected = zoomMode.name,
             onSelect = { vm.setDefaultZoom(it); dialog = Dialog.NONE },
+            onDismiss = { dialog = Dialog.NONE },
+        )
+        Dialog.VIDEO_SURFACE -> PickerDialog(
+            title = stringResource(R.string.settings_video_surface),
+            options = SettingsRepository.VideoSurface.entries.map { it.name to stringResource(videoSurfaceLabel(it)) },
+            selected = videoSurfaceMode.name,
+            onSelect = { vm.setVideoSurfaceMode(SettingsRepository.VideoSurface.valueOf(it)); dialog = Dialog.NONE },
             onDismiss = { dialog = Dialog.NONE },
         )
         // A page of its own: opened through the Settings screen, which owns the pages.
@@ -1391,15 +1397,6 @@ internal fun VideoPlayerGroupRows(
             onReset = { vm.setDefaultVolume(100) },
             onDismiss = { dialog = Dialog.NONE },
         )
-        Dialog.SEEK_STEP -> PickerDialog(
-            title = stringResource(R.string.settings_seek_step),
-            options = tv.own.owntv.core.settings.SeekSteps.SEEK_CHOICES.map {
-                it.toString() to stringResource(R.string.settings_live_buffer_seconds, it)
-            },
-            selected = seekStep.toString(),
-            onSelect = { vm.setSeekStepSec(it.toIntOrNull() ?: tv.own.owntv.core.settings.SeekSteps.DEFAULT_SEEK_STEP_SEC); dialog = Dialog.NONE },
-            onDismiss = { dialog = Dialog.NONE },
-        )
         Dialog.MAX_QUALITY -> PickerDialog(
             title = stringResource(R.string.settings_max_video_quality),
             options = vm.maxVideoHeightChoices.map { it.toString() to videoQualityLabel(it) },
@@ -1500,8 +1497,8 @@ private fun dialogForQuickKey(key: String): Dialog? = when (key) {
     "vp_multiview_tiles" -> Dialog.MULTIVIEW_TILES
     "vp_preview_on_ok" -> Dialog.PREVIEW_ON_OK
     "vp_zoom" -> Dialog.ZOOM
+    "vp_video_surface" -> Dialog.VIDEO_SURFACE
     "vp_reset_zoom" -> Dialog.RESET_SAVED_ZOOM
-    "vp_seek_step" -> Dialog.SEEK_STEP
     "vp_max_quality" -> Dialog.MAX_QUALITY
     "vp_live_preview" -> Dialog.LIVE_PREVIEW_PANEL
     "vp_live_latency" -> Dialog.LIVE_LATENCY
@@ -1522,12 +1519,19 @@ private fun dialogForQuickKey(key: String): Dialog? = when (key) {
     else -> null
 }
 
-private enum class Dialog { NONE, LIVE_LATENCY_SOURCES, LIVE_LATENCY_SOURCE, LIVE_LATENCY_CUSTOM_SOURCE, ZOOM, VOLUME, RESET_SAVED_ZOOM, RESET_SAVED_VOLUME, RESET_SAVED_AUDIO_DELAY, SEEK_STEP, SUB_STYLE, SUB_LANG, AUDIO_LANG, SURROUND, AUDIO_SYNC, OUTPUT_AUDIO_DELAY, LIVE_LATENCY, LIVE_CUSTOM, LIVE_PREROLL, LIVE_TUNE_TIMEOUT, LIVE_TUNE_TIMEOUT_SOURCES, LIVE_TUNE_TIMEOUT_SOURCE, LIVE_PREROLL_SOURCES, LIVE_PREROLL_SOURCE, PREVIEW_ON_OK, AFR_LIVE_WARNING, MAX_QUALITY, LIVE_PREVIEW_PANEL, MINI_PLAYER, MULTIVIEW_TILES, MULTIVIEW_WARNING }
+private enum class Dialog { NONE, LIVE_LATENCY_SOURCES, LIVE_LATENCY_SOURCE, LIVE_LATENCY_CUSTOM_SOURCE, ZOOM, VIDEO_SURFACE, VOLUME, RESET_SAVED_ZOOM, RESET_SAVED_VOLUME, RESET_SAVED_AUDIO_DELAY, SUB_STYLE, SUB_LANG, AUDIO_LANG, SURROUND, AUDIO_SYNC, OUTPUT_AUDIO_DELAY, LIVE_LATENCY, LIVE_CUSTOM, LIVE_PREROLL, LIVE_TUNE_TIMEOUT, LIVE_TUNE_TIMEOUT_SOURCES, LIVE_TUNE_TIMEOUT_SOURCE, LIVE_PREROLL_SOURCES, LIVE_PREROLL_SOURCE, PREVIEW_ON_OK, AFR_LIVE_WARNING, MAX_QUALITY, LIVE_PREVIEW_PANEL, MINI_PLAYER, MULTIVIEW_TILES, MULTIVIEW_WARNING }
 
 /** "Auto" for 0, else the picture height ("1080p") — Maximum video quality. */
 @Composable
 internal fun videoQualityLabel(height: Int): String =
     if (height <= 0) stringResource(R.string.settings_auto) else stringResource(R.string.settings_video_quality_lines, height)
+
+/** Label for a video-surface mode — [SettingsRepository.VideoSurface] lives in the engine, so it carries no `@StringRes`. */
+@Composable
+internal fun videoSurfaceLabel(mode: SettingsRepository.VideoSurface): Int = when (mode) {
+    SettingsRepository.VideoSurface.SURFACE_VIEW -> R.string.settings_video_surface_hardware
+    SettingsRepository.VideoSurface.TEXTURE_VIEW -> R.string.settings_video_surface_texture
+}
 
 /** Picker key for "follow the global setting" — the state a null column reads as. */
 private const val FOLLOW_GLOBAL = ""

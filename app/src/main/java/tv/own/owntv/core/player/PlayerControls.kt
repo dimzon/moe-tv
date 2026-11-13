@@ -56,7 +56,7 @@ enum class PlayerControl(
      * back to — on the phone because it is the first thing a thumb reaches on a bar that scrolls, on
      * the television because falling behind inserts it and pushes the rest right.
      */
-    GO_LIVE(ControlCluster.MEDIA, ControlHost.BOTH, R.string.player_tool_catchup),
+    GO_LIVE(ControlCluster.MEDIA, ControlHost.BOTH, R.string.player_go_live),
     VOLUME(ControlCluster.MEDIA, ControlHost.BOTH, R.string.player_tool_volume),
 
     /**

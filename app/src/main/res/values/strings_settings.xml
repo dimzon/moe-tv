@@ -307,7 +307,7 @@
     <string name="settings_content_menus_description">Rearrange or hide the actions in the channel menu</string>
     <!-- Translators: Hint shown above the list when arranging a long-press menu with the remote: OK shows or hides an action, a held OK picks it up to move it. -->
     <string name="settings_content_menus_hint">Press OK on an action to show or hide it. Hold OK to pick it up, then Up and Down to move it; press OK again to drop it.</string>
-    <!-- Translators: Note on the long-press menus settings: some actions in the list are only offered in some places (Catch-up only on catch-up channels, Remove from history only in History). -->
+    <!-- Translators: Note on the long-press menus settings: some actions in the list are only offered in some places (Remove from history only in History). -->
     <string name="settings_content_menus_note">Some actions appear only where they apply.</string>
     <!-- Translators: Settings navigation label for Browsing & lists. -->
     <string name="settings_browsing_lists">Browsing &amp; lists</string>
@@ -455,15 +455,14 @@
     <string name="settings_tunneled_playback_description">Live TV on ExoPlayer: the TV\'s own hardware keeps picture and sound together, with less work for the processor. Works on some TVs only, and turns itself off if a channel fails with it. Audio sync cannot be nudged while it is on.</string>
     <!-- Translators: Shown under the Tunneled playback row after the app switched it off by itself because a channel failed with it. -->
     <string name="settings_tunneled_playback_failed">Turned off after a channel failed with it on this device.</string>
-    <!-- Translators: Section header for catch-up playback settings. -->
-    <string name="settings_catchup">Catch-up</string>
-    <!-- Translators: Plural text showing how many channels support catch-up. 'count' is the number. -->
-    <plurals name="settings_catchup_supported">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> channel supports catch-up · timezone and player for archive playback</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> channels support catch-up · timezone and player for archive playback</item>
-    </plurals>
-    <!-- Translators: Status text when no catch-up channels exist on the playlist. -->
-    <string name="settings_catchup_unavailable">No catch-up channels available on this playlist</string>
+    <!-- Translators: Settings › Picture. How the video picture is drawn: the hardware plane (SurfaceView) or an ordinary composited view (TextureView). -->
+    <string name="settings_video_surface">Video rendering</string>
+    <!-- Translators: Description of settings_video_surface. -->
+    <string name="settings_video_surface_description">How the picture is drawn on screen. Hardware plane (default) is the direct path: 4K, HDR, lowest load. Compatibility texture draws through the ordinary view hierarchy, so the picture shows in screenshots and screen recordings.</string>
+    <!-- Translators: Choice of settings_video_surface: the direct hardware video plane. -->
+    <string name="settings_video_surface_hardware">Hardware plane (SurfaceView)</string>
+    <!-- Translators: Choice of settings_video_surface: an ordinary GPU-composited view. -->
+    <string name="settings_video_surface_texture">Compatibility texture (TextureView)</string>
     <!-- Translators: Section header for device-related settings. -->
     <string name="settings_device">Device</string>
     <!-- Translators: Setting label for the app error log (crashes and playback failures). -->
@@ -567,10 +566,6 @@
     <!-- Translators: Label for Video on Demand content type. 'VOD' is an industry abbreviation. -->
     <!-- Translators: Button to clear the playback error log. -->
     <string name="settings_clear_log">Clear log</string>
-    <!-- Translators: Description of the catch-up time zone setting. Automatic and Device are its first two choices (settings_catchup_timezone_automatic, settings_catchup_timezone_device). -->
-    <string name="settings_catchup_timezone_description">How catch-up timestamps are sent. Automatic uses the time zone your provider\'s server reports, or your device\'s if it reports none. You can also choose Device, or set the offset yourself.</string>
-    <!-- Translators: Option label for manual catch-up timestamp offset. -->
-    <string name="settings_manual">Manual</string>
     <!-- Translators: Theme option: dark mode. -->
     <string name="settings_theme_dark">Dark</string>
     <!-- Translators: Theme option: light mode. -->
@@ -625,9 +620,9 @@
     <string name="settings_vp_cat_frame_rate_summary">Match the screen to the video</string>
     <!-- Translators: Settings › Live TV: sub-heading above live latency, pre-buffer and how long a channel may take to start. -->
     <string name="settings_vp_cat_live_tuning">Live tuning</string>
-    <!-- Translators: Settings › Watching & recording: sub-heading above Multiview and the small floating player. -->
+    <!-- Translators: Settings › Watching: sub-heading above Multiview and the small floating player. -->
     <string name="settings_vp_cat_multiview">Multiview &amp; mini-player</string>
-    <!-- Translators: Phone: the line under the Multiview switch in Settings › Watching & recording. Names Multiview only. -->
+    <!-- Translators: Phone: the line under the Multiview switch in Settings › Watching. Names Multiview only. -->
     <string name="settings_vp_cat_multiview_summary_mobile">Several live channels at once</string>
     <!-- Translators: Settings › Sound & subtitles: sub-heading above the preferred audio and subtitle languages and the subtitle style. -->
     <string name="settings_vp_cat_languages">Languages &amp; subtitles</string>
@@ -639,8 +634,8 @@
     <string name="settings_group_summary_quick">The toggles you reach for most</string>
     <!-- Translators: Settings group name: volume, surround, audio and subtitle languages, subtitle style. -->
     <string name="settings_group_sound_subtitles">Sound &amp; subtitles</string>
-    <!-- Translators: Settings group name: skip steps, resume, multiview, mini-player and recording. -->
-    <string name="settings_group_watching_recording">Watching &amp; recording</string>
+    <!-- Translators: Settings group name: multiview, mini-player and picture-in-picture. -->
+    <string name="settings_group_watching_recording">Watching</string>
     <!-- Translators: Hidden keyword bag used by Settings search for the Profiles page. Translate these as individual terms a user might type; this is not a grammatical sentence and is not displayed as prose. -->
     <string name="settings_search_keywords_profiles">viewers kids mode pin lock account</string>
     <!-- Translators: Hidden keyword bag for the Playlists settings page. Translate as individual search terms. -->
@@ -687,12 +682,8 @@
     <string name="settings_search_keywords_afr">afr refresh rate hz judder 24fps 25fps 50hz 60hz display mode match</string>
     <!-- Translators: Hidden keyword bag for the Surround sound settings. 'dolby' and 'dts' are brand names. Translate as individual search terms. -->
     <string name="settings_search_keywords_surround">dolby dts 5.1 7.1 receiver audio</string>
-    <!-- Translators: Hidden keyword bag for the Catch-up settings. 'vlc' and 'mx' are player brand names. Translate as individual search terms. -->
-    <string name="settings_search_keywords_catchup">archive timezone offset catchup external player vlc mx</string>
-    <!-- Translators: Hidden keyword bag for the player settings (Player, Picture, Live TV, Watching & recording). Translate as individual search terms. -->
+    <!-- Translators: Hidden keyword bag for the player settings (Player, Picture, Live TV, Watching). Translate as individual search terms. -->
     <string name="settings_search_keywords_video">decoder subtitles sync</string>
-    <!-- Translators: Search keywords for the Recording settings page. Not shown to the user — these are the words someone might type to find it, so use natural search terms in your language rather than a literal translation. -->
-    <string name="settings_search_keywords_recording">record recording recordings dvr timer schedule save live</string>
     <!-- Translators: Hidden keyword bag for Subtitle appearance settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_subtitle_appearance">subtitle size color colour position transparency background opacity</string>
     <!-- Translators: Hidden keyword bag for the Live latency settings. Translate as individual search terms. -->
@@ -838,10 +829,6 @@
     <string name="settings_reset_saved_audio_delay_confirm">Reset saved audio sync?</string>
     <!-- Translators: Body of the confirmation dialog for resetting saved audio sync. -->
     <string name="settings_reset_saved_audio_delay_confirm_description">Every channel goes back to the audio sync above. Saved zoom and volume settings are kept. You can always set an individual one again from the player.</string>
-    <!-- Translators: Setting label for how far rewind/forward jumps in a movie or episode. -->
-    <string name="settings_seek_step">Seek step</string>
-    <!-- Translators: Description of the seek step setting. -->
-    <string name="settings_seek_step_description">How far rewind and forward jump in the stream.</string>
     <!-- Translators: Setting label for the subtitle appearance editor. -->
     <string name="settings_subtitle_appearance">Subtitle appearance</string>
     <!-- Translators: Description of the subtitle appearance editor and its disabled behavior. -->
@@ -880,18 +867,6 @@
     <string name="settings_channel_numbers">Channel numbers</string>
     <!-- Translators: Description of the channel numbers setting. -->
     <string name="settings_channel_numbers_description">Show your provider\'s channel number beside the name in the Live TV list, the channel-list overlay and the player — and type a number on the remote during full-screen playback to jump straight to that channel (OK tunes at once, Back cancels). Off hides every number and ignores the number keys; nothing is lost, and turning it back on restores them.</string>
-    <!-- Translators: Setting (Settings › Live TV). Local timeshift: saving channels that have no provider catch-up archive, so they can be paused and rewound. -->
-    <string name="settings_timeshift">Pause and rewind live TV</string>
-    <!-- Translators: Description of settings_timeshift. "Catch-up" = channels whose provider keeps an archive. 1 GB = one gigabyte. -->
-    <string name="settings_timeshift_description">Channels without catch-up are saved on this device while you watch them full screen, so you can pause and rewind. Writes to storage all the time; at least 1 GB always stays free.</string>
-    <!-- Translators: Setting under settings_timeshift: how many minutes are kept (15, 30, 45 or 60). -->
-    <string name="settings_timeshift_window">Rewind length</string>
-    <!-- Translators: Description of settings_timeshift_window. -->
-    <string name="settings_timeshift_window_description">How far back you can rewind a channel without catch-up.</string>
-    <!-- Translators: Setting under settings_timeshift (Pause and rewind live TV): what happens when the user returns to a channel whose saved copy was kept — ask, resume where they were, or go live. -->
-    <string name="settings_timeshift_resume">Resume a saved channel</string>
-    <!-- Translators: Description of settings_timeshift_resume. -->
-    <string name="settings_timeshift_resume_description">What happens when you come back to a channel that was saved while you were away.</string>
     <!-- Translators: Section header for diagnostic settings. -->
     <string name="settings_diagnostics">Diagnostics</string>
     <!-- Translators: Toggle label for showing measured stream statistics. -->
@@ -985,10 +960,6 @@
     <string name="settings_low_zoom_accept">I understand and accept the risk</string>
     <!-- Translators: Generic percentage readout used for both transparency and blur intensity. "percent" is the value. -->
     <string name="settings_surface_transparency"><xliff:g id="percent">%1$d</xliff:g>%%</string>
-    <!-- Translators: Catch-up timezone option, the default: use the time zone the provider's server reports, else the device timezone. -->
-    <string name="settings_catchup_timezone_automatic">Automatic</string>
-    <!-- Translators: Catch-up timezone option: use the device timezone. -->
-    <string name="settings_catchup_timezone_device">Device</string>
     <!-- Translators: Dialog title for the background image picker. -->
     <string name="settings_pick_background_title">Pick a background image</string>
     <!-- Translators: Dialog title for the theme picker. -->
@@ -1023,9 +994,9 @@
     <string name="settings_browsing_last_item">Remember last item</string>
     <!-- Translators: Description of the remember-last-item setting. -->
     <string name="settings_browsing_last_item_description">Each category keeps its own scroll position instead of starting at the top. Live TV also restores the last focused channel.</string>
-    <!-- Translators: Section heading in Browsing & lists for showing or hiding the built-in Live TV categories (Catch-up, All channels). -->
+    <!-- Translators: Section heading in Browsing & lists for showing or hiding the built-in Live TV categories (All channels). -->
     <string name="settings_browsing_live_categories">Live TV categories</string>
-    <!-- Translators: Help text under the Live TV categories switches (Catch-up, All channels). "All channels" and "Favorites" are the names of those two categories. -->
+    <!-- Translators: Help text under the Live TV categories switches. "All channels" and "Favorites" are the names of those categories. -->
     <string name="settings_browsing_live_categories_description">Shown in Live TV, the guide, the player and Multiview. With All channels off, Live TV opens on your first category, or Favorites if you have none.</string>
 
 
@@ -1359,11 +1330,6 @@
     <string name="settings_epg_sources_delete_message">Removes this EPG source and its guide data. Your channels stay.</string>
     <!-- Translators: Loading status while syncing an EPG source. 'percent' is the sync percentage. -->
     <string name="settings_epg_sources_syncing_percent">Syncing <xliff:g id="percent">%1$d</xliff:g>%%</string>
-    <!-- Translators: both placeholders are complete independently pluralized guide-count sentences. -->
-    <plurals name="settings_epg_sources_catchup">
-        <item quantity="one">Catch-up is available on <xliff:g id="count">%1$d</xliff:g> channel.</item>
-        <item quantity="other">Catch-up is available on <xliff:g id="count">%1$d</xliff:g> channels.</item>
-    </plurals>
     <!-- Translators: Error display for EPG source operations. 'error' is the error message. -->
     <string name="settings_epg_sources_error">⚠ <xliff:g id="error">%1$s</xliff:g></string>
     <!-- Translators: Setting label for EPG auto-refresh. -->
@@ -1404,12 +1370,8 @@
     </plurals>
     <!-- Translators: both placeholders are complete independently pluralized guide-count sentences. -->
     <string name="settings_epg_sources_status_count"><xliff:g id="channels">%1$s</xliff:g> <xliff:g id="programmes">%2$s</xliff:g></string>
-    <!-- Translators: EPG stats with catch-up info. 'counts' and 'catchup' are complete sentences. -->
-    <string name="settings_epg_sources_status_count_with_catchup"><xliff:g id="counts">%1$s</xliff:g> <xliff:g id="catchup">%2$s</xliff:g></string>
     <!-- Translators: Status text when EPG sync completes but no programmes are in the time window. -->
     <string name="settings_epg_sources_status_synced">Synced, but no programs were found in the time window.</string>
-    <!-- Translators: EPG sync completion with catch-up info. 'catchup' is a complete sentence. -->
-    <string name="settings_epg_sources_status_synced_with_catchup"><xliff:g id="catchup">%1$s</xliff:g></string>
 
     <!-- Translators: Screen title for the Backup & Restore screen. -->
     <string name="settings_backup_title">Backup &amp; Restore</string>
@@ -1802,10 +1764,6 @@
     <string name="settings_live_latency_per_playlist">Live latency per playlist</string>
     <!-- Translators: Description of the per-playlist Live latency override row. -->
     <string name="settings_live_latency_per_playlist_description">Override the setting above for one playlist, for a provider that needs a deeper or shallower buffer than the others.</string>
-    <!-- Translators: Title of the per-playlist catch-up time zone override row. -->
-    <string name="settings_catchup_timezone_per_playlist">Catch-up time zone per playlist</string>
-    <!-- Translators: Description of the per-playlist catch-up time zone override row. -->
-    <string name="settings_catchup_timezone_per_playlist_description">Override the time zone above for one playlist, for a provider whose archive runs on a different clock.</string>
     <!-- Translators: Title of the per-playlist override of "Give up on a channel after" (settings_live_tune_timeout). -->
     <string name="settings_live_tune_timeout_per_playlist">Give up after, per playlist</string>
     <!-- Translators: Description of the per-playlist "Give up after" override row. -->
@@ -2154,8 +2112,6 @@
     <string name="more_settings_search">Search all settings</string>
     <!-- Translators: More › Settings, card under "Profile": what the group holds. -->
     <string name="settings_card_profile">Viewers, kids mode, PIN locks</string>
-    <!-- Translators: More › Settings, card under "Sources & guide": what the group holds. -->
-    <string name="settings_card_sources">Playlists, EPG, reminders, catch-up</string>
     <!-- Translators: More › Settings, card under "Appearance": what the group holds. -->
     <string name="settings_card_appearance">Theme, accent, glass, text</string>
     <!-- Translators: More › Settings, card under "Layout": what the group holds. -->
@@ -2169,9 +2125,9 @@
     <!-- Translators: More › Settings, card under "Sound & subtitles": what the group holds. -->
     <string name="settings_card_sound">Volume, surround, languages</string>
     <!-- Translators: More › Settings, card under "Live TV": what the group holds. -->
-    <string name="settings_card_live">Preview, rewind, latency, start-up</string>
-    <!-- Translators: More › Settings, card under "Watching & recording": what the group holds. -->
-    <string name="settings_card_watching">Skip, resume, multiview, recording</string>
+    <string name="settings_card_live">Preview, channel numbers, latency, start-up</string>
+    <!-- Translators: More › Settings, card under "Watching": what the group holds. -->
+    <string name="settings_card_watching">Multiview, mini-player, picture-in-picture</string>
     <!-- Translators: More › Settings, card under "App": what the group holds. -->
     <string name="settings_card_app">Language, updates, network, diagnostics</string>
     <!-- Translators: More › Local sync: line under the title. -->
@@ -2402,10 +2358,8 @@
     <string name="settings_panel_choices">Choices</string>
     <!-- Translators: Small tag next to the recommended value in the Settings explanation panel. Shown in capitals. -->
     <string name="settings_panel_recommended">Recommended</string>
-    <!-- Translators: Sub-heading in Settings › Sources & guide above the TV guide and catch-up settings. Shown in capitals. -->
-    <string name="settings_part_guide_catchup">Guide &amp; catch-up</string>
-    <!-- Translators: Sub-heading in Settings › Watching & recording above the skip steps, resume and auto-play settings. Shown in capitals. -->
-    <string name="settings_vp_cat_controls_resume">Controls &amp; resume</string>
+    <!-- Translators: Heading of the Settings group with the TV guide settings. Shown in capitals. -->
+    <string name="settings_part_guide_catchup">Guide</string>
     <!-- Translators: Line under a setting pinned to the Quick group: which Settings group it comes from, e.g. “Pinned from Player”. -->
     <string name="settings_pinned_from">Pinned from <xliff:g id="group">%1$s</xliff:g></string>
     <!-- Translators: Action word on the Check for updates settings row: checks GitHub for a new version now. -->
@@ -2418,10 +2372,6 @@
     <string name="settings_line_reminder_lead">How early a reminder comes</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_guide_days">How many days ahead the guide keeps</string>
-    <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_catchup">The time zone catch-up archives run on</string>
-    <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_catchup_sources">Override the time zone for one playlist</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_override_playlist">Override for one playlist</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
@@ -2523,17 +2473,11 @@
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_live_preview">Play the focused channel</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_timeshift">Channels without catch-up, saved while you watch</string>
-    <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_timeshift_window">How far back you can go</string>
-    <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_latency">How close to live to play</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_preroll">Video collected before a channel starts</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_tune_timeout">Stop trying and say so</string>
-    <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_seek_step">How far rewind and forward jump in a stream</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_tiles">Each tile is another stream</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
@@ -2552,8 +2496,6 @@
     <string name="settings_help_epg_sources">Add an XMLTV guide feed by its link, refresh it, or remove it. Feeds fill the TV Guide and the program lines in Live TV.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_guide_days">How many days of programs the guide stores ahead. Fewer days make guide refreshes faster and the database smaller.</string>
-    <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
-    <string name="settings_help_catchup_timezone">Catch-up plays programs from your provider’s archive. Automatic uses the time zone your provider reports, or your TV’s own clock if it reports none; choose a fixed UTC offset if catch-up still starts at the wrong time. This is also where you choose which player catch-up uses.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_theme">Dark is what МОЁ ТВ is designed for. System follows the TV’s own setting where it has one; Light suits a bright room.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
@@ -2612,8 +2554,6 @@
     <string name="settings_help_preview_audio">Plays the preview’s sound as well as its picture. Off keeps browsing quiet.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_preview_on_ok">Pick where OK on a channel first plays it in the preview, and OK on the same channel again opens it full screen. In Live TV the preview then stays on that channel while you browse. Where it is off, OK opens the channel full screen at once and the preview follows the highlight.</string>
-    <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
-    <string name="settings_help_timeshift_window">How far back Pause and rewind live TV can go on a channel without catch-up. Longer keeps more of the channel in this device’s storage.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_mini">The small player that keeps a channel going in a corner while you browse. Choose its size and the corner it sits in.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
@@ -2840,8 +2780,8 @@
     <string name="settings_root_hint_mobile">Hold a row to pin it to Quick</string>
     <!-- Translators: Phone version of settings_card_layout: what the Layout group holds on a phone (no panels there). -->
     <string name="settings_card_layout_mobile">Navigation, Home, lists, menus</string>
-    <!-- Translators: Phone version of settings_card_watching: what the Watching & recording group holds on a phone. -->
-    <string name="settings_card_watching_mobile">Skip, resume, mini-player, recording</string>
+    <!-- Translators: Phone version of settings_card_watching: what the Watching group holds on a phone. -->
+    <string name="settings_card_watching_mobile">Multiview, mini-player, picture-in-picture</string>
     <!-- Translators: Phone version of settings_line_live_preview: line under the Live preview setting. The preview sits at the top of the Live TV list. -->
     <string name="settings_line_live_preview_mobile">Play the chosen channel at the top of Live TV</string>
     <!-- Translators: Phone version of settings_line_hw: line under Hardware decoding. -->
@@ -2904,8 +2844,6 @@
     <string name="settings_line_animations_mobile">Off feels snappier on older phones</string>
     <!-- Translators: Short line under Software decoding above 1080p on a phone. -->
     <string name="settings_line_sw_decode_mobile">Above 1080p in software when the hardware decoder fails</string>
-    <!-- Translators: Short line under Record on mobile data. -->
-    <string name="settings_line_rec_mobile_data_mobile">Off: a recording that falls on mobile data is skipped</string>
     <!-- Translators: Short line under Picture-in-Picture. -->
     <string name="settings_line_pip_mobile">Shrink the video into a window when you leave the app</string>
     <!-- Translators: Short line under Window size (the floating window). -->
@@ -2916,18 +2854,8 @@
     <string name="settings_line_audio_screen_off_mobile">Stop decoding video nobody can see</string>
     <!-- Translators: Short line under Remember sound only per channel. -->
     <string name="settings_line_audio_per_channel_mobile">Opens that way next time</string>
-    <!-- Translators: Phone version of settings_line_seek_step: line under Seek step. -->
-    <string name="settings_line_seek_step_mobile">How far one tap of rewind or forward jumps</string>
-    <!-- Translators: Phone version of settings_line_rewind_step: line under Live rewind step. -->
-    <string name="settings_line_rewind_step_mobile">How far one tap jumps on a live channel</string>
     <!-- Translators: Short line under Gesture sensitivity. -->
     <string name="settings_line_gesture_mobile">How far a swipe changes volume, brightness or position</string>
-    <!-- Translators: Phone version of settings_line_rec_watching: line under Record what I’m watching. -->
-    <string name="settings_line_rec_watching_mobile">A record button in the player</string>
-    <!-- Translators: Line under Start early (recording). -->
-    <string name="settings_line_rec_pre_roll_mobile">Begin before the listed start</string>
-    <!-- Translators: Line under Keep going after the end (recording). -->
-    <string name="settings_line_rec_post_roll_mobile">Carry on past the listed end</string>
     <!-- Translators: Line under Preferred subtitle language on a phone. -->
     <string name="settings_line_sub_lang_mobile">Auto-select this subtitle track</string>
     <!-- Translators: Line under Subtitle appearance on a phone. -->
