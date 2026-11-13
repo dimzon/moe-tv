@@ -10,15 +10,10 @@ import androidx.room.PrimaryKey
  * referential cleanup of these rows is handled in the repository layer.
  */
 
-@Entity(
-    tableName = "favorites",
-    indices = [
-        Index(value = ["itemId"], unique = true),
-    ],
-)
+@Entity(tableName = "favorites")
 data class FavoriteEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val itemId: String,
+    /** The channel's hex remoteId — the natural key, no surrogate id. */
+    @PrimaryKey val itemId: String,
     val addedAt: Long = System.currentTimeMillis(),
 )
 

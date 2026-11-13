@@ -7,8 +7,8 @@
 - Дата: 2026-11-13
 - Класс: `tv.own.owntv.core.database.OwnTVDatabase`
 - Файл БД: `/data/data/com.github.dimzon.owntv/databases/owntv.db`
-- **Версия схемы: 6**, `identityHash = 38d8e19fa0b27fd641c9bb9b1f721041`
-- Экспортированная схема (источник истины для DDL): `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/6.json`
+- **Версия схемы: 7**, `identityHash = da2c8b2d8fee58ae13db265323d3162c`
+- Экспортированная схема (источник истины для DDL): `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/7.json`
 - Конвертеры: `core/database/Converters.kt` — enum'ы (`MediaType`, `SourceType`,
   `TvProviderSurface`) хранятся как **имена** (`TEXT`), `Boolean` — как `INTEGER 0/1`
 
@@ -253,13 +253,13 @@ FK нет: чистка выполняется явно в repository-слое �
 
 ```sql
 CREATE TABLE IF NOT EXISTS `favorites` (
-  `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   `itemId` TEXT NOT NULL,
-  `addedAt` INTEGER NOT NULL
+  `addedAt` INTEGER NOT NULL,
+  PRIMARY KEY(`itemId`)
 );
-CREATE UNIQUE INDEX IF NOT EXISTS `index_favorites_itemId` ON `favorites` (`itemId`);
 ```
 
+Схема v7: нет суррогатного `id` — hex `itemId` сам первичный ключ.
 `addedAt` — LWW-штамп: apply локальной синхронизации двигает его только вперёд
 (`bumpIfNewer`), удаление с другого устройства применяется лишь к строке не новее (`removeIfOlderThan`).
 `purgeOrphans()` вызывается в `afterSync` и удаляет строки, чьего канала больше нет.
@@ -548,6 +548,7 @@ git history и `CHANGELOG.md`.
 | 4 | **`channels` сдута до натурального ключа:** `remoteId` — PK; удалены `id`, `sourceId`, `streamUrl`, `epgChannelId`, `catchup*`, `httpHeaders`, `drmConfig`, `manifestType`, `directSource`, `contentHash`, `providerName`, `isPaid` (живут как геттеры-синонимы). Удалена hash-diff/stable-upsert машинерия; синк — REPLACE по PK |
 | 5 | **Таблицы `sources` больше нет:** единственный источник — DTO-синглтон `BuiltInSource`, его настройки — глобальные настройки DataStore. `sourceId` удалён из `categories`, `epg_channels`, `epg_programmes`, `playback_prefs`, `playback_quirks`. Удалён `SourceDao` |
 | 6 | **Удалён `mediaType` из всех таблиц** (live-only): `categories` → уникальный `remoteId`, `favorites` → уникальный `itemId`, `content_order`/`custom_category_members` → `(contextKey, itemId)`, `playback_quirks` и `tv_provider_programs` без типа. `watch_history` — PK `(itemId, deviceId)`, без `id`; `deviceId` NOT NULL. `programme_reminders` теряет `channelName`/`epgChannelId`. Удалена legacy-колонка `playback_prefs.audioDelayMs` |
+| 7 | **`favorites` без суррогатного `id`:** hex `itemId` — PK (уникальный индекс больше не нужен) |
 
 ---
 
@@ -569,5 +570,5 @@ adb shell run-as com.github.dimzon.owntv sqlite3 databases/owntv.db \
 `watch_history` — 3 колонки с PK `(itemId, deviceId)`, индексы `index_channels_name` /
 `index_channels_sortOrder_name` / `index_channels_number`.
 
-Схема-эталон для диффа: `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/6.json` — любое
+Схема-эталон для диффа: `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/7.json` — любое
 изменение сущностей Room обязано менять этот файл (он коммитится вместе с кодом).
