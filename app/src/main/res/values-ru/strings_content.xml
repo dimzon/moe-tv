@@ -84,10 +84,7 @@
     <string name="content_episodes">Серии</string>
     <string name="content_oldest_first">Сначала старые</string>
     <string name="content_newest_first">Сначала новые</string>
-    <string name="content_delete_subtitles">Удалить субтитры OpenSub</string>
     <string name="content_play_trailer">Воспроизвести трейлер</string>
-    <string name="content_refetch_tmdb">Повторно загрузить сведения TMDB</string>
-    <string name="content_set_tmdb_name">Задать название для TMDB</string>
     <string name="content_close">Закрыть</string>
     <string name="content_rename_hint">Только для этого профиля. Оставьте поле пустым, чтобы восстановить исходное название.</string>
     <string name="content_no_movies_here">Здесь нет фильмов.</string>
@@ -106,8 +103,6 @@
     <string name="content_no_series_found">По запросу «<xliff:g id="query">%1$s</xliff:g>» сериалы не найдены</string>
     <string name="content_reorder_movie">Изменить порядок фильма</string>
     <string name="content_reorder_series">Изменить порядок сериала</string>
-    <string name="content_refetching_tmdb">Повторная загрузка сведений TMDB…</string>
-    <string name="content_researching_tmdb">Повторный поиск в TMDB…</string>
     <string name="content_duration_hours"><xliff:g id="hours">%1$d</xliff:g> ч <xliff:g id="minutes">%2$d</xliff:g> мин</string>
     <string name="content_duration_minutes"><xliff:g id="minutes">%1$d</xliff:g> мин</string>
     <string name="content_season_episode">Сезон <xliff:g id="season">%1$d</xliff:g> · Серия <xliff:g id="episode">%2$d</xliff:g></string>

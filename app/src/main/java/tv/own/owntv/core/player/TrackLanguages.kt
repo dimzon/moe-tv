@@ -12,7 +12,7 @@ import java.util.Locale
  */
 object TrackLanguages {
 
-    /** "Original language" — the film's or show's own language (TMDB), else the stream's main track. */
+    /** "Original language" — no preference; the stream's own main track plays. */
     const val ORIGINAL = "original"
 
     val CODES: List<String> = listOf(
@@ -45,9 +45,4 @@ object TrackLanguages {
     /** What an engine is given: [ORIGINAL] is not a language, so the engine gets no preference. */
     fun forEngine(pref: String): String = if (pref == ORIGINAL) "" else pref
 
-    /** A TMDB `original_language` (ISO 639-1, "ko") as the 639-2 code tracks carry ("kor"); null if unknown. */
-    fun fromIso6391(code: String?): String? {
-        if (code.isNullOrBlank()) return null
-        return runCatching { Locale.forLanguageTag(code).isO3Language }.getOrNull()?.takeIf { it.isNotBlank() }
-    }
 }

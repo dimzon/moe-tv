@@ -1059,7 +1059,7 @@ fun SettingsScreen(
     val panel = remember { tv.own.myowntv.features.settings.SettingsPanelState() }
     CompositionLocalProvider(
         // Subtitle appearance is a page of its own, opened from the Sound & subtitles rows.
-        tv.own.myowntv.features.settings.LocalOpenSubtitleStyle provides { saveScroll(); open(SettingsTab.SUBTITLE_STYLE) },
+        tv.own.myowntv.features.settings.LocalSubtitleStyleOpener provides { saveScroll(); open(SettingsTab.SUBTITLE_STYLE) },
         tv.own.myowntv.features.settings.LocalSubtitleStyleRowFocus provides rowFocus.getValue(SettingsTab.SUBTITLE_STYLE),
     ) {
         StageSettingsPage(

@@ -72,8 +72,8 @@ reproduce. Logs (`adb logcat`) help a lot for playback issues.
   Apache-2.0 §4 and MIT require their notices to travel with any redistribution, and OFL-1.1
   fonts need their license text alongside the `.ttf` files.
 - New bundled assets (fonts, logos, artwork) need a provenance line and a license file. Logos of
-  TMDB, OpenSubtitles, Weblate, RuTube and OwnTV are third-party trademarks: keep the required
-  non-endorsement statements in [NOTICE](NOTICE).
+  Weblate, RuTube and OwnTV are third-party trademarks: keep the required notices in
+  [NOTICE](NOTICE).
 - Before any public APK release, work through
   [docs/attribution-checklist.md](docs/attribution-checklist.md) — it lists the remaining
   upstream URLs and the in-app legal notices that still need to be implemented.

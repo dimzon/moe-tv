@@ -238,7 +238,7 @@ never be wired into CI or run automatically by Gradle.
 `glossary.json` has two concepts:
 
 - `preserveExact`: complete brand, product, protocol, and format phrases that may appear inside
-  translatable sentences, such as `OwnTV`, `ExoPlayer`, `mpv`, `OpenSubtitles`, `Xtream`, and `M3U`.
+  translatable sentences, such as `OwnTV`, `ExoPlayer`, `mpv`, `Xtream`, and `M3U`.
 - `consistentTerms`: roughly 120 product-domain terms whose chosen translation should be reused across
   independent chunks, such as playlist, portal, source, profile, EPG, programme guide, catch-up, Live
   TV, movies, and series.

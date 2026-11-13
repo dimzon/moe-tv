@@ -38,14 +38,6 @@ class TrackLanguagesTest {
     }
 
     @Test
-    fun `a TMDB language becomes the code tracks carry`() {
-        assertEquals("kor", TrackLanguages.fromIso6391("ko"))
-        assertEquals("deu", TrackLanguages.fromIso6391("de"))
-        assertNull(TrackLanguages.fromIso6391(null))
-        assertNull(TrackLanguages.fromIso6391(""))
-    }
-
-    @Test
     fun `two-letter form`() {
         assertEquals("de", TrackLanguages.twoLetter("deu"))
         assertEquals("zh", TrackLanguages.twoLetter("zho"))

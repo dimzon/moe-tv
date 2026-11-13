@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
  * That split is the whole point. A panel that allows one session per account refuses the second
  * connection, so a pooled leftover from the previous tune can lock the player out of the channel the
  * user just asked for — the live player therefore evicts its idle sockets on every stop. Evicting the
- * *singleton's* pool did that to the whole app: EPG downloads, panel API calls, TMDB metadata and Coil
+ * *singleton's* pool did that to the whole app: EPG downloads, API calls and Coil
  * image loads all lost keep-alive on every zap and paid a fresh TCP+TLS handshake afterwards.
  * [evictAll] here touches stream connections only.
  */

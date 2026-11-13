@@ -115,60 +115,12 @@
     <string name="settings_auto">Авто</string>
     <string name="settings_city_latlon">Город или широта,долгота</string>
     <string name="settings_location_hint">Оставьте поле пустым для автоматического определения по общедоступному IP-адресу. Введите город (например, Москва) или координаты «широта,долгота» (например, 55.75,37.62).</string>
-    <string name="settings_metadata">Метаданные (TMDB)</string>
-    <string name="settings_metadata_source">Источник метаданных</string>
-    <string name="settings_metadata_source_description">Выберите источник сведений о фильмах и сериалах.</string>
-    <string name="settings_metadata_provider_description">Использовать только данные из вашего плейлиста. Без запросов к TMDB.</string>
-    <string name="settings_metadata_provider_tmdb_description">Данные из вашего плейлиста имеют приоритет; TMDB заполняет пробелы и добавляет актёрский состав, жанры и фоновые изображения.</string>
-    <string name="settings_metadata_tmdb_only_description">Предпочитать TMDB для каждого поля; использовать данные из плейлиста, только если в TMDB ничего нет.</string>
-    <string name="settings_metadata_allowance">Ваша дневная доля</string>
-    <string name="settings_metadata_reset_automatic">Сбрасывается автоматически</string>
-    <string name="settings_metadata_library_details">Сведения о библиотеке</string>
-    <string name="settings_metadata_test_connection">Проверить текущее подключение</string>
-    <string name="settings_allowance_refills">Пополнится <xliff:g id="time">%1$s</xliff:g></string>
-    <string name="settings_allowance_minute">Минута</string>
-    <string name="settings_allowance_hour">Час</string>
-    <string name="settings_allowance_day">Сутки</string>
     <plurals name="settings_allowance_value">
         <item quantity="one">осталось <xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g></item>
         <item quantity="few">осталось <xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g></item>
         <item quantity="many">осталось <xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g></item>
         <item quantity="other">осталось <xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g></item>
     </plurals>
-    <string name="settings_metadata_active_source">Активный источник</string>
-    <string name="settings_metadata_shared_worker_description">МОЁ ТВ Worker · без настройки</string>
-    <string name="settings_metadata_connection">Подключение</string>
-    <string name="settings_metadata_remote_advanced">Получить расширенные данные TMDB</string>
-    <string name="settings_metadata_remote_advanced_description">Используйте свой ключ API TMDB или собственный Worker вместо общего сервиса по умолчанию.</string>
-    <string name="settings_metadata_key_label">Ключ</string>
-    <string name="settings_metadata_server_label">Сервер</string>
-    <string name="settings_metadata_clear_advanced_title">Перестать использовать свой ключ?</string>
-    <string name="settings_metadata_clear_advanced_message">Ваш ключ API TMDB и адрес вашего сервера будут удалены с этого устройства, а МОЁ ТВ вернётся к встроенному общему сервису с его дневной долей.</string>
-    <string name="settings_metadata_fair_share">Встроенный сервис метаданных используется всеми пользователями МОЁ ТВ, поэтому каждое устройство получает собственную дневную долю. Если вы израсходуете свою долю, постеры и описания приостановятся до её обновления — информация из вашего собственного плейлиста продолжит работать как обычно. Собственный ключ API TMDB или сервер снимает это ограничение: он бесплатный, а у личного ключа практически нет лимита.</string>
-    <string name="settings_metadata_limit_reached">Дневная доля метаданных израсходована — добавьте собственный ключ TMDB в разделе «Настройки → Метаданные», чтобы снять это ограничение.</string>
-    <string name="settings_metadata_language">Язык метаданных</string>
-    <string name="settings_metadata_language_description">Язык описаний, жанров и названий из TMDB. Поля, которые TMDB не перевёл, останутся на английском. Подробности кэшируются для каждого языка, поэтому переключение обратно происходит мгновенно.</string>
-    <string name="settings_metadata_server_description">Оставьте оба поля пустыми, чтобы использовать встроенный общий сервер без дополнительной настройки. Введите собственный ключ API TMDB для прямых запросов к TMDB или URL самостоятельно размещённого сервера, чтобы использовать собственный прокси или зеркало. URL имеет приоритет над ключом.</string>
-    <string name="settings_metadata_key_from_phone">Получить ключ с другого устройства</string>
-    <string name="settings_metadata_key_from_phone_desc">Откройте адрес в браузере любого устройства — телефона, компьютера или другого телевизора, — войдите там в TMDB и отправьте ключ. Ничего не нужно набирать пультом.</string>
-    <string name="settings_metadata_key_received">Ключ TMDB получен</string>
-    <string name="settings_tmdb_api_key">Ключ API TMDB (v3)</string>
-    <string name="settings_metadata_empty_title">Введите название для поиска.</string>
-    <string name="settings_metadata_server_unavailable">Не удалось связаться с сервером метаданных — проверьте сеть, ключ и URL.</string>
-    <string name="settings_metadata_no_match">В TMDB нет совпадений для «<xliff:g id="query">%1$s</xliff:g>».</string>
-    <string name="settings_metadata_lookup_failed">Не удалось выполнить поиск.</string>
-    <string name="settings_metadata_match_result"><xliff:g id="title">%1$s</xliff:g><xliff:g id="year">%2$s</xliff:g> · tmdb #<xliff:g id="id">%3$d</xliff:g></string>
-    <string name="settings_metadata_year">(<xliff:g id="year">%1$d</xliff:g>)</string>
-    <string name="settings_lookup_movie">Поиск фильма по названию</string>
-    <string name="settings_test_lookup">Проверить поиск</string>
-    <string name="settings_looking_up">Поиск…</string>
-    <string name="settings_tmdb_attribution">Этот продукт использует API TMDB, но не одобрен и не сертифицирован TMDB.</string>
-    <string name="settings_metadata_provider_only">Только поставщик</string>
-    <string name="settings_metadata_provider_plus_tmdb">Поставщик + TMDB</string>
-    <string name="settings_metadata_tmdb_only">Только TMDB</string>
-    <string name="settings_tier_default">По умолчанию (общий)</string>
-    <string name="settings_tier_key">Ваш ключ TMDB</string>
-    <string name="settings_tier_self_host">Собственный сервер</string>
     <string name="settings_title">Настройки</string>
     <string name="settings_quick_live_preview">Предпросмотр эфира</string>
     <string name="settings_quick_preview_sound">Звук предпросмотра</string>
@@ -200,7 +152,6 @@
     <string name="settings_browsing_description">Запоминание последней категории и последнего элемента в прямом эфире, фильмах и сериалах</string>
     <string name="settings_home_root">Главный экран</string>
     <string name="settings_home_root_description">Выбор, изменение порядка и фильтрация рядов на главном экране</string>
-    <string name="settings_metadata_root_description">Постеры, описания, актёрский состав и рейтинги фильмов и сериалов</string>
     <string name="settings_backup_restore">Резервная копия и восстановление</string>
     <string name="settings_clear_history">Очистить историю просмотров</string>
     <string name="settings_appearance_group">Внешний вид</string>
@@ -360,7 +311,6 @@
     <string name="settings_search_keywords_ch">канал вверх вниз пропуск страница список категория канал</string>
     <string name="settings_search_keywords_browsing">запомнить позиция прокрутка категория последний элемент прямой эфир фильмы сериалы сброс начало</string>
     <string name="settings_search_keywords_home">ряды главный порядок фильтр</string>
-    <string name="settings_search_keywords_metadata">постеры описания актёры рейтинги</string>
     <string name="settings_search_keywords_theme">светлая тёмная система</string>
     <string name="settings_search_keywords_glass">стекло прозрачность размытие иней полупрозрачный фон обои</string>
     <string name="settings_search_keywords_accent">оттенок палитра HEX готовый цвет</string>
@@ -463,13 +413,6 @@
     <string name="settings_preferred_subtitle_language">Предпочитаемый язык субтитров</string>
     <string name="settings_preferred_language_description">Автоматически выбирать эту дорожку субтитров, когда она доступна.</string>
     <string name="settings_preferred_audio_language_description">Воспроизводит эту звуковую дорожку, если она есть в потоке. «Язык оригинала» воспроизводит фильмы и сериалы на языке, на котором они сняты.</string>
-    <string name="settings_open_subtitles">OpenSubtitles</string>
-    <string name="settings_open_subtitles_connected">Подключено</string>
-    <string name="settings_open_subtitles_description">Войдите в аккаунт, чтобы искать, загружать и удалять загруженные субтитры. Настройка задаётся отдельно для каждого профиля; требуется бесплатный аккаунт opensubtitles.com.</string>
-    <string name="settings_open_subtitles_setup_title">Настройка OpenSubtitles</string>
-    <string name="settings_open_subtitles_api_key">Ключ API приложения OpenSubtitles</string>
-    <string name="settings_worker_server_url">URL-адрес Worker / сервера</string>
-    <string name="settings_shared">Общий</string>
     <string name="settings_preferred_audio_language">Предпочитаемый язык звука</string>
     <string name="settings_audio_sync">Синхронизация звука</string>
     <string name="settings_output_audio_delay">Задержка для этого выхода</string>
@@ -817,7 +760,6 @@
     <string name="settings_backup_section_sources_desc">Плейлисты, источники EPG и учётные данные</string>
     <string name="settings_backup_no_sources_warning">Без раздела «Источники» это устройство не получит плейлистов, и смотреть будет нечего.</string>
     <string name="settings_backup_section_customize">Настройки персонализации</string>
-    <string name="settings_backup_section_customize_desc">Скрытые, переименованные и переупорядоченные категории и каналы, сопоставления EPG и пользовательские названия TMDB</string>
     <string name="settings_backup_section_favorites">Избранное</string>
     <string name="settings_backup_section_favorites_desc">Отмеченные каналы, фильмы и сериалы</string>
     <string name="settings_backup_section_history">История просмотров</string>
@@ -864,8 +806,6 @@
     <string name="settings_backup_profile_keep_both">Оставить оба</string>
     <string name="settings_backup_profile_keep_both_description">Профиль из копии добавится как новый: «<xliff:g id="name">%1$s</xliff:g>».</string>
     <string name="settings_backup_profile_restored_name"><xliff:g id="name">%1$s</xliff:g> (восстановлен)</string>
-    <string name="settings_metadata_optional">необязательно</string>
-    <string name="settings_metadata_test_title">Оппенгеймер</string>
     <string name="settings_bulk_rename_title">Массовое переименование</string>
     <plurals name="settings_bulk_rename_selected">
         <item quantity="one">Выбрано <xliff:g id="count">%1$d</xliff:g> название. Добавьте правила или очистите его автоматически.</item>
@@ -1276,7 +1216,7 @@
     <string name="settings_card_sources">Плейлисты, EPG, напоминания, архив</string>
     <string name="settings_card_appearance">Тема, акцент, стекло, текст</string>
     <string name="settings_card_layout">Навигация, панели, Главная, меню</string>
-    <string name="settings_card_content">Категории, TMDB, субтитры</string>
+    <string name="settings_card_content">Категории, субтитры</string>
     <string name="settings_card_player">Какой плеер, потоки</string>
     <string name="settings_card_picture">Декодер, HDR, масштаб, частота кадров</string>
     <string name="settings_card_sound">Громкость, объёмный звук, языки</string>
@@ -1443,7 +1383,6 @@
     <string name="settings_line_content_menus">Порядок и видимость действий в каждом меню</string>
     <string name="settings_line_remote_shortcuts">Назначить свободные кнопки пульта</string>
     <string name="settings_line_customize">Скрыть и показать, переименовать и упорядочить</string>
-    <string name="settings_line_metadata">Постеры, сюжеты, актёры и рейтинги фильмов и сериалов</string>
     <string name="settings_line_app_icon">Значок на главном экране</string>
     <string name="settings_line_brand_accent">Треугольник воспроизведения в логотипе — в вашем цвете акцента</string>
     <string name="settings_line_check_updates">Получить последнюю версию с GitHub</string>
@@ -1559,7 +1498,6 @@
     <string name="settings_seg_guide">Телегид</string>
     <string name="settings_accent_yours">Ваш</string>
     <string name="settings_accent_picker_hint">OK на поле или на полосе оттенка, затем двигайте стрелками; OK или «Назад» — готово.</string>
-    <string name="settings_signed_out">Выход выполнен</string>
     <plurals name="settings_epg_feed_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> источник</item>
         <item quantity="few"><xliff:g id="count">%1$d</xliff:g> источника</item>
@@ -1590,9 +1528,6 @@
     <string name="settings_language_system_help">МОЁ ТВ использует язык телевизора (сейчас <xliff:g id="language">%1$s</xliff:g>). Выберите язык ниже, чтобы использовать его только в МОЁ ТВ.</string>
     <string name="settings_language_pick_help">Использовать <xliff:g id="language">%1$s</xliff:g> в МОЁ ТВ независимо от языка телевизора.</string>
     <string name="settings_key_use">Выбрать</string>
-    <string name="settings_line_metadata_source">Откуда берутся сведения о фильмах и сериалах</string>
-    <string name="settings_line_metadata_language">Сюжеты, жанры и названия из TMDB</string>
-    <string name="settings_line_metadata_advanced">Свой ключ или собственный Worker</string>
     <plurals name="settings_home_row_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> строка</item>
         <item quantity="few"><xliff:g id="count">%1$d</xliff:g> строки</item>

@@ -176,12 +176,12 @@ fork's own work.
 
 ### 🛰️ Third-party services
 
-- **TMDB** — *"This product uses the TMDB API but is not endorsed or certified by TMDB."*
-  Metadata and trailers are provided by [TMDB](https://www.themoviedb.org/); the retained
-  upstream Worker reference is in `extras/worker/tmdb/`.
-- **OpenSubtitles** — *"This product uses the OpenSubtitles API but is not endorsed or certified
-  by OpenSubtitles."* ([opensubtitles.com](https://www.opensubtitles.com/)); the Worker reference
-  is in `extras/worker/opensub/`.
+- **TMDB** — upstream OwnTV used the [TMDB](https://www.themoviedb.org/) API for metadata and
+  trailers; **this fork removed that integration** and the upstream reference Worker. No TMDB
+  requests are made.
+- **OpenSubtitles** — upstream OwnTV used the [OpenSubtitles](https://www.opensubtitles.com/)
+  API for subtitle search; **this fork removed that integration**, the reference Worker and the
+  bundled logo. No OpenSubtitles requests are made.
 
 ### 🧩 Built with
 

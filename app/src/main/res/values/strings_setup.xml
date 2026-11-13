@@ -31,12 +31,6 @@
     <!-- Translators: Error text shown when the companion link is locked after too many incorrect PIN attempts. Also sent as an HTTP response body to the remote browser. -->
     <string name="setup_companion_locked">Too many incorrect PIN attempts \u2014 the link was closed for safety.</string>
 
-    <!-- Translators: Set-TMDB-name dialog heading. -->
-    <string name="setup_tmdb_name">Set TMDB name</string>
-    <!-- Translators: Description in the Set-TMDB-name dialog. "TMDB" is a brand name (The Movie Database) and must not be translated. -->
-    <string name="setup_tmdb_description">Type the exact TMDB title to match. Year is optional but helps when several titles share a name.</string>
-    <!-- Translators: Text-field label in the Set-TMDB-name dialog for an optional year to narrow the TMDB search. -->
-    <string name="setup_year_optional">Year (optional)</string>
     <!-- Translators: Storage-browser fallback title/path label when no folder is selected. -->
     <string name="setup_pick_location">Pick a location</string>
     <!-- Translators: Button label shown in the storage browser when the app does not yet have storage permission. -->
@@ -130,12 +124,8 @@
     <string name="companion_service_config_empty">Enter an API key, a Worker URL, or both.</string>
     <string name="companion_service_config_invalid_key">That API key does not look valid.</string>
     <string name="companion_service_config_invalid_url">Enter a valid HTTPS Worker URL.</string>
-    <!-- Translators: Error on the remote page when the OpenSubtitles form was submitted completely empty. -->
-    <string name="companion_service_config_empty_account">Enter your OpenSubtitles username and password, or your own API details.</string>
     <!-- Translators: Error on the remote page when the submitted account details are too long to be real. -->
     <string name="companion_service_config_invalid_credentials">Those account details are too long. Check them and try again.</string>
-    <!-- Translators: Description on the remote page used to set up OpenSubtitles from another device's browser. -->
-    <string name="companion_open_subtitles_description">Sign in to OpenSubtitles for your TV. Add your own API details below only if you have them.</string>
     <string name="companion_service_config_sent">The connection details are now waiting on your TV. Review and save them there.</string>
     <string name="companion_service_config_again">Send different connection details</string>
     <string name="companion_add_page_title">МОЁ ТВ \u2014 Add source</string>

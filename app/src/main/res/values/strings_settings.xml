@@ -231,101 +231,10 @@
     <string name="settings_city_latlon">City or lat,lon</string>
     <!-- Translators: Placeholder hint text in the custom location field. -->
     <string name="settings_location_hint">Leave blank to auto-detect from your public IP. Enter a city (e.g. London) or \"lat,lon\" (e.g. 51.5,-0.12).</string>
-    <!-- Translators: Section header for metadata settings. 'TMDB' is a brand name (The Movie Database). -->
-    <string name="settings_metadata">Metadata (TMDB)</string>
-    <!-- Translators: Setting label for the metadata source choice. -->
-    <string name="settings_metadata_source">Metadata source</string>
-    <!-- Translators: Description of the metadata source setting. -->
-    <string name="settings_metadata_source_description">Choose where Movies &amp; Series details come from.</string>
-    <!-- Translators: Description of the 'Provider only' metadata option. -->
-    <string name="settings_metadata_provider_description">Use only what your playlist provides. No TMDB lookups.</string>
-    <!-- Translators: Description of the 'Provider + TMDB' metadata option. -->
-    <string name="settings_metadata_provider_tmdb_description">Your playlist\'s info wins; TMDB fills the gaps and adds cast, genres &amp; backdrops.</string>
-    <!-- Translators: Description of the 'TMDB only' metadata option. -->
-    <string name="settings_metadata_tmdb_only_description">Prefer TMDB for every field; fall back to your playlist only when TMDB has nothing.</string>
-    <!-- Translators: Label for the shared metadata service's remaining daily allowance. -->
-    <string name="settings_metadata_allowance">Your shared allowance</string>
-    <string name="settings_metadata_reset_automatic">Resets automatically</string>
-    <string name="settings_metadata_library_details">Library details</string>
-    <string name="settings_metadata_test_connection">Test current connection</string>
-    <string name="settings_allowance_refills">Refills <xliff:g id="time">%1$s</xliff:g></string>
-    <string name="settings_allowance_minute">Minute</string>
-    <string name="settings_allowance_hour">Hour</string>
-    <string name="settings_allowance_day">Day</string>
     <plurals name="settings_allowance_value">
         <item quantity="one"><xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g> left</item>
         <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g> left</item>
     </plurals>
-    <string name="settings_metadata_active_source">Active source</string>
-    <string name="settings_metadata_shared_worker_description">МОЁ ТВ Worker · no setup</string>
-    <string name="settings_metadata_connection">Connection</string>
-    <string name="settings_metadata_remote_advanced">Get advanced TMDB info</string>
-    <string name="settings_metadata_remote_advanced_description">Use your own TMDB API key or self-hosted Worker instead of the shared default.</string>
-    <!-- Translators: Title of the dialog that offers Remote or Enter here before OpenSubtitles sign-in. -->
-    <string name="settings_open_subtitles_setup_title">Set up OpenSubtitles</string>
-    <string name="settings_open_subtitles_api_key">OpenSubtitles application API key</string>
-    <string name="settings_worker_server_url">Worker / server URL</string>
-    <string name="settings_shared">Shared</string>
-    <!-- Translators: All three allowance windows on ONE line, e.g. "3/40 min - 150/150 hr - 399/400 day".
-         Keep it short: it shares a row with its label on a TV screen. Not a plural - the numbers are
-         ratios, and every locale shows the same three fixed windows. -->
-    <!-- Translators: InfoRow label for the user's own TMDB API key, shown masked. -->
-    <string name="settings_metadata_key_label">Key</string>
-    <!-- Translators: InfoRow label for the self-hosted metadata server address. -->
-    <string name="settings_metadata_server_label">Server</string>
-    <!-- Translators: Title of the dialog shown when switching off Advanced options while a key is saved. -->
-    <string name="settings_metadata_clear_advanced_title">Stop using your own key?</string>
-    <!-- Translators: Body of that dialog. Explains the saved key and server address are deleted. -->
-    <string name="settings_metadata_clear_advanced_message">Your TMDB API key and self-hosted server address will be deleted from this device, and МОЁ ТВ will go back to the built-in shared service with its daily share.</string>
-    <!-- Translators: Explains why the shared metadata service has a per-device limit. -->
-    <string name="settings_metadata_fair_share">The built-in service is shared by everyone using МОЁ ТВ. If any minute, hourly or daily allowance is used up, TMDB details pause until that window resets; playlist information keeps working. Your own key or Worker removes this allowance.</string>
-    <!-- Translators: Shown once per app start when the device's daily metadata share is used up. -->
-    <string name="settings_metadata_limit_reached">Daily metadata share used up — add your own TMDB key in Settings → Metadata to remove this limit.</string>
-    <!-- Translators: Setting label for the metadata language. -->
-    <string name="settings_metadata_language">Metadata language</string>
-    <!-- Translators: Description of the metadata language setting. 'TMDB' is a brand name. -->
-    <string name="settings_metadata_language_description">Language for plots, genres &amp; titles from TMDB. Fields TMDB hasn\'t translated stay in English. Details are cached per language, so switching back is instant.</string>
-    <!-- Translators: Description of the TMDB server configuration options. -->
-    <string name="settings_metadata_server_description">Leave both blank to use the built-in shared server (no setup). Enter your own TMDB API key to call TMDB directly, or a self-hosted server URL to use your own proxy/mirror. A URL takes priority over a key.</string>
-    <!-- Translators: Row that opens the remote hand-over, so the key need not be typed with the remote. -->
-    <string name="settings_metadata_key_from_phone">Get key from another device</string>
-    <!-- Translators: Description of that row. -->
-    <string name="settings_metadata_key_from_phone_desc">Open the address in a browser on any device — a phone, a computer or another TV — sign in to TMDB there, and send the key across. Nothing to type with the remote.</string>
-    <!-- Translators: Toast shown on the TV when a key arrives from the remote device. -->
-    <string name="settings_metadata_key_received">TMDB key received</string>
-    <string name="settings_tmdb_api_key">TMDB API key (v3)</string>
-    <!-- Translators: Error when no title is entered for TMDB lookup. -->
-    <string name="settings_metadata_empty_title">Enter a title to look up.</string>
-    <!-- Translators: Error when the TMDB server cannot be reached. -->
-    <string name="settings_metadata_server_unavailable">Couldn\'t reach the metadata server — check network / key / URL.</string>
-    <!-- Translators: Error when TMDB returns no match. 'query' is the searched title. -->
-    <string name="settings_metadata_no_match">No TMDB match for \"<xliff:g id="query">%1$s</xliff:g>\".</string>
-    <!-- Translators: Generic TMDB lookup failure. -->
-    <string name="settings_metadata_lookup_failed">Lookup failed.</string>
-    <!-- Translators: TMDB match result display. 'title' is the matched title, 'year' is the year, 'id' is the TMDB ID. -->
-    <string name="settings_metadata_match_result"><xliff:g id="title">%1$s</xliff:g><xliff:g id="year">%2$s</xliff:g> · tmdb #<xliff:g id="id">%3$d</xliff:g></string>
-    <!-- Translators: Year display in TMDB match results. Wrapped in parentheses. -->
-    <string name="settings_metadata_year">(<xliff:g id="year">%1$d</xliff:g>)</string>
-    <!-- Translators: Button or section label to look up a movie title on TMDB. -->
-    <string name="settings_lookup_movie">Look up a movie title</string>
-    <!-- Translators: Button to perform a test TMDB lookup. -->
-    <string name="settings_test_lookup">Test lookup</string>
-    <!-- Translators: Loading status shown while performing a TMDB lookup. -->
-    <string name="settings_looking_up">Looking up…</string>
-    <!-- Translators: Legal notice about TMDB API usage. 'TMDB' is a brand name. -->
-    <string name="settings_tmdb_attribution">This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
-    <!-- Translators: Metadata source option: use only playlist-provided metadata. -->
-    <string name="settings_metadata_provider_only">Provider only</string>
-    <!-- Translators: Metadata source option: playlist metadata supplemented by TMDB. -->
-    <string name="settings_metadata_provider_plus_tmdb">Provider + TMDB</string>
-    <!-- Translators: Metadata source option: prefer TMDB for all metadata. -->
-    <string name="settings_metadata_tmdb_only">TMDB only</string>
-    <!-- Translators: TMDB tier option: the built-in shared API key. -->
-    <string name="settings_tier_default">Default shared service</string>
-    <!-- Translators: TMDB tier option: user's own TMDB API key. -->
-    <string name="settings_tier_key">Your TMDB key</string>
-    <!-- Translators: TMDB tier option: user's self-hosted TMDB proxy. -->
-    <string name="settings_tier_self_host">Self-hosted</string>
     <!-- Translators: Screen title for the Settings screen. -->
     <string name="settings_title">Settings</string>
     <!-- Translators: Quick toggle on the Settings screen for live preview. -->
@@ -412,8 +321,6 @@
     <string name="settings_home_root">Home screen</string>
     <!-- Translators: Description of the Home screen settings. -->
     <string name="settings_home_root_description">Choose, reorder &amp; filter the rows on Home</string>
-    <!-- Translators: Description of the Metadata (TMDB) settings group. -->
-    <string name="settings_metadata_root_description">Posters, plots, cast, genres, ratings and backdrops for Movies and Series.</string>
     <!-- Translators: Settings navigation label for Backup & Restore. -->
     <string name="settings_backup_restore">Backup &amp; Restore</string>
     <!-- Translators: Settings navigation label to clear watch history. -->
@@ -703,7 +610,7 @@
     <string name="settings_group_sources">Sources &amp; guide</string>
     <!-- Translators: Settings navigation group label, and search-result breadcrumb category, for the group holding sidebar, panel width, browsing lists, Home screen and channel paging. -->
     <string name="settings_group_layout">Layout</string>
-    <!-- Translators: Settings navigation group label, and search-result breadcrumb category, for the group holding Customize, Metadata and OpenSubtitles. -->
+    <!-- Translators: Settings navigation group label, and search-result breadcrumb category, for the group holding content customization. -->
     <string name="settings_group_content_metadata">Content &amp; metadata</string>
     <!-- Translators: Settings search-result breadcrumb category for Appearance. -->
     <string name="settings_group_appearance">Appearance</string>
@@ -767,8 +674,6 @@
     <string name="settings_search_keywords_browsing">remember position scroll category last item live movies series reset top</string>
     <!-- Translators: Hidden keyword bag for the Home screen settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_home">rows hero reorder filter</string>
-    <!-- Translators: Hidden keyword bag for the Metadata (TMDB) settings. Translate as individual search terms. -->
-    <string name="settings_search_keywords_metadata">posters plots cast ratings</string>
     <!-- Translators: Hidden keyword bag for the Theme settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_theme">light dark system</string>
     <!-- Translators: Search keywords for the Glass & background page. Space-separated single words, not a sentence; they are matched against what the user types into settings search. -->
@@ -903,7 +808,7 @@
     <string name="settings_language_thai">Thai</string>
     <!-- Translators: Language name in the language picker. -->
     <string name="settings_language_turkish">Turkish</string>
-    <!-- Translators: Choice in the preferred audio language picker: play each film or series in the language it was made in (for example Korean for a Korean film), as TMDB records it; otherwise the stream's own main audio track. -->
+    <!-- Translators: Choice in the preferred audio language picker: use the stream's own original audio track. -->
     <string name="settings_language_original">Original language</string>
     <!-- Translators: Language name in the language picker. -->
     <string name="settings_language_ukrainian">Ukrainian</string>
@@ -973,11 +878,6 @@
     <string name="settings_preferred_language_description">Auto-select this subtitle track when available.</string>
     <!-- Translators: Description of the preferred AUDIO language setting. "Original language" is the picker choice settings_language_original; quote it as that string is translated. -->
     <string name="settings_preferred_audio_language_description">Plays this audio track when the stream has it. \"Original language\" plays films and series in the language they were made in.</string>
-    <!-- Translators: Settings heading/row and external subtitle-source label. 'OpenSubtitles' is a brand name. -->
-    <string name="settings_open_subtitles">OpenSubtitles</string>
-    <string name="settings_open_subtitles_connected">Connected</string>
-    <!-- Translators: Description of the OpenSubtitles setting. 'opensubtitles.com' is a website. -->
-    <string name="settings_open_subtitles_description">Sign in to search and download subtitles, and manage downloaded subtitles. Per profile; a free opensubtitles.com account is required.</string>
     <!-- Translators: Setting label for preferred audio language. -->
     <string name="settings_preferred_audio_language">Preferred audio language</string>
     <!-- Translators: Setting label for audio/video synchronization. -->
@@ -1627,8 +1527,6 @@
     <string name="settings_backup_no_sources_warning">Without Sources, this device gets no playlists and has nothing to watch.</string>
     <!-- Translators: Backup content section: Customizations. -->
     <string name="settings_backup_section_customize">Customizations</string>
-    <!-- Translators: Description of the Customizations backup section. -->
-    <string name="settings_backup_section_customize_desc">Hidden/renamed/reordered categories, channels, EPG matches &amp; custom TMDB names</string>
     <!-- Translators: Backup content section: Favorites. -->
     <string name="settings_backup_section_favorites">Favorites</string>
     <!-- Translators: Description of the Favorites backup section. -->
@@ -1707,10 +1605,6 @@
     <!-- Translators: Name of a restored profile kept beside one with the same name. %1$s is the original name. -->
     <string name="settings_backup_profile_restored_name"><xliff:g id="name">%1$s</xliff:g> (restored)</string>
 
-    <!-- Translators: Label for an optional field. Lowercase is intentional. -->
-    <string name="settings_metadata_optional">optional</string>
-    <!-- Translators: Example movie title used for testing TMDB lookup. 'Oppenheimer' is a film title. -->
-    <string name="settings_metadata_test_title">Oppenheimer</string>
 
     <!-- Translators: Title of the bulk rename flow for category items. -->
     <string name="settings_bulk_rename_title">Bulk rename</string>
@@ -2335,7 +2229,7 @@
     <!-- Translators: More › Settings, card under "Layout": what the group holds. -->
     <string name="settings_card_layout">Navigation, panels, Home, menus</string>
     <!-- Translators: More › Settings, card under "Content & metadata": what the group holds. -->
-    <string name="settings_card_content">Categories, TMDB, subtitles</string>
+    <string name="settings_card_content">Categories, subtitles</string>
     <!-- Translators: More › Settings, card under "Player": what the group holds. -->
     <string name="settings_card_player">Which player, streaming</string>
     <!-- Translators: More › Settings, card under "Picture": what the group holds. -->
@@ -2627,8 +2521,6 @@
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_customize">Hide and unhide, rename and reorder</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_metadata">Posters, plots, cast and ratings for Movies and Series</string>
-    <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_app_icon">The launcher icon</string>
     <!-- Translators: Line under "Accent-colored logo". -->
     <string name="settings_line_brand_accent">The logo\'s play triangle in your accent color</string>
@@ -2844,8 +2736,6 @@
     <string name="settings_accent_yours">Yours</string>
     <!-- Translators: Hint under the color picker in the Accent color popup. The arrows are the remote's keys. -->
     <string name="settings_accent_picker_hint">OK on the field or the hue bar, then the arrows move it; OK or Back to finish.</string>
-    <!-- Translators: Value on the OpenSubtitles settings row when no account is signed in. -->
-    <string name="settings_signed_out">Signed out</string>
     <!-- Translators: Value on the EPG Sources settings row: how many guide feeds are added, e.g. “2 feeds”. -->
     <plurals name="settings_epg_feed_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> feed</item>
@@ -2899,12 +2789,6 @@
     <string name="settings_language_pick_help">Use <xliff:g id="language">%1$s</xliff:g> in МОЁ ТВ, whatever language the TV is set to.</string>
     <!-- Translators: Key hint after the OK key: use the focused language. -->
     <string name="settings_key_use">Use</string>
-    <!-- Translators: Short line under Metadata source. -->
-    <string name="settings_line_metadata_source">Where Movies &amp; Series details come from</string>
-    <!-- Translators: Short line under Metadata language. -->
-    <string name="settings_line_metadata_language">Plots, genres and titles from TMDB</string>
-    <!-- Translators: Short line under the advanced TMDB access row. -->
-    <string name="settings_line_metadata_advanced">Your own key or a self-hosted Worker</string>
     <!-- Translators: Count beside the Home screen page title: how many rows it lists. -->
     <plurals name="settings_home_row_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> row</item>

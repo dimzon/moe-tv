@@ -15,9 +15,6 @@
     <string name="setup_companion_port_in_use">Порт <xliff:g id="port">%1$d</xliff:g> уже используется. Попробуйте другой порт.</string>
     <string name="setup_companion_unavailable">Не удалось запустить локальный сервер. Повторите попытку.</string>
     <string name="setup_companion_locked">Слишком много неверных попыток ввода PIN — в целях безопасности соединение было закрыто.</string>
-    <string name="setup_tmdb_name">Указать название в TMDB</string>
-    <string name="setup_tmdb_description">Введите точное название из TMDB для сопоставления. Год указывать необязательно, но он поможет, если названия нескольких произведений совпадают.</string>
-    <string name="setup_year_optional">Год (необязательно)</string>
     <string name="setup_pick_location">Выберите расположение</string>
     <string name="setup_grant_storage_access">Предоставить полный доступ к хранилищу</string>
     <string name="setup_use_folder">Использовать эту папку</string>
@@ -62,9 +59,7 @@
     <string name="companion_service_config_empty">Введите ключ API, URL-адрес Worker или оба значения.</string>
     <string name="companion_service_config_invalid_key">Этот ключ API выглядит недействительным.</string>
     <string name="companion_service_config_invalid_url">Введите корректный URL-адрес Worker с HTTPS.</string>
-    <string name="companion_service_config_empty_account">Введите имя пользователя и пароль OpenSubtitles или собственные данные API.</string>
     <string name="companion_service_config_invalid_credentials">Эти данные учётной записи слишком длинные. Проверьте их и повторите попытку.</string>
-    <string name="companion_open_subtitles_description">Войдите в OpenSubtitles для своего телевизора. Собственные данные API ниже указывайте, только если они у вас есть.</string>
     <string name="companion_service_config_sent">Данные подключения ожидают на телевизоре. Проверьте и сохраните их там.</string>
     <string name="companion_service_config_again">Отправить другие данные подключения</string>
     <string name="companion_add_page_title">МОЁ ТВ — добавить источник</string>

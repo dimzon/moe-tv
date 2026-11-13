@@ -113,12 +113,15 @@ docs/attribution-checklist.md.
     translators on Hosted Weblate (https://hosted.weblate.org/projects/owntv/),
     which hosts libre projects free of charge. Thank you to Weblate and to
     every translator. The strings originate in OwnTV_Core.
-  * TMDB: "This product uses the TMDB API but is not endorsed or certified
-    by TMDB." Movie/series metadata and trailers are provided by TMDB
-    (https://www.themoviedb.org/).
-  * OpenSubtitles: "This product uses the OpenSubtitles API but is not
-    endorsed or certified by OpenSubtitles." (https://www.opensubtitles.com/)
-    The upstream reference Workers live in extras/worker/.
+  * TMDB: upstream OwnTV used the TMDB API (https://www.themoviedb.org/)
+    for movie/series metadata and trailers. This fork removed that
+    integration and the upstream reference Worker, so no TMDB API is called;
+    the name is kept only to describe the upstream origin.
+  * OpenSubtitles: upstream OwnTV used the OpenSubtitles API
+    (https://www.opensubtitles.com/) for subtitle search. This fork removed
+    that integration, the reference Worker and the bundled logo, so no
+    OpenSubtitles API is called; the name is kept only to describe the
+    upstream origin.
   * mpv / libmpv / FFmpeg: these were part of upstream OwnTV but are NO
     LONGER SHIPPED by this fork (removed in commits ac5cc39 and 933cc94).
     The historical credits are preserved in CHANGELOG.md; no mpv/FFmpeg

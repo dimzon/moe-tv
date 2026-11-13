@@ -105,10 +105,6 @@
     <string name="player_av_sync_remember">Remember this delay</string>
     <!-- Translators: Status text in the subtitle timing dialog when the delay is exactly 0ms. -->
     <string name="player_no_offset">No offset</string>
-    <!-- Translators: Status text in the subtitle timing dialog when the delay is positive (subtitles appear after the audio). -->
-    <string name="player_subtitles_later">Subtitles shown later</string>
-    <!-- Translators: Status text in the subtitle timing dialog when the delay is negative (subtitles appear before the audio). -->
-    <string name="player_subtitles_earlier">Subtitles shown earlier</string>
     <!-- Translators: Formatted audio delay display in the A/V sync controls when delay is exactly 0ms. -->
     <string name="player_delay_zero">0 ms</string>
     <!-- Translators: Formatted audio delay display when delay is positive. The plus sign is intentional. "ms" means milliseconds. -->
@@ -269,71 +265,6 @@
     <string name="player_decoder_gpu">GPU</string>
 
 
-    <!-- Translators: Dialog title for the OpenSubtitles search screen. "OpenSubtitles" is a brand name. -->
-    <string name="player_subtitles_search_title">Search OpenSubtitles</string>
-    <!-- Translators: Loading indicator text in the subtitle search dialog. -->
-    <string name="player_subtitles_working">Working\u2026</string>
-    <!-- Translators: Edit Search button and heading of the query editor in the subtitle search dialog. -->
-    <string name="player_subtitles_edit_search">Edit search</string>
-    <!-- Translators: Text-field label in the subtitle search edit form. -->
-    <string name="player_subtitles_title_label">Title</string>
-    <!-- Translators: Dialog title for the subtitle deletion confirmation popup. "OpenSub" is an abbreviation of OpenSubtitles. -->
-    <string name="player_subtitles_delete_title">Delete OpenSub subtitles</string>
-    <!-- Translators: Text-field label for the OpenSubtitles username in the sign-in form. -->
-    <string name="player_subtitles_username">Username</string>
-    <!-- Translators: Text-field label for the OpenSubtitles password in the sign-in form. -->
-    <string name="player_subtitles_password">Password</string>
-    <!-- Translators: Toggle/settings row with an On/Off chip to persist the OpenSubtitles session. -->
-    <string name="player_subtitles_stay_signed_in">Stay signed in</string>
-    <!-- Translators: Settings action row opening the downloaded-subtitles screen. -->
-    <string name="player_subtitles_delete_action">Delete subtitles</string>
-    <!-- Translators: Plural compact text showing remaining daily downloads (without the total). -->
-    <plurals name="player_subtitles_remaining_short">
-        <item quantity="one"><xliff:g id="remaining">%1$d</xliff:g> download remaining today</item>
-        <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> downloads remaining today</item>
-    </plurals>
-    <!-- Translators: Plural text showing remaining downloads and reset time. "remaining" is the count; "reset" is a time string such as "3h 20m". -->
-    <plurals name="player_subtitles_remaining_reset">
-        <item quantity="one"><xliff:g id="remaining">%1$d</xliff:g> download remaining today \u00b7 resets in <xliff:g id="reset">%2$s</xliff:g></item>
-        <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> downloads remaining today \u00b7 resets in <xliff:g id="reset">%2$s</xliff:g></item>
-    </plurals>
-    <!-- Translators: Plural text showing remaining daily downloads (used in a different context than remaining_short). -->
-    <plurals name="player_subtitles_remaining_count">
-        <item quantity="one"><xliff:g id="remaining">%1$d</xliff:g> download remaining today</item>
-        <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> downloads remaining today</item>
-    </plurals>
-    <!-- Translators: Full description of the OpenSubtitles service in the subtitle settings. "opensubtitles.com" is a website URL. -->
-    <string name="player_subtitles_free_description_full">OpenSubtitles is a free, open community subtitle service. Sign in with your own opensubtitles.com account; creating one is free. This applies to the current profile only.</string>
-    <!-- Translators: Error shown when the OpenSubtitles session expires. Directs the user to Settings path. -->
-    <string name="player_subtitles_session_expired">Your OpenSubtitles session has expired. To keep searching and downloading subtitles, sign in again from Settings \u2192 Video player \u2192 Subtitles \u2192 OpenSubtitles.</string>
-    <!-- Translators: Error/dialog when the user needs an OpenSubtitles account to search. Directs to Settings path. "opensubtitles.com" is a website URL. -->
-    <string name="player_subtitles_account_needed">OpenSubtitles account needed\n\nTo search and download subtitles, sign in from Settings \u2192 Video player \u2192 Subtitles \u2192 OpenSubtitles. OpenSubtitles is a free, open community service \u2014 anyone can create a free account at opensubtitles.com.</string>
-    <!-- Translators: Button label in the subtitle search to show results in all languages. -->
-    <string name="player_subtitles_show_all_languages">Show all languages</string>
-    <!-- Translators: Label for the "all languages" filter option in subtitle search. -->
-    <string name="player_subtitles_all_languages">All languages</string>
-    <!-- Translators: Button to retry the subtitle search. -->
-    <string name="player_subtitles_try_again">Try again</string>
-    <!-- Translators: Error when the daily subtitle search/download limit is reached. -->
-    <string name="player_subtitles_limit_reached">The daily subtitle search limit has been reached. Try again tomorrow.</string>
-    <!-- Translators: Network error when the OpenSubtitles API cannot be reached. -->
-    <string name="player_subtitles_network_error">Couldn\'t reach OpenSubtitles. Check your connection and try again.</string>
-    <!-- Translators: Fallback text when subtitle language/release metadata is absent. -->
-    <string name="player_subtitles_subtitle">Subtitle</string>
-    <!-- Translators: Tag chip in the subtitle search results indicating a trusted uploader. -->
-    <string name="player_subtitles_trusted">Trusted</string>
-    <!-- Translators: Tag chip in the subtitle search results indicating subtitles for the deaf and hard of hearing. "SDH" is a standard abbreviation. -->
-    <string name="player_subtitles_sdh">SDH</string>
-    <!-- Translators: Tag chip in the subtitle search results indicating AI-translated subtitles. -->
-    <string name="player_subtitles_ai">AI</string>
-    <!-- Translators: Label in the OpenSubtitles account screen showing the connected username. -->
-    <string name="player_subtitles_connected_as">Connected as</string>
-    <!-- Translators: Empty subtitle-search state after searching every language. -->
-    <string name="player_subtitles_no_matches_all_languages">No matching subtitles were found. Try editing the search title.</string>
-    <!-- Translators: Empty subtitle-search state when the preferred-language filter narrowed results. -->
-    <string name="player_subtitles_no_matches_chosen_language">No matching subtitles were found in your chosen language.</string>
-    <!-- Translators: Setting and picker title for the language used to filter OpenSubtitles searches. -->
-    <string name="player_subtitles_search_language">Search language</string>
     <!-- Translators: Playback-log event headline after surround output fails. -->
     <string name="player_reason_stereo_fallback">Switched to stereo audio</string>
     <!-- Translators: Playback-log event headline for IPTV providers that permit only one active connection. -->
@@ -369,7 +300,6 @@
     <string name="player_error_hardware_format">This TV\'s video hardware can\'t decode <xliff:g id="resolution">%1$s</xliff:g> <xliff:g id="codec">%2$s</xliff:g>. The file is fine, but the TV can\'t play this format at this resolution.</string>
     <!-- Translators: Brief confirmation after the user saves a stream report from the player. -->
     <string name="player_report_saved">Stream report saved to the playback log</string>
-    <string name="player_subtitles_filter_title">Filter by language</string>
     <string name="player_frame_rate_prompt_title">This channel may judder</string>
     <string name="player_frame_rate_prompt_description">It plays at <xliff:g id="fps">%1$d</xliff:g> fps while your TV is running at <xliff:g id="current_hz">%2$d</xliff:g> Hz, which can’t show those frames evenly — motion looks slightly jerky.\n\nAuto frame rate switches the TV to <xliff:g id="target_hz">%3$d</xliff:g> Hz while you watch and puts it back afterwards. Some TVs blank for a moment when the rate changes; you can turn it off again in Settings → Picture → Frame rate.</string>
     <string name="player_frame_rate_turn_on">Turn on</string>

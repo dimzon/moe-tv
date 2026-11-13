@@ -77,24 +77,12 @@ Modified versions may not use a Reserved Font Name without permission.
   <https://letsencrypt.org/certificates/>. The upstream page states no copyright or license terms
   for the PEM file; the certificate itself is factual trust-anchor data, not a creative work. It
   is attributed here for provenance.
-* **TMDB logo** — `app/src/main/res/drawable/ic_tmdb_logo.xml` and
-  `extras/partner-logos/tmdb_logo.svg`, converted from TMDB's official SVG. TMDB's attribution
-  requirement applies: **"This product uses the TMDB API but is not endorsed or certified by
-  TMDB."** TMDB and its logo are trademarks of their owner; the supplied brand colours must not
-  be restyled.
-* **OpenSubtitles logo** — `app/src/main/res/drawable/ic_opensubtitles_logo.xml` and
-  `extras/partner-logos/opensubtitles_logo.svg`, converted from OpenSubtitles' official
-  `logo.svg` (<https://github.com/opensubtitles/vlsub-opensubtitles-com>). **"This product uses
-  the OpenSubtitles API but is not endorsed or certified by OpenSubtitles."**
 * **Weblate logo** — `extras/partner-logos/Weblate_logo.svg`, used to credit the translation
   platform. Trademark of its owner.
 * **Brand assets** — `extras/brand/` and `extras/brand/legacy/` are upstream OwnTV artwork
   (GPL-3.0-only, © its authors; the lowercase "owntv" wordmark is by @m3th0d93, issue #227).
   `extras/branding/` is this fork's own МОЁ ТВ kit. `extras/screenshots/` are upstream
   screenshots retained for historical reference.
-* **Cloudflare Worker reference** — `extras/worker/` (TMDB and OpenSubtitles proxies) is
-  upstream-derived GPL-3.0-only code. It is reference material for self-hosting and is not
-  packaged into the APK.
 
 ---
 

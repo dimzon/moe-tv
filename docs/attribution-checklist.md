@@ -35,7 +35,7 @@
 | B2 | `app/src/main/java/tv/own/owntv/core/i18n/SupportedLocales.kt:45` | `https://github.com/ahXN00/OwnTV/issues/new?...` | Ссылка «попросить новый язык» ведёт в issue-трекер апстрима. Заменить или убрать. |
 | B3 | `app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt:71` | `Referer: https://github.com/ahXN00/OwnTV` | Заменить на адрес форка / убрать. |
 | B4 | Новые строковые ресурсы | — | Добавить ключи, напр. `more_about_copyright`, `more_about_modified`, `more_about_no_warranty`, `more_about_licenses_link`, `more_about_upstream`. **Важно:** видимый пользователю текст нельзя хардкодить в Kotlin — сработает гейт `tools/i18n/check_hardcoded_strings.py` (зависит от `preBuild`). Добавлять в `values/strings_settings.xml` и `values-ru/strings_settings.xml` — сейчас упаковываются только `en` и `ru`; непереведённые ключи унаследуют fallback из `values/` (`MissingTranslation` отключён). |
-| B5 | `extras/worker/README.md:21` | «OwnTV's built-in default points at the maintainer's own deployment» | Утверждение про «поддержку мейнтейнера» не относится к форку. Переписать как историческую справку об апстрим-коде; TMDB/OpenSubtitles-воркеры — это GPLv3-код апстрима (см. `NOTICE`). |
+| B5 | `extras/worker/` (удалён) | Воркеры апстрима для TMDB и OpenSubtitles | Удалены вместе с интеграциями, логотипами и ключами. Закрыто. |
 | B6 | `CHANGELOG.md:3` и ниже | История релизов до v5.2.1 — апстримовская, с функциями, которых у форка уже нет (M3U/Xtream/mpv/VOD/профили) | Не выдавать за changelog форка. Верхняя сноска уже разделяет «upstream import point» и форк; при первом собственном релизе отделить/архивировать историю апстрима. |
 
 ---
@@ -57,9 +57,9 @@
 * `LICENSE` — дословный GPLv3, не изменён. Версия зафиксирована как **GPL-3.0-only**: у апстрима нет оговорки «or later», значит добавлять её к производной работе нельзя.
 * §5(a) — явное уведомление «THIS IS A SUBSTANTIALLY MODIFIED VERSION OF OwnTV» с датой 09.11.2026 и перечнем изменений: `NOTICE` §2, `README` (Origins & attribution), `CHANGELOG.md` (сноска).
 * §5(b)/(c) — заявление, что **вся** производная работа лицензирована под GPL-3.0-only: `NOTICE` §3.
-* §4 — сохранены кредиты апстрима: @m3th0d93 (wordmark, issue #227), переводчики и Weblate, TMDB и OpenSubtitles с required non-endorsement формулировками, исторические упоминания mpv/libmpv/FFmpeg.
+* §4 — сохранены кредиты апстрима: @m3th0d93 (wordmark, issue #227), переводчики и Weblate, исторические упоминания TMDB/OpenSubtitles (интеграции, воркеры и логотипы удалены), исторические упоминания mpv/libmpv/FFmpeg.
 * Атрибуция `OwnTV_Core` (GPL-3.0-only) как второго источника кода и всех 26 локалей — `NOTICE` §1.
-* Лицензии зависимостей сведены в `THIRD_PARTY_LICENSES.md`: Apache-2.0 (полный текст — `LICENSES/Apache-2.0.txt`), MIT (android-youtube-player, дословно), tri-license juniversalchardet с выбором GPL-3.0, OFL-1.1 для 6 семейств шрифтов, ISRG Root X2, логотипы TMDB/OpenSubtitles/Weblate.
+* Лицензии зависимостей сведены в `THIRD_PARTY_LICENSES.md`: Apache-2.0 (полный текст — `LICENSES/Apache-2.0.txt`), MIT (android-youtube-player, дословно), tri-license juniversalchardet с выбором GPL-3.0, OFL-1.1 для 6 семейств шрифтов, ISRG Root X2, логотип Weblate.
 * `CONTRIBUTING.md` приведён к текущему проекту (имя, RuTube-only позиционирование, рабочая ссылка на документацию, условия лицензирования вклада).
 
 **Совместимость.** Apache-2.0, MIT и OFL-1.1 совместимы с GPLv3. MPL-1.1 сама по себе несовместима, но `juniversalchardet` предлагает tri-license, поэтому в `THIRD_PARTY_LICENSES.md` явно избран GPL-3.0. Конфликтующих лицензий в зависимостях не обнаружено; mpv/FFmpeg (LGPL/GPL-стек) из сборки удалён.

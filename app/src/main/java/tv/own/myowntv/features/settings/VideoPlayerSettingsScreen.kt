@@ -526,7 +526,7 @@ internal fun VideoPlayerGroupRows(
     val externalLive by vm.externalPlayerLive.collectAsStateWithLifecycle()
     val zoom by vm.defaultZoom.collectAsStateWithLifecycle()
     val subStyleOn by vm.subtitleStyleEnabled.collectAsStateWithLifecycle()
-    val openSubtitleStyle = LocalOpenSubtitleStyle.current
+    val openSubtitleStyle = LocalSubtitleStyleOpener.current
     val audioDelay by vm.audioDelayMs.collectAsStateWithLifecycle()
     val audioOutput by tv.own.owntv.core.player.AudioOutputWatch.current(LocalContext.current).collectAsStateWithLifecycle()
     val outputAudioDelay = vm.outputAudioDelays.collectAsStateWithLifecycle().value.offsetFor(audioOutput)
@@ -1710,7 +1710,7 @@ private fun subtitlePositionName(position: SubtitleStyle.Position): String = str
  * its own "Default".
  */
 /** Opens Subtitle appearance's page; provided by the Settings screen. */
-val LocalOpenSubtitleStyle = androidx.compose.runtime.staticCompositionLocalOf<(() -> Unit)?> { null }
+val LocalSubtitleStyleOpener = androidx.compose.runtime.staticCompositionLocalOf<(() -> Unit)?> { null }
 /** The Settings screen's return target for that page: Back lands on the row that opened it. */
 val LocalSubtitleStyleRowFocus = androidx.compose.runtime.staticCompositionLocalOf<FocusRequester?> { null }
 

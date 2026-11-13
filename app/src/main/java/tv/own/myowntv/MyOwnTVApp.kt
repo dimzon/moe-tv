@@ -136,11 +136,10 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
         // The auto-start wake listener's process stays this bare (see AutoStart.isAutoStartProcess).
         if (tv.own.myowntv.features.autostart.AutoStart.isAutoStartProcess(this)) return
         // Core has its own BuildConfig, which carries none of this: a library gets no version at all,
-        // and the edge key and the maintainer switch are the app's build inputs. Hand them over before
+        // and the maintainer switch are the app's build inputs. Hand them over before
         // the first reader — CrashRecorder, two lines down (see CoreBuildInfo).
         tv.own.owntv.core.CoreBuildInfo.versionName = BuildConfig.VERSION_NAME
         tv.own.owntv.core.CoreBuildInfo.versionCode = BuildConfig.VERSION_CODE
-        tv.own.owntv.core.CoreBuildInfo.edgeKey = BuildConfig.TMDB_EDGE_KEY
         tv.own.owntv.core.CoreBuildInfo.devTools = BuildConfig.DEV_TOOLS
         tv.own.owntv.core.CoreBuildInfo.debug = BuildConfig.DEBUG
         tv.own.owntv.core.CoreBuildInfo.diagnosticBuild = BuildConfig.DIAGNOSTIC_BUILD
@@ -209,14 +208,14 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
     override fun newImageLoader(context: PlatformContext): ImageLoader {
         val lowRam = context.getSystemService(android.app.ActivityManager::class.java)?.isLowRamDevice == true
         // The shared client deliberately disables connection retries so catalog/EPG sync owns its retry
-        // policy. That setting is harmful for CDN images, though: hosts such as image.tmdb.org publish
-        // both IPv6 and IPv4, and some Android TV boxes resolve IPv6 first even when their IPv6 route is
+        // policy. That setting is harmful for CDN images, though: image CDNs publish both IPv6
+        // and IPv4, and some Android TV boxes resolve IPv6 first even when their IPv6 route is
         // unusable. OkHttp then needs retryOnConnectionFailure to try the next resolved address (the TV's
         // browser already does this fallback). Derive one long-lived client so Coil keeps the app-wide
         // proxy, DNS, UA, TLS and connection-pool configuration while regaining alternate-route fallback.
         // The shared client is also pinned to HTTP/1.1, because IPTV panels answer an HTTP/2 handshake
-        // with RST_STREAM(PROTOCOL_ERROR). Image CDNs are the opposite case: image.tmdb.org negotiates
-        // h2, and a poster grid opens dozens of requests to that one host at once. Over HTTP/1.1 those
+        // with RST_STREAM(PROTOCOL_ERROR). Image CDNs are the opposite case: they negotiate h2, and a
+        // grid opens dozens of requests to one host at once. Over HTTP/1.1 those
         // queue behind OkHttp's per-host connection limit; over h2 they multiplex on a single connection.
         // Restore protocol negotiation for images only — the panel-facing client keeps its 1.1 pin.
         val imageHttpClient = GlobalContext.get().get<OkHttpClient>()

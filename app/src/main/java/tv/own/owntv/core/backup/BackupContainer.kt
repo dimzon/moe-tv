@@ -17,7 +17,7 @@ import java.util.zip.ZipOutputStream
  *    was useless — it does not exist on the device being restored, so the wallpaper silently came back
  *    blank. The image bytes now ride inside the container.
  * 2. **A plain JSON file exposes everything.** Field-level [BackupCrypto] only ever sealed the
- *    secrets (source/proxy passwords, TMDB key, OpenSubtitles login); playlist URLs, usernames,
+ *    secrets (source/proxy passwords); playlist URLs, usernames,
  *    profile names and watch history sat next to them in readable text. With a passphrase the whole
  *    container is now encrypted — the file list included.
  *

@@ -48,8 +48,8 @@ import java.io.File
 
 /**
  * Settings search is a second, hand-written list sitting beside the real rows, and it had quietly
- * stopped matching them: four whole screens — Recording, OpenSubtitles, Glass & background and Content
- * menus — could not be found by name at all, and neither could two thirds of the Video player rows,
+ * stopped matching them: three screens — Recording, Glass & background and Content menus — could not
+ * be found by name at all, and neither could two thirds of the Video player rows,
  * Multiview and the Live TV engine picker among them. The header offers to search "every setting".
  *
  * The Video player half is now derived from `VIDEO_QUICK_ROWS`, so it cannot drift again. The screens
@@ -178,20 +178,16 @@ class SettingsSearchCoverageTest {
      */
     private val notSettings = setOf(
         "settings_remote_shortcuts_add", "settings_remote_shortcuts_choose_action", "settings_remote_shortcuts_enabled",
-        "settings_remote_shortcuts_reset", "common_reset", "settings_delete_all_subtitles", "settings_delete_subtitle",
+        "settings_remote_shortcuts_reset", "common_reset",
         "settings_epg_sources_delete_title", "settings_sources_refresh_days_title", "content_epg_title",
         "settings_panel_width_customize", "settings_refresh_now",
-        "settings_sources_delete_title", "settings_sources_probe_title", "settings_metadata_clear_advanced_title",
-        "settings_metadata_key_from_phone", "settings_metadata_remote_advanced", "settings_behavior",
-        "player_subtitles_connected_user", "player_subtitles_delete_action", "player_subtitles_sign_in",
-        "player_subtitles_sign_out", "settings_open_subtitles_advanced", "settings_open_subtitles_setup_local",
-        "settings_open_subtitles_setup_remote",
+        "settings_sources_delete_title", "settings_sources_probe_title", "settings_behavior",
         // Stage: a full page's own heading — the screen, which has its own entry — and the
         // titles and options of its popups and confirmations.
         "settings_epg_sources_title", "settings_home_screen", "settings_title_date_time_weather",
         "settings_delete_subtitles", "settings_remote_shortcuts_capture_title", "settings_epg_sources_fill_playlist",
         "settings_sources_resync_title_full", "settings_sources_resync_now_full", "settings_sources_resync_remove_full",
-        "settings_sources_test_title", "player_subtitles_sign_in_title", "settings_open_subtitles_setup_title",
+        "settings_sources_test_title",
         "settings_panel_width_dialog_title", "settings_panel_width_disable_preview_title",
         "settings_record_watching_warning_title",
     )

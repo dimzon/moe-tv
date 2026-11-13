@@ -152,7 +152,6 @@
     </plurals>
     <!-- Translators: Home row type label for the card-style row. -->
     <string name="home_row_cards">Cards</string>
-    <string name="home_row_now_trending">Now trending</string>
     <!-- Translators: Home row name in Settings for the "Keep Watching" row. -->
     <string name="home_row_keep_watching">Keep watching</string>
     <!-- Translators: Home row name in Settings for the "Continue Watching Movies" row. -->
@@ -171,27 +170,10 @@
     <string name="home_row_on_now">On now</string>
     <!-- Translators: Home row description in Settings for the hero row. -->
     <string name="home_row_hero_description">The large preview row at the top</string>
-    <string name="home_row_trending_description">Shows 4–10 items only when TMDB trending titles match movies or series in your provider catalog.</string>
-    <!-- Translators: Settings row that chooses how the Now Trending row is drawn. -->
-    <string name="home_trending_style">Trending layout</string>
-    <!-- Translators: Now Trending layout option: the large card with artwork, badges and reasons. -->
-    <string name="home_trending_style_hero">Detailed card</string>
     <!-- Translators: A running time or time left in hours and minutes, abbreviated, e.g. "1 h 05 min". -->
     <string name="home_duration_hours_minutes"><xliff:g id="hours">%1$d</xliff:g> h <xliff:g id="minutes">%2$02d</xliff:g> min</string>
     <!-- Translators: Time remaining, e.g. "31 min left". "duration" is a formatted duration. -->
     <string name="home_time_left"><xliff:g id="duration">%1$s</xliff:g> left</string>
-    <string name="home_trending_provider_match">Provider match</string>
-    <string name="home_trending_why_label">WHY THIS ITEM APPEARS</string>
-    <string name="home_trending_reason_title">TMDB rank #<xliff:g id="rank">%1$d</xliff:g> <xliff:g id="media_type">%2$s</xliff:g> + provider match</string>
-    <string name="home_trending_reason_preferred">The selected <xliff:g id="language">%1$s</xliff:g> provider version wins before entries in another language.</string>
-    <string name="home_trending_reason_english">No <xliff:g id="language">%1$s</xliff:g> provider version matched, so the English provider entry was selected.</string>
-    <string name="home_trending_reason_untagged">No <xliff:g id="language">%1$s</xliff:g> or English language tag matched, so the untagged provider entry was selected.</string>
-    <string name="home_trending_reason_other">The closest playable provider version was selected after preferred-language and English entries were unavailable.</string>
-    <string name="home_trending_play">Play</string>
-    <string name="home_trending_more_details">More Details</string>
-    <!-- Translators: Menu item on a Home Trending title's long-press menu; opens the sheet explaining why the title is on Home. -->
-    <string name="home_trending_why_menu">Why this title is here</string>
-    <string name="home_trending_pause">Pause</string>
     <!-- Translators: Home row description in Settings for "Continue Watching Movies". -->
     <string name="home_row_continue_movies_description">Movies with a saved position</string>
     <!-- Translators: Home row description in Settings for "Continue Watching Series". -->

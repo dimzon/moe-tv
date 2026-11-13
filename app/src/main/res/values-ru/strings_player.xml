@@ -50,8 +50,6 @@
     <string name="player_av_sync">Синхронизация аудио и видео</string>
     <string name="player_av_sync_remember">Запомнить эту задержку</string>
     <string name="player_no_offset">Без задержки</string>
-    <string name="player_subtitles_later">Субтитры показываются позже</string>
-    <string name="player_subtitles_earlier">Субтитры показываются раньше</string>
     <string name="player_delay_zero">0 мс</string>
     <string name="player_delay_positive">+<xliff:g id="ms">%1$d</xliff:g> мс</string>
     <string name="player_delay_negative"><xliff:g id="ms">%1$d</xliff:g> мс</string>
@@ -137,49 +135,6 @@
     <string name="player_decoder_software">программный декодер</string>
     <string name="player_decoder_direct">прямой</string>
     <string name="player_decoder_gpu">GPU</string>
-    <string name="player_subtitles_search_title">Поиск в OpenSubtitles</string>
-    <string name="player_subtitles_working">Обработка…</string>
-    <string name="player_subtitles_edit_search">Изменить запрос</string>
-    <string name="player_subtitles_title_label">Название</string>
-    <string name="player_subtitles_delete_title">Удалить субтитры OpenSub</string>
-    <string name="player_subtitles_username">Имя пользователя</string>
-    <string name="player_subtitles_password">Пароль</string>
-    <string name="player_subtitles_stay_signed_in">Оставаться в системе</string>
-    <string name="player_subtitles_delete_action">Удалить субтитры</string>
-    <plurals name="player_subtitles_remaining_short">
-        <item quantity="one"><xliff:g id="remaining">%1$d</xliff:g> загрузка осталась на сегодня</item>
-        <item quantity="few"><xliff:g id="remaining">%1$d</xliff:g> загрузки осталось на сегодня</item>
-        <item quantity="many"><xliff:g id="remaining">%1$d</xliff:g> загрузок осталось на сегодня</item>
-        <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> загрузок осталось на сегодня</item>
-    </plurals>
-    <plurals name="player_subtitles_remaining_reset">
-        <item quantity="one"><xliff:g id="remaining">%1$d</xliff:g> загрузка осталась на сегодня · сброс через <xliff:g id="reset">%2$s</xliff:g></item>
-        <item quantity="few"><xliff:g id="remaining">%1$d</xliff:g> загрузки осталось на сегодня · сброс через <xliff:g id="reset">%2$s</xliff:g></item>
-        <item quantity="many"><xliff:g id="remaining">%1$d</xliff:g> загрузок осталось на сегодня · сброс через <xliff:g id="reset">%2$s</xliff:g></item>
-        <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> загрузок осталось на сегодня · сброс через <xliff:g id="reset">%2$s</xliff:g></item>
-    </plurals>
-    <plurals name="player_subtitles_remaining_count">
-        <item quantity="one"><xliff:g id="remaining">%1$d</xliff:g> загрузка осталась на сегодня</item>
-        <item quantity="few"><xliff:g id="remaining">%1$d</xliff:g> загрузки осталось на сегодня</item>
-        <item quantity="many"><xliff:g id="remaining">%1$d</xliff:g> загрузок осталось на сегодня</item>
-        <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> загрузок осталось на сегодня</item>
-    </plurals>
-    <string name="player_subtitles_free_description_full">OpenSubtitles — бесплатный открытый общественный сервис субтитров. Войдите с помощью собственной учётной записи opensubtitles.com; её можно создать бесплатно. Это относится только к текущему профилю.</string>
-    <string name="player_subtitles_session_expired">Срок действия вашего сеанса OpenSubtitles истёк. Чтобы продолжить поиск и загрузку субтитров, снова войдите в разделе «Настройки → Видеоплеер → Субтитры → OpenSubtitles».</string>
-    <string name="player_subtitles_account_needed">Требуется учётная запись OpenSubtitles\n\nЧтобы искать и загружать субтитры, войдите в разделе «Настройки → Видеоплеер → Субтитры → OpenSubtitles». OpenSubtitles — бесплатный открытый общественный сервис: любой пользователь может бесплатно создать учётную запись на opensubtitles.com.</string>
-    <string name="player_subtitles_show_all_languages">Показать все языки</string>
-    <string name="player_subtitles_all_languages">Все языки</string>
-    <string name="player_subtitles_try_again">Повторить</string>
-    <string name="player_subtitles_limit_reached">Достигнут дневной лимит поиска субтитров. Повторите попытку завтра.</string>
-    <string name="player_subtitles_network_error">Не удалось подключиться к OpenSubtitles. Проверьте соединение и повторите попытку.</string>
-    <string name="player_subtitles_subtitle">Субтитры</string>
-    <string name="player_subtitles_trusted">Надёжный</string>
-    <string name="player_subtitles_sdh">SDH</string>
-    <string name="player_subtitles_ai">AI</string>
-    <string name="player_subtitles_connected_as">Выполнен вход как</string>
-    <string name="player_subtitles_no_matches_all_languages">Подходящих субтитров не найдено. Попробуйте изменить название для поиска.</string>
-    <string name="player_subtitles_no_matches_chosen_language">Подходящих субтитров на выбранном языке не найдено.</string>
-    <string name="player_subtitles_search_language">Язык поиска</string>
     <string name="player_reason_stereo_fallback">Переключено на стереозвук</string>
     <string name="player_reason_one_session_provider">Провайдер разрешает только одну сессию одновременно</string>
     <string name="player_reason_stream_report">Отчёт о потоке</string>
@@ -197,7 +152,6 @@
     <string name="player_stream_playlist_override">переопределение плейлистом</string>
     <string name="player_error_hardware_format">Аппаратный видеодекодер этого телевизора не может декодировать <xliff:g id="resolution">%1$s</xliff:g> <xliff:g id="codec">%2$s</xliff:g>. С файлом всё в порядке, но телевизор не может воспроизвести этот формат в таком разрешении.</string>
     <string name="player_report_saved">Отчёт о потоке сохранён в журнале воспроизведения</string>
-    <string name="player_subtitles_filter_title">Фильтр по языку</string>
     <string name="player_frame_rate_prompt_title">На этом канале возможны рывки изображения</string>
     <string name="player_frame_rate_prompt_description">Канал воспроизводится со скоростью <xliff:g id="fps">%1$d</xliff:g> fps, а ваш телевизор работает с частотой <xliff:g id="current_hz">%2$d</xliff:g> Гц, поэтому не может показывать эти кадры равномерно — движение выглядит слегка прерывистым.\n\nАвтопереключение частоты кадров переводит телевизор на <xliff:g id="target_hz">%3$d</xliff:g> Гц, пока вы смотрите, а затем возвращает обратно. Некоторые телевизоры на мгновение гаснут при смене частоты; вы можете снова отключить эту функцию в разделе «Настройки» → «Изображение» → «Частота кадров».</string>
     <string name="player_frame_rate_turn_on">Включить</string>

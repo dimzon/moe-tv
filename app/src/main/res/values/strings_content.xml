@@ -134,14 +134,8 @@
     <string name="content_oldest_first">Oldest first</string>
     <!-- Translators: Sort option to show newest items first. -->
     <string name="content_newest_first">Newest first</string>
-    <!-- Translators: Context-menu option to delete downloaded OpenSubtitles subtitles. "OpenSub" is an abbreviation of OpenSubtitles. -->
-    <string name="content_delete_subtitles">Delete OpenSubtitles subtitles</string>
     <!-- Translators: Context-menu option to play the trailer for a movie or series. -->
     <string name="content_play_trailer">Play trailer</string>
-    <!-- Translators: Context-menu option to re-fetch TMDB metadata. "TMDB" is a brand name. -->
-    <string name="content_refetch_tmdb">Update details</string>
-    <!-- Translators: Context-menu option to set a custom TMDB search title. -->
-    <string name="content_set_tmdb_name">Set TMDB name</string>
     <!-- Translators: Button to close a dialog or overlay. -->
     <string name="content_close">Close</string>
     <!-- Translators: Hint text in the rename dialog explaining the rename is local to this profile only. -->
@@ -170,10 +164,6 @@
     <string name="content_reorder_movie">Reorder movie</string>
     <!-- Translators: Context-menu option to reorder a series in a custom list. -->
     <string name="content_reorder_series">Reorder series</string>
-    <!-- Translators: Loading status shown while re-fetching TMDB metadata. "TMDB" is a brand name. -->
-    <string name="content_refetching_tmdb">Refetching TMDB details\u2026</string>
-    <!-- Translators: Loading status shown while re-searching TMDB for a title. -->
-    <string name="content_researching_tmdb">Re-searching TMDB\u2026</string>
     <!-- Translators: Duration display for content longer than one hour. "hours" and "minutes" are integers. -->
     <string name="content_duration_hours"><xliff:g id="hours">%1$d</xliff:g>h <xliff:g id="minutes">%2$d</xliff:g>m</string>
     <!-- Translators: Duration display for content under one hour. "minutes" is an integer. -->
