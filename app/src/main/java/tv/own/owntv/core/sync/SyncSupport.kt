@@ -3,8 +3,6 @@ package tv.own.owntv.core.sync
 import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
@@ -18,78 +16,36 @@ import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.CategoryEntity
 import tv.own.owntv.core.database.entity.ChannelEntity
-import tv.own.owntv.core.database.entity.ContentHashProjection
 import tv.own.owntv.core.database.entity.SourceEntity
-import tv.own.owntv.core.database.entity.computeContentHash
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.settings.SettingsRepository
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Shared building blocks for the source syncer ([RuTubeSyncer]): the chunked streaming inserter
- * with cross-pass dedupe, the hash-diffed stable upsert / fresh insert pair, category refresh +
- * stable upsert, and stale-row pruning. Extracted from SyncManager so the syncer stays focused on
- * its own protocol flow while any fix to the shared machinery lands once.
+ * with cross-pass dedupe, the REPLACE-by-PK channel upsert (the PK IS the provider's natural key,
+ * so there is no local id to preserve and no hash to diff), category refresh + stable upsert, and
+ * stale-row pruning. Extracted from SyncManager so the syncer stays focused on its own protocol
+ * flow while any fix to the shared machinery lands once.
  */
 internal class SyncSupport(
     private val categoryDao: CategoryDao,
-    channelDao: ChannelDao,
+    private val channelDao: ChannelDao,
     val sourceDao: SourceDao,
     private val customize: CustomizationStore,
     private val settings: SettingsRepository,
 ) {
-    val channelAdapter = ContentAdapter<ChannelEntity>(
-        remoteIdOf = { it.remoteId },
-        hashOf = { it.computeContentHash() },
-        sortOrderOf = { it.sortOrder },
-        copyWith = { row, id, hash -> if (id != null) row.copy(id = id, contentHash = hash) else row.copy(contentHash = hash) },
-        sourceIdOf = { it.sourceId },
-        updateAll = { channelDao.updateAll(it) },
-        insertAll = { channelDao.insertAll(it) },
-        moveAll = { m -> channelDao.applyPositionMoves(m.map { it.id }, m.map { it.sortOrder }) },
-        moveRanges = { src, r -> channelDao.applyPositionRanges(src, r.map { it.fromSortOrder }, r.map { it.toSortOrder }, r.map { it.delta }) },
-        remoteIdsForSource = { channelDao.remoteIdsForSource(it) },
-        deleteByRemoteIds = { src, ids -> channelDao.deleteByRemoteIds(src, ids) },
-        loadHashes = { channelDao.contentHashesForSource(it) },
-    )
-
-    /**
-     * Hash-diffed stable upsert: unchanged rows are skipped, changed rows keep their local id.
-     *
-     * There are three outcomes, not two. `sortOrder` is deliberately not part of
-     * `computeContentHash()` — folding it in would change every stored hash at once, so the first
-     * resync after such a change rewrites a 170k-row catalog end to end. Instead the stored
-     * `sortOrder` travels alongside the hash and is compared separately: a row whose content is
-     * identical but whose provider position moved is written (so browse order follows the provider)
-     * and counted as `moved`, while a row that matches on both is still skipped entirely. Manual
-     * reorder is unaffected — it lives in `content_order` and is applied over the top of this.
-     */
-    suspend fun <T> upsertStable(
-        rows: List<T>,
-        hashDeferred: Deferred<StoredRows>,
-        adapter: ContentAdapter<T>,
-    ): UpsertStats = upsertStable(rows, hashDeferred.await(), adapter)
-
-    /** First-ever import: no diffing, just hash + insert. */
-    suspend fun <T> insertFresh(rows: List<T>, adapter: ContentAdapter<T>): UpsertStats {
-        val hashed = rows.map { adapter.copyWith(it, null, adapter.hashOf(it)) }
-        adapter.insertAll(hashed)
-        return UpsertStats(inserted = hashed.size)
+    /** REPLACE by the hex PK: a resync rewrites only what the provider sent, and a row's key never
+     *  changes under it — favorites, history and orders keyed by the hex need no relink. */
+    suspend fun upsertChannels(rows: List<ChannelEntity>): UpsertStats {
+        if (rows.isEmpty()) return UpsertStats()
+        channelDao.upsertAll(rows)
+        return UpsertStats(inserted = rows.size)
     }
 
-    private fun List<ContentHashProjection>.toHashLookup(): StoredRows =
-        StoredRows(associateBy({ it.remoteId }, { StoredRow(it.id, it.contentHash, it.sortOrder) }))
-
-    fun asyncHashLoad(
-        scope: CoroutineScope,
-        label: String,
-        sourceId: Long,
-        load: suspend () -> List<ContentHashProjection>,
-    ): Deferred<StoredRows> = scope.async {
-        val start = SystemClock.elapsedRealtime()
-        load().toHashLookup().also {
-            Log.d(TAG, "$label hash map loaded sourceId=$sourceId size=${it.byRemoteId.size} ms=${SystemClock.elapsedRealtime() - start}")
-        }
+    /** The channel prune, wired to the (source-less) channel DAO. */
+    suspend fun pruneChannels(label: String, seenRemoteIds: Set<String>, stats: SyncStatsCollector) {
+        pruneRemoteIds(label, seenRemoteIds, stats, { channelDao.remoteIdsForSource() }, { channelDao.deleteByRemoteIds(it) })
     }
 
     /**
@@ -104,10 +60,10 @@ internal class SyncSupport(
      *
      * Returns true when the prune may proceed.
      */
-    private fun pruneAllowed(label: String, sourceId: Long, stored: Int, stale: Int, stats: SyncStatsCollector): Boolean {
+    private fun pruneAllowed(label: String, stored: Int, stale: Int, stats: SyncStatsCollector): Boolean {
         if (shouldPrune(stored, stale, stats.forcePrune)) return true
         val percent = (stale * 100) / stored
-        Log.w(TAG, "$label prune skipped sourceId=$sourceId reason=catalog_shrink stored=$stored stale=$stale")
+        Log.w(TAG, "$label prune skipped reason=catalog_shrink stored=$stored stale=$stale")
         stats.addWarning(
             SyncWarning(
                 phase = label,
@@ -121,7 +77,7 @@ internal class SyncSupport(
         val start = SystemClock.elapsedRealtime()
         val existing = categoryDao.remoteIdsForSource(sourceId, type)
         val stale = existing.filterNot(seenRemoteIds::contains)
-        if (!pruneAllowed("$label categories", sourceId, existing.size, stale.size, stats)) return
+        if (!pruneAllowed("$label categories", existing.size, stale.size, stats)) return
         stale.chunked(QUERY_CHUNK).forEach { categoryDao.deleteByRemoteIds(sourceId, type, it) }
         if (stale.isNotEmpty()) stats.processedCounts.merge(CATEGORIES_REMOVED_KEY, stale.size, Int::plus)
         Log.i(TAG, "$label category prune sourceId=$sourceId type=$type stale=${stale.size} ms=${SystemClock.elapsedRealtime() - start}")
@@ -129,18 +85,17 @@ internal class SyncSupport(
 
     suspend fun pruneRemoteIds(
         label: String,
-        sourceId: Long,
         seenRemoteIds: Set<String>,
         stats: SyncStatsCollector,
-        loadExisting: suspend (Long) -> List<String>,
-        deleteRemoteIds: suspend (Long, List<String>) -> Unit,
+        loadExisting: suspend () -> List<String>,
+        deleteRemoteIds: suspend (List<String>) -> Unit,
     ) {
-        val start = SystemClock.elapsedRealtime()
-        val existing = loadExisting(sourceId)
+        val start = System.currentTimeMillis()
+        val existing = loadExisting()
         val stale = existing.filterNot(seenRemoteIds::contains)
-        if (!pruneAllowed(label, sourceId, existing.size, stale.size, stats)) return
-        stale.chunked(QUERY_CHUNK).forEach { deleteRemoteIds(sourceId, it) }
-        Log.i(TAG, "$label content prune sourceId=$sourceId stale=${stale.size} ms=${SystemClock.elapsedRealtime() - start}")
+        if (!pruneAllowed(label, existing.size, stale.size, stats)) return
+        stale.chunked(QUERY_CHUNK).forEach { deleteRemoteIds(it) }
+        Log.i(TAG, "$label content prune stale=${stale.size} ms=${System.currentTimeMillis() - start}")
     }
 
     suspend fun refreshCategories(
@@ -392,158 +347,6 @@ internal class SyncSupport(
         /** A prune may remove at most this fraction of the stored rows before the guard trips. */
         private const val PRUNE_MAX_SHRINK = 0.5
 
-        /**
-         * The catalog-shrink decision on its own, free of DAOs and logging so it can be unit tested:
-         * true when deleting [stale] of [stored] rows is a plausible provider update rather than a
-         * truncated response.
-         */
-        /**
-         * The hash-diff itself, free of DAOs and logging so it can be unit tested. See the instance
-         * overload for why `sortOrder` is compared here rather than folded into the content hash.
-         */
-        suspend fun <T> upsertStable(
-            rows: List<T>,
-            stored: StoredRows,
-            adapter: ContentAdapter<T>,
-        ): UpsertStats {
-            val inserts = ArrayList<T>()
-            val updates = ArrayList<T>()
-            // Stored position → new position of each content update, so [StoredRows.occupied] can follow it.
-            val updatedPositions = ArrayList<Pair<Int, Int>>()
-            // Stored position → the new position, for rows whose content did not change at all.
-            val moves = ArrayList<Pair<Int, PositionMove>>()
-            // Every moved row belongs to the same playlist — a pass only ever covers one.
-            var moveSourceId = -1L
-            var skipped = 0
-            rows.forEach { row ->
-                val existing = adapter.remoteIdOf(row)?.let { stored.byRemoteId[it] }
-                val hash = adapter.hashOf(row)
-                val order = adapter.sortOrderOf(row)
-                when {
-                    existing == null -> inserts.add(adapter.copyWith(row, null, hash))
-                    hash != existing.contentHash -> {
-                        updates.add(adapter.copyWith(row, existing.id, hash))
-                        updatedPositions.add(existing.sortOrder to order)
-                    }
-                    // The content is byte-identical and only the provider's position
-                    // changed, so this must not go through @Update: that writes all ~20 columns,
-                    // re-runs the title parse in withProviderCatalogMetadata, and fires the FTS
-                    // content-sync trigger — for a row nothing has actually happened to. 1,397 real
-                    // changes used to produce 255,775 of these full-row rewrites.
-                    order != existing.sortOrder -> {
-                        moveSourceId = adapter.sourceIdOf(row)
-                        moves.add(existing.sortOrder to PositionMove(existing.id, order))
-                    }
-                    else -> skipped++
-                }
-            }
-
-            // Where a whole span shifted by one delta — the usual shape, because removing
-            // an item renumbers everything below it — one statement replaces one write per row.
-            // Checked against where rows are NOW: earlier chunks of this pass have already moved,
-            // updated and inserted rows, and a span holding one of those must not be shifted.
-            val (ranges, singles) = collapsePositionRuns(moves, stored.occupied)
-
-            // Order matters. Ranges shift by stored position, so they must run before anything
-            // rewrites a row to its final position — otherwise a range would shift an already-
-            // corrected row a second time. Content updates carry their own sortOrder and are
-            // written last, which also makes them immune to a range that overlapped them.
-            if (ranges.isNotEmpty()) adapter.moveRanges(moveSourceId, ranges)
-            if (singles.isNotEmpty()) adapter.moveAll(singles)
-            if (updates.isNotEmpty()) adapter.updateAll(updates)
-            if (inserts.isNotEmpty()) adapter.insertAll(inserts)
-            moves.forEach { (from, move) -> stored.relocate(from, move.sortOrder) }
-            updatedPositions.forEach { (from, to) -> stored.relocate(from, to) }
-            inserts.forEach { stored.place(adapter.sortOrderOf(it)) }
-            return UpsertStats(
-                inserted = inserts.size,
-                updated = updates.size,
-                skippedUnchanged = skipped,
-                moved = moves.size,
-                movedByRange = ranges.size,
-                movedScattered = singles.size,
-            )
-        }
-
-        /**
-         * Collapse position changes into range statements where it is provably safe.
-         *
-         * [moves] is every row whose content is unchanged and whose position moved, as
-         * (storedSortOrder → [PositionMove]). [occupied] counts how many rows of this source sit at
-         * each position at the moment the ranges will run — *all* of them, not only the ones being
-         * moved ([StoredRows.occupied]).
-         *
-         * A range statement says `sortOrder = sortOrder + delta WHERE sortOrder BETWEEN lo AND hi`,
-         * so it hits every stored row in that span, including ones the caller never mentioned. That
-         * is the trap in this optimisation, and [occupied] is what closes it: a run is collapsed
-         * only when the number of rows being moved across the span equals the number of rows that
-         * actually live there. A span containing a row that is not moving — a pruned leftover, a row
-         * the provider dropped — falls back to per-row moves rather than dragging it along.
-         *
-         * Returns the ranges plus the moves that could not be collapsed; together they are always
-         * exactly equivalent to applying every move individually.
-         */
-        fun collapsePositionRuns(
-            moves: List<Pair<Int, PositionMove>>,
-            occupied: Map<Int, Int>,
-        ): Pair<List<PositionRange>, List<PositionMove>> {
-            if (moves.isEmpty()) return emptyList<PositionRange>() to emptyList()
-            val ranges = ArrayList<PositionRange>()
-            val singles = ArrayList<PositionMove>()
-            // By stored position, so "contiguous" is a property of the span we are about to write.
-            val sorted = moves.sortedBy { it.first }
-
-            var i = 0
-            while (i < sorted.size) {
-                val (startAt, _) = sorted[i]
-                val delta = sorted[i].second.sortOrder - startAt
-                var j = i + 1
-                // Extend while the next row sits at the very next occupied position and shifts by
-                // the same amount. Duplicate stored positions are allowed: several rows may share
-                // one slot, and they all move together or not at all.
-                while (j < sorted.size) {
-                    val (at, move) = sorted[j]
-                    val prevAt = sorted[j - 1].first
-                    if (move.sortOrder - at != delta) break
-                    if (at != prevAt && at != prevAt + 1) break
-                    j++
-                }
-                val run = sorted.subList(i, j)
-                // The guard, position by position: a position is safe to shift only when every row
-                // there is one we are moving. An unsafe one — a row an earlier chunk already moved
-                // in, a row awaiting prune — splits the run; its own rows go one by one and the
-                // safe stretches either side stay ranges.
-                var k = 0
-                while (k < run.size) {
-                    val segment = ArrayList<Pair<Int, PositionMove>>()
-                    while (k < run.size) {
-                        val at = run[k].first
-                        var end = k
-                        while (end < run.size && run[end].first == at) end++
-                        val here = run.subList(k, end)
-                        val safe = (occupied[at] ?: 0) == here.size
-                        if (!safe) {
-                            if (segment.isNotEmpty()) break
-                            here.forEach { if (delta != 0) singles.add(it.second) }
-                            k = end
-                            break
-                        }
-                        segment.addAll(here)
-                        k = end
-                    }
-                    // A delta of zero is not a move at all, and a single row is cheaper as one
-                    // statement than as a range.
-                    if (delta != 0 && segment.size > 1) {
-                        ranges.add(PositionRange(fromSortOrder = segment.first().first, toSortOrder = segment.last().first, delta = delta))
-                    } else if (delta != 0) {
-                        segment.forEach { singles.add(it.second) }
-                    }
-                }
-                i = j
-            }
-            return ranges to singles
-        }
-
         fun shouldPrune(stored: Int, stale: Int, force: Boolean): Boolean =
             force || stored <= PRUNE_MIN_ROWS || stale <= stored * PRUNE_MAX_SHRINK
         private const val SLOW_INSERT_LOG_MS = 250L
@@ -554,71 +357,6 @@ internal class SyncSupport(
         const val CATEGORIES_REMOVED_KEY = "categoriesRemoved"
     }
 }
-
-/**
- * Per-entity DAO/mapping lambdas so ONE [SyncSupport.upsertStable]/[SyncSupport.insertFresh]/prune
- * implementation serves the channel list — any fix to the hash-diff/prune logic now
- * lands once.
- */
-internal data class ContentAdapter<T>(
-    val remoteIdOf: (T) -> String?,
-    val hashOf: (T) -> Int,
-    /** Provider position, compared against the stored one outside the hash — see [SyncSupport.upsertStable]. */
-    val sortOrderOf: (T) -> Int,
-    /** Which playlist the row belongs to — a range shift is scoped to one source. */
-    val sourceIdOf: (T) -> Long,
-    /** Copy with contentHash set; a non-null [id] rekeys the row to the existing local row. */
-    val copyWith: (row: T, id: Long?, hash: Int) -> T,
-    val updateAll: suspend (List<T>) -> Unit,
-    val insertAll: suspend (List<T>) -> Unit,
-    /** Write only `sortOrder`, for rows whose content did not change. */
-    val moveAll: suspend (List<PositionMove>) -> Unit,
-    /** Shift a whole span of positions in one statement, within one source. */
-    val moveRanges: suspend (sourceId: Long, List<PositionRange>) -> Unit,
-    val remoteIdsForSource: suspend (Long) -> List<String>,
-    val deleteByRemoteIds: suspend (Long, List<String>) -> Unit,
-    val loadHashes: suspend (Long) -> List<ContentHashProjection>,
-)
-
-/** What the DB already holds for one remote id: local row id, content hash, and provider position. */
-internal data class StoredRow(val id: Long, val contentHash: Int, val sortOrder: Int)
-
-/**
- * One source's stored rows as loaded at the start of a pass, plus how many rows sit at each
- * position right now. [byRemoteId] never changes during the pass; [occupied] follows every write,
- * because a pass is written chunk by chunk and a range statement shifts whatever is in its span
- * when it runs. Judged against the start-of-pass positions instead, a chunk shifted rows an earlier
- * chunk had already put in place: one TV re-sync left 1,129 positions shared by two to four films,
- * and each later re-sync moved those films again.
- */
-internal class StoredRows(
-    val byRemoteId: Map<String, StoredRow>,
-    val occupied: HashMap<Int, Int> = HashMap<Int, Int>(byRemoteId.size).also { counts ->
-        byRemoteId.values.forEach { counts.merge(it.sortOrder, 1, Int::plus) }
-    },
-) {
-    fun place(at: Int) {
-        occupied.merge(at, 1, Int::plus)
-    }
-
-    fun relocate(from: Int, to: Int) {
-        if (from == to) return
-        occupied.computeIfPresent(from) { _, n -> (n - 1).takeIf { it > 0 } }
-        place(to)
-    }
-}
-
-/** One row that only changed position: write the single column, never the whole entity. */
-internal data class PositionMove(val id: Long, val sortOrder: Int)
-
-/**
- * A whole span of positions shifted by the same amount.
- *
- * `[fromSortOrder, toSortOrder]` are the rows' **stored** positions, and every stored row of the
- * source inside that span moves by [delta]. One statement replaces one write per row: the measured
- * Live phase of one resync was 30,689 rows at a uniform delta of -2, i.e. exactly one of these.
- */
-internal data class PositionRange(val fromSortOrder: Int, val toSortOrder: Int, val delta: Int)
 
 internal data class UpsertStats(
     val inserted: Int = 0,

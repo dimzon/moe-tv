@@ -136,7 +136,7 @@ class GuideReader(
         globalShiftMinutes: Int,
         from: Long,
         to: Long,
-    ): Map<Long, List<EpgProgrammeEntity>> = withContext(Dispatchers.IO) {
+    ): Map<String, List<EpgProgrammeEntity>> = withContext(Dispatchers.IO) {
         if (channels.isEmpty()) return@withContext emptyMap()
         val keyed = channels.mapNotNull { ch ->
             epgKeyOf(ch, cust)?.let { key -> Triple(ch.id, key, EpgShift.minutesFor(cust, ch, globalShiftMinutes)) }
@@ -145,7 +145,7 @@ class GuideReader(
         val startedAt = SystemClock.elapsedRealtime()
         var chunks = 0
         var rowsRead = 0
-        val collected = HashMap<Long, List<EpgProgrammeEntity>>()
+        val collected = HashMap<String, List<EpgProgrammeEntity>>()
         for ((shift, group) in keyed.groupBy { it.third }) {
             val rowsByKey = group
                 .map { it.second }.distinct()
@@ -164,7 +164,7 @@ class GuideReader(
                     ?.let { collected[channelId] = EpgShift.apply(it, shift) }
             }
         }
-        val ordered = LinkedHashMap<Long, List<EpgProgrammeEntity>>(collected.size)
+        val ordered = LinkedHashMap<String, List<EpgProgrammeEntity>>(collected.size)
         for (channel in channels) collected[channel.id]?.let { ordered[channel.id] = it }
         CorePerf.log {
             "guide_slice channels=${channels.size} keys=${keyed.map { it.second }.distinct().size} " +
@@ -194,9 +194,9 @@ class GuideReader(
          * On now list): it is one request per unanswered channel, cached as [row]'s are.
          */
         providerFallback: Boolean = false,
-    ): Map<Long, GuideSlot> {
+    ): Map<String, GuideSlot> {
         val rows = slice(channels, cust, globalShiftMinutes, atMs, atMs + lookAheadMs)
-        val result = HashMap<Long, GuideSlot>(rows.size)
+        val result = HashMap<String, GuideSlot>(rows.size)
         for ((channelId, list) in rows) {
             guideSlotAt(list, atMs)?.let { result[channelId] = it }
         }

@@ -67,8 +67,7 @@ import tv.own.owntv.core.live.LiveKey
 class LiveZapListTest {
 
     private fun channel(id: Long) = ChannelEntity(
-        id = id, sourceId = 1, name = "Ch $id",
-        streamUrl = "http://x/$id.ts", remoteId = "$id",
+        name = "Ch $id", remoteId = "ch$id",
     )
 
     /** The junction snapshot the M:N sealing rule reads, seeded per test (hex → its category ids). */
@@ -81,7 +80,7 @@ class LiveZapListTest {
         val window: List<ChannelEntity> = emptyList(),
     ) {
         val scope = CoroutineScope(Dispatchers.Default)
-        var playing: Long? = null
+        var playing: String? = null
         var windowBuilds = 0
         var releaseWindow = false // when true, the rebuild loader blocks until told to finish
         var releaseArming = false // …and this one blocks the ordinary arming load the same way
@@ -113,7 +112,7 @@ class LiveZapListTest {
         fun stop() = scope.cancel()
     }
 
-    private val list = (1L..5L).map { ChannelEntity(id = it, sourceId = 1, name = "Ch $it", streamUrl = "http://x/$it.ts", remoteId = "$it") }
+    private val list = (1L..5L).map { ChannelEntity(name = "Ch $it", remoteId = "ch$it") }
 
     @Test
     fun `arming from a browse rail keeps that rail as the context`() {
@@ -131,7 +130,7 @@ class LiveZapListTest {
         val h = Harness()
         h.zap.armFromBrowse(list.take(1), title = null, key = null, categoryId = null)
         assertFalse(h.zap.canZap.value)
-        h.playing = 1
+        h.playing = "ch1"
         assertNull(h.zap.next(1))
         h.stop()
     }
@@ -140,20 +139,20 @@ class LiveZapListTest {
     fun `CH plus and minus step through the armed list and wrap around it`() {
         val h = Harness()
         h.zap.armFromBrowse(list, title = null, key = null, categoryId = null)
-        h.playing = 3
-        assertEquals(4L, h.zap.next(1)?.id)
-        assertEquals(2L, h.zap.next(-1)?.id)
-        h.playing = 5
-        assertEquals(1L, h.zap.next(1)?.id)
-        h.playing = 1
-        assertEquals(5L, h.zap.next(-1)?.id)
+        h.playing = "ch3"
+        assertEquals("ch4", h.zap.next(1)?.id)
+        assertEquals("ch2", h.zap.next(-1)?.id)
+        h.playing = "ch5"
+        assertEquals("ch1", h.zap.next(1)?.id)
+        h.playing = "ch1"
+        assertEquals("ch5", h.zap.next(-1)?.id)
         h.stop()
     }
 
     @Test
     fun `re-arming the same category while zapping inside it does not reload`() {
         val h = Harness(category = list)
-        seedMembership(mapOf("2" to setOf(10L)))
+        seedMembership(mapOf("ch2" to setOf(10L)))
         h.zap.armFor(channel(2))
         h.await("the first load") { h.zap.channels.value.isNotEmpty() }
         // The list already contains this channel and the category matches, so nothing is reloaded —
@@ -180,10 +179,10 @@ class LiveZapListTest {
     fun `a numeric tune inside the current list plays at once and rebuilds nothing`() {
         val h = Harness(window = list)
         h.zap.armFromBrowse(list, title = null, key = null, categoryId = null)
-        h.playing = 1
-        val played = mutableListOf<Long>()
-        runBlocking { h.zap.directTune(currentChannelId = 1, tuned = list[3]) { played += it.id } }
-        assertEquals(listOf(4L), played)
+        h.playing = "ch1"
+        val played = mutableListOf<String>()
+        runBlocking { h.zap.directTune(currentChannelId = "ch1", tuned = list[3]) { played += it.id } }
+        assertEquals(listOf("ch4"), played)
         runBlocking { delay(40) }
         assertEquals(0, h.windowBuilds)
         h.stop()
@@ -195,11 +194,11 @@ class LiveZapListTest {
         val rebuilt = listOf(channel(98), far, channel(100))
         val h = Harness(window = rebuilt)
         h.zap.armFromBrowse(list, title = null, key = null, categoryId = null)
-        h.playing = 1
-        runBlocking { h.zap.directTune(currentChannelId = 1, tuned = far) { h.playing = it.id } }
+        h.playing = "ch1"
+        runBlocking { h.zap.directTune(currentChannelId = "ch1", tuned = far) { h.playing = it.id } }
         h.await("the rebuilt window") { h.zap.channels.value == rebuilt }
         assertEquals(1, h.windowBuilds)
-        assertEquals(100L, h.zap.next(1)?.id) // stepping from the rebuilt list now
+        assertEquals("ch100", h.zap.next(1)?.id) // stepping from the rebuilt list now
         h.stop()
     }
 
@@ -208,15 +207,15 @@ class LiveZapListTest {
         val far = channel(99)
         val h = Harness(window = listOf(far))
         h.zap.armFromBrowse(list, title = null, key = null, categoryId = null)
-        h.playing = 1
+        h.playing = "ch1"
         h.releaseWindow = true // the rebuild is stuck; the anchor is all the user has
-        runBlocking { h.zap.directTune(currentChannelId = 1, tuned = far) { h.playing = it.id } }
+        runBlocking { h.zap.directTune(currentChannelId = "ch1", tuned = far) { h.playing = it.id } }
         // The anchor remembers index 0 of the old list, so CH+ steps to its second entry…
         val next = h.zap.next(1)
-        assertEquals(2L, next?.id)
+        assertEquals("ch2", next?.id)
         // …and a held key chains from there rather than reading the anchor as stale.
         h.playing = next!!.id
-        assertEquals(3L, h.zap.next(1)?.id)
+        assertEquals("ch3", h.zap.next(1)?.id)
         h.releaseWindow = false
         h.stop()
     }
@@ -227,9 +226,9 @@ class LiveZapListTest {
         val rebuilt = listOf(channel(98), far)
         val h = Harness(window = rebuilt)
         h.zap.armFromBrowse(list, title = null, key = null, categoryId = null)
-        h.playing = 1
+        h.playing = "ch1"
         h.releaseWindow = true
-        runBlocking { h.zap.directTune(currentChannelId = 1, tuned = far) { h.playing = it.id } }
+        runBlocking { h.zap.directTune(currentChannelId = "ch1", tuned = far) { h.playing = it.id } }
         // Ordinary navigation elsewhere — exactly what ensurePlaying does before it plays.
         h.zap.cancelPendingRebuild()
         h.releaseWindow = false
@@ -243,10 +242,10 @@ class LiveZapListTest {
         val far = channel(99)
         val h = Harness(window = listOf(channel(98), far))
         h.zap.armFromBrowse(list, title = null, key = null, categoryId = null)
-        h.playing = 1
+        h.playing = "ch1"
         h.releaseWindow = true
-        runBlocking { h.zap.directTune(currentChannelId = 1, tuned = far) { h.playing = it.id } }
-        h.playing = 3 // the user zapped on before the window finished building
+        runBlocking { h.zap.directTune(currentChannelId = "ch1", tuned = far) { h.playing = it.id } }
+        h.playing = "ch3" // the user zapped on before the window finished building
         h.releaseWindow = false
         runBlocking { delay(40) }
         assertEquals(list, h.zap.channels.value)
@@ -266,9 +265,9 @@ class LiveZapListTest {
         val chosen = listOf(channel(50), channel(51))
         val h = Harness(category = chosen, window = listOf(channel(98), far, channel(100)))
         h.zap.armFromBrowse(list, title = null, key = null, categoryId = null)
-        h.playing = 1
+        h.playing = "ch1"
         h.releaseWindow = true
-        runBlocking { h.zap.directTune(currentChannelId = 1, tuned = far) { h.playing = it.id } }
+        runBlocking { h.zap.directTune(currentChannelId = "ch1", tuned = far) { h.playing = it.id } }
         // The user opens the category browser and picks a category while the window is still building.
         var closed = false
         h.zap.armForCategory(11) { closed = true }
@@ -290,8 +289,8 @@ class LiveZapListTest {
         val h = Harness(category = list.take(2), window = rebuilt)
         h.releaseArming = true
         h.zap.armFor(channel(2)) // still loading when the user types a channel number
-        h.playing = 1
-        runBlocking { h.zap.directTune(currentChannelId = 1, tuned = far) { h.playing = it.id } }
+        h.playing = "ch1"
+        runBlocking { h.zap.directTune(currentChannelId = "ch1", tuned = far) { h.playing = it.id } }
         h.await("the rebuilt window") { h.zap.channels.value == rebuilt }
         h.releaseArming = false
         runBlocking { delay(40) }
@@ -304,9 +303,9 @@ class LiveZapListTest {
         val far = channel(99)
         val h = Harness(window = listOf(far))
         h.zap.armFromBrowse(list.take(1), title = null, key = null, categoryId = null)
-        h.playing = 1
+        h.playing = "ch1"
         h.releaseWindow = true
-        runBlocking { h.zap.directTune(currentChannelId = 1, tuned = far) { h.playing = it.id } }
+        runBlocking { h.zap.directTune(currentChannelId = "ch1", tuned = far) { h.playing = it.id } }
         assertNull(h.zap.next(1)) // one channel is not something to step through
         h.releaseWindow = false
         h.stop()
@@ -317,15 +316,15 @@ class LiveZapListTest {
         val h = Harness()
         seedMembership(
             mapOf(
-                "1" to setOf(20L), "3" to setOf(20L), "5" to setOf(20L),
-                "2" to setOf(10L), "4" to setOf(10L),
+                "ch1" to setOf(20L), "ch3" to setOf(20L), "ch5" to setOf(20L),
+                "ch2" to setOf(10L), "ch4" to setOf(10L),
             ),
         )
         h.zap.armFromBrowse(list, title = "Favorites", key = LiveKey.Favorites, categoryId = null)
         h.zap.dropCategories(setOf(20))
-        assertEquals(listOf(2L, 4L), h.zap.channels.value.map { it.id })
-        h.playing = 2
-        assertEquals(4L, h.zap.next(1)?.id)
+        assertEquals(listOf("ch2", "ch4"), h.zap.channels.value.map { it.id })
+        h.playing = "ch2"
+        assertEquals("ch4", h.zap.next(1)?.id)
         assertEquals("Favorites", h.zap.title.value)
         h.stop()
     }
@@ -335,8 +334,8 @@ class LiveZapListTest {
         val h = Harness(category = list)
         seedMembership(
             mapOf(
-                "1" to setOf(20L), "2" to setOf(20L),
-                "3" to setOf(10L), "4" to setOf(10L), "5" to setOf(10L),
+                "ch1" to setOf(20L), "ch2" to setOf(20L),
+                "ch3" to setOf(10L), "ch4" to setOf(10L), "ch5" to setOf(10L),
             ),
         )
         h.releaseArming = true
@@ -344,7 +343,7 @@ class LiveZapListTest {
         h.zap.dropCategories(setOf(20))
         h.releaseArming = false
         h.await("the arming load") { h.zap.channels.value.isNotEmpty() }
-        assertEquals(listOf(3L, 4L, 5L), h.zap.channels.value.map { it.id })
+        assertEquals(listOf("ch3", "ch4", "ch5"), h.zap.channels.value.map { it.id })
         h.stop()
     }
 
@@ -361,7 +360,7 @@ class LiveZapListTest {
     @Test
     fun `a relock that seals the whole list leaves nothing to zap`() {
         val h = Harness()
-        seedMembership((1L..5L).associate { "$it" to setOf(10L) })
+        seedMembership((1L..5L).associate { "ch$it" to setOf(10L) })
         h.zap.armFromBrowse(list, title = null, key = null, categoryId = 10)
         h.zap.dropCategories(setOf(10))
         assertEquals(emptyList<ChannelEntity>(), h.zap.channels.value)

@@ -26,7 +26,6 @@ import tv.own.owntv.core.settings.SettingsRepository
  *  [hasManualOrder] says whether that folder actually carries manual-order rows — see the fast path. */
 fun livePagingSource(
     key: LiveKey,
-    sourceIds: List<Long>,
     query: String,
     sort: SettingsRepository.SortMode,
     channelDao: ChannelDao,
@@ -34,14 +33,13 @@ fun livePagingSource(
     contextKey: (Long) -> String?,
     hasManualOrder: (String) -> Boolean,
 ): PagingSource<Int, ChannelEntity> {
-    val ids = sourceIds.ifEmpty { listOf(-1L) }
     val playlist = sort == SettingsRepository.SortMode.PLAYLIST
     return if (query.isBlank()) {
         when (key) {
-            LiveKey.All -> if (playlist) channelDao.pagingAllOriginal(ids) else channelDao.pagingAll(ids)
-            LiveKey.Favorites -> channelDao.pagingFavoritesManual(ContentOrderEntity.FAV_CONTEXT, ids)
-            LiveKey.History -> channelDao.pagingHistory(ids)
-            is LiveKey.Custom -> ManualOrderPagingSource({ customCategoryDao.baseChannelsManual(key.id, ids) }, alpha = !playlist)
+            LiveKey.All -> if (playlist) channelDao.pagingAllOriginal() else channelDao.pagingAll()
+            LiveKey.Favorites -> channelDao.pagingFavoritesManual(ContentOrderEntity.FAV_CONTEXT)
+            LiveKey.History -> channelDao.pagingHistory()
+            is LiveKey.Custom -> ManualOrderPagingSource({ customCategoryDao.baseChannelsManual(key.id) }, alpha = !playlist)
             is LiveKey.Folder -> {
                 val ctxKey = contextKey(key.id) ?: ""
                 // Fast path: no manual order in this folder → the plain indexed query has
@@ -55,10 +53,10 @@ fun livePagingSource(
         }
     } else {
         when (key) {
-            LiveKey.All -> channelDao.searchAll(query, ids)
-            LiveKey.Favorites -> channelDao.searchFavorites(query, ids)
-            LiveKey.History -> channelDao.searchHistory(query, ids)
-            is LiveKey.Custom -> customCategoryDao.searchChannels(query, key.id, ids)
+            LiveKey.All -> channelDao.searchAll(query)
+            LiveKey.Favorites -> channelDao.searchFavorites(query)
+            LiveKey.History -> channelDao.searchHistory(query)
+            is LiveKey.Custom -> customCategoryDao.searchChannels(query, key.id)
             is LiveKey.Folder -> channelDao.searchInCategory(query, key.id)
         }
     }
@@ -70,22 +68,20 @@ fun livePagingSource(
  */
 fun liveCountFlow(
     key: LiveKey,
-    sourceIds: List<Long>,
     hiddenCats: Set<Long>,
     channelDao: ChannelDao,
     customCategoryDao: CustomCategoryDao,
     sealedCats: Set<Long> = emptySet(),
 ): Flow<Int> {
-    val ids = sourceIds.ifEmpty { listOf(-1L) }
     val sealed = sealedCats.toList()
     return when (key) {
-        LiveKey.All -> if (hiddenCats.isEmpty()) channelDao.countAll(ids) else channelDao.countAllExcluding(ids, hiddenCats.toList())
-        LiveKey.Favorites -> if (sealed.isEmpty()) channelDao.countFavorites(ids)
-            else channelDao.countFavoritesExcluding(ids, sealed)
-        LiveKey.History -> if (sealed.isEmpty()) channelDao.countHistory(ids)
-            else channelDao.countHistoryExcluding(ids, sealed)
-        is LiveKey.Custom -> if (sealed.isEmpty()) customCategoryDao.countMembers(MediaType.LIVE, key.id, ids)
-            else customCategoryDao.countMembersExcluding(MediaType.LIVE, key.id, ids, sealed)
+        LiveKey.All -> if (hiddenCats.isEmpty()) channelDao.countAll() else channelDao.countAllExcluding(hiddenCats.toList())
+        LiveKey.Favorites -> if (sealed.isEmpty()) channelDao.countFavorites()
+            else channelDao.countFavoritesExcluding(sealed)
+        LiveKey.History -> if (sealed.isEmpty()) channelDao.countHistory()
+            else channelDao.countHistoryExcluding(sealed)
+        is LiveKey.Custom -> if (sealed.isEmpty()) customCategoryDao.countMembers(MediaType.LIVE, key.id)
+            else customCategoryDao.countMembersExcluding(MediaType.LIVE, key.id, sealed)
         is LiveKey.Folder -> channelDao.countByCategory(key.id)
     }
 }

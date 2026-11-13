@@ -52,7 +52,7 @@ class ReminderManager(
      * Returns false for a programme that has already started.
      */
     suspend fun add(
-        channelId: Long,
+        channelId: String,
         channelName: String,
         epgChannelId: String?,
         title: String,

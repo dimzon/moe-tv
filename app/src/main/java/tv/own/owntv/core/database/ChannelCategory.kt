@@ -43,16 +43,13 @@ interface ChannelCategoryDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(rows: List<ChannelCategoryEntity>)
 
-    /** Every membership of one source's channels — cleared and rebuilt on each sync. */
-    @Query(
-        "DELETE FROM channel_category WHERE channelHexId IN " +
-            "(SELECT remoteId FROM channels WHERE sourceId = :sourceId AND remoteId IS NOT NULL)",
-    )
-    suspend fun clearForSource(sourceId: Long)
+    /** Every membership — cleared and rebuilt on each sync. */
+    @Query("DELETE FROM channel_category")
+    suspend fun clearAll()
 
-    /** The hex ids of a source's channels that actually exist in the DB — the set the link may point at. */
-    @Query("SELECT remoteId FROM channels WHERE sourceId = :sourceId AND remoteId IS NOT NULL")
-    suspend fun presentHexIds(sourceId: Long): List<String>
+    /** The hex ids of the channels that actually exist in the DB — the set the link may point at. */
+    @Query("SELECT remoteId FROM channels")
+    suspend fun presentHexIds(): List<String>
 
     /** The categories a channel (by its hex id) belongs to. */
     @Query("SELECT categoryId FROM channel_category WHERE channelHexId = :hexId")

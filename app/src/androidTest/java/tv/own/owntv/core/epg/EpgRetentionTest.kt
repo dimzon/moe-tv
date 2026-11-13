@@ -85,7 +85,7 @@ class EpgRetentionTest {
         assertEquals(1, countAll())
     }
 
-    private suspend fun countAll(): Int = db.epgDao().countForSources(listOf(1L))
+    private suspend fun countAll(): Int = db.epgDao().countForSources()
 
     private fun programme(epgChannelId: String, startMs: Long, stopMs: Long) = EpgProgrammeEntity(
         sourceId = 1,

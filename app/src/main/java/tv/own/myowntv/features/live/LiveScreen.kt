@@ -245,7 +245,7 @@ fun LiveScreen(
     // state map (so A→B→A lands back where you were in A). OFF → reset the shared state to the top whenever
     // the category changes (fixes the cross-category scroll-leak bug).
     val perCategoryStates = remember { mutableStateMapOf<LiveKey, androidx.compose.foundation.lazy.LazyListState>() }
-    val perCategoryChannelIds = remember { mutableStateMapOf<LiveKey, Long>() }
+    val perCategoryChannelIds = remember { mutableStateMapOf<LiveKey, String>() }
     val effectiveListState =
         if (rememberLive) perCategoryStates.getOrPut(selectedKey) { androidx.compose.foundation.lazy.LazyListState() }
         else listState
@@ -290,7 +290,7 @@ fun LiveScreen(
     // menu scrim disposed the focused menu button, Compose auto-restored focus and the category rail's
     // entry-redirect pinned it to the rail before selFocus.requestFocus() ran. Tracking the long-press
     // target by id and binding a dedicated requester makes the restore deterministic.
-    var contextChannelId by remember { mutableStateOf<Long?>(null) }
+    var contextChannelId by remember { mutableStateOf<String?>(null) }
     val contextFocus = remember { FocusRequester() }
     var enteringMoveMode by remember { mutableStateOf(false) }
     LaunchedEffect(moveState) { if (moveState != null) enteringMoveMode = false }

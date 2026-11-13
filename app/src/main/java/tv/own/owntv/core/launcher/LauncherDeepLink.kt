@@ -15,7 +15,7 @@ sealed interface LauncherDeepLink {
         val sourceId: Long? = null,
         val remoteId: String? = null,
         val name: String? = null,
-        val itemId: Long? = null,
+        val itemId: String? = null,
     ) : LauncherDeepLink {
         override fun toUri(): Uri = Uri.parse("moetv://play/live").buildUpon()
             .appendOptionalQueryParameter("sourceId", sourceId?.toString())
@@ -38,7 +38,7 @@ sealed interface LauncherDeepLink {
                         sourceId = uri.queryLong("sourceId"),
                         remoteId = uri.queryString("remoteId"),
                         name = uri.queryString("name"),
-                        itemId = uri.queryLong("itemId"),
+                        itemId = uri.queryString("itemId"),
                     )
                     else -> null
                 }

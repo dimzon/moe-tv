@@ -72,7 +72,7 @@ import tv.own.owntv.core.live.LiveKey
 class LiveZapList(
     private val scope: CoroutineScope,
     /** The channel on screen — CH± steps from it, and a rebuild only publishes while it still plays. */
-    private val playingChannelId: () -> Long?,
+    private val playingChannelId: () -> String?,
     /** [ChannelEntity]'s own category (or all channels), refined the way the browse lists are. */
     private val loadForChannel: suspend (ChannelEntity) -> List<ChannelEntity>,
     /** One provider category, for the in-player category browser. */
@@ -119,7 +119,7 @@ class LiveZapList(
      *  reference and the index are stored together, so a concurrent list replacement cannot silently
      *  redirect CH± into an unrelated channel. */
     private data class PendingDirectTune(
-        val targetChannelId: Long,
+        val targetChannelId: String,
         val previousList: List<ChannelEntity>,
         val previousIndex: Int,
     )
@@ -230,7 +230,7 @@ class LiveZapList(
         _canZap.value = open.size > 1
     }
 
-    fun contains(channelId: Long): Boolean = list.any { it.id == channelId }
+    fun contains(channelId: String): Boolean = list.any { it.id == channelId }
 
     // ---- Stepping ----------------------------------------------------------------------------------
 
@@ -279,7 +279,7 @@ class LiveZapList(
      * The order matters and is the reason [play] is a parameter rather than the caller's next line:
      * the anchor has to be computed from the state *before* playback moves it.
      */
-    suspend fun directTune(currentChannelId: Long, tuned: ChannelEntity, play: suspend (ChannelEntity) -> Unit) {
+    suspend fun directTune(currentChannelId: String, tuned: ChannelEntity, play: suspend (ChannelEntity) -> Unit) {
         val alreadyInList = contains(tuned.id)
 
         val inherited = pending?.takeIf { it.targetChannelId == currentChannelId }

@@ -39,9 +39,9 @@ class ImportFinalizer(
         return counts
     }
 
-    /** Current content counts for a source (no EPG) — for the success message and the Playlists list rows. */
+    /** Current content counts (no EPG) — for the success message and the Playlists list rows. */
     suspend fun contentCounts(sourceId: Long): SyncCounts = SyncCounts(
-        channels = channelDao.countForSourceOnce(sourceId),
+        channels = 0, // unused in the live-only single-source flow; the sync summary reports the real count
     )
 
     /**

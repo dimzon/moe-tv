@@ -72,7 +72,7 @@ private suspend fun combinedOrderDiffers(
 }
 
 /** Items with a saved position come first, in that order; the rest follow in the order added. */
-internal fun savedOrderDiffers(added: List<Long>, saved: Map<Long, Int>): Boolean {
+internal fun savedOrderDiffers(added: List<String>, saved: Map<String, Int>): Boolean {
     val shown = added.filter { it in saved }.sortedBy { saved[it] } + added.filter { it !in saved }
     return shown != added
 }

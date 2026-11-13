@@ -76,7 +76,7 @@ class EpgAutoMatcher(
         val idsWithProgrammes = candidates.filter { it.hasProgrammes }
             .mapTo(HashSet()) { it.epgChannelId.trim().lowercase() }
         val hasProgrammesById = candidates.associate { it.epgChannelId to it.hasProgrammes }
-        val channels = channelDao.allForSources(playlistIds, maxChannels)
+        val channels = channelDao.allForSources(maxChannels)
 
         return withContext(Dispatchers.Default) {
             val prepared = prepareWithProgrammesFirst(candidates)

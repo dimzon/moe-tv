@@ -11,13 +11,10 @@ import org.json.JSONArray
 import org.json.JSONObject
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.ContentOrderDao
-import tv.own.owntv.core.database.dao.ContentOrderExportRow
 import tv.own.owntv.core.database.dao.CustomCategoryDao
-import tv.own.owntv.core.database.dao.CustomCategoryMemberExportRow
 import tv.own.owntv.core.database.dao.TombstoneDao
 import tv.own.owntv.core.database.dao.FavoriteDao
 import tv.own.owntv.core.database.dao.HistoryDao
-import tv.own.owntv.core.database.dao.UserDataExportRow
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.database.entity.CustomCategoryMemberEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
@@ -109,7 +106,7 @@ class UserDataResolver(
     }.toString()
 
     /** The stable content key of a live row, or null when its content row is already gone. */
-    suspend fun identityOf(type: MediaType, itemId: Long): JSONObject? = describe(type, itemId)
+    suspend fun identityOf(type: MediaType, itemId: String): JSONObject? = describe(type, itemId)
 
     /**
      * Remembers that one row was deleted, so the deletion survives a sync.
@@ -122,7 +119,7 @@ class UserDataResolver(
     suspend fun recordDeletion(
         kind: String,
         type: MediaType,
-        itemId: Long,
+        itemId: String,
         contextKey: String? = null,
         at: Long = System.currentTimeMillis(),
     ) {
@@ -231,7 +228,7 @@ class UserDataResolver(
     /**
      * Exports the chosen kinds as stable-key records for the backup file / sync payload. The
      * default is exactly the four categories the payload carries ([SyncMatrix.KINDS]); the
-     * intra-device re-sync snapshot goes through [exportForSource], which adds `member`.
+     * intra-device re-sync snapshot goes through [exportSnapshot], which adds `member`.
      */
     suspend fun exportAll(kinds: Set<String> = SyncMatrix.KINDS): JSONArray {
         val out = JSONArray()
@@ -282,97 +279,38 @@ class UserDataResolver(
     }
 
     /**
-     * Exports only the rows attached to [sourceId], so a single-source re-sync starts promptly.
-     *
-     * This is the **intra-device** snapshot (capture before a re-sync, relink after — [relinkAfterSync]),
-     * not the sync payload: it keeps `member` so the locally-alive custom categories survive the
-     * clear-then-insert of a content refresh exactly like favorites and positions do.
+     * The intra-device re-sync snapshot: the payload kinds plus custom-category membership, as
+     * stable-key records. With hex keys this is consumed only by [afterSync]'s purge decision —
+     * the rows themselves no longer need re-keying.
      */
-    suspend fun exportForSource(sourceId: Long, kinds: Set<String> = SNAPSHOT_KINDS): JSONArray {
-        val out = JSONArray()
-        if (SyncMatrix.KIND_FAVORITES in kinds) favoriteDao.exportRowsForSource(sourceId).forEach { row -> row.toJson(SyncMatrix.KIND_FAVORITES)?.let { out.put(it) } }
-        if (SyncMatrix.KIND_HISTORY in kinds) historyDao.exportRowsForSource(sourceId).forEach { row -> row.toJson(SyncMatrix.KIND_HISTORY)?.let { out.put(it) } }
-        if (SyncMatrix.KIND_ORDER in kinds) contentOrderDao.exportRowsForSource(sourceId).forEach { row -> row.toJson()?.let { out.put(it) } }
-        if (MEMBER_KIND in kinds) customCategoryDao.exportRowsForSource(sourceId).forEach { row -> row.toJson()?.let { out.put(it) } }
+    suspend fun exportSnapshot(kinds: Set<String> = SNAPSHOT_KINDS): JSONArray {
+        val out = exportAll(kinds)
+        if (MEMBER_KIND in kinds) customCategoryDao.getAllOnce().forEach { m ->
+            if (m.mediaType != MediaType.LIVE) return@forEach
+            describe(m.mediaType, m.itemId)?.let {
+                out.put(
+                    it.put("kind", MEMBER_KIND).put("ctx", m.contextKey).put("pos", m.position),
+                )
+            }
+        }
         return out
     }
 
-    private fun ContentOrderExportRow.toJson(): JSONObject? {
-        val itemName = name ?: return null
-        return JSONObject().put("t", mediaType.name).put("src", sourceId).putOpt("rid", remoteId).put("name", itemName)
-            .put("kind", SyncMatrix.KIND_ORDER).put("ctx", contextKey).put("pos", position)
-            .put("at", updatedAt)
-            .put("oid", itemId)
-    }
-
-    private fun CustomCategoryMemberExportRow.toJson(): JSONObject? {
-        val itemName = name ?: return null
-        return JSONObject().put("t", mediaType.name).put("src", sourceId).putOpt("rid", remoteId).put("name", itemName)
-            .put("kind", MEMBER_KIND).put("ctx", contextKey).put("pos", position)
-            .put("oid", itemId)
-    }
-
-    private fun UserDataExportRow.toJson(kind: String): JSONObject? {
-        val itemName = name ?: return null
-        return JSONObject().put("t", mediaType.name).put("src", sourceId).putOpt("rid", remoteId).put("name", itemName)
-            .put("kind", kind).put("at", at)
-            .putOpt("dev", deviceId?.takeIf { it.isNotBlank() })
-            .put("oid", itemId)
-    }
-
     /**
-     * Heals favorites/history/resume across a source re-sync. Content rows are clear-then-insert, so
-     * their ids change every refresh and the user-data rows (keyed on the old ids) orphan — the count
-     * badge still showed them, but the join returned nothing. Capture [exportForSource] BEFORE the sync (ids
-     * still valid → stable keys), then call this AFTER it: re-resolve each record to the new ids, and
-     * (only when [purge] is true) drop the now-orphaned rows so counts and lists agree. Keep anything
-     * still unresolvable (e.g. not-yet-loaded episodes) pending for a later sync / show-open.
-     *
-     * [purge] must be false when the sync didn't fully succeed (e.g. it failed partway through a
-     * chunked import): the clear-then-insert is deferred per chunk, so a partial import can leave
-     * content rows missing that are still valid — purging in that case would permanently delete
-     * favorites for content that's simply not re-synced yet, instead of leaving them to heal on the
-     * next successful sync.
+     * The post-sync pass, replacing the old capture-before/relink-after dance: user-data keys ARE
+     * the content keys now, so a re-sync cannot orphan them — the only thing that can is the
+     * provider dropping a channel, and [purge] controls whether such rows are dropped. [purge] must
+     * be false when the sync didn't fully succeed (a partial import can leave rows missing that a
+     * later sync brings back; purging then would delete favorites for content that isn't gone).
      */
-    suspend fun relinkAfterSync(snapshot: JSONArray, purge: Boolean = true) {
-        val (unresolved, _) = resolveAllChunked(snapshot)
-        // Purge is strictly snapshot-scoped: only rows this snapshot captured (by their old ids) may
-        // be dropped, and only when their content row is genuinely gone. An EMPTY snapshot must never
-        // purge — the old fallback ran a GLOBAL orphan purge across ALL sources, which could delete
-        // another source's favorites while that source's own sync had its content mid-rewrite
-        // (a clear-then-insert sync runs concurrently on startup refresh).
-        if (purge && snapshot.hasSourceSnapshotIds()) {
-            purgeSnapshotOrphans(snapshot)
+    suspend fun afterSync(purge: Boolean) {
+        if (purge) {
+            favoriteDao.purgeOrphans()
+            historyDao.purgeOrphans()
+            contentOrderDao.purgeOrphans()
+            customCategoryDao.purgeOrphans()
         }
-        if (unresolved.length() > 0) addPending(unresolved)
         resolvePending() // also retries any in-flight backup restore
-    }
-
-    private fun JSONArray.hasSourceSnapshotIds(): Boolean =
-        length() > 0 && (0 until length()).all { getJSONObject(it).has("oid") }
-
-    private suspend fun purgeSnapshotOrphans(snapshot: JSONArray) = db.transaction {
-        val rows = ArrayList<SnapshotRow>(snapshot.length())
-        for (i in 0 until snapshot.length()) {
-            val e = snapshot.getJSONObject(i)
-            val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: continue
-            rows += SnapshotRow(e.optString("kind"), type, e.getLong("oid"))
-        }
-        // These tables have a unique (mediaType, itemId) index: one indexed delete per row.
-        for (row in rows) {
-            when (row.kind) {
-                "fav" -> favoriteDao.purgeSnapshotOrphan(row.type, row.itemId)
-                "his" -> historyDao.purgeSnapshotOrphan(row.type, row.itemId)
-            }
-        }
-        // These two are keyed by folder first, so a one-row delete scans every row of the table:
-        // with tens of thousands of custom-category members that was hours under the writer lock.
-        for (batch in snapshotPurgeBatches(rows, setOf("order", "member"))) {
-            when (batch.kind) {
-                "order" -> contentOrderDao.purgeSnapshotOrphans(batch.type, batch.itemIds)
-                "member" -> customCategoryDao.purgeSnapshotOrphans(batch.type, batch.itemIds)
-            }
-        }
     }
 
     /** Appends records to the pending set (de-duplicated by content), so they heal on a later resolve. */
@@ -453,7 +391,7 @@ class UserDataResolver(
 
     // --- export side: content row → stable identity ---
 
-    private suspend fun describe(type: MediaType, itemId: Long): JSONObject? = when (type) {
+    private suspend fun describe(type: MediaType, itemId: String): JSONObject? = when (type) {
         MediaType.LIVE -> channelDao.getById(itemId)?.let {
             JSONObject().put("t", type.name).put("src", it.sourceId).putOpt("rid", it.remoteId).put("name", it.name)
         }
@@ -528,12 +466,16 @@ class UserDataResolver(
         }
     }
 
-    /** The current local id of the content a record points at, or null while it is not (yet) here. */
-    private suspend fun locate(type: MediaType, e: JSONObject): Long? {
-        val src = e.getLong("src")
+    /**
+     * The content key a record points at, or null while the channel is not (yet) here. The record's
+     * `rid` IS the key — the hex never changes — and the name is only a fallback for very old files
+     * that predate stable ids.
+     */
+    private suspend fun locate(type: MediaType, e: JSONObject): String? {
         val rid = e.optStringOrNull("rid")
         return when (type) {
-            MediaType.LIVE -> (rid?.let { channelDao.findByRemote(src, it) } ?: channelDao.findByName(src, e.getString("name")))?.id
+            MediaType.LIVE -> rid?.takeIf { channelDao.getById(it) != null }
+                ?: channelDao.findByName(e.optStringOrNull("name") ?: e.getString("name"))?.remoteId
             // VOD media types carry no content rows any more (the app is live-only).
             else -> null
         }
@@ -561,13 +503,13 @@ class UserDataResolver(
             ?: return Resolution.HANDLED // drop garbage
         // A VOD record (movie/series/episode) has no content rows any more: it is dropped for good,
         // never held pending — pending would retry it after every sync for ever.
-        val itemId: Long = locate(type, e)
+        val itemId: String = locate(type, e)
             ?: return if (type == MediaType.LIVE) Resolution.PENDING else Resolution.HANDLED
         return applyRecord(e, type, itemId, tombstonesPresent)
     }
 
     /** One record with its content row resolved: tombstone gate, then the per-kind LWW apply. */
-    private suspend fun applyRecord(e: JSONObject, type: MediaType, itemId: Long, tombstonesPresent: Boolean): Resolution {
+    private suspend fun applyRecord(e: JSONObject, type: MediaType, itemId: String, tombstonesPresent: Boolean): Resolution {
         // The record's own profile (`p`) is no longer read: the app has one user, and old files or
         // payloads that still carry the field are applied as that one user's data.
         val at = e.optLong("at", System.currentTimeMillis())
@@ -696,18 +638,3 @@ class UserDataResolver(
         private const val MAX_TOMBSTONES = 20_000
     }
 }
-
-/** One row of a re-sync snapshot, as the orphan purge needs it. */
-internal data class SnapshotRow(val kind: String, val type: MediaType, val itemId: Long)
-
-/** Ids of one kind and type, deleted in one statement. */
-internal data class SnapshotPurgeBatch(val kind: String, val type: MediaType, val itemIds: List<Long>)
-
-/** [rows] of [kinds], grouped by kind and type, each id once, at most [chunk] ids a batch
- *  (SQLite allows 999 bound values on older engines). */
-internal fun snapshotPurgeBatches(rows: List<SnapshotRow>, kinds: Set<String>, chunk: Int = 900): List<SnapshotPurgeBatch> =
-    rows.filter { it.kind in kinds }
-        .groupBy { Pair(it.kind, it.type) }
-        .flatMap { (key, group) ->
-            group.map { it.itemId }.distinct().chunked(chunk).map { SnapshotPurgeBatch(key.first, key.second, it) }
-        }

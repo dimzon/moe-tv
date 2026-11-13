@@ -73,13 +73,11 @@ class CategoryLockView(
     private fun hasPin(): Flow<Boolean> = settings.customizePin().map { it != null }
 
     /** Resolves the sealed provider folders to DB ids; custom ids have no row and stay key-only. */
-    private fun withSealedIds(type: MediaType, c: SectionCustomizations): Flow<SectionCustomizations> {
-        val sourceIds = c.sealedCategories.mapNotNull { it.substringBefore(':').toLongOrNull() }.distinct()
-        if (sourceIds.isEmpty()) return flowOf(c)
-        return categoryDao.observe(sourceIds, type).map { cats ->
+    private fun withSealedIds(type: MediaType, c: SectionCustomizations): Flow<SectionCustomizations> =
+        if (c.sealedCategories.isEmpty()) flowOf(c)
+        else categoryDao.observe(type).map { cats ->
             c.copy(sealedCategoryIds = cats.filter { CustomizeKeys.category(it) in c.sealedCategories }.mapTo(HashSet()) { it.id })
         }
-    }
 
     private companion object {
         val LOCKABLE_SECTIONS = listOf(MediaType.LIVE, MediaType.MOVIE, MediaType.SERIES)

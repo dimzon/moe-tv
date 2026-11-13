@@ -67,9 +67,7 @@ class EpgRepository(
      */
     suspend fun refreshRutube(source: SourceEntity, onProgress: (channels: Int, programmes: Int) -> Unit = { _, _ -> }): Int {
         val api = rutube ?: return 0
-        val keys = channelDao.guideKeysForSource(source.id)
-            .mapNotNull { it.epgChannelId.takeIf { id -> id.isNotBlank() } }
-            .distinct()
+        val keys = channelDao.allEpgChannelIds()
         if (keys.isEmpty()) return 0
         onProgress(keys.size, 0)
         val summary = tv.own.owntv.core.sync.RuTubeEpgSyncer(api, epgDao).sync(source.id, keys)

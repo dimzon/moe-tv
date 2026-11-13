@@ -22,8 +22,7 @@ fun <T> lockAwareCount(
 fun CustomCategoryDao.lockAwareCountsByContexts(
     type: MediaType,
     contextKeys: List<String>,
-    sourceIds: List<Long>,
     sealed: Set<Long>,
 ): Flow<List<CustomCategoryCount>> =
-    if (sealed.isEmpty()) observeCountsByContexts(type, contextKeys, sourceIds)
-    else observeCountsByContextsExcluding(type, contextKeys, sourceIds, sealed.toList())
+    if (sealed.isEmpty()) observeCountsByContexts(type, contextKeys)
+    else observeCountsByContextsExcluding(type, contextKeys, sealed.toList())

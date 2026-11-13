@@ -26,7 +26,7 @@ object ChannelMembership {
         rows.groupBy({ it.channelHexId }, { it.categoryId }).mapValues { it.value.toSet() }
 
     /** The channel's category ids, or null when the map has no entry (never synced / no genres). */
-    fun catsOf(channel: ChannelEntity): Set<Long>? = channel.remoteId?.let { snapshot[it] }
+    fun catsOf(channel: ChannelEntity): Set<Long>? = snapshot[channel.remoteId]
 
     /**
      * The channel's "primary" category — a stable stand-in for the old single `channels.categoryId`

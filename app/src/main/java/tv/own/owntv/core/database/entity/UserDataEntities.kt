@@ -7,7 +7,7 @@ import tv.own.owntv.core.model.MediaType
 
 /*
  * The app has a single user (profiles were removed with the live-only redesign), so every user-data
- * table is global. `itemId` is the local id of a channel and is disambiguated by `mediaType`, so
+ * table is global. `itemId` is the channel's hex remoteId and is disambiguated by `mediaType`, so
  * referential cleanup of these rows is handled in the repository layer.
  */
 
@@ -20,7 +20,7 @@ import tv.own.owntv.core.model.MediaType
 data class FavoriteEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val mediaType: MediaType,
-    val itemId: Long,
+    val itemId: String,
     val addedAt: Long = System.currentTimeMillis(),
 )
 
@@ -34,7 +34,7 @@ data class FavoriteEntity(
 data class WatchHistoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val mediaType: MediaType,
-    val itemId: Long,
+    val itemId: String,
     val watchedAt: Long = System.currentTimeMillis(),
     /**
      * The device that wrote the row ([tv.own.owntv.core.sync.local.DeviceIdentity].id hash) — the
@@ -59,7 +59,7 @@ data class ContentOrderEntity(
     val mediaType: MediaType,
     /** A category stable key (CustomizeKeys.category) for a folder, or [FAV_CONTEXT] for Favorites. */
     val contextKey: String,
-    val itemId: Long,
+    val itemId: String,
     val position: Int,
     /**
      * LWW stamp (epoch ms) for the per-row last-write-wins merge: every local Move refreshes it
@@ -178,7 +178,7 @@ data class CustomCategoryMemberEntity(
     val mediaType: MediaType,
     /** The custom category's stable key (`"custom:<uuid>"`, see CustomizeKeys.CUSTOM_PREFIX). */
     val contextKey: String,
-    val itemId: Long,
+    val itemId: String,
     val position: Int,
 )
 

@@ -52,47 +52,47 @@ class DirectTuneResolverTest {
 
     @Test
     fun singleCandidate_returnsIt() {
-        assertEquals(10L, resolveDirectTuneCandidate(listOf(10L), emptySet()))
+        assertEquals("c10", resolveDirectTuneCandidate(listOf("c10"), emptySet()))
     }
 
     @Test
     fun singleCandidate_evenIfNotInZap_returnsIt() {
-        assertEquals(10L, resolveDirectTuneCandidate(listOf(10L), setOf(99L)))
+        assertEquals("c10", resolveDirectTuneCandidate(listOf("c10"), setOf("c99")))
     }
 
     @Test
     fun twoCandidates_oneInZap_returnsThat() {
-        assertEquals(20L, resolveDirectTuneCandidate(listOf(10L, 20L), setOf(20L)))
+        assertEquals("c20", resolveDirectTuneCandidate(listOf("c10", "c20"), setOf("c20")))
     }
 
     @Test
     fun twoCandidates_noneInZap_returnsNull() {
-        assertNull(resolveDirectTuneCandidate(listOf(10L, 20L), emptySet()))
+        assertNull(resolveDirectTuneCandidate(listOf("c10", "c20"), emptySet()))
     }
 
     @Test
     fun twoCandidates_bothInZap_returnsNull() {
-        assertNull(resolveDirectTuneCandidate(listOf(10L, 20L), setOf(10L, 20L)))
+        assertNull(resolveDirectTuneCandidate(listOf("c10", "c20"), setOf("c10", "c20")))
     }
 
     @Test
     fun threeCandidates_oneInZap_returnsThat() {
-        assertEquals(30L, resolveDirectTuneCandidate(listOf(10L, 20L, 30L), setOf(30L)))
+        assertEquals("c30", resolveDirectTuneCandidate(listOf("c10", "c20", "c30"), setOf("c30")))
     }
 
     @Test
     fun threeCandidates_twoInZap_returnsNull() {
-        assertNull(resolveDirectTuneCandidate(listOf(10L, 20L, 30L), setOf(10L, 20L)))
+        assertNull(resolveDirectTuneCandidate(listOf("c10", "c20", "c30"), setOf("c10", "c20")))
     }
 
     @Test
     fun emptyCandidates_returnsNull() {
-        assertNull(resolveDirectTuneCandidate(emptyList(), emptySet()))
+        assertNull(resolveDirectTuneCandidate(emptyList<String>(), emptySet()))
     }
 
     @Test
     fun zapContextWithNoOverlap_returnsNull() {
-        assertNull(resolveDirectTuneCandidate(listOf(10L, 20L), setOf(99L, 100L)))
+        assertNull(resolveDirectTuneCandidate(listOf("c10", "c20"), setOf("c99", "c100")))
     }
 
     // --- keyToDigit ---

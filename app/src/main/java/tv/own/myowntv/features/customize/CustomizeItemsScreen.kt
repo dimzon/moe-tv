@@ -124,7 +124,6 @@ fun CustomizeItemsScreen(
                     categoryId = ctx.categoryId,
                     contextKey = row.key,
                     mediaType = ctx.mediaType,
-                    sourceIds = ctx.sourceIds,
                 )
             )
         } else {

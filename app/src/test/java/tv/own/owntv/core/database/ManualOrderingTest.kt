@@ -11,7 +11,7 @@ import tv.own.owntv.core.database.entity.ChannelEntity
  */
 class ManualOrderingTest {
     private fun ch(id: Long, name: String, sortOrder: Int) =
-        ChannelEntity(id = id, sourceId = 1, name = name, streamUrl = "u", sortOrder = sortOrder)
+        ChannelEntity(remoteId = "c" + (id).toString(), name = name, sortOrder = sortOrder)
 
     private fun row(id: Long, name: String, sortOrder: Int = 0, mp: Int = 0, pos: Int? = null) =
         ManualOrderRow(ch(id, name, sortOrder), pos, mp)
@@ -26,14 +26,14 @@ class ManualOrderingTest {
             row(3, "Beta", sortOrder = 9, mp = 1),
         )
         // mp order: 2(0), 3(1), 1(2)
-        assertEquals(listOf(2L, 3L, 1L), ManualOrdering.order(rows, alpha = false).ids())
+        assertEquals(listOf("c2", "c3", "c1"), ManualOrdering.order(rows, alpha = false).ids())
     }
 
     @Test
     fun `all unmoved, alpha sorts by name`() {
         val rows = listOf(row(1, "Zeta"), row(2, "alpha"), row(3, "Beta"))
         // case-sensitive byte order: "Zeta"(Z=0x5A) < "alpha"(a=0x61) < "Beta"(B=0x42)? -> B < Z < a
-        assertEquals(listOf(3L, 1L, 2L), ManualOrdering.order(rows, alpha = true).ids())
+        assertEquals(listOf("c3", "c1", "c2"), ManualOrdering.order(rows, alpha = true).ids())
     }
 
     @Test
@@ -46,7 +46,7 @@ class ManualOrderingTest {
         )
         // moved dense slots: pos0-rank0=0, pos1-rank1=0 (both slot 0, grp 0, tie=pos) -> 10,11;
         // unmoved slots 0,1 (grp 1) come after the grp-0 rows at slot 0.
-        assertEquals(listOf(10L, 11L, 12L, 13L), ManualOrdering.order(rows, alpha = false).ids())
+        assertEquals(listOf("c10", "c11", "c12", "c13"), ManualOrdering.order(rows, alpha = false).ids())
     }
 
     @Test
@@ -60,7 +60,7 @@ class ManualOrderingTest {
             row(4, "movedB", pos = 9),  // slot 8
         )
         val ids = ManualOrdering.order(rows, alpha = false).ids()
-        assertEquals(listOf(1L, 2L, 3L, 4L), ids)
+        assertEquals(listOf("c1", "c2", "c3", "c4"), ids)
     }
 
     @Test
@@ -68,6 +68,6 @@ class ManualOrderingTest {
         val rows = listOf(row(20, "x", pos = 3), row(19, "y", pos = 3))
         // same pos, rank by (pos, id): 19 before 20 -> both slot 3-rank+1; 19 rank1 slot3, 20 rank2 slot2?
         // 19: pos3-(1-1)=3; 20: pos3-(2-1)=2 -> slot2(20) before slot3(19).
-        assertEquals(listOf(20L, 19L), ManualOrdering.order(rows, alpha = false).ids())
+        assertEquals(listOf("c20", "c19"), ManualOrdering.order(rows, alpha = false).ids())
     }
 }

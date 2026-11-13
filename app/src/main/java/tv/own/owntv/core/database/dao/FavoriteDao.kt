@@ -21,10 +21,10 @@ interface FavoriteDao {
      * resolver's transaction.
      */
     @Query("UPDATE favorites SET addedAt = :at WHERE mediaType = :type AND itemId = :itemId AND addedAt < :at")
-    suspend fun bumpIfNewer(type: MediaType, itemId: Long, at: Long)
+    suspend fun bumpIfNewer(type: MediaType, itemId: String, at: Long)
 
     @Query("DELETE FROM favorites WHERE mediaType = :type AND itemId = :itemId")
-    suspend fun remove(type: MediaType, itemId: Long)
+    suspend fun remove(type: MediaType, itemId: String)
 
     /** Every favorite: a restore's Replace, before the backup's are put back. */
     @Query("DELETE FROM favorites")
@@ -36,55 +36,42 @@ interface FavoriteDao {
      * and survives. Returns the number of rows removed, so the sync summary can count it.
      */
     @Query("DELETE FROM favorites WHERE mediaType = :type AND itemId = :itemId AND addedAt <= :at")
-    suspend fun removeIfOlderThan(type: MediaType, itemId: Long, at: Long): Int
+    suspend fun removeIfOlderThan(type: MediaType, itemId: String, at: Long): Int
 
     @Query("SELECT EXISTS(SELECT 1 FROM favorites WHERE mediaType = :type AND itemId = :itemId)")
-    fun isFavorite(type: MediaType, itemId: Long): Flow<Boolean>
+    fun isFavorite(type: MediaType, itemId: String): Flow<Boolean>
 
     /** When it was favorited — the dry run compares it against an incoming deletion. */
     @Query("SELECT addedAt FROM favorites WHERE mediaType = :type AND itemId = :itemId")
-    suspend fun addedAt(type: MediaType, itemId: Long): Long?
+    suspend fun addedAt(type: MediaType, itemId: String): Long?
 
     /** Does this row already exist? The dry run before a sync counts what is genuinely new. */
     @Query("SELECT EXISTS(SELECT 1 FROM favorites WHERE mediaType = :type AND itemId = :itemId)")
-    suspend fun exists(type: MediaType, itemId: Long): Boolean
+    suspend fun exists(type: MediaType, itemId: String): Boolean
 
     @Query("SELECT COUNT(*) FROM favorites WHERE mediaType = :type")
     fun count(type: MediaType): Flow<Int>
 
-    /** Favorite item ids for a type, so lists can mark rows without a per-row query. */
+    /** Favorite item keys (hex remoteIds) for a type, so lists can mark rows without a per-row query. */
     @Query("SELECT itemId FROM favorites WHERE mediaType = :type")
-    fun observeFavoriteIds(type: MediaType): Flow<List<Long>>
+    fun observeFavoriteIds(type: MediaType): Flow<List<String>>
 
     /** Everything, for Backup & Restore. */
     @Query("SELECT * FROM favorites")
     suspend fun getAllOnce(): List<FavoriteEntity>
 
-    /** User-data rows tied to one source, already joined to stable content keys for fast re-sync snapshots.
-     *  Live-only: the only media type whose content rows still exist. */
-    @Query(
-        "SELECT f.mediaType AS mediaType, f.itemId AS itemId, " +
-            "c.sourceId AS sourceId, c.remoteId AS remoteId, c.name AS name, " +
-            "f.addedAt AS at " +
-            "FROM favorites f " +
-            "JOIN channels c ON f.mediaType = 'LIVE' AND f.itemId = c.id " +
-            "WHERE c.sourceId = :sourceId",
-    )
-    suspend fun exportRowsForSource(sourceId: Long): List<UserDataExportRow>
-
     /** The row is an orphan when its type no longer has content rows at all (the app is live-only)
-     *  or its LIVE row is gone. */
+     *  or its LIVE row is gone. Keys are the stable hex — an orphan is a channel the provider dropped. */
     @Query(
         "DELETE FROM favorites WHERE mediaType = :type AND itemId = :itemId AND (" +
-            "mediaType != 'LIVE' OR itemId NOT IN (SELECT id FROM channels))",
+            "mediaType != 'LIVE' OR itemId NOT IN (SELECT remoteId FROM channels))",
     )
-    suspend fun purgeSnapshotOrphan(type: MediaType, itemId: Long)
+    suspend fun purgeSnapshotOrphan(type: MediaType, itemId: String)
 
     /**
-     * Drops favorites whose content row no longer exists — content is clear-then-insert on every sync,
-     * so a favorite's itemId goes stale and the join returns nothing while the raw count still showed
-     * it. Called after a re-sync's relink (UserDataResolver).
+     * Drops favorites whose content row no longer exists. Called after a re-sync — with the hex PK
+     * a favorite's key survives every sync, so this only fires when the provider dropped the channel.
      */
-    @Query("DELETE FROM favorites WHERE mediaType != 'LIVE' OR itemId NOT IN (SELECT id FROM channels)")
+    @Query("DELETE FROM favorites WHERE mediaType != 'LIVE' OR itemId NOT IN (SELECT remoteId FROM channels)")
     suspend fun purgeOrphans()
 }

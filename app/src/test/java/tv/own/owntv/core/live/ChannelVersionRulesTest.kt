@@ -44,21 +44,21 @@ class ChannelVersionRulesTest {
     }
 
     @Test
-    fun `best picture first, then the playlists' order`() {
-        fun v(id: Long, source: Long, rank: Int, order: Int = 0) = ChannelVersion(
-            ChannelEntity(id = id, sourceId = source, name = "C$id", streamUrl = "http://x/$id", sortOrder = order),
-            "C$id", emptyList(), rank, null, null,
+    fun `best picture first, then the provider's order`() {
+        fun v(id: String, rank: Int, order: Int = 0) = ChannelVersion(
+            ChannelEntity(remoteId = id, name = "C$id", sortOrder = order),
+            "C$id", emptyList(), rank, null,
         )
-        val ordered = ChannelVersionRules.ordered(listOf(v(1, 2, 2), v(2, 1, 2), v(3, 1, 4)), sourceOrder = listOf(1L, 2L))
-        assertEquals(listOf(3L, 2L, 1L), ordered.map { it.channel.id })
+        val ordered = ChannelVersionRules.ordered(listOf(v("c1", 2, 2), v("c2", 2, 1), v("c3", 4, 0)))
+        assertEquals(listOf("c3", "c2", "c1"), ordered.map { it.channel.id })
     }
 
     @Test
     fun `the channel playing comes first`() {
-        fun v(id: Long, rank: Int) = ChannelVersion(
-            ChannelEntity(id = id, sourceId = 1, name = "C$id", streamUrl = "http://x/$id"), "C$id", emptyList(), rank, null, null,
+        fun v(id: String, rank: Int) = ChannelVersion(
+            ChannelEntity(remoteId = id, name = "C$id"), "C$id", emptyList(), rank, null,
         )
-        assertEquals(listOf(1L, 2L), ChannelVersionRules.ordered(listOf(v(1, 0), v(2, 4)), listOf(1L), playingId = 1).map { it.channel.id })
+        assertEquals(listOf("c1", "c2"), ChannelVersionRules.ordered(listOf(v("c1", 0), v("c2", 4)), playingId = "c1").map { it.channel.id })
     }
 
     @Test

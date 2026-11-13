@@ -46,25 +46,19 @@ enum class StartupMode {
 }
 
 data class StartupChannelRef(
-    val sourceId: Long,
-    val remoteId: String?,
+    val remoteId: String,
     val name: String,
-    val itemId: Long,
 ) {
     fun toJson(): org.json.JSONObject = org.json.JSONObject()
-        .put("sourceId", sourceId)
-        .putOpt("remoteId", remoteId)
+        .put("remoteId", remoteId)
         .put("name", name)
-        .put("itemId", itemId)
 
     companion object {
         fun fromJson(raw: String?): StartupChannelRef? = runCatching {
             val o = org.json.JSONObject(raw ?: return null)
             StartupChannelRef(
-                sourceId = o.getLong("sourceId").takeIf { it > 0L } ?: return null,
-                remoteId = o.optString("remoteId").takeIf { it.isNotBlank() },
+                remoteId = o.optString("remoteId").takeIf { it.isNotBlank() } ?: return null,
                 name = o.getString("name").takeIf { it.isNotBlank() } ?: return null,
-                itemId = o.optLong("itemId", -1L),
             )
         }.getOrNull()
     }
@@ -449,7 +443,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val RESUME_LAST_CHANNEL = booleanPreferencesKey("resume_last_channel")
         val LAST_LIVE_CATEGORY = stringPreferencesKey("last_live_category")
         val RECENT_SEARCHES = stringPreferencesKey("recent_searches")
-        val LAST_LIVE_CHANNEL = androidx.datastore.preferences.core.longPreferencesKey("last_live_channel")
+        val LAST_LIVE_CHANNEL = androidx.datastore.preferences.core.stringPreferencesKey("last_live_channel")
         val LIVE_LAYOUT = stringPreferencesKey("live_layout")
         val LIVE_VIEW = stringPreferencesKey("live_view")
         val REMINDER_MODE = stringPreferencesKey("reminder_mode")
@@ -628,8 +622,8 @@ class SettingsRepository(private val context: Context, private val localeStore: 
     }
 
     // --- Live TV: remember the last focused channel so reopening lands focus back on it ---
-    val lastLiveChannelId: Flow<Long> = positionFlow(Keys.LAST_LIVE_CHANNEL).map { it ?: -1L }
-    suspend fun setLastLiveChannelId(id: Long) {
+    val lastLiveChannelId: Flow<String> = positionFlow(Keys.LAST_LIVE_CHANNEL).map { it.orEmpty() }
+    suspend fun setLastLiveChannelId(id: String) {
         context.positionStore.edit { it[Keys.LAST_LIVE_CHANNEL] = id }
     }
 
@@ -2700,12 +2694,10 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         context.dataStore.edit { prefs ->
             if (prefs[Keys.STARTUP_MODE] != StartupMode.SPECIFIC_CHANNEL.name) return@edit
             val channel = StartupChannelRef.fromJson(prefs[Keys.STARTUP_CHANNEL])
-            if (channel == null || channel.sourceId !in existingSourceIds) {
+            // The hex key survives restores, so the ref is valid while the channel itself is.
+            if (channel == null) {
                 prefs[Keys.STARTUP_MODE] = StartupMode.HOME.name
                 prefs.remove(Keys.STARTUP_CHANNEL)
-            } else {
-                // The catalog was clear-then-inserted by the restore; the local item id is stale.
-                prefs[Keys.STARTUP_CHANNEL] = channel.copy(itemId = -1L).toJson().toString()
             }
         }
     }

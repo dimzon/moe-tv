@@ -165,7 +165,7 @@ class CustomizeViewModel(
     }.flatMapLatest { (c, filter) ->
             val sourceIds = c.sourceIdsFor(_section)
             combine(
-                categoryDao.observe(sourceIds, _section),
+                categoryDao.observe(_section),
                 customize.observe(_section),
             ) { cats, cust ->
                 // Built-in folders + the user's custom combined categories in ONE list, so

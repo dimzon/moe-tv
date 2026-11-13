@@ -52,9 +52,7 @@ class NavVisibility(
         // over every source. Per-section Off flags still drop a section (syncLive).
         if (sources.isEmpty()) return flowOf(MainSection.dynamicVisible(hasLive = false))
         val liveIds = sources.filter { it.syncLive }.map { it.id }
-        // Empty id lists would make countAll misbehave — use a sentinel that matches nothing.
-        val empty = listOf(-1L)
-        return channelDao.countAll(liveIds.ifEmpty { empty }).map { channels ->
+        return channelDao.countAll().map { channels ->
             MainSection.dynamicVisible(hasLive = liveIds.isNotEmpty() && channels > 0)
         }
     }

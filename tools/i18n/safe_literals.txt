@@ -80,9 +80,7 @@
 1	log	app/src/main/java/tv/own/myowntv/features/epg/EpgViewModel.kt	guide_load channels=${channels.size} rawChannels=${rawChannels.size}
 1	log	app/src/main/java/tv/own/myowntv/features/epg/EpgViewModel.kt	lookbackH=${lookbackMs / 3_600_000}
 1	log	app/src/main/java/tv/own/myowntv/features/epg/EpgViewModel.kt	rebuilt=$windowChanged reason=$rebuildReason cachedRows=${cachedRowCount()}
-1	log	app/src/main/java/tv/own/myowntv/features/epg/EpgViewModel.kt	sources-changed
 1	log	app/src/main/java/tv/own/myowntv/features/epg/EpgViewModel.kt	stored-count-changed
-1	log	app/src/main/java/tv/own/myowntv/features/epg/EpgViewModel.kt	stored=$stored sources=${ids.size}
 1	log	app/src/main/java/tv/own/myowntv/features/epg/EpgViewModel.kt	totalMs=${android.os.SystemClock.elapsedRealtime() - loadStartedAt}
 1	log	app/src/main/java/tv/own/myowntv/features/epg/EpgViewModel.kt	window-moved
 1	technical	app/src/main/java/tv/own/myowntv/features/epg/GuideCore.kt	tnum
@@ -963,22 +961,18 @@
 4	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	userData
 3	json	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	version
 8	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	at
-11	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	ctx
+10	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	ctx
 1	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	entries
 3	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	ep
-1	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	fav
-1	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	his
-13	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	kind
-3	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	member
+12	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	kind
+1	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	member
 7	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	name
-5	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	oid
-2	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	order
 1	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	owntv_pending_userdata
-5	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	pos
-7	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	rid
+4	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	pos
+4	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	rid
 3	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	season
 2	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	sname
-7	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	src
+3	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	src
 2	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	srid
 11	json	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	t
 1	empty	app/src/main/java/tv/own/owntv/core/brand/AppIcon.kt	\0
@@ -1211,81 +1205,24 @@
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	owntv.db
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	DELETE FROM categories WHERE sourceId = :sourceId AND mediaType = :type
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	DELETE FROM categories WHERE sourceId = :sourceId AND mediaType = :type AND remoteId IN (:remoteIds)
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	JOIN sources ON sources.id = categories.sourceId
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	ORDER BY sources.createdAt ASC, categories.sortOrder ASC, categories.name ASC
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	SELECT * FROM categories WHERE id = :id
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	SELECT * FROM categories WHERE sourceId = :sourceId AND mediaType = :type AND remoteId IN (:remoteIds)
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	SELECT COUNT(*) FROM categories WHERE sourceId IN (:sourceIds) AND mediaType = :type
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	SELECT categories.* FROM categories
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	SELECT remoteId FROM categories WHERE sourceId = :sourceId AND mediaType = :type AND remoteId IS NOT NULL
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	WHERE categories.sourceId IN (:sourceIds) AND categories.mediaType = :type
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	) ORDER BY number ASC, name ASC LIMIT :limit
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	AND (:query = '' OR name LIKE '%' || :query || '%')
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	AND (:query = '' OR name LIKE '%' || :query || '%') ORDER BY number ASC, name ASC LIMIT :limit
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	AND LOWER(TRIM(epgChannelId)) IN (
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	AND LOWER(TRIM(epgChannelId)) NOT IN (SELECT DISTINCT epgChannelId FROM epg_programmes)
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	AND c.id IN (SELECT rowid FROM channels_fts WHERE channels_fts MATCH :ftsQuery)
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	AND id IN (SELECT rowid FROM channels_fts WHERE channels_fts MATCH :query) ORDER BY name ASC
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	DELETE FROM channels WHERE sourceId = :sourceId
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	DELETE FROM channels WHERE sourceId = :sourceId AND remoteId IN (:remoteIds)
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	DELETE FROM channels WHERE sourceId = :sourceId AND remoteId IS NULL
-4	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	INNER JOIN favorites f ON f.itemId = c.id AND f.mediaType = 'LIVE'
-4	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	INNER JOIN watch_history h ON h.itemId = c.id AND h.mediaType = 'LIVE'
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, f.addedAt DESC
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, f.addedAt DESC LIMIT :limit
 2	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY c.name ASC LIMIT :limit
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY h.watchedAt DESC LIMIT :limit
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY number ASC, name ASC LIMIT :limit
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE id = :id
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId = :sourceId AND (sortOrder < :beforeSortOrder OR (sortOrder = :beforeSortOrder AND id < :beforeId)) ORDER BY sortOrder DESC, id DESC LIMIT :limit
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId = :sourceId AND (sortOrder > :afterSortOrder OR (sortOrder = :afterSortOrder AND id > :afterId)) ORDER BY sortOrder ASC, id ASC LIMIT :limit
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId = :sourceId AND name = :name LIMIT 1
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId = :sourceId AND remoteId = :remoteId LIMIT 1
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId = :sourceId AND remoteId IN (:remoteIds)
-2	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds)
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND (remoteId IN (:tails) OR name IN (:tails))
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND LOWER(TRIM(epgChannelId)) IN (:epgKeys)
-2	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND epgChannelId IS NOT NULL AND epgChannelId != ''
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND name LIKE '%' || :query || '%' ORDER BY name ASC
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND name LIKE '%' || :query || '%' ORDER BY name ASC LIMIT :limit
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND number = :number ORDER BY sourceId ASC, sortOrder ASC, name ASC, id ASC
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND remoteId IN (:remoteIds)
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) ORDER BY name ASC
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) ORDER BY sourceId ASC, sortOrder ASC, name ASC
-2	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) ORDER BY sourceId ASC, sortOrder ASC, name ASC LIMIT :limit
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM channels WHERE sourceId = :sourceId
-2	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM channels WHERE sourceId IN (:sourceIds)
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM favorites f INNER JOIN channels c ON c.id = f.itemId
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM watch_history h INNER JOIN channels c ON c.id = h.itemId
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT DISTINCT LOWER(TRIM(epgChannelId)) FROM channels
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT DISTINCT LOWER(TRIM(epgChannelId)) FROM channels WHERE epgChannelId IS NOT NULL AND epgChannelId != ''
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT DISTINCT epgChannelId FROM epg_programmes WHERE sourceId IN (:sourceIds)
 6	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT c.* FROM channels c
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT c.* FROM channels c INNER JOIN favorites f ON f.itemId = c.id AND f.mediaType = 'LIVE'
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT c.* FROM channels c INNER JOIN watch_history h ON h.itemId = c.id AND h.mediaType = 'LIVE'
-2	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT c.*, h.watchedAt FROM channels c
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT id, remoteId, sortOrder, number FROM channels WHERE sourceId = :sourceId ORDER BY sortOrder ASC, id ASC
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT remoteId FROM channels WHERE sourceId = :sourceId AND remoteId IS NOT NULL
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT remoteId FROM channels WHERE sourceId = :sourceId AND remoteId IS NOT NULL LIMIT 1
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT remoteId, epgChannelId FROM channels WHERE sourceId = :sourceId AND remoteId IS NOT NULL AND epgChannelId IS NOT NULL
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT remoteId, id, contentHash, sortOrder FROM channels WHERE sourceId = :sourceId AND remoteId IS NOT NULL
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	UPDATE channels SET number = :number WHERE id = :id
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	UPDATE channels SET sortOrder = :sortOrder WHERE id = :id
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	UPDATE channels SET sortOrder = sortOrder + :delta WHERE sourceId = :sourceId AND sortOrder BETWEEN :fromSortOrder AND :toSortOrder
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	UPDATE channels SET sortOrder = sortOrder - :parked WHERE sourceId = :sourceId AND sortOrder >= :parked / 2
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.sourceId IN (:sourceIds)
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.sourceId IN (:sourceIds) AND c.name LIKE '%' || :query || '%'
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE sourceId = :sourceId AND epgChannelId IS NOT NULL AND TRIM(epgChannelId) != ''
+1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT c.*, h.watchedAt FROM channels c
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	DELETE FROM content_order WHERE
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	DELETE FROM content_order WHERE contextKey != :keep
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	FROM content_order o
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/ContentOrderDao.kt	SELECT * FROM content_order
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	ORDER BY m.position, c.sortOrder, c.name
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	SELECT COUNT(*) FROM custom_category_members m
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	SELECT c.* FROM channels c
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	SELECT contextKey, COUNT(*) AS count FROM custom_category_members
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	WHERE c.sourceId IN (:sourceIds) AND c.name LIKE '%' || :query || '%'
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CustomCategoryDao.kt	m.contextKey AS contextKey, m.position AS position,
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	AND startMs > :from - 86400000 AND stopMs > :from AND startMs < :to ORDER BY epgChannelId ASC, startMs ASC
 2	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	AND startMs > :from - 86400000 AND stopMs > :from AND startMs < :to ORDER BY startMs ASC
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	AND title LIKE '%' || :query || '%' ORDER BY startMs ASC LIMIT :limit
@@ -1307,7 +1244,6 @@
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT * FROM epg_programmes WHERE id = :programmeId LIMIT 1
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT COUNT(*) FROM epg_programmes WHERE epgChannelId = :epgChannelId AND stopMs > :now
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT COUNT(*) FROM epg_programmes WHERE sourceId = :sourceId
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT COUNT(*) FROM epg_programmes WHERE sourceId IN (:sourceIds)
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT COUNT(DISTINCT epgChannelId) FROM epg_programmes WHERE sourceId IN (:sourceIds)
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT DISTINCT epgChannelId FROM epg_programmes LIMIT :limit
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT DISTINCT sourceId FROM epg_channels WHERE epgChannelId IN (:epgChannelIds) AND iconUrl IS NOT NULL AND iconUrl != ''
@@ -1318,9 +1254,7 @@
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT id, description FROM epg_programmes WHERE id IN (:ids) AND description IS NOT NULL
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT id, epgChannelId, startMs, contentHash FROM epg_programmes WHERE sourceId = :sourceId AND epgChannelId = :epgChannelId
 3	sql	app/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT id, sourceId, epgChannelId, startMs, stopMs, title, NULL AS description, 0 AS contentHash,
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/FavoriteDao.kt	FROM favorites f
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/FavoriteDao.kt	SELECT * FROM favorites
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	FROM watch_history h
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/HistoryDao.kt	SELECT * FROM watch_history
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/PlaybackPrefsDao.kt	AND audioLang IS NULL AND subtitleLang IS NULL
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/PlaybackPrefsDao.kt	DELETE FROM playback_prefs WHERE sourceId = :sourceId
@@ -1358,17 +1292,15 @@
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/TombstoneDao.kt	SELECT * FROM user_data_tombstones
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/TombstoneDao.kt	SELECT COUNT(*) FROM user_data_tombstones
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/TvProviderProgramDao.kt	AND mediaType = :mediaType AND groupId = :groupId LIMIT 1
-3	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	0
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	categories
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	channels
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	epgChannelId
-2	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	id
+1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	id
 2	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	mediaType
 2	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	name
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	number
-2	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	remoteId
+1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	remoteId
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	sortOrder
-9	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	sourceId
+4	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	sourceId
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/EpgEntities.kt	0
 3	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/EpgEntities.kt	epgChannelId
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/EpgEntities.kt	epg_channels
@@ -1646,8 +1578,6 @@
 2	uri	app/src/main/java/tv/own/owntv/core/launcher/LauncherDeepLink.kt	sourceId
 1	technical	app/src/main/java/tv/own/owntv/core/live/ChannelVersions.kt	\0
 1	technical	app/src/main/java/tv/own/owntv/core/live/ChannelVersions.kt	$it*
-1	technical	app/src/main/java/tv/own/owntv/core/live/ChannelVersions.kt	${it.id}@${it.lastSyncAt}
-1	technical	app/src/main/java/tv/own/owntv/core/live/ChannelVersions.kt	,
 1	log	app/src/main/java/tv/own/owntv/core/live/ChannelVersions.kt	ChannelVersions
 1	regex	app/src/main/java/tv/own/owntv/core/live/ChannelVersions.kt	[^\\p{L}\\p{N}]+
 1	log	app/src/main/java/tv/own/owntv/core/live/ChannelVersions.kt	channel search failed: ${it.message}
@@ -1992,7 +1922,6 @@
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	guide_width_on
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	hero_preview
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	hw_decoding
-2	json	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	itemId
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	last_backup_at
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	last_backup_bytes
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	last_backup_encrypted
@@ -2088,7 +2017,6 @@
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	software_decode_above_1080p
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sort_guide
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sort_live
-2	json	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sourceId
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	stage_defaults_applied
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_font
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_scale
@@ -2156,7 +2084,6 @@
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	f785d738a845cc80658e887843a18ed9
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	ffc110c6785e57f4c329179b555547b4
 1	protocol	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	rutube://
-1	protocol	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	rutube://${s.id}/${ch.videoId}
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	Прямая трансляция
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	Прямое включение
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	Прямой эфир
@@ -2218,9 +2145,6 @@
 1	log	app/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	$label category prune sourceId=$sourceId type=$type stale=${stale.size} ms=${SystemClock.elapsedRealtime() - start}
 1	technical	app/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	$label chunk applied phase=${phase.name} chunk=$chunkIndex raw=$rawCount accepted=${rows.size}
 1	technical	app/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	$label chunk skipped phase=${phase.name} chunk=$chunkIndex raw=$rawCount skipped=$skipped
-1	log	app/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	$label content prune sourceId=$sourceId stale=${stale.size} ms=${SystemClock.elapsedRealtime() - start}
-1	log	app/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	$label hash map loaded sourceId=$sourceId size=${it.byRemoteId.size} ms=${SystemClock.elapsedRealtime() - start}
-1	log	app/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	$label prune skipped sourceId=$sourceId reason=catalog_shrink stored=$stored stale=$stale
 1	technical	app/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	$label stream done phase=${phase.name} chunks=$chunkIndex totalUnique=${total[0]}
 1	log	app/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	SyncManager
 1	technical	app/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	categoriesAdded

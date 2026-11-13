@@ -40,7 +40,7 @@ class UserDataWriter(
 ) {
 
     /** Unfavorite one item. */
-    suspend fun removeFavorite(type: MediaType, itemId: Long) = db.transaction {
+    suspend fun removeFavorite(type: MediaType, itemId: String) = db.transaction {
         if (gives(SyncMatrix.KIND_FAVORITES)) userData.recordDeletion(SyncMatrix.KIND_FAVORITES, type, itemId)
         favoriteDao.remove(type, itemId)
     }
@@ -50,7 +50,7 @@ class UserDataWriter(
      * `watchedAt` and its tombstone kind does not travel, so unless the user turns the category's
      * "give" on the deletion stays local.
      */
-    suspend fun removeHistory(type: MediaType, itemId: Long) = db.transaction {
+    suspend fun removeHistory(type: MediaType, itemId: String) = db.transaction {
         if (gives(SyncMatrix.KIND_HISTORY)) userData.recordDeletion(SyncMatrix.KIND_HISTORY, type, itemId)
         historyDao.remove(type, itemId)
     }
@@ -59,7 +59,7 @@ class UserDataWriter(
     suspend fun removeCustomCategoryMember(
         type: MediaType,
         contextKey: String,
-        itemId: Long,
+        itemId: String,
     ) = db.transaction {
         customCategoryDao.deleteItem(type, contextKey, itemId)
     }

@@ -6,7 +6,6 @@ import kotlinx.coroutines.withContext
 import tv.own.owntv.core.CorePerf
 import tv.own.owntv.core.customize.SectionCustomizations
 import tv.own.owntv.core.database.dao.EpgDao
-import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.epg.EpgShift
@@ -40,7 +39,6 @@ private const val UPCOMING_LIMIT = 18
  */
 class LiveEpgReader(
     private val epgDao: EpgDao,
-    private val sourceDao: SourceDao,
     private val streamUrlResolver: StreamUrlResolver,
 ) {
     private data class CachedEpg(val at: Long, val data: EpgNowNext)
@@ -48,12 +46,12 @@ class LiveEpgReader(
     /** Written from the IO dispatcher (the now/next fetch) and cleared from Main (EPG mapping/shift
      *  changes), so it cannot be a plain HashMap — concurrent structural modification of one is
      *  undefined, up to a corrupt table or an infinite loop inside `get`. */
-    private val cache = java.util.concurrent.ConcurrentHashMap<Long, CachedEpg>()
+    private val cache = java.util.concurrent.ConcurrentHashMap<String, CachedEpg>()
 
     private data class CachedRows(val at: Long, val rows: List<EpgProgrammeEntity>)
 
     /** Provider-fetched guide rows per channel, so the grid and the preview share one request. */
-    private val providerRows = java.util.concurrent.ConcurrentHashMap<Long, CachedRows>()
+    private val providerRows = java.util.concurrent.ConcurrentHashMap<String, CachedRows>()
 
     /** Drop every cached now/next — the global guide offset moved, so all of them are stale. */
     fun clearCache() {
@@ -61,7 +59,7 @@ class LiveEpgReader(
     }
 
     /** Drop one channel's cached now/next (its EPG match or per-channel shift changed). */
-    fun invalidate(channelId: Long) {
+    fun invalidate(channelId: String) {
         cache.remove(channelId)
     }
 
@@ -196,7 +194,7 @@ class LiveEpgReader(
         channels: List<ChannelEntity>,
         cust: SectionCustomizations,
         globalShiftMinutes: Int,
-    ): Map<Long, String> = nowProgrammesFor(channels, cust, globalShiftMinutes).mapValues { it.value.title }
+    ): Map<String, String> = nowProgrammesFor(channels, cust, globalShiftMinutes).mapValues { it.value.title }
 
     /**
      * [nowPlayingFor] with the programme's start and stop as well, in display time (the channel's
@@ -207,11 +205,10 @@ class LiveEpgReader(
         channels: List<ChannelEntity>,
         cust: SectionCustomizations,
         globalShiftMinutes: Int,
-    ): Map<Long, XtEpgEntry> = withContext(Dispatchers.IO) {
+    ): Map<String, XtEpgEntry> = withContext(Dispatchers.IO) {
         if (channels.isEmpty()) return@withContext emptyMap()
         val now = System.currentTimeMillis()
-        val sourceIds = sourceDao.allSourceIds()
-        // Manual EPG-match overrides take precedence over the channel's own epgChannelId, mirroring nowNext.
+                // Manual EPG-match overrides take precedence over the channel's own epgChannelId, mirroring nowNext.
         // Shifted channels look up a different instant, so the batch is grouped by shift — with no
         // offsets configured (the normal case) that's still exactly one query group.
         val channelKeys = channels.mapNotNull { ch ->
@@ -222,7 +219,7 @@ class LiveEpgReader(
         if (channelKeys.isEmpty()) return@withContext emptyMap()
         val startedAt = android.os.SystemClock.elapsedRealtime()
         var chunks = 0
-        val result = HashMap<Long, XtEpgEntry>()
+        val result = HashMap<String, XtEpgEntry>()
         for ((shift, group) in channelKeys.groupBy { it.third }) {
             val delta = shift * 60_000L
             val at = EpgShift.toStored(now, shift)
@@ -274,7 +271,7 @@ class LiveEpgReader(
      *
      * Deliberately never fetches. See the note in [nowPlayingFor] for what happened when it did.
      */
-    private fun cachedNow(channelId: Long, now: Long): XtEpgEntry? {
+    private fun cachedNow(channelId: String, now: Long): XtEpgEntry? {
         cache[channelId]?.takeIf { now - it.at < CACHE_TTL_MS }?.data?.now
             ?.takeIf { it.title.isNotBlank() }?.let { return it.copy(description = null) }
         return providerRows[channelId]

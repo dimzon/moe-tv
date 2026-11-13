@@ -209,17 +209,22 @@ class UserDataTombstoneTest {
      * stable identity a favorite is — otherwise the next playlist refresh would forget every deletion
      * and the next sync would undo them all at once.
      */
+    /**
+     * The row id is gone as a concept: user data is keyed on the hex remoteId, which a re-sync
+     * does not change — a deletion therefore matches the channel that returns after the re-sync
+     * with no relink pass at all.
+     */
     @Test
-    fun aDeletionStillMatchesAfterAResyncChangesTheRowId() = runBlocking {
-        val oldId = insertChannel("m-1", "BBC One")
-        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = oldId, addedAt = 100))
-        writer.removeFavorite(MediaType.LIVE, oldId)
+    fun aDeletionStillMatchesAfterAResyncRewritesTheCatalogue() = runBlocking {
+        val key = insertChannel("m-1", "BBC One")
+        db.favoriteDao().add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = key, addedAt = 100))
+        writer.removeFavorite(MediaType.LIVE, key)
 
-        db.channelDao().clearSource(sourceId)
-        val newId = insertChannel("m-1", "BBC One")
-        assertTrue(newId != oldId)
+        db.channelDao().deleteByRemoteIds(listOf(key))
+        val returned = insertChannel("m-1", "BBC One")
+        assertEquals(key, returned)
 
-        resolver.importAll(incomingFavorites(newId, at = 100))
+        resolver.importAll(incomingFavorites(returned, at = 100))
 
         assertEquals(0, db.favoriteDao().getAllOnce().size)
     }
@@ -254,22 +259,22 @@ class UserDataTombstoneTest {
         assertEquals(900L, db.historyDao().getAllOnce().single().watchedAt)
     }
 
-    private suspend fun incomingHistory(itemId: Long, at: Long): JSONArray {
+    private suspend fun incomingHistory(itemId: String, at: Long): JSONArray {
         val record = resolver.identityOf(MediaType.LIVE, itemId)!!
         return JSONArray().put(record.put("kind", "his").put("at", at))
     }
 
-    private suspend fun incomingFavorites(itemId: Long, at: Long): JSONArray {
+    private suspend fun incomingFavorites(itemId: String, at: Long): JSONArray {
         val record = resolver.identityOf(MediaType.LIVE, itemId)!!
         return JSONArray().put(record.put("kind", "fav").put("at", at))
     }
 
-    private suspend fun incomingDeletion(itemId: Long, at: Long): JSONArray = incomingFavorites(itemId, at)
+    private suspend fun incomingDeletion(itemId: String, at: Long): JSONArray = incomingFavorites(itemId, at)
 
-    private suspend fun insertChannel(remoteId: String?, name: String): Long {
-        db.channelDao().insertAll(
-            listOf(ChannelEntity(sourceId = sourceId, name = name, streamUrl = "https://portal.test/$name", remoteId = remoteId)),
-        )
-        return db.channelDao().findByName(sourceId, name)!!.id
+    /** The channel key IS the identity user data is keyed on now — no local row ids left. */
+    private suspend fun insertChannel(remoteId: String?, name: String): String {
+        val key = remoteId ?: "name-$name"
+        db.channelDao().insertAll(listOf(ChannelEntity(remoteId = key, name = name)))
+        return key
     }
 }

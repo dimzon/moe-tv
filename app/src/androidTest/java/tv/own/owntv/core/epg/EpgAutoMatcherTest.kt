@@ -141,12 +141,10 @@ class EpgAutoMatcherTest {
     }
 
     private suspend fun insertChannel(name: String, remoteId: String?, tvgId: String?): ChannelEntity {
+        // tvgId is no longer separate metadata: for RuTube the guide key IS the remoteId.
         val channel = ChannelEntity(
-            sourceId = playlist,
-            remoteId = remoteId,
+            remoteId = remoteId ?: name,
             name = name,
-            streamUrl = "http://example.invalid/$remoteId",
-            epgChannelId = tvgId,
         )
         db.channelDao().insertAll(listOf(channel))
         return channel

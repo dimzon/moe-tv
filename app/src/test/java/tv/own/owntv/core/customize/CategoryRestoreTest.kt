@@ -7,21 +7,21 @@ import org.junit.Test
 class CategoryRestoreTest {
     @Test
     fun `no saved order, or one that matches the order added, is nothing to clear`() {
-        assertFalse(savedOrderDiffers(listOf(1L, 2L, 3L), emptyMap()))
-        assertFalse(savedOrderDiffers(listOf(1L, 2L, 3L), mapOf(1L to 0, 2L to 1, 3L to 2)))
+        assertFalse(savedOrderDiffers(listOf("1", "2", "3"), emptyMap()))
+        assertFalse(savedOrderDiffers(listOf("1", "2", "3"), mapOf("1" to 0, "2" to 1, "3" to 2)))
     }
 
     @Test
     fun `a reordered combined category has an order to clear`() {
-        assertTrue(savedOrderDiffers(listOf(1L, 2L, 3L), mapOf(3L to 0, 1L to 1, 2L to 2)))
+        assertTrue(savedOrderDiffers(listOf("1", "2", "3"), mapOf("3" to 0, "1" to 1, "2" to 2)))
     }
 
     @Test
     fun `saved items lead and the rest follow in the order added`() {
         // 3 was saved first; 1 and 2 follow as added — that differs from 1, 2, 3.
-        assertTrue(savedOrderDiffers(listOf(1L, 2L, 3L), mapOf(3L to 0)))
+        assertTrue(savedOrderDiffers(listOf("1", "2", "3"), mapOf("3" to 0)))
         // 1 was saved first, the rest follow as added — the same as 1, 2, 3.
-        assertFalse(savedOrderDiffers(listOf(1L, 2L, 3L), mapOf(1L to 0)))
+        assertFalse(savedOrderDiffers(listOf("1", "2", "3"), mapOf("1" to 0)))
     }
 
     @Test

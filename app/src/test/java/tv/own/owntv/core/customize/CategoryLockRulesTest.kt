@@ -77,7 +77,7 @@ class CategoryLockRulesTest {
 
     @Test
     fun `a sealed channel is kept out of Favorites and History too, unlike a hidden one`() {
-        val ch = ChannelEntity(sourceId = 1, name = "X", streamUrl = "http://x/1.ts", remoteId = "c1")
+        val ch = ChannelEntity( name = "X", remoteId = "c1")
         ChannelMembership.snapshot = mapOf("c1" to setOf(3L))
         val hidden = SectionCustomizations(hiddenCategories = setOf(keyOf(3)))
         assertTrue(isChannelVisible(ch, hidden, setOf(3L), LiveKey.Favorites))
@@ -89,7 +89,7 @@ class CategoryLockRulesTest {
 
     @Test
     fun `nothing in a sealed custom category shows while it is open on screen`() {
-        val ch = ChannelEntity(sourceId = 1, name = "Y", streamUrl = "http://x/2.ts", remoteId = "c2")
+        val ch = ChannelEntity( name = "Y", remoteId = "c2")
         val c = SectionCustomizations(sealedCategories = setOf("custom:x"))
         assertFalse(isChannelVisible(ch, c, emptySet(), LiveKey.Custom("custom:x")))
         assertTrue(isChannelVisible(ch, c, emptySet(), LiveKey.All))

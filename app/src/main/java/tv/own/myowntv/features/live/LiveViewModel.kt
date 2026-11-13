@@ -146,7 +146,7 @@ class LiveViewModel(
     private val externalPlayerLauncher: tv.own.owntv.core.player.ExternalPlayerLauncher,
 ) : ViewModel() {
 
-    data class ChannelMoveState(val items: List<ChannelEntity>, val activeIndex: Int, val contextKey: String, val carried: Set<Long> = emptySet())
+    data class ChannelMoveState(val items: List<ChannelEntity>, val activeIndex: Int, val contextKey: String, val carried: Set<String> = emptySet())
     private val _moveState = MutableStateFlow<ChannelMoveState?>(null)
     val moveState: StateFlow<ChannelMoveState?> = _moveState.asStateFlow()
 
@@ -216,7 +216,7 @@ class LiveViewModel(
 
     private val folderContextKeys: StateFlow<Map<Long, String>> = ctx
         .flatMapLatest { c ->
-            categoryDao.observe(c.sourceIds, MediaType.LIVE).map { cats ->
+            categoryDao.observe(MediaType.LIVE).map { cats ->
                 cats.associateBy({ it.id }, { CustomizeKeys.category(it) })
             }
         }
@@ -308,7 +308,7 @@ class LiveViewModel(
 
     /** Now/next for the focused channel, fetched (debounced) — each answer with the id of the channel it
      *  was looked up for, so [zapGuide] can tell a stale one. [nowNext] is the answer alone. */
-    private val keyedNowNext: StateFlow<Pair<Long?, EpgNowNext?>> = combine(_previewChannel, epgRefresh) { ch, tick -> ch to tick }
+    private val keyedNowNext: StateFlow<Pair<String?, EpgNowNext?>> = combine(_previewChannel, epgRefresh) { ch, tick -> ch to tick }
         .debounce(350)
         .distinctUntilChanged { a, b -> a.first?.id == b.first?.id && a.second == b.second }
         .mapLatest { (ch, _) -> ch?.id to ch?.let { epgReader.nowNext(it, custom.value, epgOffset.value) } }
@@ -364,7 +364,7 @@ class LiveViewModel(
             if (cust.customCategories.isEmpty()) flowOf(emptyList())
             else customCategoryDao.lockAwareCountsByContexts(
                 MediaType.LIVE,
-                cust.customCategories.map { it.id }, c.sourceIds.ifEmpty { listOf(-1L) }, cust.sealedCategoryIds,
+                cust.customCategories.map { it.id }, cust.sealedCategoryIds,
             ).map { counts ->
                 cust.customCategories.map { cc ->
                     MoveTarget(
@@ -394,7 +394,7 @@ class LiveViewModel(
      * folder is marked in movedFromOrigin — the pager chain then drops it from that folder while
      * keeping it in All / search / recent.
      */
-    fun moveToCategory(itemKey: String, itemId: Long, originKey: String, targetId: String, keepInOrigin: Boolean) {
+    fun moveToCategory(itemKey: String, itemId: String, originKey: String, targetId: String, keepInOrigin: Boolean) {
         if (targetId == originKey) return
         viewModelScope.launch {
             customCategoryDao.appendItem(MediaType.LIVE, targetId, itemId)
@@ -416,7 +416,7 @@ class LiveViewModel(
      */
     private val hiddenCategoryIds: StateFlow<Set<Long>> = ctx
         .flatMapLatest { c ->
-            combine(categoryDao.observe(c.sourceIds, MediaType.LIVE), custom) { cats, cust ->
+            combine(categoryDao.observe(MediaType.LIVE), custom) { cats, cust ->
                 tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
                     cats,
                     cust.hiddenCategories,
@@ -442,7 +442,7 @@ class LiveViewModel(
     private val railSnapshot: StateFlow<Pair<Ctx, List<LiveRailItem>>> = ctx
         .flatMapLatest { c ->
             combine(
-                categoryDao.observe(c.sourceIds, MediaType.LIVE),
+                categoryDao.observe(MediaType.LIVE),
                 customize.visibleOnceRead(MediaType.LIVE).filterNotNull(),
                 combine(sortMode, settings.liveBuiltIns) { s, b -> s to b },
             ) { cats, cust, (sort, builtIns) ->
@@ -578,7 +578,6 @@ class LiveViewModel(
         viewModelScope.launch {
             val c = ctx.value
             _categoryMoveState.value = categoryEditor.beginMove(
-                sourceIds = c.sourceIds,
                 type = MediaType.LIVE,
                 alphabetical = sortMode.value == SettingsRepository.SortMode.ALPHA,
                 key = key,
@@ -657,7 +656,7 @@ class LiveViewModel(
                 countFlow(item.key, c, hidden, sealed).map { mapOf(item.key to it) }
             }
             // A sealed folder shows no count: how many channels it holds is the lock's business.
-            val folders = channelDao.observeCountsByCategory(c.sourceIds.ifEmpty { listOf(-1L) })
+            val folders = channelDao.observeCountsByCategory()
                 .map { rows -> rows.filter { it.categoryId !in sealed }.associate { LiveKey.Folder(it.categoryId) as LiveKey to it.itemCount } }
             combine(single + folders) { parts -> parts.fold(emptyMap<LiveKey, Int>()) { acc, m -> acc + m } }.throttleLatest()
         }
@@ -668,7 +667,7 @@ class LiveViewModel(
         .flatMapLatest { it.throttleLatest() } // Cap live COUNT re-runs during bulk sync
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
-    val favoriteIds: StateFlow<Set<Long>> = favoriteDao.observeFavoriteIds(MediaType.LIVE)
+    val favoriteIds: StateFlow<Set<String>> = favoriteDao.observeFavoriteIds(MediaType.LIVE)
         .map { it.toSet() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
 
@@ -796,7 +795,7 @@ class LiveViewModel(
         // auto-preview on launch) and left alone while the mini player plays.
         viewModelScope.launch {
             if (!settings.rememberLastLive.first() || miniPlaying != null || _previewChannel.value != null) return@launch
-            val saved = settings.lastLiveChannelId.first().takeIf { it > 0 }
+            val saved = settings.lastLiveChannelId.first().takeIf { it.isNotEmpty() }
                 ?.let { channelDao.getById(it) }
                 ?.takeIf { !tv.own.owntv.core.database.ChannelMembership.allExcluded(it, customize.sealedCategoryIds(MediaType.LIVE).first()) }
             if (saved != null && _previewChannel.value == null) _previewChannel.value = saved
@@ -999,8 +998,8 @@ class LiveViewModel(
         }
     }
 
-    fun rememberPeekFocus(channelId: Long) = peek.rememberFocus(channelId)
-    fun peekEntryChannel(): Long? = peek.entryChannel(playingChannel?.id)
+    fun rememberPeekFocus(channelId: String) = peek.rememberFocus(channelId)
+    fun peekEntryChannel(): String? = peek.entryChannel(playingChannel?.id)
 
     /** OK on a channel in the channel browser: CH± now steps through the list it was picked from, then it tunes. */
     fun watchFromPeek(channel: ChannelEntity) {
@@ -1040,8 +1039,8 @@ class LiveViewModel(
         val sources = c.sourceIds.ifEmpty { listOf(-1L) }
         val raw = withContext(Dispatchers.IO) {
             when (key) {
-                LiveKey.Favorites -> channelDao.snapshotFavoritesManual(ContentOrderEntity.FAV_CONTEXT, sources, ZAP_LIST_LIMIT)
-                else -> channelDao.snapshotAll(sources, ZAP_LIST_LIMIT)
+                LiveKey.Favorites -> channelDao.snapshotFavoritesManual(ContentOrderEntity.FAV_CONTEXT, ZAP_LIST_LIMIT)
+                else -> channelDao.snapshotAll(ZAP_LIST_LIMIT)
             }
         }
         val cust = custom.value
@@ -1056,7 +1055,7 @@ class LiveViewModel(
         val c = ctx.value
         val cs = custResolved.value ?: return emptyList()
         return withContext(Dispatchers.IO) {
-            customCategoryDao.snapshotChannels(key.id, c.sourceIds.ifEmpty { listOf(-1L) }, sortMode.value == SettingsRepository.SortMode.ALPHA, ZAP_LIST_LIMIT)
+            customCategoryDao.snapshotChannels(key.id, sortMode.value == SettingsRepository.SortMode.ALPHA, ZAP_LIST_LIMIT)
         }
             .filter { isChannelVisible(it, cs.cust, cs.hiddenCats, key) }
             .map { ch -> cs.cust.itemNames[CustomizeKeys.channel(ch)]?.let { ch.copy(name = it) } ?: ch }
@@ -1078,7 +1077,7 @@ class LiveViewModel(
                 channelDao.snapshotByCategoryManual(catId, folderContextKeys.value[catId] ?: "", sortMode.value == SettingsRepository.SortMode.ALPHA, ZAP_LIST_LIMIT)
             } else {
                 // No category on this row (an entry imported without one) — fall back to All Channels.
-                channelDao.snapshotAll(ctx.value.sourceIds.ifEmpty { listOf(-1L) }, ZAP_LIST_LIMIT)
+                channelDao.snapshotAll(ZAP_LIST_LIMIT)
             }
         }
         val cust = custom.value
@@ -1160,13 +1159,12 @@ class LiveViewModel(
             .filter { it.syncLive }.map { it.id }.toSet()
         if (liveIds.isEmpty()) return null
         val channel = when {
-            link.sourceId != null && !link.remoteId.isNullOrBlank() -> channelDao.findByRemote(link.sourceId, link.remoteId)
-            link.sourceId != null && !link.name.isNullOrBlank() -> channelDao.findByName(link.sourceId, link.name)
-            link.itemId != null && link.itemId > 0L -> channelDao.getById(link.itemId)
+            !link.remoteId.isNullOrBlank() -> channelDao.findByRemote(link.remoteId)
+            !link.name.isNullOrBlank() -> channelDao.findByName(link.name)
+            link.itemId != null && link.itemId.isNotBlank() -> channelDao.getById(link.itemId)
             else -> null
         } ?: return null
-        if (link.sourceId != null && channel.sourceId != link.sourceId) return null
-        return channel.takeIf { it.sourceId in liveIds }
+        return channel
     }
 
     /** Open a channel fullscreen, preserving the browse context it was launched from. The channel's
@@ -1280,7 +1278,7 @@ class LiveViewModel(
     suspend fun tuneByNumber(number: Int): tv.own.myowntv.player.DirectTuneResult {
         try {
             val currentChannel = playingChannel ?: return tv.own.myowntv.player.DirectTuneResult.NotFound(number)
-            val snapshotSourceIds = ctx.value.sourceIds
+
             // Snapshot the zap list at lookup START so the resolver's zap-context tiebreaker is
             // stable for the duration of the IO query. After the lookup completes and context
             // validity is verified we re-read zapList: a previous background rebuild may have
@@ -1293,8 +1291,8 @@ class LiveViewModel(
             val resolved = withContext(Dispatchers.IO) {
                 // Resolve hidden categories for sources not in the active set (source may have been removed).
                 val activeHiddenCats = hiddenCategoryIds.value.toMutableSet()
-                if (currentChannel.sourceId !in snapshotSourceIds) {
-                    val cats = categoryDao.observe(listOf(currentChannel.sourceId), MediaType.LIVE).first()
+                if (false) {
+                    val cats = categoryDao.observe(MediaType.LIVE).first()
                     val cust = custom.value
                     if (cust.hiddenCategories.isNotEmpty()) {
                         cats.filter { CustomizeKeys.category(it) in cust.hiddenCategories }.forEach { activeHiddenCats += it.id }
@@ -1303,9 +1301,8 @@ class LiveViewModel(
                 val currentCustom = custom.value
 
                 // Stage 1: query the currently playing source.
-                val currentSourceCandidates = channelDao.findByNumber(
-                    listOf(currentChannel.sourceId), number,
-                ).filter { isChannelVisible(it, currentCustom, activeHiddenCats) }
+                val currentSourceCandidates = channelDao.findByNumber(number)
+                    .filter { isChannelVisible(it, currentCustom, activeHiddenCats) }
 
                 if (currentSourceCandidates.isNotEmpty()) {
                     val resolvedId = tv.own.myowntv.player.resolveDirectTuneCandidate(
@@ -1319,11 +1316,7 @@ class LiveViewModel(
                 }
 
                 // Stage 2: fallback to other active Live sources.
-                val fallbackSourceIds = snapshotSourceIds.filter { it != currentChannel.sourceId }
-                if (fallbackSourceIds.isEmpty()) return@withContext ChannelNumberLookupResult.NotFound
-
-                val fallbackCandidates = channelDao.findByNumber(fallbackSourceIds, number)
-                    .filter { isChannelVisible(it, currentCustom, activeHiddenCats) }
+                val fallbackCandidates = emptyList<ChannelEntity>()
                 if (fallbackCandidates.isEmpty()) return@withContext ChannelNumberLookupResult.NotFound
 
                 val r = tv.own.myowntv.player.resolveDirectTuneCandidate(
@@ -1346,9 +1339,9 @@ class LiveViewModel(
 
             // Verify context hasn't changed during lookup. If the playing channel or active source
             // set moved, the resolved channel is stale — return Cancelled and do nothing.
-            if (_previewChannel.value?.id != currentChannel.id ||
-                ctx.value.sourceIds != snapshotSourceIds
-            ) return tv.own.myowntv.player.DirectTuneResult.Cancelled
+            if (_previewChannel.value?.id != currentChannel.id) {
+                return tv.own.myowntv.player.DirectTuneResult.Cancelled
+            }
 
             // If the tuned channel is already playing, skip playback + rebuild to avoid a stream
             // restart. Still return Found so the HUD shows normal success feedback.
@@ -1398,8 +1391,8 @@ class LiveViewModel(
             afterRaw = channelDao.channelsAfterCategory(categoryId, channel.sortOrder, channel.id, half)
             beforeRaw = channelDao.channelsBeforeCategory(categoryId, channel.sortOrder, channel.id, half)
         } else {
-            afterRaw = channelDao.channelsAfterSource(channel.sourceId, channel.sortOrder, channel.id, half)
-            beforeRaw = channelDao.channelsBeforeSource(channel.sourceId, channel.sortOrder, channel.id, half)
+            afterRaw = channelDao.channelsAfterSource(channel.sortOrder, channel.id, half)
+            beforeRaw = channelDao.channelsBeforeSource(channel.sortOrder, channel.id, half)
         }
         // beforeRaw is in reverse order; combine: before(reversed) + tuned + after
         val raw = beforeRaw.asReversed() + channel + afterRaw
@@ -1527,7 +1520,7 @@ class LiveViewModel(
     /** Open a channel from a caller-owned rail (for example Home favorites), preserving that rail as the
      *  playback browse/zap context instead of replacing it with provider-category metadata. A channel in
      *  a locked category, or one that is gone, does not open: false. */
-    suspend fun ensurePlayingByIdAsync(channelId: Long, zapChannels: List<ChannelEntity> = emptyList()): Boolean {
+    suspend fun ensurePlayingByIdAsync(channelId: String, zapChannels: List<ChannelEntity> = emptyList()): Boolean {
         val channel = channelDao.getById(channelId)
             ?.takeUnless { tv.own.owntv.core.database.ChannelMembership.allExcluded(it, customize.sealedCategoryIds(MediaType.LIVE).first()) }
             ?: return false
@@ -1595,7 +1588,7 @@ class LiveViewModel(
      * guide simply has no entry here, and the row shows no second line. Returns only channels that
      * actually have something airing right now.
      */
-    suspend fun nowPlayingFor(channels: List<ChannelEntity>): Map<Long, tv.own.owntv.core.parser.XtEpgEntry> =
+    suspend fun nowPlayingFor(channels: List<ChannelEntity>): Map<String, tv.own.owntv.core.parser.XtEpgEntry> =
         epgReader.nowProgrammesFor(channels, custom.value, epgOffset.value)
 
     /**
@@ -1605,11 +1598,11 @@ class LiveViewModel(
      * behalf. An earlier version had each caller drop everything outside its own list, which made the
      * Live list and the channel-list overlay evict each other's work every time one opened.
      */
-    private val nowPlayingCache = object : LinkedHashMap<Long, tv.own.owntv.core.parser.XtEpgEntry?>(256, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Long, tv.own.owntv.core.parser.XtEpgEntry?>?) = size > MAX_NOW_PLAYING
+    private val nowPlayingCache = object : LinkedHashMap<String, tv.own.owntv.core.parser.XtEpgEntry?>(256, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, tv.own.owntv.core.parser.XtEpgEntry?>?) = size > MAX_NOW_PLAYING
     }
 
-    private val _nowPlaying = MutableStateFlow<Map<Long, tv.own.owntv.core.parser.XtEpgEntry?>>(emptyMap())
+    private val _nowPlaying = MutableStateFlow<Map<String, tv.own.owntv.core.parser.XtEpgEntry?>>(emptyMap())
 
     /**
      * Channel id → the programme airing now.
@@ -1618,25 +1611,25 @@ class LiveViewModel(
      * not asked again on every append; that sentinel is filtered out here, so such a row simply has
      * no entry and draws no second line.
      */
-    val nowPlaying: StateFlow<Map<Long, String>> = _nowPlaying
+    val nowPlaying: StateFlow<Map<String, String>> = _nowPlaying
         .map { found -> buildMap { found.forEach { (id, p) -> if (p != null) put(id, p.title) } } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     /** [nowPlaying] with the programme's start and stop, for the Stage rows' time left and progress. */
-    val nowProgrammes: StateFlow<Map<Long, tv.own.owntv.core.parser.XtEpgEntry>> = _nowPlaying
+    val nowProgrammes: StateFlow<Map<String, tv.own.owntv.core.parser.XtEpgEntry>> = _nowPlaying
         .map { found -> buildMap { found.forEach { (id, p) -> if (p != null) put(id, p) } } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     private var nowPlayingJob: kotlinx.coroutines.Job? = null
 
-    private fun publishNowPlaying(resolved: Map<Long, tv.own.owntv.core.parser.XtEpgEntry?>) {
+    private fun publishNowPlaying(resolved: Map<String, tv.own.owntv.core.parser.XtEpgEntry?>) {
         synchronized(nowPlayingCache) {
             nowPlayingCache.putAll(resolved)
             _nowPlaying.value = HashMap(nowPlayingCache)
         }
     }
 
-    private fun cachedNowPlaying(): Map<Long, tv.own.owntv.core.parser.XtEpgEntry?> = synchronized(nowPlayingCache) { HashMap(nowPlayingCache) }
+    private fun cachedNowPlaying(): Map<String, tv.own.owntv.core.parser.XtEpgEntry?> = synchronized(nowPlayingCache) { HashMap(nowPlayingCache) }
 
     /** Forget every resolved title — the guide data or the offset moved underneath them. */
     private fun clearNowPlaying() {
@@ -1685,7 +1678,6 @@ class LiveViewModel(
     private fun pagingSource(key: LiveKey, c: Ctx, query: String, sort: SettingsRepository.SortMode): PagingSource<Int, ChannelEntity> =
         livePagingSource(
             key = key,
-            sourceIds = c.sourceIds,
             query = query,
             sort = sort,
             channelDao = channelDao,
@@ -1705,8 +1697,8 @@ class LiveViewModel(
             val alpha = sortMode.value == SettingsRepository.SortMode.ALPHA
             val items = when (key) {
                 is LiveKey.Folder -> channelDao.snapshotByCategoryManual(key.id, contextKey, alpha, 5000)
-                is LiveKey.Custom -> customCategoryDao.snapshotChannels(key.id, ctx.value.sourceIds.ifEmpty { listOf(-1L) }, alpha, 5000)
-                LiveKey.Favorites -> channelDao.snapshotFavoritesManual(contextKey, ctx.value.sourceIds.ifEmpty { listOf(-1L) }, 5000)
+                is LiveKey.Custom -> customCategoryDao.snapshotChannels(key.id, alpha, 5000)
+                LiveKey.Favorites -> channelDao.snapshotFavoritesManual(contextKey, 5000)
                 // History/All are computed views: no stored order to move within.
                 LiveKey.History, LiveKey.All -> return@launch
             }
@@ -1749,14 +1741,14 @@ class LiveViewModel(
         }
     }
 
-    fun removeFromHistory(channelId: Long) {
+    fun removeFromHistory(channelId: String) {
         viewModelScope.launch {
             userDataWriter.removeHistory(MediaType.LIVE, channelId)
         }
     }
 
     private fun countFlow(key: LiveKey, c: Ctx, hiddenCats: Set<Long>, sealedCats: Set<Long>): Flow<Int> =
-        liveCountFlow(key, c.sourceIds, hiddenCats, channelDao, customCategoryDao, sealedCats)
+        liveCountFlow(key, hiddenCats, channelDao, customCategoryDao, sealedCats)
 
     internal companion object {
         /** How long a channel must stay tuned before it counts as watched — see [recordLiveHistory]. */

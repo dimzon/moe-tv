@@ -63,7 +63,7 @@ val HeroItem.homeKey: String
 @Immutable
 data class GuideSliceState(
     val channels: List<ChannelEntity> = emptyList(),
-    val programmes: Map<Long, List<EpgProgrammeEntity>> = emptyMap(),
+    val programmes: Map<String, List<EpgProgrammeEntity>> = emptyMap(),
     val windowStart: Long = 0L,
     val windowEnd: Long = 0L,
     val now: Long = 0L,
@@ -111,9 +111,9 @@ class HomeFeedReader(
             val liveIds = liveIdsAsync.await()
 
             // Hidden items / hidden categories never surface on Home either.
-            val hidden = hiddenState(allIdsAsync.await().toList())
+            val hidden = hiddenState()
             val recentLiveAsync = async {
-                channelDao.recentlyWatchedWithTimestampFiltered(liveIds.toList(), RECENT_LIVE_ROW_LIMIT).first()
+                channelDao.recentlyWatchedWithTimestamp(RECENT_LIVE_ROW_LIMIT).first()
             }
             val liveWithTs = recentLiveAsync.await().filterNot { isChannelHidden(it.channel, hidden) }
             val live = liveWithTs.map { it.channel }
@@ -124,14 +124,14 @@ class HomeFeedReader(
             // The two guide slices read different channel sets and never depend on each other.
             val recentGuideAsync = async {
                 if (HomeRow.RECENT_CHANNELS in config.visibleOrder && config.recentLiveMode == HomeLiveRowMode.ON_NOW) {
-                    liveGuide(liveIds, live)
+                    liveGuide(live)
                 } else {
                     GuideSliceState()
                 }
             }
             val favoriteGuideAsync = async {
                 if (HomeRow.FAVORITE_CHANNELS in config.visibleOrder && config.favoriteLiveMode == HomeLiveRowMode.ON_NOW) {
-                    liveGuide(liveIds, favLive)
+                    liveGuide(favLive)
                 } else {
                     GuideSliceState()
                 }
@@ -160,13 +160,13 @@ class HomeFeedReader(
             get() = live.hiddenItems.isEmpty() && liveCats.isEmpty()
     }
 
-    private suspend fun hiddenState(sourceIds: List<Long>): HiddenState {
+    private suspend fun hiddenState(): HiddenState {
         val live = customize.observeVisible(MediaType.LIVE).first()
-        val liveCats = if (live.hiddenCategories.isEmpty() || sourceIds.isEmpty()) {
+        val liveCats = if (live.hiddenCategories.isEmpty()) {
             emptySet()
         } else {
             AdultCategoryClassifier.hiddenCategoryIds(
-                categoryDao.observe(sourceIds, MediaType.LIVE).first(),
+                categoryDao.observe(MediaType.LIVE).first(),
                 live.hiddenCategories,
             )
         }
@@ -200,7 +200,6 @@ class HomeFeedReader(
 
     /** A live rail in "On now" mode: six hours of guide for the channels it is about to draw. */
     private suspend fun liveGuide(
-        activeIds: Set<Long>,
         channels: List<ChannelEntity>,
     ): GuideSliceState {
         val now = System.currentTimeMillis()

@@ -81,10 +81,9 @@ class CategoryRailEditor(
 
     /** The rail's categories, exactly as the screen has them. */
     private suspend fun rows(
-        sourceIds: List<Long>,
         type: MediaType,
         alphabetical: Boolean,
-    ): List<CustomizedCategory> = categoryDao.observe(sourceIds, type).first().railCategories(
+    ): List<CustomizedCategory> = categoryDao.observe(type).first().railCategories(
         customize.observe(type).first(),
         alphabetical = alphabetical,
     )
@@ -95,24 +94,22 @@ class CategoryRailEditor(
 
     /** Starts a move the caller then steps and commits itself — the television's overlay. */
     suspend fun beginMove(
-        sourceIds: List<Long>,
         type: MediaType,
         alphabetical: Boolean,
         key: LiveKey,
     ): CategoryMove? = CategoryMove.begin(
-        rows(sourceIds, type, alphabetical),
+        rows(type, alphabetical),
         customizationKey(key) ?: return null,
     )
 
     /** Moves a category one step and stores the result — the phone's menu. */
     suspend fun move(
-        sourceIds: List<Long>,
         type: MediaType,
         alphabetical: Boolean,
         key: LiveKey,
         kind: MoveKind,
     ) {
-        val moved = beginMove(sourceIds, type, alphabetical, key)?.moved(kind) ?: return
+        val moved = beginMove(type, alphabetical, key)?.moved(kind) ?: return
         customize.saveCategoryMove(type, moved.keys, moved.carried)
     }
 }

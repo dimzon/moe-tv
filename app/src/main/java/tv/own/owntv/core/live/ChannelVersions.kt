@@ -13,7 +13,6 @@ import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.matchName
 import tv.own.owntv.core.model.MediaType
-import tv.own.owntv.core.repository.activeProfileSources
 
 /**
  * One version of a live channel: the same channel in another quality, category or playlist. [name] is
@@ -25,7 +24,6 @@ data class ChannelVersion(
     val tags: List<String>,
     val qualityRank: Int,
     val categoryName: String?,
-    val playlistName: String?,
 )
 
 /**
@@ -57,12 +55,11 @@ object ChannelVersionRules {
         return x.isNotEmpty() && y.isNotEmpty() && (x.containsAll(y) || y.containsAll(x))
     }
 
-    /** The channel playing ([playingId]) first; then best picture, the playlists' order and the provider's own. */
-    fun ordered(versions: List<ChannelVersion>, sourceOrder: List<Long>, playingId: Long = -1): List<ChannelVersion> =
+    /** The channel playing ([playingId]) first; then best picture and the provider's own. */
+    fun ordered(versions: List<ChannelVersion>, playingId: String = ""): List<ChannelVersion> =
         versions.sortedWith(
             compareByDescending<ChannelVersion> { it.channel.id == playingId }
                 .thenByDescending { it.qualityRank }
-                .thenBy { sourceOrder.indexOf(it.channel.sourceId) }
                 .thenBy { it.channel.sortOrder },
         )
 
@@ -90,36 +87,30 @@ class ChannelVersions(
 ) {
     private class Cached(val fingerprint: String, val versions: List<ChannelVersion>)
 
-    private val cache = object : LinkedHashMap<Long, Cached>(16, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Long, Cached>?) = size > CACHE_MAX
+    private val cache = object : LinkedHashMap<String, Cached>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Cached>?) = size > CACHE_MAX
     }
 
     /** Every version of [channel], [channel] itself included, best first. */
     suspend fun of(channel: ChannelEntity): List<ChannelVersion> = withContext(Dispatchers.IO) {
-        val sources = activeProfileSources(sourceDao).first()
-        val ids = sources.liveSourceIds
-        // observeVisible: a locked category the PIN has not opened counts as hidden, as in every list.
+                // observeVisible: a locked category the PIN has not opened counts as hidden, as in every list.
         val cust = customize.observeVisible(MediaType.LIVE).first()
         val fingerprint = listOf(
-            sources.sources.filter { it.syncLive }.joinToString(",") { "${it.id}@${it.lastSyncAt}" },
             cust.hiddenItems.keys.hashCode(), cust.hiddenCategories.hashCode(), cust.itemNames.hashCode(), cust.epgMatches.hashCode(),
         ).joinToString("|")
         synchronized(cache) { cache[channel.id]?.takeIf { it.fingerprint == fingerprint }?.let { return@withContext it.versions } }
-        if (ids.isEmpty()) return@withContext emptyList()
-
-        val categories = categoryDao.observe(ids, MediaType.LIVE).first()
+        val categories = categoryDao.observe(MediaType.LIVE).first()
         val hiddenCats = AdultCategoryClassifier.hiddenCategoryIds(categories, cust.hiddenCategories)
         val categoryNames = categories.associate { it.id to it.name }
-        val playlistNames = sources.sources.associate { it.id to it.name }
         fun visible(ch: ChannelEntity) =
             CustomizeKeys.channel(ch) !in cust.hiddenItems && tv.own.owntv.core.database.ChannelMembership.visible(ch, hiddenCats)
 
         val facets = ChannelFacets.of(channel.matchName)
         val guide = epgKeyOf(channel, cust)
-        val byGuide = guide?.let { channelDao.byEpgKeys(ids, listOf(it)) }.orEmpty()
+        val byGuide = guide?.let { channelDao.byEpgKeys(listOf(it)) }.orEmpty()
         val words = ChannelVersionRules.searchWords(facets)
         val byName = if (words.isEmpty()) emptyList() else runCatching {
-            channelDao.searchListDetailedFts(words.joinToString(" ") { "$it*" }, ids, MAX_CANDIDATES).map { it.channel }
+            channelDao.searchListDetailedFts(words.joinToString(" ") { "$it*" }, MAX_CANDIDATES).map { it.channel }
         }.getOrElse { Log.w(TAG, "channel search failed: ${it.message}"); emptyList() }
 
         val versions = (listOf(channel) + byGuide + byName)
@@ -134,10 +125,9 @@ class ChannelVersions(
                     tags = parsed.tags,
                     qualityRank = ChannelFacets.of(ch.matchName).qualityRank,
                     categoryName = tv.own.owntv.core.database.ChannelMembership.primaryCat(ch)?.let { categoryNames[it] }?.let { ProviderTags.parse(it).name },
-                    playlistName = playlistNames[ch.sourceId],
                 )
             }
-        val ordered = ChannelVersionRules.ordered(versions, ids, channel.id)
+        val ordered = ChannelVersionRules.ordered(versions, channel.id)
         synchronized(cache) { cache[channel.id] = Cached(fingerprint, ordered) }
         ordered
     }

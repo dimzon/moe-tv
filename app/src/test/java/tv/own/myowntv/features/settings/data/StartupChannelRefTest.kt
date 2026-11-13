@@ -50,10 +50,8 @@ class StartupChannelRefTest {
     @Test
     fun `stable channel reference survives settings serialization`() {
         val original = StartupChannelRef(
-            sourceId = 7L,
             remoteId = "stream-42",
             name = "News HD",
-            itemId = 99L,
         )
 
         assertEquals(original, StartupChannelRef.fromJson(original.toJson().toString()))

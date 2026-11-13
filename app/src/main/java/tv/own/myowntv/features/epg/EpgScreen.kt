@@ -377,7 +377,7 @@ fun EpgScreen(
     // the grid on screen. That channel was chosen, so its preview starts without another OK. Any other return
     // (a menu, Settings) goes back to the channel last tuned here and leaves the preview as it was.
     // The playing channel's category is opened once; if the channel is still not listed, the old target is used.
-    var categoryOpenedFor by remember { mutableStateOf<Long?>(null) }
+    var categoryOpenedFor by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(restoreFocus, state.loading, state.channels) {
         if (!restoreFocus || state.loading || state.channels.isEmpty()) return@LaunchedEffect
         val playing = previewChannel.takeIf { vm.playerClosed && previewEnabled }

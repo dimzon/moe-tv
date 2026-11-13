@@ -149,9 +149,9 @@ interface EpgDao {
     @Query("SELECT id, description FROM epg_programmes WHERE id IN (:ids) AND description IS NOT NULL")
     suspend fun programmeDescriptions(ids: List<Long>): List<EpgProgrammeText>
 
-    /** How many programmes are stored for these sources (to tell "no guide yet" from "empty window"). */
-    @Query("SELECT COUNT(*) FROM epg_programmes WHERE sourceId IN (:sourceIds)")
-    suspend fun countForSources(sourceIds: List<Long>): Int
+    /** How many programmes are stored (to tell "no guide yet" from "empty window"). */
+    @Query("SELECT COUNT(*) FROM epg_programmes")
+    suspend fun countForSources(): Int
 
     /** Current/upcoming programmes for one (normalized) EPG channel id — 0 means the feed has nothing
      *  scheduled from now on, so a freshly-matched channel would show an empty guide row. */

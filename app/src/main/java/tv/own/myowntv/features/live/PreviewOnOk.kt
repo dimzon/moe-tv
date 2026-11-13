@@ -53,5 +53,5 @@ enum class OkAction { PREVIEW, WATCH }
  * [paneChannelId] is the channel the pane was last asked to play, whether it plays or not: on a panel
  * that allows one stream the pane stays blank and says so, and the second OK must still go full screen.
  */
-fun okAction(twoStep: Boolean, paneCanPlay: Boolean, paneChannelId: Long?, okChannelId: Long): OkAction =
+fun okAction(twoStep: Boolean, paneCanPlay: Boolean, paneChannelId: String?, okChannelId: String): OkAction =
     if (twoStep && paneCanPlay && paneChannelId != okChannelId) OkAction.PREVIEW else OkAction.WATCH

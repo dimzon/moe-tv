@@ -45,10 +45,10 @@ interface HistoryDao {
         "UPDATE watch_history SET watchedAt = :at, deviceId = :deviceId " +
             "WHERE mediaType = :type AND itemId = :itemId AND watchedAt < :at",
     )
-    suspend fun bumpIfNewer(type: MediaType, itemId: Long, at: Long, deviceId: String?)
+    suspend fun bumpIfNewer(type: MediaType, itemId: String, at: Long, deviceId: String?)
 
     @Query("DELETE FROM watch_history WHERE mediaType = :type AND itemId = :itemId")
-    suspend fun remove(type: MediaType, itemId: Long)
+    suspend fun remove(type: MediaType, itemId: String)
 
     /**
      * Deletes the row only when it is older than [at] — the local-sync merge rule for an
@@ -56,7 +56,7 @@ interface HistoryDao {
      * and survives. Returns the number of rows removed, so the sync summary can count it.
      */
     @Query("DELETE FROM watch_history WHERE mediaType = :type AND itemId = :itemId AND watchedAt <= :at")
-    suspend fun removeIfOlderThan(type: MediaType, itemId: Long, at: Long): Int
+    suspend fun removeIfOlderThan(type: MediaType, itemId: String, at: Long): Int
 
     @Query("DELETE FROM watch_history")
     suspend fun clear()
@@ -67,11 +67,11 @@ interface HistoryDao {
 
     /** When it was last watched — the dry run compares it against an incoming deletion. */
     @Query("SELECT watchedAt FROM watch_history WHERE mediaType = :type AND itemId = :itemId")
-    suspend fun watchedAt(type: MediaType, itemId: Long): Long?
+    suspend fun watchedAt(type: MediaType, itemId: String): Long?
 
     /** Does this row already exist? The dry run before a sync counts what is genuinely new. */
     @Query("SELECT EXISTS(SELECT 1 FROM watch_history WHERE mediaType = :type AND itemId = :itemId)")
-    suspend fun exists(type: MediaType, itemId: Long): Boolean
+    suspend fun exists(type: MediaType, itemId: String): Boolean
 
     @Query("SELECT COUNT(*) FROM watch_history WHERE mediaType = :type")
     fun count(type: MediaType): Flow<Int>
@@ -95,28 +95,16 @@ interface HistoryDao {
     @Query("SELECT * FROM watch_history")
     suspend fun getAllOnce(): List<WatchHistoryEntity>
 
-    /** User-data rows tied to one source, already joined to stable content keys for fast re-sync snapshots.
-     *  Live-only: the only media type whose content rows still exist. */
-    @Query(
-        "SELECT h.mediaType AS mediaType, h.itemId AS itemId, " +
-            "c.sourceId AS sourceId, c.remoteId AS remoteId, c.name AS name, " +
-            "h.watchedAt AS at, h.deviceId AS deviceId " +
-            "FROM watch_history h " +
-            "JOIN channels c ON h.mediaType = 'LIVE' AND h.itemId = c.id " +
-            "WHERE c.sourceId = :sourceId",
-    )
-    suspend fun exportRowsForSource(sourceId: Long): List<UserDataExportRow>
-
     /** The row is an orphan when its type no longer has content rows at all (the app is live-only)
      *  or its LIVE row is gone. */
     @Query(
         "DELETE FROM watch_history WHERE mediaType = :type AND itemId = :itemId AND (" +
-            "mediaType != 'LIVE' OR itemId NOT IN (SELECT id FROM channels))",
+            "mediaType != 'LIVE' OR itemId NOT IN (SELECT remoteId FROM channels))",
     )
-    suspend fun purgeSnapshotOrphan(type: MediaType, itemId: Long)
+    suspend fun purgeSnapshotOrphan(type: MediaType, itemId: String)
 
     /** Drops history rows orphaned by a re-sync (see FavoriteDao.purgeOrphans). */
-    @Query("DELETE FROM watch_history WHERE mediaType != 'LIVE' OR itemId NOT IN (SELECT id FROM channels)")
+    @Query("DELETE FROM watch_history WHERE mediaType != 'LIVE' OR itemId NOT IN (SELECT remoteId FROM channels)")
     suspend fun purgeOrphans()
 }
 

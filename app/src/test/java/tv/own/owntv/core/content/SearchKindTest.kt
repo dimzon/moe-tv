@@ -11,10 +11,10 @@ import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 /** The search filter buttons: each kind switched on and off on its own, none on meaning everything. */
 class SearchKindTest {
 
-    private val bbcOne = ChannelEntity(sourceId = 1, name = "BBC One", streamUrl = "u1")
+    private val bbcOne = ChannelEntity(remoteId = "bbc1", name = "BBC One")
     private val channel = ChannelSearchResult(channel = bbcOne, categoryName = null)
     private val otherChannel = ChannelSearchResult(
-        channel = ChannelEntity(sourceId = 1, name = "BBC Two", streamUrl = "u2"),
+        channel = ChannelEntity(remoteId = "bbc2", name = "BBC Two"),
         categoryName = null,
     )
     private val programme = ProgrammeSearchResult(

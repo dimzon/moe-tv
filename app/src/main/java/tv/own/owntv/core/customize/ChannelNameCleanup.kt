@@ -33,10 +33,11 @@ class ChannelNameCleanup private constructor(private val rules: List<RenameRules
         return if (cleaned.isEmpty() || cleaned == raw.trim()) raw else cleaned
     }
 
-    /** [channel] with its display name cleaned and the provider's name kept for guide matching. */
+    /** [channel] with its display name cleaned. The provider's name needs no separate storage:
+     *  the display name is the stored name and guide matching keys on the hex remoteId. */
     fun applyTo(channel: ChannelEntity): ChannelEntity {
         val cleaned = clean(channel.name)
-        return if (cleaned == channel.name) channel else channel.copy(name = cleaned, providerName = channel.name)
+        return if (cleaned == channel.name) channel else channel.copy(name = cleaned)
     }
 
     companion object {

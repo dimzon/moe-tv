@@ -35,7 +35,7 @@ class ChannelRenameDaoTest {
     private suspend fun insertChannel(remoteId: String, name: String) {
         db.channelDao().insertAll(
             listOf(
-                ChannelEntity(sourceId = source, name = name, streamUrl = "rutube://1/$remoteId", remoteId = remoteId),
+                ChannelEntity(remoteId = remoteId, name = name),
             ),
         )
     }
@@ -45,21 +45,21 @@ class ChannelRenameDaoTest {
         db.channelRenameDao().replaceAll(listOf(ChannelRenameEntity("hex-1", "Красивое имя")))
         insertChannel("hex-1", "provider name")
         db.channelRenameDao().applyToChannels()
-        assertEquals("Красивое имя", db.channelDao().getById(1)?.name)
+        assertEquals("Красивое имя", db.channelDao().getById("hex-1")?.name)
     }
 
     @Test
     fun aDeletedChannelLeavesAnInertRenameThatWaits() = runBlocking {
         db.channelRenameDao().replaceAll(listOf(ChannelRenameEntity("hex-1", "Красивое имя")))
         insertChannel("hex-1", "provider name")
-        db.channelDao().deleteByRemoteIds(source, listOf("hex-1"))
+        db.channelDao().deleteByRemoteIds(listOf("hex-1"))
         // No FK: the orphaned rename must not throw, and applying over an empty catalogue is a no-op.
         db.channelRenameDao().applyToChannels()
-        assertTrue(db.channelDao().snapshotAll(listOf(source), 10).isEmpty())
+        assertTrue(db.channelDao().snapshotAll(10).isEmpty())
         // The channel returns with the same videoId (a re-sync) and is renamed again.
         insertChannel("hex-1", "provider name")
         db.channelRenameDao().applyToChannels()
-        assertEquals("Красивое имя", db.channelDao().getById(2)?.name)
+        assertEquals("Красивое имя", db.channelDao().getById("hex-1")?.name)
     }
 
     @Test

@@ -315,15 +315,15 @@ internal fun FavouritesPage(
     vm: MoreCountsViewModel,
     /** Hands More what OK / ▶ on the sheet does: focus the first card. */
     setEntry: (() -> Boolean) -> Unit,
-    onPlayChannel: (Long) -> Unit,
+    onPlayChannel: (String) -> Unit,
 ) {
     val counts by vm.favorites.collectAsStateWithLifecycle()
     val lists by vm.favouriteLists.collectAsStateWithLifecycle()
     val move by vm.move.collectAsStateWithLifecycle()
     // Hold OK: the item whose small menu is open, and the card to return to when it closes.
-    var menu by remember { mutableStateOf<Triple<MediaType, Long, String>?>(null) }
-    val itemFocus = remember { HashMap<Pair<MediaType, Long>, FocusRequester>() }
-    fun focusOf(type: MediaType, id: Long) = itemFocus.getOrPut(type to id) { FocusRequester() }
+    var menu by remember { mutableStateOf<Triple<MediaType, String, String>?>(null) }
+    val itemFocus = remember { HashMap<Pair<MediaType, String>, FocusRequester>() }
+    fun focusOf(type: MediaType, id: String) = itemFocus.getOrPut(type to id) { FocusRequester() }
     var returnTo by remember { mutableStateOf<FocusRequester?>(null) }
     LaunchedEffect(menu, move) {
         if (menu == null && move == null) returnTo?.let { withFrameNanos { }; runCatching { it.requestFocus() }; returnTo = null }
@@ -402,14 +402,14 @@ internal fun HistoryPage(
     vm: MoreCountsViewModel,
     setEntry: (() -> Boolean) -> Unit,
     onClearHistory: (MediaType?) -> Unit,
-    onPlayChannel: (Long) -> Unit,
+    onPlayChannel: (String) -> Unit,
 ) {
     val counts by vm.history.collectAsStateWithLifecycle()
     val rows = vm.historyLists.collectAsStateWithLifecycle().value.live
     var showClear by remember { mutableStateOf(false) }
     val clearFocus = remember { FocusRequester() }
-    val rowFocus = remember { HashMap<Long, FocusRequester>() }
-    fun focusOf(id: Long) = rowFocus.getOrPut(id) { FocusRequester() }
+    val rowFocus = remember { HashMap<String, FocusRequester>() }
+    fun focusOf(id: String) = rowFocus.getOrPut(id) { FocusRequester() }
     var clearWasOpen by remember { mutableStateOf(false) }
     LaunchedEffect(showClear) { if (showClear) clearWasOpen = true else if (clearWasOpen) { clearWasOpen = false; withFrameNanos { }; runCatching { clearFocus.requestFocus() } } }
 

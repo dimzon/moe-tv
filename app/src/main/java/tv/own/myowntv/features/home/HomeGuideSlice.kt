@@ -97,7 +97,7 @@ fun HomeLiveRow(
     mode: HomeLiveRowMode,
     channels: List<ChannelEntity>,
     guide: GuideSliceState,
-    onChannelClick: (Long, List<ChannelEntity>) -> Unit,
+    onChannelClick: (String, List<ChannelEntity>) -> Unit,
     onFocus: () -> Unit,
     firstItemFocusRequester: FocusRequester?,
     start: Dp,

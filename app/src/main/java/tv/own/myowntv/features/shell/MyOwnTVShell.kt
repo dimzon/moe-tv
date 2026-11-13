@@ -413,17 +413,12 @@ fun MyOwnTVShell(
                 if (ref != null) {
                     if (!ref.remoteId.isNullOrBlank()) {
                         channel = liveVm.resolveLauncherChannel(
-                            LauncherDeepLink.Live(sourceId = ref.sourceId, remoteId = ref.remoteId),
+                            LauncherDeepLink.Live(remoteId = ref.remoteId),
                         )
                     }
                     if (channel == null) {
                         channel = liveVm.resolveLauncherChannel(
-                            LauncherDeepLink.Live(sourceId = ref.sourceId, name = ref.name),
-                        )
-                    }
-                    if (channel == null && ref.itemId > 0L) {
-                        channel = liveVm.resolveLauncherChannel(
-                            LauncherDeepLink.Live(sourceId = ref.sourceId, itemId = ref.itemId),
+                            LauncherDeepLink.Live(name = ref.name),
                         )
                     }
                 }
@@ -1332,7 +1327,7 @@ fun MyOwnTVShell(
                     // "End of programme" sleep: the programme on air is the one being watched.
                     sleepProgrammeEndMs = if (isTunedLive) { { liveVm.nowNext.value?.now?.stopMs } } else null,
                     onTuneToNumber = if (tv.own.myowntv.player.numberKeysTune(directTuneEnabled, playerRemoteOptions) && isTunedLive && previewChannel != null) liveVm::tuneByNumber else null,
-                    directTuneContextKey = previewChannel?.id ?: 0L,
+                    directTuneContextKey = previewChannel?.id.orEmpty(),
                     remoteOptions = playerRemoteOptions,
                     // In-stream favorite toggle for the current channel.
                     favorite = favActive,

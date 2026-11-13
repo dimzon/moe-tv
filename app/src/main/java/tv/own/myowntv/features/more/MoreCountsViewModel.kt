@@ -89,13 +89,13 @@ data class SyncSnapshot(val listening: Boolean = false, val devices: List<Paired
 /** More › Favourites: the starred channels in the user's own order, with what is on each one now. */
 data class FavouriteLists(
     val live: List<ChannelEntity> = emptyList(),
-    val onNow: Map<Long, GuideSlot> = emptyMap(),
+    val onNow: Map<String, GuideSlot> = emptyMap(),
     val now: Long = 0L,
 )
 
 /** One More › History row: a channel last watched. */
 data class HistoryEntry(
-    val id: Long,
+    val id: String,
     val title: String,
     val channel: ChannelEntity?,
     val watchedAt: Long,
@@ -106,7 +106,7 @@ data class HistoryLists(
 )
 
 /** A favourite being moved in More › Favourites: the type's whole list and where the moving one is. */
-data class FavouriteMove(val type: MediaType, val ids: List<Long>, val names: List<String>, val index: Int)
+data class FavouriteMove(val type: MediaType, val ids: List<String>, val names: List<String>, val index: Int)
 
 /**
  * More's data: the sheet's counts, and the Favourites and History pages.
@@ -179,7 +179,7 @@ class MoreCountsViewModel(
 
     private suspend fun loadFavourites(c: ActiveProfileSources, sealed: Sealed): FavouriteLists {
         val key = ContentOrderEntity.FAV_CONTEXT
-        val live = channelDao.snapshotFavoritesManual(key, ids(c, MediaType.LIVE), LIST_LIMIT)
+        val live = channelDao.snapshotFavoritesManual(key, LIST_LIMIT)
             .filterNot { sealedAllCats(sealed, MediaType.LIVE, it) }
         val now = System.currentTimeMillis()
         val onNow = if (live.isEmpty()) emptyMap() else guide.onNow(
@@ -194,14 +194,14 @@ class MoreCountsViewModel(
     }
 
     private suspend fun loadHistory(c: ActiveProfileSources, sealed: Sealed): HistoryLists {
-        val live = channelDao.recentlyWatchedWithTimestampFiltered(ids(c, MediaType.LIVE), LIST_LIMIT).first()
+        val live = channelDao.recentlyWatchedWithTimestamp(LIST_LIMIT).first()
             .filterNot { sealedAllCats(sealed, MediaType.LIVE, it.channel) }.map {
             HistoryEntry(it.channel.id, it.channel.name, it.channel, it.watchedAt)
         }
         return HistoryLists(live)
     }
 
-    fun removeFavourite(type: MediaType, id: Long) {
+    fun removeFavourite(type: MediaType, id: String) {
         viewModelScope.launch { userDataWriter.removeFavorite(type, id) }
     }
 
@@ -211,7 +211,7 @@ class MoreCountsViewModel(
     }
 
     /** Move starts on the favourite channels' whole list, in its current order. */
-    fun startMove(type: MediaType, id: Long) {
+    fun startMove(type: MediaType, id: String) {
         val lists = favouriteLists.value
         val pairs = when (type) {
             MediaType.LIVE -> lists.live.map { it.id to it.name }
@@ -246,8 +246,8 @@ class MoreCountsViewModel(
     private fun counts(favorites: Boolean): StateFlow<TypeCounts> = ctx
         .flatMapLatest { c ->
             // What a locked category holds leaves the counts too, so they agree with the lists.
-            fun count(type: MediaType, all: (List<Long>) -> Flow<Int>, excluding: (List<Long>, List<Long>) -> Flow<Int>) =
-                lockAwareCount(customize.sealedCategoryIds(type), { all(ids(c, type)) }) { excluding(ids(c, type), it) }
+            fun count(type: MediaType, all: () -> Flow<Int>, excluding: (List<Long>) -> Flow<Int>) =
+                lockAwareCount(customize.sealedCategoryIds(type), { all() }) { excluding(it) }
             (
                 if (favorites) count(MediaType.LIVE, channelDao::countFavorites, channelDao::countFavoritesExcluding)
                 else count(MediaType.LIVE, channelDao::countHistory, channelDao::countHistoryExcluding)

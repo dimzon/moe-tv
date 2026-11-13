@@ -82,14 +82,9 @@ class RailCountsViewModel(
 
     val counts: StateFlow<Map<MainSection, Int>> =
         sourceDao.observeAll()
-        .map { sources ->
-            // The live-only app surfaces only sources whose live sync scope is on. An empty id list
-            // would make the IN clause meaningless; -1 matches nothing.
-            sources.filter { it.syncLive }.map { it.id }.ifEmpty { listOf(-1L) }
-        }
-        .flatMapLatest { ids ->
-            lockAwareCount(customize.sealedCategoryIds(MediaType.LIVE), { channelDao.countAll(ids) }) {
-                channelDao.countAllExcluding(ids, it)
+        .flatMapLatest {
+            lockAwareCount(customize.sealedCategoryIds(MediaType.LIVE), { channelDao.countAll() }) {
+                channelDao.countAllExcluding(it)
             }.map { live -> mapOf(MainSection.LIVE_TV to live) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())

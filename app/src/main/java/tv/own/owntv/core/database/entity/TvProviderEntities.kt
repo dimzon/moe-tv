@@ -25,7 +25,7 @@ data class TvProviderProgramEntity(
     val surface: TvProviderSurface,
     val mediaType: MediaType,
     val groupId: Long,
-    val targetItemId: Long,
+    val targetItemId: String,
     val providerProgramId: Long? = null,
     val lastPositionMs: Long = 0L,
     val durationMs: Long = 0L,

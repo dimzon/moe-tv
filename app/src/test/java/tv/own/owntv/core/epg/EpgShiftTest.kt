@@ -15,8 +15,7 @@ import tv.own.owntv.core.database.entity.EpgProgrammeEntity
  */
 class EpgShiftTest {
 
-    private val channel = ChannelEntity(
-        sourceId = 7, name = "CBS West", streamUrl = "http://x/1.ts", remoteId = "1234",
+    private val channel = ChannelEntity( name = "CBS West", remoteId = "1234",
     )
     private val key = CustomizeKeys.channel(channel)
 

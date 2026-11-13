@@ -142,7 +142,7 @@ internal enum class HudDialog { NONE, AUDIO, SUBS, ZOOM, QUALITY, VOLUME, SLEEP_
  */
 class HudSources(
     val load: suspend () -> List<tv.own.owntv.core.live.ChannelVersion>,
-    val playingId: Long,
+    val playingId: String,
     val onPick: (tv.own.owntv.core.database.entity.ChannelEntity) -> Unit,
 )
 
@@ -181,7 +181,7 @@ fun PlayerHud(
     // Direct tune: enter a provider channel number to switch channels. Null = disabled (not live / no channel).
     onTuneToNumber: (suspend (Int) -> DirectTuneResult)? = null,
     // Channel identity key for direct tune: changing this cancels any in-flight submission.
-    directTuneContextKey: Long = 0L,
+    directTuneContextKey: String = "",
     remoteOptions: PlayerRemoteOptions = PlayerRemoteOptions(), // Settings › Remote shortcuts › Player buttons
     // Favorite toggle for the CURRENT item (the live channel). Null hides the button
     // (no item context). [favorite] = current state — fills the star teal when true.

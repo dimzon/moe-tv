@@ -49,7 +49,7 @@ import androidx.paging.PagingSource
  * position, before the list's hide/move filters: the row is at or above it, so scrolling there loads
  * the right part of the list and the screen then finds the row by id. Null when it is not in the list.
  */
-suspend fun <T : Any> PagingSource<Int, T>.positionOf(id: Long, idOf: (T) -> Long, maxRows: Int = 60_000): Int? {
+suspend fun <T : Any> PagingSource<Int, T>.positionOf(id: String, idOf: (T) -> String, maxRows: Int = 60_000): Int? {
     var offset = 0
     while (offset < maxRows) {
         val page = load(PagingSource.LoadParams.Append(offset, REVEAL_PAGE, false)) as? PagingSource.LoadResult.Page ?: return null
@@ -64,4 +64,4 @@ suspend fun <T : Any> PagingSource<Int, T>.positionOf(id: Long, idOf: (T) -> Lon
 private const val REVEAL_PAGE = 1000
 
 /** A pending "Go to": the category to show, the item, and its raw position in that category's list. */
-data class Reveal(val key: tv.own.owntv.core.live.LiveKey, val id: Long, val position: Int)
+data class Reveal(val key: tv.own.owntv.core.live.LiveKey, val id: String, val position: Int)

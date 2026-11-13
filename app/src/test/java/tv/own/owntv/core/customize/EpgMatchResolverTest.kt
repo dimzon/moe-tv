@@ -16,31 +16,28 @@ class EpgMatchResolverTest {
 
     @Test
     fun `the exact key always wins`() {
-        val resolver = EpgMatchResolver(
-            mapOf("7:bbc1" to "bbc.one.uk", "9:bbc1" to "bbc.one.hd"),
-        )
+        val resolver = EpgMatchResolver(mapOf("0:bbc1" to "bbc.one.uk", "7:bbc1" to "bbc.one.hd"))
 
         // Both tiers could answer, and they disagree — but tier 1 is never in doubt.
-        assertEquals("bbc.one.uk", resolver.epgIdFor(channel(sourceId = 7, remoteId = "bbc1")))
-        assertEquals("bbc.one.hd", resolver.epgIdFor(channel(sourceId = 9, remoteId = "bbc1")))
+        assertEquals("bbc.one.uk", resolver.epgIdFor(channel(remoteId = "bbc1")))
     }
 
     @Test
     fun `a match survives the playlist being deleted and re-added`() {
-        // The match was stored under source 7; the re-imported playlist is source 42.
+        // The match was stored under an older source id; the channel's key is the one source's now.
         val resolver = EpgMatchResolver(mapOf("7:bbc1" to "bbc.one.uk"))
 
-        assertEquals("bbc.one.uk", resolver.epgIdFor(channel(sourceId = 42, remoteId = "bbc1")))
+        assertEquals("bbc.one.uk", resolver.epgIdFor(channel(remoteId = "bbc1")))
     }
 
     @Test
     fun `a channel with no provider id is found by its name`() {
-        // A channel with no provider id is keyed by its name, so that is the only thing left to match on.
+        // A channel keyed by its name is matched on that name, normalised.
         val resolver = EpgMatchResolver(mapOf("7:Sky Movies F1" to "sky.f1.uk"))
 
         assertEquals(
             "sky.f1.uk",
-            resolver.epgIdFor(channel(sourceId = 42, remoteId = null, name = "SKY MOVIES F1 HD")),
+            resolver.epgIdFor(channel(remoteId = "SKY MOVIES F1 HD", name = "SKY MOVIES F1 HD")),
         )
     }
 
@@ -48,33 +45,29 @@ class EpgMatchResolverTest {
     fun `an ambiguous provider id is never guessed`() {
         // Two old playlists matched the same provider id to different guide channels. Guessing would
         // put a wrong guide on a channel, which is worse than showing none.
-        val resolver = EpgMatchResolver(
-            mapOf("7:bbc1" to "bbc.one.uk", "9:bbc1" to "bbc.one.hd"),
-        )
+        val resolver = EpgMatchResolver(mapOf("7:bbc1" to "bbc.one.uk", "9:bbc1" to "bbc.one.hd"))
 
-        assertNull(resolver.epgIdFor(channel(sourceId = 42, remoteId = "bbc1")))
+        assertNull(resolver.epgIdFor(channel(remoteId = "bbc1")))
     }
 
     @Test
     fun `duplicate entries that agree are not ambiguous`() {
         // The same channel matched under two playlists, to the same guide channel. Nothing to resolve.
-        val resolver = EpgMatchResolver(
-            mapOf("7:bbc1" to "bbc.one.uk", "9:bbc1" to "bbc.one.uk"),
-        )
+        val resolver = EpgMatchResolver(mapOf("7:bbc1" to "bbc.one.uk", "9:bbc1" to "bbc.one.uk"))
 
-        assertEquals("bbc.one.uk", resolver.epgIdFor(channel(sourceId = 42, remoteId = "bbc1")))
+        assertEquals("bbc.one.uk", resolver.epgIdFor(channel(remoteId = "bbc1")))
     }
 
     @Test
     fun `an unmatched channel stays unmatched`() {
         val resolver = EpgMatchResolver(mapOf("7:bbc1" to "bbc.one.uk"))
 
-        assertNull(resolver.epgIdFor(channel(sourceId = 42, remoteId = "itv1", name = "ITV1")))
+        assertNull(resolver.epgIdFor(channel(remoteId = "ITV1")))
     }
 
     @Test
     fun `no stored matches resolves nothing`() {
-        assertNull(EpgMatchResolver(emptyMap()).epgIdFor(channel(sourceId = 1, remoteId = "bbc1")))
+        assertNull(EpgMatchResolver(emptyMap()).epgIdFor(channel(remoteId = "bbc1")))
     }
 
     @Test
@@ -88,13 +81,10 @@ class EpgMatchResolverTest {
     }
 
     private fun channel(
-        sourceId: Long,
-        remoteId: String?,
+        remoteId: String,
         name: String = "Channel",
     ) = ChannelEntity(
-        sourceId = sourceId,
         remoteId = remoteId,
         name = name,
-        streamUrl = "http://example.invalid/stream",
     )
 }

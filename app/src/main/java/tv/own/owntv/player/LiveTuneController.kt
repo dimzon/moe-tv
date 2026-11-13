@@ -180,7 +180,7 @@ class LiveTuneController(
     }
 
     /** The channel the preview pane last asked the engine for (see [expectPromotion]). */
-    private var previewedChannelId: Long? = null
+    private var previewedChannelId: String? = null
 
     /**
      * The user is opening [channel] full screen. When the engine is already previewing it, say so at

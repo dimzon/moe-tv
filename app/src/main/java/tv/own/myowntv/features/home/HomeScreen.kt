@@ -124,7 +124,7 @@ private val NoHeroTop = 110.mpx
 @Composable
 fun HomeScreen(
     vm: HomeViewModel,
-    onPlayChannel: (channelId: Long, zapChannels: List<ChannelEntity>) -> Unit,
+    onPlayChannel: (channelId: String, zapChannels: List<ChannelEntity>) -> Unit,
     onChildFocused: () -> Unit,
     restoreFocus: Boolean = false,
     onRestored: () -> Unit = {},

@@ -379,25 +379,20 @@ class SettingsViewModel(
         viewModelScope.launch {
             settings.setSpecificStartupChannel(
                 tv.own.owntv.core.settings.StartupChannelRef(
-                    sourceId = channel.sourceId,
                     remoteId = channel.remoteId,
                     name = channel.name,
-                    itemId = channel.id,
                 ),
             )
         }
     }
 
     private suspend fun loadStartupChannelResults(query: String): List<tv.own.owntv.core.database.entity.ChannelEntity> {
-        val sources = sourceDao.observeAll().first().filter { it.syncLive }
-        val sourceIds = sources.map { it.id }
-        if (sourceIds.isEmpty()) return emptyList()
         val customizations = customizationStore.observeVisible(tv.own.owntv.core.model.MediaType.LIVE).first()
         val hiddenCategoryIds = tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
-            categoryDao.observe(sourceIds, tv.own.owntv.core.model.MediaType.LIVE).first(),
+            categoryDao.observe(tv.own.owntv.core.model.MediaType.LIVE).first(),
             customizations.hiddenCategories,
         )
-        return channelDao.searchList(query.trim(), sourceIds, 500)
+        return channelDao.searchList(query.trim(), 500)
             .asSequence()
             .filter { tv.own.owntv.core.customize.CustomizeKeys.channel(it) !in customizations.hiddenItems }
             .filter { tv.own.owntv.core.database.ChannelMembership.visible(it, hiddenCategoryIds) }

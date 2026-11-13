@@ -33,7 +33,7 @@ interface ContentOrderDao {
         "UPDATE content_order SET position = :position, updatedAt = :updatedAt " +
             "WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId AND updatedAt < :updatedAt",
     )
-    suspend fun bumpIfNewer(type: MediaType, contextKey: String, itemId: Long, position: Int, updatedAt: Long)
+    suspend fun bumpIfNewer(type: MediaType, contextKey: String, itemId: String, position: Int, updatedAt: Long)
 
     /**
      * Deletes the row only when it is older than [at] — the merge rule for an incoming **deletion**
@@ -44,14 +44,14 @@ interface ContentOrderDao {
         "DELETE FROM content_order WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId " +
             "AND updatedAt <= :at",
     )
-    suspend fun removeIfOlderThan(type: MediaType, contextKey: String, itemId: Long, at: Long): Int
+    suspend fun removeIfOlderThan(type: MediaType, contextKey: String, itemId: String, at: Long): Int
 
     /** The row's LWW stamp, or null when absent — the dry run compares it against an incoming copy. */
     @Query(
         "SELECT updatedAt FROM content_order WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId " +
             "LIMIT 1",
     )
-    suspend fun updatedAt(type: MediaType, contextKey: String, itemId: Long): Long?
+    suspend fun updatedAt(type: MediaType, contextKey: String, itemId: String): Long?
 
     @Query("DELETE FROM content_order WHERE mediaType = :type AND contextKey = :contextKey")
     suspend fun clearContext(type: MediaType, contextKey: String)
@@ -88,7 +88,7 @@ interface ContentOrderDao {
      * chip around them (see `placePinned`). Favorites has no sort chip, so its whole order is kept.
      */
     @Transaction
-    suspend fun saveMove(type: MediaType, contextKey: String, order: List<Long>, carried: Set<Long>) {
+    suspend fun saveMove(type: MediaType, contextKey: String, order: List<String>, carried: Set<String>) {
         val positions =
             if (contextKey == ContentOrderEntity.FAV_CONTEXT) order.withIndex().associate { (i, id) -> id to i }
             else pinnedAfterMove(order, movedItemIds(type, contextKey).toSet(), carried)
@@ -105,30 +105,14 @@ interface ContentOrderDao {
 
     /** Does this row already exist? The dry run before a sync counts what is genuinely new. */
     @Query("SELECT EXISTS(SELECT 1 FROM content_order WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId)")
-    suspend fun exists(type: MediaType, contextKey: String, itemId: Long): Boolean
+    suspend fun exists(type: MediaType, contextKey: String, itemId: String): Boolean
 
     /** The items of one list that the user moved by hand (they keep a saved position). */
     @Query("SELECT itemId FROM content_order WHERE mediaType = :type AND contextKey = :contextKey")
-    suspend fun movedItemIds(type: MediaType, contextKey: String): List<Long>
+    suspend fun movedItemIds(type: MediaType, contextKey: String): List<String>
 
     @Query("SELECT * FROM content_order")
     suspend fun getAllOnce(): List<ContentOrderEntity>
-
-    /**
-     * Manual-order rows tied to one source, joined to stable content keys — the per-source re-sync
-     * snapshot. Without this, a resync renumbered the content ids and every Move the user had
-     * made in that source's folders was silently lost. Episodes never appear in content_order, so
-     * the join only covers LIVE/MOVIE/SERIES.
-     */
-    @Query(
-        "SELECT o.mediaType AS mediaType, o.itemId AS itemId, " +
-            "o.contextKey AS contextKey, o.position AS position, o.updatedAt AS updatedAt, " +
-            "c.sourceId AS sourceId, c.remoteId AS remoteId, c.name AS name " +
-            "FROM content_order o " +
-            "JOIN channels c ON o.mediaType = 'LIVE' AND o.itemId = c.id " +
-            "WHERE c.sourceId = :sourceId",
-    )
-    suspend fun exportRowsForSource(sourceId: Long): List<ContentOrderExportRow>
 
     /**
      * Snapshot-scoped orphan drop (as FavoriteDao.purgeSnapshotOrphan) for many ids at once. This
@@ -138,9 +122,9 @@ interface ContentOrderDao {
      */
     @Query(
         "DELETE FROM content_order WHERE mediaType = :type AND itemId IN (:itemIds) " +
-            "AND itemId NOT IN (SELECT id FROM channels)",
+            "AND itemId NOT IN (SELECT remoteId FROM channels)",
     )
-    suspend fun purgeSnapshotOrphans(type: MediaType, itemIds: List<Long>)
+    suspend fun purgeSnapshotOrphans(type: MediaType, itemIds: List<String>)
 
     /**
      * Drops order rows whose content row no longer exists — content is clear-then-insert on every sync,
@@ -149,7 +133,7 @@ interface ContentOrderDao {
      */
     @Query(
         "DELETE FROM content_order WHERE " +
-            "mediaType = 'LIVE' AND itemId NOT IN (SELECT id FROM channels)",
+            "mediaType = 'LIVE' AND itemId NOT IN (SELECT remoteId FROM channels)",
     )
     suspend fun purgeOrphans()
 }

@@ -88,7 +88,7 @@ import tv.own.owntv.core.settings.SettingsRepository
 /** One item row in the Customize items screen. */
 data class CustomizeItemRow(
     val key: String,
-    val itemId: Long,
+    val itemId: String,
     val originalName: String,
     val displayName: String,
     val hidden: Boolean,
@@ -125,7 +125,6 @@ class CustomizeItemsViewModel(
         val categoryId: Long?,
         val contextKey: String,
         val mediaType: MediaType,
-        val sourceIds: List<Long>,
     ) {
         /** True when this is a user-created combined category, keyed "custom:<uuid>". */
         val isCustom: Boolean get() = CustomizeKeys.isCustom(contextKey)
@@ -244,9 +243,9 @@ class CustomizeItemsViewModel(
     /** Snapshot of the whole category in current display order: (itemId, stable key) pairs.
      *  Custom categories snapshot the membership join (same rail-order
      *  query as the browse screens). Channels only. */
-    private suspend fun orderedSnapshot(ci: CatInfo): List<Pair<Long, String>> {
+    private suspend fun orderedSnapshot(ci: CatInfo): List<Pair<String, String>> {
         if (ci.isCustom) {
-            return customCategoryDao.snapshotChannels(ci.contextKey, ci.sourceIds, false, SNAPSHOT_LIMIT)
+            return customCategoryDao.snapshotChannels(ci.contextKey, false, SNAPSHOT_LIMIT)
                 .map { it.id to CustomizeKeys.channel(it) }
         }
         return channelDao.snapshotByCategoryManual(ci.categoryId!!, ci.contextKey, false, SNAPSHOT_LIMIT)
@@ -254,7 +253,7 @@ class CustomizeItemsViewModel(
     }
 
     /** Saves a move for this context: the moved items keep their place (the Move commit point). */
-    private suspend fun runMove(ci: CatInfo, block: (List<Pair<Long, String>>) -> Pair<List<Long>, Set<Long>>?) {
+    private suspend fun runMove(ci: CatInfo, block: (List<Pair<String, String>>) -> Pair<List<String>, Set<String>>?) {
         moveMutex.withLock {
             val snapshot = orderedSnapshot(ci)
             val (reordered, carried) = block(snapshot) ?: return
@@ -319,7 +318,7 @@ class CustomizeItemsViewModel(
     private fun pagingSource(categoryId: Long?, info: CatInfo, ordered: Boolean): PagingSource<Int, *> =
         if (info.isCustom) {
             tv.own.owntv.core.database.ManualOrderPagingSource(
-                { customCategoryDao.baseChannelsManual(info.contextKey, info.sourceIds) }, alpha = false,
+                { customCategoryDao.baseChannelsManual(info.contextKey) }, alpha = false,
             )
         } else if (ordered) {
             tv.own.owntv.core.database.ManualOrderPagingSource(
@@ -415,7 +414,6 @@ class CustomizeItemsViewModel(
             else customCategoryDao.observeCountsByContexts(
                 ci.mediaType,
                 targets,
-                ci.sourceIds.ifEmpty { listOf(-1L) },
             )
                 .map { counts ->
                     targets.map { id ->

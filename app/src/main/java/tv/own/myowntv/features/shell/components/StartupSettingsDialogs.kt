@@ -109,10 +109,7 @@ private fun androidx.compose.foundation.layout.ColumnScope.StartupChannelList(
     }
     LazyColumn(Modifier.fillMaxWidth().weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(2.mpx)) {
         items(channels, key = { it.id }) { channel ->
-            val isSelected = selected?.let { ref ->
-                ref.sourceId == channel.sourceId &&
-                    if (!ref.remoteId.isNullOrBlank() && !channel.remoteId.isNullOrBlank()) ref.remoteId == channel.remoteId else ref.name == channel.name
-            } == true
+            val isSelected = selected?.let { ref -> ref.remoteId == channel.remoteId } == true
             tv.own.myowntv.ui.stage.StageSurface(
                 onClick = { onSelect(channel) },
                 radius = 14.mpx,

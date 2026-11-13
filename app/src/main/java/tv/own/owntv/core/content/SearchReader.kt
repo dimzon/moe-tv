@@ -91,8 +91,8 @@ class SearchReader(
         return SearchResults(
             channels = if (sources.liveSourceIds.isEmpty()) emptyList() else
                 (
-                    if (fts != null) channelDao.searchListDetailedFts(fts, sources.liveSourceIds, limit)
-                    else channelDao.searchListDetailed(query, sources.liveSourceIds, limit)
+                    if (fts != null) channelDao.searchListDetailedFts(fts, limit)
+                    else channelDao.searchListDetailed(query, limit)
                     )
                     .filter {
                         CustomizeKeys.channel(it.channel) !in custLive.hiddenItems &&
@@ -138,8 +138,8 @@ class SearchReader(
         val matchedTails = cust.epgMatches
             .filterValues { it.trim().lowercase() in byKey }
             .keys.map { CustomizeKeys.tailOf(it) }.filter { it.isNotEmpty() }.distinct()
-        val candidates = keys.chunked(KEY_CHUNK).flatMap { channelDao.byEpgKeys(liveSourceIds, it) } +
-            matchedTails.chunked(KEY_CHUNK).flatMap { channelDao.byRemoteIdsOrNames(liveSourceIds, it) }
+        val candidates = keys.chunked(KEY_CHUNK).flatMap { channelDao.byEpgKeys(it) } +
+            matchedTails.chunked(KEY_CHUNK).flatMap { channelDao.byRemoteIdsOrNames(it) }
         val globalShift = settings.epgOffsetMinutes.first()
         return candidates
             .distinctBy { it.id }
@@ -191,7 +191,7 @@ class SearchReader(
     ): Set<Long> {
         if (cust.hiddenCategories.isEmpty()) return emptySet()
         return AdultCategoryClassifier.hiddenCategoryIds(
-            categoryDao.observe(sourceIds, type).first(),
+            categoryDao.observe(type).first(),
             cust.hiddenCategories,
         )
     }

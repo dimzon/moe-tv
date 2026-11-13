@@ -7,7 +7,7 @@ import tv.own.owntv.core.database.entity.ChannelEntity
 /** A name given in Customize is the one shown; without one, the provider's. */
 class DisplayNameTest {
 
-    private val channel = ChannelEntity(sourceId = 3, name = "SKY MOVIES F1 FHD", streamUrl = "http://x/1", remoteId = "101")
+    private val channel = ChannelEntity( name = "SKY MOVIES F1 FHD", remoteId = "101")
 
     @Test
     fun `a renamed item shows its new name`() {

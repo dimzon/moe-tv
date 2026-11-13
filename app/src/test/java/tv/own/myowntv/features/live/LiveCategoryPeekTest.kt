@@ -57,10 +57,7 @@ import tv.own.owntv.core.live.LiveKey
  */
 class LiveCategoryPeekTest {
 
-    private fun channel(id: Long) = ChannelEntity(
-        id = id, sourceId = 1, name = "Ch $id",
-        streamUrl = "http://x/$id.ts", remoteId = "$id",
-    )
+    private fun channel(id: Long) = ChannelEntity(remoteId = "ch$id", name = "Ch $id")
 
     /** The junction snapshot the M:N sealing rule reads, seeded per test (hex → its category ids). */
     private fun seedMembership(membership: Map<String, Set<Long>>) {
@@ -88,7 +85,7 @@ class LiveCategoryPeekTest {
         p.load(news) { gate.await() }
         assertEquals(zap, p.channels.value) // nothing changes before the load lands
         gate.complete(listOf(channel(5)))
-        assertEquals(listOf(5L), p.channels.value.map { it.id })
+        assertEquals(listOf("ch5"), p.channels.value.map { it.id })
         assertEquals(news, p.key.value)
     }
 
@@ -101,7 +98,7 @@ class LiveCategoryPeekTest {
         p.load(news) { withContext(NonCancellable) { slow.await() } }
         p.load(sport) { listOf(channel(7)) }
         slow.complete(listOf(channel(5)))
-        assertEquals(listOf(7L), p.channels.value.map { it.id })
+        assertEquals(listOf("ch7"), p.channels.value.map { it.id })
         assertEquals(sport, p.key.value)
     }
 
@@ -118,22 +115,22 @@ class LiveCategoryPeekTest {
     fun `each category remembers its focused channel, else the playing one`() {
         val p = peek()
         p.start(zap, null)
-        assertEquals(2L, p.entryChannel(playingId = 2))
-        p.rememberFocus(1)
+        assertEquals("ch2", p.entryChannel(playingId = "ch2"))
+        p.rememberFocus("ch1")
         p.load(news) { listOf(channel(5), channel(6)) }
-        assertEquals(2L, p.entryChannel(playingId = 2))
-        p.rememberFocus(6)
+        assertEquals("ch2", p.entryChannel(playingId = "ch2"))
+        p.rememberFocus("ch6")
         p.start(zap, null)
-        assertEquals(1L, p.entryChannel(playingId = 2))
+        assertEquals("ch1", p.entryChannel(playingId = "ch2"))
         p.load(news) { listOf(channel(5), channel(6)) }
-        assertEquals(6L, p.entryChannel(playingId = 2))
+        assertEquals("ch6", p.entryChannel(playingId = "ch2"))
     }
 
     @Test
     fun `a shown folder locked while open goes back to the CH± list`() {
         val p = peek()
         p.start(zap, LiveKey.Folder(10))
-        seedMembership(mapOf("5" to setOf(20L)))
+        seedMembership(mapOf("ch5" to setOf(20L)))
         p.load(news) { listOf(channel(5)) }
         p.dropCategories(setOf(20))
         assertEquals(zap, p.channels.value)
@@ -144,10 +141,10 @@ class LiveCategoryPeekTest {
     fun `a mixed list loses only the locked folder's channels`() {
         val p = peek()
         p.start(zap, null)
-        seedMembership(mapOf("5" to setOf(20L), "6" to setOf(30L)))
+        seedMembership(mapOf("ch5" to setOf(20L), "ch6" to setOf(30L)))
         p.load(LiveKey.Favorites) { listOf(channel(5), channel(6)) }
         p.dropCategories(setOf(20))
-        assertEquals(listOf(6L), p.channels.value.map { it.id })
+        assertEquals(listOf("ch6"), p.channels.value.map { it.id })
         assertEquals(LiveKey.Favorites, p.key.value)
     }
 }

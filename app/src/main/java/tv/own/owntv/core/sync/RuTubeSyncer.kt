@@ -101,33 +101,18 @@ internal class RuTubeSyncer(
                 ch.name
             }
             ChannelEntity(
-                sourceId = s.id,
                 // A curated rename wins over the provider's name and the disambiguation suffix.
                 name = renames[ch.videoId] ?: displayName,
                 logoUrl = ch.logoUrl,
-                // Marker — resolved at tune time; never handed to a player as a URL.
-                streamUrl = "rutube://${s.id}/${ch.videoId}",
-                epgChannelId = ch.videoId,
                 number = ch.orderNumber?.takeIf { it != 999 },
                 remoteId = ch.videoId,
                 sortOrder = order++,
-                isPaid = ch.isPaid,
             )
         }
 
-        // Hash-diffed stable upsert via chunked(), same as Xtream. The fresh-import path
-        // takes insertFresh (no hash load).
-        val hashDeferred = if (!freshSource) {
-            coroutineScope {
-                support.asyncHashLoad(this, label, s.id) { support.channelAdapter.loadHashes(s.id) }
-            }
-        } else null
-
-        val insertFn: suspend (List<ChannelEntity>) -> UpsertStats = if (freshSource) {
-            { rows -> support.insertFresh(rows, support.channelAdapter) }
-        } else {
-            { rows -> support.upsertStable(rows, hashDeferred!!, support.channelAdapter) }
-        }
+        // REPLACE-by-PK upsert via chunked(): the row's key IS the provider's hex videoId, so there
+        // is no local id to preserve and no hash to diff — every sync writes exactly what arrived.
+        val insertFn: suspend (List<ChannelEntity>) -> UpsertStats = { rows -> support.upsertChannels(rows) }
 
         val total = intArrayOf(0)
         val remoteIds = HashSet<String>()
@@ -140,12 +125,12 @@ internal class RuTubeSyncer(
             val chunkSize = if (freshSource) BulkInsertHelper.CHUNK_FRESH else BulkInsertHelper.CHUNK
             support.chunked<ChannelEntity, Unit>(
                 ctx, SyncPhase.LIVE, label, progress, insertFn, total,
-                remoteIds, support.channelAdapter.remoteIdOf, chunkSize,
+                remoteIds, { it.remoteId }, chunkSize,
             ) { add ->
                 entities.forEach { add(it) }
             }
             if (!freshSource) {
-                support.pruneRemoteIds(label, s.id, remoteIds, stats, support.channelAdapter.remoteIdsForSource, support.channelAdapter.deleteByRemoteIds)
+                support.pruneChannels(label, remoteIds, stats)
                 support.pruneCategories(s.id, MediaType.LIVE, categoryRefresh.seenRemoteIds, label, stats)
             }
         }
@@ -174,8 +159,8 @@ internal class RuTubeSyncer(
         channels: List<RutubeChannel>,
         catMap: Map<String, Long>,
     ) {
-        channelCategoryDao.clearForSource(sourceId)
-        val present = channelCategoryDao.presentHexIds(sourceId).toSet()
+        channelCategoryDao.clearAll()
+        val present = channelCategoryDao.presentHexIds().toSet()
         val rows = ArrayList<tv.own.owntv.core.database.ChannelCategoryEntity>()
         for (ch in channels) {
             if (ch.videoId !in present) continue

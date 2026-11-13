@@ -52,11 +52,11 @@ import androidx.compose.ui.focus.focusRequester
  * instead of copy-pasted per screen/branch.
  */
 fun Modifier.gridFocusTarget(
-    itemId: Long,
+    itemId: String,
     index: Int,
-    contextId: Long?,
+    contextId: String?,
     contextFocus: FocusRequester,
-    selectedId: Long?,
+    selectedId: String?,
     selectedFocus: FocusRequester,
     firstItemFocus: FocusRequester,
 ): Modifier = when {

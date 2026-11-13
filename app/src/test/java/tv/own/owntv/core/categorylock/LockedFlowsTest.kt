@@ -19,9 +19,9 @@ class LockedFlowsTest {
     private val scope = CoroutineScope(Dispatchers.Unconfined)
     private val sealed = MutableStateFlow<Set<Long>>(emptySet())
 
-    /** Channel id to its category: 1 and 2 are in 10, 3 is in 20, 4 has none, any other is gone. */
-    private val categories = mapOf(1L to 10L, 2L to 10L, 3L to 20L)
-    private val categoryOf: suspend (Long) -> Long? = { categories[it] }
+    /** Channel key to its category: ch1 and ch2 are in 10, ch3 is in 20, any other is gone. */
+    private val categories = mapOf("ch1" to 10L, "ch2" to 10L, "ch3" to 20L)
+    private val categoryOf: suspend (String) -> Long? = { categories[it] }
 
     @After
     fun tearDown() = scope.cancel()
@@ -49,14 +49,14 @@ class LockedFlowsTest {
         assertEquals("Ch 2", seen.last())
     }
 
-    private fun reminder(id: Long, channelId: Long) = ReminderEntity(
+    private fun reminder(id: Long, channelId: String) = ReminderEntity(
         id = id, channelId = channelId, channelName = "Ch $channelId",
         title = "Show $id", startMs = 0, stopMs = 1, leadMinutes = 0, createdAt = 0,
     )
 
     @Test
     fun aDueReminderOnASealedChannelWaitsAndTheNextOneComesUp() {
-        val due = MutableStateFlow(listOf(reminder(1, channelId = 1), reminder(2, channelId = 3)))
+        val due = MutableStateFlow(listOf(reminder(1, channelId = "ch1"), reminder(2, channelId = "ch3")))
         val shown = due.firstUnsealed(sealed = sealed, categoryOf = categoryOf).values()
         assertEquals(1L, shown.last()?.id) // ch 1 (category 10) is first and nothing is sealed
         sealed.value = setOf(10)

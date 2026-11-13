@@ -327,7 +327,7 @@ internal fun SourcesDialog(sources: HudSources, onDismiss: () -> Unit) {
             val playing = v.channel.id == sources.playingId
             tv.own.myowntv.ui.stage.StagePopupOption(
                 title = v.name,
-                subtitle = listOfNotNull(v.categoryName, v.playlistName).filter { it.isNotBlank() }.distinct().joinToString(separator).ifEmpty { null },
+                subtitle = v.categoryName?.takeIf { it.isNotBlank() },
                 value = v.tags.joinToString(" ").ifEmpty { null },
                 chosen = playing,
                 modifier = if (index == focusIndex) Modifier.focusRequester(focus) else Modifier,

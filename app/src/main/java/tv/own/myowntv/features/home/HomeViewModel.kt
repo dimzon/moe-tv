@@ -119,7 +119,7 @@ data class ContinueTarget(
     /** Display name (channel). */
     val name: String,
     val action: ContinueAction,
-    val channelId: Long = -1L,
+    val channelId: String = "",
 )
 
 class HomeViewModel(

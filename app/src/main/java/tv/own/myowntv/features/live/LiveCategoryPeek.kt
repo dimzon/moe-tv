@@ -71,7 +71,7 @@ class LiveCategoryPeek(private val scope: CoroutineScope) {
     val key: StateFlow<LiveKey?> = _key.asStateFlow()
 
     /** The channel last focused in each category this session, so coming back lands where it was. */
-    private val lastFocused = HashMap<LiveKey?, Long>()
+    private val lastFocused = HashMap<LiveKey?, String>()
 
     private var generation = 0
     private var loadJob: Job? = null
@@ -99,10 +99,10 @@ class LiveCategoryPeek(private val scope: CoroutineScope) {
         }
     }
 
-    fun rememberFocus(channelId: Long) { lastFocused[_key.value] = channelId }
+    fun rememberFocus(channelId: String) { lastFocused[_key.value] = channelId }
 
     /** Where the list is entered: the channel last focused in this category, else [playingId]. */
-    fun entryChannel(playingId: Long?): Long? = lastFocused[_key.value] ?: playingId
+    fun entryChannel(playingId: String?): String? = lastFocused[_key.value] ?: playingId
 
     /** Locked folders not open this session: a shown folder among them goes back to the CH± list;
      *  any other list loses just those channels. */

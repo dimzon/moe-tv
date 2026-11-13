@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
  * A programme reminder (v47): "tell me when this starts". The alarm fires [leadMinutes]
  * before [startMs]; the apps show the prompt, core only keeps time.
  *
- * `channelId` is a local id that goes stale on a re-sync, so `channelName` and `epgChannelId`
+ * `channelId` is the channel's hex remoteId (stable across re-syncs); `channelName` and `epgChannelId`
  * travel with it to keep the row readable and re-matchable. A row lives for hours or days and is
  * deleted once its programme has ended or the user dismisses the prompt. Since the sync-matrix
  * redesign it travels between the household's devices as the `prog` kind (identity
@@ -25,7 +25,7 @@ import androidx.room.PrimaryKey
 )
 data class ReminderEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val channelId: Long,
+    val channelId: String,
     val channelName: String,
     val epgChannelId: String? = null,
     val title: String,

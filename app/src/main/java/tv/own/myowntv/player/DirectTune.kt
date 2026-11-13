@@ -71,9 +71,9 @@ data class DirectTuneChannelInfo(
  *  If exactly one candidate exists, return it. If multiple exist, return the one in [zapContext]
  *  (if exactly one duplicate is there). Returns null when resolution is ambiguous. */
 internal fun resolveDirectTuneCandidate(
-    candidateIds: List<Long>,
-    zapContextIds: Set<Long>,
-): Long? {
+    candidateIds: List<String>,
+    zapContextIds: Set<String>,
+): String? {
     if (candidateIds.size == 1) return candidateIds[0]
     val inZap = candidateIds.filter { it in zapContextIds }
     return if (inZap.size == 1) inZap[0] else null

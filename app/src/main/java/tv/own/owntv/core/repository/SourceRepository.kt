@@ -56,7 +56,7 @@ class SourceRepository(
      * which assumes empty tables). Content before categories — same order the syncers clear in.
      */
     suspend fun clearSourceContent(sourceId: Long) {
-        channelDao.clearSource(sourceId)
+        channelDao.deleteByRemoteIds(channelDao.remoteIdsForSource())
         categoryDao.clear(sourceId, tv.own.owntv.core.model.MediaType.LIVE)
     }
 
@@ -79,7 +79,7 @@ class SourceRepository(
         // Snapshot favorites/history with stable keys BEFORE the sync clears content (their ids
         // change on every refresh, so they'd otherwise orphan — count badge set, list empty).
         val snapshotStartedAt = SystemClock.elapsedRealtime()
-        val snapshot = runCatching { userData.exportForSource(source.id) }
+        val snapshot = runCatching { userData.exportSnapshot() }
             .onSuccess { Log.i(TAG, "userData export sourceId=${source.id} rows=${it.length()} ${it.typeCounts()} ms=${SystemClock.elapsedRealtime() - snapshotStartedAt}") }
             .onFailure { Log.w(TAG, "userData export failed sourceId=${source.id} ms=${SystemClock.elapsedRealtime() - snapshotStartedAt}", it) }
             .getOrNull()
@@ -98,7 +98,7 @@ class SourceRepository(
         // Serialized: parallel source syncs (startup refresh runs every source at once) must not
         // relink/purge against each other's mid-flight state.
         relinkMutex.withLock {
-            runCatching { userData.relinkAfterSync(snapshot ?: org.json.JSONArray(), purge = purge) }
+            runCatching { userData.afterSync(purge) }
                 .onSuccess { Log.i(TAG, "userData relink sourceId=${source.id} rows=${snapshot?.length() ?: 0} purge=$purge ms=${SystemClock.elapsedRealtime() - relinkStartedAt}") }
                 .onFailure { Log.w(TAG, "userData relink failed sourceId=${source.id} ms=${SystemClock.elapsedRealtime() - relinkStartedAt}", it) }
         }

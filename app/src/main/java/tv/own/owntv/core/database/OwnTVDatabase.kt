@@ -68,9 +68,12 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
     // fallbackToDestructiveMigration). v2 dropped `channels.categoryId` — the M:N junction
     // `channel_category` owns channel↔category membership, and the in-memory visibility rules
     // read ChannelMembership's snapshot. v3 adds `channel_rename` — curated hex→name renames
-    // without an FK, mirrored from ChannelRenameSeeds on every sync. The old per-version log
+    // without an FK, mirrored from ChannelRenameSeeds on every sync. v4 slims `channels` to the
+    // natural key: remoteId IS the PK and the wide row (row id, sourceId, stream marker, EPG id,
+    // catch-up/DRM/headers/hash) is gone — one built-in source publishes only what it has, the
+    // removed fields live on as code-level synonyms over remoteId. The old per-version log
     // lives in git history and in CHANGELOG.md.
-    version = 3,
+    version = 4,
 
     exportSchema = true,
 )

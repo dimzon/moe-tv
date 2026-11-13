@@ -119,7 +119,7 @@ private val PIN_PAGES = setOf(MoreItem.LOCAL_SYNC)
 fun MoreScreen(
     onOpenSettings: (group: Int?, search: Boolean) -> Unit,
     /** ▶ / OK on a Favourites or History row: the same path Home uses, straight to the channel. */
-    onPlayChannel: (Long) -> Unit,
+    onPlayChannel: (String) -> Unit,
     onChildFocused: () -> Unit,
     onEntryHook: (((() -> Boolean)?) -> Unit)? = null,
     /** Back from Settings: land on the Settings page's first card instead of the rail. */

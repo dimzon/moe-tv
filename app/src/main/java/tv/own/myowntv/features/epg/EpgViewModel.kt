@@ -227,7 +227,7 @@ class EpgViewModel(
     private var loadJob: kotlinx.coroutines.Job? = null
     private val loadMutex = kotlinx.coroutines.sync.Mutex()
 
-    @Volatile private var loadedSourceIds: List<Long> = emptyList()
+    @Volatile private var loadedWindow: Pair<Long, Long>? = null
     // The window the cached rows belong to. A sort / filter / category change keeps the same window,
     // so the rows stay valid and nothing is re-read.
     @Volatile private var cachedWindow: Pair<Long, Long>? = null
@@ -395,7 +395,7 @@ class EpgViewModel(
     }
 
     /** The channel last tuned from the guide — the screen refocuses its row after fullscreen exits. */
-    var lastTunedChannelId: Long? = null
+    var lastTunedChannelId: String? = null
         private set
 
     /** Set when the player closes. The guide is not on screen while the player is, so the mark is kept here:
@@ -415,7 +415,7 @@ class EpgViewModel(
     // one place a live channel starts.
 
     /** Live channels the user has favourited — so the Guide can show/toggle a channel's star. */
-    val favoriteChannelIds: StateFlow<Set<Long>> = favoriteDao.observeFavoriteIds(MediaType.LIVE)
+    val favoriteChannelIds: StateFlow<Set<String>> = favoriteDao.observeFavoriteIds(MediaType.LIVE)
         .map { it.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
@@ -717,11 +717,7 @@ class EpgViewModel(
         // is already populated — keep the existing list on screen and refresh it silently, so opening the
         // Guide menu is instant instead of flashing a spinner and re-rendering from scratch every time.
         if (_state.value.channels.isEmpty()) _state.value = _state.value.copy(loading = true, message = null)
-        val playlistIds = activeSourceIds(sourceDao, MediaType.LIVE)
-        // Channels come from the playlists; the RuTube guide is stored under the playlist source ids.
-        val ids = playlistIds
-
-        if (playlistIds.isEmpty()) {
+        if (sourceDao.observeAll().first().none { it.syncLive }) {
             _state.value = EpgUiState(loading = false, message = EpgMessage.AddPlaylist)
             return
         }
@@ -739,8 +735,8 @@ class EpgViewModel(
         // Respect customizations: hidden channels stay out of the guide, renames show.
         val cust = customize.observeVisible(MediaType.LIVE).first()
         val q = _query.value.trim()
-        val rawChannels = if (settings.guideShowEmpty.first()) channelDao.channelsForGuide(playlistIds, q, MAX_CHANNELS)
-            else channelDao.channelsWithGuide(ids, q, MAX_CHANNELS)
+        val rawChannels = if (settings.guideShowEmpty.first()) channelDao.channelsForGuide(q, MAX_CHANNELS)
+            else channelDao.channelsWithGuide(q, MAX_CHANNELS)
         val favoriteIds = favoriteDao.observeFavoriteIds(MediaType.LIVE).first().toSet()
         val sortGuideMode = settings.sortGuide.first()
         // Hidden categories keep their channels out of the guide too (parity with Live TV), and a
@@ -749,7 +745,7 @@ class EpgViewModel(
             emptySet()
         } else {
             tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
-                categoryDao.observe(ids, MediaType.LIVE).first(),
+                categoryDao.observe(MediaType.LIVE).first(),
                 cust.hiddenCategories,
             )
         }
@@ -757,7 +753,7 @@ class EpgViewModel(
         // A provider folder keeps out the channels the user moved from it into a custom category.
         val folderKey = (filter as? tv.own.owntv.core.live.LiveKey.Folder)
             ?.let { categoryDao.getById(it.id) }?.let(CustomizeKeys::category)
-        val memberIds: Set<Long>? = when (filter) {
+        val memberIds: Set<String>? = when (filter) {
             is tv.own.owntv.core.live.LiveKey.Custom -> if (filter.id in cust.sealedCategories) emptySet() else customCategoryDao.itemIds(MediaType.LIVE, filter.id).toSet()
             tv.own.owntv.core.live.LiveKey.Favorites -> favoriteIds
             tv.own.owntv.core.live.LiveKey.History ->
@@ -769,11 +765,11 @@ class EpgViewModel(
         // the playlist's order or plain A–Z.
         val alphaSort = sortGuideMode == SettingsRepository.GuideSort.ALPHA
         val liveTvSort = alphaSort || sortGuideMode == SettingsRepository.GuideSort.PROVIDER || sortGuideMode == SettingsRepository.GuideSort.LIVE_TV
-        val liveOrder: Map<Long, Int>? = if (!liveTvSort) null else when (filter) {
+        val liveOrder: Map<String, Int>? = if (!liveTvSort) null else when (filter) {
             is tv.own.owntv.core.live.LiveKey.Folder -> folderKey?.let { channelDao.snapshotByCategoryManual(filter.id, it, alphaSort, MAX_CHANNELS) }
-            is tv.own.owntv.core.live.LiveKey.Custom -> customCategoryDao.snapshotChannels(filter.id, playlistIds, alphaSort, MAX_CHANNELS)
+            is tv.own.owntv.core.live.LiveKey.Custom -> customCategoryDao.snapshotChannels(filter.id, alphaSort, MAX_CHANNELS)
             tv.own.owntv.core.live.LiveKey.Favorites ->
-                channelDao.snapshotFavoritesManual(tv.own.owntv.core.database.entity.ContentOrderEntity.FAV_CONTEXT, playlistIds, MAX_CHANNELS)
+                channelDao.snapshotFavoritesManual(tv.own.owntv.core.database.entity.ContentOrderEntity.FAV_CONTEXT, MAX_CHANNELS)
             else -> null
         }?.withIndex()?.associate { (i, ch) -> ch.id to i }
         // Heavy work — filter hidden, apply renames + manual EPG matches, sort, category-filter — runs off
@@ -785,7 +781,7 @@ class EpgViewModel(
                     memberIds != null || tv.own.owntv.core.database.ChannelMembership.visible(it, hiddenCatIds)
                 }
                 .map { ch -> cust.itemNames[CustomizeKeys.channel(ch)]?.let { ch.copy(name = it) } ?: ch }
-            val matched = applyEpgMatches(auto, cust, playlistIds, q)
+            val matched = applyEpgMatches(auto, cust, q)
             // The Order menu: Provider (also the old stored LIVE_TV value), A–Z,
             // Favourites first (and the legacy CATCHUP value, no longer offered in the menu).
             // The last two only float those channels to the top.
@@ -808,7 +804,7 @@ class EpgViewModel(
                 }
             }
         }
-        val stored = epgDao.countForSources(ids)
+        val stored = epgDao.countForSources()
 
 
         // Per-row programmes are loaded in ONE batched query and grouped into rowCache here, instead of
@@ -817,17 +813,15 @@ class EpgViewModel(
         // window, so the cache stays valid and we reuse it. Grouping runs off the main thread.
         // Also re-batch when the stored programme count changed (a sync, or a post-match top-up, added
         // data) even if the window is unchanged — so freshly-matched channels' guides appear.
-        val windowChanged = cachedWindow != (windowStart to windowEnd) || loadedSourceIds != ids || stored != lastStored
+        val windowChanged = cachedWindow != (windowStart to windowEnd) || stored != lastStored
         // Logged so a trace shows which of the three conditions fired: a
         // sync can re-trigger the whole-table scan through the count alone.
         val rebuildReason = when {
             !windowChanged -> "cache-reused"
             cachedWindow == null -> "first-load"
             cachedWindow != (windowStart to windowEnd) -> "window-moved"
-            loadedSourceIds != ids -> "sources-changed"
             else -> "stored-count-changed"
         }
-        loadedSourceIds = ids
         lastStored = stored
         if (windowChanged) {
             // Dropping the cached rows is the whole of it. There is no preload any more: the rows
@@ -858,7 +852,7 @@ class EpgViewModel(
 
         tv.own.owntv.core.CorePerf.log {
             "guide_load channels=${channels.size} rawChannels=${rawChannels.size} " +
-                "stored=$stored sources=${ids.size} " +
+                "stored=$stored " +
                 "rebuilt=$windowChanged reason=$rebuildReason cachedRows=${cachedRowCount()} " +
                 "lookbackH=${lookbackMs / 3_600_000} " +
                 "totalMs=${android.os.SystemClock.elapsedRealtime() - loadStartedAt}"
@@ -873,7 +867,6 @@ class EpgViewModel(
     private suspend fun applyEpgMatches(
         auto: List<ChannelEntity>,
         cust: tv.own.owntv.core.customize.SectionCustomizations,
-        playlistIds: List<Long>,
         query: String,
     ): List<ChannelEntity> {
         val matches = cust.epgMatches
@@ -882,7 +875,8 @@ class EpgViewModel(
         val byKey = auto.associateBy { CustomizeKeys.channel(it) }
         // Override the epg id of channels already in the list. Through the resolver, so a match made
         // before the playlist was deleted and re-added still applies under the channel's new key.
-        val overridden = auto.map { ch -> resolver.epgIdFor(ch)?.let { ch.copy(epgChannelId = it) } ?: ch }.toMutableList()
+        // The manual match rides the customize key (the resolver reads it); nothing to copy onto the row.
+        val overridden = auto.toMutableList()
         // Add matched channels that didn't auto-appear. Resolve them with ONE bulk query (all channels keyed
         // by their customize key) instead of two DB lookups per match — the old per-match resolveChannel was a
         // query-storm that dominated guide load time once a lot of channels had been smart-matched.
@@ -900,15 +894,15 @@ class EpgViewModel(
             // unambiguous tail is used — two playlists carrying one provider id must not pick one.
             val remoteIds = missingKeys.mapNotNull { CustomizeKeys.tailOf(it).takeIf { r -> r.isNotEmpty() } }.distinct()
             val resolved = remoteIds.chunked(QUERY_CHUNK)
-                .flatMap { channelDao.findByRemoteIds(playlistIds, it) }
-                .groupBy { it.remoteId ?: it.name }
+                .flatMap { channelDao.findByRemoteIds(it) }
+                .groupBy { it.remoteId }
             for (key in missingKeys) {
                 val epgId = matches[key] ?: continue
                 val ch = resolved[CustomizeKeys.tailOf(key)]?.singleOrNull() ?: continue
                 if (CustomizeKeys.channel(ch) in byKey) continue // already in the list, already overridden
                 val name = cust.itemNames[key] ?: ch.name
                 if (query.isNotBlank() && !name.contains(query, ignoreCase = true)) continue
-                overridden.add(ch.copy(epgChannelId = epgId, name = name))
+                overridden.add(ch.copy(name = name))
             }
         }
         return overridden

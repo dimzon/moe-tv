@@ -7,7 +7,7 @@ import tv.own.owntv.core.database.entity.ChannelEntity
 
 class ChannelRecallTest {
 
-    private fun channel(id: Long) = ChannelEntity(id = id, sourceId = 1, name = "ch$id", streamUrl = "http://recall.invalid/$id.ts")
+    private fun channel(id: Long) = ChannelEntity(remoteId = "ch$id", name = "ch$id")
 
     @Test
     fun `nothing to go back to before a second channel`() {
@@ -23,7 +23,7 @@ class ChannelRecallTest {
         recall.onWatched(channel(1))
         recall.onWatched(channel(2))
         recall.onWatched(channel(3))
-        assertEquals(2L, recall.previous.value?.id)
+        assertEquals("ch2", recall.previous.value?.id)
     }
 
     @Test
@@ -32,9 +32,9 @@ class ChannelRecallTest {
         recall.onWatched(channel(1))
         recall.onWatched(channel(2))
         recall.onWatched(recall.previous.value!!)
-        assertEquals(2L, recall.previous.value?.id)
+        assertEquals("ch2", recall.previous.value?.id)
         recall.onWatched(recall.previous.value!!)
-        assertEquals(1L, recall.previous.value?.id)
+        assertEquals("ch1", recall.previous.value?.id)
     }
 
     @Test
@@ -43,6 +43,6 @@ class ChannelRecallTest {
         recall.onWatched(channel(1))
         recall.onWatched(channel(2))
         recall.onWatched(channel(2))
-        assertEquals(1L, recall.previous.value?.id)
+        assertEquals("ch1", recall.previous.value?.id)
     }
 }

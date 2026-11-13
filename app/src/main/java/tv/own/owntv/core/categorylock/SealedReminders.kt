@@ -11,7 +11,7 @@ import tv.own.owntv.core.database.entity.ReminderEntity
  */
 fun Flow<List<ReminderEntity>>.firstUnsealed(
     sealed: Flow<Set<Long>>,
-    categoryOf: suspend (channelId: Long) -> Long?,
+    categoryOf: suspend (channelId: String) -> Long?,
 ): Flow<ReminderEntity?> = combine(this, sealed) { due, ids ->
     due.firstOrNull { ids.isEmpty() || categoryOf(it.channelId) !in ids }
 }
