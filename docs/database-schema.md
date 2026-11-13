@@ -7,10 +7,10 @@
 - Дата: 2026-11-13
 - Класс: `tv.own.owntv.core.database.OwnTVDatabase`
 - Файл БД: `/data/data/com.github.dimzon.owntv/databases/owntv.db`
-- **Версия схемы: 8**, `identityHash = cc01942d3233ec82b58bab312c1b14b2`
-- Экспортированная схема (источник истины для DDL): `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/8.json`
-- Конвертеры: `core/database/Converters.kt` — enum'ы (`MediaType`, `SourceType`,
-  `TvProviderSurface`) хранятся как **имена** (`TEXT`), `Boolean` — как `INTEGER 0/1`
+- **Версия схемы: 9**, `identityHash = ed30d41c5211d392b2ffea0aaebe723d`
+- Экспортированная схема (источник истины для DDL): `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/9.json`
+- Конвертеры: `core/database/Converters.kt` — единственный сохраняемый enum, `TvProviderSurface`,
+  хранится как **имя** (`TEXT`); `Boolean` — как `INTEGER 0/1`
 
 ---
 
@@ -42,12 +42,12 @@
 а затем восстанавливает их из этого же списка. Прерванный импорт иначе оставил бы таблицу без
 индексов — это невидимо до следующей полной валидации схемы Room, которая падает на старте.
 
-Канонический набор неуникальных индексов (v8):
+Канонический набор неуникальных индексов (v9):
 
 | Таблица | Индексы |
 |---|---|
 | `channels` | `index_channels_name`, `index_channels_sortOrder_name`, `index_channels_number` |
-| `epg_programmes` | `index_epg_programmes_epgChannelId_startMs`, `index_epg_programmes_stopMs`, `index_epg_programmes_startMs_stopMs` |
+| `epg_programmes` | `index_epg_programmes_stopMs`, `index_epg_programmes_startMs_stopMs` |
 
 Уникальные индексы сюда не входят осознанно: их никто никогда не дропает, а пересоздание
 уникального индекса на неожиданных данных само может упасть. У `epg_programmes` уникальный
@@ -134,6 +134,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   `name` TEXT NOT NULL,
   `remoteId` TEXT,
+  `alias` TEXT,
   `sortOrder` INTEGER NOT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS `index_categories_remoteId` ON `categories` (`remoteId`);
@@ -143,9 +144,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS `index_categories_remoteId` ON `categories` (`
 |---|---|
 | `name` | Название жанра как у провайдера |
 | `remoteId` | id жанра у провайдера (nullable; в SQLite уникальный индекс допускает несколько `NULL`) |
+| `alias` | Слаг провайдера (`all`, `federal`, `movies`…) как есть; пока не читается |
 | `sortOrder` | Порядок провайдера |
 
 Схема v6 убрала `mediaType` (источник один, тип контента один): категория — просто `remoteId`.
+Схема v9 добавила `alias` — значение сохраняется на будущее, UI и синк его пока не читают.
 Пишет: синк (`categoryRefresh`), `SyncSupport.pruneCategories` удаляет исчезнувшие.
 Читает: `CategoryDao`, Customize. Видимость/замки/переименования категорий живут **не здесь**, а в
 DataStore (см. §8); строка `categories` — только данные провайдера.
@@ -185,7 +188,6 @@ CREATE INDEX IF NOT EXISTS `index_channels_number` ON `channels` (`number`);
 | `catchup`, `catchupDays`, `catchupSource`, `catchupType`, `catchupCorrectionMin` | `false` / `0` / `null` (live-only) |
 | `httpHeaders`, `drmConfig`, `manifestType`, `directSource`, `providerName` | `null` |
 | `isPaid` | `false` (платные каналы отфильтрованы на синке) |
-| `matchName` | `providerName ?: name` → всегда `name` |
 
 Пишут: `SyncSupport.upsertChannels()` — `upsertAll` (REPLACE по PK) чанками;
 `ChannelRenameDao.applyToChannels()` — UPDATE имён; `SyncSupport.pruneChannels()` — удаление
@@ -329,10 +331,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS `index_custom_category_members_contextKey_item
 категории делает `LEFT JOIN` обеих таблиц. Определение самой категории (имя, порядок в рельсе) —
 в DataStore.
 
-Членство входит в снапшот бэкапа (`member`), но **не** ездит в локальной синхронизации между
-устройствами — там только `fav`/`order`/`his`/`prog` (`SyncMatrix.KINDS`). При пересинхронизации
-на этом же устройстве строки не перепривязываются: hex-ключ стабилен, а `afterSync` только чистит
-осиротевшие.
+Членство **не** входит ни в бэкап, ни в локальную синхронизацию между устройствами — там только
+`fav`/`order`/`his`/`prog` (`SyncMatrix.KINDS`). Внутридевайсный re-sync snapshot
+(`UserDataResolver.exportSnapshot`) несёт `member`, чтобы строки пережили пересборку каталога; при
+обычной пересинхронизации hex-ключ стабилен, а `afterSync` только чистит осиротевшие.
 
 ### 5.5. `user_data_tombstones` — надгробия удалений
 
@@ -350,9 +352,11 @@ CREATE INDEX IF NOT EXISTS `index_user_data_tombstones_deletedAt`
 ```
 
 `kind`: `fav`, `order`, `prog` — только эти удаления ездят между устройствами.
-`identity` — **не** `itemId`, а канонический стабильный ключ (JSON: provider id, name /
-show+season+episode), чтобы удаление было узнаваемо на устройстве с другими id.
-Пишутся только реальные действия пользователя; housekeeping-пуржи после синка надгробий не пишут.
+`identity` — **не** `itemId`, а канонический стабильный ключ: JSON с `rid` (hex `remoteId`
+канала) и `name`, плюс `ctx` для удаления из пользовательской категории и `startMs` для
+напоминания. Поля пишутся всегда в одном порядке, чтобы одно и то же удаление давало одну и ту же
+строку на любом устройстве. Пишутся только реальные действия пользователя; housekeeping-пуржи
+после синка надгробий не пишут.
 
 ### 5.6. `programme_reminders` — напоминания о передачах
 
@@ -395,8 +399,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS `index_tv_provider_programs_surface_groupId`
   ON `tv_provider_programs` (`surface`, `groupId`);
 ```
 
-`surface`: `WATCH_NEXT`, `RECENT_LIVE`. `groupId` — стабильный хеш identity контента, чтобы строка
-канала могла «перерасти» в следующий эпизод, не меняя локальную identity.
+`surface`: `WATCH_NEXT`, `RECENT_LIVE`. `groupId` — стабильный хеш identity контента; локальная
+строка не зависит от того, какую передачу или канал ей сопоставят.
 **В live-only приложении таблица спит:** DAO зарегистрирован в Koin, но production-вызовов записи и
 чтения сейчас нет — оставлена в схеме для будущего возврата интеграции с домашним экраном.
 
@@ -414,7 +418,8 @@ CREATE TABLE IF NOT EXISTS `playback_prefs` (
 );
 ```
 
-`contentKey` = hex `remoteId` (fallback — URL для строк без provider id). Все настройки nullable:
+`contentKey` = hex `remoteId` канала. Все строки каталога — RuTube-каналы с provider id, поэтому
+URL-fallback в текущем коде не срабатывает. Все настройки nullable:
 `null` = «следовать глобальной настройке», и строки нет, пока пользователь ничего не менял.
 `subtitleLang = ""` = субтитры выключены. Колонка `audioDelayMs` удалена в v6: задержка живёт в
 `playback_quirks`.
@@ -513,9 +518,9 @@ CREATE INDEX IF NOT EXISTS `index_epg_programmes_startMs_stopMs`
 4. **Каскады только в каталоге.** FK с `CASCADE` есть только у `channel_category`
    (→ `channels`/`categories`). Пользовательские таблицы FK не имеют намеренно.
 5. **Бэкап и локальная синхронизация** сериализуют пользовательские данные через стабильные ключи
-   (hex / canonical identity JSON), а не через локальные `id` строк. Локальная синхронизация несёт
-   `fav`/`order`/`his`/`prog`; бэкапный снапшот — те же `prog`-напоминания плюс `member`
-   (состав пользовательских категорий).
+   (hex / canonical identity JSON), а не через локальные `id` строк. И локальная синхронизация, и
+   бэкап несут `fav`/`order`/`his`/`prog`; состав пользовательских категорий (`member`) остаётся
+   локальным и участвует только во внутридевайсном re-sync snapshot.
 6. **Схема самовосстанавливается** на каждом открытии; ожидаемый набор индексов/FTS — в
    `OwnTVDatabase.EXPECTED_NON_UNIQUE_INDEXES` / `EXPECTED_FTS_TABLES`. Любое будущее изменение
    финальной схемы обязано сохранить работу `healSchema`.
@@ -557,6 +562,7 @@ git history и `CHANGELOG.md`.
 | 6 | **Удалён `mediaType` из всех таблиц** (live-only): `categories` → уникальный `remoteId`, `favorites` → уникальный `itemId`, `content_order`/`custom_category_members` → `(contextKey, itemId)`, `playback_quirks` и `tv_provider_programs` без типа. `watch_history` — PK `(itemId, deviceId)`, без `id`; `deviceId` NOT NULL. `programme_reminders` теряет `channelName`/`epgChannelId`. Удалена legacy-колонка `playback_prefs.audioDelayMs` |
 | 7 | **`favorites` без суррогатного `id`:** hex `itemId` — PK (уникальный индекс больше не нужен) |
 | 8 | **`epg_channels` удалена**; `epg_programmes` приведена к полям RuTube: добавлены `subtitle`, `category`, `ageRating`, `iconUrl`, удалены `year`, `episode`, `lengthMin`, `contentHash`. Guide-ключ = `channels.remoteId`, имена гида — из каталога |
+| 9 | **`categories.alias` добавлена:** слаг провайдера (`all`, `federal`, `movies`…) сохраняется на будущее, сейчас не читается |
 
 ---
 
@@ -573,12 +579,15 @@ adb shell run-as com.github.dimzon.owntv sqlite3 databases/owntv.db \
   "select count(*) from sqlite_master where type='table' and name='sources'; pragma table_info(categories);"
 ```
 
-Ожидаемо для текущего каталога: 5 колонок `channels`, 205 каналов, 382 строки `channel_category`,
-68 строк `channel_rename`, `sources` — 0 таблиц, `mediaType`/`sourceId` нет ни в одной таблице,
-`watch_history` — 3 колонки с PK `(itemId, deviceId)`, индексы `index_channels_name` /
-`index_channels_sortOrder_name` / `index_channels_number`. Таблицы `epg_channels` нет; у
-`epg_programmes` 10 колонок (`id`, `epgChannelId`, `startMs`, `stopMs`, `title`, `subtitle`,
-`description`, `category`, `ageRating`, `iconUrl`).
+Ожидаемо: 5 колонок `channels` с PK `remoteId`; `categories` — 5 колонок (`id`, `name`,
+`remoteId`, `alias`, `sortOrder`); `sources` — 0 таблиц; `mediaType`/`sourceId`
+нет ни в одной таблице; `watch_history` — 3 колонки с PK `(itemId, deviceId)`; индексы
+`index_channels_name` / `index_channels_sortOrder_name` / `index_channels_number`. Таблицы
+`epg_channels` нет; у `epg_programmes` 10 колонок (`id`, `epgChannelId`, `startMs`, `stopMs`,
+`title`, `subtitle`, `description`, `category`, `ageRating`, `iconUrl`), уникальный
+`index_epg_programmes_natural_key` и неуникальные `index_epg_programmes_stopMs` /
+`index_epg_programmes_startMs_stopMs`. Число строк каталога меняется с каждым синком и в этом
+документе не фиксируется.
 
-Схема-эталон для диффа: `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/8.json` — любое
+Схема-эталон для диффа: `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/9.json` — любое
 изменение сущностей Room обязано менять этот файл (он коммитится вместе с кодом).

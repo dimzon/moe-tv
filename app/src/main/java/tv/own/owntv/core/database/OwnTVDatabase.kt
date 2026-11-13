@@ -76,8 +76,9 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
     // year/episode/lengthMin/contentHash out (the hash-diff machinery went with XMLTV), and
     // epg_channels is gone — with one source the guide key IS channels.remoteId, so the table only
     // duplicated the catalogue with worse (pre-rename, pre-disambiguation) names.
+    // v9 stores the provider's category slug (`categories.alias`); nothing reads it yet.
     // The old per-version log lives in git history and in CHANGELOG.md.
-    version = 8,
+    version = 9,
 
     exportSchema = true,
 )
@@ -117,7 +118,6 @@ abstract class OwnTVDatabase : RoomDatabase() {
                 "CREATE INDEX IF NOT EXISTS `index_channels_number` ON `channels` (`number`)",
             ),
             "epg_programmes" to listOf(
-                "CREATE INDEX IF NOT EXISTS `index_epg_programmes_epgChannelId_startMs` ON `epg_programmes` (`epgChannelId`, `startMs`)",
                 "CREATE INDEX IF NOT EXISTS `index_epg_programmes_stopMs` ON `epg_programmes` (`stopMs`)",
                 "CREATE INDEX IF NOT EXISTS `index_epg_programmes_startMs_stopMs` ON `epg_programmes` (`startMs`, `stopMs`)",
             ),

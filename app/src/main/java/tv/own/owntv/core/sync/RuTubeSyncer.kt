@@ -77,11 +77,17 @@ internal class RuTubeSyncer(
         }
         val categoryNameById = rawCategories.associateBy({ it.id }, { it.name.ifBlank { it.alias } })
 
-        // Map to XtCategory for refreshCategories (id/name). RuTube category 1 = "all live"
+        // Map to XtCategory for refreshCategories (id/name/alias). RuTube category 1 = "all live"
         // is skipped (it mirrors "Everything"); the rest are real genre buckets.
         val xtCats = rawCategories
             .filter { it.id != 1 }
-            .map { XtCategory(id = it.id.toString(), name = it.name.ifBlank { it.alias }) }
+            .map {
+                XtCategory(
+                    id = it.id.toString(),
+                    name = it.name.ifBlank { it.alias },
+                    alias = it.alias.ifBlank { null },
+                )
+            }
         val categoryRefresh = support.refreshCategories(s, MediaType.LIVE, xtCats, stats)
         val catMap = categoryRefresh.idsByRemoteId // "4" -> db row id
 

@@ -118,6 +118,7 @@ internal class SyncSupport(
                 id = existing[c.id]?.id ?: 0,
                 name = c.name,
                 remoteId = c.id,
+                alias = c.alias,
                 sortOrder = i,
             )
         }

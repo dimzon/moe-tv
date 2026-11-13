@@ -10,7 +10,8 @@ import tv.own.owntv.core.database.SingleSource
 
 /**
  * A category/folder. The Layer-2 rail is built from these. `remoteId` is the provider's category id
- * (used to dedupe on re-sync). Schema v6 dropped `mediaType` — the app is live-only, so a category is
+ * (used to dedupe on re-sync); [alias] is its provider slug ("all", "movies"…), stored for future
+ * use but not read yet. Schema v6 dropped `mediaType` — the app is live-only, so a category is
  * simply (remoteId).
  */
 @Entity(
@@ -24,6 +25,8 @@ data class CategoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
     val remoteId: String? = null,
+    /** Provider slug (`all`, `federal`, `movies`…), nullable when the API omits it. */
+    val alias: String? = null,
     val sortOrder: Int = 0,
 )
 

@@ -6,16 +6,17 @@
 
 ## Схема и данные
 
-1. **`SourceEntity` всё ещё описывает VOD-эру.** В DTO остались `syncMovies`, `syncSeries`,
-   `isPaid`, `createdAt`, `httpReferer`, `syncLive` — ни одно из этих полей не читается (источник
-   один, live-only). Оставлены, чтобы не переписывать всех читателей `SourceEntity` сразу.
-   *Закрыть:* вычистить поля из DTO и из `BuiltInSource`, когда последний читатель уйдёт.
-2. **`ChannelEntity` — 13 геттеров-синонимов** (`catchup*`, `httpHeaders`, `drmConfig`,
+1. **`SourceEntity` всё ещё описывает VOD-эру.** DTO больше не содержит `syncMovies`/`syncSeries`
+   (вычищены вместе с VOD), но остались `isPaid`, `createdAt` (читателей нет), а также
+   `httpReferer` и `syncLive` — они ещё читаются, хотя у единственного источника всегда
+   `syncLive = true`, а `httpReferer` пуст. *Закрыть:* убрать мёртвые поля и свести два читаемых
+   к константам `BuiltInSource`, когда последний читатель уйдёт.
+2. **`ChannelEntity` — 15 геттеров-синонимов** (`catchup*`, `httpHeaders`, `drmConfig`,
    `manifestType`, `directSource`, `providerName`, `isPaid`, `id`, `epgChannelId`, `sourceId`,
    `streamUrl`). Это компенсирует удалённые из БД колонки; ~700 read-site'ов ещё используют
    синонимы. *Закрыть:* переписать чтения на реальные поля/константы и удалить геттеры.
-3. **`EpgProgrammeEntity.contentHash` всегда 0** — поле наследия VOD-дедупликации, в v5/v6 не
-   заполняется. *Закрыть:* убрать колонку вместе со следующим изменением схемы.
+3. ~~**`EpgProgrammeEntity.contentHash` всегда 0**~~ — закрыто в v8: колонка удалена вместе с
+   `year`/`episode`/`lengthMin`.
 4. **`mediaType` в коде.** Из БД колонка удалена (v6), но `MediaType.LIVE` остаётся параметром
    многих API (`CustomizationStore`, `LiveKey`, `SettingsRepository.observe*`) как жёстко
    зашитый LIVE. Это осознанно: один тип контента. *Закрыть:* только если появится второй тип
@@ -23,9 +24,10 @@
 5. **`tv_provider_programs` — спящая таблица.** DAO зарегистрирован в Koin, production-вызовов
    записи/чтения нет (интеграция с домашним экраном Android TV демонтирована). *Закрыть:*
    удалить таблицу/DAO или вернуть фичу.
-6. **`SingleSource.id = 1` — константа**, хотя `sourceId` больше нигде в БД нет. Осталась как
-   пространство имён `contentKey` и синоним `ChannelEntity.sourceId`. *Закрыть:* вместе с п.2
-   (тогда `contentKey` станет просто hex, а константа исчезнет).
+6. **`SingleSource.id = 1` — константа**, хотя `sourceId` больше нигде в БД нет. Осталась
+   пространством имён ключей кастомизации (`<sourceId>:<remoteId|name>`) и синонимом
+   `ChannelEntity.sourceId`; playback `contentKey` — уже просто hex. *Закрыть:* вместе с п.2
+   (тогда ключи кастомизации станут `<remoteId|name>`, а константа исчезнет).
 7. **Деструктивная миграция** `fallbackToDestructiveMigration(dropAllTables = true)` — временная
    мера периода редизайна. *Закрыть:* убрать строку и написать миграции до публичного релиза.
 
