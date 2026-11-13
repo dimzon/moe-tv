@@ -149,7 +149,7 @@ fun PanelWidthSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) 
                 val stageWidths = (liveStageSaved ?: tv.own.owntv.core.settings.LiveStageWidths.DEFAULT)
                     .takeIf { section == PanelSection.LIVE && liveStage }
                 val layoutName = stringResource(
-                    if (liveStage) R.string.settings_live_layout_stage else R.string.settings_vod_layout_separate,
+                    if (liveStage) R.string.settings_live_layout_stage else R.string.settings_live_layout_separate,
                 )
                 val title = sectionTitle(section) + sep + layoutName
                 val value = SettingValue.Opens(stringResource(if (enabled) R.string.settings_live_latency_custom else R.string.settings_subtitle_default))
@@ -193,7 +193,7 @@ private fun sectionTitle(section: PanelSection): String = stringResource(R.strin
 
 @Composable
 private fun previewLabel(section: PanelSection): String =
-    stringResource(if (section == PanelSection.LIVE) R.string.settings_panel_width_preview else R.string.settings_panel_width_poster)
+    stringResource(R.string.settings_panel_width_preview)
 
 @Composable
 private fun listLabel(section: PanelSection): String = stringResource(R.string.settings_panel_width_list)

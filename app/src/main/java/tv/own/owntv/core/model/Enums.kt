@@ -1,7 +1,7 @@
 package tv.own.owntv.core.model
 
-/** What kind of media an item is. Used to scope favorites/history/progress generically. */
-enum class MediaType { LIVE, MOVIE, SERIES, EPISODE }
+/** The one content kind the app has: live channels. Kept as the scoping key for customizations. */
+enum class MediaType { LIVE }
 
 /**
  * How a source delivers its content. The app has a single built-in provider since the

@@ -26,7 +26,6 @@ whole (GPLv3 section 5(c)).
 | Koin (`koin-android`, `koin-androidx-compose`, BOM) | 4.2.2 | **Apache-2.0** | © 2017–present Arnaud Giuliani. |
 | ZXing (`com.google.zxing:core`) | 3.5.4 | **Apache-2.0** | QR generation only. |
 | `com.github.albfernandez:juniversalchardet` | 2.5.0 | **MPL-1.1 / GPL-3.0 / LGPL-3.0 (tri-license)** | This project elects **GPL-3.0** (MPL-1.1 alone is not GPL-compatible). © Alberto Fernández; source: <https://github.com/albfernandez/juniversalchardet>. Local subtitle charset detection only. |
-| `com.pierfrancescosoffritti.androidyoutubeplayer:core` | 13.0.0 | **MIT** | © 2025 Pierfrancesco Soffritti. MIT requires the copyright notice and permission notice to be reproduced — full text in section 4 below. |
 | SIL Open Font License fonts in `app/src/main/res/font/` | — | **OFL-1.1** | See section 2. Font files are bundled in the APK. |
 
 **Apache-2.0 section 4 obligations**: a copy of the license and the retained attribution notices
@@ -86,39 +85,7 @@ Modified versions may not use a Reserved Font Name without permission.
 
 ---
 
-## 4. MIT notice — android-youtube-player
-
-Reproduced verbatim, as required by the MIT license:
-
-```
-MIT License
-
-Copyright (c) 2025 Pierfrancesco Soffritti
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
-Source: <https://github.com/PierfrancescoSoffritti/android-youtube-player/blob/master/LICENSE>
-
----
-
-## 5. Not bundled (historical)
+## 4. Not bundled (historical)
 
 Upstream OwnTV shipped **mpv / libmpv (FFmpeg)** as a second playback engine. This fork removed
 it (commits `ac5cc39`, `933cc94`) and removed the external `tv.own.owntv:libmpv` dependency.

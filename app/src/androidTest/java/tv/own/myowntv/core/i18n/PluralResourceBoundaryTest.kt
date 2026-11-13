@@ -57,12 +57,12 @@ class PluralResourceBoundaryTest {
     @Test
     fun english_zero_one_two_use_plural_resources() {
         val context = localized("en-US")
-        val zero = context.resources.getQuantityString(R.plurals.content_count_movies, 0, "Library", 0)
-        val one = context.resources.getQuantityString(R.plurals.content_count_movies, 1, "Library", 1)
-        val two = context.resources.getQuantityString(R.plurals.content_count_movies, 2, "Library", 2)
-        assertTrue(zero.contains("movies"))
-        assertTrue(one.contains("movie)"))
-        assertTrue(two.contains("movies"))
+        val zero = context.resources.getQuantityString(R.plurals.settings_epg_sources_status_count_channels, 0, 0)
+        val one = context.resources.getQuantityString(R.plurals.settings_epg_sources_status_count_channels, 1, 1)
+        val two = context.resources.getQuantityString(R.plurals.settings_epg_sources_status_count_channels, 2, 2)
+        assertTrue(zero.contains("channels"))
+        assertTrue(one.contains("channel."))
+        assertTrue(two.contains("channels"))
     }
 
     @Test

@@ -62,7 +62,6 @@ koin = "4.2.2"
 # Android platform support (TLS socket adapter, cert chain cleaner) and consumer R8 rules.
 # Brings Happy Eyeballs (fastFallback) on by default — parallel IPv4/IPv6 connect.
 okhttp = "5.5.0"
-youtubePlayer = "13.0.0"
 # QR generation for the Remote (companion) add-source flow — pure-Java, offline, no Android deps.
 zxing = "3.5.4"
 # Charset detection for local subtitle files — tiny, pure-Java
@@ -152,9 +151,6 @@ juniversalchardet = { group = "com.github.albfernandez", name = "juniversalchard
 
 # Networking (M3U/Xtream fetch)
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-# In-app YouTube trailer playback (WebView IFrame wrapper); ToS-clean, exposes currentSecond/duration
-youtube-player = { group = "com.pierfrancescosoffritti.androidyoutubeplayer", name = "core", version.ref = "youtubePlayer" }
-
 # Media3 / ExoPlayer
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 androidx-media3-exoplayer-hls = { group = "androidx.media3", name = "media3-exoplayer-hls", version.ref = "media3" }

@@ -212,8 +212,6 @@ fun SettingsScreen(
     var showStartup by remember { mutableStateOf(false) }
     var showStartupChannelPicker by remember { mutableStateOf(false) }
     var showAfrWarning by remember { mutableStateOf(false) }
-    // Which switch the warning turns on: Live TV's, or films and series'.
-    var afrWarningLive by remember { mutableStateOf(false) }
     var showLivePreviewPanelWarning by remember { mutableStateOf(false) }
     var showBgImageChooser by remember { mutableStateOf(false) }
     var showBgPicker by remember { mutableStateOf(false) }
@@ -308,7 +306,6 @@ fun SettingsScreen(
     val livePreviewPanelActive by settingsVm.livePreviewPanelActive.collectAsStateWithLifecycle()
     val previewAudio by settingsVm.livePreviewAudio.collectAsStateWithLifecycle()
     val hdr by settingsVm.preferSdr.collectAsStateWithLifecycle()
-    val autoFrameRateFilms by settingsVm.autoFrameRateFilms.collectAsStateWithLifecycle()
     val autoFrameRateLive by settingsVm.autoFrameRateLive.collectAsStateWithLifecycle()
     val surroundMode by settingsVm.surroundMode.collectAsStateWithLifecycle()
     val updateCheckOnStart by settingsVm.updateCheckOnStart.collectAsStateWithLifecycle()
@@ -345,15 +342,13 @@ fun SettingsScreen(
     // below Android 12 there is no way to ask the display which refresh rates it can reach without
     // blanking. Turning it on there therefore asks first; turning it off remains immediate.
     val afrNeedsWarning = android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S
-    val toggleAutoFrameRate: (FocusRequester, Boolean) -> Unit = { returnFocus, live ->
-        val on = if (live) autoFrameRateLive else autoFrameRateFilms
-        if (!on && afrNeedsWarning) {
+    val toggleAutoFrameRate: (FocusRequester) -> Unit = { returnFocus ->
+        if (!autoFrameRateLive && afrNeedsWarning) {
             saveScroll()
             dialogReturn = returnFocus
-            afrWarningLive = live
             showAfrWarning = true
         } else {
-            settingsVm.setAutoFrameRate(live, !on)
+            settingsVm.setAutoFrameRateLive(!autoFrameRateLive)
         }
     }
     val toggleLivePreview: (FocusRequester) -> Unit = { returnFocus ->
@@ -944,10 +939,8 @@ fun SettingsScreen(
             SettingsSearchEntry(tv.own.myowntv.features.settings.videoRowPath("vp_mini"), stringResource(R.string.settings_mini_player_root), stringResource(R.string.settings_search_keywords_mini), MyOwnTVIcon.PIP, TileTone.TERTIARY) { openMiniPlayer = true; jumpVideo("vp_mini", false) },
             SettingsSearchEntry(tv.own.myowntv.features.settings.videoRowPath("vp_hdr"), stringResource(R.string.settings_quick_prefer_sdr), stringResource(R.string.settings_search_keywords_prefer_sdr), MyOwnTVIcon.VIDEO, TileTone.PRIMARY,
                 chip = if (hdr) stringResource(R.string.common_on) else stringResource(R.string.common_off), chipTone = if (hdr) TileTone.PRIMARY else TileTone.SECONDARY, showChevron = false) { settingsVm.setPreferSdr(!hdr) },
-            SettingsSearchEntry(tv.own.myowntv.features.settings.videoRowPath("vp_afr"), stringResource(R.string.settings_auto_frame_rate_films), stringResource(R.string.settings_search_keywords_afr), MyOwnTVIcon.VIDEO, TileTone.PRIMARY,
-                chip = if (autoFrameRateFilms) stringResource(R.string.common_on) else stringResource(R.string.common_off), chipTone = if (autoFrameRateFilms) TileTone.PRIMARY else TileTone.SECONDARY, showChevron = false) { toggleAutoFrameRate(searchFieldFocus, false) },
             SettingsSearchEntry(tv.own.myowntv.features.settings.videoRowPath("vp_afr_live"), stringResource(R.string.settings_auto_frame_rate_live), stringResource(R.string.settings_search_keywords_afr), MyOwnTVIcon.LIVE_TV, TileTone.PRIMARY,
-                chip = if (autoFrameRateLive) stringResource(R.string.common_on) else stringResource(R.string.common_off), chipTone = if (autoFrameRateLive) TileTone.PRIMARY else TileTone.SECONDARY, showChevron = false) { toggleAutoFrameRate(searchFieldFocus, true) },
+                chip = if (autoFrameRateLive) stringResource(R.string.common_on) else stringResource(R.string.common_off), chipTone = if (autoFrameRateLive) TileTone.PRIMARY else TileTone.SECONDARY, showChevron = false) { toggleAutoFrameRate(searchFieldFocus) },
             SettingsSearchEntry(tv.own.myowntv.features.settings.videoRowPath("vp_surround"), stringResource(R.string.settings_surround_sound), stringResource(R.string.settings_search_keywords_surround), MyOwnTVIcon.AUDIO, TileTone.SECONDARY,
                 chip = surroundModeLabel(surroundMode), chipTone = if (surroundMode == SurroundMode.STEREO) TileTone.SECONDARY else TileTone.PRIMARY, showChevron = false) { settingsVm.cycleSurroundMode() },
             // Four screens that had no entry at all, so nothing on them could be found by name.
@@ -976,7 +969,7 @@ fun SettingsScreen(
         // in place, or carry a confirmation the search field has to own — so the catalogue skips them
         // rather than listing them a second time.
         val bespokeVideoKeys = setOf(
-            "vp_live_preview", "vp_preview_audio", "vp_channel_numbers", "vp_mini", "vp_hdr", "vp_afr", "vp_afr_live",
+            "vp_live_preview", "vp_preview_audio", "vp_channel_numbers", "vp_mini", "vp_hdr", "vp_afr_live",
             "vp_surround", "vp_sub_style", "vp_live_latency", "vp_preroll", "vp_logging",
         )
         // …and every OTHER player-group row, taken straight from the catalogue those groups already draw
@@ -1207,7 +1200,7 @@ fun SettingsScreen(
     if (showAmbientGlow) AmbientGlowHost(settingsVm, ambientGlowEnabled, ambientGlowPulse, onClose = { showAmbientGlow = false })
     if (showAfrWarning) {
         AutoFrameRateWarningDialog(
-            onEnable = { settingsVm.setAutoFrameRate(afrWarningLive, true); showAfrWarning = false },
+            onEnable = { settingsVm.setAutoFrameRateLive(true); showAfrWarning = false },
             onDismiss = { showAfrWarning = false },
         )
     }
@@ -1349,7 +1342,7 @@ private fun liveLayoutSearchEntry(settingsVm: SettingsViewModel, onClick: () -> 
 }
 
 private fun liveLayoutLabelRes(layout: tv.own.owntv.core.settings.SettingsRepository.LiveLayout): Int =
-    if (layout == tv.own.owntv.core.settings.SettingsRepository.LiveLayout.SEPARATE) R.string.settings_vod_layout_separate
+    if (layout == tv.own.owntv.core.settings.SettingsRepository.LiveLayout.SEPARATE) R.string.settings_live_layout_separate
     else R.string.settings_live_layout_stage
 
 @Composable
@@ -1727,13 +1720,11 @@ internal fun LivePreviewPanelHiddenDialog(onDismiss: () -> Unit) {
 /** Stable, non-display choices for the history picker. */
 private enum class HistoryScope(val type: tv.own.owntv.core.model.MediaType?, val labelRes: Int) {
     LIVE(tv.own.owntv.core.model.MediaType.LIVE, R.string.settings_history_live),
-    MOVIES(tv.own.owntv.core.model.MediaType.MOVIE, R.string.settings_history_movies),
-    SERIES(tv.own.owntv.core.model.MediaType.SERIES, R.string.settings_history_series),
     ALL(null, R.string.settings_history_all),
 }
 
 /**
- * Pick what watch history to clear: everything, or just Live TV / Movies / Series. Over a dimmed scrim;
+ * Pick what watch history to clear: everything, or just Live TV. Over a dimmed scrim;
  * Cancel is focused first so a stray OK doesn't wipe anything. [onClear] gets null for "all".
  */
 @Composable
@@ -1761,7 +1752,7 @@ internal fun ClearHistoryDialog(
         },
     ) {
         if (p == null) {
-            listOf(HistoryScope.LIVE to MyOwnTVIcon.LIVE_TV, HistoryScope.MOVIES to MyOwnTVIcon.MOVIES, HistoryScope.SERIES to MyOwnTVIcon.SERIES, HistoryScope.ALL to MyOwnTVIcon.TRASH).forEachIndexed { i, (scope, icon) ->
+            listOf(HistoryScope.LIVE to MyOwnTVIcon.LIVE_TV, HistoryScope.ALL to MyOwnTVIcon.TRASH).forEachIndexed { i, (scope, icon) ->
                 val all = scope == HistoryScope.ALL
                 tv.own.myowntv.ui.stage.StagePopupOption(
                     title = stringResource(if (all) R.string.settings_all_history else scope.labelRes),

@@ -139,8 +139,6 @@
     <string name="companion_send_to_tv">Send to TV</string>
     <!-- Translators: Tooltip/hint text on the companion add-source page explaining the Xtream sync scope options. -->
     <string name="companion_sync_xtream_hint">What to sync \u2014 Now imports first, Later syncs in the background, Off is never fetched.</string>
-    <!-- Translators: Tooltip/hint text on the companion add-source page explaining the Stalker sync scope defaults. -->
-    <string name="companion_sync_stalker_hint">What to sync \u2014 Live defaults to Now; Movies/Series default to Later (Stalker VOD is slow).</string>
     <!-- Translators: Page title in the companion browser tab after a source was sent successfully. "МОЁ ТВ" is a brand name. -->
     <string name="companion_saved_page_title">МОЁ ТВ \u2014 Sent</string>
     <!-- Translators: Heading on the companion success page after sending a source. The checkmark is a visual indicator. -->

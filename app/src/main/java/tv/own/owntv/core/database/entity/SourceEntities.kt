@@ -30,10 +30,6 @@ data class SourceEntity(
     val userAgent: String? = null,
     /** Live scope; the app is live-only, so this is always true for the built-in source. */
     val syncLive: Boolean = true,
-    /** Retired with the VOD sections; kept for the DTO shape and backup round-tripping. */
-    val syncMovies: Boolean = false,
-    /** Retired with the VOD sections; kept for the DTO shape and backup round-tripping. */
-    val syncSeries: Boolean = false,
     /**
      * Live pre-buffer override in seconds. `-1` = follow the global Settings value; `0` = off;
      * `N` = fill N seconds before a live channel starts and after a rebuffer.

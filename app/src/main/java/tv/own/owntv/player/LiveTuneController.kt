@@ -585,7 +585,6 @@ class LiveTuneController(
             PlaybackErrorLog.event(
                 context = context,
                 engine = "ExoPlayer",
-                live = true,
                 reason = reason,
                 detail = detail,
             )

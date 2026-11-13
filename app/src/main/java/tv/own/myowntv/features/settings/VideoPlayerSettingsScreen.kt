@@ -191,10 +191,7 @@ internal val VIDEO_QUICK_ROWS: List<VideoQuickRef> = listOf(
     VideoQuickRef("vp_tunneled", SECTION_PICTURE, MyOwnTVIcon.VIDEO, R.string.settings_tunneled_playback, R.string.settings_tunneled_playback_description),
     VideoQuickRef("vp_zoom", SECTION_PICTURE, MyOwnTVIcon.ASPECT, R.string.settings_default_zoom, R.string.settings_default_zoom_description),
     VideoQuickRef("vp_reset_zoom", SECTION_PICTURE, MyOwnTVIcon.ASPECT, R.string.settings_reset_saved_zoom, R.string.settings_reset_saved_zoom_description),
-    VideoQuickRef("vp_afr", SECTION_FRAME_RATE, MyOwnTVIcon.VIDEO, R.string.settings_auto_frame_rate_films, R.string.settings_auto_frame_rate_films_description),
     VideoQuickRef("vp_afr_live", SECTION_FRAME_RATE, MyOwnTVIcon.LIVE_TV, R.string.settings_auto_frame_rate_live, R.string.settings_auto_frame_rate_live_description),
-    VideoQuickRef("vp_afr_pause", SECTION_FRAME_RATE, MyOwnTVIcon.PAUSE, R.string.settings_afr_pause, R.string.settings_afr_pause_description),
-    VideoQuickRef("vp_afr_resolution", SECTION_FRAME_RATE, MyOwnTVIcon.ASPECT, R.string.settings_afr_resolution, R.string.settings_afr_resolution_description),
     VideoQuickRef("vp_channel_numbers", SECTION_LIVE, MyOwnTVIcon.LIVE_TV, R.string.settings_channel_numbers, R.string.settings_channel_numbers_description),
     VideoQuickRef("vp_live_preview", SECTION_LIVE, MyOwnTVIcon.LIVE_TV, R.string.settings_quick_live_preview, R.string.settings_live_preview_description),
     VideoQuickRef("vp_preview_audio", SECTION_LIVE, MyOwnTVIcon.AUDIO, R.string.settings_preview_audio, R.string.settings_preview_audio_description),
@@ -300,12 +297,11 @@ internal fun videoQuickBinding(key: String, vm: SettingsViewModel): VideoQuickBi
                 tiles > tv.own.owntv.core.live.DEFAULT_MULTIVIEW_TILES,
             )
         }
-        "vp_afr", "vp_afr_live" -> {
-            val live = key == "vp_afr_live"
-            val on by (if (live) vm.autoFrameRateLive else vm.autoFrameRateFilms).collectAsStateWithLifecycle()
+        "vp_afr_live" -> {
+            val on by vm.autoFrameRateLive.collectAsStateWithLifecycle()
             // Below Android 12 turning it ON asks first, and that warning lives on the screen itself.
             val needsWarning = android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S
-            if (!on && needsWarning) link(onOff(on)) else toggle(onOff(on), on) { vm.setAutoFrameRate(live, !on) }
+            if (!on && needsWarning) link(onOff(on)) else toggle(onOff(on), on) { vm.setAutoFrameRateLive(!on) }
         }
         "vp_external" -> {
             val live by vm.externalPlayerLive.collectAsStateWithLifecycle()
@@ -322,14 +318,6 @@ internal fun videoQuickBinding(key: String, vm: SettingsViewModel): VideoQuickBi
         "vp_seek_step" -> {
             val secs by vm.seekStepSec.collectAsStateWithLifecycle()
             link(stringResource(R.string.settings_live_buffer_seconds, secs))
-        }
-        "vp_afr_pause" -> {
-            val secs by vm.afrPauseSecs.collectAsStateWithLifecycle()
-            link(afrPauseLabel(secs), secs > 0)
-        }
-        "vp_afr_resolution" -> {
-            val on by vm.afrMatchResolution.collectAsStateWithLifecycle()
-            toggle(onOff(on), on) { vm.setAfrMatchResolution(!on) }
         }
         "vp_live_preview" -> {
             val on by vm.livePreviewEnabled.collectAsStateWithLifecycle()
@@ -521,8 +509,6 @@ internal fun VideoPlayerGroupRows(
     val measuredStats by vm.measuredStreamStats.collectAsStateWithLifecycle()
     val detailedDiagnostics by vm.detailedDiagnostics.collectAsStateWithLifecycle()
     val directTune by vm.directTune.collectAsStateWithLifecycle()
-    val afrPauseSecs by vm.afrPauseSecs.collectAsStateWithLifecycle()
-    val afrMatchResolution by vm.afrMatchResolution.collectAsStateWithLifecycle()
     val externalLive by vm.externalPlayerLive.collectAsStateWithLifecycle()
     val zoom by vm.defaultZoom.collectAsStateWithLifecycle()
     val subStyleOn by vm.subtitleStyleEnabled.collectAsStateWithLifecycle()
@@ -539,7 +525,6 @@ internal fun VideoPlayerGroupRows(
     // The playback settings that Quick and Settings search also offer. Their rows live here, so these
     // groups are the one complete list; a pin or a search result is a shortcut to the same value.
     val hdr by vm.preferSdr.collectAsStateWithLifecycle()
-    val autoFrameRateFilms by vm.autoFrameRateFilms.collectAsStateWithLifecycle()
     val autoFrameRateLive by vm.autoFrameRateLive.collectAsStateWithLifecycle()
     val multiviewEnabled by vm.multiviewEnabled.collectAsStateWithLifecycle()
     val multiviewTiles by vm.multiviewTiles.collectAsStateWithLifecycle()
@@ -648,12 +633,11 @@ internal fun VideoPlayerGroupRows(
     // for the refresh rates it can reach without blanking it. Turning it off stays immediate. This is
     // the same rule the root row follows, and both go through the same warning popup.
     val afrNeedsWarning = android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S
-    val toggleAutoFrameRate = { live: Boolean ->
-        val on = if (live) autoFrameRateLive else autoFrameRateFilms
-        if (!on && afrNeedsWarning) {
-            savedScroll = scrollState.value; dialog = if (live) Dialog.AFR_LIVE_WARNING else Dialog.AFR_WARNING
+    val toggleAutoFrameRate = {
+        if (!autoFrameRateLive && afrNeedsWarning) {
+            savedScroll = scrollState.value; dialog = Dialog.AFR_LIVE_WARNING
         } else {
-            vm.setAutoFrameRate(live, !on)
+            vm.setAutoFrameRateLive(!autoFrameRateLive)
         }
     }
     // Turning Live preview ON while the layout leaves no room for the preview panel would do nothing
@@ -769,16 +753,6 @@ internal fun VideoPlayerGroupRows(
                     }
                     SECTION_FRAME_RATE -> {
         KeyedSettingRow(
-            quickKey = "vp_afr",
-            icon = MyOwnTVIcon.VIDEO,
-            title = stringResource(R.string.settings_auto_frame_rate_films),
-            desc = stringResource(R.string.settings_auto_frame_rate_films_description) +
-                if (afrNeedsWarning) " " + stringResource(R.string.settings_auto_frame_rate_warning_suffix) else "",
-            value = SettingValue.Switch(autoFrameRateFilms),
-            modifier = Modifier.focusRequester(dialogRowFocus.getValue(Dialog.AFR_WARNING)),
-            onClick = { toggleAutoFrameRate(false) },
-        )
-        KeyedSettingRow(
             quickKey = "vp_afr_live",
             icon = MyOwnTVIcon.LIVE_TV,
             title = stringResource(R.string.settings_auto_frame_rate_live),
@@ -786,25 +760,7 @@ internal fun VideoPlayerGroupRows(
                 if (afrNeedsWarning) " " + stringResource(R.string.settings_auto_frame_rate_warning_suffix) else "",
             value = SettingValue.Switch(autoFrameRateLive),
             modifier = Modifier.focusRequester(dialogRowFocus.getValue(Dialog.AFR_LIVE_WARNING)),
-            onClick = { toggleAutoFrameRate(true) },
-        )
-        // Both only act for a film with Auto frame rate on; shown always, like every row here.
-        KeyedSettingRow(
-            quickKey = "vp_afr_pause",
-            icon = MyOwnTVIcon.PAUSE,
-            title = stringResource(R.string.settings_afr_pause),
-            desc = stringResource(R.string.settings_afr_pause_description),
-            value = SettingValue.Choice(afrPauseLabel(afrPauseSecs)),
-            modifier = Modifier.focusRequester(dialogRowFocus.getValue(Dialog.AFR_PAUSE)),
-            onClick = { savedScroll = scrollState.value; dialog = Dialog.AFR_PAUSE },
-        )
-        KeyedSettingRow(
-            quickKey = "vp_afr_resolution",
-            icon = MyOwnTVIcon.ASPECT,
-            title = stringResource(R.string.settings_afr_resolution),
-            desc = stringResource(R.string.settings_afr_resolution_description),
-            value = SettingValue.Switch(afrMatchResolution),
-            onClick = { vm.setAfrMatchResolution(!afrMatchResolution) },
+            onClick = { toggleAutoFrameRate() },
         )
                     }
                     SECTION_LIVE -> {
@@ -1451,13 +1407,6 @@ internal fun VideoPlayerGroupRows(
             onSelect = { vm.setMaxVideoHeight(it.toIntOrNull() ?: 0); dialog = Dialog.NONE },
             onDismiss = { dialog = Dialog.NONE },
         )
-        Dialog.AFR_PAUSE -> PickerDialog(
-            title = stringResource(R.string.settings_afr_pause),
-            options = (0..vm.afrPauseMaxSecs).map { it.toString() to afrPauseLabel(it) },
-            selected = afrPauseSecs.toString(),
-            onSelect = { vm.setAfrPauseSecs(it.toIntOrNull() ?: 0); dialog = Dialog.NONE },
-            onDismiss = { dialog = Dialog.NONE },
-        )
         Dialog.RESET_SAVED_ZOOM -> ConfirmResetDialog(
             title = stringResource(R.string.settings_reset_saved_zoom_confirm),
             description = stringResource(R.string.settings_reset_saved_zoom_confirm_description),
@@ -1476,8 +1425,8 @@ internal fun VideoPlayerGroupRows(
             onConfirm = { vm.clearSavedAudioDelay(); dialog = Dialog.NONE },
             onCancel = { dialog = Dialog.NONE },
         )
-        Dialog.AFR_WARNING, Dialog.AFR_LIVE_WARNING -> AutoFrameRateWarningDialog(
-            onEnable = { vm.setAutoFrameRate(dialog == Dialog.AFR_LIVE_WARNING, true); dialog = Dialog.NONE },
+        Dialog.AFR_LIVE_WARNING -> AutoFrameRateWarningDialog(
+            onEnable = { vm.setAutoFrameRateLive(true); dialog = Dialog.NONE },
             onDismiss = { dialog = Dialog.NONE },
         )
         Dialog.MULTIVIEW_TILES -> run {
@@ -1547,14 +1496,12 @@ private fun ConfirmResetDialog(title: String, description: String, onConfirm: ()
 
 /** The dialog a pinned row opens when Quick jumps into this screen. Null for rows that toggle. */
 private fun dialogForQuickKey(key: String): Dialog? = when (key) {
-    "vp_afr" -> Dialog.AFR_WARNING
     "vp_afr_live" -> Dialog.AFR_LIVE_WARNING
     "vp_multiview_tiles" -> Dialog.MULTIVIEW_TILES
     "vp_preview_on_ok" -> Dialog.PREVIEW_ON_OK
     "vp_zoom" -> Dialog.ZOOM
     "vp_reset_zoom" -> Dialog.RESET_SAVED_ZOOM
     "vp_seek_step" -> Dialog.SEEK_STEP
-    "vp_afr_pause" -> Dialog.AFR_PAUSE
     "vp_max_quality" -> Dialog.MAX_QUALITY
     "vp_live_preview" -> Dialog.LIVE_PREVIEW_PANEL
     "vp_live_latency" -> Dialog.LIVE_LATENCY
@@ -1575,17 +1522,12 @@ private fun dialogForQuickKey(key: String): Dialog? = when (key) {
     else -> null
 }
 
-private enum class Dialog { NONE, LIVE_LATENCY_SOURCES, LIVE_LATENCY_SOURCE, LIVE_LATENCY_CUSTOM_SOURCE, ZOOM, VOLUME, RESET_SAVED_ZOOM, RESET_SAVED_VOLUME, RESET_SAVED_AUDIO_DELAY, SEEK_STEP, SUB_STYLE, SUB_LANG, AUDIO_LANG, SURROUND, AUDIO_SYNC, OUTPUT_AUDIO_DELAY, LIVE_LATENCY, LIVE_CUSTOM, LIVE_PREROLL, LIVE_TUNE_TIMEOUT, LIVE_TUNE_TIMEOUT_SOURCES, LIVE_TUNE_TIMEOUT_SOURCE, LIVE_PREROLL_SOURCES, LIVE_PREROLL_SOURCE, PREVIEW_ON_OK, AFR_WARNING, AFR_LIVE_WARNING, AFR_PAUSE, MAX_QUALITY, LIVE_PREVIEW_PANEL, MINI_PLAYER, MULTIVIEW_TILES, MULTIVIEW_WARNING }
+private enum class Dialog { NONE, LIVE_LATENCY_SOURCES, LIVE_LATENCY_SOURCE, LIVE_LATENCY_CUSTOM_SOURCE, ZOOM, VOLUME, RESET_SAVED_ZOOM, RESET_SAVED_VOLUME, RESET_SAVED_AUDIO_DELAY, SEEK_STEP, SUB_STYLE, SUB_LANG, AUDIO_LANG, SURROUND, AUDIO_SYNC, OUTPUT_AUDIO_DELAY, LIVE_LATENCY, LIVE_CUSTOM, LIVE_PREROLL, LIVE_TUNE_TIMEOUT, LIVE_TUNE_TIMEOUT_SOURCES, LIVE_TUNE_TIMEOUT_SOURCE, LIVE_PREROLL_SOURCES, LIVE_PREROLL_SOURCE, PREVIEW_ON_OK, AFR_LIVE_WARNING, MAX_QUALITY, LIVE_PREVIEW_PANEL, MINI_PLAYER, MULTIVIEW_TILES, MULTIVIEW_WARNING }
 
 /** "Auto" for 0, else the picture height ("1080p") — Maximum video quality. */
 @Composable
 internal fun videoQualityLabel(height: Int): String =
     if (height <= 0) stringResource(R.string.settings_auto) else stringResource(R.string.settings_video_quality_lines, height)
-
-/** "Off", or the hold in seconds ("2s"), for the Auto frame rate pause. */
-@Composable
-private fun afrPauseLabel(secs: Int): String =
-    if (secs <= 0) stringResource(R.string.common_off) else stringResource(R.string.settings_live_buffer_seconds, secs)
 
 /** Picker key for "follow the global setting" — the state a null column reads as. */
 private const val FOLLOW_GLOBAL = ""

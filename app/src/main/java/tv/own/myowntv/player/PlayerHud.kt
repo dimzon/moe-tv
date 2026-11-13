@@ -618,7 +618,6 @@ fun PlayerHud(
                             PlaybackErrorLog.report(
                                 context = reportContext,
                                 engine = "ExoPlayer",
-                                live = true,
                                 title = meta.title,
                                 snapshot = snapshot,
                             )

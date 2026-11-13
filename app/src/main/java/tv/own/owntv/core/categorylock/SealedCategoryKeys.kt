@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.map
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.model.MediaType
 
-private val LOCKABLE_SECTIONS = listOf(MediaType.LIVE, MediaType.MOVIE, MediaType.SERIES)
+private val LOCKABLE_SECTIONS = listOf(MediaType.LIVE)
 
 /**
  * The sealed category keys of Live TV, Movies and Series. A new value each time a lock closes or

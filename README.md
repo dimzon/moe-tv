@@ -47,8 +47,9 @@ It also incorporates source from **[OwnTV_Core](https://github.com/ahXN00/OwnTV_
 (likewise `GPL-3.0-only`), folded into `app/src/main/java/tv/own/owntv/**`: the database, sync,
 parsers, EPG and playback engine, **plus the translated UI strings** (upstream shipped 26 locales;
 this fork currently packages English and Russian). The docs,
-i18n tooling, upstream brand assets in `extras/brand/` and the reference Workers in
-`extras/worker/` are upstream-derived too. Full legal notice: [NOTICE](NOTICE).
+i18n tooling and upstream brand assets in `extras/brand/` are upstream-derived too; the
+TMDB/OpenSubtitles reference Workers (`extras/worker/`) and their logos were removed in this
+fork (commit `cf8b0b5`). Full legal notice: [NOTICE](NOTICE).
 
 > **Modified since 2026-11-09 by Dmitry Alexandrov (dimzon).** Copyright (C) 2026 Dmitry
 > Alexandrov for the modifications and additions; the original portions remain © ahXN00 and the

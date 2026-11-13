@@ -12,11 +12,11 @@ import tv.own.owntv.core.model.MediaType
 class CategoryUnlockSessionTest {
 
     @Test
-    fun `an opened category stays open for that section only`() = runBlocking {
+    fun `an opened category stays open until the session ends`() = runBlocking {
         val s = CategoryUnlockSession()
         s.unlock(MediaType.LIVE, "1:adult")
         assertTrue(s.isUnlocked(MediaType.LIVE, "1:adult"))
-        assertFalse(s.isUnlocked(MediaType.MOVIE, "1:adult"))
+        assertFalse(s.isUnlocked(MediaType.LIVE, "1:films"))
         assertEquals(setOf("1:adult"), s.unlocked(MediaType.LIVE).first())
     }
 
@@ -24,10 +24,10 @@ class CategoryUnlockSessionTest {
     fun `leaving the app locks everything again`() = runBlocking {
         val s = CategoryUnlockSession()
         s.unlock(MediaType.LIVE, "1:adult")
-        s.unlock(MediaType.MOVIE, "1:films")
+        s.unlock(MediaType.LIVE, "1:films")
         s.relockAll()
         assertFalse(s.isUnlocked(MediaType.LIVE, "1:adult"))
-        assertTrue(s.unlocked(MediaType.MOVIE).first().isEmpty())
+        assertTrue(s.unlocked(MediaType.LIVE).first().isEmpty())
     }
 
     @Test

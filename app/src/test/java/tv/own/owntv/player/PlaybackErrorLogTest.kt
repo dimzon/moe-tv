@@ -32,7 +32,6 @@ class PlaybackErrorLogTest {
         val entry = PlaybackErrorLog.Entry(
             atMs = 0L,
             engine = "ExoPlayer",
-            live = false,
             reason = null,
             spec = null,
             raw = null,
@@ -65,7 +64,6 @@ class PlaybackErrorLogTest {
         val entry = PlaybackErrorLog.Entry(
             atMs = 0L,
             engine = "ExoPlayer",
-            live = false,
             reason = parsed.semantic,
             legacyReason = parsed.legacyText,
             spec = null,
@@ -85,7 +83,6 @@ class PlaybackErrorLogTest {
         val entry = PlaybackErrorLog.Entry(
             atMs = 0L,
             engine = "ExoPlayer",
-            live = false,
             reason = parsed.semantic,
             legacyReason = parsed.legacyText,
             spec = null,
@@ -102,7 +99,6 @@ class PlaybackErrorLogTest {
     private fun entry(spec: String) = PlaybackErrorLog.Entry(
         atMs = 0L,
         engine = "ExoPlayer",
-        live = false,
         reason = null,
         spec = spec,
         raw = null,

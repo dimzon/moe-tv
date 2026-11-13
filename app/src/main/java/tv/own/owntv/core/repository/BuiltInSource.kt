@@ -29,8 +29,6 @@ object BuiltInSource {
         url = RutubeApi.BASE_URL,
         userAgent = RutubeApi.USER_AGENT,
         syncLive = true,
-        syncMovies = false,
-        syncSeries = false,
         livePrerollSecs = FOLLOW_GLOBAL_PREROLL,
         liveLatencyMode = null,
         createdAt = 0L,

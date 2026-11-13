@@ -909,7 +909,7 @@ class LivePreviewEngine(
                     }
                     LiveDiagnosticsLog.event("audioWatchdog: $reason — forcing stereo for this session")
                     AudioOutputPolicy.latchStereo("exo/live: $reason")
-                    PlaybackErrorLog.event(context, "ExoPlayer", live = true, reason = PlayerFailureReason.STEREO_FALLBACK, detail = reason)
+                    PlaybackErrorLog.event(context, "ExoPlayer", reason = PlayerFailureReason.STEREO_FALLBACK, detail = reason)
                     onAudioFallback?.invoke()
                     rebuildForSettingChange()
                     return
@@ -2260,8 +2260,7 @@ class LivePreviewEngine(
         // The user sees a channel that "just works after a pause" — this is the line that explains why,
         // and it is the one piece of evidence a provider-specific report needs.
         PlaybackErrorLog.event(
-            context, "ExoPlayer", live = true,
-            reason = PlayerFailureReason.LIVE_FALLBACK,
+            context, "ExoPlayer", reason = PlayerFailureReason.LIVE_FALLBACK,
             detail = "provider refused $status on ${refusedSegments.size} signed segment URLs",
         )
     }
@@ -2285,8 +2284,7 @@ class LivePreviewEngine(
             "provider refused with HTTP 458 (account session still in use) uri=${HttpClient.redactUrl(uri)}",
         )
         PlaybackErrorLog.event(
-            context, "ExoPlayer", live = true,
-            reason = PlayerFailureReason.ONE_SESSION_PROVIDER,
+            context, "ExoPlayer", reason = PlayerFailureReason.ONE_SESSION_PROVIDER,
             detail = "HTTP 458 while the previous engine's session was still open — waiting and retrying once",
         )
     }
@@ -2354,8 +2352,7 @@ class LivePreviewEngine(
         // Once per tune: the user-visible log should say the channel was queued, not spam a line a second.
         if (tune.providerBackOffs == 1) {
             PlaybackErrorLog.event(
-                context, "ExoPlayer", live = true,
-                reason = PlayerFailureReason.ONE_SESSION_PROVIDER,
+                context, "ExoPlayer", reason = PlayerFailureReason.ONE_SESSION_PROVIDER,
                 detail = "HTTP $HTTP_TOO_MANY_REQUESTS with Retry-After ${secs}s — waiting it out and retrying automatically",
             )
         }

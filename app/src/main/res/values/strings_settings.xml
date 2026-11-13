@@ -25,10 +25,6 @@
     <string name="settings_live_keep_watching">Live channels in Keep Watching</string>
     <!-- Translators: Description of the live-channels-in-Keep-Watching toggle. -->
     <string name="settings_live_keep_watching_description">Show recently watched live channels in the hero row.</string>
-    <!-- Translators: Toggle label for showing movies in the Keep Watching row. -->
-    <string name="settings_movies_keep_watching">Movies in Keep Watching</string>
-    <!-- Translators: Toggle label for showing series in the Keep Watching row. -->
-    <string name="settings_series_keep_watching">Series in Keep Watching</string>
     <!-- Translators: Toggle label for playing the highlighted Home item's video in the hero row. -->
     <string name="settings_hero_preview">Play video in the hero row</string>
     <!-- Translators: Description of the hero-row video preview toggle. -->
@@ -140,13 +136,13 @@
     <!-- Translators: One-line description under the "Hold OK in the player" setting. -->
     <string name="settings_player_hold_ok_description">What holding OK opens while the controls are hidden</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while "Hold OK in the player" has focus. -->
-    <string name="settings_help_player_hold_ok">Hold OK in the full-screen live player, with the controls hidden, to open the channel list, the guide or the programme info. Off keeps OK as it always was. While this is on, a short OK acts when you let go. Films and episodes keep the usual OK.</string>
+    <string name="settings_help_player_hold_ok">Hold OK in the full-screen live player, with the controls hidden, to open the channel list, the guide or the programme info. Off keeps OK as it always was. While this is on, a short OK acts when you let go.</string>
     <!-- Translators: Setting label: what a short press of OK does in the full-screen player while its controls are hidden. -->
     <string name="settings_player_short_ok">OK when the controls are hidden</string>
     <!-- Translators: One-line description under the "OK when the controls are hidden" setting. -->
     <string name="settings_player_short_ok_description">What a short OK press does in the full-screen player</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while "OK when the controls are hidden" has focus. -->
-    <string name="settings_help_player_short_ok">A short OK press in the full-screen player shows the controls. Choose Channel list or Guide to open that instead on live channels; any other button the player does not use still shows the controls. Films and episodes always show the controls.</string>
+    <string name="settings_help_player_short_ok">A short OK press in the full-screen player shows the controls. Choose Channel list or Guide to open that instead on live channels; any other button the player does not use still shows the controls.</string>
     <!-- Translators: Setting label: a switch that swaps which way the channel up/down buttons change channel. -->
     <string name="settings_player_swap_channel_keys">Swap channel up/down</string>
     <!-- Translators: One-line description under the "Swap channel up/down" setting. -->
@@ -308,7 +304,7 @@
     <!-- Translators: Settings navigation label for the long-press content menus. -->
     <string name="settings_content_menus_title">Long-press menus</string>
     <!-- Translators: Description of the long-press content menus settings. -->
-    <string name="settings_content_menus_description">Rearrange or hide the actions in the channel, movie, series &amp; episode menus</string>
+    <string name="settings_content_menus_description">Rearrange or hide the actions in the channel menu</string>
     <!-- Translators: Hint shown above the list when arranging a long-press menu with the remote: OK shows or hides an action, a held OK picks it up to move it. -->
     <string name="settings_content_menus_hint">Press OK on an action to show or hide it. Hold OK to pick it up, then Up and Down to move it; press OK again to drop it.</string>
     <!-- Translators: Note on the long-press menus settings: some actions in the list are only offered in some places (Catch-up only on catch-up channels, Remove from history only in History). -->
@@ -316,7 +312,7 @@
     <!-- Translators: Settings navigation label for Browsing & lists. -->
     <string name="settings_browsing_lists">Browsing &amp; lists</string>
     <!-- Translators: Description of the Browsing & lists settings. -->
-    <string name="settings_browsing_description">Remember the last category and the last item in Live TV, Movies &amp; Series</string>
+    <string name="settings_browsing_description">Remember the last category and the last channel in Live TV</string>
     <!-- Translators: Settings navigation label for Home screen settings. -->
     <string name="settings_home_root">Home screen</string>
     <!-- Translators: Description of the Home screen settings. -->
@@ -411,22 +407,10 @@
     <string name="settings_pip_on_leave">Picture-in-picture when leaving the app</string>
     <!-- Translators: Description of the picture-in-picture setting. -->
     <string name="settings_pip_on_leave_description">Keep the video playing in a small window when you press Home</string>
-    <!-- Translators: Setting label: auto frame rate matching for films and episodes. -->
-    <string name="settings_auto_frame_rate_films">Auto frame rate for films and series</string>
-    <!-- Translators: Description of settings_auto_frame_rate_films. -->
-    <string name="settings_auto_frame_rate_films_description">Match the TV\'s refresh rate to the film or episode (24/25/50/60 fps) in full screen, and restore it on exit.</string>
     <!-- Translators: Setting label: auto frame rate matching for live channels. -->
     <string name="settings_auto_frame_rate_live">Auto frame rate for Live TV</string>
     <!-- Translators: Description of settings_auto_frame_rate_live. Explains when to turn it off. -->
     <string name="settings_auto_frame_rate_live_description">Match the TV\'s refresh rate to the channel (25/50/60 fps) in full screen, and restore it on exit. Turn off if your TV or receiver re-handshakes HDMI noisily on every channel change.</string>
-    <!-- Translators: TV setting under Auto frame rate. How long a film pauses while the TV switches display mode. -->
-    <string name="settings_afr_pause">Pause during the display switch</string>
-    <!-- Translators: Description of settings_afr_pause. "Re-sync" = the HDMI handshake that blacks the screen for a moment. -->
-    <string name="settings_afr_pause_description">Films only. When the TV has to re-sync to a new display mode, the film waits this long so its opening is not lost to the black screen. A seamless switch never pauses.</string>
-    <!-- Translators: TV setting under Auto frame rate. Also switch the display to the resolution of the film. -->
-    <string name="settings_afr_resolution">Match resolution</string>
-    <!-- Translators: Description of settings_afr_resolution. "Upscale" = the TV enlarging a lower-resolution picture itself. -->
-    <string name="settings_afr_resolution_description">Films only. When the display mode changes for a film, the TV also switches to its resolution — 1080p for an HD film on a 4K TV — never above the resolution it started on. Off leaves the resolution alone and lets the TV upscale, usually the better picture.</string>
     <!-- Translators: Extra warning appended to Auto frame rate on devices older than Android 12. -->
     <string name="settings_auto_frame_rate_warning_suffix">Not recommended on this TV: below Android 12 the rate can\'t be changed smoothly.</string>
     <!-- Translators: Title warning that Auto frame rate may blank the display on this older TV. -->
@@ -456,11 +440,11 @@
     <!-- Translators: Settings › Sound & subtitles. Toggle: automatic loudness leveling across channels and movies. -->
     <string name="settings_volume_leveling">Volume leveling</string>
     <!-- Translators: Description of settings_volume_leveling. -->
-    <string name="settings_volume_leveling_description">Brings every channel and movie slowly to the same loudness, so switching does not jump in volume.</string>
+    <string name="settings_volume_leveling_description">Brings every channel slowly to the same loudness, so switching does not jump in volume.</string>
     <!-- Translators: Settings › Picture. Picker: the highest picture resolution played (Auto, 2160p, 1080p, 720p, 480p). -->
     <string name="settings_max_video_quality">Maximum video quality</string>
     <!-- Translators: Description of settings_max_video_quality. -->
-    <string name="settings_max_video_quality_description">The highest picture played when a channel or movie offers several. Saves bandwidth and eases the decoder.</string>
+    <string name="settings_max_video_quality_description">The highest picture played when a channel offers several. Saves bandwidth and eases the decoder.</string>
     <!-- Translators: Phone Settings › Player. Picker: the highest resolution played on mobile data (Off, 1080p, 720p, 480p). -->
     <string name="settings_mobile_data_quality">Maximum quality on mobile data</string>
     <!-- Translators: Description of settings_mobile_data_quality. "Metered" is Android's term for a connection that costs money per byte. -->
@@ -471,10 +455,6 @@
     <string name="settings_tunneled_playback_description">Live TV on ExoPlayer: the TV\'s own hardware keeps picture and sound together, with less work for the processor. Works on some TVs only, and turns itself off if a channel fails with it. Audio sync cannot be nudged while it is on.</string>
     <!-- Translators: Shown under the Tunneled playback row after the app switched it off by itself because a channel failed with it. -->
     <string name="settings_tunneled_playback_failed">Turned off after a channel failed with it on this device.</string>
-    <!-- Translators: Setting label to auto-play the next episode. -->
-    <string name="settings_autoplay_next">Auto-play next episode</string>
-    <!-- Translators: Description of the auto-play next episode setting. -->
-    <string name="settings_autoplay_next_description">When an episode ends, automatically start the next one — and roll into the next season. Catch-up plays on to the next programme too.</string>
     <!-- Translators: Section header for catch-up playback settings. -->
     <string name="settings_catchup">Catch-up</string>
     <!-- Translators: Plural text showing how many channels support catch-up. 'count' is the number. -->
@@ -579,11 +559,8 @@
     <!-- Translators: Label for Live TV content type in settings and filters. -->
     <string name="settings_live">Live</string>
     <!-- Translators: Label for Video on Demand content type. 'VOD' is an industry abbreviation. -->
-    <string name="settings_vod">VOD</string>
     <!-- Translators: Button to clear the playback error log. -->
     <string name="settings_clear_log">Clear log</string>
-    <!-- Translators: Description of the Browsing & lists settings. -->
-    <string name="settings_browsing_description_full">What Live TV, Movies and Series return to when you come back.</string>
     <!-- Translators: Description of the catch-up time zone setting. Automatic and Device are its first two choices (settings_catchup_timezone_automatic, settings_catchup_timezone_device). -->
     <string name="settings_catchup_timezone_description">How catch-up timestamps are sent. Automatic uses the time zone your provider\'s server reports, or your device\'s if it reports none. You can also choose Device, or set the offset yourself.</string>
     <!-- Translators: Option label for manual catch-up timestamp offset. -->
@@ -671,7 +648,7 @@
     <!-- Translators: Hidden keyword bag for the CH+ Key Paging settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_ch">channel up down skip page list category channel</string>
     <!-- Translators: Hidden keyword bag for the Browsing & lists settings. Translate as individual search terms. -->
-    <string name="settings_search_keywords_browsing">remember position scroll category last item live movies series reset top</string>
+    <string name="settings_search_keywords_browsing">remember position scroll category last channel live reset top</string>
     <!-- Translators: Hidden keyword bag for the Home screen settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_home">rows hero reorder filter</string>
     <!-- Translators: Hidden keyword bag for the Theme settings. Translate as individual search terms. -->
@@ -704,14 +681,12 @@
     <string name="settings_search_keywords_afr">afr refresh rate hz judder 24fps 25fps 50hz 60hz display mode match</string>
     <!-- Translators: Hidden keyword bag for the Surround sound settings. 'dolby' and 'dts' are brand names. Translate as individual search terms. -->
     <string name="settings_search_keywords_surround">dolby dts 5.1 7.1 receiver audio</string>
-    <!-- Translators: Hidden keyword bag for the Auto-play settings. Translate as individual search terms. -->
-    <string name="settings_search_keywords_autoplay">autoplay series season</string>
     <!-- Translators: Hidden keyword bag for the Catch-up settings. 'vlc' and 'mx' are player brand names. Translate as individual search terms. -->
     <string name="settings_search_keywords_catchup">archive timezone offset catchup external player vlc mx</string>
     <!-- Translators: Hidden keyword bag for the player settings (Player, Picture, Live TV, Watching & recording). Translate as individual search terms. -->
     <string name="settings_search_keywords_video">decoder subtitles sync</string>
     <!-- Translators: Search keywords for the Recording settings page. Not shown to the user — these are the words someone might type to find it, so use natural search terms in your language rather than a literal translation. -->
-    <string name="settings_search_keywords_recording">record recording recordings dvr timer schedule series save live</string>
+    <string name="settings_search_keywords_recording">record recording recordings dvr timer schedule save live</string>
     <!-- Translators: Hidden keyword bag for Subtitle appearance settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_subtitle_appearance">subtitle size color colour position transparency background opacity</string>
     <!-- Translators: Hidden keyword bag for the Live latency settings. Translate as individual search terms. -->
@@ -835,35 +810,31 @@
     <!-- Translators: Settings-row title for forgetting the zoom saved for individual items. -->
     <string name="settings_reset_saved_zoom">Reset saved zoom</string>
     <!-- Translators: Description of the reset-saved-zoom setting row. -->
-    <string name="settings_reset_saved_zoom_description">Changing zoom in the player saves it for that channel, movie or episode. Reset makes everything follow the default zoom again.</string>
+    <string name="settings_reset_saved_zoom_description">Changing zoom in the player saves it for that channel. Reset makes everything follow the default zoom again.</string>
     <!-- Translators: Confirmation dialog title before forgetting the saved per-item zoom. -->
     <string name="settings_reset_saved_zoom_confirm">Reset saved zoom?</string>
     <!-- Translators: Confirmation dialog body before forgetting the saved per-item zoom. -->
-    <string name="settings_reset_saved_zoom_confirm_description">Every channel, movie and episode goes back to the default zoom. Saved volumes are kept. You can always set an individual one again from the player.</string>
+    <string name="settings_reset_saved_zoom_confirm_description">Every channel goes back to the default zoom. Saved volumes are kept. You can always set an individual one again from the player.</string>
     <!-- Translators: Settings-row title for forgetting the volume saved for individual items. -->
     <string name="settings_reset_saved_volume">Reset saved volume</string>
     <!-- Translators: Description of the reset-saved-volume setting row. -->
-    <string name="settings_reset_saved_volume_description">Changing volume in the player saves it for that channel, movie or episode. Reset makes everything follow the default volume again.</string>
+    <string name="settings_reset_saved_volume_description">Changing volume in the player saves it for that channel. Reset makes everything follow the default volume again.</string>
     <!-- Translators: Confirmation dialog title before forgetting the saved per-item volume. -->
     <string name="settings_reset_saved_volume_confirm">Reset saved volume?</string>
     <!-- Translators: Confirmation dialog body before forgetting the saved per-item volume. -->
-    <string name="settings_reset_saved_volume_confirm_description">Every channel, movie and episode goes back to the default volume. Saved zoom settings are kept. You can always set an individual one again from the player.</string>
+    <string name="settings_reset_saved_volume_confirm_description">Every channel goes back to the default volume. Saved zoom settings are kept. You can always set an individual one again from the player.</string>
     <!-- Translators: Settings row that forgets every per-item audio-sync offset. -->
     <string name="settings_reset_saved_audio_delay">Reset saved audio sync</string>
     <!-- Translators: Description of the reset-saved-audio-sync row. -->
-    <string name="settings_reset_saved_audio_delay_description">Choosing \'Remember this delay\' in the player saves the audio sync for that channel, movie or episode. Reset makes everything follow the setting above again.</string>
+    <string name="settings_reset_saved_audio_delay_description">Choosing \'Remember this delay\' in the player saves the audio sync for that channel. Reset makes everything follow the setting above again.</string>
     <!-- Translators: Title of the confirmation dialog for resetting saved audio sync. -->
     <string name="settings_reset_saved_audio_delay_confirm">Reset saved audio sync?</string>
     <!-- Translators: Body of the confirmation dialog for resetting saved audio sync. -->
-    <string name="settings_reset_saved_audio_delay_confirm_description">Every channel, movie and episode goes back to the audio sync above. Saved zoom and volume settings are kept. You can always set an individual one again from the player.</string>
+    <string name="settings_reset_saved_audio_delay_confirm_description">Every channel goes back to the audio sync above. Saved zoom and volume settings are kept. You can always set an individual one again from the player.</string>
     <!-- Translators: Setting label for how far rewind/forward jumps in a movie or episode. -->
     <string name="settings_seek_step">Seek step</string>
     <!-- Translators: Description of the seek step setting. -->
-    <string name="settings_seek_step_description">How far rewind and forward jump in a movie or episode.</string>
-    <!-- Translators: Setting label for the resume playback behavior. -->
-    <string name="settings_resume_playback">Resume playback</string>
-    <!-- Translators: Description of the resume playback setting. -->
-    <string name="settings_resume_playback_description">What to do when a movie or episode has a saved position.</string>
+    <string name="settings_seek_step_description">How far rewind and forward jump in the stream.</string>
     <!-- Translators: Setting label for the subtitle appearance editor. -->
     <string name="settings_subtitle_appearance">Subtitle appearance</string>
     <!-- Translators: Description of the subtitle appearance editor and its disabled behavior. -->
@@ -877,7 +848,7 @@
     <!-- Translators: Description of the preferred language setting. -->
     <string name="settings_preferred_language_description">Auto-select this subtitle track when available.</string>
     <!-- Translators: Description of the preferred AUDIO language setting. "Original language" is the picker choice settings_language_original; quote it as that string is translated. -->
-    <string name="settings_preferred_audio_language_description">Plays this audio track when the stream has it. \"Original language\" plays films and series in the language they were made in.</string>
+    <string name="settings_preferred_audio_language_description">Plays this audio track when the stream has it. \"Original language\" plays the stream\'s main audio track.</string>
     <!-- Translators: Setting label for preferred audio language. -->
     <string name="settings_preferred_audio_language">Preferred audio language</string>
     <!-- Translators: Setting label for audio/video synchronization. -->
@@ -965,16 +936,6 @@
     </plurals>
     <!-- Translators: Description of the external player row setting. -->
     <string name="settings_external_player_row_description">Open streams in an external app (VLC, MX Player) instead of the built-in player, chosen per section. Useful for streams this app can\'t decode, or if you prefer another player. Resume position and prev/next are unavailable while playing externally; streams needing a custom User-Agent or referer may not play.</string>
-    <!-- Translators: Resume playback option: always resume from saved position. -->
-    <string name="settings_resume_always">Always resume</string>
-    <!-- Translators: Resume playback option: ask whether to resume. -->
-    <string name="settings_resume_ask">Ask to resume</string>
-    <!-- Translators: Resume playback option: never resume, always start fresh. -->
-    <string name="settings_resume_never">Never resume</string>
-    <!-- Translators: Used in subtitle deletion and as a Customize-screen section chip. -->
-    <string name="settings_movies">Movies</string>
-    <!-- Translators: Used in subtitle deletion and as a Customize-screen section chip. -->
-    <string name="settings_series">Series</string>
     <!-- Translators: Section label with item count. 'section' is the section name, 'count' is the number. -->
     <string name="settings_section_count"><xliff:g id="section">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g>)</string>
     <!-- Translators: Dialog title asking whether to sync the TV guide. -->
@@ -1003,10 +964,6 @@
     <string name="settings_try_again">Try again</string>
     <!-- Translators: Button to restart the companion server with a new PIN. -->
     <string name="settings_new_pin">Start again with a new PIN</string>
-    <!-- Translators: Screen title for the remote download companion screen. -->
-    <string name="settings_download_remote_title">Download on another device</string>
-    <!-- Translators: Description of the remote backup download process. -->
-    <string name="settings_download_remote_description">On any device with a browser on the same Wi-Fi — a phone, a computer or another TV — scan the QR (or open the URL), enter this PIN, and download your backup file to keep it safe.</string>
     <!-- Translators: Loading status shown while preparing a backup file. -->
     <string name="settings_preparing_backup">Preparing backup…</string>
     <!-- Translators: Description of the UI Zoom range. 'min' and 'max' are percentages. -->
@@ -1043,10 +1000,6 @@
     <string name="settings_device_details"><xliff:g id="model">%1$s</xliff:g> · <xliff:g id="android">%2$s</xliff:g></string>
     <!-- Translators: History scope label for Live TV. -->
     <string name="settings_history_live">Live TV</string>
-    <!-- Translators: History scope label for Movies. -->
-    <string name="settings_history_movies">Movies</string>
-    <!-- Translators: History scope label for Series. -->
-    <string name="settings_history_series">Series</string>
     <!-- Translators: History scope label for all content. -->
     <string name="settings_history_all">all</string>
     <!-- Translators: Toggle label to remember the last viewed category. -->
@@ -1108,7 +1061,7 @@
     <!-- Translators: Settings search keywords for the Settings lock, space-separated, lowercase. -->
     <string name="settings_search_keywords_settings_lock">lock pin password parental settings</string>
     <!-- Translators: Description of the Customize Categories & Items feature. -->
-    <string name="settings_customize_description">Hide &amp; unhide channels, movies and series, and rename or reorder categories for this profile. Survives re-syncs.</string>
+    <string name="settings_customize_description">Hide &amp; unhide channels and rename or reorder categories for this profile. Survives re-syncs.</string>
     <!-- Translators: Setting label for new-category visibility behavior. -->
     <string name="settings_customize_new_category_behavior">New category behavior</string>
     <!-- Translators: Imperative command button to hide one or more categories. Translate as an action, not the state "Hidden". -->
@@ -1241,8 +1194,6 @@
     <string name="settings_sources_resync">Re-sync</string>
     <!-- Translators: Dialog title for source deletion confirmation. 'name' is the source name. -->
     <string name="settings_sources_delete_title">Delete “<xliff:g id="name">%1$s</xliff:g>”?</string>
-    <!-- Translators: Description of what deleting a source does. -->
-    <string name="settings_sources_delete_message">This removes the source and all its channels, movies and series from every profile.</string>
     <!-- Translators: Source type display for M3U sources. 'url' is the playlist URL. -->
     <string name="settings_sources_type_m3u">M3U · <xliff:g id="url">%1$s</xliff:g></string>
     <!-- Translators: Source type display for Xtream sources. 'url' is the server URL. -->
@@ -1529,21 +1480,13 @@
     <string name="settings_backup_section_customize">Customizations</string>
     <!-- Translators: Backup content section: Favorites. -->
     <string name="settings_backup_section_favorites">Favorites</string>
-    <!-- Translators: Description of the Favorites backup section. -->
-    <string name="settings_backup_section_favorites_desc">Starred channels, movies and series</string>
     <!-- Translators: Backup content section: Watch history. -->
     <string name="settings_backup_section_history">Watch history</string>
     <!-- Translators: Description of the Watch history backup section. -->
     <string name="settings_backup_section_history_desc">Recently watched lists</string>
-    <!-- Translators: Backup content section: Resume positions. -->
-    <string name="settings_backup_section_resume">Resume positions</string>
-    <!-- Translators: Description of the Resume positions backup section. -->
-    <string name="settings_backup_section_resume_desc">Where you stopped in movies &amp; episodes</string>
     <!-- Translators: Backup content section: Manual reorder. -->
     <string name="settings_backup_section_reorder">Manual reorder</string>
     <string name="settings_backup_section_reminders">Reminders</string>
-    <!-- Translators: Description of the Manual reorder backup section. -->
-    <string name="settings_backup_section_reorder_desc">Your Move up/down positions for channels, movies and series</string>
     <!-- Translators: Backup content section: App settings. -->
     <string name="settings_backup_section_settings">App settings</string>
     <!-- Translators: Description of the App settings backup section. -->
@@ -1708,7 +1651,7 @@
     <!-- Translators: Title for creating a user-defined category. -->
     <string name="settings_customize_new_category_title">New category</string>
     <!-- Translators: Description of a user-defined category that may combine several media types. -->
-    <string name="settings_customize_new_category_description">A combined category for this profile — move channels, movies or series into it.</string>
+    <string name="settings_customize_new_category_description">A combined category for this profile — move channels into it.</string>
     <!-- Translators: Fallback name for the category currently being viewed. -->
     <string name="settings_customize_this_category">this category</string>
     <!-- Translators: Dialog title for sorting customization categories. -->
@@ -1874,23 +1817,10 @@
     <string name="settings_surround_stereo_description_mobile">Stereo only — always decode in the app and send plain 2.0 sound. Use this for the built-in speaker, headphones or a stereo soundbar, or if audio lags behind the picture.</string>
     <string name="settings_surround_forced_description">Surround — send Dolby/DTS to a real 5.1/7.1 receiver. If it goes silent or stutters, МОЁ ТВ still falls back to stereo and tells you.</string>
     <string name="settings_panel_width">Panel widths</string>
-    <string name="settings_panel_width_description">Resize the category, list and preview panels in Live TV, Movies &amp; Series.</string>
-    <!-- Translators: Settings row. Chooses how the Movies and Series screens are laid out. -->
-    <string name="settings_vod_layout">Movies &amp; Series layout</string>
-    <string name="settings_vod_layout_description">Separate panels, or one cinematic view with the artwork behind</string>
-    <!-- Translators: Subtitle of the layout chooser popup. -->
-    <string name="settings_vod_layout_screen_description">Choose how Movies and Series are laid out. Live TV and the episode list are unchanged.</string>
-    <string name="settings_vod_layout_separate">Separate panels</string>
-    <!-- Translators: The existing layout — category panel, title list, preview panel. -->
-    <string name="settings_vod_layout_separate_description">Categories, the title list and a preview side by side. Includes the List and Grid views.</string>
-    <string name="settings_vod_layout_cinematic">Cinematic</string>
-    <!-- Translators: The new layout — the focused title's backdrop fills the screen. -->
-    <string name="settings_vod_layout_cinematic_description">The focused title’s artwork fills the screen, with its details above a poster grid. Grid only.</string>
-    <string name="settings_search_keywords_vod_layout">layout cinematic backdrop artwork panels movies series poster view grid</string>
+    <string name="settings_panel_width_description">Resize the category, list and preview panels in Live TV.</string>
+    <string name="settings_live_layout_separate">Separate panels</string>
     <!-- Translators: Panel-width slider label, Cinematic layout only. Sizes the details block. -->
     <string name="settings_panel_width_details_height">Details height</string>
-    <!-- Translators: Hint under the Details height slider, Cinematic layout only. -->
-    <string name="settings_panel_width_details_hint">Lower the details height for another row of posters; raise it for more plot and cast.</string>
     <!-- Translators: Panel-width slider label, Cinematic layout only. The column holding the details and the poster grid. -->
     <string name="settings_panel_width_content_area">Content area</string>
     <string name="settings_guide_width">Guide column widths</string>
@@ -1900,7 +1830,7 @@
     <string name="settings_guide_width_help">• The channel list and EPG timeline share one row, so their percentages must add up to 100%%.\n• Widening the channel list shows less of the timeline at once; programme lengths and the time scale stay unchanged.\n• Both columns stay at 10%% or more.\n• Reset returns to 10%% channel list and 90%% EPG timeline.\n• Turning customization off restores the standard Guide layout without losing your values.</string>
     <string name="settings_guide_width_channels">Channel list</string>
     <string name="settings_search_keywords_epg_offset">epg guide time offset shift timezone east west hours</string>
-    <string name="settings_search_keywords_panel_width">panel width size resize category list preview poster column layout live movies series</string>
+    <string name="settings_search_keywords_panel_width">panel width size resize category list preview column layout live</string>
     <string name="settings_search_keywords_live_preroll">prebuffer preroll pre-roll buffering buffer before playing rebuffer stutter freeze per playlist</string>
     <string name="settings_detailed_playback_logging">Detailed playback logging</string>
     <string name="settings_search_keywords_detailed_logging">diagnostics verbose trace logcat debug report bug live engine</string>
@@ -1915,9 +1845,8 @@
     <string name="settings_epg_offset_root_description">Shift the whole guide when a feed’s times don’t match what’s actually on. A single channel can be shifted on its own from its long-press menu (Live TV or Guide) — that’s the one for East/West versions sharing a guide.</string>
     <string name="settings_epg_offset_dialog_description">Moves every programme in the guide. Use it when the whole feed is on the wrong clock; for a single channel (an East/West version sharing one guide), long-press the channel in Live TV or the Guide and set its own offset there.</string>
     <string name="settings_panel_width_summary">Category <xliff:g id="category">%1$d</xliff:g>%% · List <xliff:g id="list">%2$d</xliff:g>%% · <xliff:g id="preview_label">%3$s</xliff:g> <xliff:g id="preview">%4$d</xliff:g>%%</string>
-    <string name="settings_panel_width_help">• The panels share one row, so their percentages must add up to 100%%.\n• Set the Preview or Poster panel to 0%% to hide it; Category and List stay at 10%% or more.\n• Widen one panel and you have to take the same amount off another before saving.\n• Reset puts a section back to the standard widths this screen started with.\n• Turning a section off restores its standard layout without losing your values.\n• Movie and series posters re-flow automatically, so a narrower list just shows fewer per row.</string>
+    <string name="settings_panel_width_help">• The panels share one row, so their percentages must add up to 100%%.\n• Set the Preview panel to 0%% to hide it; Category and List stay at 10%% or more.\n• Widen one panel and you have to take the same amount off another before saving.\n• Reset puts a section back to the standard widths this screen started with.\n• Turning a section off restores its standard layout without losing your values.</string>
     <string name="settings_panel_width_preview">Preview</string>
-    <string name="settings_panel_width_poster">Poster</string>
     <string name="settings_panel_width_dialog_title"><xliff:g id="section">%1$s</xliff:g> panel widths</string>
     <string name="settings_panel_width_customize">Customize panel</string>
     <string name="settings_panel_width_category">Category panel</string>
@@ -2070,8 +1999,6 @@
     <string name="local_sync_change_favorites">New favorites: <xliff:g id="count">%1$d</xliff:g></string>
     <!-- Translators: One counted change: how many watch history entries would be added. %1$d is a number. -->
     <string name="local_sync_change_history">New history entries: <xliff:g id="count">%1$d</xliff:g></string>
-    <!-- Translators: One counted change: how many saved playback positions would be added. %1$d is a number. -->
-    <string name="local_sync_change_resume">New resume positions: <xliff:g id="count">%1$d</xliff:g></string>
     <!-- Translators: One counted change: how many manually ordered items would change. %1$d is a number. -->
     <string name="local_sync_change_reorder">Ordering changes: <xliff:g id="count">%1$d</xliff:g></string>
     <!-- Translators: One counted change: how many settings hold a different value. %1$d is a number. -->
@@ -2185,9 +2112,7 @@
     <!-- Translators: More › Favorites: nothing has been added to Favorites yet. -->
     <string name="more_fav_empty_title">No favorites yet</string>
     <!-- Translators: More › Favorites, empty: how to add something. {L} is the existing "Add to Favorites" menu label. -->
-    <string name="more_fav_empty_body">Hold OK on a channel, film or show and choose Add to Favorites.</string>
-    <!-- Translators: Phone version of more_fav_empty_body: More › Favourites with nothing starred yet. On a phone you touch and hold an item. -->
-    <string name="more_fav_empty_body_mobile">Touch and hold a channel, film or show and choose Add to Favorites.</string>
+    <string name="more_fav_empty_body">Hold OK on a channel and choose Add to Favorites.</string>
     <!-- Translators: More › History: nothing has been watched yet. -->
     <string name="more_history_empty">Nothing watched yet</string>
     <!-- Translators: More › Backup & Restore: warning card when no backup has ever been made on this device. -->
@@ -2505,8 +2430,6 @@
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_live_opens_in">The channel list, or the guide grid</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_vod_layout">Separate panels, or one cinematic view</string>
-    <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_panel_width">Category, list and preview widths</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_guide_width">Channel list and timeline</string>
@@ -2543,8 +2466,6 @@
     <!-- Translators: One-line description under the Prefer SDR setting's name; keep it short, it is cut to one line. -->
     <string name="settings_line_prefer_sdr">SDR when a stream offers both</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_quick_autoplay">Start the next episode by itself</string>
-    <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_external">VLC, MX Player… per section</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_hw">Use the TV’s own decoder</string>
@@ -2556,8 +2477,6 @@
     <string name="settings_line_zoom">Aspect and zoom when playback starts</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_saved_zoom">Zoom you changed in the player</string>
-    <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_films_only">Films only</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_volume">Above 100%% quiet streams are amplified</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
@@ -2607,11 +2526,7 @@
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_tune_timeout">Stop trying and say so</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_seek_step">How far rewind and forward jump in a film</string>
-    <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_resume">When a film has a saved position</string>
-    <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_autoplay">And into the next season</string>
+    <string name="settings_line_seek_step">How far rewind and forward jump in a stream</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_tiles">Each tile is another stream</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
@@ -2653,8 +2568,6 @@
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_live_layout">Stage shows the categories as a sheet that slides in with ◀, so the channel list and preview get the room. Separate keeps the categories on screen beside the list.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
-    <string name="settings_help_vod_layout">Cinematic shows the focused title’s artwork behind a grid of posters. Separate shows categories, titles and details side by side.</string>
-    <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_home">Pick which rows Home shows and in what order, and how the Now trending row looks.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_customize">Hide categories and items you never watch, give categories your own names and put them in your order. Hidden things come back here, never lost.</string>
@@ -2677,11 +2590,11 @@
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_hw">Uses the TV’s hardware decoder: smooth 4K and less heat. Turn it off only if some streams stutter or show blocks; the software decoder then does the work.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
-    <string name="settings_help_volume">The volume every channel, film and episode starts at. Above 100%% quiet streams are amplified. A volume you change in the player is kept for that title until you reset it.</string>
+    <string name="settings_help_volume">The volume every channel starts at. Above 100%% quiet streams are amplified. A volume you change in the player is kept for that channel until you reset it.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_channel_numbers">Shows your provider’s channel number beside the name in the Live TV list, the channel-list overlay and the player, and lets you type a number on the remote in full screen to jump to that channel.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
-    <string name="settings_help_seek_step">How far rewind and forward jump in a film or episode with one press. Holding the key keeps jumping.</string>
+    <string name="settings_help_seek_step">How far rewind and forward jump in a stream with one press. Holding the key keeps jumping.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_zoom_mode">How the picture fills the screen when playback starts. Fit shows the whole picture; the other choices fill, stretch or force a shape. A zoom changed in the player is kept for that title.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
@@ -2694,8 +2607,6 @@
     <string name="settings_help_preview_on_ok">Pick where OK on a channel first plays it in the preview, and OK on the same channel again opens it full screen. In Live TV the preview then stays on that channel while you browse. Where it is off, OK opens the channel full screen at once and the preview follows the highlight.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_timeshift_window">How far back Pause and rewind live TV can go on a channel without catch-up. Longer keeps more of the channel in this device’s storage.</string>
-    <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
-    <string name="settings_help_resume">Ask to resume offers Resume or Start over when a film or episode has a saved position. Always resume carries on where you stopped; Never resume starts from the beginning.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_mini">The small player that keeps a channel going in a corner while you browse. Choose its size and the corner it sits in.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
@@ -2909,7 +2820,7 @@
     <!-- Translators: Phone version of settings_line_glass_switch: the phone has bars at the top and bottom instead of the TV's rail. -->
     <string name="settings_line_glass_switch_mobile">Bars, sheets, menus and popups are frosted</string>
     <!-- Translators: Panel text for Glass and Glass opacity. -->
-    <string name="settings_help_glass_chrome">Frosts the floating parts: the rail, the category sheets, menus, popups and the pills at the top. Lists and posters stay flat.</string>
+    <string name="settings_help_glass_chrome">Frosts the floating parts: the rail, the category sheets, menus, popups and the pills at the top. Lists and channel artwork stay flat.</string>
     <!-- Translators: Row title: how solid the glass is. -->
     <string name="settings_glass_opacity">Glass opacity</string>
     <!-- Translators: Line under Glass opacity. -->
@@ -2934,10 +2845,6 @@
     <string name="settings_line_passthrough_mobile">Undecoded to a connected receiver</string>
     <!-- Translators: Line under the Navigation setting on a phone: the bottom bar's options. -->
     <string name="settings_line_navigation_mobile">The bar at the bottom: labels, hide while scrolling, items</string>
-    <!-- Translators: Settings row on a phone: whether a Movies or Series category opens as a poster grid or a list. -->
-    <string name="settings_vod_view_mobile">Movies &amp; Series view</string>
-    <!-- Translators: Line under the Movies & Series view setting. -->
-    <string name="settings_line_vod_view_mobile">How a category opens</string>
     <!-- Translators: Settings row on a phone: how wide the TV Guide grid's time scale is. -->
     <string name="settings_guide_size_mobile">TV Guide size</string>
     <!-- Translators: Line under the TV Guide size setting. -->
@@ -2988,12 +2895,6 @@
     <string name="settings_line_popup_size_mobile">Scale sheets and menus without changing their text</string>
     <!-- Translators: Phone version of settings_line_animations: line under Animations. -->
     <string name="settings_line_animations_mobile">Off feels snappier on older phones</string>
-    <!-- Translators: Line under Film buffer on a phone. -->
-    <string name="settings_line_vod_buffer_mobile">How far ahead films and catch-up are loaded</string>
-    <!-- Translators: Line under Network timeout on a phone. -->
-    <string name="settings_line_vod_timeout_mobile">How long to wait on a silent server</string>
-    <!-- Translators: Line under Reconnect attempts on a phone. -->
-    <string name="settings_line_vod_reconnects_mobile">How many times a lost stream is reopened</string>
     <!-- Translators: Short line under Software decoding above 1080p on a phone. -->
     <string name="settings_line_sw_decode_mobile">Above 1080p in software when the hardware decoder fails</string>
     <!-- Translators: Short line under Record on mobile data. -->

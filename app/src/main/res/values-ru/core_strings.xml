@@ -27,14 +27,9 @@
     <string name="common_nav_search">Поиск</string>
     <string name="common_nav_home">Главная</string>
     <string name="common_nav_live_tv">Прямой эфир</string>
-    <string name="common_nav_movies">Фильмы</string>
-    <string name="common_nav_series">Сериалы</string>
-    <string name="common_nav_downloads">Загрузки</string>
     <string name="common_nav_guide">Программа передач</string>
     <string name="common_nav_guide_short">Программа</string>
-    <string name="common_nav_library">Библиотека</string>
     <string name="common_nav_more">Ещё</string>
-    <string name="common_cast">Транслировать</string>
     <string name="common_nav_settings">Настройки</string>
     <string name="shell_no_source">Нет источника</string>
     <string name="shell_now_playing">Сейчас играет</string>
@@ -42,8 +37,6 @@
     <string name="common_percent"><xliff:g id="percent">%1$d</xliff:g>%%</string>
     <string name="common_timestamp_minutes"><xliff:g id="minutes">%1$d</xliff:g>:<xliff:g id="seconds">%2$02d</xliff:g></string>
     <string name="common_timestamp_hours"><xliff:g id="hours">%1$d</xliff:g>:<xliff:g id="minutes">%2$02d</xliff:g>:<xliff:g id="seconds">%3$02d</xliff:g></string>
-    <string name="common_resume_position">Вы остановились на <xliff:g id="position">%1$s</xliff:g>.</string>
-    <string name="common_resume_prompt">Продолжить воспроизведение?</string>
     <string name="sync_error_offline">Похоже, вы не в сети. Проверьте соединение и повторите попытку.</string>
     <string name="sync_error_generic">Что-то пошло не так. Повторите попытку.</string>
     <string name="sync_error_timeout">Сервер слишком долго не отвечал. Повторите попытку.</string>
@@ -84,30 +77,12 @@
     <string name="sync_status_complete_with_changes">Синхронизация завершена · <xliff:g id="source">%1$s</xliff:g> · <xliff:g id="changes">%2$s</xliff:g></string>
     <string name="sync_status_failed">Ошибка синхронизации · <xliff:g id="source">%1$s</xliff:g>: <xliff:g id="reason">%2$s</xliff:g></string>
     <string name="sync_status_cancelled">Синхронизация отменена · <xliff:g id="source">%1$s</xliff:g></string>
-    <string name="sync_status_download">Загрузка <xliff:g id="title">%1$s</xliff:g></string>
-    <string name="sync_status_download_with_progress">Загрузка <xliff:g id="title">%1$s</xliff:g> · <xliff:g id="percent">%2$d</xliff:g>%%</string>
-    <string name="sync_status_download_locked">Загрузка из заблокированной категории</string>
-    <string name="sync_status_download_locked_with_progress">Загрузка из заблокированной категории · <xliff:g id="percent">%1$d</xliff:g>%%</string>
     <string name="sync_phase_live">Прямой эфир</string>
-    <string name="sync_phase_movies">Фильмы</string>
-    <string name="sync_phase_series">Сериалы</string>
     <plurals name="sync_count_channels">
         <item quantity="one"><xliff:g id="count">%1$s</xliff:g> канал</item>
         <item quantity="few"><xliff:g id="count">%1$s</xliff:g> канала</item>
         <item quantity="many"><xliff:g id="count">%1$s</xliff:g> каналов</item>
         <item quantity="other"><xliff:g id="count">%1$s</xliff:g> каналов</item>
-    </plurals>
-    <plurals name="sync_count_movies">
-        <item quantity="one"><xliff:g id="count">%1$s</xliff:g> фильм</item>
-        <item quantity="few"><xliff:g id="count">%1$s</xliff:g> фильма</item>
-        <item quantity="many"><xliff:g id="count">%1$s</xliff:g> фильмов</item>
-        <item quantity="other"><xliff:g id="count">%1$s</xliff:g> фильмов</item>
-    </plurals>
-    <plurals name="sync_count_series">
-        <item quantity="one"><xliff:g id="count">%1$s</xliff:g> сериал</item>
-        <item quantity="few"><xliff:g id="count">%1$s</xliff:g> сериала</item>
-        <item quantity="many"><xliff:g id="count">%1$s</xliff:g> сериалов</item>
-        <item quantity="other"><xliff:g id="count">%1$s</xliff:g> сериалов</item>
     </plurals>
     <plurals name="sync_count_epg">
         <item quantity="one"><xliff:g id="count">%1$s</xliff:g> запись EPG</item>
@@ -151,16 +126,8 @@
     <string name="common_qr_code_companion_url">QR-код для URL страницы-компаньона</string>
     <string name="shell_rail_profile_line"><xliff:g id="playlist">%1$s</xliff:g> · сменить</string>
     <string name="shell_rail_detail_last">Последний: <xliff:g id="title">%1$s</xliff:g></string>
-    <string name="shell_rail_detail_resume">Продолжить: <xliff:g id="title">%1$s</xliff:g></string>
     <string name="shell_rail_detail_next">Далее: <xliff:g id="title">%1$s</xliff:g></string>
-    <string name="shell_rail_detail_episode"><xliff:g id="series">%1$s</xliff:g> <xliff:g id="episode">%2$s</xliff:g></string>
     <string name="shell_rail_detail_more">Настройки, избранное, резервная копия</string>
-    <plurals name="shell_rail_detail_downloads">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> загружается · <xliff:g id="progress">%2$s</xliff:g></item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> загружаются · <xliff:g id="progress">%2$s</xliff:g></item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> загружаются · <xliff:g id="progress">%2$s</xliff:g></item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> загружаются · <xliff:g id="progress">%2$s</xliff:g></item>
-    </plurals>
     <string name="shell_now_playing_audio">Звук</string>
     <string name="common_weather_degrees_city"><xliff:g id="temperature">%1$d</xliff:g>° <xliff:g id="city">%2$s</xliff:g></string>
     <string name="common_dismiss">Закрыть</string>

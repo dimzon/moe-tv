@@ -1,52 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Translators: Plural queued status shown on the download progress chip. "count" is the number of queued items. -->
-    <plurals name="content_queued_items">
-        <item quantity="one">Queued <xliff:g id="count">%1$d</xliff:g> item</item>
-        <item quantity="other">Queued <xliff:g id="count">%1$d</xliff:g> items</item>
-    </plurals>
-    <!-- Translators: Plural paused status shown on the download progress chip. "count" is the number of paused items. -->
-    <plurals name="content_paused_items">
-        <item quantity="one">Paused <xliff:g id="count">%1$d</xliff:g> item</item>
-        <item quantity="other">Paused <xliff:g id="count">%1$d</xliff:g> items</item>
-    </plurals>
 
-    <!-- Translators: Genre label for Action content. Used in genre filters and category lists. -->
-    <string name="content_genre_action">Action</string>
-    <!-- Translators: Genre label for Adult content. -->
-    <string name="content_genre_adult">Adult</string>
-    <!-- Translators: Genre label for Anime content. -->
-    <string name="content_genre_anime">Anime</string>
-    <!-- Translators: Genre label for Comedy content. -->
-    <string name="content_genre_comedy">Comedy</string>
-    <!-- Translators: Genre label for Documentary content. -->
-    <string name="content_genre_documentary">Documentary</string>
-    <!-- Translators: Genre label for Drama content. -->
-    <string name="content_genre_drama">Drama</string>
-    <!-- Translators: Genre label for Entertainment content. -->
-    <string name="content_genre_entertainment">Entertainment</string>
-    <!-- Translators: Genre label for Horror content. -->
-    <string name="content_genre_horror">Horror</string>
-    <!-- Translators: Genre label for Kids content. -->
-    <string name="content_genre_kids">Kids</string>
-    <!-- Translators: Genre label for Movies content. -->
-    <string name="content_genre_movies">Movies</string>
-    <!-- Translators: Genre label for Music content. -->
-    <string name="content_genre_music">Music</string>
-    <!-- Translators: Genre label for News content. -->
-    <string name="content_genre_news">News</string>
-    <!-- Translators: Genre label for uncategorized/other content. -->
-    <string name="content_genre_other">Other</string>
-    <!-- Translators: Genre label for Religious content. -->
-    <string name="content_genre_religious">Religious</string>
-    <!-- Translators: Genre label for Romance content. -->
-    <string name="content_genre_romance">Romance</string>
-    <!-- Translators: Genre label for Science Fiction content. -->
-    <string name="content_genre_scifi">Sci-Fi</string>
-    <!-- Translators: Genre label for Series content. -->
-    <string name="content_genre_series">Series</string>
-    <!-- Translators: Genre label for Sports content. -->
-    <string name="content_genre_sport">Sport</string>
     <!-- Translators: Dialog title for the exit-confirmation dialog. -->
     <string name="content_exit_owntv">Exit МОЁ ТВ?</string>
     <!-- Translators: Body text in the exit-confirmation dialog. -->
@@ -116,64 +70,27 @@
     <string name="content_move_to_category">Move to category…</string>
     <!-- Translators: Context-menu option on a channel inside a category the user created: take it out of that category only. The channel itself and its own provider category are unaffected. -->
     <string name="content_remove_from_category">Remove from this category</string>
-    <!-- Translators: Context-menu option to download a movie or episode for offline playback. -->
-    <string name="content_download">Download</string>
-    <!-- Translators: Context-menu option to download all episodes of a series. -->
-    <string name="content_download_all_episodes">Download all episodes</string>
     <!-- Translators: Button or context-menu option to play content. -->
     <string name="content_play">Play</string>
     <!-- Translators: Status chip indicating content has been favorited. This is a state, not a command. -->
     <string name="content_favorited">Favorited</string>
     <!-- Translators: Button to add content to Favorites. Contrasts with Favorited (the state). -->
     <string name="content_favorite">Favorite</string>
-    <!-- Translators: Sorting-dialog row label for season ordering. -->
-    <string name="content_seasons">Seasons</string>
-    <!-- Translators: Sorting-dialog row label for episode ordering. -->
-    <string name="content_episodes">Episodes</string>
     <!-- Translators: Sort option to show oldest items first. -->
     <string name="content_oldest_first">Oldest first</string>
     <!-- Translators: Sort option to show newest items first. -->
     <string name="content_newest_first">Newest first</string>
-    <!-- Translators: Context-menu option to play the trailer for a movie or series. -->
-    <string name="content_play_trailer">Play trailer</string>
     <!-- Translators: Button to close a dialog or overlay. -->
     <string name="content_close">Close</string>
     <!-- Translators: Hint text in the rename dialog explaining the rename is local to this profile only. -->
     <string name="content_rename_hint">Only for this profile. Leave blank to restore the original name.</string>
-    <!-- Translators: Empty-state message on the Movies screen when the category has no movies. -->
-    <string name="content_no_movies_here">No movies here.</string>
-    <!-- Translators: Empty-state message on the Series screen when the category has no series. -->
-    <string name="content_no_series_here">No series here.</string>
-    <!-- Translators: Empty-state message when a season has no episodes. -->
-    <string name="content_no_episodes">No episodes available.</string>
-    <!-- Translators: Shown instead of "No episodes available." when the provider refused or failed the request for a show's episode list. "reason" is technical and untranslated, e.g. HTTP 407 or SocketTimeoutException. -->
-    <string name="content_episodes_load_failed">Could not load the episodes from the provider (<xliff:g id="reason">%1$s</xliff:g>).</string>
-    <!-- Translators: Empty-state message when a movie search returns no results. "query" is the user\'s search text. -->
-    <string name="content_no_movies_found">No movies found for \u201c<xliff:g id="query">%1$s</xliff:g>\u201d</string>
-    <!-- Translators: Plural category count label in the category browser. "category" is the category name; "count" is the number of movies. -->
-    <plurals name="content_count_movies">
-        <item quantity="one"><xliff:g id="category">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g> movie)</item>
-        <item quantity="other"><xliff:g id="category">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g> movies)</item>
-    </plurals>
     <!-- Translators: Current sort-mode label in the SortChip toggle. -->
     <string name="content_provider">Provider</string>
     <string name="content_provider_name">Provider: <xliff:g id="provider">%1$s</xliff:g></string>
-    <!-- Translators: Empty-state message when a series search returns no results. "query" is the user\'s search text. -->
-    <string name="content_no_series_found">No series found for \u201c<xliff:g id="query">%1$s</xliff:g>\u201d</string>
-    <!-- Translators: Context-menu option to reorder a movie in a custom list. -->
-    <string name="content_reorder_movie">Reorder movie</string>
-    <!-- Translators: Context-menu option to reorder a series in a custom list. -->
-    <string name="content_reorder_series">Reorder series</string>
     <!-- Translators: Duration display for content longer than one hour. "hours" and "minutes" are integers. -->
     <string name="content_duration_hours"><xliff:g id="hours">%1$d</xliff:g>h <xliff:g id="minutes">%2$d</xliff:g>m</string>
     <!-- Translators: Duration display for content under one hour. "minutes" is an integer. -->
     <string name="content_duration_minutes"><xliff:g id="minutes">%1$d</xliff:g>m</string>
-    <!-- Translators: Season/episode display format. "season" and "episode" are integers. S and E are conventional abbreviations. -->
-    <string name="content_season_episode">S<xliff:g id="season">%1$d</xliff:g> \u00b7 E<xliff:g id="episode">%2$d</xliff:g></string>
-    <!-- Translators: Season/episode display with title. "title" is the episode name. -->
-    <string name="content_season_episode_title">S<xliff:g id="season">%1$d</xliff:g> \u00b7 E<xliff:g id="episode">%2$d</xliff:g> <xliff:g id="title">%3$s</xliff:g></string>
-    <!-- Translators: Season number label. "season" is the season number. -->
-    <string name="content_season">Season <xliff:g id="season">%1$d</xliff:g></string>
     <!-- Translators: Status chip when no EPG data is available for a channel. "EPG" is Electronic Program Guide. -->
     <string name="content_no_epg">No EPG</string>
     <!-- Translators: Label for catch-up (time-shifted) playback feature. -->
@@ -238,30 +155,6 @@
     <string name="content_storage_folder_lost">That folder is no longer available. Choose it again, or pick another.</string>
     <!-- Translators: Shown on the Downloads screen while the folder the user chose for downloads is missing (a USB stick removed, or its permission withdrawn). Downloads go to the app's own folder until it is back; the choice itself is kept. -->
     <string name="content_storage_folder_fallback">Your download folder isn\'t available right now, so downloads are being saved to МОЁ ТВ\'s own folder until it\'s back.</string>
-    <!-- Translators: Why a download failed: the TV provider says every connection the account allows is in use. -->
-    <string name="content_downloads_reason_account_busy">Account busy: another stream is using the connection</string>
-    <!-- Translators: Why a download failed: the server refused the link (expired, blocked or busy; it does not say which). -->
-    <string name="content_downloads_reason_refused">The server refused the link</string>
-    <!-- Translators: Why a download failed: the server no longer has the file. -->
-    <string name="content_downloads_reason_not_found">The server no longer has this file</string>
-    <!-- Translators: Why a download failed: the server reported an internal error. -->
-    <string name="content_downloads_reason_server_error">Server error</string>
-    <!-- Translators: Why a download failed: the server answered with something other than the file. -->
-    <string name="content_downloads_reason_http">The server did not send the file</string>
-    <!-- Translators: Why a download failed: the network dropped, timed out or never connected. -->
-    <string name="content_downloads_reason_connection_lost">Connection lost</string>
-    <!-- Translators: Why a download failed: the download folder is gone (card or USB removed) or its permission was withdrawn. -->
-    <string name="content_downloads_reason_folder">Download folder unavailable</string>
-    <!-- Translators: Why a download failed: the storage is full. -->
-    <string name="content_downloads_reason_no_space">Not enough space</string>
-    <!-- Translators: Why a download failed: the drive (often a USB stick formatted FAT32) cannot hold a single file over 4 GB. -->
-    <string name="content_downloads_reason_too_large">Too large for this drive: it cannot store files over 4 GB. Choose another download folder, or format the drive as exFAT</string>
-    <!-- Translators: A queued download on a playlist that allows only one stream, waiting because the user is watching from it. It starts by itself when playback stops. -->
-    <string name="content_downloads_reason_waiting_watching">Waiting: starts when you stop watching</string>
-    <!-- Translators: A download paused because the user chose to watch on a playlist that allows only one stream. The user resumes it. -->
-    <string name="content_downloads_reason_paused_watching">Paused while you watch</string>
-    <!-- Translators: A download failure reason followed by the server's HTTP status number, e.g. "Server error (HTTP 503)". Keep "HTTP" as is. -->
-    <string name="content_downloads_reason_with_code"><xliff:g id="reason">%1$s</xliff:g> (HTTP <xliff:g id="code">%2$d</xliff:g>)</string>
 
     <!-- Translators: Empty-state message on the EPG screen when no profile exists. Directs the user to create one. -->
     <string name="content_epg_create_profile">Create a profile to see the guide.</string>
@@ -423,30 +316,6 @@
     <string name="content_programmes_earlier">Earlier</string>
     <!-- Translators: Group heading on the Program details page: programmes still to come today, after the one on now. -->
     <string name="content_programmes_later">Later</string>
-    <!-- Translators: Options menu item: open the details window of a movie. -->
-    <string name="content_movie_details">Movie details</string>
-    <!-- Translators: Options menu item: open the details window of a series. -->
-    <string name="content_series_details">Series details</string>
-    <!-- Translators: The series page's main button for an episode already started: "Resume S1 · E3". The argument is the season and episode. -->
-    <string name="content_resume_episode">Resume <xliff:g id="episode">%1$s</xliff:g></string>
-    <!-- Translators: The series page's main button for an episode not started yet: "Play S1 · E4". The argument is the season and episode. -->
-    <string name="content_play_episode">Play <xliff:g id="episode">%1$s</xliff:g></string>
-    <!-- Translators: Title of the series page's order menu (seasons and episodes, oldest or newest first). -->
-    <string name="content_episode_order">Episode order</string>
-    <!-- Translators: Line under "Episode order": the choice is saved for this series only. -->
-    <string name="content_episode_order_hint">Remembered for this series</string>
-    <!-- Translators: Order menu switch: leave out the episodes already watched. -->
-    <string name="content_hide_watched_episodes">Hide watched episodes</string>
-    <!-- Translators: After an episode's date and length in the episode list: it has been watched to the end. -->
-    <string name="content_episode_watched">Watched</string>
     <!-- Translators: Episode options menu item: play the episode from the beginning, ignoring the resume point. -->
     <string name="content_play_from_start">Play from start</string>
-    <!-- Translators: Episode options menu item: open the details window of an episode. -->
-    <string name="content_episode_details">Episode details</string>
-    <!-- Translators: Name of a series' season 0: the specials, extras and one-off episodes outside the numbered seasons. -->
-    <string name="content_season_specials">Specials</string>
-    <!-- Translators: Heading above the poster-size slider in the Movies / Series sort sheet. Shown in capitals by the style. -->
-    <string name="content_poster_size">Poster size</string>
-    <!-- Translators: Small heading on a movie's page above more posters from the same category: "More in Disney+ Kids Movies". Shown in capitals by the style. -->
-    <string name="content_vod_more_in">More in <xliff:g id="category">%1$s</xliff:g></string>
 </resources>

@@ -1,35 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <plurals name="content_queued_items">
-        <item quantity="one">В очереди <xliff:g id="count">%1$d</xliff:g> элемент</item>
-        <item quantity="few">В очереди <xliff:g id="count">%1$d</xliff:g> элемента</item>
-        <item quantity="many">В очереди <xliff:g id="count">%1$d</xliff:g> элементов</item>
-        <item quantity="other">В очереди <xliff:g id="count">%1$d</xliff:g> элементов</item>
-    </plurals>
-    <plurals name="content_paused_items">
-        <item quantity="one">Приостановлен <xliff:g id="count">%1$d</xliff:g> элемент</item>
-        <item quantity="few">Приостановлены <xliff:g id="count">%1$d</xliff:g> элемента</item>
-        <item quantity="many">Приостановлено <xliff:g id="count">%1$d</xliff:g> элементов</item>
-        <item quantity="other">Приостановлено <xliff:g id="count">%1$d</xliff:g> элементов</item>
-    </plurals>
-    <string name="content_genre_action">Боевик</string>
-    <string name="content_genre_adult">Для взрослых</string>
-    <string name="content_genre_anime">Аниме</string>
-    <string name="content_genre_comedy">Комедия</string>
-    <string name="content_genre_documentary">Документальное кино</string>
-    <string name="content_genre_drama">Драма</string>
-    <string name="content_genre_entertainment">Развлечения</string>
-    <string name="content_genre_horror">Ужасы</string>
-    <string name="content_genre_kids">Детское</string>
-    <string name="content_genre_movies">Фильмы</string>
-    <string name="content_genre_music">Музыка</string>
-    <string name="content_genre_news">Новости</string>
-    <string name="content_genre_other">Другое</string>
-    <string name="content_genre_religious">Религия</string>
-    <string name="content_genre_romance">Мелодрама</string>
-    <string name="content_genre_scifi">Фантастика</string>
-    <string name="content_genre_series">Сериалы</string>
-    <string name="content_genre_sport">Спорт</string>
     <string name="content_exit_owntv">Выйти из МОЁ ТВ?</string>
     <string name="content_exit_confirmation">Закрыть приложение?</string>
     <string name="content_restore_incomplete_title">Восстановление не завершено</string>
@@ -75,39 +45,17 @@
     </plurals>
     <string name="content_move_to_category">Переместить в категорию…</string>
     <string name="content_remove_from_category">Удалить из этой категории</string>
-    <string name="content_download">Скачать</string>
-    <string name="content_download_all_episodes">Скачать все серии</string>
     <string name="content_play">Воспроизвести</string>
     <string name="content_favorited">В избранном</string>
     <string name="content_favorite">В избранное</string>
-    <string name="content_seasons">Сезоны</string>
-    <string name="content_episodes">Серии</string>
     <string name="content_oldest_first">Сначала старые</string>
     <string name="content_newest_first">Сначала новые</string>
-    <string name="content_play_trailer">Воспроизвести трейлер</string>
     <string name="content_close">Закрыть</string>
     <string name="content_rename_hint">Только для этого профиля. Оставьте поле пустым, чтобы восстановить исходное название.</string>
-    <string name="content_no_movies_here">Здесь нет фильмов.</string>
-    <string name="content_no_series_here">Здесь нет сериалов.</string>
-    <string name="content_no_episodes">Нет доступных серий.</string>
-    <string name="content_episodes_load_failed">Не удалось загрузить серии от поставщика (<xliff:g id="reason">%1$s</xliff:g>).</string>
-    <string name="content_no_movies_found">По запросу «<xliff:g id="query">%1$s</xliff:g>» фильмы не найдены</string>
-    <plurals name="content_count_movies">
-        <item quantity="one"><xliff:g id="category">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g> фильм)</item>
-        <item quantity="few"><xliff:g id="category">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g> фильма)</item>
-        <item quantity="many"><xliff:g id="category">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g> фильмов)</item>
-        <item quantity="other"><xliff:g id="category">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g> фильмов)</item>
-    </plurals>
     <string name="content_provider">Поставщик</string>
     <string name="content_provider_name">Поставщик: %1$s</string>
-    <string name="content_no_series_found">По запросу «<xliff:g id="query">%1$s</xliff:g>» сериалы не найдены</string>
-    <string name="content_reorder_movie">Изменить порядок фильма</string>
-    <string name="content_reorder_series">Изменить порядок сериала</string>
     <string name="content_duration_hours"><xliff:g id="hours">%1$d</xliff:g> ч <xliff:g id="minutes">%2$d</xliff:g> мин</string>
     <string name="content_duration_minutes"><xliff:g id="minutes">%1$d</xliff:g> мин</string>
-    <string name="content_season_episode">Сезон <xliff:g id="season">%1$d</xliff:g> · Серия <xliff:g id="episode">%2$d</xliff:g></string>
-    <string name="content_season_episode_title">Сезон <xliff:g id="season">%1$d</xliff:g> · Серия <xliff:g id="episode">%2$d</xliff:g> <xliff:g id="title">%3$s</xliff:g></string>
-    <string name="content_season">Сезон <xliff:g id="season">%1$d</xliff:g></string>
     <string name="content_no_epg">Нет данных EPG</string>
     <string name="content_catchup">Архив</string>
     <string name="content_play_external_short">Воспроизвести во внешнем плеере</string>
@@ -139,18 +87,6 @@
     <string name="content_storage_chosen_folder">Выбранная папка</string>
     <string name="content_storage_folder_lost">Эта папка больше недоступна. Выберите её снова или укажите другую.</string>
     <string name="content_storage_folder_fallback">Папка загрузок сейчас недоступна, поэтому загрузки сохраняются в собственную папку МОЁ ТВ, пока она не вернётся.</string>
-    <string name="content_downloads_reason_account_busy">Аккаунт занят: соединение использует другой поток</string>
-    <string name="content_downloads_reason_refused">Сервер отклонил ссылку</string>
-    <string name="content_downloads_reason_not_found">На сервере больше нет этого файла</string>
-    <string name="content_downloads_reason_server_error">Ошибка сервера</string>
-    <string name="content_downloads_reason_http">Сервер не отправил файл</string>
-    <string name="content_downloads_reason_connection_lost">Соединение потеряно</string>
-    <string name="content_downloads_reason_folder">Папка загрузок недоступна</string>
-    <string name="content_downloads_reason_no_space">Недостаточно места</string>
-    <string name="content_downloads_reason_too_large">Слишком большой для этого накопителя: он не хранит файлы больше 4 ГБ. Выберите другую папку загрузок или отформатируйте накопитель в exFAT</string>
-    <string name="content_downloads_reason_waiting_watching">Ожидание: начнётся, когда вы перестанете смотреть</string>
-    <string name="content_downloads_reason_paused_watching">Приостановлено, пока вы смотрите</string>
-    <string name="content_downloads_reason_with_code"><xliff:g id="reason">%1$s</xliff:g> (HTTP <xliff:g id="code">%2$d</xliff:g>)</string>
     <string name="content_epg_create_profile">Создайте профиль, чтобы увидеть программу передач.</string>
     <string name="content_epg_filter_hides_all">Текущий фильтр скрывает все каналы. Измените сортировку, чтобы увидеть телепрограмму.</string>
     <string name="content_epg_no_channels_query">По запросу «<xliff:g id="query">%1$s</xliff:g>» каналы программы передач не найдены.</string>
@@ -238,17 +174,5 @@
     <string name="content_programme_details">О телепередаче</string>
     <string name="content_programmes_earlier">Ранее</string>
     <string name="content_programmes_later">Позже</string>
-    <string name="content_movie_details">О фильме</string>
-    <string name="content_series_details">О сериале</string>
-    <string name="content_resume_episode">Продолжить <xliff:g id="episode">%1$s</xliff:g></string>
-    <string name="content_play_episode">Смотреть <xliff:g id="episode">%1$s</xliff:g></string>
-    <string name="content_episode_order">Порядок серий</string>
-    <string name="content_episode_order_hint">Запоминается для этого сериала</string>
-    <string name="content_hide_watched_episodes">Скрыть просмотренные серии</string>
-    <string name="content_episode_watched">Просмотрено</string>
     <string name="content_play_from_start">Смотреть сначала</string>
-    <string name="content_episode_details">Сведения о серии</string>
-    <string name="content_season_specials">Спецвыпуски</string>
-    <string name="content_poster_size">Размер постеров</string>
-    <string name="content_vod_more_in">Ещё в категории «<xliff:g id="category">%1$s</xliff:g>»</string>
 </resources>

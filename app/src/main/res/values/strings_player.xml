@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Translators: Button in the trailer player's bottom transport bar to exit the trailer. -->
-    <string name="player_trailer_exit">Exit</string>
-    <!-- Translators: Time progress display in the trailer player. "current" is the current position and "duration" is the total length, both formatted as mm:ss or h:mm:ss. -->
-    <string name="player_trailer_progress"><xliff:g id="current">%1$s</xliff:g> / <xliff:g id="duration">%2$s</xliff:g></string>
     <!-- Translators: Zoom mode option in the player's zoom dialog. Scales the video to fit within the screen without cropping. -->
     <string name="player_zoom_fit_screen">Fit Screen</string>
     <!-- Translators: Zoom mode option. Fills the screen and crops edges if the aspect ratio differs. -->
@@ -121,8 +117,6 @@
     <string name="player_percent"><xliff:g id="value">%1$d</xliff:g>%%</string>
     <!-- Translators: Duration display in the player top bar metadata chips for VOD content. "minutes" is the total duration in minutes. -->
     <string name="player_duration_minutes"><xliff:g id="minutes">%1$d</xliff:g> min</string>
-    <!-- Translators: Season number in the player top bar subtitle and Android TV home "Watch Next" row. "season" is the season number. -->
-    <string name="player_season_number">Season <xliff:g id="season">%1$d</xliff:g></string>
     <!-- Translators: Channel number display on the channel OSD card after a direct tune. "number" is the channel number string. The hash (#) is a conventional channel prefix. -->
     <string name="player_channel_number">#<xliff:g id="number">%1$s</xliff:g></string>
     <!-- Translators: Live badge shown in the player top bar, on the live timeline tooltip, and in the audio now-playing bar. All caps is intentional for this badge. This is a state indicator, not a command. -->
@@ -365,12 +359,4 @@
     <string name="multiview_tile_show_picture">Show the picture</string>
     <!-- Translators: Shown on a sound-only tile. It still uses one provider connection. -->
     <string name="multiview_sound_only_note">Sound only — still one of your provider\'s streams</string>
-    <!-- Translators: Key hint in the trailer player: ◀ and ▶ jump 10 seconds back or forward. Keep it short. -->
-    <string name="player_trailer_skip">Skip 10 s</string>
-    <!-- Translators: Popup title when no trailer video for a title is allowed to play inside the app. -->
-    <string name="player_trailer_blocked_title">This trailer can’t play in МОЁ ТВ</string>
-    <!-- Translators: Popup text under that title: the video owners only allow playback on YouTube itself. "YouTube" is a brand name — keep it. -->
-    <string name="player_trailer_blocked_body">Its owner only allows it to be played on YouTube.</string>
-    <!-- Translators: Popup button: open the trailer in the YouTube app instead. Keep "YouTube" as is. -->
-    <string name="player_trailer_open_youtube">Open in YouTube</string>
 </resources>

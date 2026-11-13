@@ -80,6 +80,6 @@ class CategoryLockView(
         }
 
     private companion object {
-        val LOCKABLE_SECTIONS = listOf(MediaType.LIVE, MediaType.MOVIE, MediaType.SERIES)
+        val LOCKABLE_SECTIONS = listOf(MediaType.LIVE)
     }
 }

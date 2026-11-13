@@ -159,9 +159,6 @@ class SettingsViewModel(
         viewModelScope.launch { settings.setPreferSdr(enabled) }
     }
 
-    val autoFrameRateFilms: StateFlow<Boolean> = settings.autoFrameRateFilms
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-
     val autoFrameRateLive: StateFlow<Boolean> = settings.autoFrameRateLive
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
@@ -187,9 +184,8 @@ class SettingsViewModel(
         }
     }
 
-    /** [live]: the Live TV switch; otherwise films and series. */
-    fun setAutoFrameRate(live: Boolean, enabled: Boolean) {
-        viewModelScope.launch { if (live) settings.setAutoFrameRateLive(enabled) else settings.setAutoFrameRateFilms(enabled) }
+    fun setAutoFrameRateLive(enabled: Boolean) {
+        viewModelScope.launch { settings.setAutoFrameRateLive(enabled) }
     }
 
     // The old surround BOOLEAN is gone from here: [surroundMode] replaced it, and the leftover flow
@@ -312,13 +308,6 @@ class SettingsViewModel(
 
     val directTune: StateFlow<Boolean> = settings.directTune.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
     fun setDirectTune(enabled: Boolean) { viewModelScope.launch { settings.setDirectTune(enabled) } }
-
-    // Auto frame rate's film extras.
-    val afrPauseMaxSecs: Int get() = settings.afrPauseMaxSecs
-    val afrPauseSecs: StateFlow<Int> = settings.afrPauseSecs.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
-    fun setAfrPauseSecs(secs: Int) { viewModelScope.launch { settings.setAfrPauseSecs(secs) } }
-    val afrMatchResolution: StateFlow<Boolean> = settings.afrMatchResolution.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-    fun setAfrMatchResolution(enabled: Boolean) { viewModelScope.launch { settings.setAfrMatchResolution(enabled) } }
 
     // External player is a Live TV toggle — handing a live channel's URL to VLC/MX Player.
     val externalPlayerLive: StateFlow<Boolean> = settings.externalPlayerLive.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)

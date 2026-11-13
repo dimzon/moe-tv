@@ -30,8 +30,11 @@ Original work:
   (en, ru), the rest remaining available in the upstream resource trees.
 
   Upstream-derived material also remains in docs/, extras/USER_GUIDE.md,
-  extras/OwnTV_Master_Product_Brief.md, extras/brand/, extras/worker/,
-  tools/i18n/ and the historical release notes in CHANGELOG.md.
+  extras/OwnTV_Master_Product_Brief.md, extras/brand/,
+  extras/partner-logos/Weblate_logo.svg, tools/i18n/ and the historical
+  release notes in CHANGELOG.md. The former TMDB/OpenSubtitles Worker
+  reference under extras/worker/ and their logos were removed from this
+  fork (commit cf8b0b5) and are no longer distributed.
 
 Modifications and additions:
 

@@ -59,7 +59,7 @@
 * §5(b)/(c) — заявление, что **вся** производная работа лицензирована под GPL-3.0-only: `NOTICE` §3.
 * §4 — сохранены кредиты апстрима: @m3th0d93 (wordmark, issue #227), переводчики и Weblate, исторические упоминания TMDB/OpenSubtitles (интеграции, воркеры и логотипы удалены), исторические упоминания mpv/libmpv/FFmpeg.
 * Атрибуция `OwnTV_Core` (GPL-3.0-only) как второго источника кода и всех 26 локалей — `NOTICE` §1.
-* Лицензии зависимостей сведены в `THIRD_PARTY_LICENSES.md`: Apache-2.0 (полный текст — `LICENSES/Apache-2.0.txt`), MIT (android-youtube-player, дословно), tri-license juniversalchardet с выбором GPL-3.0, OFL-1.1 для 6 семейств шрифтов, ISRG Root X2, логотип Weblate.
+* Лицензии зависимостей сведены в `THIRD_PARTY_LICENSES.md`: Apache-2.0 (полный текст — `LICENSES/Apache-2.0.txt`), tri-license juniversalchardet с выбором GPL-3.0, OFL-1.1 для 6 семейств шрифтов, ISRG Root X2, логотип Weblate.
 * `CONTRIBUTING.md` приведён к текущему проекту (имя, RuTube-only позиционирование, рабочая ссылка на документацию, условия лицензирования вклада).
 
 **Совместимость.** Apache-2.0, MIT и OFL-1.1 совместимы с GPLv3. MPL-1.1 сама по себе несовместима, но `juniversalchardet` предлагает tri-license, поэтому в `THIRD_PARTY_LICENSES.md` явно избран GPL-3.0. Конфликтующих лицензий в зависимостях не обнаружено; mpv/FFmpeg (LGPL/GPL-стек) из сборки удалён.

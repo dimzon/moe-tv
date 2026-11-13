@@ -55,22 +55,12 @@
     <string name="common_nav_home">Home</string>
     <!-- Translators: Navigation label for the Live TV screen in the sidebar. -->
     <string name="common_nav_live_tv">Live TV</string>
-    <!-- Translators: Navigation label for the Movies screen in the sidebar. -->
-    <string name="common_nav_movies">Movies</string>
-    <!-- Translators: Navigation label for the Series screen in the sidebar. -->
-    <string name="common_nav_series">Series</string>
-    <!-- Translators: Navigation label for the Downloads screen in the sidebar. Also used in download notifications. -->
-    <string name="common_nav_downloads">Downloads</string>
     <!-- Translators: Navigation label for the TV Guide screen in the sidebar. -->
     <string name="common_nav_guide">TV Guide</string>
     <!-- Translators: The TV Guide place in the phone's bottom bar, a fifth of the screen wide. Keep it one short word if the full name is long (German: "Programm"). -->
     <string name="common_nav_guide_short">TV Guide</string>
-    <!-- Translators: Navigation label for the Library tab (Movies and Series together) on phones. -->
-    <string name="common_nav_library">Library</string>
     <!-- Translators: Navigation label for the More tab on phones, which holds the items that do not fit the bottom bar. -->
     <string name="common_nav_more">More</string>
-    <!-- Translators: Button that sends what is playing to another screen (Chromecast and similar). Not the cast of a film. -->
-    <string name="common_cast">Cast</string>
     <!-- Translators: Navigation label for the Settings screen in the sidebar. -->
     <string name="common_nav_settings">Settings</string>
     <!-- Translators: Status text when no content source is configured. -->
@@ -85,10 +75,6 @@
     <string name="common_timestamp_minutes"><xliff:g id="minutes">%1$d</xliff:g>:<xliff:g id="seconds">%2$02d</xliff:g></string>
     <!-- Translators: Time format for durations of one hour or more (h:mm:ss). "hours", "minutes", and "seconds" are integers. -->
     <string name="common_timestamp_hours"><xliff:g id="hours">%1$d</xliff:g>:<xliff:g id="minutes">%2$02d</xliff:g>:<xliff:g id="seconds">%3$02d</xliff:g></string>
-    <!-- Translators: Resume-prompt message showing where playback stopped. "position" is a formatted time string. -->
-    <string name="common_resume_position">You stopped at <xliff:g id="position">%1$s</xliff:g>.</string>
-    <!-- Translators: Dialog title for the resume-playback confirmation prompt. -->
-    <string name="common_resume_prompt">Resume playback?</string>
 
     <!-- Translators: Error message when the device appears to be offline during a sync operation. -->
     <string name="sync_error_offline">You appear to be offline. Check your connection and try again.</string>
@@ -156,34 +142,12 @@
     <string name="sync_status_failed">Sync failed \u00b7 <xliff:g id="source">%1$s</xliff:g>: <xliff:g id="reason">%2$s</xliff:g></string>
     <!-- Translators: Sync cancellation status. "source" is the source name. -->
     <string name="sync_status_cancelled">Sync cancelled \u00b7 <xliff:g id="source">%1$s</xliff:g></string>
-    <!-- Translators: Status pill line while a film or episode is downloading. "title" is the item name. -->
-    <string name="sync_status_download">Downloading <xliff:g id="title">%1$s</xliff:g></string>
-    <!-- Translators: The same download line once a size is known. "percent" is 0-100; the double percent (%%) is an XML escape. -->
-    <string name="sync_status_download_with_progress">Downloading <xliff:g id="title">%1$s</xliff:g> \u00b7 <xliff:g id="percent">%2$d</xliff:g>%%</string>
-    <!-- Translators: Status pill line while a film or episode from a category locked with the PIN is downloading; its name stays hidden until the PIN opens the category. -->
-    <string name="sync_status_download_locked">Downloading from a locked category</string>
-    <!-- Translators: The same locked download line once a size is known. "percent" is 0-100; the double percent (%%) is an XML escape. -->
-    <string name="sync_status_download_locked_with_progress">Downloading from a locked category \u00b7 <xliff:g id="percent">%1$d</xliff:g>%%</string>
     <!-- Translators: Phase label for the Live TV sync phase. -->
     <string name="sync_phase_live">Live TV</string>
-    <!-- Translators: Phase label for the Movies sync phase. -->
-    <string name="sync_phase_movies">Movies</string>
-    <!-- Translators: Phase label for the Series sync phase. -->
-    <string name="sync_phase_series">Series</string>
     <!-- Translators: Plural channel count in sync status. "count" is the formatted count. -->
     <plurals name="sync_count_channels">
         <item quantity="one"><xliff:g id="count">%1$s</xliff:g> channel</item>
         <item quantity="other"><xliff:g id="count">%1$s</xliff:g> channels</item>
-    </plurals>
-    <!-- Translators: Plural movie count in sync status. "count" is the formatted count. -->
-    <plurals name="sync_count_movies">
-        <item quantity="one"><xliff:g id="count">%1$s</xliff:g> movie</item>
-        <item quantity="other"><xliff:g id="count">%1$s</xliff:g> movies</item>
-    </plurals>
-    <!-- Translators: Plural series count in sync status. "count" is the formatted count. "series" is both singular and plural in English. -->
-    <plurals name="sync_count_series">
-        <item quantity="one"><xliff:g id="count">%1$s</xliff:g> series</item>
-        <item quantity="other"><xliff:g id="count">%1$s</xliff:g> series</item>
     </plurals>
     <!-- Translators: Plural EPG entry count in sync status. "count" is the formatted count. "EPG" is Electronic Program Guide. -->
     <plurals name="sync_count_epg">
@@ -246,19 +210,10 @@
     <string name="shell_rail_profile_line"><xliff:g id="playlist">%1$s</xliff:g> · switch</string>
     <!-- Translators: Line under Live TV in the widest menu: the last channel watched. -->
     <string name="shell_rail_detail_last">Last: <xliff:g id="title">%1$s</xliff:g></string>
-    <!-- Translators: Line under Movies or Series in the widest menu: a title to resume. -->
-    <string name="shell_rail_detail_resume">Resume: <xliff:g id="title">%1$s</xliff:g></string>
     <!-- Translators: Line under Series in the widest menu: the next episode, e.g. "Solo Leveling S1 · E3". -->
     <string name="shell_rail_detail_next">Next: <xliff:g id="title">%1$s</xliff:g></string>
-    <!-- Translators: The series and its episode code together in that line, e.g. "Solo Leveling" and "S1 · E3". -->
-    <string name="shell_rail_detail_episode"><xliff:g id="series">%1$s</xliff:g> <xliff:g id="episode">%2$s</xliff:g></string>
     <!-- Translators: Line under More in the widest menu: what More holds. -->
     <string name="shell_rail_detail_more">Settings, favorites, backup</string>
-    <!-- Translators: Line under Downloads in the widest menu: how many are downloading, then the progress, e.g. "1 downloading · 64%". -->
-    <plurals name="shell_rail_detail_downloads">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> downloading · <xliff:g id="progress">%2$s</xliff:g></item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> downloading · <xliff:g id="progress">%2$s</xliff:g></item>
-    </plurals>
     <!-- Translators: Small tag after Now playing in the navigation menu while only the sound of a stream is playing (Audio mode). -->
     <string name="shell_now_playing_audio">Audio</string>
     <!-- Translators: Weather under the clock: the temperature as a bare number with the degree sign (the unit is the one chosen in Settings), then the city, e.g. 26° Düsseldorf. -->

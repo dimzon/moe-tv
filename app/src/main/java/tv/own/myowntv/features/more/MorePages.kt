@@ -530,7 +530,7 @@ internal fun ErrorLogPage(setEntry: (() -> Boolean) -> Unit, onCountChanged: () 
                         title = e.reason?.displayText() ?: e.legacyReason ?: e.engine.playbackDisplayName(),
                         line = listOfNotNull(
                             e.engine.playbackDisplayName(),
-                            stringResource(if (e.live) R.string.settings_live else R.string.settings_vod),
+                            stringResource(R.string.settings_live),
                             e.mediaSpec()?.displayText() ?: e.spec,
                         ).joinToString(sep),
                         trailing = { Text(formatBestDateTime(context, "dMMM", e.atMs), style = stageText(17, 500), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis) },

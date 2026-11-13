@@ -86,19 +86,19 @@
     <!-- Translators: Button under the recent searches list that deletes them all. -->
     <string name="search_clear_recent">Clear recent searches</string>
     <!-- Translators: Placeholder in the empty search field. -->
-    <string name="search_field_hint">Channels, movies and series</string>
+    <string name="search_field_hint">Channels and programmes</string>
     <!-- Translators: Spoken label of the microphone button beside the search field (read by screen readers). -->
     <string name="search_voice">Voice search</string>
     <!-- Translators: Prompt the system speech recogniser shows while it listens for a search. -->
-    <string name="search_voice_prompt">Say a channel, movie or series</string>
+    <string name="search_voice_prompt">Say a channel or programme</string>
     <!-- Translators: Title of the card shown on the empty search page. -->
     <string name="search_card_title">Find anything in your playlists</string>
     <!-- Translators: Text of the card shown on the empty search page. -->
-    <string name="search_card_body">Channels, movies and series from every playlist you show. Pick a result to go straight to it, then play, download or open its options there. TV programs on now or later today are found by their title too.</string>
+    <string name="search_card_body">Channels from the playlist you show. Pick a result to go straight to it and play or open its options. TV programs on now or later today are found by their title too.</string>
     <!-- Translators: Title when a search finds nothing. "query" is the typed text, in quotes. -->
     <string name="search_nothing_found">Nothing found for “<xliff:g id="query">%1$s</xliff:g>”</string>
     <!-- Translators: Line under "Nothing found" explaining what search looks in. -->
-    <string name="search_nothing_found_body">Search looks in channel, movie and series names in the playlists you show. Hidden categories are not searched. TV programs are found by their title in the downloaded guide.</string>
+    <string name="search_nothing_found_body">Search looks in channel names and in the titles of programmes in the downloaded guide. Hidden categories are not searched.</string>
     <!-- Translators: The typed search text shown in quotes next to the page title. Use your language's quotation marks. -->
     <string name="search_query_quoted">“<xliff:g id="query">%1$s</xliff:g>”</string>
     <!-- Translators: Number of search results next to the page title. -->
@@ -119,10 +119,6 @@
     <string name="launcher_recent_live_title">Recent Live</string>
     <!-- Translators: Description for the Android TV home screen "Recent Live" row. -->
     <string name="launcher_recent_live_description">Recently watched live channels</string>
-    <!-- Translators: Content type label for movies in the Android TV home screen. -->
-    <string name="launcher_movie_type">Movie</string>
-    <!-- Translators: Episode number display for the Android TV home screen. "episode" is the episode number. -->
-    <string name="launcher_episode_number">Episode <xliff:g id="episode">%1$d</xliff:g></string>
     <!-- Translators: Empty-state message on the Home screen when nothing is available to preview. -->
     <string name="home_no_preview">Nothing to preview yet.</string>
     <!-- Translators: Empty-state message when all Home rows are hidden. -->
@@ -154,18 +150,10 @@
     <string name="home_row_cards">Cards</string>
     <!-- Translators: Home row name in Settings for the "Keep Watching" row. -->
     <string name="home_row_keep_watching">Keep watching</string>
-    <!-- Translators: Home row name in Settings for the "Continue Watching Movies" row. -->
-    <string name="home_row_continue_movies">Continue watching movies</string>
-    <!-- Translators: Home row name in Settings for the "Continue Watching Series" row. -->
-    <string name="home_row_continue_series">Continue watching series</string>
     <!-- Translators: Home row name in Settings for the "Recent Channels" row. -->
     <string name="home_row_recent_channels">Recent channels</string>
     <!-- Translators: Home row name in Settings for the "Favorite Channels" row. -->
     <string name="home_row_favorite_channels">Favorite channels</string>
-    <!-- Translators: Home row name for the movies the user marked as favorite. -->
-    <string name="home_row_favorite_movies">Favorite movies</string>
-    <!-- Translators: Home row name for the series the user marked as favorite. -->
-    <string name="home_row_favorite_series">Favorite series</string>
     <!-- Translators: Home row name in Settings for the "On Now" row. -->
     <string name="home_row_on_now">On now</string>
     <!-- Translators: Home row description in Settings for the hero row. -->
@@ -174,18 +162,10 @@
     <string name="home_duration_hours_minutes"><xliff:g id="hours">%1$d</xliff:g> h <xliff:g id="minutes">%2$02d</xliff:g> min</string>
     <!-- Translators: Time remaining, e.g. "31 min left". "duration" is a formatted duration. -->
     <string name="home_time_left"><xliff:g id="duration">%1$s</xliff:g> left</string>
-    <!-- Translators: Home row description in Settings for "Continue Watching Movies". -->
-    <string name="home_row_continue_movies_description">Movies with a saved position</string>
-    <!-- Translators: Home row description in Settings for "Continue Watching Series". -->
-    <string name="home_row_continue_series_description">Episodes to resume or play next</string>
     <!-- Translators: Home row description in Settings for "Recent Channels". -->
     <string name="home_row_recent_description">Live channels you tuned recently</string>
     <!-- Translators: Home row description in Settings for "Favorite Channels". -->
     <string name="home_row_favorite_description">Your favorited live channels</string>
-    <!-- Translators: Home row description in Settings for "Favorite movies". -->
-    <string name="home_row_favorite_movies_description">Your favorited movies</string>
-    <!-- Translators: Home row description in Settings for "Favorite series". -->
-    <string name="home_row_favorite_series_description">Your favorited series</string>
 
 
     <!-- Translators: Screen title for the app update dialog. -->
@@ -591,8 +571,6 @@
     <string name="sports_next">Next: <xliff:g id="match">%1$s</xliff:g></string>
     <!-- Translators: Badge on the next fixture in a list. Shown in capitals by the style. -->
     <string name="sports_next_badge">Next</string>
-    <!-- Translators: Cricket in the Leagues tab: there is no league table, because the series being played change every week. -->
-    <string name="sports_no_table_series">No table — series change every week</string>
     <!-- Translators: Menu action on a league card: add the league to the followed leagues. -->
     <string name="sports_follow_league">Follow league</string>
     <!-- Translators: Menu action on a league card: remove the league from the followed leagues. -->

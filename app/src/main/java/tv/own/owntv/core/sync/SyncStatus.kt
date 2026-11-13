@@ -65,10 +65,8 @@ data class SyncWarning(
 )
 
 /**
- * Which sections of a source's catalogue a sync pass covers. The app is live-only now, so there is
- * exactly one section: live channels. The `movies`/`series` sections and their persisted
- * `sources.syncMovies`/`syncSeries` columns are retired (v57) — the columns stay in the schema for
- * backup round-tripping and are simply never read.
+ * Which sections of a source's catalogue a sync pass covers. The app is live-only, so there is
+ * exactly one section: live channels. The VOD sections and their sync flags are gone.
  */
 data class SyncContentTypes(
     val live: Boolean = true,

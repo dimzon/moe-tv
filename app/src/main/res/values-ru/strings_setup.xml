@@ -68,7 +68,6 @@
     <string name="companion_default_playlist">Плейлист по умолчанию</string>
     <string name="companion_send_to_tv">Отправить на телевизор</string>
     <string name="companion_sync_xtream_hint">Что синхронизировать: «Сейчас» — импорт в первую очередь, «Позже» — синхронизация в фоновом режиме, «Выкл.» — данные не загружаются.</string>
-    <string name="companion_sync_stalker_hint">Что синхронизировать: по умолчанию для прямого эфира выбрано «Сейчас», а для фильмов и сериалов — «Позже» (VOD в Stalker работает медленно).</string>
     <string name="companion_saved_page_title">МОЁ ТВ — отправлено</string>
     <string name="companion_saved_heading">Отправлено на телевизор ✓</string>
     <string name="companion_saved_source_body">Источник <xliff:g id="name">%1$s</xliff:g> теперь отображается на экране добавления источника на телевизоре. Проверьте там данные и нажмите «Начать импорт» на пульте ДУ.</string>

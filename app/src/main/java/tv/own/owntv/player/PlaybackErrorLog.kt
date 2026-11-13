@@ -47,7 +47,6 @@ object PlaybackErrorLog {
     data class Entry(
         val atMs: Long,
         val engine: String,
-        val live: Boolean,
         val reason: PlayerFailureReason?,
         /** Legacy single-string diagnostic, retained for old files only. */
         val spec: String?,
@@ -116,14 +115,13 @@ object PlaybackErrorLog {
     private fun file(context: Context) = File(context.filesDir, FILE_NAME)
 
     /** Append an error (fire-and-forget; trims to the newest [MAX]). */
-    fun log(context: Context, engine: String, live: Boolean, info: ErrorInfo) {
+    fun log(context: Context, engine: String, info: ErrorInfo) {
         if (info.reason == null && info.raw == null) return // nothing useful to keep
         append(
             context,
             Entry(
                 atMs = System.currentTimeMillis(),
                 engine = engine,
-                live = live,
                 reason = info.reason,
                 spec = null,
                 raw = info.raw?.let(HttpClient::redactUrl),
@@ -147,13 +145,12 @@ object PlaybackErrorLog {
      * report, so the log stayed empty and every report became a guessing game. Callers must keep these
      * rare — one per genuine event, never per frame or per retry tick.
      */
-    fun event(context: Context, engine: String, live: Boolean, reason: PlayerFailureReason, detail: String? = null) {
+    fun event(context: Context, engine: String, reason: PlayerFailureReason, detail: String? = null) {
         append(
             context,
             Entry(
                 atMs = System.currentTimeMillis(),
                 engine = engine,
-                live = live,
                 reason = reason,
                 spec = null,
                 raw = detail?.let(HttpClient::redactUrl),
@@ -165,13 +162,12 @@ object PlaybackErrorLog {
     }
 
     /** The player's "Report this stream" action: a snapshot of a stream that is playing right now. */
-    fun report(context: Context, engine: String, live: Boolean, title: String?, snapshot: String) {
+    fun report(context: Context, engine: String, title: String?, snapshot: String) {
         append(
             context,
             Entry(
                 atMs = System.currentTimeMillis(),
                 engine = engine,
-                live = live,
                 reason = PlayerFailureReason.STREAM_REPORT,
                 spec = title?.let(HttpClient::redactUrl),
                 raw = snapshot.let(HttpClient::redactUrl),
@@ -237,7 +233,6 @@ object PlaybackErrorLog {
             Entry(
                 atMs = o.optLong("atMs"),
                 engine = o.optString("engine"),
-                live = o.optBoolean("live"),
                 reason = persistedReason.semantic,
                 legacyReason = persistedReason.legacyText,
                 spec = o.optString("spec").takeIf { it.isNotEmpty() }?.let(HttpClient::redactUrl),
@@ -263,7 +258,6 @@ object PlaybackErrorLog {
                 JSONObject()
                     .put("atMs", e.atMs)
                     .put("engine", e.engine)
-                    .put("live", e.live)
                     // Preserve an unknown pre-i18n reason when an old file is rewritten after a new
                     // failure. Known legacy prose is upgraded to the stable enum name.
                     .put("reason", e.persistedReasonValue())
@@ -306,7 +300,7 @@ object PlaybackErrorLog {
                 appendLine()
             }
             read(appContext).forEach { e ->
-                appendLine("[${stamp.format(java.util.Date(e.atMs))}] ${e.kind} · ${e.engine} · ${if (e.live) "live" else "vod"}")
+                appendLine("[${stamp.format(java.util.Date(e.atMs))}] ${e.kind} · ${e.engine}")
                 e.reason?.let { appendLine("  reason: $it") }
                 e.spec?.let { appendLine("  spec  : $it") }
                 e.raw?.let { appendLine("  raw   : $it") }
