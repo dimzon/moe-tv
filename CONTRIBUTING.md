@@ -31,22 +31,20 @@ A quick tour of the codebase lives in the [README](README.md), the RuTube API/sy
 [docs/rutube.md](docs/rutube.md), and the broader design reference in
 [`extras/OwnTV_Master_Product_Brief.md`](extras/OwnTV_Master_Product_Brief.md) (upstream-derived).
 
-## Workflow (branch → Pull Request)
+## Workflow (commits go to `main`)
 
-We use a simple fork-and-PR flow:
+The repository currently has **no public remote**, so work and commits happen directly in the
+current branch, `main`. **Do not create branches** (`git checkout -b`, `git switch -c`,
+`git branch <name>`, `git worktree add -b`) without an explicit instruction — see
+[AGENTS.md](AGENTS.md). `origin` points at the private `dimzon/moe-tv` repository; once it is
+made public, the usual fork-and-PR review flow applies.
 
-1. **Fork** the repo (or, if you're a collaborator, create a branch directly).
-2. Create a branch off `main`:
-   ```bash
-   git checkout -b feature/short-description
-   ```
-3. Make your changes and **commit** them with clear messages — these become the release changelog,
+1. Make your changes and **commit** them with clear messages — these become the release changelog,
    so write them for a reader (e.g. `Fix EPG grid scroll desync on D-pad`).
-4. Push your branch and **open a Pull Request** against `main`.
-5. CI builds the app on your PR — please make sure it's green.
-6. A maintainer reviews and merges.
+2. Run the checks that the change affects (unit tests, the i18n ratchet, a compile).
+3. If a public remote exists, push and open a Pull Request; CI must be green before merge.
 
-> Keep each PR focused on one thing. Small, reviewable PRs get merged faster.
+> Keep each commit / PR focused on one thing. Small, reviewable changes get merged faster.
 
 ## Commit messages
 
@@ -67,13 +65,18 @@ reproduce. Logs (`adb logcat`) help a lot for playback issues.
   © 2026 Dmitry Alexandrov. Your contribution is © you, licensed under GPL-3.0-only. There is no
   CLA and no copyright assignment.
 - New dependencies must be **GPLv3-compatible** (Apache-2.0, MIT, BSD, OFL-1.1, GPL-family, or
-  an explicit GPL option in a multi-license). Add the component, its version, license, copyright
-  holder and source URL to [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) in the same PR —
-  Apache-2.0 §4 and MIT require their notices to travel with any redistribution, and OFL-1.1
-  fonts need their license text alongside the `.ttf` files.
-- New bundled assets (fonts, logos, artwork) need a provenance line and a license file. Logos of
-  Weblate, RuTube and OwnTV are third-party trademarks: keep the required notices in
-  [NOTICE](NOTICE).
+  an explicit GPL option in a multi-license). In the **same** commit/PR, add, upgrade or remove
+  the component's row — version, license, copyright holder and source URL — in
+  [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md). Apache-2.0 §4 requires its notice to
+  travel with any redistribution (an MIT notice would be required for any MIT component; none is
+  currently bundled), and OFL-1.1 fonts need their license text alongside the `.ttf` files.
+- New bundled assets (fonts, logos, artwork) need a provenance line and a license file. The
+  Weblate logo and the upstream OwnTV brand assets are third-party trademarks: keep the required
+  notices in [NOTICE](NOTICE). When an integration is removed, delete its active trademark
+  disclaimer but keep the historical credit — as done for TMDB/OpenSubtitles in `cf8b0b5`.
+- When a feature is removed, sweep the docs in the same change: `README.md`, `NOTICE` §2,
+  `THIRD_PARTY_LICENSES.md` and [docs/attribution-checklist.md](docs/attribution-checklist.md)
+  must not keep claiming the feature exists.
 - Before any public APK release, work through
   [docs/attribution-checklist.md](docs/attribution-checklist.md) — it lists the remaining
   upstream URLs and the in-app legal notices that still need to be implemented.

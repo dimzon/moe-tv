@@ -6,10 +6,11 @@ and [NOTICE](NOTICE). Versions below are the ones pinned in
 [gradle/libs.versions.toml](gradle/libs.versions.toml); the actually packaged dependencies are
 the `implementation(...)` entries in [app/build.gradle.kts](app/build.gradle.kts).
 
-All licenses listed here are compatible with GPL-3.0-only. Where a library offers a choice, the
-entry states which option this project uses. **None of these components is relicensed**: each
-remains under its own license; the GPLv3 obligation applies to the combined derivative work as a
-whole (GPLv3 section 5(c)).
+All licenses of the components **shipped in the APK** are compatible with GPL-3.0-only. Where a
+library offers a choice, the entry states which option this project uses. **None of these
+components is relicensed**: each remains under its own license; the GPLv3 obligation applies to the
+combined derivative work as a whole (GPLv3 section 5(c)). Test- and build-time-only components
+(section 1, second table) are never distributed to end users.
 
 ---
 
@@ -25,7 +26,7 @@ whole (GPLv3 section 5(c)).
 | Coil 3 (`coil-compose`, `coil-network-okhttp`) | 3.6.0 | **Apache-2.0** | © 2026 Coil Contributors. |
 | Koin (`koin-android`, `koin-androidx-compose`, BOM) | 4.2.2 | **Apache-2.0** | © 2017–present Arnaud Giuliani. |
 | ZXing (`com.google.zxing:core`) | 3.5.4 | **Apache-2.0** | QR generation only. |
-| `com.github.albfernandez:juniversalchardet` | 2.5.0 | **MPL-1.1 / GPL-3.0 / LGPL-3.0 (tri-license)** | This project elects **GPL-3.0** (MPL-1.1 alone is not GPL-compatible). © Alberto Fernández; source: <https://github.com/albfernandez/juniversalchardet>. Local subtitle charset detection only. |
+| `com.github.albfernandez:juniversalchardet` | 2.5.0 | **MPL-1.1 / GPL-3.0 / LGPL-3.0 (tri-license)** | This project elects **GPL-3.0** (MPL-1.1 alone is not GPL-compatible). © Alberto Fernández; source: <https://github.com/albfernandez/juniversalchardet>. Declared for local subtitle charset detection, but **no source file imports it** after the VOD/subtitle cleanup (`ec31209`); drop the `implementation(...)` line and this row together when the dependency is removed. |
 | SIL Open Font License fonts in `app/src/main/res/font/` | — | **OFL-1.1** | See section 2. Font files are bundled in the APK. |
 
 **Apache-2.0 section 4 obligations**: a copy of the license and the retained attribution notices
@@ -81,25 +82,41 @@ Modified versions may not use a Reserved Font Name without permission.
 * **Brand assets** — `extras/brand/` and `extras/brand/legacy/` are upstream OwnTV artwork
   (GPL-3.0-only, © its authors; the lowercase "owntv" wordmark is by @m3th0d93, issue #227).
   `extras/branding/` is this fork's own МОЁ ТВ kit. `extras/screenshots/` are upstream
-  screenshots retained for historical reference.
+  screenshots retained for historical reference only — several of them depict features this fork
+  no longer has (Downloads, Movies, Series, Playlist, Profile Selection, Settings › Profiles).
 
 ---
 
 ## 4. Not bundled (historical)
 
-Upstream OwnTV shipped **mpv / libmpv (FFmpeg)** as a second playback engine. This fork removed
-it (commits `ac5cc39`, `933cc94`) and removed the external `tv.own.owntv:libmpv` dependency.
-No mpv, FFmpeg or LGPL/GPL-licensed native `.so` from that stack is distributed here; the only
-native libraries in the APK are the stripped, dependency-supplied `androidx.sqlite` ones. The
-corresponding upstream credits are kept in [NOTICE](NOTICE) and [CHANGELOG.md](CHANGELOG.md)
+Recorded so that a removed component is not silently resurrected, and so that upstream credits
+remain traceable. **None of these is distributed by this fork.**
+
+* **mpv / libmpv (FFmpeg)** — upstream's second playback engine, removed in `ac5cc39` and
+  `933cc94` together with the external `tv.own.owntv:libmpv` dependency. No mpv, FFmpeg or
+  LGPL/GPL-licensed native `.so` from that stack is distributed here; the only native libraries
+  in the APK are the stripped, dependency-supplied `androidx.sqlite` ones.
+* **android-youtube-player 13.0.0 (MIT, © 2025 Pierfrancesco Soffritti)** — used by upstream for
+  trailers. Removed with the trailer code in `ec31209`, including its MIT notice. **No MIT-licensed
+  component is currently packaged**, so no MIT text needs to travel with an APK build.
+* **TMDB / OpenSubtitles Workers and logos** — `extras/worker/`, the drawables
+  `app/src/main/res/drawable/ic_tmdb_logo.xml` and `ic_opensubtitles_logo.xml`, and the partner
+  SVGs `extras/partner-logos/tmdb_logo.svg` and `opensubtitles_logo.svg` were upstream-derived
+  material removed in `cf8b0b5` (only `Weblate_logo.svg` remains in that directory). The
+  historical trademark credits stay in [NOTICE](NOTICE) §5 and [README.md](README.md), but no
+  active API disclaimer applies: this fork makes no TMDB or OpenSubtitles requests.
+
+The corresponding upstream credits are kept in [NOTICE](NOTICE) and [CHANGELOG.md](CHANGELOG.md)
 for historical accuracy.
 
 ---
 
-## 6. Maintaining this file
+## 5. Maintaining this file
 
 When a dependency is added, upgraded or removed, update the table above and the version
-catalogue together, and check that the new license is GPL-3.0-only-compatible. Before publishing
-an APK, verify that `LICENSE`, `NOTICE`, this file, `LICENSES/Apache-2.0.txt` and the six OFL
+catalogue together, and check that the new license is GPL-3.0-only-compatible. Removing an
+integration also means checking for its logos, API keys and trademark disclaimers: delete the
+active notice, keep the historical one. Before publishing an APK, verify that `LICENSE`,
+`NOTICE`, this file, `LICENSES/Apache-2.0.txt` and the six OFL
 texts are shipped with it or reachable through a GPLv3 section 6 written offer. See
 [docs/attribution-checklist.md](docs/attribution-checklist.md).

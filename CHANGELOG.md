@@ -1,6 +1,6 @@
 # MyOwnTV — Changelog
 
-> MyOwnTV / МОЁ ТВ 0.1.0 — a **substantially modified derivative** of [OwnTV](https://github.com/ahXN00/OwnTV) (© ahXN00 and the OwnTV contributors, GPL-3.0-only) and [OwnTV_Core](https://github.com/ahXN00/OwnTV_Core) (GPL-3.0-only). Upstream `main` snapshot imported **2026-11-09** as root commit `214719f`, history squashed; **modified since that date by Dmitry Alexandrov, © 2026**. Reworked so the channel list and programme guide come from **RuTube's public API** instead of Xtream/M3U/Stalker providers; mpv, VOD, profiles and backups removed; rebranded. Full attribution: [NOTICE](NOTICE); dependency licenses: [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+> MyOwnTV / МОЁ ТВ 0.1.0 — a **substantially modified derivative** of [OwnTV](https://github.com/ahXN00/OwnTV) (© ahXN00 and the OwnTV contributors, GPL-3.0-only) and [OwnTV_Core](https://github.com/ahXN00/OwnTV_Core) (GPL-3.0-only). Upstream `main` snapshot imported **2026-11-09** as root commit `214719f`, history squashed; **modified since that date by Dmitry Alexandrov, © 2026**. Reworked so the channel list and programme guide come from **RuTube's public API** instead of Xtream/M3U/Stalker providers; mpv, VOD, trailers, downloads, catch-up, profiles, backups, the TMDB/OpenSubtitles integrations and EPG channel matching removed; database rebuilt through schema v8; translations trimmed to English and Russian; rebranded. Full attribution: [NOTICE](NOTICE); dependency licenses: [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 >
 > The release history below describes the **upstream import point** (up to v5.2.1), not this fork: its feature and community-PR credits belong to the original OwnTV project. See [docs/attribution-checklist.md](docs/attribution-checklist.md).
 
@@ -11,7 +11,34 @@
 > Issue numbers that are part of a title are fine; explanatory parentheticals are not. The detail —
 > what, why, files and verification — belongs in the commit message, never here.
 
-## Unreleased
+## Fork changes — unreleased (since 2026-11-09)
+
+> This is this fork's own log. Everything from *Upstream snapshot notes* below belongs to the
+> original OwnTV project and is kept for provenance only. Bullets only — the detail lives in the
+> commit messages and in [NOTICE](NOTICE) §2.
+
+### ✨ New features
+- **RuTube live catalogue and week-long programme guide**
+- **Curated channel-name dictionary** (`assets/channel_renames.json`)
+- **Rebrand to МОЁ ТВ** (`moetv://` deep links, launcher assets, `extras/branding/`)
+- **NOTICE, attribution and third-party license inventory**
+
+### 🧹 Removed
+- **Xtream / M3U / Stalker source model**
+- **mpv / libmpv / FFmpeg playback engine**
+- **VOD catalogue, trailers, downloads, catch-up, profiles and file-backup UI**
+- **TMDB and OpenSubtitles integrations, Workers, logos and API keys**
+- **EPG channel matcher, guide candidates and channel "Sources"**
+- **android-youtube-player (MIT) dependency**
+- **Translation trees other than English and Russian**
+
+### 🔧 Internals
+- **Live-only database schema rebuilt through v8**
+- **Attribution checklist and GPLv3 modification notice**
+
+---
+
+## Upstream snapshot notes (unreleased at the 2026-11-09 import)
 
 ### ✨ New features
 - **⚡ Search: the poster backdrop is blurred once, and blurred on Android 11 and older too** (community PR #268 by @sarmadsoomro)

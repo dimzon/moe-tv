@@ -26,8 +26,9 @@ Original work:
   Its sources are folded into app/src/main/java/tv/own/owntv/** — the
   database, sync, parsers, EPG and playback engine — together with the
   translated UI strings and the i18n tooling. Upstream shipped 26
-  translations; this fork currently packages only English and Russian
-  (en, ru), the rest remaining available in the upstream resource trees.
+  locales; this fork currently packages only English and Russian (en, ru).
+  The other translation trees were removed here (baa3d2b) but remain
+  available in the upstream repository.
 
   Upstream-derived material also remains in docs/, extras/USER_GUIDE.md,
   extras/OwnTV_Master_Product_Brief.md, extras/brand/,
@@ -53,12 +54,24 @@ since 2026-11-09 by Dmitry Alexandrov. Relevant dates:
     history squashed)"). Upstream history is NOT part of this repository.
   * 2026-11-09 — present — all subsequent changes are this fork's own.
 
-Principal changes: the app became a live-TV-only client of RuTube's public
-catalogue and programme guide; the Xtream/M3U/Stalker source model, the
-mpv/libmpv playback engine, VOD (movies/series), downloads, profiles and the
-file-backup UI were removed; the database schema was repeatedly rebuilt; the
-app was rebranded to МОЁ ТВ with a new applicationId, launcher assets and
-moetv:// deep links; the brand kit in extras/branding/ was added.
+Principal changes (all after the import; commit ids refer to this repository):
+
+  * The app became a live-TV-only client of RuTube's public catalogue and
+    programme guide. The Xtream/M3U/Stalker source model, the mpv/libmpv
+    playback engine, VOD (movies/series), trailers, downloads, catch-up,
+    profiles and the file-backup UI were removed (culminating in ec31209).
+    Only ExoPlayer / Media3 remains as a playback engine.
+  * The TMDB and OpenSubtitles integrations, their reference Workers under
+    extras/worker/, their logos and API keys were removed (cf8b0b5). The EPG
+    channel matcher, the guide-candidate dialog and the player's channel
+    "Sources" comparison were removed (4a962f9). The unused
+    android-youtube-player dependency went with the trailer code (ec31209).
+  * The database schema was rebuilt repeatedly (v4 through v8) and the
+    packaged locale set was reduced to English and Russian (baa3d2b).
+  * The app was rebranded to МОЁ ТВ with a new applicationId
+    (com.github.dimzon.owntv), launcher assets and moetv:// deep links;
+    the brand kit in extras/branding/ was added as this fork's own work
+    (distinct from the upstream artwork in extras/brand/).
 
 This fork is NOT affiliated with, endorsed by, sponsored by or connected to
 the original OwnTV project, ahXN00, or its contributors. "OwnTV" is used
@@ -92,14 +105,16 @@ from third-party components must be kept intact in any redistribution.
 
 The Corresponding Source for a binary (APK) build is the complete source
 tree that produced it, including this NOTICE, LICENSE,
-THIRD_PARTY_LICENSES.md, the OFL font license texts in
-extras/font-licenses/, the Gradle build scripts and all resources.
+THIRD_PARTY_LICENSES.md, LICENSES/Apache-2.0.txt, the OFL font license
+texts in extras/font-licenses/, the Gradle build scripts and all resources.
 
 No public source repository is configured for this fork at the time of
-writing. Accordingly: the source is the tree from which your copy was
-obtained; if you received a binary-only build, the party that conveyed it
-must provide the Corresponding Source (or a valid written offer) under
-GPLv3 section 6. Before publishing any APK, configure the fork's own source
+writing. A private repository exists at https://github.com/dimzon/moe-tv,
+but a private repository does not by itself satisfy GPLv3 section 6 for a
+binary conveyed to a third party. Accordingly: the source is the tree from
+which your copy was obtained; if you received a binary-only build, the party
+that conveyed it must provide the Corresponding Source (or a valid written
+offer) under GPLv3 section 6. Before publishing any APK, configure the fork's own source
 repository URL and ship these notice files with the release — see
 docs/attribution-checklist.md.
 
@@ -111,11 +126,13 @@ docs/attribution-checklist.md.
     @m3th0d93 (https://github.com/m3th0d93) in issue #227
     (https://github.com/ahXN00/OwnTV/issues/227). The МОЁ ТВ brand kit in
     extras/branding/ is this fork's own work.
-  * Translations: the locale resources retained here (currently English and
-    Russian) are derived from the 26 translations contributed by volunteer
-    translators on Hosted Weblate (https://hosted.weblate.org/projects/owntv/),
-    which hosts libre projects free of charge. Thank you to Weblate and to
-    every translator. The strings originate in OwnTV_Core.
+  * Translations: upstream shipped 26 locales from OwnTV_Core. The English
+    source strings and the Russian translation are the two still packaged
+    here; the other trees were removed from this fork (baa3d2b) and remain
+    available in the upstream repository. Most of those translations were
+    contributed by volunteer translators on Hosted Weblate
+    (https://hosted.weblate.org/projects/owntv/), which hosts libre projects
+    free of charge. Thank you to Weblate and to every translator.
   * TMDB: upstream OwnTV used the TMDB API (https://www.themoviedb.org/)
     for movie/series metadata and trailers. This fork removed that
     integration and the upstream reference Worker, so no TMDB API is called;
@@ -137,8 +154,8 @@ docs/attribution-checklist.md.
 -------------------------
 
 Licenses and notices for the Gradle dependencies, the bundled SIL OFL 1.1
-fonts, the ISRG Root X2 trust anchor and the third-party logos are listed
-in THIRD_PARTY_LICENSES.md. The full Apache License 2.0 text is in
+fonts, the ISRG Root X2 trust anchor and the retained Weblate logo are
+listed in THIRD_PARTY_LICENSES.md. The full Apache License 2.0 text is in
 LICENSES/Apache-2.0.txt; the OFL 1.1 texts are in extras/font-licenses/.
 
 

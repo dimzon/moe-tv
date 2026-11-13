@@ -60,12 +60,19 @@ What changed:
 - **RuTube-only live TV** — the channel catalogue and week-long programme guide now come from
   RuTube's public API; Xtream / M3U / Stalker providers and their source model are gone.
 - **One playback engine** — the mpv / libmpv / FFmpeg engine was removed; playback is
-  ExoPlayer (Media3) only. VOD (movies/series), catch-up, downloads, profiles and the file-backup
-  UI were dropped; the live-only database schema was rebuilt repeatedly.
+  ExoPlayer (Media3) only. VOD (movies/series), trailers, catch-up, downloads, profiles and the
+  file-backup UI were dropped (`ec31209`); the live-only database schema was rebuilt repeatedly
+  (v4–v8).
+- **External metadata services gone** — the TMDB and OpenSubtitles integrations, their reference
+  Workers (`extras/worker/`), logos and API keys were removed (`cf8b0b5`), as were the EPG
+  channel matcher and the player's channel "Sources" comparison (`4a962f9`). The unused
+  `android-youtube-player` dependency went with the trailer code.
+- **Two languages** — upstream shipped 26 translations; this fork packages English and Russian
+  only (`baa3d2b`). The upstream credits are retained in `NOTICE`.
 - **Rebrand** — МОЁ ТВ wordmark, launcher icons/banner, `applicationId com.github.dimzon.owntv`
   and `moetv://` deep links; the new brand kit lives in `extras/branding/`.
-- Some upstream settings screens, strings and reference Worker code remain in the tree even
-  though the features behind them are gone.
+- Upstream screenshots in `extras/screenshots/` and the historical release notes in
+  `CHANGELOG.md` are retained for provenance; several depict features this fork no longer has.
 
 MyOwnTV / МОЁ ТВ is **not affiliated with, endorsed by, sponsored by or connected to** the
 original OwnTV project, ahXN00 or its contributors. "OwnTV" is used here only to identify the
@@ -79,8 +86,8 @@ project (and awaiting a fork repository URL) is in
 
 ### 🎬 Playback
 - **ExoPlayer (Media3)** — one playback engine tuned for instant Live TV zapping
-- **4K HDR** direct rendering, optional auto frame-rate matching, surround sound, 150% volume boost
-- **Subtitles** — text, image and closed captions
+- **4K HDR** direct rendering, optional auto frame-rate matching for live TV (with the pre-Android-12 warning), surround sound, 150% volume boost
+- **Subtitles** — appearance controls (scale, font, colour, position, background) for the tracks a stream provides
 - Mini-player/PiP, picture-in-picture when you press Home, audio-only mode, live stream-info overlay
 - Media-session transport keys and proper audio focus — it behaves like a TV app
 
@@ -93,7 +100,7 @@ project (and awaiting a fork repository URL) is in
 
 ### 📚 Library & personalisation
 - Favourites, categories, hide channels, search with an on-screen keyboard
-- Profiles, a parental PIN, multiple UI languages
+- A category-lock PIN, and two UI languages (English, Russian) — profiles are gone
 
 ## 🧱 Tech stack
 
@@ -106,7 +113,8 @@ project (and awaiting a fork repository URL) is in
 | Database | Room + Paging + FTS4 |
 | DI · Network · Images | Koin · OkHttp · Coil |
 
-`minSdk 26`, `targetSdk 36`, `applicationId tv.own.myowntv`.
+`minSdk 26`, `targetSdk 36`, `applicationId com.github.dimzon.owntv` (Kotlin namespace
+`tv.own.myowntv`).
 
 ### Project layout
 
@@ -115,7 +123,8 @@ MyOwnTV/  (this repo)
 tv.own.myowntv/
 ├── player/      the TV player HUD, surfaces and mini-player
 ├── ui/          theme + reusable components
-├── features/    setup, shell, live, search, epg, profiles, settings
+├── features/    live, epg, home, more, search, settings, setup, shell, customize,
+│                pip, multiview, categorylock, autostart, recovery, update
 └── di/          Koin modules
 ```
 
@@ -127,7 +136,8 @@ documented in [docs/rutube.md](docs/rutube.md).
 
 ## 📥 Installing (Fire TV / Android TV)
 
-1. Download the APK from this repository's **Releases**.
+1. Download the APK from this repository's **Releases** (once the fork has a public repository
+   — none is configured yet), or build it from source as described below.
 2. Install it — on Fire TV, use the **Downloader** app; elsewhere sideload from a USB drive,
    *Send files to TV*, or `adb install MyOwnTV.apk`.
 
@@ -154,8 +164,9 @@ the project's player-only positioning and match the existing code style.
 
 ### 🌍 Translations
 
-The locale resources retained here (currently English and Russian) derive from upstream's 26
-translations, the work of volunteer translators on
+Upstream shipped 26 locales; this fork packages the English source strings and the Russian
+translation only (`baa3d2b`), while the other trees remain in the upstream repository. Most of
+those translations were made by volunteer translators on
 [Hosted Weblate](https://hosted.weblate.org/projects/owntv/), which hosts libre software free of
 charge. The strings themselves originate in
 [OwnTV_Core](https://github.com/ahXN00/OwnTV_Core). Thank you to Weblate and to every translator.
