@@ -9,7 +9,7 @@ import tv.own.owntv.core.database.entity.ReminderEntity
 
 /**
  * Programme reminders. The sync payload carries them as the `prog` kind (identity
- * (epgChannelId, startMs), per-row LWW on [ReminderEntity.updatedAt]) — see [ReminderEntity].
+ * (channelId, startMs), per-row LWW on [ReminderEntity.updatedAt]) — see [ReminderEntity].
  */
 @Dao
 interface ReminderDao {
@@ -23,14 +23,9 @@ interface ReminderDao {
     @Query("SELECT * FROM programme_reminders WHERE id = :id")
     suspend fun getById(id: Long): ReminderEntity?
 
-    /**
-     * The sync-identity lookup: one reminder per programme per epg channel. `channelId` is local
-     * and goes stale on a re-sync, so the payload (and the merge) key on `epgChannelId` instead.
-     */
-    @Query(
-        "SELECT * FROM programme_reminders WHERE epgChannelId = :epgChannelId AND startMs = :startMs LIMIT 1",
-    )
-    suspend fun getByEpgAndStart(epgChannelId: String, startMs: Long): ReminderEntity?
+    /** The sync-identity lookup: one reminder per programme per channel (channelId is the hex). */
+    @Query("SELECT * FROM programme_reminders WHERE channelId = :channelId AND startMs = :startMs LIMIT 1")
+    suspend fun getByChannelAndStart(channelId: String, startMs: Long): ReminderEntity?
 
     /**
      * Deletes the reminder only when it is older than [at] — the merge rule for an incoming
@@ -38,10 +33,10 @@ interface ReminderDao {
      * newer and survives. Returns the number of rows removed.
      */
     @Query(
-        "DELETE FROM programme_reminders WHERE epgChannelId = :epgChannelId AND startMs = :startMs " +
+        "DELETE FROM programme_reminders WHERE channelId = :channelId AND startMs = :startMs " +
             "AND updatedAt <= :at",
     )
-    suspend fun removeIfOlderThan(epgChannelId: String, startMs: Long, at: Long): Int
+    suspend fun removeIfOlderThan(channelId: String, startMs: Long, at: Long): Int
 
     /** Soonest first — the guide marks these with a bell. */
     @Query("SELECT * FROM programme_reminders ORDER BY startMs ASC")

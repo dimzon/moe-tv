@@ -71,14 +71,14 @@ internal class SyncSupport(
         return false
     }
 
-    suspend fun pruneCategories(type: MediaType, seenRemoteIds: Set<String>, label: String, stats: SyncStatsCollector) {
+    suspend fun pruneCategories(seenRemoteIds: Set<String>, label: String, stats: SyncStatsCollector) {
         val start = SystemClock.elapsedRealtime()
-        val existing = categoryDao.remoteIds(type)
+        val existing = categoryDao.remoteIds()
         val stale = existing.filterNot(seenRemoteIds::contains)
         if (!pruneAllowed("$label categories", existing.size, stale.size, stats)) return
-        stale.chunked(QUERY_CHUNK).forEach { categoryDao.deleteByRemoteIds(type, it) }
+        stale.chunked(QUERY_CHUNK).forEach { categoryDao.deleteByRemoteIds(it) }
         if (stale.isNotEmpty()) stats.processedCounts.merge(CATEGORIES_REMOVED_KEY, stale.size, Int::plus)
-        Log.i(TAG, "$label category prune type=$type stale=${stale.size} ms=${SystemClock.elapsedRealtime() - start}")
+        Log.i(TAG, "$label category prune stale=${stale.size} ms=${SystemClock.elapsedRealtime() - start}")
     }
 
     suspend fun pruneRemoteIds(
@@ -111,12 +111,11 @@ internal class SyncSupport(
         val freshSource = s.lastSyncAt == null
         Log.d(TAG, "refreshCategories start sourceId=${s.id} type=$type count=${parsed.size}")
         val uniqueCategories = parsed.distinctBy { it.id }
-        val existing = existingCategoriesByRemoteId(type, uniqueCategories.map { it.id })
+        val existing = existingCategoriesByRemoteId(uniqueCategories.map { it.id })
         // sortOrder = provider index, so the rail follows the provider's category order.
         val entities = uniqueCategories.mapIndexed { i, c ->
             CategoryEntity(
                 id = existing[c.id]?.id ?: 0,
-                mediaType = type,
                 name = c.name,
                 remoteId = c.id,
                 sortOrder = i,
@@ -144,8 +143,8 @@ internal class SyncSupport(
         }
     }
 
-    private suspend fun existingCategoriesByRemoteId(type: MediaType, remoteIds: List<String>): Map<String, CategoryEntity> =
-        remoteIds.distinct().chunked(QUERY_CHUNK).flatMap { categoryDao.findByRemoteIds(type, it) }
+    private suspend fun existingCategoriesByRemoteId(remoteIds: List<String>): Map<String, CategoryEntity> =
+        remoteIds.distinct().chunked(QUERY_CHUNK).flatMap { categoryDao.findByRemoteIds(it) }
             .mapNotNull { category -> category.remoteId?.let { it to category } }
             .toMap()
 
@@ -180,7 +179,7 @@ internal class SyncSupport(
             // IGNOREd conflicts return −1 (shouldn't happen — inserts were pre-checked by remoteId);
             // heal by re-fetching just those rows rather than everything.
             if (missed.isNotEmpty()) {
-                existingCategoriesByRemoteId(type, missed).forEach { (rid, cat) -> ids[rid] = cat.id }
+                existingCategoriesByRemoteId(missed).forEach { (rid, cat) -> ids[rid] = cat.id }
             }
         }
         return CategoryUpsert(

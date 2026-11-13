@@ -34,16 +34,16 @@ interface PlaybackQuirkDao {
 
     /** Only a sound-only item is recorded; false forgets it. */
     @Transaction
-    suspend fun setAudioOnly(contentKey: String, mediaType: String, audioOnly: Boolean) {
-        if (audioOnly) insertIfMissing(PlaybackQuirkEntity(contentKey = contentKey, mediaType = mediaType))
+    suspend fun setAudioOnly(contentKey: String, audioOnly: Boolean) {
+        if (audioOnly) insertIfMissing(PlaybackQuirkEntity(contentKey = contentKey))
         updateAudioOnly(contentKey, audioOnly.takeIf { it }, System.currentTimeMillis())
         if (!audioOnly) dropEmptyRows()
     }
 
     /** [audioDelayMs] null forgets it and returns the item to the global setting. */
     @Transaction
-    suspend fun setAudioDelay(contentKey: String, mediaType: String, audioDelayMs: Int?) {
-        if (audioDelayMs != null) insertIfMissing(PlaybackQuirkEntity(contentKey = contentKey, mediaType = mediaType))
+    suspend fun setAudioDelay(contentKey: String, audioDelayMs: Int?) {
+        if (audioDelayMs != null) insertIfMissing(PlaybackQuirkEntity(contentKey = contentKey))
         updateAudioDelay(contentKey, audioDelayMs, System.currentTimeMillis())
         if (audioDelayMs == null) dropEmptyRows()
     }

@@ -70,8 +70,11 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
     // removed fields live on as code-level synonyms over remoteId. v5 removes the `sources` table:
     // the one built-in source is a hardcoded DTO (BuiltInSource), its user-adjustable values are
     // global Settings, and every `sourceId` column (categories, EPG, playback prefs/quirks) is gone.
+    // v6 removes the last "multi-kind" columns: `mediaType` is gone from every table (the app is
+    // live-only), watch_history is keyed (itemId, deviceId) with no surrogate id, reminders drop the
+    // stored channelName/epgChannelId, and the legacy playback_prefs.audioDelayMs column is gone.
     // The old per-version log lives in git history and in CHANGELOG.md.
-    version = 5,
+    version = 6,
 
     exportSchema = true,
 )

@@ -200,12 +200,12 @@ class MoreCountsViewModel(
     }
 
     fun removeFavourite(type: MediaType, id: String) {
-        viewModelScope.launch { userDataWriter.removeFavorite(type, id) }
+        viewModelScope.launch { userDataWriter.removeFavorite(id) }
     }
 
     /** The same removal the Live TV list's "Remove from History" does. */
     fun removeHistory(entry: HistoryEntry) {
-        viewModelScope.launch { userDataWriter.removeHistory(MediaType.LIVE, entry.id) }
+        viewModelScope.launch { userDataWriter.removeHistory(entry.id) }
     }
 
     /** Move starts on the favourite channels' whole list, in its current order. */
@@ -232,8 +232,8 @@ class MoreCountsViewModel(
         val key = ContentOrderEntity.FAV_CONTEXT
         viewModelScope.launch {
             contentOrderDao.replaceContext(
-                type = m.type, contextKey = key,
-                rows = m.ids.mapIndexed { i, id -> ContentOrderEntity(mediaType = m.type, contextKey = key, itemId = id, position = i) },
+                contextKey = key,
+                rows = m.ids.mapIndexed { i, id -> ContentOrderEntity(contextKey = key, itemId = id, position = i) },
             )
             reload.value++
         }

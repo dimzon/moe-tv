@@ -7,24 +7,21 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import tv.own.owntv.core.database.SingleSource
-import tv.own.owntv.core.model.MediaType
 
 /**
- * A category/folder for a media type (LIVE / MOVIE / SERIES). The Layer-2 rail is built from these.
- * `remoteId` is the provider's category id (used to dedupe on re-sync). Schema v5 dropped
- * `sourceId` — there is one built-in source, so a category is simply (mediaType, remoteId).
+ * A category/folder. The Layer-2 rail is built from these. `remoteId` is the provider's category id
+ * (used to dedupe on re-sync). Schema v6 dropped `mediaType` — the app is live-only, so a category is
+ * simply (remoteId).
  */
 @Entity(
     tableName = "categories",
     indices = [
-        Index("mediaType"),
-        Index(value = ["mediaType", "remoteId"], unique = true),
+        Index(value = ["remoteId"], unique = true),
     ],
 )
 @Immutable
 data class CategoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val mediaType: MediaType,
     val name: String,
     val remoteId: String? = null,
     val sortOrder: Int = 0,

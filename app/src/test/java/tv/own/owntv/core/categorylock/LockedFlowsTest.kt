@@ -50,7 +50,7 @@ class LockedFlowsTest {
     }
 
     private fun reminder(id: Long, channelId: String) = ReminderEntity(
-        id = id, channelId = channelId, channelName = "Ch $channelId",
+        id = id, channelId = channelId,
         title = "Show $id", startMs = 0, stopMs = 1, leadMinutes = 0, createdAt = 0,
     )
 

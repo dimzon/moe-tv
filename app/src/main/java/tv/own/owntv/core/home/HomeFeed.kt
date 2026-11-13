@@ -158,7 +158,7 @@ class HomeFeedReader(
             emptySet()
         } else {
             AdultCategoryClassifier.hiddenCategoryIds(
-                categoryDao.observe(MediaType.LIVE).first(),
+                categoryDao.observe().first(),
                 live.hiddenCategories,
             )
         }

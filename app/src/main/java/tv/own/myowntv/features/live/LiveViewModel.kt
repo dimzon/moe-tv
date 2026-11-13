@@ -214,7 +214,7 @@ class LiveViewModel(
 
     private val folderContextKeys: StateFlow<Map<Long, String>> = ctx
         .flatMapLatest { c ->
-            categoryDao.observe(MediaType.LIVE).map { cats ->
+            categoryDao.observe().map { cats ->
                 cats.associateBy({ it.id }, { CustomizeKeys.category(it) })
             }
         }
@@ -224,7 +224,7 @@ class LiveViewModel(
      *  unindexable content_order join-sort; everything else stays on the plain indexed query. */
     private val orderedContexts: StateFlow<Set<String>> = ctx
         .flatMapLatest {
-            contentOrderDao.observeContextKeys(MediaType.LIVE).map { it.toSet() }
+            contentOrderDao.observeContextKeys().map { it.toSet() }
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
 
@@ -349,7 +349,6 @@ class LiveViewModel(
         .flatMapLatest { (c, cust) ->
             if (cust.customCategories.isEmpty()) flowOf(emptyList())
             else customCategoryDao.lockAwareCountsByContexts(
-                MediaType.LIVE,
                 cust.customCategories.map { it.id }, cust.sealedCategoryIds,
             ).map { counts ->
                 cust.customCategories.map { cc ->
@@ -383,11 +382,11 @@ class LiveViewModel(
     fun moveToCategory(itemKey: String, itemId: String, originKey: String, targetId: String, keepInOrigin: Boolean) {
         if (targetId == originKey) return
         viewModelScope.launch {
-            customCategoryDao.appendItem(MediaType.LIVE, targetId, itemId)
+            customCategoryDao.appendItem(targetId, itemId)
             if (!keepInOrigin) {
                 when {
-                    originKey == ContentOrderEntity.FAV_CONTEXT -> userDataWriter.removeFavorite(MediaType.LIVE, itemId)
-                    CustomizeKeys.isCustom(originKey) -> userDataWriter.removeCustomCategoryMember(MediaType.LIVE, originKey, itemId)
+                    originKey == ContentOrderEntity.FAV_CONTEXT -> userDataWriter.removeFavorite(itemId)
+                    CustomizeKeys.isCustom(originKey) -> userDataWriter.removeCustomCategoryMember(originKey, itemId)
                     else -> customize.setItemMovedFromOrigin(MediaType.LIVE, itemKey, originKey, moved = true)
                 }
             }
@@ -402,7 +401,7 @@ class LiveViewModel(
      */
     private val hiddenCategoryIds: StateFlow<Set<Long>> = ctx
         .flatMapLatest { c ->
-            combine(categoryDao.observe(MediaType.LIVE), custom) { cats, cust ->
+            combine(categoryDao.observe(), custom) { cats, cust ->
                 tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
                     cats,
                     cust.hiddenCategories,
@@ -428,7 +427,7 @@ class LiveViewModel(
     private val railSnapshot: StateFlow<Pair<Ctx, List<LiveRailItem>>> = ctx
         .flatMapLatest { c ->
             combine(
-                categoryDao.observe(MediaType.LIVE),
+                categoryDao.observe(),
                 customize.visibleOnceRead(MediaType.LIVE).filterNotNull(),
                 combine(sortMode, settings.liveBuiltIns) { s, b -> s to b },
             ) { cats, cust, (sort, builtIns) ->
@@ -647,7 +646,7 @@ class LiveViewModel(
         .flatMapLatest { it.throttleLatest() } // Cap live COUNT re-runs during bulk sync
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
-    val favoriteIds: StateFlow<Set<String>> = favoriteDao.observeFavoriteIds(MediaType.LIVE)
+    val favoriteIds: StateFlow<Set<String>> = favoriteDao.observeFavoriteIds()
         .map { it.toSet() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
 
@@ -1264,7 +1263,7 @@ class LiveViewModel(
                 // Resolve hidden categories for sources not in the active set (source may have been removed).
                 val activeHiddenCats = hiddenCategoryIds.value.toMutableSet()
                 if (false) {
-                    val cats = categoryDao.observe(MediaType.LIVE).first()
+                    val cats = categoryDao.observe().first()
                     val cust = custom.value
                     if (cust.hiddenCategories.isNotEmpty()) {
                         cats.filter { CustomizeKeys.category(it) in cust.hiddenCategories }.forEach { activeHiddenCats += it.id }
@@ -1524,7 +1523,7 @@ class LiveViewModel(
             if (!immediate) delay(HISTORY_DEBOUNCE_MS)
             Log.d(TAG, "ensurePlaying history channelId=${channel.id}")
             runCatching {
-                historyDao.record(WatchHistoryEntity(mediaType = MediaType.LIVE, itemId = channel.id))
+                historyDao.record(WatchHistoryEntity(itemId = channel.id))
             }.onFailure { t ->
                 Log.w(TAG, "ensurePlaying history record failed channelId=${channel.id}", t)
             }
@@ -1539,9 +1538,9 @@ class LiveViewModel(
     fun toggleFavorite(channel: ChannelEntity) {
         viewModelScope.launch {
             if (favoriteIds.value.contains(channel.id)) {
-                userDataWriter.removeFavorite(MediaType.LIVE, channel.id)
+                userDataWriter.removeFavorite(channel.id)
             } else {
-                favoriteDao.add(FavoriteEntity(mediaType = MediaType.LIVE, itemId = channel.id))
+                favoriteDao.add(FavoriteEntity(itemId = channel.id))
             }
         }
     }
@@ -1693,7 +1692,7 @@ class LiveViewModel(
         val s = _moveState.value ?: return
         _moveState.value = null
         viewModelScope.launch {
-            contentOrderDao.saveMove(MediaType.LIVE, s.contextKey, s.items.map { it.id }, s.carried)
+            contentOrderDao.saveMove(s.contextKey, s.items.map { it.id }, s.carried)
         }
     }
 
@@ -1705,7 +1704,7 @@ class LiveViewModel(
      *  folder into here, it goes back there — the same as deleting the whole category does. */
     fun removeFromCustomCategory(channel: ChannelEntity, key: LiveKey.Custom) {
         viewModelScope.launch {
-            userDataWriter.removeCustomCategoryMember(MediaType.LIVE, key.id, channel.id)
+            userDataWriter.removeCustomCategoryMember(key.id, channel.id)
             val itemKey = CustomizeKeys.channel(channel)
             custom.value.movedFromOrigin[itemKey]?.let { origin ->
                 customize.setItemMovedFromOrigin(MediaType.LIVE, itemKey, origin, moved = false)
@@ -1715,7 +1714,7 @@ class LiveViewModel(
 
     fun removeFromHistory(channelId: String) {
         viewModelScope.launch {
-            userDataWriter.removeHistory(MediaType.LIVE, channelId)
+            userDataWriter.removeHistory(channelId)
         }
     }
 

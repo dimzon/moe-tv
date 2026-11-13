@@ -109,9 +109,9 @@ val dataModule = module {
     // (needsResolve = RuTube) and how captions resolve.
     single { tv.own.owntv.core.stalker.StreamUrlResolver(get()) }
     // Per-channel "watched without a picture" memory, for the mobile audio-only mode.
-    single { tv.own.owntv.core.player.AudioOnlyStore(androidContext(), get()) }
+    single { tv.own.owntv.core.player.AudioOnlyStore(get()) }
     // Per-item zoom/volume the player remembers (playbackPrefsDao, settings).
-    single { tv.own.owntv.core.player.PlaybackPrefsStore(dao = get(), settings = get(), quirks = get()) }
+    single { tv.own.owntv.core.player.PlaybackPrefsStore(dao = get(), quirks = get()) }
     single { tv.own.owntv.core.player.ExternalPlayerLauncher(androidContext()) }
     single { WeatherRepository(get(), get()) }
     // Remote (companion) LAN server — one shared instance for the Settings screens that host it.

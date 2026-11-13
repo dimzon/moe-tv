@@ -2819,18 +2819,20 @@ class LivePreviewEngine(
     private fun applyRememberedPrefs(key: String, volumeOnly: Boolean = false) {
         val tunedUrl = lastTunedUrl
         scope.launch {
-            val row = playbackPrefs.prefsFor(key) ?: return@launch
+            val row = playbackPrefs.prefsFor(key)
+            val delay = playbackPrefs.audioDelayFor(key)
+            if (row == null && delay == null) return@launch
             if (tunedUrl != lastTunedUrl) return@launch
             if (volumeOnly) {
-                if (!muted) row.volumeBoost?.let { adjustVolume(it - _volume.value) }
+                if (!muted) row?.volumeBoost?.let { adjustVolume(it - _volume.value) }
                 return@launch
             }
-            row.zoomMode?.let { name ->
+            row?.zoomMode?.let { name ->
                 runCatching { ZoomMode.valueOf(name) }.getOrNull()?.let { _zoomMode.value = it }
             }
             // Never un-mute the browse preview pane by restoring a level the user set in fullscreen.
-            if (!muted) row.volumeBoost?.let { adjustVolume(it - _volume.value) }
-            row.audioDelayMs?.let {
+            if (!muted) row?.volumeBoost?.let { adjustVolume(it - _volume.value) }
+            delay?.let {
                 applyAudioDelay(it)
                 _audioDelayRemembered.value = true
             }

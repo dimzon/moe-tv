@@ -48,7 +48,7 @@ suspend fun planCategoryRestore(
     return CategoryRestorePlan(
         hidden = hidden,
         movedOut = cust.movedFromOrigin.filterValues { it == contextKey }.keys,
-        hasOrder = contextKey in contentOrderDao.observeContextKeys(type).first() &&
+        hasOrder = contextKey in contentOrderDao.observeContextKeys().first() &&
             (!CustomizeKeys.isCustom(contextKey) || combinedOrderDiffers(contentOrderDao, customCategoryDao, type, contextKey)),
     )
 }
@@ -62,11 +62,11 @@ private suspend fun combinedOrderDiffers(
     contextKey: String,
 ): Boolean {
     val added = customCategoryDao.getAllOnce()
-        .filter { it.mediaType == type && it.contextKey == contextKey }
+        .filter { it.contextKey == contextKey }
         .sortedBy { it.position }
         .map { it.itemId }
     val saved = contentOrderDao.getAllOnce()
-        .filter { it.mediaType == type && it.contextKey == contextKey }
+        .filter { it.contextKey == contextKey }
         .associate { it.itemId to it.position }
     return savedOrderDiffers(added, saved)
 }
@@ -89,7 +89,7 @@ suspend fun restoreCategoryToDefault(
     contextKey: String,
     plan: CategoryRestorePlan,
 ) {
-    if (plan.hasOrder) contentOrderDao.clearContext(type, contextKey)
+    if (plan.hasOrder) contentOrderDao.clearContext(contextKey)
     if (plan.hidden.isEmpty() && plan.movedOut.isEmpty()) return
     customize.update(type) { c ->
         c.copy(

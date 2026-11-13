@@ -20,9 +20,8 @@ fun <T> lockAwareCount(
 
 /** The Move-to dialog's member counts per custom category, without members filed under a [sealed] category. */
 fun CustomCategoryDao.lockAwareCountsByContexts(
-    type: MediaType,
     contextKeys: List<String>,
     sealed: Set<Long>,
 ): Flow<List<CustomCategoryCount>> =
-    if (sealed.isEmpty()) observeCountsByContexts(type, contextKeys)
-    else observeCountsByContextsExcluding(type, contextKeys, sealed.toList())
+    if (sealed.isEmpty()) observeCountsByContexts(contextKeys)
+    else observeCountsByContextsExcluding(contextKeys, sealed.toList())

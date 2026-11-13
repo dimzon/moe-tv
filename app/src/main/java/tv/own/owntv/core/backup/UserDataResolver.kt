@@ -21,7 +21,6 @@ import tv.own.owntv.core.database.entity.FavoriteEntity
 import tv.own.owntv.core.database.entity.ReminderEntity
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
 import tv.own.owntv.core.database.transaction
-import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.settings.SyncMatrix
 
 /**
@@ -86,27 +85,20 @@ class UserDataResolver(
      * (`kind`/`at`/`oid`/`pos`/`dur`/`dev`) are not, because they say when and by whom, not what.
      * Old files and payloads may also carry a per-profile `p`; profiles are gone and it is ignored.
      *
-     * Reminders identify by (epgChannelId, startMs) — see [ReminderEntity] — so those two fields
-     * ride at the end in a fixed order; every producer of this string spells them the same way.
+     * Reminders identify by (channelId, startMs) — see [ReminderEntity] — and `rid` carries the
+     * channelId there; every producer of this string spells those two fields the same way.
      */
     fun canonicalIdentity(record: JSONObject): String = JSONObject().apply {
-        put("t", record.optString("t"))
-        put("src", record.optLong("src", -1))
         record.optStringOrNull("rid")?.let { put("rid", it) }
         record.optStringOrNull("name")?.let { put("name", it) }
-        record.optStringOrNull("srid")?.let { put("srid", it) }
-        record.optStringOrNull("sname")?.let { put("sname", it) }
-        if (record.has("season")) put("season", record.optInt("season"))
-        if (record.has("ep")) put("ep", record.optInt("ep"))
-        // Membership is per custom category: removing a film from one list is not removing it from
+        // Membership is per custom category: removing a channel from one list is not removing it from
         // another, so the category has to be part of what was deleted.
         record.optStringOrNull("ctx")?.let { put("ctx", it) }
         if (record.has("startMs")) put("startMs", record.optLong("startMs"))
-        record.optStringOrNull("epg")?.let { put("epg", it) }
     }.toString()
 
-    /** The stable content key of a live row, or null when its content row is already gone. */
-    suspend fun identityOf(type: MediaType, itemId: String): JSONObject? = describe(type, itemId)
+    /** The stable content key of a channel, or null when its content row is already gone. */
+    suspend fun identityOf(itemId: String): JSONObject? = describe(itemId)
 
     /**
      * Remembers that one row was deleted, so the deletion survives a sync.
@@ -118,30 +110,27 @@ class UserDataResolver(
      */
     suspend fun recordDeletion(
         kind: String,
-        type: MediaType,
         itemId: String,
         contextKey: String? = null,
         at: Long = System.currentTimeMillis(),
     ) {
-        val record = describe(type, itemId) ?: return
+        val record = describe(itemId) ?: return
         contextKey?.let { record.put("ctx", it) }
         tombstoneDao.record(kind, canonicalIdentity(record), at)
     }
 
     /**
      * Records that one reminder was dismissed, so the deletion survives a sync. A reminder's sync
-     * identity is (epgChannelId, startMs) — see [ReminderEntity] — and a row without a guide id has
-     * no identity, so its dismissal records nothing: the deletion stays local. Call before the row
-     * is deleted.
+     * identity is (channelId, startMs) — see [ReminderEntity]. Call before the row is deleted.
      */
     suspend fun recordReminderDeletion(
-        epgChannelId: String,
+        channelId: String,
         startMs: Long,
         at: Long = System.currentTimeMillis(),
     ) {
         tombstoneDao.record(
             SyncMatrix.KIND_REMINDERS,
-            canonicalIdentity(JSONObject().put("epg", epgChannelId).put("startMs", startMs)),
+            canonicalIdentity(JSONObject().put("rid", channelId).put("startMs", startMs)),
             at,
         )
     }
@@ -207,19 +196,17 @@ class UserDataResolver(
         tombstoneDao.record(kind, canonicalIdentity(e), at)
         return when (kind) {
             SyncMatrix.KIND_FAVORITES -> {
-                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
-                val itemId = locate(type, e) ?: return false
-                favoriteDao.removeIfOlderThan(type, itemId, at) > 0
+                val itemId = locate(e) ?: return false
+                favoriteDao.removeIfOlderThan(itemId, at) > 0
             }
             SyncMatrix.KIND_ORDER -> {
-                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
-                val itemId = locate(type, e) ?: return false
+                val itemId = locate(e) ?: return false
                 val ctx = e.optStringOrNull("ctx") ?: return false
-                contentOrderDao.removeIfOlderThan(type, ctx, itemId, at) > 0
+                contentOrderDao.removeIfOlderThan(ctx, itemId, at) > 0
             }
             SyncMatrix.KIND_REMINDERS -> {
-                val epg = e.optStringOrNull("epg") ?: return false
-                reminderDao().removeIfOlderThan(epg, e.optLong("startMs", 0), at) > 0
+                val channelId = e.optStringOrNull("rid") ?: return false
+                reminderDao().removeIfOlderThan(channelId, e.optLong("startMs", 0), at) > 0
             }
             else -> false
         }
@@ -233,19 +220,19 @@ class UserDataResolver(
     suspend fun exportAll(kinds: Set<String> = SyncMatrix.KINDS): JSONArray {
         val out = JSONArray()
         if (SyncMatrix.KIND_FAVORITES in kinds) favoriteDao.getAllOnce().forEach { f ->
-            describe(f.mediaType, f.itemId)?.let { out.put(it.put("kind", SyncMatrix.KIND_FAVORITES).put("at", f.addedAt)) }
+            describe(f.itemId)?.let { out.put(it.put("kind", SyncMatrix.KIND_FAVORITES).put("at", f.addedAt)) }
         }
         if (SyncMatrix.KIND_HISTORY in kinds) historyDao.getAllOnce().forEach { h ->
-            describe(h.mediaType, h.itemId)?.let {
+            describe(h.itemId)?.let {
                 out.put(
                     it.put("kind", SyncMatrix.KIND_HISTORY).put("at", h.watchedAt)
                         // Which device watched it — the "recently in this household" rail's attribution.
-                        .putOpt("dev", h.deviceId?.takeIf { d -> d.isNotBlank() }),
+                        .putOpt("dev", h.deviceId.takeIf { d -> d.isNotBlank() }),
                 )
             }
         }
         if (SyncMatrix.KIND_ORDER in kinds) contentOrderDao.getAllOnce().forEach { o ->
-            describe(o.mediaType, o.itemId)?.let {
+            describe(o.itemId)?.let {
                 // `at` is the row's LWW stamp ([ContentOrderEntity.updatedAt]) — the merge on the far
                 // side only takes a position that is newer than its own.
                 out.put(it.put("kind", SyncMatrix.KIND_ORDER).put("ctx", o.contextKey).put("pos", o.position).put("at", o.updatedAt))
@@ -255,23 +242,16 @@ class UserDataResolver(
         return out
     }
 
-    /**
-     * Reminders as `prog` records. Identity is (epgChannelId, startMs); `channelId` is device-local
-     * and never travels — the far side remaps through `epgChannelId` on apply, and a row without a
-     * guide id has no identity and stays local.
-     */
+    /** Reminders as `prog` records. Identity is (channelId, startMs); `rid` carries the channelId. */
     private suspend fun exportReminders(out: JSONArray) {
         reminderDao().all().forEach { r ->
-            val epg = r.epgChannelId?.takeIf { it.isNotBlank() } ?: return@forEach
             out.put(
                 JSONObject()
                     .put("kind", SyncMatrix.KIND_REMINDERS)
-                    .put("epg", epg)
+                    .put("rid", r.channelId)
                     .put("startMs", r.startMs)
                     .put("stopMs", r.stopMs)
                     .put("title", r.title)
-                    // Reference only, not identity: the far side shows its own channel row's name.
-                    .put("name", r.channelName)
                     .put("lead", r.leadMinutes)
                     .put("at", r.updatedAt),
             )
@@ -286,8 +266,7 @@ class UserDataResolver(
     suspend fun exportSnapshot(kinds: Set<String> = SNAPSHOT_KINDS): JSONArray {
         val out = exportAll(kinds)
         if (MEMBER_KIND in kinds) customCategoryDao.getAllOnce().forEach { m ->
-            if (m.mediaType != MediaType.LIVE) return@forEach
-            describe(m.mediaType, m.itemId)?.let {
+            describe(m.itemId)?.let {
                 out.put(
                     it.put("kind", MEMBER_KIND).put("ctx", m.contextKey).put("pos", m.position),
                 )
@@ -391,13 +370,8 @@ class UserDataResolver(
 
     // --- export side: content row → stable identity ---
 
-    private suspend fun describe(type: MediaType, itemId: String): JSONObject? = when (type) {
-        MediaType.LIVE -> channelDao.getById(itemId)?.let {
-            JSONObject().put("t", type.name).put("src", it.sourceId).putOpt("rid", it.remoteId).put("name", it.name)
-        }
-        // VOD media types carry no content rows any more (the app is live-only): their records
-        // describe nothing and are dropped rather than held pending.
-        else -> null
+    private suspend fun describe(itemId: String): JSONObject? = channelDao.getById(itemId)?.let {
+        JSONObject().put("rid", it.remoteId).put("name", it.name)
     }
 
     // --- restore side: stable identity → current content row ---
@@ -417,24 +391,21 @@ class UserDataResolver(
         if (tombstoneDao.deletedAt(kind, canonicalIdentity(e))?.let { it >= at } == true) return false
         return when (kind) {
             SyncMatrix.KIND_FAVORITES -> {
-                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
-                val itemId = locate(type, e) ?: return true
-                favoriteDao.addedAt(type, itemId)?.let { it >= at } != true
+                val itemId = locate(e) ?: return true
+                favoriteDao.addedAt(itemId)?.let { it >= at } != true
             }
             SyncMatrix.KIND_HISTORY -> {
-                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
-                val itemId = locate(type, e) ?: return true
-                historyDao.watchedAt(type, itemId)?.let { it >= at } != true
+                val itemId = locate(e) ?: return true
+                historyDao.watchedAt(itemId)?.let { it >= at } != true
             }
             SyncMatrix.KIND_ORDER -> {
-                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
                 val ctx = e.optStringOrNull("ctx") ?: return false
-                val itemId = locate(type, e) ?: return true
-                contentOrderDao.updatedAt(type, ctx, itemId)?.let { it >= at } != true
+                val itemId = locate(e) ?: return true
+                contentOrderDao.updatedAt(ctx, itemId)?.let { it >= at } != true
             }
             SyncMatrix.KIND_REMINDERS -> {
-                val epg = e.optStringOrNull("epg") ?: return false
-                val existing = reminderDao().getByEpgAndStart(epg, e.optLong("startMs", 0)) ?: return true
+                val channelId = e.optStringOrNull("rid") ?: return false
+                val existing = reminderDao().getByChannelAndStart(channelId, e.optLong("startMs", 0)) ?: return true
                 existing.updatedAt < at
             }
             else -> false
@@ -448,19 +419,17 @@ class UserDataResolver(
         val at = e.optLong("at", 0)
         return when (kind) {
             SyncMatrix.KIND_FAVORITES -> {
-                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
-                val itemId = locate(type, e) ?: return false
-                favoriteDao.addedAt(type, itemId).let { it != null && it <= at }
+                val itemId = locate(e) ?: return false
+                favoriteDao.addedAt(itemId).let { it != null && it <= at }
             }
             SyncMatrix.KIND_ORDER -> {
-                val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull() ?: return false
-                val itemId = locate(type, e) ?: return false
+                val itemId = locate(e) ?: return false
                 val ctx = e.optStringOrNull("ctx") ?: return false
-                contentOrderDao.updatedAt(type, ctx, itemId).let { it != null && it <= at }
+                contentOrderDao.updatedAt(ctx, itemId).let { it != null && it <= at }
             }
             SyncMatrix.KIND_REMINDERS -> {
-                val epg = e.optStringOrNull("epg") ?: return false
-                reminderDao().getByEpgAndStart(epg, e.optLong("startMs", 0))?.let { it.updatedAt <= at } == true
+                val channelId = e.optStringOrNull("rid") ?: return false
+                reminderDao().getByChannelAndStart(channelId, e.optLong("startMs", 0))?.let { it.updatedAt <= at } == true
             }
             else -> false
         }
@@ -471,14 +440,10 @@ class UserDataResolver(
      * `rid` IS the key — the hex never changes — and the name is only a fallback for very old files
      * that predate stable ids.
      */
-    private suspend fun locate(type: MediaType, e: JSONObject): String? {
+    private suspend fun locate(e: JSONObject): String? {
         val rid = e.optStringOrNull("rid")
-        return when (type) {
-            MediaType.LIVE -> rid?.takeIf { channelDao.getById(it) != null }
-                ?: channelDao.findByName(e.optStringOrNull("name") ?: e.getString("name"))?.remoteId
-            // VOD media types carry no content rows any more (the app is live-only).
-            else -> null
-        }
+        return rid?.takeIf { channelDao.getById(it) != null }
+            ?: channelDao.findByName(e.optStringOrNull("name") ?: e.getString("name"))?.remoteId
     }
 
     /** What [resolveAndInsert] did with one record. */
@@ -497,19 +462,14 @@ class UserDataResolver(
 
     private suspend fun resolveAndInsert(e: JSONObject, tombstonesPresent: Boolean): Resolution {
         val kind = runCatching { e.getString("kind") }.getOrNull() ?: return Resolution.HANDLED
-        // Reminders key on the guide id, not on a content row: they resolve without a `t`/itemId.
+        // Reminders key on the channel id, not on a content row: they resolve without an itemId.
         if (kind == SyncMatrix.KIND_REMINDERS) return resolveAndInsertReminder(e, tombstonesPresent)
-        val type = runCatching { MediaType.valueOf(e.getString("t")) }.getOrNull()
-            ?: return Resolution.HANDLED // drop garbage
-        // A VOD record (movie/series/episode) has no content rows any more: it is dropped for good,
-        // never held pending — pending would retry it after every sync for ever.
-        val itemId: String = locate(type, e)
-            ?: return if (type == MediaType.LIVE) Resolution.PENDING else Resolution.HANDLED
-        return applyRecord(e, type, itemId, tombstonesPresent)
+        val itemId: String = locate(e) ?: return Resolution.PENDING
+        return applyRecord(e, itemId, tombstonesPresent)
     }
 
     /** One record with its content row resolved: tombstone gate, then the per-kind LWW apply. */
-    private suspend fun applyRecord(e: JSONObject, type: MediaType, itemId: String, tombstonesPresent: Boolean): Resolution {
+    private suspend fun applyRecord(e: JSONObject, itemId: String, tombstonesPresent: Boolean): Resolution {
         // The record's own profile (`p`) is no longer read: the app has one user, and old files or
         // payloads that still carry the field are applied as that one user's data.
         val at = e.optLong("at", System.currentTimeMillis())
@@ -525,10 +485,10 @@ class UserDataResolver(
         return runCatching {
             when (e.getString("kind")) {
                 SyncMatrix.KIND_FAVORITES -> {
-                    favoriteDao.add(FavoriteEntity(mediaType = type, itemId = itemId, addedAt = at))
+                    favoriteDao.add(FavoriteEntity(itemId = itemId, addedAt = at))
                     // Per-row LWW: the incoming copy takes the row only when it is actually newer
                     // than the one here; an older arriving copy changes nothing.
-                    favoriteDao.bumpIfNewer(type, itemId, at)
+                    favoriteDao.bumpIfNewer(itemId, at)
                 }
                 // Newest wins, both of them. An incoming record is a fact with a time on it exactly
                 // like a deletion is, and the later fact is the true one — so these insert when the
@@ -536,14 +496,11 @@ class UserDataResolver(
                 // A plain REPLACE would let the other device's older state win purely by arriving
                 // second, which is the difference between a merge and a coin toss.
                 SyncMatrix.KIND_HISTORY -> {
-                    historyDao.insertIfAbsent(
-                        WatchHistoryEntity(
-                            mediaType = type, itemId = itemId, watchedAt = at,
-                            // Which device watched it, carried as-is from the payload (`dev`).
-                            deviceId = e.optStringOrNull("dev"),
-                        ),
-                    )
-                    historyDao.bumpIfNewer(type, itemId, at, e.optStringOrNull("dev"))
+                    // One row per (item, device): the payload's `dev` is part of the key, and an
+                    // absent one means "this device wrote it before the id could be read".
+                    val deviceId = e.optStringOrNull("dev").orEmpty()
+                    historyDao.insertIfAbsent(WatchHistoryEntity(itemId = itemId, watchedAt = at, deviceId = deviceId))
+                    historyDao.bumpIfNewer(itemId, deviceId, at)
                 }
                 SyncMatrix.KIND_ORDER -> {
                     val ctx = e.optStringOrNull("ctx") ?: return@runCatching Resolution.HANDLED
@@ -553,14 +510,14 @@ class UserDataResolver(
                     // already has — its stamp is 0, so [bumpIfNewer] can never fire for it.
                     val rowAt = if (e.has("at")) at else 0L
                     contentOrderDao.insertIfAbsent(
-                        ContentOrderEntity(mediaType = type, contextKey = ctx, itemId = itemId, position = pos, updatedAt = rowAt),
+                        ContentOrderEntity(contextKey = ctx, itemId = itemId, position = pos, updatedAt = rowAt),
                     )
-                    contentOrderDao.bumpIfNewer(type, ctx, itemId, pos, rowAt)
+                    contentOrderDao.bumpIfNewer(ctx, itemId, pos, rowAt)
                 }
                 // Custom-category membership is not part of the sync payload any more; this branch
                 // serves only the intra-device re-sync snapshot ([exportForSource] → [relinkAfterSync]).
                 MEMBER_KIND -> customCategoryDao.insertAll(
-                    listOf(CustomCategoryMemberEntity(mediaType = type, contextKey = e.getString("ctx"), itemId = itemId, position = e.getInt("pos"))),
+                    listOf(CustomCategoryMemberEntity(contextKey = e.getString("ctx"), itemId = itemId, position = e.getInt("pos"))),
                 )
             }
             Resolution.HANDLED
@@ -569,9 +526,8 @@ class UserDataResolver(
 
     /**
      * Applies one `prog` record, per-row LWW on [ReminderEntity.updatedAt]: absent → insert, local
-     * older → replace, local same-or-newer → keep. The identity is (epgChannelId, startMs);
-     * `channelId` is remapped through the guide id, and a record whose channel this device does not
-     * have is skipped for good — it can never resolve here, so it must not sit pending for ever.
+     * older → replace, local same-or-newer → keep. The identity is (channelId, startMs); a record
+     * whose channel this device does not have is skipped for good.
      */
     private suspend fun resolveAndInsertReminder(e: JSONObject, tombstonesPresent: Boolean): Resolution {
         val at = e.optLong("at", System.currentTimeMillis())
@@ -582,18 +538,16 @@ class UserDataResolver(
         ) {
             return Resolution.REFUSED
         }
-        val epg = e.optStringOrNull("epg") ?: return Resolution.HANDLED
+        val channelId = e.optStringOrNull("rid") ?: return Resolution.HANDLED
         val startMs = e.optLong("startMs", 0)
         val dao = db.reminderDao()
-        val existing = dao.getByEpgAndStart(epg, startMs)
+        val existing = dao.getByChannelAndStart(channelId, startMs)
         if (existing != null && existing.updatedAt >= at) return Resolution.HANDLED
-        val channel = channelDao.findByEpgChannelId(epg) ?: return Resolution.HANDLED
+        val channel = channelDao.getById(channelId) ?: return Resolution.HANDLED
         return runCatching {
             dao.upsert(
                 ReminderEntity(
-                    channelId = channel.id,
-                    channelName = e.optStringOrNull("name") ?: channel.name,
-                    epgChannelId = epg,
+                    channelId = channelId,
                     title = e.optStringOrNull("title") ?: channel.name,
                     startMs = startMs,
                     stopMs = if (e.has("stopMs")) e.optLong("stopMs") else startMs,

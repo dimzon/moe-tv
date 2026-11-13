@@ -51,7 +51,7 @@ class SourceRepository(
      */
     suspend fun clearSourceContent() {
         channelDao.deleteByRemoteIds(channelDao.remoteIdsForSource())
-        categoryDao.clear(tv.own.owntv.core.model.MediaType.LIVE)
+        categoryDao.clear()
     }
 
     /**

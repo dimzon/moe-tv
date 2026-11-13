@@ -3,60 +3,53 @@ package tv.own.owntv.core.database.entity
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import tv.own.owntv.core.model.MediaType
 
 /*
- * The app has a single user (profiles were removed with the live-only redesign), so every user-data
- * table is global. `itemId` is the channel's hex remoteId and is disambiguated by `mediaType`, so
+ * The app has a single user (profiles were removed with the live-only redesign) and is live-only:
+ * schema v6 dropped `mediaType` from every table. `itemId` is the channel's hex remoteId, so
  * referential cleanup of these rows is handled in the repository layer.
  */
 
 @Entity(
     tableName = "favorites",
     indices = [
-        Index(value = ["mediaType", "itemId"], unique = true),
+        Index(value = ["itemId"], unique = true),
     ],
 )
 data class FavoriteEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val mediaType: MediaType,
     val itemId: String,
     val addedAt: Long = System.currentTimeMillis(),
 )
 
 @Entity(
     tableName = "watch_history",
+    primaryKeys = ["itemId", "deviceId"],
     indices = [
         Index("watchedAt"),
-        Index(value = ["mediaType", "itemId"], unique = true),
     ],
 )
 data class WatchHistoryEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val mediaType: MediaType,
     val itemId: String,
     val watchedAt: Long = System.currentTimeMillis(),
     /**
-     * The device that wrote the row ([tv.own.owntv.core.sync.local.DeviceIdentity].id hash) — the
-     * foundation of the cross-device "recently watched in this household" rail: after a sync merges
-     * another device's rows in, the rail can attribute and tune them. Nullable on rows written
-     * before the column existed, or where the id could not be read; the sync payload carries it
-     * verbatim (`dev`), and an apply writes it as it came.
+     * The device that wrote the row ([tv.own.owntv.core.sync.local.DeviceIdentity].id hash). One row
+     * per item **per device**, so two household devices that watched the same channel keep their own
+     * timestamp instead of overwriting each other's. `""` = the id could not be read; it is a real
+     * key value, never "another device". The sync payload carries it verbatim (`dev`).
      */
-    val deviceId: String? = null,
+    val deviceId: String = "",
 )
 
 @Entity(
     tableName = "content_order",
     indices = [
-        Index(value = ["mediaType", "contextKey"]),
-        Index(value = ["mediaType", "contextKey", "itemId"], unique = true),
+        Index("contextKey"),
+        Index(value = ["contextKey", "itemId"], unique = true),
     ],
 )
 data class ContentOrderEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    /** LIVE / MOVIE / SERIES — never EPISODE (episodes aren't reorderable). */
-    val mediaType: MediaType,
     /** A category stable key (CustomizeKeys.category) for a folder, or [FAV_CONTEXT] for Favorites. */
     val contextKey: String,
     val itemId: String,
@@ -78,16 +71,13 @@ data class ContentOrderEntity(
 
 /**
  * Per-item playback preferences: the zoom/aspect mode and the volume level the user last chose
- * while watching one specific channel, film or episode. Both are nullable and a null means "no
- * per-item choice — follow the global default in Settings", which is also why there is no row at
- * all until the user changes something in the player.
+ * while watching one specific channel. Both are nullable and a null means "no per-item choice —
+ * follow the global default in Settings", which is also why there is no row at all until the user
+ * changes something in the player.
  *
- * [contentKey] is deliberately NOT the volatile Room `itemId` that favorites/history use. It is the
- * stable identity — `sourceId:mediaType:remoteId` from
+ * [contentKey] is the channel's stable identity — the hex remoteId from
  * [tv.own.owntv.core.player.contentKey], falling back to the stream URL for rows with no provider
- * id — exactly like the per-item stores and the subtitle tables. That key survives the clear-then-insert of a re-sync on
- * its own, so unlike `content_order` these rows need no snapshot/relink pass: after a re-sync the
- * same film computes the same key and finds its own row again.
+ * id. It survives re-syncs on its own, so these rows need no snapshot/relink pass.
  */
 @Entity(
     tableName = "playback_prefs",
@@ -100,14 +90,6 @@ data class PlaybackPrefsEntity(
     val zoomMode: String? = null,
     /** Volume percent (0–150, the shared boost ceiling); null = follow the global default volume. */
     val volumeBoost: Int? = null,
-    /**
-     * A/V-sync offset in ms (-5000..5000, positive = audio delayed); null = follow the global default.
-     *
-     * Per item because lip-sync error belongs to the **stream**, not to the user: one badly-muxed film
-     * or one channel whose provider mis-times its audio needs the correction, and carrying that same
-     * correction onto the next, correctly-muxed item would break it.
-     */
-    val audioDelayMs: Int? = null,
     val updatedAt: Long = System.currentTimeMillis(),
     /** The audio track language last chosen here; null = follow the preference. */
     val audioLang: String? = null,
@@ -129,12 +111,6 @@ data class PlaybackPrefsEntity(
 )
 data class PlaybackQuirkEntity(
     @PrimaryKey val contentKey: String,
-    /**
-     * `LIVE`, `MOVIE` or `EPISODE` — the kind of item, recorded by whoever wrote the row. The key
-     * alone cannot say: an item with no provider id is keyed by its stream URL. Live rows are what
-     * the surviving stores write; the older VOD kinds still sit in rows carried from before.
-     */
-    val mediaType: String,
     val audioOnly: Boolean? = null,
     /** A/V-sync offset in ms (-5000..5000, positive = audio delayed); null = follow the global default. */
     val audioDelayMs: Int? = null,
@@ -159,14 +135,12 @@ data class PlaybackQuirkEntity(
 @Entity(
     tableName = "custom_category_members",
     indices = [
-        Index(value = ["mediaType", "contextKey"]),
-        Index(value = ["mediaType", "contextKey", "itemId"], unique = true),
+        Index("contextKey"),
+        Index(value = ["contextKey", "itemId"], unique = true),
     ],
 )
 data class CustomCategoryMemberEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    /** LIVE / MOVIE / SERIES — never EPISODE (episodes aren't added to custom categories). */
-    val mediaType: MediaType,
     /** The custom category's stable key (`"custom:<uuid>"`, see CustomizeKeys.CUSTOM_PREFIX). */
     val contextKey: String,
     val itemId: String,

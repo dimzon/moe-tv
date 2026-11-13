@@ -191,7 +191,7 @@ class SearchReader(
     ): Set<Long> {
         if (cust.hiddenCategories.isEmpty()) return emptySet()
         return AdultCategoryClassifier.hiddenCategoryIds(
-            categoryDao.observe(type).first(),
+            categoryDao.observe().first(),
             cust.hiddenCategories,
         )
     }

@@ -131,7 +131,7 @@ internal class RuTubeSyncer(
             }
             if (!freshSource) {
                 support.pruneChannels(label, remoteIds, stats)
-                support.pruneCategories(MediaType.LIVE, categoryRefresh.seenRemoteIds, label, stats)
+                support.pruneCategories(categoryRefresh.seenRemoteIds, label, stats)
             }
         }
         // Rebuild the many-to-many link (redesign §2): every genre in broadcast_category[], not just

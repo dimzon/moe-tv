@@ -191,7 +191,7 @@ internal fun GuideVideo(
 
 /** "Starts in 58 min · 20:05 – 21:40 · 95 min · Sky Cinema Family" — or "Live now · …", or just the times once it has been on. */
 @Composable
-internal fun programmeEyebrow(p: EpgProgrammeEntity, channelName: String, now: Long): String {
+internal fun programmeEyebrow(p: EpgProgrammeEntity, channelName: String?, now: Long): String {
     val formatTime = rememberSystemTimeFormatter()
     val range = stringResource(R.string.content_live_time_range_plain, formatTime(p.startMs), formatTime(p.stopMs))
     val lead = when {
@@ -200,7 +200,7 @@ internal fun programmeEyebrow(p: EpgProgrammeEntity, channelName: String, now: L
         else -> null
     }
     val length = ((p.stopMs - p.startMs) / 60_000L).toInt().takeIf { it > 0 }?.let { stringResource(R.string.player_duration_minutes, it) }
-    return listOfNotNull(lead, range, length, channelName).joinToString(" · ")
+    return listOfNotNull(lead, range, length, channelName?.takeIf { it.isNotBlank() }).joinToString(" · ")
 }
 
 /** The details line: "Animation · Family · 2023 · FSK 0 · 95 min" — only what the feed provides. */
@@ -732,7 +732,7 @@ private fun GuideReviewRow(
 @Composable
 internal fun reminderEyebrow(reminder: tv.own.owntv.core.database.entity.ReminderEntity): String = programmeEyebrow(
     EpgProgrammeEntity(epgChannelId = "", startMs = reminder.startMs, stopMs = reminder.stopMs, title = reminder.title),
-    reminder.channelName,
+    null,
     System.currentTimeMillis(),
 )
 

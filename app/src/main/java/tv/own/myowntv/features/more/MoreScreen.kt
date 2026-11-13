@@ -243,7 +243,7 @@ fun MoreScreen(
                 )
                 MoreItem.HISTORY -> HistoryPage(
                     vm = vm, setEntry = setEntry,
-                    onClearHistory = { settingsVm.clearWatchHistory(it) },
+                    onClearHistory = { settingsVm.clearWatchHistory() },
                     onPlayChannel = onPlayChannel,
                 )
                 MoreItem.LOCAL_SYNC -> LocalSyncScreen(entry = pageTarget, modifier = Modifier.fillMaxSize())

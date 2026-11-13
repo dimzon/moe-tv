@@ -97,7 +97,7 @@ class ChannelVersions(
             cust.hiddenItems.keys.hashCode(), cust.hiddenCategories.hashCode(), cust.itemNames.hashCode(), cust.epgMatches.hashCode(),
         ).joinToString("|")
         synchronized(cache) { cache[channel.id]?.takeIf { it.fingerprint == fingerprint }?.let { return@withContext it.versions } }
-        val categories = categoryDao.observe(MediaType.LIVE).first()
+        val categories = categoryDao.observe().first()
         val hiddenCats = AdultCategoryClassifier.hiddenCategoryIds(categories, cust.hiddenCategories)
         val categoryNames = categories.associate { it.id to it.name }
         fun visible(ch: ChannelEntity) =

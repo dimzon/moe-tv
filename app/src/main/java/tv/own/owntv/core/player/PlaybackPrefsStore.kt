@@ -2,7 +2,6 @@ package tv.own.owntv.core.player
 
 import tv.own.owntv.core.database.dao.PlaybackPrefsDao
 import tv.own.owntv.core.database.entity.PlaybackPrefsEntity
-import tv.own.owntv.core.settings.SettingsRepository
 
 /**
  * Remembers the zoom/aspect mode, the volume and the A/V-sync offset the user last chose for one
@@ -18,50 +17,15 @@ import tv.own.owntv.core.settings.SettingsRepository
  */
 class PlaybackPrefsStore(
     private val dao: PlaybackPrefsDao,
-    /** Kept for the DI wiring; the store no longer reads anything from settings (it did the active
-     *  profile before the profiles went away). */
-    private val settings: SettingsRepository,
     private val quirks: tv.own.owntv.core.database.dao.PlaybackQuirkDao,
 ) {
-    /**
-     * v44 housekeeping, once per process and safe to repeat: rows learn their playlist from their key,
-     * and each leftover audio delay moves to the stream's shared row — the most recently set one
-     * winning where rows disagreed — and is emptied from the old column as it goes, so a delay the
-     * user later clears cannot come back.
-     */
-    private val copy = CopyOnce(
-        isDone = { false },
-        markDone = {},
-        copy = {
-            runCatching {
-                val moved = dao.legacyAudioDelays()
-                moved.forEach { row ->
-                    quirks.setAudioDelay(
-                        row.contentKey,
-                        mediaTypeOfContentKey(row.contentKey) ?: "LIVE",
-                        row.audioDelayMs,
-                    )
-                }
-                if (moved.isNotEmpty()) {
-                    dao.clearAudioDelayColumn()
-                    dao.dropEmptyRows()
-                }
-            }
-        },
-    )
+    /** The remembered zoom/volume/track values for [contentKey], or null when this item has none. */
+    suspend fun prefsFor(contentKey: String): PlaybackPrefsEntity? =
+        runCatching { dao.get(contentKey) }.getOrNull()
 
-    /** The remembered values for [contentKey], or null when this item has none. The audio delay is
-     *  the stream's, kept in the quirks table; zoom and volume are the row's. */
-    suspend fun prefsFor(contentKey: String): PlaybackPrefsEntity? = runCatching {
-        copy.ensure()
-        val own = dao.get(contentKey)
-        val delay = quirks.get(contentKey)?.audioDelayMs
-        when {
-            own != null -> own.copy(audioDelayMs = delay)
-            delay != null -> PlaybackPrefsEntity(contentKey = contentKey, audioDelayMs = delay)
-            else -> null
-        }
-    }.getOrNull()
+    /** The stream's remembered A/V-sync offset, kept in `playback_quirks`, or null. */
+    suspend fun audioDelayFor(contentKey: String): Int? =
+        runCatching { quirks.get(contentKey)?.audioDelayMs }.getOrNull()
 
     /** Remember a deliberate zoom choice ([tv.own.owntv.player.ZoomMode] name). */
     suspend fun rememberZoom(contentKey: String, zoomMode: String) {
@@ -75,10 +39,7 @@ class PlaybackPrefsStore(
 
     /** Remember a deliberate A/V-sync offset in ms; null forgets it and returns to the global value. */
     suspend fun rememberAudioDelay(contentKey: String, audioDelayMs: Int?) {
-        runCatching {
-            copy.ensure()
-            quirks.setAudioDelay(contentKey, mediaTypeOfContentKey(contentKey) ?: "LIVE", audioDelayMs)
-        }
+        runCatching { quirks.setAudioDelay(contentKey, audioDelayMs) }
     }
 
     /**
@@ -118,10 +79,7 @@ class PlaybackPrefsStore(
 
     /** Settings escape hatch: forget every item's audio delay. */
     suspend fun clearAudioDelay() {
-        runCatching {
-            copy.ensure()
-            quirks.clearAudioDelays()
-        }
+        runCatching { quirks.clearAudioDelays() }
     }
 
     fun observeAudioDelayCount(): kotlinx.coroutines.flow.Flow<Int> = quirks.observeAudioDelayCount()

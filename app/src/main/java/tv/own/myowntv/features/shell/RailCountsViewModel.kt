@@ -86,7 +86,7 @@ class RailCountsViewModel(
 
     val details: StateFlow<RailDetails> =
         combine(
-            historyDao.observeMostRecentOfType(MediaType.LIVE),
+            historyDao.observeMostRecent(),
             customize.observe(MediaType.LIVE),
             customize.sealedCategoryIds(MediaType.LIVE),
         ) { h, cust, sealed -> Triple(h, cust, sealed) }

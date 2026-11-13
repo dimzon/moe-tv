@@ -2,22 +2,16 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "0bcac9e23a2c3531328e48ae4a71c1ff",
+    "identityHash": "38d8e19fa0b27fd641c9bb9b1f721041",
     "entities": [
       {
         "tableName": "categories",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mediaType` TEXT NOT NULL, `name` TEXT NOT NULL, `remoteId` TEXT, `sortOrder` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `remoteId` TEXT, `sortOrder` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "mediaType",
-            "columnName": "mediaType",
-            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -46,23 +40,13 @@
         },
         "indices": [
           {
-            "name": "index_categories_mediaType",
-            "unique": false,
-            "columnNames": [
-              "mediaType"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_categories_mediaType` ON `${TABLE_NAME}` (`mediaType`)"
-          },
-          {
-            "name": "index_categories_mediaType_remoteId",
+            "name": "index_categories_remoteId",
             "unique": true,
             "columnNames": [
-              "mediaType",
               "remoteId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_categories_mediaType_remoteId` ON `${TABLE_NAME}` (`mediaType`, `remoteId`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_categories_remoteId` ON `${TABLE_NAME}` (`remoteId`)"
           }
         ]
       },
@@ -231,18 +215,12 @@
       },
       {
         "tableName": "favorites",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mediaType` TEXT NOT NULL, `itemId` TEXT NOT NULL, `addedAt` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `itemId` TEXT NOT NULL, `addedAt` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "mediaType",
-            "columnName": "mediaType",
-            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -266,33 +244,20 @@
         },
         "indices": [
           {
-            "name": "index_favorites_mediaType_itemId",
+            "name": "index_favorites_itemId",
             "unique": true,
             "columnNames": [
-              "mediaType",
               "itemId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_favorites_mediaType_itemId` ON `${TABLE_NAME}` (`mediaType`, `itemId`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_favorites_itemId` ON `${TABLE_NAME}` (`itemId`)"
           }
         ]
       },
       {
         "tableName": "watch_history",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mediaType` TEXT NOT NULL, `itemId` TEXT NOT NULL, `watchedAt` INTEGER NOT NULL, `deviceId` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`itemId` TEXT NOT NULL, `watchedAt` INTEGER NOT NULL, `deviceId` TEXT NOT NULL, PRIMARY KEY(`itemId`, `deviceId`))",
         "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "mediaType",
-            "columnName": "mediaType",
-            "affinity": "TEXT",
-            "notNull": true
-          },
           {
             "fieldPath": "itemId",
             "columnName": "itemId",
@@ -308,13 +273,15 @@
           {
             "fieldPath": "deviceId",
             "columnName": "deviceId",
-            "affinity": "TEXT"
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
-          "autoGenerate": true,
+          "autoGenerate": false,
           "columnNames": [
-            "id"
+            "itemId",
+            "deviceId"
           ]
         },
         "indices": [
@@ -326,33 +293,17 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_watch_history_watchedAt` ON `${TABLE_NAME}` (`watchedAt`)"
-          },
-          {
-            "name": "index_watch_history_mediaType_itemId",
-            "unique": true,
-            "columnNames": [
-              "mediaType",
-              "itemId"
-            ],
-            "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_watch_history_mediaType_itemId` ON `${TABLE_NAME}` (`mediaType`, `itemId`)"
           }
         ]
       },
       {
         "tableName": "content_order",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mediaType` TEXT NOT NULL, `contextKey` TEXT NOT NULL, `itemId` TEXT NOT NULL, `position` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL DEFAULT 0)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `contextKey` TEXT NOT NULL, `itemId` TEXT NOT NULL, `position` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "mediaType",
-            "columnName": "mediaType",
-            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -389,42 +340,34 @@
         },
         "indices": [
           {
-            "name": "index_content_order_mediaType_contextKey",
+            "name": "index_content_order_contextKey",
             "unique": false,
             "columnNames": [
-              "mediaType",
               "contextKey"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_content_order_mediaType_contextKey` ON `${TABLE_NAME}` (`mediaType`, `contextKey`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_content_order_contextKey` ON `${TABLE_NAME}` (`contextKey`)"
           },
           {
-            "name": "index_content_order_mediaType_contextKey_itemId",
+            "name": "index_content_order_contextKey_itemId",
             "unique": true,
             "columnNames": [
-              "mediaType",
               "contextKey",
               "itemId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_content_order_mediaType_contextKey_itemId` ON `${TABLE_NAME}` (`mediaType`, `contextKey`, `itemId`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_content_order_contextKey_itemId` ON `${TABLE_NAME}` (`contextKey`, `itemId`)"
           }
         ]
       },
       {
         "tableName": "custom_category_members",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mediaType` TEXT NOT NULL, `contextKey` TEXT NOT NULL, `itemId` TEXT NOT NULL, `position` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `contextKey` TEXT NOT NULL, `itemId` TEXT NOT NULL, `position` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "mediaType",
-            "columnName": "mediaType",
-            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -454,31 +397,29 @@
         },
         "indices": [
           {
-            "name": "index_custom_category_members_mediaType_contextKey",
+            "name": "index_custom_category_members_contextKey",
             "unique": false,
             "columnNames": [
-              "mediaType",
               "contextKey"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_custom_category_members_mediaType_contextKey` ON `${TABLE_NAME}` (`mediaType`, `contextKey`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_custom_category_members_contextKey` ON `${TABLE_NAME}` (`contextKey`)"
           },
           {
-            "name": "index_custom_category_members_mediaType_contextKey_itemId",
+            "name": "index_custom_category_members_contextKey_itemId",
             "unique": true,
             "columnNames": [
-              "mediaType",
               "contextKey",
               "itemId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_custom_category_members_mediaType_contextKey_itemId` ON `${TABLE_NAME}` (`mediaType`, `contextKey`, `itemId`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_custom_category_members_contextKey_itemId` ON `${TABLE_NAME}` (`contextKey`, `itemId`)"
           }
         ]
       },
       {
         "tableName": "playback_prefs",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentKey` TEXT NOT NULL, `zoomMode` TEXT, `volumeBoost` INTEGER, `audioDelayMs` INTEGER, `updatedAt` INTEGER NOT NULL, `audioLang` TEXT, `subtitleLang` TEXT, PRIMARY KEY(`contentKey`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentKey` TEXT NOT NULL, `zoomMode` TEXT, `volumeBoost` INTEGER, `updatedAt` INTEGER NOT NULL, `audioLang` TEXT, `subtitleLang` TEXT, PRIMARY KEY(`contentKey`))",
         "fields": [
           {
             "fieldPath": "contentKey",
@@ -494,11 +435,6 @@
           {
             "fieldPath": "volumeBoost",
             "columnName": "volumeBoost",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "audioDelayMs",
-            "columnName": "audioDelayMs",
             "affinity": "INTEGER"
           },
           {
@@ -527,17 +463,11 @@
       },
       {
         "tableName": "playback_quirks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentKey` TEXT NOT NULL, `mediaType` TEXT NOT NULL, `audioOnly` INTEGER, `audioDelayMs` INTEGER, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`contentKey`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentKey` TEXT NOT NULL, `audioOnly` INTEGER, `audioDelayMs` INTEGER, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`contentKey`))",
         "fields": [
           {
             "fieldPath": "contentKey",
             "columnName": "contentKey",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "mediaType",
-            "columnName": "mediaType",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -624,7 +554,7 @@
       },
       {
         "tableName": "programme_reminders",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `channelId` TEXT NOT NULL, `channelName` TEXT NOT NULL, `epgChannelId` TEXT, `title` TEXT NOT NULL, `startMs` INTEGER NOT NULL, `stopMs` INTEGER NOT NULL, `leadMinutes` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL DEFAULT 0)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `channelId` TEXT NOT NULL, `title` TEXT NOT NULL, `startMs` INTEGER NOT NULL, `stopMs` INTEGER NOT NULL, `leadMinutes` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
           {
             "fieldPath": "id",
@@ -637,17 +567,6 @@
             "columnName": "channelId",
             "affinity": "TEXT",
             "notNull": true
-          },
-          {
-            "fieldPath": "channelName",
-            "columnName": "channelName",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epgChannelId",
-            "columnName": "epgChannelId",
-            "affinity": "TEXT"
           },
           {
             "fieldPath": "title",
@@ -717,7 +636,7 @@
       },
       {
         "tableName": "tv_provider_programs",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `surface` TEXT NOT NULL, `mediaType` TEXT NOT NULL, `groupId` INTEGER NOT NULL, `targetItemId` TEXT NOT NULL, `providerProgramId` INTEGER, `lastPositionMs` INTEGER NOT NULL, `durationMs` INTEGER NOT NULL, `lastEngagementAt` INTEGER NOT NULL, `lastPublishedAt` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `surface` TEXT NOT NULL, `groupId` INTEGER NOT NULL, `targetItemId` TEXT NOT NULL, `providerProgramId` INTEGER, `lastPositionMs` INTEGER NOT NULL, `durationMs` INTEGER NOT NULL, `lastEngagementAt` INTEGER NOT NULL, `lastPublishedAt` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -728,12 +647,6 @@
           {
             "fieldPath": "surface",
             "columnName": "surface",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "mediaType",
-            "columnName": "mediaType",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -787,15 +700,14 @@
         },
         "indices": [
           {
-            "name": "index_tv_provider_programs_surface_mediaType_groupId",
+            "name": "index_tv_provider_programs_surface_groupId",
             "unique": true,
             "columnNames": [
               "surface",
-              "mediaType",
               "groupId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_tv_provider_programs_surface_mediaType_groupId` ON `${TABLE_NAME}` (`surface`, `mediaType`, `groupId`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_tv_provider_programs_surface_groupId` ON `${TABLE_NAME}` (`surface`, `groupId`)"
           }
         ]
       },
@@ -1009,7 +921,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0bcac9e23a2c3531328e48ae4a71c1ff')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '38d8e19fa0b27fd641c9bb9b1f721041')"
     ]
   }
 }

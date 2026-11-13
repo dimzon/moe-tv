@@ -8,7 +8,6 @@ import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.customize.pinnedAfterMove
-import tv.own.owntv.core.model.MediaType
 
 /**
  * Write side of the manual item order ("Move up/down"). The ordered content lists are
@@ -31,9 +30,9 @@ interface ContentOrderDao {
     /** Applies the incoming order row's position+stamp only when it is newer. The `<` is the whole rule. */
     @Query(
         "UPDATE content_order SET position = :position, updatedAt = :updatedAt " +
-            "WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId AND updatedAt < :updatedAt",
+            "WHERE contextKey = :contextKey AND itemId = :itemId AND updatedAt < :updatedAt",
     )
-    suspend fun bumpIfNewer(type: MediaType, contextKey: String, itemId: String, position: Int, updatedAt: Long)
+    suspend fun bumpIfNewer(contextKey: String, itemId: String, position: Int, updatedAt: Long)
 
     /**
      * Deletes the row only when it is older than [at] — the merge rule for an incoming **deletion**
@@ -41,20 +40,19 @@ interface ContentOrderDao {
      * and survives. Returns the number of rows removed, so the sync summary can count it.
      */
     @Query(
-        "DELETE FROM content_order WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId " +
+        "DELETE FROM content_order WHERE contextKey = :contextKey AND itemId = :itemId " +
             "AND updatedAt <= :at",
     )
-    suspend fun removeIfOlderThan(type: MediaType, contextKey: String, itemId: String, at: Long): Int
+    suspend fun removeIfOlderThan(contextKey: String, itemId: String, at: Long): Int
 
     /** The row's LWW stamp, or null when absent — the dry run compares it against an incoming copy. */
     @Query(
-        "SELECT updatedAt FROM content_order WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId " +
-            "LIMIT 1",
+        "SELECT updatedAt FROM content_order WHERE contextKey = :contextKey AND itemId = :itemId LIMIT 1",
     )
-    suspend fun updatedAt(type: MediaType, contextKey: String, itemId: String): Long?
+    suspend fun updatedAt(contextKey: String, itemId: String): Long?
 
-    @Query("DELETE FROM content_order WHERE mediaType = :type AND contextKey = :contextKey")
-    suspend fun clearContext(type: MediaType, contextKey: String)
+    @Query("DELETE FROM content_order WHERE contextKey = :contextKey")
+    suspend fun clearContext(contextKey: String)
 
     /** Every manual position: a restore's Replace, before the backup's are put back. */
     @Query("DELETE FROM content_order")
@@ -63,8 +61,8 @@ interface ContentOrderDao {
     /** Context keys that actually have manual-order rows for this section — the fast
      *  path: folders with no overrides use the plain indexed paging query instead of the
      *  unindexable content_order join-sort (which materializes the whole folder per page). */
-    @Query("SELECT DISTINCT contextKey FROM content_order WHERE mediaType = :type")
-    fun observeContextKeys(type: MediaType): Flow<List<String>>
+    @Query("SELECT DISTINCT contextKey FROM content_order")
+    fun observeContextKeys(): Flow<List<String>>
 
     /**
      * Replaces a context's entire order in one transaction (commit point of a Move), stamping every
@@ -74,8 +72,8 @@ interface ContentOrderDao {
      * write path through the DAO carries a fresh stamp.
      */
     @Transaction
-    suspend fun replaceContext(type: MediaType, contextKey: String, rows: List<ContentOrderEntity>) {
-        clearContext(type, contextKey)
+    suspend fun replaceContext(contextKey: String, rows: List<ContentOrderEntity>) {
+        clearContext(contextKey)
         if (rows.isNotEmpty()) {
             val now = System.currentTimeMillis()
             insertAll(rows.map { if (it.updatedAt == 0L) it.copy(updatedAt = now) else it })
@@ -88,13 +86,13 @@ interface ContentOrderDao {
      * chip around them (see `placePinned`). Favorites has no sort chip, so its whole order is kept.
      */
     @Transaction
-    suspend fun saveMove(type: MediaType, contextKey: String, order: List<String>, carried: Set<String>) {
+    suspend fun saveMove(contextKey: String, order: List<String>, carried: Set<String>) {
         val positions =
             if (contextKey == ContentOrderEntity.FAV_CONTEXT) order.withIndex().associate { (i, id) -> id to i }
-            else pinnedAfterMove(order, movedItemIds(type, contextKey).toSet(), carried)
+            else pinnedAfterMove(order, movedItemIds(contextKey).toSet(), carried)
         replaceContext(
-            type, contextKey,
-            positions.map { (id, pos) -> ContentOrderEntity(mediaType = type, contextKey = contextKey, itemId = id, position = pos) },
+            contextKey,
+            positions.map { (id, pos) -> ContentOrderEntity(contextKey = contextKey, itemId = id, position = pos) },
         )
     }
 
@@ -104,36 +102,31 @@ interface ContentOrderDao {
     suspend fun dropListOrdersExcept(keep: String)
 
     /** Does this row already exist? The dry run before a sync counts what is genuinely new. */
-    @Query("SELECT EXISTS(SELECT 1 FROM content_order WHERE mediaType = :type AND contextKey = :contextKey AND itemId = :itemId)")
-    suspend fun exists(type: MediaType, contextKey: String, itemId: String): Boolean
+    @Query("SELECT EXISTS(SELECT 1 FROM content_order WHERE contextKey = :contextKey AND itemId = :itemId)")
+    suspend fun exists(contextKey: String, itemId: String): Boolean
 
     /** The items of one list that the user moved by hand (they keep a saved position). */
-    @Query("SELECT itemId FROM content_order WHERE mediaType = :type AND contextKey = :contextKey")
-    suspend fun movedItemIds(type: MediaType, contextKey: String): List<String>
+    @Query("SELECT itemId FROM content_order WHERE contextKey = :contextKey")
+    suspend fun movedItemIds(contextKey: String): List<String>
 
     @Query("SELECT * FROM content_order")
     suspend fun getAllOnce(): List<ContentOrderEntity>
 
     /**
-     * Snapshot-scoped orphan drop (as FavoriteDao.purgeSnapshotOrphan) for many ids at once. This
-     * table has no index that starts with (mediaType, itemId), so a one-row form scans all of
-     * the section's rows for every snapshot row — quadratic, and hours with tens of thousands of rows while
-     * it holds the writer.
+     * Snapshot-scoped orphan drop (as FavoriteDao.purgeSnapshotOrphan) for many ids at once — a
+     * one-row form would scan the table once per snapshot row.
      */
     @Query(
-        "DELETE FROM content_order WHERE mediaType = :type AND itemId IN (:itemIds) " +
+        "DELETE FROM content_order WHERE itemId IN (:itemIds) " +
             "AND itemId NOT IN (SELECT remoteId FROM channels)",
     )
-    suspend fun purgeSnapshotOrphans(type: MediaType, itemIds: List<String>)
+    suspend fun purgeSnapshotOrphans(itemIds: List<String>)
 
     /**
      * Drops order rows whose content row no longer exists — content is clear-then-insert on every sync,
      * so an item's itemId goes stale. Called after a re-sync's relink (UserDataResolver), mirroring
      * FavoriteDao.purgeOrphans. Live-only now.
      */
-    @Query(
-        "DELETE FROM content_order WHERE " +
-            "mediaType = 'LIVE' AND itemId NOT IN (SELECT remoteId FROM channels)",
-    )
+    @Query("DELETE FROM content_order WHERE itemId NOT IN (SELECT remoteId FROM channels)")
     suspend fun purgeOrphans()
 }

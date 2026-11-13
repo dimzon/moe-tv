@@ -7,8 +7,8 @@
 - Дата: 2026-11-13
 - Класс: `tv.own.owntv.core.database.OwnTVDatabase`
 - Файл БД: `/data/data/com.github.dimzon.owntv/databases/owntv.db`
-- **Версия схемы: 5**, `identityHash` — см. `5.json`
-- Экспортированная схема (источник истины для DDL): `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/5.json`
+- **Версия схемы: 6**, `identityHash = 38d8e19fa0b27fd641c9bb9b1f721041`
+- Экспортированная схема (источник истины для DDL): `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/6.json`
 - Конвертеры: `core/database/Converters.kt` — enum'ы (`MediaType`, `SourceType`,
   `TvProviderSurface`) хранятся как **имена** (`TEXT`), `Boolean` — как `INTEGER 0/1`
 
@@ -42,7 +42,7 @@
 а затем восстанавливает их из этого же списка. Прерванный импорт иначе оставил бы таблицу без
 индексов — это невидимо до следующей полной валидации схемы Room, которая падает на старте.
 
-Канонический набор индексов (v5):
+Канонический набор индексов (v6):
 
 | Таблица | Индексы |
 |---|---|
@@ -77,10 +77,11 @@ FTS-триггер, последний — восстанавливает. `rest
   `BuiltInSource.snapshot(...)` — так все прежние читатели `SourceEntity` работают без изменений.
   Значение, равное глобальному дефолту, отдаётся как «follow global» (`-1`/`null`), чтобы UI-счётчики
   переопределений оставались осмысленными.
-- `SingleSource.id = 1L` — `const`, больше нигде не присваивается. Он остался только как пространство
-  имён playback-ключа `contentKey` и синоним `ChannelEntity.sourceId`.
+- `SingleSource.id = 1L` — `const`, больше нигде не присваивается. Остался только как синоним
+  `ChannelEntity.sourceId` и префикс ключей кастомизации; playback `contentKey` — уже просто hex.
 
-Следствие: **ни одна таблица не хранит `sourceId`** и нет FK на источник.
+Следствие: **ни одна таблица не хранит `sourceId`** и нет FK на источник. Схема v6 убрала и
+`mediaType`: приложение live-only, поэтому дискриминатор типа контента тоже не нужен.
 
 ---
 
@@ -93,9 +94,10 @@ categories ──< channel_category >── channels
                     channels_fts  (external content = channels)
 
 Пользовательские данные (ключ — hex remoteId, без FK):
-  favorites, watch_history, content_order, custom_category_members,
-  user_data_tombstones, programme_reminders, tv_provider_programs
-  playback_prefs, playback_quirks (ключ — contentKey)
+  favorites, watch_history (PK itemId+deviceId), content_order,
+  custom_category_members, user_data_tombstones, programme_reminders,
+  tv_provider_programs
+  playback_prefs, playback_quirks (ключ — contentKey = hex remoteId)
 
 EPG (без FK): epg_channels, epg_programmes
 ```
@@ -129,24 +131,20 @@ erDiagram
 ```sql
 CREATE TABLE IF NOT EXISTS `categories` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  `mediaType` TEXT NOT NULL,
   `name` TEXT NOT NULL,
   `remoteId` TEXT,
   `sortOrder` INTEGER NOT NULL
 );
-CREATE INDEX IF NOT EXISTS `index_categories_mediaType` ON `categories` (`mediaType`);
-CREATE UNIQUE INDEX IF NOT EXISTS `index_categories_mediaType_remoteId`
-  ON `categories` (`mediaType`, `remoteId`);
+CREATE UNIQUE INDEX IF NOT EXISTS `index_categories_remoteId` ON `categories` (`remoteId`);
 ```
 
 | Колонка | Смысл |
 |---|---|
-| `mediaType` | `MediaType`; фактически только `LIVE` |
 | `name` | Название жанра как у провайдера |
 | `remoteId` | id жанра у провайдера (nullable; в SQLite уникальный индекс допускает несколько `NULL`) |
 | `sortOrder` | Порядок провайдера |
 
-Схема v5 убрала `sourceId` и FK на `sources`: один источник, категория — просто `(mediaType, remoteId)`.
+Схема v6 убрала `mediaType` (источник один, тип контента один): категория — просто `remoteId`.
 Пишет: синк (`categoryRefresh`), `SyncSupport.pruneCategories` удаляет исчезнувшие.
 Читает: `CategoryDao`, Customize. Видимость/замки/переименования категорий живут **не здесь**, а в
 DataStore (см. §8); строка `categories` — только данные провайдера.
@@ -246,7 +244,7 @@ External-content FTS4 только по `name`; триггеры синхрон�
 
 ## 5. Пользовательские данные
 
-Общее правило: ключ — **hex `remoteId`** (стабильный навсегда), дискриминатор — `mediaType`.
+Общее правило: ключ — **hex `remoteId`** (стабильный навсегда); `mediaType` из схемы удалён в v6.
 FK нет: чистка выполняется явно в repository-слое после синка
 (`DELETE … WHERE itemId NOT IN (SELECT remoteId FROM channels)`), чтобы housekeeping никогда не
 писал tombstone и не каскадил удаление пользовательских строк.
@@ -256,12 +254,10 @@ FK нет: чистка выполняется явно в repository-слое �
 ```sql
 CREATE TABLE IF NOT EXISTS `favorites` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  `mediaType` TEXT NOT NULL,
   `itemId` TEXT NOT NULL,
   `addedAt` INTEGER NOT NULL
 );
-CREATE UNIQUE INDEX IF NOT EXISTS `index_favorites_mediaType_itemId`
-  ON `favorites` (`mediaType`, `itemId`);
+CREATE UNIQUE INDEX IF NOT EXISTS `index_favorites_itemId` ON `favorites` (`itemId`);
 ```
 
 `addedAt` — LWW-штамп: apply локальной синхронизации двигает его только вперёд
@@ -272,36 +268,32 @@ CREATE UNIQUE INDEX IF NOT EXISTS `index_favorites_mediaType_itemId`
 
 ```sql
 CREATE TABLE IF NOT EXISTS `watch_history` (
-  `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  `mediaType` TEXT NOT NULL,
   `itemId` TEXT NOT NULL,
   `watchedAt` INTEGER NOT NULL,
-  `deviceId` TEXT
+  `deviceId` TEXT NOT NULL,
+  PRIMARY KEY(`itemId`, `deviceId`)
 );
 CREATE INDEX IF NOT EXISTS `index_watch_history_watchedAt` ON `watch_history` (`watchedAt`);
-CREATE UNIQUE INDEX IF NOT EXISTS `index_watch_history_mediaType_itemId`
-  ON `watch_history` (`mediaType`, `itemId`);
 ```
 
-Одна строка на элемент (просмотр обновляет `watchedAt`). `deviceId` — хеш
-`DeviceIdentity.id` устройства-писателя: рель «недавно смотрели в этом доме» после merge показывает,
-откуда пришла строка. `NULL` — строка старше колонки или id не прочитался.
+Схема v6: **одна строка на элемент на устройство**, PK `(itemId, deviceId)`, без суррогатного `id`.
+`deviceId` — хеш `DeviceIdentity.id` устройства-писателя; `""` — id не прочитался (это значение
+ключа, не «другое устройство»). Списки (Favorites/History/«недавно смотрели») сворачивают устройства
+через `GROUP BY itemId` + `MAX(watchedAt)`; счётчики считают `DISTINCT itemId`.
 
 ### 5.3. `content_order` — ручной порядок списков
 
 ```sql
 CREATE TABLE IF NOT EXISTS `content_order` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  `mediaType` TEXT NOT NULL,
   `contextKey` TEXT NOT NULL,
   `itemId` TEXT NOT NULL,
   `position` INTEGER NOT NULL,
   `updatedAt` INTEGER NOT NULL DEFAULT 0
 );
-CREATE INDEX IF NOT EXISTS `index_content_order_mediaType_contextKey`
-  ON `content_order` (`mediaType`, `contextKey`);
-CREATE UNIQUE INDEX IF NOT EXISTS `index_content_order_mediaType_contextKey_itemId`
-  ON `content_order` (`mediaType`, `contextKey`, `itemId`);
+CREATE INDEX IF NOT EXISTS `index_content_order_contextKey` ON `content_order` (`contextKey`);
+CREATE UNIQUE INDEX IF NOT EXISTS `index_content_order_contextKey_itemId`
+  ON `content_order` (`contextKey`, `itemId`);
 ```
 
 `contextKey`:
@@ -321,15 +313,14 @@ CREATE UNIQUE INDEX IF NOT EXISTS `index_content_order_mediaType_contextKey_item
 ```sql
 CREATE TABLE IF NOT EXISTS `custom_category_members` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  `mediaType` TEXT NOT NULL,
   `contextKey` TEXT NOT NULL,
   `itemId` TEXT NOT NULL,
   `position` INTEGER NOT NULL
 );
-CREATE INDEX IF NOT EXISTS `index_custom_category_members_mediaType_contextKey`
-  ON `custom_category_members` (`mediaType`, `contextKey`);
-CREATE UNIQUE INDEX IF NOT EXISTS `index_custom_category_members_mediaType_contextKey_itemId`
-  ON `custom_category_members` (`mediaType`, `contextKey`, `itemId`);
+CREATE INDEX IF NOT EXISTS `index_custom_category_members_contextKey`
+  ON `custom_category_members` (`contextKey`);
+CREATE UNIQUE INDEX IF NOT EXISTS `index_custom_category_members_contextKey_itemId`
+  ON `custom_category_members` (`contextKey`, `itemId`);
 ```
 
 Здесь лежит именно **состав** (какие элементы входят) и порядок вставки (`position`). Порядок,
@@ -368,8 +359,6 @@ show+season+episode), чтобы удаление было узнаваемо н
 CREATE TABLE IF NOT EXISTS `programme_reminders` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   `channelId` TEXT NOT NULL,
-  `channelName` TEXT NOT NULL,
-  `epgChannelId` TEXT,
   `title` TEXT NOT NULL,
   `startMs` INTEGER NOT NULL,
   `stopMs` INTEGER NOT NULL,
@@ -383,11 +372,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS `index_programme_reminders_channelId_startMs`
   ON `programme_reminders` (`channelId`, `startMs`);
 ```
 
-Одно напоминание на передачу канала (повторное нажатие обновляет). `channelId` — hex, `channelName` и
-`epgChannelId` едут рядом, чтобы строку можно было перепривязать. Живёт часы/дни: `stopMs <= now`
-вычищается. В локальной синхронизации ездит как `prog` с identity `(epgChannelId, startMs)` —
-`channelId` при apply перепривязывается на месте, а строка без `epgChannelId` остаётся локальной.
-`prog` входит и в снапшот бэкапа (`SyncMatrix.KINDS`).
+Одно напоминание на передачу канала (повторное нажатие обновляет). `channelId` — hex и единственная
+идентичность строки; `channelName`/`epgChannelId` удалены в v6. Живёт часы/дни: `stopMs <= now`
+вычищается. В локальной синхронизации и бэкапе ездит как `prog` с identity `(channelId, startMs)`.
 
 ### 5.7. `tv_provider_programs` — зеркало Android TV (спящая)
 
@@ -395,7 +382,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS `index_programme_reminders_channelId_startMs`
 CREATE TABLE IF NOT EXISTS `tv_provider_programs` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   `surface` TEXT NOT NULL,
-  `mediaType` TEXT NOT NULL,
   `groupId` INTEGER NOT NULL,
   `targetItemId` TEXT NOT NULL,
   `providerProgramId` INTEGER,
@@ -404,8 +390,8 @@ CREATE TABLE IF NOT EXISTS `tv_provider_programs` (
   `lastEngagementAt` INTEGER NOT NULL,
   `lastPublishedAt` INTEGER NOT NULL
 );
-CREATE UNIQUE INDEX IF NOT EXISTS `index_tv_provider_programs_surface_mediaType_groupId`
-  ON `tv_provider_programs` (`surface`, `mediaType`, `groupId`);
+CREATE UNIQUE INDEX IF NOT EXISTS `index_tv_provider_programs_surface_groupId`
+  ON `tv_provider_programs` (`surface`, `groupId`);
 ```
 
 `surface`: `WATCH_NEXT`, `RECENT_LIVE`. `groupId` — стабильный хеш identity контента, чтобы строка
@@ -420,7 +406,6 @@ CREATE TABLE IF NOT EXISTS `playback_prefs` (
   `contentKey` TEXT NOT NULL,
   `zoomMode` TEXT,
   `volumeBoost` INTEGER,
-  `audioDelayMs` INTEGER,
   `updatedAt` INTEGER NOT NULL,
   `audioLang` TEXT,
   `subtitleLang` TEXT,
@@ -428,17 +413,16 @@ CREATE TABLE IF NOT EXISTS `playback_prefs` (
 );
 ```
 
-`contentKey` = `<sourceId>:<mediaType>:<remoteId>` (fallback — URL); `sourceId` — константа 1, но
-ключ остаётся стабильным и переживает пересинк. Все настройки nullable: `null` = «следовать
-глобальной настройке», и строки нет, пока пользователь ничего не менял. `subtitleLang = ""` =
-субтитры выключены.
+`contentKey` = hex `remoteId` (fallback — URL для строк без provider id). Все настройки nullable:
+`null` = «следовать глобальной настройке», и строки нет, пока пользователь ничего не менял.
+`subtitleLang = ""` = субтитры выключены. Колонка `audioDelayMs` удалена в v6: задержка живёт в
+`playback_quirks`.
 
 ### 5.9. `playback_quirks` — факты о потоке
 
 ```sql
 CREATE TABLE IF NOT EXISTS `playback_quirks` (
   `contentKey` TEXT NOT NULL,
-  `mediaType` TEXT NOT NULL,
   `audioOnly` INTEGER,
   `audioDelayMs` INTEGER,
   `updatedAt` INTEGER NOT NULL,
@@ -447,8 +431,7 @@ CREATE TABLE IF NOT EXISTS `playback_quirks` (
 ```
 
 Отдельно от `playback_prefs`: это свойство **потока** и выхода устройства (audio-only, липсинк), а не
-предпочтение человека. `mediaType` пишется как имя (`LIVE`/`MOVIE`/`EPISODE`); в live-only пишутся
-живые строки. Схема v5 убрала `sourceId` — удалять плейлист больше неоткуда.
+предпочтение человека. Схема v6 убрала `mediaType` и `sourceId`: остались только факты о потоке.
 
 ---
 
@@ -514,8 +497,8 @@ upsert чанками по 500. Ретенция: прошедшее старш�
 1. **Hex — единственный стабильный id.** `channels.remoteId` (32-символьный hex `videoId`) — PK;
    все пользовательские таблицы ключуются им. Пересинхронизация делает REPLACE по PK, поэтому ключ
    не может «съехать», и отдельного relink/capture-прохода в коде нет.
-2. **Источника нет в БД.** `sources` удалена в v5; `BuiltInSource` — захардкоженный DTO-синглтон,
-   его изменяемые значения — глобальные настройки. Ни одна таблица не хранит `sourceId`.
+2. **Ни источника, ни типа контента в БД нет.** `sources` удалена в v5, `mediaType` — в v6;
+   `BuiltInSource` — захардкоженный DTO-синглтон, его изменяемые значения — глобальные настройки.
 3. **Purge-контракт.** После синка `SourceRepository.sync` вызывает `UserDataResolver.afterSync(purge)`,
    который удаляет строки пользовательских таблиц, чей канал исчез. Удаление housekeeping'ом не
    пишет tombstone.
@@ -563,7 +546,8 @@ git history и `CHANGELOG.md`.
 | 2 | Удалена `channels.categoryId`; членство канала в жанрах — M:N `channel_category` |
 | 3 | Добавлена `channel_rename` (hex → имя, без FK), зеркалится из `assets/channel_renames.json` на каждом синке |
 | 4 | **`channels` сдута до натурального ключа:** `remoteId` — PK; удалены `id`, `sourceId`, `streamUrl`, `epgChannelId`, `catchup*`, `httpHeaders`, `drmConfig`, `manifestType`, `directSource`, `contentHash`, `providerName`, `isPaid` (живут как геттеры-синонимы). Удалена hash-diff/stable-upsert машинерия; синк — REPLACE по PK |
-| 5 | **Таблицы `sources` больше нет:** единственный источник — DTO-синглтон `BuiltInSource`, его настройки — глобальные настройки DataStore. `sourceId` удалён из `categories`, `epg_channels`, `epg_programmes`, `playback_prefs`, `playback_quirks`; ключи стали `(mediaType, remoteId)`, `(epgChannelId)`, `(epgChannelId, startMs)`. Удалён `SourceDao` |
+| 5 | **Таблицы `sources` больше нет:** единственный источник — DTO-синглтон `BuiltInSource`, его настройки — глобальные настройки DataStore. `sourceId` удалён из `categories`, `epg_channels`, `epg_programmes`, `playback_prefs`, `playback_quirks`. Удалён `SourceDao` |
+| 6 | **Удалён `mediaType` из всех таблиц** (live-only): `categories` → уникальный `remoteId`, `favorites` → уникальный `itemId`, `content_order`/`custom_category_members` → `(contextKey, itemId)`, `playback_quirks` и `tv_provider_programs` без типа. `watch_history` — PK `(itemId, deviceId)`, без `id`; `deviceId` NOT NULL. `programme_reminders` теряет `channelName`/`epgChannelId`. Удалена legacy-колонка `playback_prefs.audioDelayMs` |
 
 ---
 
@@ -581,8 +565,9 @@ adb shell run-as com.github.dimzon.owntv sqlite3 databases/owntv.db \
 ```
 
 Ожидаемо для текущего каталога: 5 колонок `channels`, 205 каналов, 382 строки `channel_category`,
-68 строк `channel_rename`, `sources` — 0 таблиц, в `categories` нет `sourceId`, индексы
-`index_channels_name` / `index_channels_sortOrder_name` / `index_channels_number`.
+68 строк `channel_rename`, `sources` — 0 таблиц, `mediaType`/`sourceId` нет ни в одной таблице,
+`watch_history` — 3 колонки с PK `(itemId, deviceId)`, индексы `index_channels_name` /
+`index_channels_sortOrder_name` / `index_channels_number`.
 
-Схема-эталон для диффа: `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/5.json` — любое
+Схема-эталон для диффа: `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/6.json` — любое
 изменение сущностей Room обязано менять этот файл (он коммитится вместе с кодом).

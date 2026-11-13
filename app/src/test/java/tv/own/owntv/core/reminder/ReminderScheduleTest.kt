@@ -11,7 +11,7 @@ class ReminderScheduleTest {
 
     private val min = 60_000L
     private fun reminder(id: Long, start: Long, stop: Long, lead: Int) = ReminderEntity(
-        id = id, channelId = "ch259", channelName = "Sky Cinema Family", title = "Toy Story 4",
+        id = id, channelId = "ch259", title = "Toy Story 4",
         startMs = start, stopMs = stop, leadMinutes = lead, createdAt = 0,
     )
 

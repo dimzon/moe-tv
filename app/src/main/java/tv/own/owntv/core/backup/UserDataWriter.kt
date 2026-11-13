@@ -6,7 +6,6 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
 import tv.own.owntv.core.database.dao.FavoriteDao
 import tv.own.owntv.core.database.dao.HistoryDao
 import tv.own.owntv.core.database.transaction
-import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.settings.SyncMatrix
 
@@ -40,9 +39,9 @@ class UserDataWriter(
 ) {
 
     /** Unfavorite one item. */
-    suspend fun removeFavorite(type: MediaType, itemId: String) = db.transaction {
-        if (gives(SyncMatrix.KIND_FAVORITES)) userData.recordDeletion(SyncMatrix.KIND_FAVORITES, type, itemId)
-        favoriteDao.remove(type, itemId)
+    suspend fun removeFavorite(itemId: String) = db.transaction {
+        if (gives(SyncMatrix.KIND_FAVORITES)) userData.recordDeletion(SyncMatrix.KIND_FAVORITES, itemId)
+        favoriteDao.remove(itemId)
     }
 
     /**
@@ -50,39 +49,30 @@ class UserDataWriter(
      * `watchedAt` and its tombstone kind does not travel, so unless the user turns the category's
      * "give" on the deletion stays local.
      */
-    suspend fun removeHistory(type: MediaType, itemId: String) = db.transaction {
-        if (gives(SyncMatrix.KIND_HISTORY)) userData.recordDeletion(SyncMatrix.KIND_HISTORY, type, itemId)
-        historyDao.remove(type, itemId)
+    suspend fun removeHistory(itemId: String) = db.transaction {
+        if (gives(SyncMatrix.KIND_HISTORY)) userData.recordDeletion(SyncMatrix.KIND_HISTORY, itemId)
+        historyDao.remove(itemId)
     }
 
     /** Take one item out of one custom category. Custom categories are not a sync category — no marker. */
-    suspend fun removeCustomCategoryMember(
-        type: MediaType,
-        contextKey: String,
-        itemId: String,
-    ) = db.transaction {
-        customCategoryDao.deleteItem(type, contextKey, itemId)
+    suspend fun removeCustomCategoryMember(contextKey: String, itemId: String) = db.transaction {
+        customCategoryDao.deleteItem(contextKey, itemId)
     }
 
     /**
-     * "Clear watch history" — everything, or one media type.
+     * "Clear watch history".
      *
      * Every row is described before it goes, which is thousands of small reads on a large history.
      * That is the price of the deletion actually sticking on the user's other device, and it is a
      * once-in-a-while action taken from a settings screen, not something on a hot path. Only paid
      * when the category's "give" is on — see the class doc.
      */
-    suspend fun clearHistory(type: MediaType? = null) = db.transaction {
+    suspend fun clearHistory() = db.transaction {
         if (gives(SyncMatrix.KIND_HISTORY)) {
-            val history = if (type == null) historyDao.getAll() else historyDao.getAllOfType(type)
-            history.forEach { userData.recordDeletion(SyncMatrix.KIND_HISTORY, it.mediaType, it.itemId) }
+            historyDao.getAllOnce().forEach { userData.recordDeletion(SyncMatrix.KIND_HISTORY, it.itemId) }
             userData.pruneTombstones()
         }
-        if (type == null) {
-            historyDao.clear()
-        } else {
-            historyDao.clearType(type)
-        }
+        historyDao.clear()
     }
 
     /** The "give" side of a category, as the matrix has it right now. */

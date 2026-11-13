@@ -83,7 +83,7 @@ class CategoryRailEditor(
     private suspend fun rows(
         type: MediaType,
         alphabetical: Boolean,
-    ): List<CustomizedCategory> = categoryDao.observe(type).first().railCategories(
+    ): List<CustomizedCategory> = categoryDao.observe().first().railCategories(
         customize.observe(type).first(),
         alphabetical = alphabetical,
     )

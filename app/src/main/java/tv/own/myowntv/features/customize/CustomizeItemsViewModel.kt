@@ -149,7 +149,7 @@ class CustomizeItemsViewModel(
     private val hasOrder: StateFlow<Boolean> = combine(ctx, _catInfo) { c, ci -> c to ci }
         .flatMapLatest { (c, ci) ->
             if (ci == null) flowOf(false)
-            else contentOrderDao.observeContextKeys(ci.mediaType)
+            else contentOrderDao.observeContextKeys()
                 .map { keys -> ci.contextKey in keys }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
@@ -255,7 +255,7 @@ class CustomizeItemsViewModel(
         moveMutex.withLock {
             val snapshot = orderedSnapshot(ci)
             val (reordered, carried) = block(snapshot) ?: return
-            contentOrderDao.saveMove(ci.mediaType, ci.contextKey, reordered, carried)
+            contentOrderDao.saveMove(ci.contextKey, reordered, carried)
         }
     }
 
@@ -409,10 +409,7 @@ class CustomizeItemsViewModel(
         else {
             val targets = cust.customCategories.map { it.id }.filterNot { it == ci.contextKey }
             if (targets.isEmpty()) flowOf(emptyList())
-            else customCategoryDao.observeCountsByContexts(
-                ci.mediaType,
-                targets,
-            )
+            else customCategoryDao.observeCountsByContexts(targets)
                 .map { counts ->
                     targets.map { id ->
                         MoveTarget(
@@ -444,7 +441,7 @@ class CustomizeItemsViewModel(
     fun removeFromCategory(row: CustomizeItemRow) {
         val ci = _catInfo.value?.takeIf { it.isCustom } ?: return
         viewModelScope.launch {
-            userDataWriter.removeCustomCategoryMember(ci.mediaType, ci.contextKey, row.itemId)
+            userDataWriter.removeCustomCategoryMember(ci.contextKey, row.itemId)
             customize.observe(ci.mediaType).first().movedFromOrigin[row.key]?.let { origin ->
                 customize.setItemMovedFromOrigin(ci.mediaType, row.key, origin, moved = false)
             }
@@ -455,13 +452,13 @@ class CustomizeItemsViewModel(
         val ci = _catInfo.value ?: return
         if (targetId == ci.contextKey) return
         viewModelScope.launch {
-            customCategoryDao.appendItem(ci.mediaType, targetId, row.itemId)
+            customCategoryDao.appendItem(targetId, row.itemId)
             if (!keepInOrigin) {
                 when {
                     // Custom origin → drop the membership row (the item leaves THIS category).
                     // Through the writer, so the removal is recorded and a sync cannot bring it back.
                     CustomizeKeys.isCustom(ci.contextKey) ->
-                        userDataWriter.removeCustomCategoryMember(ci.mediaType, ci.contextKey, row.itemId)
+                        userDataWriter.removeCustomCategoryMember(ci.contextKey, row.itemId)
                     // Provider-folder origin → mark it moved-out; the browse pager then drops the
                     // item from that folder while keeping it in All/search/recent. (Favorites can't
                     // be an origin here — this screen is only opened from Customize's category rows.)

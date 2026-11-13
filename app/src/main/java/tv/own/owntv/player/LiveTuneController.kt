@@ -578,7 +578,7 @@ class LiveTuneController(
             title = channel.name,
             subtitle = label(channel),
             logoUrl = channel.logoUrl,
-            contentKey = contentKey(channel.sourceId, tv.own.owntv.core.model.MediaType.LIVE.name, channel.remoteId),
+            contentKey = contentKey(channel.remoteId),
         )
 
         override fun recordLadderEvent(reason: PlayerFailureReason, detail: String) =

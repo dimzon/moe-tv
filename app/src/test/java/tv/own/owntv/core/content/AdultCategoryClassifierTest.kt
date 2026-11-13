@@ -62,9 +62,5 @@ class AdultCategoryClassifierTest {
         assertTrue(AdultCategoryClassifier.hiddenCategoryIds(listOf(adult), emptySet()).isEmpty())
     }
 
-    private fun category(id: Long, name: String) = CategoryEntity(
-        id = id,
-        mediaType = MediaType.MOVIE,
-        name = name,
-    )
+    private fun category(id: Long, name: String) = CategoryEntity(id = id, name = name)
 }

@@ -53,8 +53,6 @@ class ReminderManager(
      */
     suspend fun add(
         channelId: String,
-        channelName: String,
-        epgChannelId: String?,
         title: String,
         startMs: Long,
         stopMs: Long,
@@ -63,7 +61,7 @@ class ReminderManager(
         val now = clock()
         if (!ReminderSchedule.canRemind(startMs, now)) return false
         val reminder = ReminderEntity(
-            channelId = channelId, channelName = channelName, epgChannelId = epgChannelId,
+            channelId = channelId,
             title = title, startMs = startMs, stopMs = stopMs, leadMinutes = leadMinutes, createdAt = now,
             // Per-row LWW stamp: a sync apply only replaces this row with an incoming reminder that is newer.
             updatedAt = now,
@@ -77,16 +75,13 @@ class ReminderManager(
      * Cancel a reminder, or answer its prompt (Watch or Dismiss both end it).
      *
      * When sync is wired, the dismissal is recorded as a `prog` tombstone (identity
-     * (epgChannelId, startMs)) BEFORE the row goes, so the other devices hear about the deletion
-     * and the merge does not put the reminder straight back. Without an epg id the row has no sync
-     * identity and the deletion stays local.
+     * (channelId, startMs)) BEFORE the row goes, so the other devices hear about the deletion and
+     * the merge does not put the reminder straight back.
      */
     suspend fun dismiss(id: Long) {
         val reminder = reminderDao.getById(id)
         if (reminder != null) {
-            reminder.epgChannelId?.takeIf { it.isNotBlank() }?.let { epg ->
-                userData?.recordReminderDeletion(epg, reminder.startMs, at = clock())
-            }
+            userData?.recordReminderDeletion(reminder.channelId, reminder.startMs, at = clock())
         }
         scheduler.cancel(id)
         reminderDao.delete(id)

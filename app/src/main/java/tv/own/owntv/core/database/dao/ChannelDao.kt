@@ -224,7 +224,7 @@ interface ChannelDao {
      *  [tv.own.owntv.core.database.ManualOrderPagingSource]; the Move session uses [snapshotByCategoryManual]. */
     @Query(
         "SELECT c.*, o.position AS pos, 0 AS mp FROM channels c " +
-        "LEFT JOIN content_order o ON o.itemId = c.remoteId AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey " +
+        "LEFT JOIN content_order o ON o.itemId = c.remoteId AND o.contextKey = :contextKey " +
         "WHERE c.remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId)",
     )
     suspend fun baseByCategoryManual(categoryId: Long, contextKey: String): List<ManualOrderRow>
@@ -238,16 +238,16 @@ interface ChannelDao {
      */
     @Query(
         "SELECT (SELECT COUNT(*) FROM channels) " +
-        "+ (SELECT COUNT(*) FROM content_order WHERE mediaType = 'LIVE') " +
-        "+ (SELECT COUNT(*) FROM custom_category_members WHERE mediaType = 'LIVE')",
+        "+ (SELECT COUNT(*) FROM content_order) " +
+        "+ (SELECT COUNT(*) FROM custom_category_members)",
     )
     fun observeManualVersion(): Flow<Int>
 
 
     @Query(
         "SELECT c.* FROM channels c " +
-            "INNER JOIN favorites f ON f.itemId = c.remoteId AND f.mediaType = 'LIVE' " +
-            "LEFT JOIN content_order o ON o.itemId = c.remoteId AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey " +
+            "INNER JOIN favorites f ON f.itemId = c.remoteId " +
+            "LEFT JOIN content_order o ON o.itemId = c.remoteId AND o.contextKey = :contextKey " +
             "ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, f.addedAt DESC",
     )
     fun pagingFavoritesManual(contextKey: String): PagingSource<Int, ChannelEntity>
@@ -264,8 +264,8 @@ interface ChannelDao {
     /** Bounded snapshot of Favorites in manual order, for the Move session's in-memory reorder. */
     @Query(
         "SELECT c.* FROM channels c " +
-            "INNER JOIN favorites f ON f.itemId = c.remoteId AND f.mediaType = 'LIVE' " +
-            "LEFT JOIN content_order o ON o.itemId = c.remoteId AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey " +
+            "INNER JOIN favorites f ON f.itemId = c.remoteId " +
+            "LEFT JOIN content_order o ON o.itemId = c.remoteId AND o.contextKey = :contextKey " +
             "ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, f.addedAt DESC LIMIT :limit",
     )
     suspend fun snapshotFavoritesManual(contextKey: String, limit: Int): List<ChannelEntity>
@@ -332,80 +332,76 @@ interface ChannelDao {
     suspend fun searchListDetailedFts(ftsQuery: String, limit: Int): List<ChannelSearchResult>
 
     @Query(
-        "SELECT c.* FROM channels c INNER JOIN favorites f ON f.itemId = c.remoteId AND f.mediaType = 'LIVE' " +
+        "SELECT c.* FROM channels c INNER JOIN favorites f ON f.itemId = c.remoteId " +
             "WHERE c.name LIKE '%' || :query || '%' ORDER BY f.addedAt DESC",
     )
     fun searchFavorites(query: String): PagingSource<Int, ChannelEntity>
 
     @Query(
-        "SELECT c.* FROM channels c INNER JOIN watch_history h ON h.itemId = c.remoteId AND h.mediaType = 'LIVE' " +
-            "WHERE c.name LIKE '%' || :query || '%' ORDER BY h.watchedAt DESC",
+        "SELECT c.* FROM channels c INNER JOIN watch_history h ON h.itemId = c.remoteId " +
+            "WHERE c.name LIKE '%' || :query || '%' GROUP BY c.remoteId ORDER BY MAX(h.watchedAt) DESC",
     )
     fun searchHistory(query: String): PagingSource<Int, ChannelEntity>
 
     // --- Favorites / History ---
     @Query(
         "SELECT c.* FROM channels c " +
-            "INNER JOIN favorites f ON f.itemId = c.remoteId AND f.mediaType = 'LIVE' " +
+            "INNER JOIN favorites f ON f.itemId = c.remoteId " +
             "ORDER BY f.addedAt DESC",
     )
     fun pagingFavorites(): PagingSource<Int, ChannelEntity>
 
     @Query(
         "SELECT c.* FROM channels c " +
-            "INNER JOIN favorites f ON f.itemId = c.remoteId AND f.mediaType = 'LIVE' " +
+            "INNER JOIN favorites f ON f.itemId = c.remoteId " +
             "ORDER BY LOWER(c.name) ASC",
     )
     fun favoritesListAlpha(): Flow<List<ChannelEntity>>
 
     // Counts via the same join the list uses, so the badge can't show favorites whose channel went
     // stale before the prune catches up.
-    @Query(
-        "SELECT COUNT(*) FROM favorites f INNER JOIN channels c ON c.remoteId = f.itemId " +
-            "WHERE f.mediaType = 'LIVE'",
-    )
+    @Query("SELECT COUNT(*) FROM favorites f INNER JOIN channels c ON c.remoteId = f.itemId")
     fun countFavorites(): Flow<Int>
 
     /** History rail count, joined to channels so it follows the same visibility as the list. */
     @Query(
-        "SELECT COUNT(*) FROM watch_history h INNER JOIN channels c ON c.remoteId = h.itemId " +
-            "WHERE h.mediaType = 'LIVE'",
+        "SELECT COUNT(DISTINCT h.itemId) FROM watch_history h INNER JOIN channels c ON c.remoteId = h.itemId",
     )
     fun countHistory(): Flow<Int>
 
     /** [countFavorites] without the channels filed under [excluded] (locked categories). */
     @Query(
         "SELECT COUNT(*) FROM favorites f INNER JOIN channels c ON c.remoteId = f.itemId " +
-            "WHERE f.mediaType = 'LIVE' AND (c.remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId NOT IN (:excluded)) OR c.remoteId NOT IN (SELECT channelHexId FROM channel_category))",
+            "WHERE (c.remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId NOT IN (:excluded)) OR c.remoteId NOT IN (SELECT channelHexId FROM channel_category))",
     )
     fun countFavoritesExcluding(excluded: List<Long>): Flow<Int>
 
     /** [countHistory] without the channels filed under [excluded] (locked categories). */
     @Query(
-        "SELECT COUNT(*) FROM watch_history h INNER JOIN channels c ON c.remoteId = h.itemId " +
-            "WHERE h.mediaType = 'LIVE' AND (c.remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId NOT IN (:excluded)) OR c.remoteId NOT IN (SELECT channelHexId FROM channel_category))",
+        "SELECT COUNT(DISTINCT h.itemId) FROM watch_history h INNER JOIN channels c ON c.remoteId = h.itemId " +
+            "WHERE (c.remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId NOT IN (:excluded)) OR c.remoteId NOT IN (SELECT channelHexId FROM channel_category))",
     )
     fun countHistoryExcluding(excluded: List<Long>): Flow<Int>
 
     @Query(
         "SELECT c.* FROM channels c " +
-            "INNER JOIN watch_history h ON h.itemId = c.remoteId AND h.mediaType = 'LIVE' " +
-            "ORDER BY h.watchedAt DESC",
+            "INNER JOIN watch_history h ON h.itemId = c.remoteId " +
+            "GROUP BY c.remoteId ORDER BY MAX(h.watchedAt) DESC",
     )
     fun pagingHistory(): PagingSource<Int, ChannelEntity>
 
     /** Recently-watched row at the top of Live TV. */
     @Query(
         "SELECT c.* FROM channels c " +
-            "INNER JOIN watch_history h ON h.itemId = c.remoteId AND h.mediaType = 'LIVE' " +
-            "ORDER BY h.watchedAt DESC LIMIT :limit",
+            "INNER JOIN watch_history h ON h.itemId = c.remoteId " +
+            "GROUP BY c.remoteId ORDER BY MAX(h.watchedAt) DESC LIMIT :limit",
     )
     fun recentlyWatched(limit: Int): Flow<List<ChannelEntity>>
 
     @Query(
-        "SELECT c.*, h.watchedAt FROM channels c " +
-            "INNER JOIN watch_history h ON h.itemId = c.remoteId AND h.mediaType = 'LIVE' " +
-            "ORDER BY h.watchedAt DESC LIMIT :limit",
+        "SELECT c.*, MAX(h.watchedAt) AS watchedAt FROM channels c " +
+            "INNER JOIN watch_history h ON h.itemId = c.remoteId " +
+            "GROUP BY c.remoteId ORDER BY watchedAt DESC LIMIT :limit",
     )
     fun recentlyWatchedWithTimestamp(limit: Int): Flow<List<ChannelWithWatchedAt>>
 }

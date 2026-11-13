@@ -163,7 +163,7 @@ class HomeViewModel(
         // The section's customizations ride along so a rename in Customize retitles the chip at once.
         combine(historyDao.observeMostRecent(), customize.sealedCategoryKeys()) { h, _ -> h }
             .flatMapLatest { h ->
-                if (h == null || h.mediaType != MediaType.LIVE) return@flatMapLatest flowOf(null)
+                if (h == null) return@flatMapLatest flowOf(null)
                 customize.observe(MediaType.LIVE).map { cust -> resolveContinue(h, cust) }
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -171,12 +171,11 @@ class HomeViewModel(
     private suspend fun resolveContinue(
         h: tv.own.owntv.core.database.entity.WatchHistoryEntity,
         cust: SectionCustomizations,
-    ): ContinueTarget? = when (h.mediaType) {
-        MediaType.LIVE -> channelDao.getById(h.itemId)?.let { c ->
-            if (!tv.own.owntv.core.database.ChannelMembership.allExcluded(c, customize.sealedCategoryIds(MediaType.LIVE).first())) return@let null
-            ContinueTarget(ContinueKind.LIVE, cust.displayName(c), ContinueAction.LAST_CHANNEL, channelId = c.id)
+    ): ContinueTarget? = channelDao.getById(h.itemId)?.let { c ->
+        if (!tv.own.owntv.core.database.ChannelMembership.allExcluded(c, customize.sealedCategoryIds(MediaType.LIVE).first())) {
+            return@let null
         }
-        else -> null
+        ContinueTarget(ContinueKind.LIVE, cust.displayName(c), ContinueAction.LAST_CHANNEL, channelId = c.id)
     }
 
     private val _heroFocused = MutableStateFlow(false)

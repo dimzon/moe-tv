@@ -80,8 +80,8 @@ fun liveCountFlow(
             else channelDao.countFavoritesExcluding(sealed)
         LiveKey.History -> if (sealed.isEmpty()) channelDao.countHistory()
             else channelDao.countHistoryExcluding(sealed)
-        is LiveKey.Custom -> if (sealed.isEmpty()) customCategoryDao.countMembers(MediaType.LIVE, key.id)
-            else customCategoryDao.countMembersExcluding(MediaType.LIVE, key.id, sealed)
+        is LiveKey.Custom -> if (sealed.isEmpty()) customCategoryDao.countMembers(key.id)
+            else customCategoryDao.countMembersExcluding(key.id, sealed)
         is LiveKey.Folder -> channelDao.countByCategory(key.id)
     }
 }

@@ -3,7 +3,6 @@ package tv.own.owntv.core.database.entity
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.tv.TvProviderSurface
 
 /**
@@ -17,13 +16,12 @@ import tv.own.owntv.core.tv.TvProviderSurface
 @Entity(
     tableName = "tv_provider_programs",
     indices = [
-        Index(value = ["surface", "mediaType", "groupId"], unique = true),
+        Index(value = ["surface", "groupId"], unique = true),
     ],
 )
 data class TvProviderProgramEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val surface: TvProviderSurface,
-    val mediaType: MediaType,
     val groupId: Long,
     val targetItemId: String,
     val providerProgramId: Long? = null,

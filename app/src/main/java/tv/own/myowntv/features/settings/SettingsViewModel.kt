@@ -105,12 +105,11 @@ class SettingsViewModel(
 
     /** Clear the watch history (the "recently watched" rows).
      *  [type] null = everything; otherwise just LIVE / MOVIE / SERIES. */
-    fun clearWatchHistory(type: tv.own.owntv.core.model.MediaType? = null) {
+    fun clearWatchHistory() {
         viewModelScope.launch {
-            // The [type] split covers the old Movies/Series scopes — the callers pass LIVE today,
-            // and the core tables for the other scopes are pruned in wave 2. userDataWriter records
-            // each deletion so a local sync does not hand the cleared history straight back.
-            userDataWriter.clearHistory(type)
+            // userDataWriter records each deletion so a local sync does not hand the cleared
+            // history straight back.
+            userDataWriter.clearHistory()
         }
     }
 
@@ -387,7 +386,7 @@ class SettingsViewModel(
     private suspend fun loadStartupChannelResults(query: String): List<tv.own.owntv.core.database.entity.ChannelEntity> {
         val customizations = customizationStore.observeVisible(tv.own.owntv.core.model.MediaType.LIVE).first()
         val hiddenCategoryIds = tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
-            categoryDao.observe(tv.own.owntv.core.model.MediaType.LIVE).first(),
+            categoryDao.observe().first(),
             customizations.hiddenCategories,
         )
         return channelDao.searchList(query.trim(), 500)

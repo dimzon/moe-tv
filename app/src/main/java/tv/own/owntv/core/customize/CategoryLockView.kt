@@ -47,10 +47,10 @@ class CategoryLockView(
     ): Boolean {
         // A category row a re-sync removed after the item was read is as unknown as a gone item.
         val category = categoryDao.getById(categoryId) ?: return anySealed(anySession, raw)
-        val locked = raw(category.mediaType).lockedCategories
+        val locked = raw(MediaType.LIVE).lockedCategories
         if (locked.isEmpty() || !hasPin().first()) return false
         val key = CustomizeKeys.category(category)
-        return key in locked && (anySession || !session.isUnlocked(category.mediaType, key))
+        return key in locked && (anySession || !session.isUnlocked(MediaType.LIVE, key))
     }
 
     /** Whether there is a lock, in any section, that unless [anySession] this session has not opened. */
@@ -75,7 +75,7 @@ class CategoryLockView(
     /** Resolves the sealed provider folders to DB ids; custom ids have no row and stay key-only. */
     private fun withSealedIds(type: MediaType, c: SectionCustomizations): Flow<SectionCustomizations> =
         if (c.sealedCategories.isEmpty()) flowOf(c)
-        else categoryDao.observe(type).map { cats ->
+        else categoryDao.observe().map { cats ->
             c.copy(sealedCategoryIds = cats.filter { CustomizeKeys.category(it) in c.sealedCategories }.mapTo(HashSet()) { it.id })
         }
 

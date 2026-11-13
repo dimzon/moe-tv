@@ -163,7 +163,7 @@ class CustomizeViewModel(
     }.flatMapLatest { (c, filter) ->
             val sourceIds = c.sourceIdsFor(_section)
             combine(
-                categoryDao.observe(_section),
+                categoryDao.observe(),
                 customize.observe(_section),
             ) { cats, cust ->
                 // Built-in folders + the user's custom combined categories in ONE list, so
@@ -277,8 +277,8 @@ class CustomizeViewModel(
             val formerMemberKeys = customCategoryDao.stableItemKeys(row.key).toSet()
             // 1) Room: drop the category's membership + its content_order rows (the category's own
             //    rail-order rows ride the same contextKey as the browse screens' reorder).
-            customCategoryDao.clearContext(type, row.key)
-            contentOrderDao.clearContext(type, row.key)
+            customCategoryDao.clearContext(row.key)
+            contentOrderDao.clearContext(row.key)
             // 2) DataStore: remove the definition + any hide/rename pins on it.
             customize.deleteCustomCategory(type, row.key, formerMemberKeys)
         }
@@ -304,9 +304,9 @@ class CustomizeViewModel(
             val type = _section
             val ids = ctx.value.sourceIdsFor(type).toSet()
             fun mine(key: String) = key.substringBefore(':').toLongOrNull() in ids
-            contentOrderDao.observeContextKeys(type).first()
+            contentOrderDao.observeContextKeys().first()
                 .filter { it != ContentOrderEntity.FAV_CONTEXT && mine(it) }
-                .forEach { contentOrderDao.clearContext(type, it) }
+                .forEach { contentOrderDao.clearContext(it) }
             customize.update(type) {
                 it.copy(
                     hiddenCategories = it.hiddenCategories.filterNot(::mine).toSet(),

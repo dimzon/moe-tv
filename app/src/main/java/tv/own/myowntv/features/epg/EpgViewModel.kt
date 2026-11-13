@@ -408,7 +408,7 @@ class EpgViewModel(
     // one place a live channel starts.
 
     /** Live channels the user has favourited — so the Guide can show/toggle a channel's star. */
-    val favoriteChannelIds: StateFlow<Set<String>> = favoriteDao.observeFavoriteIds(MediaType.LIVE)
+    val favoriteChannelIds: StateFlow<Set<String>> = favoriteDao.observeFavoriteIds()
         .map { it.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
@@ -416,9 +416,9 @@ class EpgViewModel(
     fun toggleFavoriteChannel(channel: ChannelEntity) {
         viewModelScope.launch {
             if (favoriteChannelIds.value.contains(channel.id)) {
-                userDataWriter.removeFavorite(MediaType.LIVE, channel.id)
+                userDataWriter.removeFavorite(channel.id)
             } else {
-                favoriteDao.add(tv.own.owntv.core.database.entity.FavoriteEntity(mediaType = MediaType.LIVE, itemId = channel.id))
+                favoriteDao.add(tv.own.owntv.core.database.entity.FavoriteEntity(itemId = channel.id))
             }
             // The "Favorites" guide sort shows only favourited channels — refresh it to match.
             if (settings.sortGuide.first() == SettingsRepository.GuideSort.FAVORITES) load()
@@ -444,7 +444,7 @@ class EpgViewModel(
         viewModelScope.launch {
             reminderFor(channel, programme)?.let { reminderManager.dismiss(it.id); return@launch }
             reminderManager.add(
-                channel.id, channel.name, channel.epgChannelId, programme.title,
+                channel.id, programme.title,
                 programme.startMs, programme.stopMs, reminderLeadMinutes.value,
             )
         }
@@ -725,7 +725,7 @@ class EpgViewModel(
         val q = _query.value.trim()
         val rawChannels = if (settings.guideShowEmpty.first()) channelDao.channelsForGuide(q, MAX_CHANNELS)
             else channelDao.channelsWithGuide(q, MAX_CHANNELS)
-        val favoriteIds = favoriteDao.observeFavoriteIds(MediaType.LIVE).first().toSet()
+        val favoriteIds = favoriteDao.observeFavoriteIds().first().toSet()
         val sortGuideMode = settings.sortGuide.first()
         // Hidden categories keep their channels out of the guide too (parity with Live TV), and a
         // filter pointing at a now-hidden category falls back to "All" instead of an empty grid.
@@ -733,7 +733,7 @@ class EpgViewModel(
             emptySet()
         } else {
             tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
-                categoryDao.observe(MediaType.LIVE).first(),
+                categoryDao.observe().first(),
                 cust.hiddenCategories,
             )
         }
@@ -742,10 +742,10 @@ class EpgViewModel(
         val folderKey = (filter as? tv.own.owntv.core.live.LiveKey.Folder)
             ?.let { categoryDao.getById(it.id) }?.let(CustomizeKeys::category)
         val memberIds: Set<String>? = when (filter) {
-            is tv.own.owntv.core.live.LiveKey.Custom -> if (filter.id in cust.sealedCategories) emptySet() else customCategoryDao.itemIds(MediaType.LIVE, filter.id).toSet()
+            is tv.own.owntv.core.live.LiveKey.Custom -> if (filter.id in cust.sealedCategories) emptySet() else customCategoryDao.itemIds(filter.id).toSet()
             tv.own.owntv.core.live.LiveKey.Favorites -> favoriteIds
             tv.own.owntv.core.live.LiveKey.History ->
-                historyDao.getAllOfType(MediaType.LIVE).mapTo(HashSet()) { it.itemId }
+                historyDao.getAllOnce().mapTo(HashSet()) { it.itemId }
             else -> null
         }
         // Provider and A–Z are Live TV's own lists: in a folder, a custom category or Favourites the guide

@@ -7,7 +7,6 @@ import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import tv.own.owntv.core.database.entity.CategoryEntity
-import tv.own.owntv.core.model.MediaType
 
 @Dao
 interface CategoryDao {
@@ -22,27 +21,24 @@ interface CategoryDao {
     suspend fun updateAll(categories: List<CategoryEntity>)
 
     /** One built-in source, so the rail follows the provider's category order directly. */
-    @Query(
-        "SELECT categories.* FROM categories WHERE categories.mediaType = :type " +
-            "ORDER BY categories.sortOrder ASC, categories.name ASC",
-    )
-    fun observe(type: MediaType): Flow<List<CategoryEntity>>
+    @Query("SELECT * FROM categories ORDER BY sortOrder ASC, name ASC")
+    fun observe(): Flow<List<CategoryEntity>>
 
     @Query("SELECT * FROM categories WHERE id = :id")
     suspend fun getById(id: Long): CategoryEntity?
 
-    @Query("SELECT COUNT(*) FROM categories WHERE mediaType = :type")
-    fun count(type: MediaType): Flow<Int>
+    @Query("SELECT COUNT(*) FROM categories")
+    fun count(): Flow<Int>
 
-    @Query("DELETE FROM categories WHERE mediaType = :type")
-    suspend fun clear(type: MediaType)
+    @Query("DELETE FROM categories")
+    suspend fun clear()
 
-    @Query("SELECT * FROM categories WHERE mediaType = :type AND remoteId IN (:remoteIds)")
-    suspend fun findByRemoteIds(type: MediaType, remoteIds: List<String>): List<CategoryEntity>
+    @Query("SELECT * FROM categories WHERE remoteId IN (:remoteIds)")
+    suspend fun findByRemoteIds(remoteIds: List<String>): List<CategoryEntity>
 
-    @Query("SELECT remoteId FROM categories WHERE mediaType = :type AND remoteId IS NOT NULL")
-    suspend fun remoteIds(type: MediaType): List<String>
+    @Query("SELECT remoteId FROM categories WHERE remoteId IS NOT NULL")
+    suspend fun remoteIds(): List<String>
 
-    @Query("DELETE FROM categories WHERE mediaType = :type AND remoteId IN (:remoteIds)")
-    suspend fun deleteByRemoteIds(type: MediaType, remoteIds: List<String>)
+    @Query("DELETE FROM categories WHERE remoteId IN (:remoteIds)")
+    suspend fun deleteByRemoteIds(remoteIds: List<String>)
 }
