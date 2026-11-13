@@ -15,8 +15,7 @@ import tv.own.owntv.core.model.MediaType
 /** A locked category counts as hidden until the PIN opens it, stays on the rail, and needs a PIN to count at all. */
 class CategoryLockRulesTest {
 
-    private fun cat(id: Long, name: String) =
-        CategoryEntity(id = id, name = name, remoteId = "r$id")
+    private fun cat(id: Long, name: String) = CategoryEntity(id = id, name = name)
 
     private val cats = listOf(cat(1, "Music"), cat(2, "News"), cat(3, "Adult"))
     private fun keyOf(id: Long) = CustomizeKeys.category(cats.first { it.id == id })

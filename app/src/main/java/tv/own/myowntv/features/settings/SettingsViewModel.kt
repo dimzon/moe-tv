@@ -85,6 +85,7 @@ class SettingsViewModel(
     private val okHttpClient: okhttp3.OkHttpClient,
     private val companion: tv.own.owntv.core.companion.CompanionController,
     private val playbackPrefs: tv.own.owntv.core.player.PlaybackPrefsStore,
+    private val sourceImporter: SourceImporter,
 ) : ViewModel() {
     companion object {
         private const val TAG = "OwnTVHome"
@@ -121,6 +122,23 @@ class SettingsViewModel(
     val sources: StateFlow<List<SourceEntity>> = loadedSources
         .map { it.orEmpty() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** True while the built-in catalogue is being downloaded again from RuTube. */
+    val catalogSyncRunning: StateFlow<Boolean> = sourceImporter.state
+        .map { it is SourceImporter.ImportState.Running }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    /**
+     * Re-download the RuTube catalogue on demand. Onboarding is normally the only import; this is
+     * the recovery path for a first run that failed after onboarding was marked complete.
+     */
+    fun resyncCatalog() {
+        if (catalogSyncRunning.value) return
+        viewModelScope.launch {
+            runCatching { sourceImporter.ensureRutube() }
+                .onFailure { Log.w(TAG, "catalogue resync failed", it) }
+        }
+    }
 
     val livePreviewEnabled: StateFlow<Boolean> = settings.livePreviewEnabled
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
@@ -469,7 +487,7 @@ class SettingsViewModel(
     val themeMode: StateFlow<ThemeMode> = settings.themeMode.stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.DARK)
     fun setThemeMode(mode: ThemeMode) { viewModelScope.launch { settings.setThemeMode(mode) } }
 
-    val accent: StateFlow<AccentColor> = settings.accent.stateIn(viewModelScope, SharingStarted.Eagerly, AccentColor.TEAL)
+    val accent: StateFlow<AccentColor> = settings.accent.stateIn(viewModelScope, SharingStarted.Eagerly, AccentColor.VIOLET)
     fun setAccent(accent: AccentColor) { viewModelScope.launch { settings.setAccent(accent) } }
 
     /** Custom accent hex ("#52DBC8"); blank = the preset is in effect. */

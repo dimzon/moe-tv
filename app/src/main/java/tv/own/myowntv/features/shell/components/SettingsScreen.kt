@@ -302,6 +302,7 @@ fun SettingsScreen(
     val languageVm: LanguageSettingsViewModel = koinViewModel()
     val currentLocaleTag by languageVm.currentTag.collectAsStateWithLifecycle()
     val languageChip = languageChipText(currentLocaleTag)
+    val catalogSyncRunning by settingsVm.catalogSyncRunning.collectAsStateWithLifecycle()
     val livePreview by settingsVm.livePreviewEnabled.collectAsStateWithLifecycle()
     val livePreviewPanelActive by settingsVm.livePreviewPanelActive.collectAsStateWithLifecycle()
     val previewAudio by settingsVm.livePreviewAudio.collectAsStateWithLifecycle()
@@ -664,6 +665,15 @@ fun SettingsScreen(
             onClick = { open(SettingsTab.LANGUAGE) },
         ),
         RootRow(
+            "catalog_sync", TileTone.SECONDARY, MyOwnTVIcon.REFRESH,
+            heading = stringResource(R.string.settings_group_app),
+            title = stringResource(R.string.settings_catalog_sync),
+            desc = stringResource(R.string.settings_catalog_sync_description),
+            chip = if (catalogSyncRunning) stringResource(R.string.settings_catalog_syncing) else null,
+            chipTone = TileTone.PRIMARY,
+            onClick = { settingsVm.resyncCatalog() },
+        ),
+        RootRow(
             "app_icon", TileTone.SECONDARY, MyOwnTVIcon.PALETTE,
             title = stringResource(R.string.settings_app_icon), desc = stringResource(R.string.settings_app_icon_summary),
             chip = stringResource(appIcon.label), chipTone = TileTone.SECONDARY,
@@ -960,6 +970,8 @@ fun SettingsScreen(
                 chip = startupLabel(startupMode)) { saveScroll(); dialogReturn = searchFieldFocus; showStartup = true },
             *autoStartSearchEntries(autoStart).toTypedArray(),
             *tv.own.myowntv.features.settings.lock.settingsLockSearchEntries(settingsLock, settingsLockVm) { saveScroll(); dialogReturn = searchFieldFocus }.toTypedArray(),
+            SettingsSearchEntry(stringResource(R.string.settings_group_app), stringResource(R.string.settings_catalog_sync), stringResource(R.string.settings_search_keywords_catalog_sync), MyOwnTVIcon.REFRESH, TileTone.SECONDARY,
+                chip = if (catalogSyncRunning) stringResource(R.string.settings_catalog_syncing) else null, chipTone = TileTone.PRIMARY, showChevron = false) { settingsVm.resyncCatalog() },
             SettingsSearchEntry(stringResource(R.string.settings_group_app), stringResource(R.string.settings_check_updates), stringResource(R.string.settings_search_keywords_updates), MyOwnTVIcon.REFRESH, TileTone.PRIMARY,
                 chip = "v${tv.own.myowntv.BuildConfig.VERSION_NAME}") { saveScroll(); dialogReturn = searchFieldFocus; showUpdate = true },
             SettingsSearchEntry(stringResource(R.string.settings_group_app), stringResource(R.string.settings_update_startup), stringResource(R.string.settings_search_keywords_update_auto), MyOwnTVIcon.REFRESH, TileTone.SECONDARY,

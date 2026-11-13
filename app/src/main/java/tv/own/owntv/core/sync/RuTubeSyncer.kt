@@ -89,7 +89,7 @@ internal class RuTubeSyncer(
                 )
             }
         val categoryRefresh = support.refreshCategories(s, MediaType.LIVE, xtCats, stats)
-        val catMap = categoryRefresh.idsByRemoteId // "4" -> db row id
+        val catMap = categoryRefresh.idsByRemoteId // "4" -> provider category id
 
         // Disambiguation needs the full list first (duplicate author-name groups).
         val duplicateNames = channels.groupBy { it.name }.filterValues { it.size > 1 }.keys
@@ -137,7 +137,7 @@ internal class RuTubeSyncer(
             }
             if (!freshSource) {
                 support.pruneChannels(label, remoteIds, stats)
-                support.pruneCategories(categoryRefresh.seenRemoteIds, label, stats)
+                support.pruneCategories(categoryRefresh.seenIds, label, stats)
             }
         }
         // Rebuild the many-to-many link (redesign §2): every genre in broadcast_category[], not just

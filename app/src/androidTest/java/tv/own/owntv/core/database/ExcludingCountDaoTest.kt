@@ -31,8 +31,8 @@ class ExcludingCountDaoTest {
         db = ownTVTestDatabase()
         val (a, b) = db.categoryDao().insertAll(
             listOf(
-                CategoryEntity(name = "Locked"),
-                CategoryEntity(name = "Open"),
+                CategoryEntity(id = 101, name = "Locked"),
+                CategoryEntity(id = 102, name = "Open"),
             ),
         )
         locked = a

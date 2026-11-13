@@ -138,6 +138,7 @@ val appModule = module {
             okHttpClient = get(),
             companion = get(),
             playbackPrefs = get(),
+            sourceImporter = get(),
         )
     }
     viewModelOf(::LocalSyncViewModel)

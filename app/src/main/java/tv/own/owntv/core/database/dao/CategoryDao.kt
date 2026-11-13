@@ -10,10 +10,7 @@ import tv.own.owntv.core.database.entity.CategoryEntity
 
 @Dao
 interface CategoryDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertAll(categories: List<CategoryEntity>): List<Long>
-
-    /** Returns rowids (−1 for IGNOREd conflicts) so the sync can learn new category ids without a re-query. */
+    /** Returns the provider ids (−1 for IGNOREd conflicts) so the sync can map rows without a re-query. */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(categories: List<CategoryEntity>): List<Long>
 
@@ -33,12 +30,12 @@ interface CategoryDao {
     @Query("DELETE FROM categories")
     suspend fun clear()
 
-    @Query("SELECT * FROM categories WHERE remoteId IN (:remoteIds)")
-    suspend fun findByRemoteIds(remoteIds: List<String>): List<CategoryEntity>
+    @Query("SELECT * FROM categories WHERE id IN (:ids)")
+    suspend fun findByIds(ids: List<Long>): List<CategoryEntity>
 
-    @Query("SELECT remoteId FROM categories WHERE remoteId IS NOT NULL")
-    suspend fun remoteIds(): List<String>
+    @Query("SELECT id FROM categories")
+    suspend fun ids(): List<Long>
 
-    @Query("DELETE FROM categories WHERE remoteId IN (:remoteIds)")
-    suspend fun deleteByRemoteIds(remoteIds: List<String>)
+    @Query("DELETE FROM categories WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: List<Long>)
 }

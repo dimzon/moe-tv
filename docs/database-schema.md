@@ -7,8 +7,8 @@
 - Дата: 2026-11-13
 - Класс: `tv.own.owntv.core.database.OwnTVDatabase`
 - Файл БД: `/data/data/com.github.dimzon.owntv/databases/owntv.db`
-- **Версия схемы: 9**, `identityHash = ed30d41c5211d392b2ffea0aaebe723d`
-- Экспортированная схема (источник истины для DDL): `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/9.json`
+- **Версия схемы: 10**, `identityHash = f47bb0e887a027222b40c40bdfe70e3d`
+- Экспортированная схема (источник истины для DDL): `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/10.json`
 - Конвертеры: `core/database/Converters.kt` — единственный сохраняемый enum, `TvProviderSurface`,
   хранится как **имя** (`TEXT`); `Boolean` — как `INTEGER 0/1`
 
@@ -42,7 +42,7 @@
 а затем восстанавливает их из этого же списка. Прерванный импорт иначе оставил бы таблицу без
 индексов — это невидимо до следующей полной валидации схемы Room, которая падает на старте.
 
-Канонический набор неуникальных индексов (v9):
+Канонический набор неуникальных индексов (v10):
 
 | Таблица | Индексы |
 |---|---|
@@ -131,24 +131,25 @@ erDiagram
 
 ```sql
 CREATE TABLE IF NOT EXISTS `categories` (
-  `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  `id` INTEGER NOT NULL,
   `name` TEXT NOT NULL,
-  `remoteId` TEXT,
   `alias` TEXT,
-  `sortOrder` INTEGER NOT NULL
+  `sortOrder` INTEGER NOT NULL,
+  PRIMARY KEY(`id`)
 );
-CREATE UNIQUE INDEX IF NOT EXISTS `index_categories_remoteId` ON `categories` (`remoteId`);
 ```
 
 | Колонка | Смысл |
 |---|---|
+| `id` | Числовой id жанра у RuTube — натуральный PK, без AUTOINCREMENT |
 | `name` | Название жанра как у провайдера |
-| `remoteId` | id жанра у провайдера (nullable; в SQLite уникальный индекс допускает несколько `NULL`) |
 | `alias` | Слаг провайдера (`all`, `federal`, `movies`…) как есть; пока не читается |
 | `sortOrder` | Порядок провайдера |
 
-Схема v6 убрала `mediaType` (источник один, тип контента один): категория — просто `remoteId`.
-Схема v9 добавила `alias` — значение сохраняется на будущее, UI и синк его пока не читают.
+Схема v6 убрала `mediaType` (источник один, тип контента один). Схема v10 сделала `id` самим
+провайдерским id: суррогатный AUTOINCREMENT и колонка `remoteId` удалены, `remoteId` остался
+вычисляемым getter'ом (`id.toString()`) для ключей кастомизации и синка. Схема v9 добавила
+`alias` — значение сохраняется на будущее, ни UI, ни бизнес-логика его пока не читают.
 Пишет: синк (`categoryRefresh`), `SyncSupport.pruneCategories` удаляет исчезнувшие.
 Читает: `CategoryDao`, Customize. Видимость/замки/переименования категорий живут **не здесь**, а в
 DataStore (см. §8); строка `categories` — только данные провайдера.
@@ -563,6 +564,7 @@ git history и `CHANGELOG.md`.
 | 7 | **`favorites` без суррогатного `id`:** hex `itemId` — PK (уникальный индекс больше не нужен) |
 | 8 | **`epg_channels` удалена**; `epg_programmes` приведена к полям RuTube: добавлены `subtitle`, `category`, `ageRating`, `iconUrl`, удалены `year`, `episode`, `lengthMin`, `contentHash`. Guide-ключ = `channels.remoteId`, имена гида — из каталога |
 | 9 | **`categories.alias` добавлена:** слаг провайдера (`all`, `federal`, `movies`…) сохраняется на будущее, сейчас не читается |
+| 10 | **`categories.id` — провайдерский ключ:** убраны AUTOINCREMENT и колонка `remoteId`; `remoteId` стал вычисляемым `id.toString()` |
 
 ---
 
@@ -579,8 +581,8 @@ adb shell run-as com.github.dimzon.owntv sqlite3 databases/owntv.db \
   "select count(*) from sqlite_master where type='table' and name='sources'; pragma table_info(categories);"
 ```
 
-Ожидаемо: 5 колонок `channels` с PK `remoteId`; `categories` — 5 колонок (`id`, `name`,
-`remoteId`, `alias`, `sortOrder`); `sources` — 0 таблиц; `mediaType`/`sourceId`
+Ожидаемо: 5 колонок `channels` с PK `remoteId`; `categories` — 4 колонки (`id`, `name`,
+`alias`, `sortOrder`) с PK `id`; `sources` — 0 таблиц; `mediaType`/`sourceId`
 нет ни в одной таблице; `watch_history` — 3 колонки с PK `(itemId, deviceId)`; индексы
 `index_channels_name` / `index_channels_sortOrder_name` / `index_channels_number`. Таблицы
 `epg_channels` нет; у `epg_programmes` 10 колонок (`id`, `epgChannelId`, `startMs`, `stopMs`,
@@ -589,5 +591,5 @@ adb shell run-as com.github.dimzon.owntv sqlite3 databases/owntv.db \
 `index_epg_programmes_startMs_stopMs`. Число строк каталога меняется с каждым синком и в этом
 документе не фиксируется.
 
-Схема-эталон для диффа: `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/9.json` — любое
+Схема-эталон для диффа: `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/10.json` — любое
 изменение сущностей Room обязано менять этот файл (он коммитится вместе с кодом).

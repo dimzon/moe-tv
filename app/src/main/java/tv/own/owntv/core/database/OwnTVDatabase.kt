@@ -77,8 +77,10 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
     // epg_channels is gone — with one source the guide key IS channels.remoteId, so the table only
     // duplicated the catalogue with worse (pre-rename, pre-disambiguation) names.
     // v9 stores the provider's category slug (`categories.alias`); nothing reads it yet.
+    // v10 makes the provider's numeric category id the primary key — `categories.id` loses the
+    // surrogate AUTOINCREMENT row id and `remoteId` becomes a computed string view of it.
     // The old per-version log lives in git history and in CHANGELOG.md.
-    version = 9,
+    version = 10,
 
     exportSchema = true,
 )

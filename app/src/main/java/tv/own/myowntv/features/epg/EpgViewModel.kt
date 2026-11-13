@@ -291,6 +291,14 @@ class EpgViewModel(
             .distinctUntilChanged()
             .onEach { load() }
             .launchIn(viewModelScope)
+        // A catalogue sync repopulates `channels` without touching `epg_programmes`; without this
+        // the guide kept the empty list it built before the first import finished.
+        channelDao.countAll()
+            .drop(1)
+            .distinctUntilChanged()
+            .debounce(GUIDE_DATA_SETTLE_MS)
+            .onEach { load() }
+            .launchIn(viewModelScope)
         // Reload when the category filter changes (#8).
         _categoryFilter
             .drop(1)
@@ -331,10 +339,14 @@ class EpgViewModel(
 
     /** Order ▾ › Show › Channels without guide: list every channel, so a blank one can be matched from here. */
     val showEmpty: StateFlow<Boolean> = settings.guideShowEmpty
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     fun setShowEmpty(show: Boolean) {
-        viewModelScope.launch { settings.setGuideShowEmpty(show) }
+        viewModelScope.launch {
+            settings.setGuideShowEmpty(show)
+            // Do not wait for the preference collector: applying the filter is the point of the tap.
+            load()
+        }
     }
 
     /** Order ▾ › Show › Video preview: the focused channel plays in the pane; off shows its logo only. */
@@ -530,7 +542,7 @@ class EpgViewModel(
         // the main thread (#3/#5) so a 50k-channel playlist never freezes the UI building the guide list.
         val channels = withContext(Dispatchers.Default) {
             val auto = rawChannels
-                .filter { CustomizeKeys.channel(it) !in cust.hiddenItems && tv.own.owntv.core.database.ChannelMembership.allExcluded(it, cust.sealedCategoryIds) }
+                .filter { CustomizeKeys.channel(it) !in cust.hiddenItems && !tv.own.owntv.core.database.ChannelMembership.allExcluded(it, cust.sealedCategoryIds) }
                 .filter {
                     memberIds != null || tv.own.owntv.core.database.ChannelMembership.visible(it, hiddenCatIds)
                 }

@@ -212,6 +212,9 @@
     <string name="settings_app_group">Приложение</string>
     <string name="settings_app_startup">Запуск приложения</string>
     <string name="settings_app_startup_description">Какой экран МОЁ ТВ открывает при запуске</string>
+    <string name="settings_catalog_sync">Обновить каналы</string>
+    <string name="settings_catalog_sync_description">Заново скачать каталог каналов RuTube</string>
+    <string name="settings_catalog_syncing">Обновление…</string>
     <string name="settings_check_updates">Проверить обновления</string>
     <string name="settings_check_updates_description">Получить последнюю версию из GitHub Releases</string>
     <string name="settings_update_startup">Проверять обновления при запуске</string>
@@ -323,6 +326,7 @@
     <string name="settings_search_keywords_dns">домен поиск резолвер DoH DNS-over-HTTPS</string>
     <string name="settings_search_keywords_startup">запуск открыть начальный экран</string>
     <string name="settings_search_keywords_updates">GitHub выпуск версия</string>
+    <string name="settings_search_keywords_catalog_sync">обновить каналы каталог rutube синхронизация загрузка</string>
     <string name="settings_search_keywords_update_auto">автоматически обновление новая версия</string>
     <string name="settings_search_keywords_auto_start">загрузка включение пробуждение сон ожидание автозапуск открыть</string>
     <string name="settings_language_default">По умолчанию (английский)</string>

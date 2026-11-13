@@ -261,6 +261,7 @@
 1	protocol	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	Network is unreachable
 1	log	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	OwnTVHome
 2	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	Proxy-Authorization
+1	log	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	catalogue resync failed
 1	url	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	https://www.gstatic.com/generate_204
 1	log	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	setAndroidTvHomeEnabled enabled=$enabled
 1	protocol	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	timed out
@@ -340,6 +341,7 @@
 2	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	bmp
 2	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	brand_accent
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	browsing_lists
+1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	catalog_sync
 2	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	check_updates
 2	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	epg_offset
 1	protocol	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	exo
@@ -752,12 +754,12 @@
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	name
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	owntv.db
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	DELETE FROM categories
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	DELETE FROM categories WHERE remoteId IN (:remoteIds)
+1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	DELETE FROM categories WHERE id IN (:ids)
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	SELECT * FROM categories ORDER BY sortOrder ASC, name ASC
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	SELECT * FROM categories WHERE id = :id
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	SELECT * FROM categories WHERE remoteId IN (:remoteIds)
+1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	SELECT * FROM categories WHERE id IN (:ids)
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	SELECT COUNT(*) FROM categories
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	SELECT remoteId FROM categories WHERE remoteId IS NOT NULL
+1	sql	app/src/main/java/tv/own/owntv/core/database/dao/CategoryDao.kt	SELECT id FROM categories
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	+ (SELECT COUNT(*) FROM content_order)
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	+ (SELECT COUNT(*) FROM custom_category_members)
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	AND (sortOrder < :beforeSortOrder OR (sortOrder = :beforeSortOrder AND remoteId < :beforeRemoteId))
@@ -951,7 +953,6 @@
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	channels
 2	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	name
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	number
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	remoteId
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	sortOrder
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/EpgEntities.kt	epgChannelId
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/EpgEntities.kt	epg_programmes

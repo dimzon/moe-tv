@@ -312,7 +312,7 @@ class ChannelDaoBoundedWindowTest {
         }
         dao.upsertAll(rows)
         // The junction has FKs to both the catalogue and the category, so the category must exist.
-        db.categoryDao().upsertAll(listOf(CategoryEntity(id = categoryId, name = "Cat $categoryId")))
+        db.categoryDao().insertAll(listOf(CategoryEntity(id = categoryId, name = "Cat $categoryId")))
         db.channelCategoryDao().insertAll(
             rows.map { ChannelCategoryEntity(channelHexId = it.remoteId, categoryId = categoryId) },
         )

@@ -71,12 +71,12 @@ internal class SyncSupport(
         return false
     }
 
-    suspend fun pruneCategories(seenRemoteIds: Set<String>, label: String, stats: SyncStatsCollector) {
+    suspend fun pruneCategories(seenIds: Set<Long>, label: String, stats: SyncStatsCollector) {
         val start = SystemClock.elapsedRealtime()
-        val existing = categoryDao.remoteIds()
-        val stale = existing.filterNot(seenRemoteIds::contains)
+        val existing = categoryDao.ids()
+        val stale = existing.filterNot(seenIds::contains)
         if (!pruneAllowed("$label categories", existing.size, stale.size, stats)) return
-        stale.chunked(QUERY_CHUNK).forEach { categoryDao.deleteByRemoteIds(it) }
+        stale.chunked(QUERY_CHUNK).forEach { categoryDao.deleteByIds(it) }
         if (stale.isNotEmpty()) stats.processedCounts.merge(CATEGORIES_REMOVED_KEY, stale.size, Int::plus)
         Log.i(TAG, "$label category prune stale=${stale.size} ms=${SystemClock.elapsedRealtime() - start}")
     }
@@ -111,19 +111,18 @@ internal class SyncSupport(
         val freshSource = s.lastSyncAt == null
         Log.d(TAG, "refreshCategories start sourceId=${s.id} type=$type count=${parsed.size}")
         val uniqueCategories = parsed.distinctBy { it.id }
-        val existing = existingCategoriesByRemoteId(uniqueCategories.map { it.id })
+        val existing = existingCategoriesById(uniqueCategories.map { it.id.toLong() })
         // sortOrder = provider index, so the rail follows the provider's category order.
         val entities = uniqueCategories.mapIndexed { i, c ->
             CategoryEntity(
-                id = existing[c.id]?.id ?: 0,
+                id = c.id.toLong(),
                 name = c.name,
-                remoteId = c.id,
                 alias = c.alias,
                 sortOrder = i,
             )
         }
         val upsertStart = SystemClock.elapsedRealtime()
-        val upsert = upsertCategoriesStable(type, entities, existing)
+        val upsert = upsertCategoriesStable(entities, existing)
         Log.d(
             TAG,
             "refreshCategories upsert sourceId=${s.id} type=$type rows=${entities.size} " +
@@ -137,50 +136,47 @@ internal class SyncSupport(
             stats.processedCounts.merge(CATEGORIES_ADDED_KEY, announced.size, Int::plus)
             applyHideNewCategoriesDefault(type, announced)
         }
-        // Ids come straight from the upsert (existing rows + returned insert rowids) — the old
-        // second existingCategoriesByRemoteId round-trip only re-fetched just-upserted rows.
-        return CategoryRefresh(idsByRemoteId = upsert.idsByRemoteId, seenRemoteIds = uniqueCategories.mapTo(HashSet()) { it.id }).also {
+        // Ids come straight from the upsert (existing rows + inserted provider ids) — the old
+        // second existingCategoriesById round-trip only re-fetched just-upserted rows.
+        return CategoryRefresh(idsByRemoteId = upsert.idsByRemoteId, seenIds = uniqueCategories.mapTo(HashSet()) { it.id.toLong() }).also {
             Log.d(TAG, "refreshCategories end sourceId=${s.id} type=$type mapped=${it.idsByRemoteId.size} totalMs=${SystemClock.elapsedRealtime() - start}")
         }
     }
 
-    private suspend fun existingCategoriesByRemoteId(remoteIds: List<String>): Map<String, CategoryEntity> =
-        remoteIds.distinct().chunked(QUERY_CHUNK).flatMap { categoryDao.findByRemoteIds(it) }
-            .mapNotNull { category -> category.remoteId?.let { it to category } }
-            .toMap()
+    private suspend fun existingCategoriesById(ids: List<Long>): Map<Long, CategoryEntity> =
+        ids.distinct().chunked(QUERY_CHUNK).flatMap { categoryDao.findByIds(it) }
+            .associateBy { it.id }
 
     private class CategoryUpsert(val stats: UpsertStats, val idsByRemoteId: Map<String, Long>, val newRows: List<CategoryEntity>)
 
     private suspend fun upsertCategoriesStable(
-        type: MediaType,
         rows: List<CategoryEntity>,
-        existingByRemoteId: Map<String, CategoryEntity>,
+        existingById: Map<Long, CategoryEntity>,
     ): CategoryUpsert {
         val inserts = ArrayList<CategoryEntity>()
         val updates = ArrayList<CategoryEntity>()
         var skipped = 0
         val ids = HashMap<String, Long>()
         rows.forEach { row ->
-            val current = row.remoteId?.let(existingByRemoteId::get)
+            val current = existingById[row.id]
             when {
                 current == null -> inserts.add(row)
-                row != current -> { updates.add(row); ids[row.remoteId] = current.id }
-                else -> { skipped++; ids[row.remoteId] = current.id }
+                row != current -> { updates.add(row); ids[row.remoteId] = row.id }
+                else -> { skipped++; ids[row.remoteId] = row.id }
             }
         }
         if (updates.isNotEmpty()) categoryDao.updateAll(updates)
         if (inserts.isNotEmpty()) {
-            val rowIds = categoryDao.insertAll(inserts)
-            val missed = ArrayList<String>()
+            val insertedIds = categoryDao.insertAll(inserts)
+            val missed = ArrayList<Long>()
             inserts.forEachIndexed { i, row ->
-                val rid = row.remoteId ?: return@forEachIndexed
-                val id = rowIds.getOrNull(i) ?: -1L
-                if (id > 0) ids[rid] = id else missed.add(rid)
+                val id = insertedIds.getOrNull(i) ?: -1L
+                if (id > 0) ids[row.remoteId] = id else missed.add(row.id)
             }
-            // IGNOREd conflicts return −1 (shouldn't happen — inserts were pre-checked by remoteId);
+            // IGNOREd conflicts return −1 (shouldn't happen — inserts were pre-checked by id);
             // heal by re-fetching just those rows rather than everything.
             if (missed.isNotEmpty()) {
-                existingCategoriesByRemoteId(missed).forEach { (rid, cat) -> ids[rid] = cat.id }
+                existingCategoriesById(missed).forEach { (id, cat) -> ids[cat.remoteId] = id }
             }
         }
         return CategoryUpsert(
@@ -376,7 +372,7 @@ internal data class UpsertStats(
 
 internal data class CategoryRefresh(
     val idsByRemoteId: Map<String, Long>,
-    val seenRemoteIds: Set<String>,
+    val seenIds: Set<Long>,
 )
 
 internal class SyncCounters(

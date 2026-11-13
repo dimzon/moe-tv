@@ -1154,7 +1154,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
     }
 
     /** The TV Guide also lists channels with no guide data (Order ▾ › Show), so they can be matched from there. */
-    val guideShowEmpty: Flow<Boolean> = prefsFlow { it[Keys.GUIDE_SHOW_EMPTY] ?: false }
+    val guideShowEmpty: Flow<Boolean> = prefsFlow { it[Keys.GUIDE_SHOW_EMPTY] ?: true }
     suspend fun setGuideShowEmpty(show: Boolean) {
         context.dataStore.edit { it[Keys.GUIDE_SHOW_EMPTY] = show }
     }
@@ -2213,7 +2213,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     val accent: Flow<AccentColor> = prefsFlow { prefs ->
         prefs[Keys.ACCENT]?.let { runCatching { AccentColor.valueOf(it) }.getOrNull() }
-            ?: AccentColor.TEAL
+            ?: AccentColor.VIOLET
     }
 
     /** Picking a preset clears any custom accent so the preset takes effect. */
