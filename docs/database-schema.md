@@ -7,8 +7,8 @@
 - Дата: 2026-11-13
 - Класс: `tv.own.owntv.core.database.OwnTVDatabase`
 - Файл БД: `/data/data/com.github.dimzon.owntv/databases/owntv.db`
-- **Версия схемы: 7**, `identityHash = da2c8b2d8fee58ae13db265323d3162c`
-- Экспортированная схема (источник истины для DDL): `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/7.json`
+- **Версия схемы: 8**, `identityHash = cc01942d3233ec82b58bab312c1b14b2`
+- Экспортированная схема (источник истины для DDL): `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/8.json`
 - Конвертеры: `core/database/Converters.kt` — enum'ы (`MediaType`, `SourceType`,
   `TvProviderSurface`) хранятся как **имена** (`TEXT`), `Boolean` — как `INTEGER 0/1`
 
@@ -42,16 +42,17 @@
 а затем восстанавливает их из этого же списка. Прерванный импорт иначе оставил бы таблицу без
 индексов — это невидимо до следующей полной валидации схемы Room, которая падает на старте.
 
-Канонический набор индексов (v6):
+Канонический набор неуникальных индексов (v8):
 
 | Таблица | Индексы |
 |---|---|
 | `channels` | `index_channels_name`, `index_channels_sortOrder_name`, `index_channels_number` |
-| `epg_programmes` | `index_epg_programmes_stopMs`, `index_epg_programmes_startMs_stopMs` |
-| `epg_channels` | `index_epg_channels_normName` |
+| `epg_programmes` | `index_epg_programmes_epgChannelId_startMs`, `index_epg_programmes_stopMs`, `index_epg_programmes_startMs_stopMs` |
 
 Уникальные индексы сюда не входят осознанно: их никто никогда не дропает, а пересоздание
-уникального индекса на неожиданных данных само может упасть.
+уникального индекса на неожиданных данных само может упасть. У `epg_programmes` уникальный
+естественный ключ — `index_epg_programmes_natural_key (epgChannelId, startMs)`, Room создаёт его
+сам (см. §6).
 
 ### 1.3. Bulk-импорт
 
@@ -59,7 +60,7 @@
 `EXPECTED_NON_UNIQUE_INDEXES`): первый писатель на пустую таблицу дропает неуникальные индексы и
 FTS-триггер, последний — восстанавливает. `restoreIndexes` берёт **канонический** набор из
 `OwnTVDatabase`, а не снимок `sqlite_master` (снимок сохранил бы уже существовавшую дыру).
-Плюс `analyzeTables` для `categories`/`epg_channels` (ANALYZE без дропа).
+Плюс `analyzeTables` для `categories` (ANALYZE без дропа).
 
 ---
 
@@ -99,7 +100,7 @@ categories ──< channel_category >── channels
   tv_provider_programs
   playback_prefs, playback_quirks (ключ — contentKey = hex remoteId)
 
-EPG (без FK): epg_channels, epg_programmes
+EPG (без FK): epg_programmes
 ```
 
 | Группа | Таблицы |
@@ -107,7 +108,7 @@ EPG (без FK): epg_channels, epg_programmes
 | Каталог RuTube | `categories`, `channels`, `channel_category`, `channel_rename`, `channels_fts` |
 | Пользовательское | `favorites`, `watch_history`, `content_order`, `custom_category_members`, `user_data_tombstones`, `programme_reminders` |
 | Плеер | `playback_prefs`, `playback_quirks` |
-| EPG | `epg_channels`, `epg_programmes` |
+| EPG | `epg_programmes` |
 | Android TV (спящая) | `tv_provider_programs` |
 
 ```mermaid
@@ -178,7 +179,7 @@ CREATE INDEX IF NOT EXISTS `index_channels_number` ON `channels` (`number`);
 | Синоним | Значение |
 |---|---|
 | `id` | `remoteId` |
-| `epgChannelId` | `remoteId` (hex сам служит guide-id, если фид его знает) |
+| `epgChannelId` | `remoteId` — hex сам служит guide-id: при одном источнике отдельного EPG-клю­ча нет |
 | `streamUrl` | `"rutube://$remoteId"` |
 | `sourceId` | `SingleSource.id` (константа 1) |
 | `catchup`, `catchupDays`, `catchupSource`, `catchupType`, `catchupCorrectionMin` | `false` / `0` / `null` (live-only) |
@@ -437,26 +438,18 @@ CREATE TABLE IF NOT EXISTS `playback_quirks` (
 
 ## 6. EPG
 
-### 6.1. `epg_channels` — дескриптор канала гида
+### 6.1. Где живёт гид
 
-```sql
-CREATE TABLE IF NOT EXISTS `epg_channels` (
-  `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  `epgChannelId` TEXT NOT NULL,
-  `displayName` TEXT,
-  `iconUrl` TEXT,
-  `normName` TEXT,
-  `normId` TEXT
-);
-CREATE UNIQUE INDEX IF NOT EXISTS `index_epg_channels_epgChannelId`
-  ON `epg_channels` (`epgChannelId`);
-CREATE INDEX IF NOT EXISTS `index_epg_channels_normName` ON `epg_channels` (`normName`);
-```
+Схема v8 удалила `epg_channels`. При одном источнике guide-id канала — это его hex `remoteId`
+(`ChannelEntity.epgChannelId` — геттер `remoteId`), поэтому отдельный реестр гида только дублировал
+каталог, причём **худшими** именами: сырыми `author.name` до словаря `channel_rename` и до
+дизамбигуации дублей. Теперь:
 
-`normName`/`normId` — результат `EpgMatcher.normalizeForEpg`, посчитанный на синке; `null` означает
-«ещё не знаем» и читатель нормализует на лету (не «пусто»).
-FK нет (источника-таблицы нет). В single-source приложении guide-чтения ключуются по
-`epgChannelId`; один id — одна строка.
+- имена и логотипы гид берёт из `channels` (`ChannelDao.guideChannelNames`);
+- наличие программ — из `epg_programmes` (`EpgDao.guideProgrammeChannelIds`);
+- обе половины сводит `GuideCandidates` — общий источник для пикера «Match EPG» и авто-матча.
+
+FK нет ни у одной EPG-таблицы.
 
 ### 6.2. `epg_programmes` — передачи
 
@@ -467,13 +460,11 @@ CREATE TABLE IF NOT EXISTS `epg_programmes` (
   `startMs` INTEGER NOT NULL,
   `stopMs` INTEGER NOT NULL,
   `title` TEXT NOT NULL,
+  `subtitle` TEXT,
   `description` TEXT,
-  `contentHash` INTEGER NOT NULL DEFAULT 0,
-  `categories` TEXT,
-  `year` INTEGER,
-  `rating` TEXT,
-  `lengthMin` INTEGER,
-  `episode` TEXT
+  `category` TEXT,
+  `ageRating` TEXT,
+  `iconUrl` TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS `index_epg_programmes_natural_key`
   ON `epg_programmes` (`epgChannelId`, `startMs`);
@@ -482,12 +473,30 @@ CREATE INDEX IF NOT EXISTS `index_epg_programmes_startMs_stopMs`
   ON `epg_programmes` (`startMs`, `stopMs`);
 ```
 
-Естественный ключ — `(epgChannelId, startMs)` (schema v5 убрала `sourceId` из ключа); запись —
-upsert чанками по 500. Ретенция: прошедшее старше 2 дней вычищается после EPG-синка (`pruneOld`),
-будущее — по настройке «сколько дней телепрограммы хранить» (`pruneFuture`). `categories` — до
-`EpgDetails.MAX_CATEGORIES` значений, склеенных `CATEGORY_SEPARATOR` (U+001F), см. `EpgGuide.kt`;
-`year`/`rating`/`lengthMin`/`episode` — строка деталей XMLTV. `contentHash` = 0 у RuTube (поле —
-наследие VOD-дедупликации).
+| Колонка | Смысл |
+|---|---|
+| `epgChannelId` | hex `remoteId` канала — guide-ключ |
+| `startMs` / `stopMs` | окно эфира |
+| `title` | название передачи |
+| `subtitle` | вторая строка эфира; часто эпизод («Сезон 2 Серия 17», «Выпуск 3») |
+| `description` | синопсис |
+| `category` | `ext_categories[0].name` — ровно один жанр |
+| `ageRating` | `ageRating` (pangolin/бриф) или `age_rating` (mobile) как есть: `16+`, `12+`, `0+` |
+| `iconUrl` | `preview_picture_url` — арт передачи 600×450 |
+
+Естественный ключ — `(epgChannelId, startMs)`; запись `writeBrief`/`writeChannel` — REPLACE чанками
+по 500. Бриф (`tvprogramm=true`) пишет now/next с `title`/`subtitle`/`description`/`ageRating`;
+сетка pangolin затем REPLACE-ит те же строки, добавляя `category`/`iconUrl`.
+
+Схема v8 привела таблицу ровно к тому, что публикует API: `year`, `episode`, `lengthMin`,
+`contentHash` удалены. Года и номера эпизода RuTube не отдаёт вовсе; длина выводится из
+`stopMs − startMs` и показывается в details-строке, а не хранится. Для сравнения: бриф — тот же
+эндпоинт `tvbroadcastinfo`, что и каталог, только с `tvprogramm=true` (отличается лишь `title`).
+
+Ретенция: `prune(stopMs < now − 2 дня)` после каждого EPG-синка. `pruneFuture(startMs > after)` —
+для горизонта «сколько дней телепрограммы хранить»; в текущем коде вызов не подключён (настройка
+пока только сужает окно отображения в `EpgViewModel`).
+
 Привязка «канал → epgChannelId» **в БД не хранится** — это `epgMatches` в DataStore (см. §8).
 
 ---
@@ -549,6 +558,7 @@ git history и `CHANGELOG.md`.
 | 5 | **Таблицы `sources` больше нет:** единственный источник — DTO-синглтон `BuiltInSource`, его настройки — глобальные настройки DataStore. `sourceId` удалён из `categories`, `epg_channels`, `epg_programmes`, `playback_prefs`, `playback_quirks`. Удалён `SourceDao` |
 | 6 | **Удалён `mediaType` из всех таблиц** (live-only): `categories` → уникальный `remoteId`, `favorites` → уникальный `itemId`, `content_order`/`custom_category_members` → `(contextKey, itemId)`, `playback_quirks` и `tv_provider_programs` без типа. `watch_history` — PK `(itemId, deviceId)`, без `id`; `deviceId` NOT NULL. `programme_reminders` теряет `channelName`/`epgChannelId`. Удалена legacy-колонка `playback_prefs.audioDelayMs` |
 | 7 | **`favorites` без суррогатного `id`:** hex `itemId` — PK (уникальный индекс больше не нужен) |
+| 8 | **`epg_channels` удалена**; `epg_programmes` приведена к полям RuTube: добавлены `subtitle`, `category`, `ageRating`, `iconUrl`, удалены `year`, `episode`, `lengthMin`, `contentHash`. Guide-ключ = `channels.remoteId`, имена гида — из каталога |
 
 ---
 
@@ -568,7 +578,9 @@ adb shell run-as com.github.dimzon.owntv sqlite3 databases/owntv.db \
 Ожидаемо для текущего каталога: 5 колонок `channels`, 205 каналов, 382 строки `channel_category`,
 68 строк `channel_rename`, `sources` — 0 таблиц, `mediaType`/`sourceId` нет ни в одной таблице,
 `watch_history` — 3 колонки с PK `(itemId, deviceId)`, индексы `index_channels_name` /
-`index_channels_sortOrder_name` / `index_channels_number`.
+`index_channels_sortOrder_name` / `index_channels_number`. Таблицы `epg_channels` нет; у
+`epg_programmes` 10 колонок (`id`, `epgChannelId`, `startMs`, `stopMs`, `title`, `subtitle`,
+`description`, `category`, `ageRating`, `iconUrl`).
 
-Схема-эталон для диффа: `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/7.json` — любое
+Схема-эталон для диффа: `app/schemas/tv.own.owntv.core.database.OwnTVDatabase/8.json` — любое
 изменение сущностей Room обязано менять этот файл (он коммитится вместе с кодом).
