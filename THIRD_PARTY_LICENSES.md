@@ -79,9 +79,10 @@ Modified versions may not use a Reserved Font Name without permission.
   is attributed here for provenance.
 * **Weblate logo** — `extras/partner-logos/Weblate_logo.svg`, used to credit the translation
   platform. Trademark of its owner.
-* **Brand assets** — `extras/brand/` and `extras/brand/legacy/` are upstream OwnTV artwork
-  (GPL-3.0-only, © its authors; the lowercase "owntv" wordmark is by @m3th0d93, issue #227).
-  `extras/branding/` is this fork's own МОЁ ТВ kit. `extras/screenshots/` are upstream
+* **Brand assets** — `extras/brand/legacy/` is upstream OwnTV artwork (GPL-3.0-only, © its
+  authors; the lowercase "owntv" wordmark is by @m3th0d93, issue #227). The current
+  `extras/brand/` kit (icons, logos and TV banners generated from `app/src/main/res/`) and
+  `extras/branding/` are this fork's own МОЁ ТВ artwork. `extras/screenshots/` are upstream
   screenshots retained for historical reference only — several of them depict features this fork
   no longer has (Downloads, Movies, Series, Playlist, Profile Selection, Settings › Profiles).
 

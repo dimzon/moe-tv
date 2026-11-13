@@ -35,6 +35,7 @@
 ### 🔧 Internals
 - **Live-only database schema rebuilt through v8**
 - **Attribution checklist and GPLv3 modification notice**
+- **`extras/brand/` rebuilt for the МОЁ ТВ mark (9 variants; upstream artwork kept in `legacy/`)**
 
 ---
 

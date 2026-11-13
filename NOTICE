@@ -31,7 +31,7 @@ Original work:
   available in the upstream repository.
 
   Upstream-derived material also remains in docs/, extras/USER_GUIDE.md,
-  extras/OwnTV_Master_Product_Brief.md, extras/brand/,
+  extras/OwnTV_Master_Product_Brief.md, extras/brand/legacy/,
   extras/partner-logos/Weblate_logo.svg, tools/i18n/ and the historical
   release notes in CHANGELOG.md. The former TMDB/OpenSubtitles Worker
   reference under extras/worker/ and their logos were removed from this
@@ -70,8 +70,9 @@ Principal changes (all after the import; commit ids refer to this repository):
     packaged locale set was reduced to English and Russian (baa3d2b).
   * The app was rebranded to МОЁ ТВ with a new applicationId
     (com.github.dimzon.owntv), launcher assets and moetv:// deep links;
-    the brand kit in extras/branding/ was added as this fork's own work
-    (distinct from the upstream artwork in extras/brand/).
+    the current brand kit in extras/brand/ and its generators in
+    extras/branding/ are this fork's own work (the original artwork is
+    retained in extras/brand/legacy/).
 
 This fork is NOT affiliated with, endorsed by, sponsored by or connected to
 the original OwnTV project, ahXN00, or its contributors. "OwnTV" is used
@@ -125,7 +126,8 @@ docs/attribution-checklist.md.
   * Brand: the lowercase "owntv" wordmark was designed for OwnTV by
     @m3th0d93 (https://github.com/m3th0d93) in issue #227
     (https://github.com/ahXN00/OwnTV/issues/227). The МОЁ ТВ brand kit in
-    extras/branding/ is this fork's own work.
+    extras/brand/ (generators in extras/branding/) is this fork's own work;
+    the original artwork is retained in extras/brand/legacy/.
   * Translations: upstream shipped 26 locales from OwnTV_Core. The English
     source strings and the Russian translation are the two still packaged
     here; the other trees were removed from this fork (baa3d2b) and remain
