@@ -285,14 +285,8 @@
     <string name="settings_language_coverage"><xliff:g id="percent">%1$d</xliff:g>%%</string>
     <!-- Translators: Settings navigation group label for Profile settings. -->
     <string name="settings_profile_group">Profile</string>
-    <!-- Translators: Settings navigation label for Playlists management. -->
-    <string name="settings_playlists">Playlists</string>
-    <!-- Translators: Description of the Playlists settings. 'M3U' and 'Xtream' are protocol names. -->
-    <string name="settings_playlists_description">Add, re-sync or remove M3U / Xtream playlists</string>
     <!-- Translators: Settings navigation label for EPG Sources. -->
     <string name="settings_epg_sources">EPG Sources</string>
-    <!-- Translators: Description of the EPG Sources settings. 'XMLTV' is a technical format name. -->
-    <string name="settings_epg_sources_nav_description">Add XMLTV guide feeds for the TV Guide</string>
     <!-- Translators: Settings navigation label for Customize Categories & Items. -->
     <string name="settings_customize">Customize categories &amp; items</string>
     <!-- Translators: Description of the Customize Categories & Items settings. -->
@@ -638,8 +632,6 @@
     <string name="settings_group_watching_recording">Watching</string>
     <!-- Translators: Hidden keyword bag used by Settings search for the Profiles page. Translate these as individual terms a user might type; this is not a grammatical sentence and is not displayed as prose. -->
     <string name="settings_search_keywords_profiles">viewers kids mode pin lock account</string>
-    <!-- Translators: Hidden keyword bag for the Playlists settings page. Translate as individual search terms. -->
-    <string name="settings_search_keywords_playlists">m3u xtream source sync add remove</string>
     <!-- Translators: Hidden keyword bag for the EPG settings page. 'xmltv' is a technical format name. Translate as individual search terms. -->
     <string name="settings_search_keywords_epg">xmltv guide feed program</string>
     <!-- Translators: Hidden keyword bag for the Guide channel logos settings. 'xmltv' and 'picon' are technical terms. Translate as individual search terms. -->
@@ -1153,59 +1145,6 @@
     <string name="settings_span_ch_help">CH+ / CH− skip a page. Hold CH+ / CH− to jump to the last or first item.</string>
     <!-- Translators: Visible single middle-dot separator between metadata segments in the Customize screen. -->
     <string name="settings_customize_metadata_separator">"  ·  "</string>
-
-    <!-- Translators: Screen title for the Sources management screen. -->
-    <string name="settings_sources_title">Sources</string>
-    <!-- Translators: Empty-state message when no sources are configured. 'M3U' and 'Xtream' are protocol names. -->
-    <string name="settings_sources_empty">No sources yet. Add an M3U or Xtream source.</string>
-    <!-- Translators: Button to add a new source. -->
-    <string name="settings_sources_add">Add Source</string>
-    <!-- Translators: Error text when a source import fails. -->
-    <string name="settings_sources_import_failed">Import failed</string>
-    <!-- Translators: Loading status shown while importing a source catalog. -->
-    <string name="settings_sources_importing">Importing catalog…</string>
-    <!-- Translators: Loading status shown while preparing a source catalog. -->
-    <string name="settings_sources_preparing">Preparing catalog</string>
-    <!-- Translators: Loading status shown while deleting a source. All caps is intentional. -->
-    <string name="settings_sources_deleting">DELETING…</string>
-    <!-- Translators: Button to re-sync a source. -->
-    <string name="settings_sources_resync">Re-sync</string>
-    <!-- Translators: Dialog title for source deletion confirmation. 'name' is the source name. -->
-    <string name="settings_sources_delete_title">Delete “<xliff:g id="name">%1$s</xliff:g>”?</string>
-    <!-- Translators: Source type display for M3U sources. 'url' is the playlist URL. -->
-    <string name="settings_sources_type_m3u">M3U · <xliff:g id="url">%1$s</xliff:g></string>
-    <!-- Translators: Source type display for Xtream sources. 'url' is the server URL. -->
-    <string name="settings_sources_type_xtream">Xtream · <xliff:g id="url">%1$s</xliff:g></string>
-    <!-- Translators: Source type display for Stalker sources. 'url' is the portal URL. -->
-    <string name="settings_sources_type_stalker">Stalker · <xliff:g id="url">%1$s</xliff:g></string>
-    <!-- Translators: Source type display for the built-in RuTube source. 'url' is the RuTube base URL. -->
-    <string name="settings_sources_type_rutube">RuTube · <xliff:g id="url">%1$s</xliff:g></string>
-    <!-- Translators: Expiry date display for a source. 'date' is the expiry date. -->
-    <string name="settings_sources_expiry">Expires <xliff:g id="date">%1$s</xliff:g></string>
-    <!-- Translators: Title of the popup that reports the result of testing a saved source. -->
-    <string name="settings_sources_test_title">Source test</string>
-    <!-- Translators: Success line in the source-test popup: the server answered and accepted the account. -->
-    <string name="settings_sources_test_ok">Connection OK</string>
-    <!-- Translators: Failure line in the source-test popup: the server answered but rejected the credentials. -->
-    <string name="settings_sources_test_auth">The provider rejected these details. Check the username, password or MAC address.</string>
-    <!-- Translators: Failure line in the source-test popup: the subscription has run out. -->
-    <string name="settings_sources_test_expired">This subscription has expired.</string>
-    <!-- Translators: Failure line in the source-test popup: the server could not be contacted at all. -->
-    <string name="settings_sources_test_unreachable">Couldn’t reach the server. Check the address and your internet connection.</string>
-    <!-- Translators: Account status word reported verbatim by the provider (e.g. "Active"). "status" is that word. -->
-    <string name="settings_sources_test_status">Status: <xliff:g id="status">%1$s</xliff:g></string>
-    <!-- Translators: How many streams the account has open now vs. how many it may open. "used" and "max" are counts. -->
-    <string name="settings_sources_test_connections">Connections: <xliff:g id="used">%1$d</xliff:g> of <xliff:g id="max">%2$d</xliff:g> in use</string>
-    <!-- Translators: How many streams the account may open at once, when the provider does not say how many are in use. "max" is a count. -->
-    <string name="settings_sources_test_connections_max">Connections: up to <xliff:g id="max">%1$d</xliff:g> at once</string>
-    <!-- Translators: Marker shown when the provider reports the account is a trial line. -->
-    <string name="settings_sources_test_trial">Trial account</string>
-    <!-- Translators: Shown when the provider reports no subscription end date. -->
-    <string name="settings_sources_test_expiry_none">No expiry date reported</string>
-    <!-- Translators: Button on a playlist row: show what is already known about it. -->
-    <string name="settings_sources_info">Info</string>
-    <!-- Translators: Button on a playlist row: open the "Clean channel names" option for this playlist. Keep it short. -->
-    <string name="settings_sources_clean_names">Names</string>
     <!-- Translators: Dialog title for a playlist's channel-name options. 'name' is the playlist name. -->
     <string name="settings_sources_clean_names_title">Channel names in “<xliff:g id="name">%1$s</xliff:g>”</string>
     <!-- Translators: Description in the channel-name dialog. "Customize" is the app's Customize screen. -->
@@ -1218,44 +1157,6 @@
     <string name="settings_sources_clean_names_custom">Also remove</string>
     <!-- Translators: Placeholder of the "Also remove" field. Keep the semicolon: it separates the words. -->
     <string name="settings_sources_clean_names_custom_hint">Words separated by ; e.g. VIP; Backup</string>
-    <!-- Translators: Button inside the Info popup: measure the playlist again. -->
-    <string name="settings_sources_retest">Re-test</string>
-    <!-- Translators: Button or switch beside Re-test for a playlist: let Multiview and recordings open more streams than the provider's stated limit. -->
-    <string name="settings_sources_ignore_limit">Ignore connection limit</string>
-    <!-- Translators: Line shown while settings_sources_ignore_limit is on. "Multiview" is the feature that plays several channels at once. -->
-    <string name="settings_sources_ignore_limit_on">Connection limit ignored: Multiview and recordings may open more streams than this playlist reports. A stream the provider refuses still says so.</string>
-    <!-- Translators: Title of the confirmation shown before the connection measurement runs. -->
-    <string name="settings_sources_probe_title">Test this playlist?</string>
-    <!-- Translators: Body of that confirmation. It must be clear that playback stops and that it is slow. -->
-    <string name="settings_sources_probe_warning">Many providers never say how many channels you may watch at the same time, so МОЁ ТВ finds out by opening a few and seeing which ones survive. Anything playing now will stop, and this can take up to two minutes.</string>
-    <!-- Translators: Progress while measuring. "current" is the stream being opened, "total" the most that will be. -->
-    <string name="settings_sources_probe_running">Checking how many channels this provider allows… (<xliff:g id="current">%1$d</xliff:g> of <xliff:g id="total">%2$d</xliff:g>)</string>
-    <!-- Translators: Shown when the measurement finished without being able to tell. -->
-    <string name="settings_sources_probe_unknown">МОЁ ТВ could not work out how many channels this provider allows.</string>
-    <!-- Translators: Button that abandons the connection measurement while it is running. -->
-    <string name="settings_sources_probe_skip">Skip</string>
-    <!-- Translators: Auto-refresh mode display. 'mode' is the refresh mode. The circular arrow is a visual indicator. -->
-    <string name="settings_sources_auto_refresh">⟳ <xliff:g id="mode">%1$s</xliff:g></string>
-    <!-- Translators: Badge indicating the default source. All caps is intentional. -->
-    <string name="settings_sources_default">DEFAULT</string>
-    <!-- Translators: Source-type label for a restored/local-backup source. -->
-    <string name="settings_sources_backup">Backup</string>
-    <!-- Translators: Visible bullet separator between source detail segments. -->
-    <string name="settings_sources_details_separator">"  •  "</string>
-    <!-- Translators: Status text shown while preparing a source catalog. -->
-    <string name="settings_sources_preparing_detail">Preparing catalog</string>
-    <!-- Translators: Loading status shown while removing a source. -->
-    <string name="settings_sources_removing_detail">Removing…</string>
-    <!-- Translators: Button to edit a source. -->
-    <string name="settings_sources_edit">Edit</string>
-    <!-- Translators: Button to delete a source. -->
-    <string name="settings_sources_delete">Delete</string>
-    <!-- Translators: Button to cancel a source operation. -->
-    <string name="settings_sources_cancel">Cancel</string>
-    <!-- Translators: Button to retry a failed source operation. -->
-    <string name="settings_sources_try_again">Try again</string>
-    <!-- Translators: Status text when a source import completes. -->
-    <string name="settings_sources_import_title">Import complete</string>
     <!-- Translators: Dialog title for resyncing a source. 'name' is the source name. -->
     <string name="settings_sources_resync_title_full">Resync “<xliff:g id="name">%1$s</xliff:g>”</string>
     <!-- Translators: Option to resync and keep existing data. -->
@@ -1264,25 +1165,6 @@
     <string name="settings_sources_resync_remove_full">Resync and remove missing titles</string>
     <!-- Translators: Description of the resync options and their effects. -->
     <string name="settings_sources_resync_description">Resync now fetches the latest catalog and keeps everything already saved.\n\nResync and remove missing titles also allows removing titles the provider no longer lists. Your favorites, history and resume positions for titles that are still listed are kept.</string>
-    <!-- Translators: Auto-refresh option: off (no automatic refresh). -->
-    <string name="settings_sources_refresh_off">Off</string>
-    <!-- Translators: Auto-refresh option: refresh when the app starts. -->
-    <string name="settings_sources_refresh_startup">Refresh at startup</string>
-    <!-- Translators: Auto-refresh interval: every 6 hours. -->
-    <string name="settings_sources_refresh_6h">6 hours</string>
-    <!-- Translators: Auto-refresh interval: every 12 hours. -->
-    <string name="settings_sources_refresh_12h">12 hours</string>
-    <!-- Translators: Auto-refresh option that opens a picker for a number of days. The ellipsis marks that it opens a picker. -->
-    <string name="settings_sources_refresh_manual">Custom interval\u2026</string>
-    <!-- Translators: Auto-refresh interval in whole days. "count" is the number of days, 1 to 99. -->
-    <plurals name="settings_sources_refresh_days">
-        <item quantity="one">Every <xliff:g id="count">%1$d</xliff:g> day</item>
-        <item quantity="other">Every <xliff:g id="count">%1$d</xliff:g> days</item>
-    </plurals>
-    <!-- Translators: Title of the picker where the user chooses how many days between automatic refreshes. -->
-    <string name="settings_sources_refresh_days_title">Refresh interval</string>
-    <!-- Translators: Instruction under that picker. Left/right are the TV remote directions. -->
-    <string name="settings_sources_refresh_days_hint">Left and right choose how many days, from 1 to 99.</string>
 
     <!-- Translators: Settings row: how many days of upcoming guide the app stores. Opens a day picker. -->
     <string name="settings_epg_guide_days">Guide days to keep</string>
@@ -1293,53 +1175,8 @@
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> day</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> days</item>
     </plurals>
-
-    <!-- Translators: Screen title for the EPG Sources management screen. -->
-    <string name="settings_epg_sources_title">EPG Sources</string>
-    <!-- Translators: Empty-state message when no EPG sources are configured. 'XMLTV' is a format name. -->
-    <string name="settings_epg_sources_empty">No EPG sources yet. Add an XMLTV link.</string>
-    <!-- Translators: Add-EPG form heading. -->
-    <string name="settings_epg_sources_add">Add EPG source</string>
-    <!-- Translators: Edit-EPG form heading. -->
-    <string name="settings_epg_sources_edit">Edit EPG source</string>
-    <!-- Translators: Button to add and immediately sync an EPG source. -->
-    <string name="settings_epg_sources_add_sync">Add &amp; sync</string>
-    <!-- Translators: Button to save changes and re-sync an EPG source. -->
-    <string name="settings_epg_sources_save_sync">Save &amp; sync</string>
-    <!-- Translators: Button opening the playlist picker and the picker's dialog heading. -->
-    <string name="settings_epg_sources_fill_playlist">Fill from playlist</string>
-    <!-- Translators: Status text when no playlists provide an EPG URL. -->
-    <string name="settings_epg_sources_none_playlist">None of your playlists provide an EPG URL.</string>
-    <!-- Translators: Text-field label for the EPG source name. -->
-    <string name="settings_epg_sources_name">Name</string>
-    <!-- Translators: Text-field label for the EPG XMLTV URL. -->
-    <string name="settings_epg_sources_url">XMLTV URL</string>
-    <!-- Translators: Shown instead of a feed address for the guide that comes from a Stalker portal itself, which has no URL. -->
-    <string name="settings_epg_sources_portal_guide">Guide from the portal</string>
-    <!-- Translators: Text-field label for an optional custom User-Agent. -->
-    <string name="settings_epg_sources_user_agent">User-Agent (optional)</string>
-    <!-- Translators: Placeholder example in the EPG source name field. -->
-    <string name="settings_epg_sources_name_hint">e.g. UK Guide</string>
-    <!-- Translators: Placeholder example in the EPG URL field. '.gz' indicates a gzipped file. -->
-    <string name="settings_epg_sources_url_hint">https://…/epg.xml(.gz)</string>
-    <!-- Translators: Placeholder hint in the User-Agent field. -->
-    <string name="settings_epg_sources_user_agent_hint">Leave blank for default</string>
-    <!-- Translators: Dialog title for EPG source deletion. 'name' is the source name. -->
-    <string name="settings_epg_sources_delete_title">Delete “<xliff:g id="name">%1$s</xliff:g>”?</string>
-    <!-- Translators: Description of what deleting an EPG source does. -->
-    <string name="settings_epg_sources_delete_message">Removes this EPG source and its guide data. Your channels stay.</string>
-    <!-- Translators: Loading status while syncing an EPG source. 'percent' is the sync percentage. -->
-    <string name="settings_epg_sources_syncing_percent">Syncing <xliff:g id="percent">%1$d</xliff:g>%%</string>
-    <!-- Translators: Error display for EPG source operations. 'error' is the error message. -->
-    <string name="settings_epg_sources_error">⚠ <xliff:g id="error">%1$s</xliff:g></string>
-    <!-- Translators: Setting label for EPG auto-refresh. -->
-    <string name="settings_epg_sources_auto_refresh_title">Auto refresh</string>
-    <!-- Translators: Description of the EPG auto-refresh setting. -->
-    <string name="settings_epg_sources_auto_refresh_description">Off, on startup, or when data is stale</string>
     <!-- Translators: Status text when the EPG source has not been synced yet. -->
     <string name="settings_epg_sources_not_synced">Not synced yet</string>
-    <!-- Translators: Line in an EPG source's panel giving its place in the list, which decides whose guide is shown when two sources list the same channel. 'position' is this source's place (1 = top), 'total' is how many sources there are. -->
-    <string name="settings_epg_sources_priority">Guide priority <xliff:g id="position">%1$d</xliff:g> of <xliff:g id="total">%2$d</xliff:g>. When two sources list the same channel, the one higher in this list is used.</string>
     <!-- Translators: EPG refresh interval: every 1 hour. -->
     <string name="settings_epg_refresh_1h">1 hour</string>
     <!-- Translators: EPG refresh interval: every 3 hours. -->
@@ -1352,26 +1189,11 @@
     <string name="settings_epg_refresh_24h">24 hours</string>
     <!-- Translators: EPG refresh interval: every 48 hours. -->
     <string name="settings_epg_refresh_48h">48 hours</string>
-    <!-- Translators: Loading status while deleting an EPG source. -->
-    <string name="settings_epg_sources_deleting">Deleting…</string>
-    <!-- Translators: Status text while an EPG source is syncing. -->
-    <string name="settings_epg_sources_syncing_label">Syncing</string>
-    <!-- Translators: Loading status while connecting to an EPG source. -->
-    <string name="settings_epg_sources_connecting">Connecting…</string>
-    <!-- Translators: Plural EPG channel count. 'channels' is the number. -->
-    <plurals name="settings_epg_sources_status_count_channels">
-        <item quantity="one">The guide contains <xliff:g id="channels">%1$d</xliff:g> channel.</item>
-        <item quantity="other">The guide contains <xliff:g id="channels">%1$d</xliff:g> channels.</item>
-    </plurals>
     <!-- Translators: Plural EPG programme count. 'programmes' is the number. -->
     <plurals name="settings_epg_sources_status_count_programmes">
         <item quantity="one">It contains <xliff:g id="programmes">%1$d</xliff:g> program.</item>
         <item quantity="other">It contains <xliff:g id="programmes">%1$d</xliff:g> programs.</item>
     </plurals>
-    <!-- Translators: both placeholders are complete independently pluralized guide-count sentences. -->
-    <string name="settings_epg_sources_status_count"><xliff:g id="channels">%1$s</xliff:g> <xliff:g id="programmes">%2$s</xliff:g></string>
-    <!-- Translators: Status text when EPG sync completes but no programmes are in the time window. -->
-    <string name="settings_epg_sources_status_synced">Synced, but no programs were found in the time window.</string>
 
     <!-- Translators: Screen title for the Backup & Restore screen. -->
     <string name="settings_backup_title">Backup &amp; Restore</string>
@@ -2491,10 +2313,6 @@
     <!-- Translators: Explanation of the Profile settings group, shown in the panel beside the profiles. -->
     <string name="settings_help_profiles">Each viewer keeps their own favorites, watch history, resume points and Home rows. Kids mode shows only the categories you allow; a PIN stops anyone else from opening the profile.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
-    <string name="settings_help_playlists">Add a playlist from a link, an Xtream login, a Stalker portal or a file, re-sync one, or remove it.</string>
-    <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
-    <string name="settings_help_epg_sources">Add an XMLTV guide feed by its link, refresh it, or remove it. Feeds fill the TV Guide and the program lines in Live TV.</string>
-    <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_guide_days">How many days of programs the guide stores ahead. Fewer days make guide refreshes faster and the database smaller.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_theme">Dark is what МОЁ ТВ is designed for. System follows the TV’s own setting where it has one; Light suits a bright room.</string>
@@ -2802,15 +2620,6 @@
     <string name="settings_line_add_type_here_mobile">Xtream, M3U or Stalker</string>
     <!-- Translators: Phone version of settings_line_local_file: under "Choose a local file…" in the add form. -->
     <string name="setup_local_file_hint_mobile">.m3u or .m3u8 on this phone</string>
-    <!-- Translators: Settings › Playlists, crumb under the title: how many playlists there are, e.g. “3 sources”. -->
-    <plurals name="settings_sources_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> source</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> sources</item>
-    </plurals>
-    <!-- Translators: Settings › Playlists, at the end of the row of the default playlist (the one Home and Live TV open on). One short word. -->
-    <string name="settings_sources_status_default">Default</string>
-    <!-- Translators: Note at the bottom of Settings › EPG sources: guide addresses never show the account's user name and password. -->
-    <string name="settings_epg_sources_addresses_note">Addresses are shown without the user name and password.</string>
     <!-- Translators: Settings › Customize, crumb under the title: how many categories the open section has, e.g. “24 categories”. -->
     <plurals name="settings_customize_categories_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> category</item>

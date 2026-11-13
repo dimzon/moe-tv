@@ -134,10 +134,7 @@
     <string name="settings_search_keywords_language">язык локаль перевод международный i18n</string>
     <string name="settings_language_coverage"><xliff:g id="percent">%1$d</xliff:g>%%</string>
     <string name="settings_profile_group">Профиль</string>
-    <string name="settings_playlists">Плейлисты</string>
-    <string name="settings_playlists_description">Добавление, повторная синхронизация и удаление плейлистов M3U / Xtream</string>
     <string name="settings_epg_sources">Источники EPG</string>
-    <string name="settings_epg_sources_nav_description">Добавление лент программы передач XMLTV для телегида</string>
     <string name="settings_customize">Настройка категорий и элементов</string>
     <string name="settings_customize_nav_description">Скрытие и отображение элементов, переименование и изменение порядка категорий</string>
     <string name="settings_ch_paging">Команды пульта</string>
@@ -289,7 +286,6 @@
     <string name="settings_group_sound_subtitles">Звук и субтитры</string>
     <string name="settings_group_watching_recording">Просмотр</string>
     <string name="settings_search_keywords_profiles">зрители дети детский режим PIN блокировка учётная запись</string>
-    <string name="settings_search_keywords_playlists">M3U Xtream источник синхронизация добавить удалить</string>
     <string name="settings_search_keywords_epg">XMLTV программа передач лента телепередача</string>
     <string name="settings_search_keywords_logos">канал логотип значок XMLTV программа передач picon плейлист</string>
     <string name="settings_search_keywords_customize">скрыть показать переименовать порядок категории</string>
@@ -555,73 +551,16 @@
     <string name="settings_span_help">Удерживайте OK на «Переместить», «Переименовать» или «Скрыть» у первого элемента, затем нажмите то же у последнего. Всё между ними изменится вместе.</string>
     <string name="settings_span_ch_help">CH+ / CH− перелистывают страницу. Удерживайте CH+ / CH−, чтобы перейти к последнему или первому элементу.</string>
     <string name="settings_customize_metadata_separator">"  ·  "</string>
-    <string name="settings_sources_title">Источники</string>
-    <string name="settings_sources_empty">Источников пока нет. Добавьте источник M3U или Xtream.</string>
-    <string name="settings_sources_add">Добавить источник</string>
-    <string name="settings_sources_import_failed">Не удалось выполнить импорт</string>
-    <string name="settings_sources_importing">Импорт каталога…</string>
-    <string name="settings_sources_preparing">Подготовка каталога</string>
-    <string name="settings_sources_deleting">УДАЛЕНИЕ…</string>
-    <string name="settings_sources_resync">Повторная синхронизация</string>
-    <string name="settings_sources_delete_title">Удалить «<xliff:g id="name">%1$s</xliff:g>»?</string>
-    <string name="settings_sources_type_m3u">M3U · <xliff:g id="url">%1$s</xliff:g></string>
-    <string name="settings_sources_type_xtream">Xtream · <xliff:g id="url">%1$s</xliff:g></string>
-    <string name="settings_sources_type_stalker">Stalker · <xliff:g id="url">%1$s</xliff:g></string>
-    <string name="settings_sources_expiry">Действует до <xliff:g id="date">%1$s</xliff:g></string>
-    <string name="settings_sources_test_title">Проверка источника</string>
-    <string name="settings_sources_test_ok">Соединение в порядке</string>
-    <string name="settings_sources_test_auth">Провайдер отклонил эти данные. Проверьте имя пользователя, пароль или MAC-адрес.</string>
-    <string name="settings_sources_test_expired">Срок действия подписки истёк.</string>
-    <string name="settings_sources_test_unreachable">Не удалось связаться с сервером. Проверьте адрес и подключение к интернету.</string>
-    <string name="settings_sources_test_status">Статус: <xliff:g id="status">%1$s</xliff:g></string>
-    <string name="settings_sources_test_connections">Подключения: занято <xliff:g id="used">%1$d</xliff:g> из <xliff:g id="max">%2$d</xliff:g></string>
-    <string name="settings_sources_test_connections_max">Подключения: до <xliff:g id="max">%1$d</xliff:g> одновременно</string>
-    <string name="settings_sources_test_trial">Пробная учётная запись</string>
-    <string name="settings_sources_test_expiry_none">Дата окончания не указана</string>
-    <string name="settings_sources_info">Сведения</string>
-    <string name="settings_sources_clean_names">Названия</string>
     <string name="settings_sources_clean_names_title">Названия каналов в «<xliff:g id="name">%1$s</xliff:g>»</string>
     <string name="settings_sources_clean_names_description">Более короткие названия каналов на всех экранах. Телегид по-прежнему сопоставляет названия, которые присылает провайдер, а каналы, переименованные в «Настройке», сохраняют ваше название. Сохранение обновляет плейлист.</string>
     <string name="settings_sources_clean_names_toggle">Очищать названия каналов</string>
     <string name="settings_sources_clean_names_example">Убирает префикс страны и отметку качества в конце: «UK| News One HD» показывается как «News One»</string>
     <string name="settings_sources_clean_names_custom">Также удалять</string>
     <string name="settings_sources_clean_names_custom_hint">Слова через ; например VIP; Backup</string>
-    <string name="settings_sources_retest">Проверить снова</string>
-    <string name="settings_sources_ignore_limit">Не учитывать лимит подключений</string>
-    <string name="settings_sources_ignore_limit_on">Лимит подключений не учитывается: мультиэкран и записи могут открыть больше потоков, чем указано для этого плейлиста. Если провайдер отклонит поток, об этом по-прежнему будет сообщено.</string>
-    <string name="settings_sources_probe_title">Проверить этот плейлист?</string>
-    <string name="settings_sources_probe_warning">Многие провайдеры не сообщают, сколько каналов можно смотреть одновременно, поэтому МОЁ ТВ выясняет это, открывая несколько каналов и наблюдая, какие из них продолжают работать. Всё, что сейчас воспроизводится, остановится, и это может занять до двух минут.</string>
-    <string name="settings_sources_probe_running">Проверяем, сколько каналов разрешает этот провайдер… (<xliff:g id="current">%1$d</xliff:g> из <xliff:g id="total">%2$d</xliff:g>)</string>
-    <string name="settings_sources_probe_unknown">МОЁ ТВ не смог определить, сколько каналов разрешает этот провайдер.</string>
-    <string name="settings_sources_probe_skip">Пропустить</string>
-    <string name="settings_sources_auto_refresh">⟳ <xliff:g id="mode">%1$s</xliff:g></string>
-    <string name="settings_sources_default">ПО УМОЛЧАНИЮ</string>
-    <string name="settings_sources_backup">Резервная копия</string>
-    <string name="settings_sources_details_separator">"  •  "</string>
-    <string name="settings_sources_preparing_detail">Подготовка каталога</string>
-    <string name="settings_sources_removing_detail">Удаление…</string>
-    <string name="settings_sources_edit">Изменить</string>
-    <string name="settings_sources_delete">Удалить</string>
-    <string name="settings_sources_cancel">Отмена</string>
-    <string name="settings_sources_try_again">Повторить</string>
-    <string name="settings_sources_import_title">Импорт завершён</string>
     <string name="settings_sources_resync_title_full">Повторно синхронизировать «<xliff:g id="name">%1$s</xliff:g>»</string>
     <string name="settings_sources_resync_now_full">Повторно синхронизировать сейчас</string>
     <string name="settings_sources_resync_remove_full">Повторно синхронизировать и удалить отсутствующие материалы</string>
     <string name="settings_sources_resync_description">При повторной синхронизации сейчас загружается актуальный каталог, а все уже сохранённые данные остаются.\n\nПовторная синхронизация с удалением отсутствующих материалов также позволяет удалить материалы, которых больше нет в списках поставщика. Избранное, история и позиции продолжения просмотра для материалов, которые по-прежнему доступны, сохраняются.</string>
-    <string name="settings_sources_refresh_off">Выкл.</string>
-    <string name="settings_sources_refresh_startup">Обновлять при запуске</string>
-    <string name="settings_sources_refresh_6h">6 часов</string>
-    <string name="settings_sources_refresh_12h">12 часов</string>
-    <string name="settings_sources_refresh_manual">Свой интервал…</string>
-    <plurals name="settings_sources_refresh_days">
-        <item quantity="one">Каждый <xliff:g id="count">%1$d</xliff:g> день</item>
-        <item quantity="few">Каждые <xliff:g id="count">%1$d</xliff:g> дня</item>
-        <item quantity="many">Каждые <xliff:g id="count">%1$d</xliff:g> дней</item>
-        <item quantity="other">Каждые <xliff:g id="count">%1$d</xliff:g> дней</item>
-    </plurals>
-    <string name="settings_sources_refresh_days_title">Интервал обновления</string>
-    <string name="settings_sources_refresh_days_hint">Влево и вправо выбирают число дней, от 1 до 99.</string>
     <string name="settings_epg_guide_days">Сколько дней телепрограммы хранить</string>
     <string name="settings_epg_guide_days_hint">Влево и вправо выбирают число дней, от <xliff:g id="min">%1$d</xliff:g> до <xliff:g id="max">%2$d</xliff:g>.</string>
     <plurals name="settings_epg_guide_days_value">
@@ -630,52 +569,19 @@
         <item quantity="many"><xliff:g id="count">%1$d</xliff:g> дней</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> дней</item>
     </plurals>
-    <string name="settings_epg_sources_title">Источники EPG</string>
-    <string name="settings_epg_sources_empty">Источников EPG пока нет. Добавьте ссылку XMLTV.</string>
-    <string name="settings_epg_sources_add">Добавить источник EPG</string>
-    <string name="settings_epg_sources_edit">Изменить источник EPG</string>
-    <string name="settings_epg_sources_add_sync">Добавить и синхронизировать</string>
-    <string name="settings_epg_sources_save_sync">Сохранить и синхронизировать</string>
-    <string name="settings_epg_sources_fill_playlist">Заполнить из плейлиста</string>
-    <string name="settings_epg_sources_none_playlist">Ни в одном из ваших плейлистов нет URL EPG.</string>
-    <string name="settings_epg_sources_name">Название</string>
-    <string name="settings_epg_sources_url">URL XMLTV</string>
-    <string name="settings_epg_sources_portal_guide">Телепрограмма с портала</string>
-    <string name="settings_epg_sources_user_agent">User-Agent (необязательно)</string>
-    <string name="settings_epg_sources_name_hint">например, программа передач Великобритании</string>
-    <string name="settings_epg_sources_url_hint">https://…/epg.xml(.gz)</string>
-    <string name="settings_epg_sources_user_agent_hint">Оставьте пустым для значения по умолчанию</string>
-    <string name="settings_epg_sources_delete_title">Удалить «<xliff:g id="name">%1$s</xliff:g>»?</string>
-    <string name="settings_epg_sources_delete_message">Этот источник EPG и данные его программы передач будут удалены. Ваши каналы останутся.</string>
-    <string name="settings_epg_sources_syncing_percent">Синхронизация: <xliff:g id="percent">%1$d</xliff:g>%%</string>
-    <string name="settings_epg_sources_error">⚠ <xliff:g id="error">%1$s</xliff:g></string>
-    <string name="settings_epg_sources_auto_refresh_title">Автоматическое обновление</string>
-    <string name="settings_epg_sources_auto_refresh_description">Отключено, при запуске или при устаревании данных</string>
     <string name="settings_epg_sources_not_synced">Ещё не синхронизировано</string>
-    <string name="settings_epg_sources_priority">Приоритет телепрограммы: <xliff:g id="position">%1$d</xliff:g> из <xliff:g id="total">%2$d</xliff:g>. Если два источника содержат один и тот же канал, используется тот, что выше в этом списке.</string>
     <string name="settings_epg_refresh_1h">1 час</string>
     <string name="settings_epg_refresh_3h">3 часа</string>
     <string name="settings_epg_refresh_6h">6 часов</string>
     <string name="settings_epg_refresh_12h">12 часов</string>
     <string name="settings_epg_refresh_24h">24 часа</string>
     <string name="settings_epg_refresh_48h">48 часов</string>
-    <string name="settings_epg_sources_deleting">Удаление…</string>
-    <string name="settings_epg_sources_syncing_label">Синхронизация</string>
-    <string name="settings_epg_sources_connecting">Подключение…</string>
-    <plurals name="settings_epg_sources_status_count_channels">
-        <item quantity="one">Программа передач содержит <xliff:g id="channels">%1$d</xliff:g> канал.</item>
-        <item quantity="few">Программа передач содержит <xliff:g id="channels">%1$d</xliff:g> канала.</item>
-        <item quantity="many">Программа передач содержит <xliff:g id="channels">%1$d</xliff:g> каналов.</item>
-        <item quantity="other">Программа передач содержит <xliff:g id="channels">%1$d</xliff:g> каналов.</item>
-    </plurals>
     <plurals name="settings_epg_sources_status_count_programmes">
         <item quantity="one">Она содержит <xliff:g id="programmes">%1$d</xliff:g> телепередачу.</item>
         <item quantity="few">Она содержит <xliff:g id="programmes">%1$d</xliff:g> телепередачи.</item>
         <item quantity="many">Она содержит <xliff:g id="programmes">%1$d</xliff:g> телепередач.</item>
         <item quantity="other">Она содержит <xliff:g id="programmes">%1$d</xliff:g> телепередач.</item>
     </plurals>
-    <string name="settings_epg_sources_status_count"><xliff:g id="channels">%1$s</xliff:g> <xliff:g id="programmes">%2$s</xliff:g></string>
-    <string name="settings_epg_sources_status_synced">Синхронизация завершена, но в указанном временном интервале телепередачи не найдены.</string>
     <string name="settings_backup_title">Резервное копирование и восстановление</string>
     <string name="settings_backup_working">Выполнение…</string>
     <string name="settings_backup_what_backup">Что включить в резервную копию</string>
@@ -1359,8 +1265,6 @@
     <string name="settings_line_measured_stats">Текущие FPS, битрейт и пропуски кадров</string>
     <string name="settings_line_logging">Полный журнал для отчётов об ошибках</string>
     <string name="settings_help_profiles">У каждого зрителя свои избранное, история, места продолжения и строки на главной. Детский режим показывает только разрешённые категории; PIN-код не даёт другим открыть профиль.</string>
-    <string name="settings_help_playlists">Добавьте плейлист по ссылке, входу Xtream, порталу Stalker или из файла, синхронизируйте заново или удалите.</string>
-    <string name="settings_help_epg_sources">Добавьте источник телегида XMLTV по ссылке, обновите или удалите его. Источники заполняют телегид и строки передач в прямом эфире.</string>
     <string name="settings_help_guide_days">Сколько дней передач телегид хранит вперёд. Чем меньше дней, тем быстрее обновление и меньше база данных.</string>
     <string name="settings_help_theme">МОЁ ТВ создан для тёмной темы. Системная следует настройке телевизора, если она есть; светлая подходит для яркой комнаты.</string>
     <string name="settings_help_accent">Окрашивает кнопки, свечение выделения, полосы прогресса и акценты везде. Выберите готовый цвет или нажмите OK, чтобы открыть палитру и ввести любой HEX-код.</string>
@@ -1542,14 +1446,6 @@
     <string name="settings_help_add_from_phone_mobile">Откройте адрес или отсканируйте код в браузере любого устройства в той же сети Wi-Fi — компьютера, планшета или телевизора, — заполните там плейлист и отправьте его сюда. Гораздо быстрее, чем вводить URL на телефоне.</string>
     <string name="settings_line_add_type_here_mobile">Xtream, M3U или Stalker</string>
     <string name="setup_local_file_hint_mobile">.m3u или .m3u8 на этом телефоне</string>
-    <plurals name="settings_sources_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> источник</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> источника</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> источников</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> источников</item>
-    </plurals>
-    <string name="settings_sources_status_default">По умолчанию</string>
-    <string name="settings_epg_sources_addresses_note">Адреса показываются без имени пользователя и пароля.</string>
     <plurals name="settings_customize_categories_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> категория</item>
         <item quantity="few"><xliff:g id="count">%1$d</xliff:g> категории</item>
