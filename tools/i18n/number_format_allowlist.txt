@@ -1,5 +1,13 @@
 # CATEGORY<TAB>path<TAB>format-literal<TAB>occurrence<TAB>justification
 # Line numbers may be recorded in comments, but are never matching keys.
-DISPLAY	app/src/main/java/tv/own/owntv/features/home/HomeScreen.kt	%.1f	1	Rating shown in the viewer's own number format (8.4 / 8,4)
-DISPLAY	app/src/main/java/tv/own/owntv/features/more/MorePages.kt	%d:%02d	1	Watched time shown to the viewer in their own digits
-DISPLAY	app/src/main/java/tv/own/owntv/features/shell/components/VodStage.kt	%.1f	1	Rating shown in the viewer's own number format (8.4 / 8,4)
+#
+# Актуальных записей сейчас нет. Три унаследованные от апстрима строки ссылались на
+# app/src/main/java/tv/own/owntv/features/{home/HomeScreen.kt,more/MorePages.kt,
+# shell/components/VodStage.kt}: после переезда исходников в tv/own/myowntv/features/**
+# и удаления VOD (ec31209) этих файлов больше нет. check_number_locale.py считает
+# неиспользованную запись ошибкой ("stale number-format allowlist entry"), поэтому
+# мёртвые строки нельзя оставлять — они роняли job validate при первом же запуске CI.
+#
+# Единственный оставшийся числовой формат `%.1f` (LivePreviewEngine.kt, битрейт в Mbps)
+# использует Locale.ROOT и в разрешении не нуждается. Новые display-форматы без
+# Locale.ROOT вносить сюда вместе с обоснованием.

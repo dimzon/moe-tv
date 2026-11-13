@@ -858,7 +858,7 @@ private fun SyncMatrixBlock(matrix: SyncMatrix, onToggle: (SyncMatrix) -> Unit) 
 
 @Composable
 private fun MatrixHeaderCell(label: String) {
-    Text(label, style = stageText(12, 700, 0.06.em), color = StageColors.Dim, modifier = Modifier.width(88.mpx), textAlign = TextAlign.Center, maxLines = 1)
+    Text(label, style = stageText(12, 700, 0.06.em), color = StageColors.Dim, modifier = Modifier.width(88.mpx), textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis)
 }
 
 @Composable
@@ -886,6 +886,7 @@ private fun MatrixCell(on: Boolean, onClick: () -> Unit) {
             style = stageText(15, 700),
             color = if (on) stageAccent.accent else StageColors.Muted,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
