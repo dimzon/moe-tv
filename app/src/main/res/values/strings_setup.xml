@@ -71,10 +71,6 @@
     <string name="setup_sync_device">From another device</string>
     <!-- Translators: Description text beneath the "From another device" choice card. "МОЁ ТВ" is the app name and must not be translated. -->
     <string name="setup_sync_device_description">Copy everything from your other МОЁ ТВ device over Wi-Fi</string>
-    <!-- Translators: ChoiceCard title for importing from a backup file. -->
-    <string name="setup_import">Import</string>
-    <!-- Translators: Primary button on the password-prompt screen to confirm restore with the entered password. -->
-    <string name="setup_restore">Restore</string>
     <!-- Translators: Error heading on the import-progress screen when restore fails. -->
     <string name="setup_restore_failed">Restore failed</string>
     <!-- Translators: Error text when the backup file is unreadable or corrupted. -->
@@ -96,8 +92,6 @@
     <!-- Translators: Button on the import-failure screen to retry the import. Capitalized as a standalone button label. -->
     <string name="setup_try_again_caps">Try Again</string>
 
-    <!-- Translators: Loading label while the companion server is starting. -->
-    <string name="setup_opening">Opening\u2026</string>
 
     <!-- Translators: Error text when a local M3U playlist file cannot be opened. -->
     <string name="setup_playlist_file_unavailable">Couldn\'t open the playlist file. Pick it again; it may have moved.</string>
@@ -120,45 +114,12 @@
     <string name="companion_continue">Continue</string>
     <!-- Translators: Error text on the companion PIN entry page when the entered PIN does not match. -->
     <string name="companion_pin_mismatch">That PIN did not match \u2014 try again.</string>
-    <!-- Translators: Page title in the companion browser tab for the add-source page. "МОЁ ТВ" is a brand name. -->
-    <string name="companion_service_config_empty">Enter an API key, a Worker URL, or both.</string>
-    <string name="companion_service_config_invalid_key">That API key does not look valid.</string>
-    <string name="companion_service_config_invalid_url">Enter a valid HTTPS Worker URL.</string>
-    <!-- Translators: Error on the remote page when the submitted account details are too long to be real. -->
-    <string name="companion_service_config_invalid_credentials">Those account details are too long. Check them and try again.</string>
-    <string name="companion_service_config_sent">The connection details are now waiting on your TV. Review and save them there.</string>
-    <string name="companion_service_config_again">Send different connection details</string>
-    <string name="companion_add_page_title">МОЁ ТВ \u2014 Add source</string>
-    <!-- Translators: Heading on the companion add-source page. -->
-    <string name="companion_add_heading">Add a source</string>
-    <!-- Translators: Description on the companion add-source page. -->
-    <string name="companion_add_description">Fill in one source and press Send. It appears on the TV \u2014 pick up the remote and press Start Import there when you are ready.</string>
-    <!-- Translators: Label for the default-playlist toggle on the companion add-source page. -->
-    <string name="companion_default_playlist">Default playlist</string>
     <!-- Translators: Button label on the companion add-source page to send the source to the TV. -->
     <string name="companion_send_to_tv">Send to TV</string>
-    <!-- Translators: Tooltip/hint text on the companion add-source page explaining the Xtream sync scope options. -->
-    <string name="companion_sync_xtream_hint">What to sync \u2014 Now imports first, Later syncs in the background, Off is never fetched.</string>
     <!-- Translators: Page title in the companion browser tab after a source was sent successfully. "МОЁ ТВ" is a brand name. -->
     <string name="companion_saved_page_title">МОЁ ТВ \u2014 Sent</string>
     <!-- Translators: Heading on the companion success page after sending a source. The checkmark is a visual indicator. -->
     <string name="companion_saved_heading">Sent to your TV \u2713</string>
-    <!-- Translators: Body text on the companion success page when a source was sent. "name" is the source name entered by the user. -->
-    <string name="companion_saved_source_body"><xliff:g id="name">%1$s</xliff:g> is now on the TV\'s Add source screen. Check the details there and press Start Import on the remote.</string>
-    <!-- Translators: Button on the companion success page to send another source. -->
-    <string name="companion_saved_send_another">Send another source</string>
-    <!-- Translators: Browser tab title of the companion page that edits one existing source. МОЁ ТВ is the app name. -->
-    <string name="companion_edit_page_title">МОЁ ТВ \u2014 Edit source</string>
-    <!-- Translators: Heading on the companion edit page. "name" is the name of the source being edited. -->
-    <string name="companion_edit_heading">Edit <xliff:g id="name">%1$s</xliff:g></string>
-    <!-- Translators: Description on the companion edit page. Send to TV is the button on this page; Save is the button on the TV's edit screen. -->
-    <string name="companion_edit_description">Change what you need and press Send to TV. A field left empty keeps its current value. The changes appear on the TV \u2014 press Save there with the remote.</string>
-    <!-- Translators: Placeholder inside an empty field on the companion edit page (password, MAC address, playlist address): typing nothing keeps the value the TV already has. -->
-    <string name="companion_keep_current">Leave empty to keep the current one</string>
-    <!-- Translators: Body text on the companion success page after an edit was sent. "name" is the source name. Save is the button on the TV's edit screen. -->
-    <string name="companion_saved_edit_body">The changes to <xliff:g id="name">%1$s</xliff:g> are now on the TV\'s edit screen. Check them there and press Save on the remote.</string>
-    <!-- Translators: Link on the companion success page that opens the edit page again. -->
-    <string name="companion_saved_edit_again">Change something else</string>
     <!-- Translators: Body text on the companion success page when a backup was sent. -->
     <string name="companion_saved_backup_body">Your backup is now on the TV. Pick up the remote and choose which parts to restore.</string>
     <!-- Translators: Link text on the companion success page to send a different backup file. -->
@@ -177,10 +138,6 @@
     <string name="companion_backup_file">Backup file</string>
     <!-- Translators: Error text on the companion backup restore page when no file has been selected. -->
     <string name="companion_choose_backup">Please choose a backup file first.</string>
-    <!-- Translators: Label for the optional playlist-file input on the companion Add a source page (M3U tab). Lets the user upload a playlist from the computer instead of typing a URL. -->
-    <string name="companion_playlist_file">Or upload a playlist file</string>
-    <!-- Translators: Error text on the companion Add a source page (M3U tab) when neither a playlist URL was typed nor a file chosen. -->
-    <string name="companion_playlist_url_or_file">Enter a playlist URL or choose a file.</string>
     <!-- Translators: Loading status shown on the companion page while a file is being uploaded to the TV. -->
     <string name="companion_sending">Sending\u2026</string>
     <!-- Translators: Error shown in the companion browser page when an upload to the TV fails. "status" is a numeric HTTP response such as 403. -->
@@ -233,8 +190,6 @@
     <string name="companion_error_image_too_large">The image is too large.</string>
     <!-- Translators: Error text on the companion image upload page when the uploaded file is not a valid image. -->
     <string name="companion_error_invalid_image">That is not a valid image upload.</string>
-    <!-- Translators: Error text on the companion page when required form fields are missing. -->
-    <string name="companion_error_missing_fields">Required fields are missing.</string>
 
 
 
@@ -262,8 +217,6 @@
     <string name="setup_device_appear">Devices with Sync mode on appear here</string>
     <!-- Translators: Placeholder of the Address field when copying from another device. -->
     <string name="setup_device_address_hint">or type the other device’s address</string>
-    <!-- Translators: Button that creates the profile and continues setup. -->
-    <string name="setup_create_profile">Create profile</string>
     <!-- Translators: Title while a playlist imports. %1$s is the playlist's name. -->
     <string name="setup_importing_title">Importing <xliff:g id="name">%1$s</xliff:g></string>
 </resources>

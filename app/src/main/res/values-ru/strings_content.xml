@@ -4,8 +4,6 @@
     <string name="content_exit_confirmation">Закрыть приложение?</string>
     <string name="content_restore_incomplete_title">Восстановление не завершено</string>
     <string name="content_restore_incomplete_message">Приложение закрылось во время восстановления <xliff:g id="description">%1$s</xliff:g>, поэтому часть данных могла не восстановиться. Ничего не было удалено — снова запустите то же восстановление в разделе «Настройки → Резервное копирование и восстановление», чтобы восстановить остальное.</string>
-    <string name="content_playlist_picker_title">Показать плейлист</string>
-    <string name="content_avatar_picker_title">Выберите аватар</string>
     <string name="content_category_browser_title">Категории</string>
     <string name="content_channel_overlay_title">Каналы</string>
     <string name="content_live_now">В эфире сейчас</string>
@@ -15,8 +13,6 @@
     <string name="content_clock_current">Текущее время</string>
     <string name="content_add_favourite">Добавить в избранное</string>
     <string name="content_remove_favourite">Удалить из избранного</string>
-    <string name="content_mark_watched">Отметить как просмотренное</string>
-    <string name="content_mark_unwatched">Отметить как непросмотренное</string>
     <string name="content_move">Переместить</string>
     <string name="content_category_restore_playlist">Вернуть по умолчанию</string>
     <string name="content_category_restore_custom">Вернуть по умолчанию</string>
@@ -46,18 +42,10 @@
     <string name="content_move_to_category">Переместить в категорию…</string>
     <string name="content_remove_from_category">Удалить из этой категории</string>
     <string name="content_play">Воспроизвести</string>
-    <string name="content_favorited">В избранном</string>
-    <string name="content_favorite">В избранное</string>
-    <string name="content_oldest_first">Сначала старые</string>
-    <string name="content_newest_first">Сначала новые</string>
     <string name="content_close">Закрыть</string>
     <string name="content_rename_hint">Только для этого профиля. Оставьте поле пустым, чтобы восстановить исходное название.</string>
     <string name="content_provider">Поставщик</string>
     <string name="content_provider_name">Поставщик: %1$s</string>
-    <string name="content_duration_hours"><xliff:g id="hours">%1$d</xliff:g> ч <xliff:g id="minutes">%2$d</xliff:g> мин</string>
-    <string name="content_duration_minutes"><xliff:g id="minutes">%1$d</xliff:g> мин</string>
-    <string name="content_no_epg">Нет данных EPG</string>
-    <string name="content_catchup">Архив</string>
     <string name="content_play_external_short">Воспроизвести во внешнем плеере</string>
     <string name="content_rename">Переименовать</string>
     <string name="content_rename_channel">Переименовать канал</string>
@@ -70,48 +58,29 @@
     <string name="content_category_favorites">Избранное</string>
     <string name="content_category_history">История</string>
     <string name="content_category_all_channels">Все каналы</string>
-    <string name="content_add_source">Добавить источник</string>
-    <string name="content_preview_select_channel">Выберите канал, чтобы посмотреть его здесь.</string>
     <string name="content_offline_banner">Вы не в сети — воспроизведение и обновления не будут работать, пока соединение не восстановится.</string>
     <string name="content_all_playlists">Все плейлисты</string>
     <string name="content_search_categories">Поиск категорий…</string>
     <string name="content_action_resume">Продолжить</string>
     <string name="content_action_last_channel">Последний канал</string>
-    <string name="content_progress_percent"><xliff:g id="percent">%1$d</xliff:g>%%</string>
     <string name="content_live_time_range"><xliff:g id="start">%1$s</xliff:g> – <xliff:g id="end">%2$s</xliff:g></string>
     <string name="content_live_time_remaining"><xliff:g id="end">%1$s</xliff:g> · осталось <xliff:g id="minutes">%2$d</xliff:g> мин</string>
     <string name="content_storage_internal">Внутреннее хранилище</string>
     <string name="content_storage_removable">Съёмное хранилище</string>
     <string name="content_storage_app">Хранилище приложения (разрешение не требуется)</string>
-    <string name="content_storage_choose_folder">Выбрать другую папку…</string>
-    <string name="content_storage_chosen_folder">Выбранная папка</string>
-    <string name="content_storage_folder_lost">Эта папка больше недоступна. Выберите её снова или укажите другую.</string>
-    <string name="content_storage_folder_fallback">Папка загрузок сейчас недоступна, поэтому загрузки сохраняются в собственную папку МОЁ ТВ, пока она не вернётся.</string>
-    <string name="content_epg_create_profile">Создайте профиль, чтобы увидеть программу передач.</string>
-    <string name="content_epg_filter_hides_all">Текущий фильтр скрывает все каналы. Измените сортировку, чтобы увидеть телепрограмму.</string>
     <string name="content_epg_no_channels_query">По запросу «<xliff:g id="query">%1$s</xliff:g>» каналы программы передач не найдены.</string>
     <string name="content_epg_mismatched_ids">Данные программы передач сохранены, но идентификаторы её каналов не совпадают с идентификаторами EPG ваших каналов — возможно, этот источник EPG предназначен для другого набора каналов поставщика.</string>
     <string name="content_epg_title">Программа передач</string>
-    <string name="content_epg_empty">EPG не добавлен.</string>
     <string name="content_epg_no_guide">Нет программы передач.</string>
     <string name="content_epg_no_programme">На это время телепередач нет.</string>
-    <string name="content_epg_add_description">Добавьте источник EPG (XMLTV), чтобы заполнить программу передач.</string>
     <string name="content_epg_guide_category">Категория программы передач</string>
     <string name="content_epg_search_hint">Поиск каналов программы передач…</string>
-    <string name="content_epg_add">Добавить EPG</string>
     <string name="content_epg_add_favourite">Добавить в избранное</string>
     <string name="content_epg_remove_favourite">Удалить из избранного</string>
-    <string name="content_epg_jump_now">К текущему времени</string>
-    <string name="content_epg_time_range"><xliff:g id="start">%1$s</xliff:g> – <xliff:g id="end">%2$s</xliff:g></string>
-    <string name="content_epg_all">Все</string>
     <string name="content_epg_sort_alpha">А–Я</string>
     <string name="content_epg_sort_provider">Поставщик</string>
-    <string name="content_epg_sort_favorites">Избранное</string>
-    <string name="content_epg_channel_score">→ <xliff:g id="name">%1$s</xliff:g> · <xliff:g id="percent">%2$d</xliff:g>%%</string>
     <string name="content_epg_bits_separator">" · "</string>
     <string name="content_epg_watch_channel">Смотреть канал</string>
-    <string name="content_epg_favourite">В избранное</string>
-    <string name="content_epg_unfavourite">Удалить из избранного</string>
     <string name="content_epg_time_offset">Смещение времени EPG</string>
     <string name="content_epg_shift_minutes"><xliff:g id="sign">%1$s</xliff:g><xliff:g id="minutes">%2$s</xliff:g>мин</string>
     <string name="content_epg_shift_hours"><xliff:g id="sign">%1$s</xliff:g><xliff:g id="hours">%2$s</xliff:g>ч</string>
@@ -121,8 +90,6 @@
     <string name="content_epg_offset_channel_only">Только этот канал · глобальное: <xliff:g id="offset">%1$s</xliff:g></string>
     <string name="content_epg_offset_use_global">Использовать глобальное смещение</string>
     <string name="content_preview_single_stream">Предпросмотр отключён — ваш провайдер позволяет одновременно только один поток.</string>
-    <string name="content_playlist_picker_subtitle">Действует везде и запоминается</string>
-    <string name="content_playlist_marks_note">При «Все плейлисты» в каждой строке есть метка плейлиста, из которого она взята.</string>
     <string name="content_search_in">Поиск: <xliff:g id="name">%1$s</xliff:g></string>
     <string name="content_live_guide_view">Вид телегида</string>
     <string name="content_key_watch">Смотреть</string>
@@ -168,11 +135,8 @@
     <string name="content_menu_group_show">Показывать</string>
     <string name="content_epg_show_empty">Каналы без телегида</string>
     <string name="content_epg_show_preview">Предпросмотр видео</string>
-    <string name="content_epg_view_timeline">Хронология</string>
-    <string name="content_menu_group_view">Вид</string>
     <string name="content_menu_group_details">Подробности</string>
     <string name="content_programme_details">О телепередаче</string>
     <string name="content_programmes_earlier">Ранее</string>
     <string name="content_programmes_later">Позже</string>
-    <string name="content_play_from_start">Смотреть сначала</string>
 </resources>

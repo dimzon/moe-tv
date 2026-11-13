@@ -15,23 +15,18 @@
     <string name="player_channel_label">КАНАЛ</string>
     <string name="player_go_live">К эфиру</string>
     <string name="player_previous_channel">Предыдущий канал</string>
-    <string name="player_next_channel_in_list">Следующий канал</string>
-    <string name="player_previous_channel_in_list">Предыдущий канал в списке</string>
     <string name="player_tool_volume">Громкость</string>
     <string name="player_tool_brightness">Яркость</string>
     <string name="player_tool_audio">Звук</string>
     <string name="player_tool_subtitles">Субтитры</string>
     <string name="player_tool_favorite">Избранное</string>
-    <string name="player_tool_speed">Скорость</string>
     <string name="player_tool_aspect">Формат</string>
     <string name="player_tool_quality">Качество</string>
     <string name="player_tool_mini">Мини</string>
     <string name="player_tool_audio_only">Только звук</string>
-    <string name="player_tool_engine">Плеер</string>
     <string name="player_tool_info">Сведения</string>
     <string name="player_tool_report">Отчёт</string>
     <string name="player_channel_not_found">Канал не найден</string>
-    <string name="player_channel_number_entry">Номер канала</string>
     <string name="player_multiple_channels">Найдено несколько каналов</string>
     <string name="player_tune_failed">Не удалось переключиться</string>
     <string name="player_playback_error">Ошибка воспроизведения</string>
@@ -42,11 +37,11 @@
     <string name="player_image_track"><xliff:g id="label">%1$s</xliff:g> · графические</string>
     <string name="player_av_sync">Синхронизация аудио и видео</string>
     <string name="player_av_sync_remember">Запомнить эту задержку</string>
-    <string name="player_no_offset">Без задержки</string>
     <string name="player_delay_zero">0 мс</string>
     <string name="player_delay_positive">+<xliff:g id="ms">%1$d</xliff:g> мс</string>
     <string name="player_delay_negative"><xliff:g id="ms">%1$d</xliff:g> мс</string>
     <string name="player_volume">Громкость</string>
+    <string name="player_smoothness_hint">Канал теряет кадры — картинка может дёргаться.</string>
     <string name="player_unmute">Включить звук</string>
     <string name="player_mute">Выключить звук</string>
     <string name="player_percent"><xliff:g id="value">%1$d</xliff:g>%%</string>
@@ -152,35 +147,24 @@
     <string name="player_provider_retry_after">HTTP <xliff:g id="code">%1$d</xliff:g>: <xliff:g id="reason">%2$s</xliff:g> Повторная попытка через <xliff:g id="seconds">%3$d</xliff:g> с.</string>
     <string name="player_provider_busy">Провайдер занят.</string>
     <string name="player_reconnecting">Трансляция прервана. Переподключение…</string>
-    <string name="player_error_data_saver">Экономия трафика включена, поэтому воспроизведение через мобильный интернет отключено. Подключитесь к Wi-Fi или выключите экономию трафика в настройках.</string>
     <string name="player_sleep_timer">Таймер сна</string>
     <string name="player_sleep_timer_end_of_programme">Конец передачи</string>
     <string name="player_sleep_timer_remaining">Остановится через <xliff:g id="time">%1$s</xliff:g></string>
     <string name="player_sleep_timer_screen_off">Также выключать экран</string>
     <string name="player_sleep_timer_screen_off_explanation">Используется только для выключения экрана по окончании таймера и больше ни для чего.</string>
     <string name="player_sleep_timer_screen_off_unavailable">Это устройство не позволяет приложениям выключать экран.</string>
-    <string name="player_pip_expand">Развернуть</string>
     <string name="player_error_cast_unsupported">Устройство, на которое вы транслируете, не может воспроизвести этот поток. Многие каналы используют формат, который оно не поддерживает, — включите его на телефоне.</string>
-    <string name="player_cast_playing_on">Воспроизводится на <xliff:g id="device">%1$s</xliff:g></string>
     <string name="multiview_button">Мультиэкран</string>
     <string name="multiview_add_channel">Добавить канал</string>
     <string name="multiview_refused_single">Провайдер разрешает только один поток одновременно.</string>
-    <string name="multiview_refused_single_recording">Провайдер разрешает только один поток одновременно, и его занимает запись.</string>
     <plurals name="multiview_refused_all_in_use">
         <item quantity="one">Провайдер разрешает <xliff:g id="count">%1$d</xliff:g> поток одновременно, и он занят.</item>
         <item quantity="few">Провайдер разрешает <xliff:g id="count">%1$d</xliff:g> потока одновременно, и все они заняты.</item>
         <item quantity="many">Провайдер разрешает <xliff:g id="count">%1$d</xliff:g> потоков одновременно, и все они заняты.</item>
         <item quantity="other">Провайдер разрешает <xliff:g id="count">%1$d</xliff:g> потоков одновременно, и все они заняты.</item>
     </plurals>
-    <plurals name="multiview_refused_all_in_use_recording">
-        <item quantity="one">Провайдер разрешает <xliff:g id="count">%1$d</xliff:g> поток одновременно. Из них записывают <xliff:g id="recording">%2$d</xliff:g>.</item>
-        <item quantity="few">Провайдер разрешает <xliff:g id="count">%1$d</xliff:g> потока одновременно. Из них записывают <xliff:g id="recording">%2$d</xliff:g>.</item>
-        <item quantity="many">Провайдер разрешает <xliff:g id="count">%1$d</xliff:g> потоков одновременно. Из них записывают <xliff:g id="recording">%2$d</xliff:g>.</item>
-        <item quantity="other">Провайдер разрешает <xliff:g id="count">%1$d</xliff:g> потоков одновременно. Из них записывают <xliff:g id="recording">%2$d</xliff:g>.</item>
-    </plurals>
     <string name="multiview_refused_reserved">Одно подключение остаётся свободным, чтобы вы могли продолжать смотреть. Измените это в настройках, чтобы записывать на всех подключениях.</string>
     <string name="multiview_decoder_exhausted">Этот телевизор не может декодировать ещё один канал одновременно.</string>
-    <string name="multiview_decoder_exhausted_mobile">Это устройство не может декодировать ещё один канал одновременно.</string>
     <string name="multiview_tile_change_channel">Сменить канал</string>
     <string name="multiview_tile_fullscreen">На весь экран</string>
     <string name="multiview_tile_remove">Убрать плитку</string>

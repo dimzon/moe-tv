@@ -33,16 +33,6 @@
     <string name="settings_android_tv_home">Android TV home</string>
     <!-- Translators: Description of the Android TV home screen integration. -->
     <string name="settings_android_tv_home_description">Show Continue Watching and recent live channels on the TV home screen.</string>
-    <!-- Translators: Button to force-refresh the Android TV home screen cards. -->
-    <string name="settings_refresh_now">Refresh now</string>
-    <!-- Translators: Description of the refresh action for Android TV home. -->
-    <string name="settings_refresh_description">Rebuild the Continue Watching / recent cards on the Android TV home.</string>
-    <!-- Translators: Loading status shown while rebuilding Android TV home cards. -->
-    <string name="settings_rebuilding">Rebuilding…</string>
-    <!-- Translators: Completion indicator after a successful action. -->
-    <string name="settings_done_check">Done ✓</string>
-    <!-- Translators: Wrapper that passes a mode value through unchanged. -->
-    <string name="settings_mode"><xliff:g id="mode">%1$s</xliff:g></string>
     <!-- Translators: Status label for a hidden item. This is a state, not a command. -->
     <string name="settings_hidden">Hidden</string>
     <!-- Translators: Navigation behavior option where icons are manually chosen. -->
@@ -227,10 +217,6 @@
     <string name="settings_city_latlon">City or lat,lon</string>
     <!-- Translators: Placeholder hint text in the custom location field. -->
     <string name="settings_location_hint">Leave blank to auto-detect from your public IP. Enter a city (e.g. London) or \"lat,lon\" (e.g. 51.5,-0.12).</string>
-    <plurals name="settings_allowance_value">
-        <item quantity="one"><xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g> left</item>
-        <item quantity="other"><xliff:g id="remaining">%1$d</xliff:g> / <xliff:g id="limit">%2$d</xliff:g> left</item>
-    </plurals>
     <!-- Translators: Screen title for the Settings screen. -->
     <string name="settings_title">Settings</string>
     <!-- Translators: Quick toggle on the Settings screen for live preview. -->
@@ -241,8 +227,6 @@
     <string name="settings_quick_channel_numbers">Channel numbers</string>
     <!-- Translators: Setting name: an HLS stream that offers both a standard (SDR) and a high dynamic range (HDR) picture plays the SDR one. 'SDR' and 'HDR' are standard abbreviations; keep them. -->
     <string name="settings_quick_prefer_sdr">Prefer SDR</string>
-    <!-- Translators: Quick toggle label for the auto-play next episode setting. -->
-    <string name="settings_quick_autoplay">Auto-play</string>
     <!-- Translators: Quick action label to check for app updates. -->
     <string name="settings_quick_check_update">Check for update</string>
     <!-- Translators: Row-menu action that adds the chosen setting to the Quick group. -->
@@ -257,8 +241,6 @@
     <string name="settings_quick_empty_title">Nothing pinned yet</string>
     <!-- Translators: Hint under "Nothing pinned yet". OK is the remote's select button. -->
     <string name="settings_quick_empty_hint">Hold OK on any setting and choose “Pin to Quick”.</string>
-    <!-- Translators: The same hint on a phone or tablet, where there is no OK button. -->
-    <string name="settings_quick_empty_hint_touch">Long-press any setting and choose “Pin to Quick”.</string>
     <!-- Translators: Badge counting how many settings a group holds. -->
     <plurals name="settings_setting_count">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> setting</item>
@@ -277,16 +259,10 @@
     <string name="settings_language_system_default">System default</string>
     <!-- Translators: Subtitle under the System default row in the language picker. -->
     <string name="settings_language_system_default_description">Follows device language</string>
-    <!-- Translators: Placeholder text in the language picker search field. -->
-    <string name="settings_language_search_hint">Search languages…</string>
     <!-- Translators: Hidden keyword bag for the Language settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_language">language locale translation international i18n</string>
     <!-- Translators: Translation coverage percentage badge next to a language in the picker. '%1$d' is the coverage number 0–100. The '%%' renders as a single percent sign. -->
     <string name="settings_language_coverage"><xliff:g id="percent">%1$d</xliff:g>%%</string>
-    <!-- Translators: Settings navigation group label for Profile settings. -->
-    <string name="settings_profile_group">Profile</string>
-    <!-- Translators: Settings navigation label for EPG Sources. -->
-    <string name="settings_epg_sources">EPG Sources</string>
     <!-- Translators: Settings navigation label for Customize Categories & Items. -->
     <string name="settings_customize">Customize categories &amp; items</string>
     <!-- Translators: Description of the Customize Categories & Items settings. -->
@@ -311,8 +287,6 @@
     <string name="settings_home_root">Home screen</string>
     <!-- Translators: Description of the Home screen settings. -->
     <string name="settings_home_root_description">Choose, reorder &amp; filter the rows on Home</string>
-    <!-- Translators: Settings navigation label for Backup & Restore. -->
-    <string name="settings_backup_restore">Backup &amp; Restore</string>
     <!-- Translators: Settings navigation label to clear watch history. -->
     <string name="settings_clear_history">Clear watch history</string>
     <!-- Translators: Settings navigation group label for Appearance settings. -->
@@ -352,7 +326,6 @@
     <string name="settings_font_customization_description">Text size and fonts for the main interface and popups</string>
     <string name="settings_font_size">Font size</string>
     <string name="settings_main_interface_font">Main interface font</string>
-    <string name="settings_popup_font">Popups font</string>
     <string name="settings_choose_font">Choose font</string>
     <string name="settings_font_size_range">Adjust main app text, not popups, from <xliff:g id="min">%1$d</xliff:g>%% to <xliff:g id="max">%2$d</xliff:g>%%. Subtitles keep their own size.</string>
     <!-- Translators: Font-size control that affects text inside dialogs and popup menus only. -->
@@ -379,8 +352,6 @@
     <string name="settings_animations_description">Turn interface motion on or off — Off feels snappier on lower-end TV boxes</string>
     <!-- Translators: Description of the Weather row in Settings › Appearance. -->
     <string name="settings_weather_description_root">Top-bar weather chip: show or hide, custom location, and Celsius / Fahrenheit.</string>
-    <!-- Translators: Name of the phone's media playback notification channel, as listed in Android's notification settings for the app. -->
-    <string name="settings_playback_group">Playback</string>
     <!-- Translators: Description of the Live preview setting. -->
     <string name="settings_live_preview_description">Auto-play a channel when you focus it</string>
     <!-- Translators: Setting label for the preview sound toggle. -->
@@ -409,20 +380,14 @@
     <string name="settings_auto_frame_rate_warning_suffix">Not recommended on this TV: below Android 12 the rate can\'t be changed smoothly.</string>
     <!-- Translators: Title warning that Auto frame rate may blank the display on this older TV. -->
     <string name="settings_auto_frame_rate_warning_title">Not recommended on this TV</string>
-    <!-- Translators: Phone/tablet wording of settings_auto_frame_rate_warning_title. -->
-    <string name="settings_auto_frame_rate_warning_title_mobile">Not recommended on this device</string>
     <!-- Translators: Auto frame rate warning. %1$s is the device Android version, such as 11. -->
     <string name="settings_auto_frame_rate_warning_description">This device runs Android <xliff:g id="android_version">%1$s</xliff:g>. Below Android 12 the TV can\'t tell МОЁ ТВ which refresh rates it can switch to smoothly, so changing the rate may black the screen out for a second or two — sometimes more than once during a programme.\n\nWe recommend leaving Auto frame rate off here. If your TV switches cleanly, turn it on and see: you can change it back at any time.</string>
-    <!-- Translators: Phone/tablet wording of settings_auto_frame_rate_warning_description. %1$s is the device Android version, such as 11. -->
-    <string name="settings_auto_frame_rate_warning_description_mobile">This device runs Android <xliff:g id="android_version">%1$s</xliff:g>. Below Android 12 the device can\'t tell МОЁ ТВ which refresh rates it can switch to smoothly, so changing the rate may black the screen out for a second or two — sometimes more than once during a programme.\n\nWe recommend leaving Auto frame rate off here. If your screen switches cleanly, turn it on and see: you can change it back at any time.</string>
     <!-- Translators: Safe action that leaves Auto frame rate disabled. -->
     <string name="settings_auto_frame_rate_keep_off">Keep off</string>
     <!-- Translators: Action that enables Auto frame rate despite the warning. -->
     <string name="settings_auto_frame_rate_turn_on_anyway">Turn on anyway</string>
     <!-- Translators: Setting label for surround sound decoding. -->
     <string name="settings_surround_sound">Surround sound</string>
-    <!-- Translators: Phone/tablet wording of settings_surround_description. -->
-    <string name="settings_surround_description_mobile">Decode Dolby/DTS to surround (5.1/7.1) for a real 5.1/7.1 receiver connected to this device. Leave OFF for the built-in speaker, headphones or a stereo soundbar — multichannel can lag audio behind video. If it drifts, nudge the player\'s Audio menu → A/V sync.</string>
     <!-- Translators: Settings › Sound & subtitles. Toggle: send Dolby/DTS audio undecoded ("bitstream") to the TV or receiver. -->
     <string name="settings_audio_passthrough">Dolby and DTS passthrough</string>
     <!-- Translators: Description of settings_audio_passthrough. "Surround sound", "Night mode" and "Volume leveling" are the names of other settings rows. -->
@@ -439,10 +404,6 @@
     <string name="settings_max_video_quality">Maximum video quality</string>
     <!-- Translators: Description of settings_max_video_quality. -->
     <string name="settings_max_video_quality_description">The highest picture played when a channel offers several. Saves bandwidth and eases the decoder.</string>
-    <!-- Translators: Phone Settings › Player. Picker: the highest resolution played on mobile data (Off, 1080p, 720p, 480p). -->
-    <string name="settings_mobile_data_quality">Maximum quality on mobile data</string>
-    <!-- Translators: Description of settings_mobile_data_quality. "Metered" is Android's term for a connection that costs money per byte. -->
-    <string name="settings_mobile_data_quality_description">On a metered connection, plays at most this quality. Off: the same as on Wi-Fi.</string>
     <!-- Translators: Settings › Picture. Toggle for an experimental decoder mode ("tunneled playback") where the TV hardware syncs picture and sound. -->
     <string name="settings_tunneled_playback">Tunneled playback (experimental)</string>
     <!-- Translators: Description of settings_tunneled_playback. -->
@@ -457,8 +418,6 @@
     <string name="settings_video_surface_hardware">Hardware plane (SurfaceView)</string>
     <!-- Translators: Choice of settings_video_surface: an ordinary GPU-composited view. -->
     <string name="settings_video_surface_texture">Compatibility texture (TextureView)</string>
-    <!-- Translators: Section header for device-related settings. -->
-    <string name="settings_device">Device</string>
     <!-- Translators: Setting label for the app error log (crashes and playback failures). -->
     <string name="settings_playback_error_log">Error log</string>
     <!-- Translators: Setting label for player zoom control. -->
@@ -533,12 +492,6 @@
     <string name="settings_presets">Presets</string>
     <!-- Translators: Text-field label for entering a hex color code. -->
     <string name="settings_hex_code">Hex code</string>
-    <!-- Translators: Button to apply the selected accent color. -->
-    <string name="settings_apply">Apply</string>
-    <!-- Translators: Error when the hex code is invalid. '52DBC8' is an example. -->
-    <string name="settings_hex_error">Enter 6 hex digits, e.g. 52DBC8</string>
-    <!-- Translators: Label for the color picker tool. -->
-    <string name="settings_color_picker">Color picker</string>
     <!-- Translators: Button to confirm the selected color from the picker. -->
     <string name="settings_use_color">Use this color</string>
     <!-- Translators: Version display on the About screen. 'version' is the version string. -->
@@ -551,8 +504,6 @@
     <string name="settings_contributions">Contributions, bug reports &amp; stars are welcome on GitHub.</string>
     <!-- Translators: Description of the error log content. -->
     <string name="settings_playback_error_description_full">The last crash and the most recent playback failures (newest first). Include these details when reporting a problem.</string>
-    <!-- Translators: Generic loading status text. -->
-    <string name="settings_loading">Loading…</string>
     <!-- Translators: Empty-state message when no playback errors are recorded. -->
     <string name="settings_no_playback_errors">No playback errors recorded.</string>
     <!-- Translators: Label for Live TV content type in settings and filters. -->
@@ -576,10 +527,6 @@
     <string name="settings_accent_green">Green</string>
     <!-- Translators: Accent color preset name. -->
     <string name="settings_accent_amber">Amber</string>
-    <!-- Translators: Settings search-result breadcrumb category for Profile. -->
-    <string name="settings_group_profile">Profile</string>
-    <!-- Translators: Settings navigation group label, and search-result breadcrumb category, for the group holding playlists, EPG sources, the EPG time offset and catch-up. -->
-    <string name="settings_group_sources">Sources &amp; guide</string>
     <!-- Translators: Settings navigation group label, and search-result breadcrumb category, for the group holding sidebar, panel width, browsing lists, Home screen and channel paging. -->
     <string name="settings_group_layout">Layout</string>
     <!-- Translators: Settings navigation group label, and search-result breadcrumb category, for the group holding content customization. -->
@@ -592,10 +539,6 @@
     <string name="settings_dns">DNS</string>
     <!-- Translators: Settings search-result breadcrumb category for App. -->
     <string name="settings_group_app">App</string>
-    <!-- Translators: Settings sheet summary line under the "Profile" group heading. -->
-    <string name="settings_group_summary_profile">Profiles and who can watch what</string>
-    <!-- Translators: Settings sheet summary line under the "Sources &amp; guide" group heading. -->
-    <string name="settings_group_summary_sources">Playlists, guide data and their clocks</string>
     <!-- Translators: Settings sheet summary line under the "Appearance" group heading. -->
     <string name="settings_group_summary_appearance">Theme, accent, glass, motion and text size</string>
     <!-- Translators: Settings sheet summary line under the "Layout" group heading. -->
@@ -630,12 +573,8 @@
     <string name="settings_group_sound_subtitles">Sound &amp; subtitles</string>
     <!-- Translators: Settings group name: multiview, mini-player and picture-in-picture. -->
     <string name="settings_group_watching_recording">Watching</string>
-    <!-- Translators: Hidden keyword bag used by Settings search for the Profiles page. Translate these as individual terms a user might type; this is not a grammatical sentence and is not displayed as prose. -->
-    <string name="settings_search_keywords_profiles">viewers kids mode pin lock account</string>
     <!-- Translators: Hidden keyword bag for the EPG settings page. 'xmltv' is a technical format name. Translate as individual search terms. -->
     <string name="settings_search_keywords_epg">xmltv guide feed program</string>
-    <!-- Translators: Hidden keyword bag for the Guide channel logos settings. 'xmltv' and 'picon' are technical terms. Translate as individual search terms. -->
-    <string name="settings_search_keywords_logos">channel logo icon xmltv guide picon playlist</string>
     <!-- Translators: Hidden keyword bag for the Customize Categories settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_customize">hide unhide rename reorder categories</string>
     <!-- Translators: Hidden keyword bag for the CH+ Key Paging settings. Translate as individual search terms. -->
@@ -693,92 +632,8 @@
     <string name="settings_search_keywords_update_auto">auto update new version</string>
     <!-- Translators: Hidden keyword bag for the auto-start settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_auto_start">boot power on wake sleep standby launch automatically</string>
-    <!-- Translators: Language option to use the default (English) language. -->
-    <string name="settings_language_default">Default (English)</string>
-    <!-- Translators: Language option to follow the device language. -->
-    <string name="settings_language_device">Device language</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_arabic">Arabic</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_bulgarian">Bulgarian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_chinese">Chinese</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_croatian">Croatian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_czech">Czech</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_danish">Danish</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_dutch">Dutch</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_english">English</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_estonian">Estonian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_finnish">Finnish</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_french">French</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_german">German</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_greek">Greek</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_hebrew">Hebrew</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_hindi">Hindi</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_hungarian">Hungarian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_indonesian">Indonesian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_italian">Italian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_japanese">Japanese</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_korean">Korean</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_latvian">Latvian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_lithuanian">Lithuanian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_malay">Malay</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_norwegian">Norwegian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_persian">Persian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_polish">Polish</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_portuguese_brazil">Portuguese (Brazil)</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_portuguese_portugal">Portuguese (Portugal)</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_romanian">Romanian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_russian">Russian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_serbian">Serbian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_slovak">Slovak</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_slovenian">Slovenian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_spanish">Spanish</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_spanish_latam">Spanish (Latin America)</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_swedish">Swedish</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_thai">Thai</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_turkish">Turkish</string>
     <!-- Translators: Choice in the preferred audio language picker: use the stream's own original audio track. -->
     <string name="settings_language_original">Original language</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_ukrainian">Ukrainian</string>
-    <!-- Translators: Language name in the language picker. -->
-    <string name="settings_language_vietnamese">Vietnamese</string>
     <!-- Translators: Toggle label for hardware video decoding. -->
     <string name="settings_hardware_decoding">Hardware decoding</string>
     <!-- Translators: Description of the hardware decoding setting. -->
@@ -867,8 +722,6 @@
     <string name="settings_measured_stats_description">Show live fps, bitrate and dropped frames in the stream-info overlay (measured while the overlay is open, for streams that don\'t declare these values). Turn off only if a low-end TV stutters — it never affects the actual video, only the diagnostic numbers.</string>
     <!-- Translators: Option label for 'None / Auto' in various pickers. -->
     <string name="settings_none_auto">None / Auto</string>
-    <!-- Translators: View mode option: grid layout. -->
-    <string name="settings_view_grid">Grid</string>
     <!-- Translators: View mode option: list layout. -->
     <string name="settings_view_list">List</string>
     <!-- Translators: Subtitle size option: small. -->
@@ -910,8 +763,6 @@
     </plurals>
     <!-- Translators: Description of the external player row setting. -->
     <string name="settings_external_player_row_description">Open streams in an external app (VLC, MX Player) instead of the built-in player, chosen per section. Useful for streams this app can\'t decode, or if you prefer another player. Resume position and prev/next are unavailable while playing externally; streams needing a custom User-Agent or referer may not play.</string>
-    <!-- Translators: Section label with item count. 'section' is the section name, 'count' is the number. -->
-    <string name="settings_section_count"><xliff:g id="section">%1$s</xliff:g> (<xliff:g id="count">%2$d</xliff:g>)</string>
     <!-- Translators: Dialog title asking whether to sync the TV guide. -->
     <string name="settings_sync_guide_question">Sync the TV guide now?</string>
     <!-- Translators: Description of the guide sync prompt. 'source' is the EPG source name. -->
@@ -930,24 +781,12 @@
     <string name="settings_guide_synced">TV guide synced</string>
     <!-- Translators: Status text when the TV guide sync fails. -->
     <string name="settings_guide_sync_failed">TV guide sync failed</string>
-    <!-- Translators: Screen title for the remote restore companion screen. -->
-    <string name="settings_restore_remote_title">Restore from another device</string>
-    <!-- Translators: Description of the remote restore process. -->
-    <string name="settings_restore_remote_description">On any device with a browser on the same Wi-Fi — a phone, a computer or another TV — scan the QR (or open the URL), enter this PIN, choose your МОЁ ТВ backup file and send it. You then pick what to restore here.</string>
-    <!-- Translators: Button to retry after a failure. -->
-    <string name="settings_try_again">Try again</string>
-    <!-- Translators: Button to restart the companion server with a new PIN. -->
-    <string name="settings_new_pin">Start again with a new PIN</string>
-    <!-- Translators: Loading status shown while preparing a backup file. -->
-    <string name="settings_preparing_backup">Preparing backup…</string>
     <!-- Translators: Description of the UI Zoom range. 'min' and 'max' are percentages. -->
     <string name="settings_ui_zoom_range">Scale the whole interface (<xliff:g id="min">%1$d</xliff:g>%%–<xliff:g id="max">%2$d</xliff:g>%%).</string>
     <!-- Translators: Warning header for the low zoom setting. The warning emoji is part of the display. -->
     <string name="settings_low_zoom_warning_title">⚠️ Low zoom warning</string>
     <!-- Translators: Warning about low zoom levels causing instability. 'zoom' is the zoom percentage, 'safe_zoom' is the recommended safe level. -->
     <string name="settings_low_zoom_warning"><xliff:g id="zoom">%1$d</xliff:g>%% zoom shows many more items on screen at once. On devices with limited memory (for example, 2 GB TV sticks) this can make the app unstable or crash, especially with large playlists and EPG data.\n\nPress OK to continue, or Back to stay at <xliff:g id="safe_zoom">%2$d</xliff:g>%%.</string>
-    <!-- Translators: Phone/tablet wording of settings_low_zoom_warning. 'zoom' is the chosen zoom percentage, 'safe_zoom' the recommended level. Cancel is the dialog button common_cancel. -->
-    <string name="settings_low_zoom_warning_mobile"><xliff:g id="zoom">%1$d</xliff:g>%% zoom shows many more items on screen at once. On devices with limited memory this can make the app unstable or crash, especially with large playlists and EPG data.\n\nChoose Cancel to stay at <xliff:g id="safe_zoom">%2$d</xliff:g>%%.</string>
     <!-- Translators: Button to acknowledge the low zoom warning. -->
     <string name="settings_low_zoom_accept">I understand and accept the risk</string>
     <!-- Translators: Generic percentage readout used for both transparency and blur intensity. "percent" is the value. -->
@@ -1056,24 +895,10 @@
     <string name="settings_customize_range_rename_start">Rename span started. Press Rename on the end item to select the span.</string>
     <!-- Translators: Instructional text when a span-selection for move has started. -->
     <string name="settings_customize_range_move_start">Move span started. Press ⤒ ↑ ↓ ⤓ on the end item to move the whole span.</string>
-    <!-- Translators: Long-press menu entry on a phone that starts a span selection for hiding or showing. -->
-    <string name="settings_customize_span_hide">Select span to hide or show</string>
-    <!-- Translators: Long-press menu entry on a phone that starts a span selection for moving. -->
-    <string name="settings_customize_span_move">Select span to move</string>
     <!-- Translators: Long-press menu action that jumps a folder or item to the very top of its list. -->
     <string name="settings_customize_move_top">Move to top</string>
     <!-- Translators: Long-press menu action that jumps a folder or item to the very bottom of its list. -->
     <string name="settings_customize_move_bottom">Move to bottom</string>
-    <!-- Translators: Shown under a folder's name when the folder is one the user created themselves, rather than one a provider supplied. -->
-    <string name="settings_customize_custom_category">Custom</string>
-    <!-- Translators: Long-press menu entry on a phone that starts a span selection for renaming. -->
-    <string name="settings_customize_span_rename">Select span to rename</string>
-    <!-- Translators: The hide span prompt on a phone or tablet, where items are tapped instead of pressed with a remote. -->
-    <string name="settings_customize_range_hide_start_touch">Span selection started. Tap the last item, then choose Hide or Show.</string>
-    <!-- Translators: The move span prompt on a phone or tablet, where items are tapped instead of pressed with a remote. -->
-    <string name="settings_customize_range_move_start_touch">Move span started. Tap the last item, then use the arrows to move the whole block.</string>
-    <!-- Translators: The rename span prompt on a phone or tablet, where items are tapped instead of pressed with a remote. -->
-    <string name="settings_customize_range_rename_start_touch">Rename span started. Tap the last item to rename everything in between.</string>
     <!-- Translators: Plural text showing how many categories are selected for moving. 'count' is the number. -->
     <plurals name="settings_customize_range_selected">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> category selected. Keep pressing ⤒ ↑ ↓ ⤓ to move it.</item>
@@ -1177,167 +1002,31 @@
     </plurals>
     <!-- Translators: Status text when the EPG source has not been synced yet. -->
     <string name="settings_epg_sources_not_synced">Not synced yet</string>
-    <!-- Translators: EPG refresh interval: every 1 hour. -->
-    <string name="settings_epg_refresh_1h">1 hour</string>
-    <!-- Translators: EPG refresh interval: every 3 hours. -->
-    <string name="settings_epg_refresh_3h">3 hours</string>
     <!-- Translators: EPG refresh interval: every 6 hours. -->
     <string name="settings_epg_refresh_6h">6 hours</string>
-    <!-- Translators: EPG refresh interval: every 12 hours. -->
-    <string name="settings_epg_refresh_12h">12 hours</string>
-    <!-- Translators: EPG refresh interval: every 24 hours. -->
-    <string name="settings_epg_refresh_24h">24 hours</string>
-    <!-- Translators: EPG refresh interval: every 48 hours. -->
-    <string name="settings_epg_refresh_48h">48 hours</string>
     <!-- Translators: Plural EPG programme count. 'programmes' is the number. -->
     <plurals name="settings_epg_sources_status_count_programmes">
         <item quantity="one">It contains <xliff:g id="programmes">%1$d</xliff:g> program.</item>
         <item quantity="other">It contains <xliff:g id="programmes">%1$d</xliff:g> programs.</item>
     </plurals>
 
-    <!-- Translators: Screen title for the Backup & Restore screen. -->
-    <string name="settings_backup_title">Backup &amp; Restore</string>
-    <!-- Translators: Loading status while a backup operation is in progress. -->
-    <string name="settings_backup_working">Working…</string>
-    <!-- Translators: Section header for backup content selection. -->
-    <string name="settings_backup_what_backup">What to back up</string>
-    <!-- Translators: Section header for restore content selection. -->
-    <string name="settings_backup_what_restore">What to restore</string>
-    <!-- Translators: Dialog title for the backup encryption prompt. -->
-    <string name="settings_backup_encrypt_title">Encrypt this backup?</string>
-    <!-- Translators: Description explaining backup encryption options. -->
-    <string name="settings_backup_encrypt_message">With a backup password, the whole file is encrypted — playlists, profiles and saved passwords included — and nothing in it can be read without that password. Keep it safe: if you lose it, the backup cannot be opened at all. Without a password the file is not encrypted, and saved passwords and PINs are left out of it.</string>
-    <!-- Translators: Section header for the backup export flow. -->
-    <string name="settings_backup_export_title">Export a backup</string>
-    <!-- Translators: Section header for the backup restore flow. -->
-    <string name="settings_backup_restore_title">Restore a backup</string>
-    <!-- Translators: Text-field label for the backup password. -->
-    <string name="settings_backup_password">Backup password</string>
-    <!-- Translators: Heading for the backup password entry screen. -->
-    <string name="settings_backup_enter_password">Enter backup password</string>
-    <!-- Translators: Error text when the wrong backup password is entered. -->
-    <string name="settings_backup_wrong_password">Wrong backup password</string>
-    <!-- Translators: Error description when the backup password doesn't match (non-sealed backup). -->
-    <string name="settings_backup_password_mismatch">That password didn\'t match. Try again, or skip to restore everything except saved passwords.</string>
-    <!-- Translators: Error description when the backup password doesn't match (fully encrypted backup). -->
-    <string name="settings_backup_password_encrypted_mismatch">That password didn\'t match. This backup is encrypted — it can\'t be opened without the password it was created with.</string>
-    <!-- Translators: Description for the encrypted backup password prompt. -->
-    <string name="settings_backup_encrypted_description">This backup is encrypted. Enter the backup password to open it and choose what to restore.</string>
-    <!-- Translators: Description for the partially-encrypted backup password prompt. -->
-    <string name="settings_backup_saved_passwords_description">This backup\'s passwords are encrypted. Enter the backup password to restore them, or skip to restore everything else and re-enter passwords later.</string>
-    <!-- Translators: Heading for choosing a folder to save the backup. -->
-    <string name="settings_backup_choose_folder">Choose a folder to save the backup</string>
-    <!-- Translators: Button to open the folder picker. -->
-    <string name="settings_backup_choose_folder_action">Choose folder</string>
-    <!-- Translators: Heading for picking a backup file to restore. -->
-    <string name="settings_backup_pick_file">Pick a backup file to restore</string>
-    <!-- Translators: Option label for restoring from a remote device. -->
-    <string name="settings_backup_remote">Remote</string>
-    <!-- Translators: Checkbox label to include everything in the backup. -->
-    <string name="settings_backup_everything">Everything</string>
-    <!-- Translators: Checkbox label to include kids profile in the backup. -->
-    <string name="settings_backup_kids_profile">Kids profile</string>
-    <!-- Translators: name is a user-provided profile name; keep the full current-profile label intact. -->
-    <string name="settings_backup_profile_current">“<xliff:g id="name">%1$s</xliff:g>” (current)</string>
-    <!-- Translators: Profile label indicating a locked profile. 'name' is the profile name. -->
-    <string name="settings_backup_profile_locked">“<xliff:g id="name">%1$s</xliff:g>” is locked</string>
-    <!-- Translators: Error text when the PIN is incorrect. -->
-    <string name="settings_backup_pin_incorrect">PIN incorrect.</string>
-    <!-- Translators: Status text when the profile is PIN-locked. -->
-    <string name="settings_backup_pin_locked">PIN locked</string>
-    <!-- Translators: Button to unlock a PIN-locked profile. -->
-    <string name="settings_backup_unlock">Unlock</string>
     <!-- Translators: Button to continue the backup flow. -->
     <string name="settings_backup_continue">Continue</string>
-    <!-- Translators: Button to encrypt and export the backup. -->
-    <string name="settings_backup_encrypt_export">Encrypt &amp; export</string>
-    <!-- Translators: Button to export without encryption. -->
-    <string name="settings_backup_export_unencrypted">Export unencrypted</string>
-    <!-- Translators: Button to encrypt and prepare the backup for transfer. -->
-    <string name="settings_backup_encrypt_prepare">Encrypt &amp; prepare</string>
-    <!-- Translators: Button to prepare without encryption. -->
-    <string name="settings_backup_prepare_unencrypted">Prepare unencrypted</string>
-    <!-- Translators: Button to confirm and start the restore. -->
-    <string name="settings_backup_restore_action">Restore</string>
-    <!-- Translators: Button to skip password entry and restore without passwords. -->
-    <string name="settings_backup_skip_passwords">Skip (no passwords)</string>
-    <!-- Translators: Backup content section: Sources. -->
-    <string name="settings_backup_section_sources">Sources</string>
-    <!-- Translators: Description of the Sources backup section. -->
-    <string name="settings_backup_section_sources_desc">Playlists, EPG feeds and credentials</string>
-    <!-- Translators: Warning in the first-run restore dialog when the Sources section is unticked. -->
-    <string name="settings_backup_no_sources_warning">Without Sources, this device gets no playlists and has nothing to watch.</string>
-    <!-- Translators: Backup content section: Customizations. -->
-    <string name="settings_backup_section_customize">Customizations</string>
     <!-- Translators: Backup content section: Favorites. -->
     <string name="settings_backup_section_favorites">Favorites</string>
     <!-- Translators: Backup content section: Watch history. -->
     <string name="settings_backup_section_history">Watch history</string>
-    <!-- Translators: Description of the Watch history backup section. -->
-    <string name="settings_backup_section_history_desc">Recently watched lists</string>
     <!-- Translators: Backup content section: Manual reorder. -->
     <string name="settings_backup_section_reorder">Manual reorder</string>
     <string name="settings_backup_section_reminders">Reminders</string>
-    <!-- Translators: Backup content section: App settings. -->
-    <string name="settings_backup_section_settings">App settings</string>
-    <!-- Translators: Description of the App settings backup section. -->
-    <string name="settings_backup_section_settings_desc">Theme, accent, player &amp; layout preferences</string>
     <!-- Translators: Restore option, shown only for a backup made on another device (or first-run setup). The settings describing that device's hardware; left unticked by default. -->
     <string name="settings_backup_device_settings">Hardware settings from the other device</string>
     <!-- Translators: Description of the option above: which settings it covers, and when to take them. -->
     <string name="settings_backup_device_settings_desc">Player engine, hardware decoding, frame rate, HDR and surround. Only take them if both devices have the same hardware.</string>
     <!-- Translators: Status text when backup is saved. 'path' is the file path. -->
     <string name="settings_backup_saved_to">Saved to <xliff:g id="path">%1$s</xliff:g>.</string>
-    <!-- Translators: Status text when backup is saved without passwords. 'path' is the file path. -->
-    <string name="settings_backup_saved_to_without_passwords">Saved to <xliff:g id="path">%1$s</xliff:g>. Passwords and PINs were not included.</string>
-    <!-- Translators: Plural text when restore completes. 'items' is the number of restored items. -->
-    <plurals name="settings_backup_restored">
-        <item quantity="one"><xliff:g id="items">%1$d</xliff:g> item restored.</item>
-        <item quantity="other"><xliff:g id="items">%1$d</xliff:g> items restored.</item>
-    </plurals>
-    <!-- Translators: Instruction after restore to re-sync sources. -->
-    <string name="settings_backup_restore_resync">Re-sync your sources to load content.</string>
-    <!-- Translators: Note after restore about re-entering passwords. -->
-    <string name="settings_backup_restore_password_note">Re-enter any saved passwords in Sources/Proxy, and any profile PINs.</string>
-    <!-- Translators: Plural warning when sources are skipped due to unsupported types. 'count' is the number. -->
-    <plurals name="settings_backup_skipped_sources">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> source was skipped because its playlist type is not supported.</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> sources were skipped because their playlist types are not supported.</item>
-    </plurals>
     <!-- Translators: Error text when backup export fails. -->
     <string name="settings_backup_export_error">Export failed.</string>
-    <!-- Translators: Shown instead of the file picker when no app on the phone can save a file (some phones have the system Files app disabled or removed). "Share" is the backup page's Share button. -->
-    <string name="settings_backup_no_file_app">No app on this phone can save the file. Use Share instead.</string>
-    <!-- Translators: Error text when the backup file cannot be read. -->
-    <string name="settings_backup_read_error">Couldn\'t read the backup file.</string>
-    <!-- Translators: Error text when backup import fails. -->
-    <string name="settings_backup_import_error">Import failed.</string>
-    <!-- Translators: Warning when the backup contains an unsupported language. -->
-    <string name="settings_backup_invalid_locale">This backup contained an unsupported app language. The restore succeeded, but your current language was kept.</string>
-    <!-- Translators: Section header for selecting which profiles to back up. -->
-    <string name="settings_backup_which_profiles">Which profiles to back up</string>
-    <!-- Translators: Description of profile selection for backups. -->
-    <string name="settings_backup_selected_profiles">The backup will contain only the selected profiles and their data. Locked profiles need their PIN.</string>
-    <!-- Translators: Description explaining why a PIN is needed for locked profiles in backups. -->
-    <string name="settings_backup_profile_pin_description">This isn\'t your current profile. Enter its PIN to include it in the backup — without the PIN, its data won\'t be backed up.</string>
-    <!-- Translators: Restore, a profile in the backup has the name of one already on this device. %1$s is the name. -->
-    <string name="settings_backup_profile_clash_title">“<xliff:g id="name">%1$s</xliff:g>” is already on this device</string>
-    <!-- Translators: Under that title. -->
-    <string name="settings_backup_profile_clash_body">The backup has a profile with the same name. What should happen to it?</string>
-    <!-- Translators: Choice: merge the backup's profile into the one already here. -->
-    <string name="settings_backup_profile_merge">Merge into it</string>
-    <!-- Translators: What merging does. -->
-    <string name="settings_backup_profile_merge_description">Keeps what it has here and adds what the backup brings.</string>
-    <!-- Translators: Choice: clear the profile here, then restore the backup's. -->
-    <string name="settings_backup_profile_replace">Replace it</string>
-    <!-- Translators: What replacing does. -->
-    <string name="settings_backup_profile_replace_description">Its favorites, watch history, resume positions, customizations and manual order here are cleared first, for the parts being restored.</string>
-    <!-- Translators: Choice: keep the profile here and add the backup's as a new profile. -->
-    <string name="settings_backup_profile_keep_both">Keep both</string>
-    <!-- Translators: What keeping both does. %1$s is the new profile's name. -->
-    <string name="settings_backup_profile_keep_both_description">The backup\'s profile comes in as a new profile, “<xliff:g id="name">%1$s</xliff:g>”.</string>
-    <!-- Translators: Name of a restored profile kept beside one with the same name. %1$s is the original name. -->
-    <string name="settings_backup_profile_restored_name"><xliff:g id="name">%1$s</xliff:g> (restored)</string>
 
 
     <!-- Translators: Title of the bulk rename flow for category items. -->
@@ -1471,8 +1160,6 @@
     <string name="settings_customize_item_was">was “<xliff:g id="name">%1$s</xliff:g>”</string>
     <!-- Translators: Button opening the dialog for moving an item to a combined category. -->
     <string name="settings_customize_move_to">Move to…</string>
-    <!-- Translators: Back button in the category-items screen. Keep the left arrow. -->
-    <string name="settings_customize_back">← Back</string>
 
     <!-- Translators: Title of the dialog that moves an item into a user-defined category. -->
     <string name="settings_move_category_title">Move to category</string>
@@ -1530,12 +1217,6 @@
     <string name="settings_subtitle_reset_all">Reset all</string>
     <!-- Translators: Subtitle color setting title. -->
     <string name="settings_subtitle_color">Subtitle color</string>
-    <!-- Translators: Description of the default subtitle color. -->
-    <string name="settings_subtitle_color_default_description">Default leaves the color to the stream and the player.</string>
-    <!-- Translators: Error hint for a hexadecimal subtitle color. FFEB3B is an example and stays unchanged. -->
-    <string name="settings_subtitle_color_hex_hint">Enter 6 hex digits, e.g. FFEB3B</string>
-    <!-- Translators: Button that leaves a subtitle appearance setting under player or stream control. -->
-    <string name="settings_subtitle_use_default">Use default</string>
     <!-- Translators: Subtitle position setting title. -->
     <string name="settings_subtitle_position">Subtitle position</string>
     <!-- Translators: Subtitle background transparency setting title. -->
@@ -1556,10 +1237,6 @@
     <string name="settings_subtitle_position_description">Where subtitles sit on screen.</string>
     <!-- Translators: Description of the subtitle background transparency control. -->
     <string name="settings_subtitle_background_description">How solid the box behind the text is.</string>
-    <!-- Translators: Label for a hexadecimal color field. -->
-    <string name="settings_subtitle_hex">Hex</string>
-    <!-- Translators: Explains the default subtitle position and fixed-position choices. -->
-    <string name="settings_subtitle_position_default_description">Default leaves placement to the stream — including where a broadcaster puts a live caption. Any other choice always wins.</string>
     <!-- Translators: Subtitle background option meaning no background box. -->
     <string name="settings_subtitle_background_none">None</string>
     <!-- Translators: Subtitle background option meaning a fully solid background box. -->
@@ -1597,19 +1274,11 @@
     </plurals>
     <string name="settings_surround_stereo">Stereo only</string>
     <string name="settings_surround_auto_description">Auto — try Dolby/DTS surround, and switch back to stereo automatically if the TV or soundbar does not play it. Recommended.</string>
-    <!-- Translators: Phone/tablet wording of settings_surround_auto_description. -->
-    <string name="settings_surround_auto_description_mobile">Auto — try Dolby/DTS surround, and switch back to stereo automatically if the speaker, headphones or connected receiver do not play it. Recommended.</string>
     <string name="settings_surround_stereo_description">Stereo only — always decode in the app and send plain 2.0 sound. Use this on TV speakers or a stereo soundbar, or if audio lags behind the picture.</string>
-    <!-- Translators: Phone/tablet wording of settings_surround_stereo_description. -->
-    <string name="settings_surround_stereo_description_mobile">Stereo only — always decode in the app and send plain 2.0 sound. Use this for the built-in speaker, headphones or a stereo soundbar, or if audio lags behind the picture.</string>
     <string name="settings_surround_forced_description">Surround — send Dolby/DTS to a real 5.1/7.1 receiver. If it goes silent or stutters, МОЁ ТВ still falls back to stereo and tells you.</string>
     <string name="settings_panel_width">Panel widths</string>
     <string name="settings_panel_width_description">Resize the category, list and preview panels in Live TV.</string>
     <string name="settings_live_layout_separate">Separate panels</string>
-    <!-- Translators: Panel-width slider label, Cinematic layout only. Sizes the details block. -->
-    <string name="settings_panel_width_details_height">Details height</string>
-    <!-- Translators: Panel-width slider label, Cinematic layout only. The column holding the details and the poster grid. -->
-    <string name="settings_panel_width_content_area">Content area</string>
     <string name="settings_guide_width">Guide column widths</string>
     <string name="settings_guide_width_description">Resize the channel list and EPG timeline in the TV Guide.</string>
     <string name="settings_search_keywords_guide_width">guide epg channel list timeline column panel width size resize layout</string>
@@ -1651,60 +1320,14 @@
     <string name="settings_language_contribution_description">Scan the QR code or open the link to choose any available language and contribute across all six МОЁ ТВ translation components.</string>
     <!-- Translators: Workflow for adding a language that is not yet listed. Hosted Weblate is a product name. -->
     <string name="settings_language_request_workflow">Want to add a language that isn\'t listed? Open a language request first. A maintainer will register it and prepare the base translation files; once it appears on Hosted Weblate, you can start contributing.</string>
-    <!-- Translators: Button opening the issue form used to request a language that is not yet listed. -->
-    <string name="settings_language_request_new">Request a new language</string>
     <!-- Translators: Accessibility description for the QR image linking to the МОЁ ТВ translation project. -->
     <string name="settings_language_contribution_qr_description">QR code for the МОЁ ТВ translation project overview</string>
-    <!-- Translators: Graceful fallback shown when the app cannot generate the translation QR code. -->
-    <string name="settings_language_contribution_qr_failed">The QR code could not be generated. Use the link shown below instead.</string>
-    <!-- Translators: Button that copies the translation project URL to the clipboard. -->
-    <string name="settings_language_contribution_copy">Copy link</string>
-    <!-- Translators: Confirmation after copying the translation project URL. -->
-    <string name="settings_language_contribution_copied">Link copied</string>
-    <!-- Translators: Error shown when no app can open the translation project link. -->
-    <string name="settings_language_contribution_open_failed">The link could not be opened. Copy it instead.</string>
-    <!-- Translators: Error shown if copying the translation project URL fails. -->
-    <string name="settings_language_contribution_copy_failed">The link could not be copied. Read or type the URL shown above.</string>
     <string name="settings_ambient_glow">Ambient glow</string>
     <string name="settings_ambient_glow_description">Adds setup-style radiance to the solid interface</string>
     <string name="settings_ambient_glow_dialog_description">Adds a soft accent aura to the non-glass interface. Slow pulse gently breathes when animations are enabled.</string>
     <string name="settings_ambient_glow_effect">Glow</string>
     <string name="settings_ambient_glow_pulse">Slow pulse</string>
     <string name="settings_glass_live_preview">Live preview</string>
-    <!-- Translators: Settings row. The touch equivalent of "Focus highlight": the ring drawn around the item the user has selected. -->
-    <string name="settings_selection_highlight">Selection highlight</string>
-    <string name="settings_selection_highlight_description">Color and thickness of the ring around the selected item</string>
-    <!-- Translators: Settings row. Whether audio keeps playing once the user leaves the app. -->
-    <string name="settings_background_playback">Background playback</string>
-    <string name="settings_background_playback_description">Keep the sound playing after you leave the app</string>
-    <!-- Translators: Settings row. Android's floating-window mode. Keep the platform's own name for it in your language. -->
-    <string name="settings_pip">Picture-in-Picture</string>
-    <!-- Translators: Settings row. Refuse to stream over a metered (mobile data) connection. -->
-    <string name="settings_data_saver">Data saver</string>
-    <string name="settings_data_saver_description">Do not stream over mobile data</string>
-    <!-- Translators: Settings row. How far a swipe must travel to change volume, brightness or position. -->
-    <string name="settings_gesture_sensitivity">Gesture sensitivity</string>
-    <!-- Translators: Phone settings, under the Mini-player row. What keeps playing while the user browses: a window they can drag, or a bar docked above the tabs. -->
-    <string name="settings_mini_player_style_description">How playback follows you while you browse</string>
-    <!-- Translators: Option for the row above. A small video window the user drags around the screen. -->
-    <string name="settings_mini_player_style_floating">Floating window</string>
-    <!-- Translators: Option for the row above. A fixed bar just above the navigation tabs. -->
-    <string name="settings_mini_player_style_docked">Docked bar</string>
-    <!-- Translators: Settings row. The starting size of the floating video window. -->
-    <string name="settings_pip_size">Window size</string>
-    <!-- Translators: Three size options for the row above. -->
-    <string name="settings_pip_size_small">Small</string>
-    <string name="settings_pip_size_medium">Medium</string>
-    <string name="settings_pip_size_large">Large</string>
-    <!-- Translators: Settings row. The floating window jumps to the nearest screen edge when released. -->
-    <string name="settings_pip_snap">Snap to edges</string>
-    <!-- Translators: Settings row. Drop the video and keep the sound once the phone screen switches off, to save battery. -->
-    <string name="settings_audio_on_screen_off">Sound only when the screen turns off</string>
-    <!-- Translators: Settings row. Begin playback without a picture while the phone is on mobile data. -->
-    <string name="settings_audio_on_mobile_data">Sound only on mobile data</string>
-    <string name="settings_audio_on_mobile_data_description">Start without a picture when there is no Wi-Fi</string>
-    <!-- Translators: Settings row. The app remembers, for each channel, whether the user watched it without a picture. -->
-    <string name="settings_audio_per_channel">Remember sound only per channel</string>
     <!-- Local sync: two МОЁ ТВ devices on the same Wi-Fi exchanging their data directly. -->
     <!-- Translators: Title of the Local sync settings screen, and its row on the Data settings page. -->
     <string name="local_sync_title">Local sync</string>
@@ -1712,10 +1335,6 @@
     <string name="local_sync_host_hint">On your other device, turn Sync mode on too, then tap Connect and pick this one.</string>
     <!-- Translators: Accessibility description of the QR code image. -->
     <string name="local_sync_qr_description">QR code with this device\'s address</string>
-    <!-- Translators: The pairing code shown on screen. %1$s is a six-digit number. -->
-    <string name="local_sync_pin_is">PIN: <xliff:g id="pin">%1$s</xliff:g></string>
-    <!-- Translators: Button that starts looking for another device to pair with. -->
-    <string name="local_sync_add_device">Find a device</string>
     <!-- Translators: Section heading above the list of devices already paired. -->
     <string name="local_sync_paired_devices">Paired devices</string>
     <!-- Translators: Shown while a transfer is in progress. -->
@@ -1724,20 +1343,8 @@
     <string name="local_sync_find_hint">Both devices must be on the same Wi-Fi, and the other one must have Sync mode on.</string>
     <!-- Translators: Shown while no device has answered on the network yet. -->
     <string name="local_sync_searching">Searching the network…</string>
-    <!-- Translators: Heading above the list of devices found on the network. -->
-    <string name="local_sync_found">Found on your network</string>
-    <!-- Translators: Button that opens the camera to read the other device\'s QR code. -->
-    <string name="local_sync_scan_qr">Scan the code</string>
-    <!-- Translators: Description under the scan button, and instruction while the camera is open. -->
-    <string name="local_sync_scan_qr_description">Point the camera at the code on your other device</string>
-    <!-- Translators: Shown instead of the camera when permission to use it was refused. -->
-    <string name="local_sync_camera_denied">Without the camera you can still pick the device from the list, or type its address.</string>
-    <!-- Translators: Heading above the field for typing the other device\'s address by hand. -->
-    <string name="local_sync_manual_address">Or type the address</string>
     <!-- Translators: Label of the address field. -->
     <string name="local_sync_manual_address_label">Address</string>
-    <!-- Translators: Title of the sheet asking for the PIN shown on the other device. -->
-    <string name="local_sync_enter_pin">Enter the PIN</string>
     <!-- Translators: Explanation under the PIN field. The PIN is only needed the first time. -->
     <string name="local_sync_enter_pin_description">Type the six digits shown on your other device. You only need to do this once.</string>
     <!-- Translators: Label of the PIN field. -->
@@ -1760,16 +1367,6 @@
     <string name="local_sync_unpair">Forget this device</string>
     <!-- Translators: Description under the "Forget this device" button. -->
     <string name="local_sync_unpair_description">You will need the PIN again next time</string>
-    <!-- Translators: Title of the sheet where the user picks what to send. -->
-    <string name="local_sync_what_to_send">What to send</string>
-    <!-- Translators: Title of the sheet where the user picks what to receive. -->
-    <string name="local_sync_what_to_receive">What to receive</string>
-    <!-- Translators: Title of the sheet where the user picks what to merge. -->
-    <string name="local_sync_what_to_merge">What to merge</string>
-    <!-- Translators: Explanation above the tick list of what a sync includes. -->
-    <string name="local_sync_sections_hint">The same things a backup holds. Untick anything you would rather leave out.</string>
-    <!-- Translators: Tick box that selects every part at once. -->
-    <string name="local_sync_everything">Everything</string>
     <!-- Translators: Title of the sheet showing what a sync would change before it happens. -->
     <string name="local_sync_confirm_title">What will change</string>
     <!-- Translators: Explanation above the list of counted changes. -->
@@ -1778,8 +1375,6 @@
     <string name="local_sync_nothing_to_change">Both devices already hold the same thing. There is nothing to apply.</string>
     <!-- Translators: Note shown for the Merge direction, explaining that this device\'s data goes back afterwards. -->
     <string name="local_sync_merge_note">Your own data is sent back afterwards, so both devices end up the same.</string>
-    <!-- Translators: One counted change: how many profiles this device does not have yet. %1$d is a number. -->
-    <string name="local_sync_change_profiles">New profiles: <xliff:g id="count">%1$d</xliff:g></string>
     <!-- Translators: One counted change: how many playlists this device does not have yet. %1$d is a number. -->
     <string name="local_sync_change_sources">New playlists: <xliff:g id="count">%1$d</xliff:g></string>
     <!-- Translators: One counted change: how many favorites would be added. %1$d is a number. -->
@@ -1811,8 +1406,6 @@
     <string name="local_sync_received_items">Items received: <xliff:g id="count">%1$d</xliff:g></string>
     <!-- Translators: Result line shown when this device\'s data was sent to the other one. -->
     <string name="local_sync_sent">Your data was sent</string>
-    <!-- Translators: Title of the sheet shown when a sync failed. -->
-    <string name="local_sync_failed">Sync failed</string>
     <!-- Translators: Failure reason: the other device did not answer. -->
     <string name="local_sync_error_unreachable">This device could not be reached. On it, open МОЁ ТВ → More → Local sync and turn Sync mode on. Both devices must be on the same Wi-Fi.</string>
     <!-- Translators: Failure reason: wrong PIN, or the pairing was removed on the other device. -->
@@ -1833,8 +1426,6 @@
     <string name="local_sync_already_paired">Already paired</string>
     <!-- Translators: A device name followed by a short code, used only when two paired devices are the same model and share a name. %1$s is the device name, %2$s a four-character code. -->
     <string name="local_sync_device_with_code"><xliff:g id="name">%1$s</xliff:g> (<xliff:g id="code">%2$s</xliff:g>)</string>
-    <!-- Translators: Local sync, before a sync starts: only the profile in use is synced. %1$s is its name. -->
-    <string name="local_sync_profile_note">Only the profile in use syncs: <xliff:g id="profile">%1$s</xliff:g> here, with the profile in use on the other device.</string>
     <!-- Auto-sync: two paired devices syncing by themselves while МОЁ ТВ is open on both. -->
     <!-- Translators: Name of the feature, and of the button on a paired device's row in Local sync that opens its settings. -->
     <string name="local_auto_sync_title">Auto-sync</string>
@@ -1856,8 +1447,6 @@
     <string name="local_auto_sync_accept">Allow</string>
     <!-- Translators: Button that refuses it; focused by default. -->
     <string name="local_auto_sync_decline">Don\'t allow</string>
-    <!-- Translators: Heading over the sections this device lets travel. -->
-    <string name="local_auto_sync_what_to_sync">What this device syncs</string>
     <!-- Translators: Heading over the timing choices: the least time between two automatic syncs. -->
     <string name="local_auto_sync_when">How often</string>
     <!-- Translators: Timing choice: every time either device opens or leaves МОЁ ТВ. -->
@@ -1870,12 +1459,6 @@
     <string name="local_auto_sync_note">Auto-sync merges both ways, and deletions stay deleted. Each device decides what it lets through: playlists with their logins and Settings travel only where they are ticked.</string>
     <!-- Translators: Line under a paired device's row: when the last automatic sync with it completed. %1$s is a relative time such as “2 hours ago”. -->
     <string name="local_auto_sync_last_run">Last auto-sync: <xliff:g id="when">%1$s</xliff:g></string>
-    <!-- Translators: What the other device lets travel. %1$s is its name, %2$s a list of sections. -->
-    <string name="local_auto_sync_their_sections"><xliff:g id="device">%1$s</xliff:g> syncs: <xliff:g id="sections">%2$s</xliff:g></string>
-    <!-- Translators: The two profiles an auto-sync keeps as one: this device's, then the other device's. -->
-    <string name="local_auto_sync_profiles">Profiles: <xliff:g id="here">%1$s</xliff:g> ↔ <xliff:g id="there">%2$s</xliff:g></string>
-    <!-- Translators: In an auto-sync's settings before it is on. %1$s is the profile in use here, %2$s the other device. -->
-    <string name="local_auto_sync_profile_hint">Pairs this profile, <xliff:g id="profile">%1$s</xliff:g>, with the profile in use on <xliff:g id="device">%2$s</xliff:g>.</string>
     <!-- Translators: Line under a paired device's row: the other device turned auto-sync off. -->
     <string name="local_auto_sync_turned_off">Auto-sync turned off on <xliff:g id="device">%1$s</xliff:g></string>
     <!-- Translators: Line under a paired device's row: the last automatic sync could not reach it. -->
@@ -1886,44 +1469,16 @@
     <string name="local_auto_sync_listen_description">On: paired devices can auto-sync with this one whenever МОЁ ТВ is open here. Off: only while Sync mode is on.</string>
     <!-- Translators: State of that switch's listener: it is running now. -->
     <string name="local_auto_sync_listening">Listening</string>
-    <!-- Translators: Label for the date of the most recent backup, in the More screen's Backup preview pane. -->
-    <string name="more_pane_last_backup">Last backup</string>
-    <!-- Translators: Shown beside a backup file size when that backup is password-encrypted. -->
-    <string name="more_pane_encrypted">Encrypted</string>
     <!-- Translators: More menu: group heading over Favorites and History. Shown in capitals by the style. -->
     <string name="more_group_your_things">Your things</string>
     <!-- Translators: More menu: group heading over Backup & Restore and Local sync. Shown in capitals by the style. -->
     <string name="more_group_keep_safe">Keep it safe</string>
-    <!-- Translators: More menu: button beside the profile name that switches to another profile. One short verb. -->
-    <string name="more_profile_switch">Switch</string>
     <!-- Translators: More › Favorites: nothing has been added to Favorites yet. -->
     <string name="more_fav_empty_title">No favorites yet</string>
     <!-- Translators: More › Favorites, empty: how to add something. {L} is the existing "Add to Favorites" menu label. -->
     <string name="more_fav_empty_body">Hold OK on a channel and choose Add to Favorites.</string>
     <!-- Translators: More › History: nothing has been watched yet. -->
     <string name="more_history_empty">Nothing watched yet</string>
-    <!-- Translators: More › Backup & Restore: warning card when no backup has ever been made on this device. -->
-    <string name="more_backup_never_title">Never backed up</string>
-    <!-- Translators: More › Backup & Restore, warning card: what would be lost. "playlists", "favorites" and "history" are counted phrases, e.g. "3 playlists", "5 favorites", "209 history items". -->
-    <string name="more_backup_never_body"><xliff:g id="playlists">%1$s</xliff:g>, <xliff:g id="favorites">%2$s</xliff:g>, <xliff:g id="history">%3$s</xliff:g> and every customization live only on this TV.</string>
-    <!-- Translators: Phone version of more_backup_never_body: the backup warning on More › Backup & Restore. %1$s playlists, %2$s favorites and %3$s history items are counted phrases. -->
-    <string name="more_backup_never_body_mobile"><xliff:g id="playlists">%1$s</xliff:g>, <xliff:g id="favorites">%2$s</xliff:g>, <xliff:g id="history">%3$s</xliff:g> and every customization live only on this phone.</string>
-    <!-- Translators: More › Backup & Restore: tile that makes a backup. -->
-    <string name="more_backup_now">Back up now</string>
-    <!-- Translators: More › Backup & Restore: line under Back up now. -->
-    <string name="more_backup_now_body">Save a file on this TV, or send it by Remote to another device</string>
-    <!-- Translators: Phone version of more_backup_now_body: line under Back up now on More › Backup & Restore. -->
-    <string name="more_backup_now_body_mobile">Save a file on this phone, or send it to another device</string>
-    <!-- Translators: More › Backup & Restore: button that saves the backup as a file on this TV. -->
-    <string name="more_backup_file_tv">File on this TV</string>
-    <!-- Translators: Phone version of more_backup_file_tv: button that saves the backup as a file on the phone. -->
-    <string name="more_backup_file_tv_mobile">File on this phone</string>
-    <!-- Translators: More › Backup & Restore: line under Restore. -->
-    <string name="more_restore_body">From a file on this TV, or by Remote from another device</string>
-    <!-- Translators: Phone version of more_restore_body: line under Restore on More › Backup & Restore. -->
-    <string name="more_restore_body_mobile">From a file on this phone, or by Remote from another device</string>
-    <!-- Translators: More › Backup & Restore: heading over the list of what a backup contains. Shown in capitals by the style. -->
-    <string name="more_backup_included">What\'s included</string>
     <!-- Translators: More › About: tag beside the version after a check found no newer version. Shown in capitals by the style. -->
     <string name="more_about_up_to_date">Up to date</string>
     <!-- Translators: More › About: when the app last checked for a new version. "value" is a date and time, e.g. "1 Oct, 20:12". -->
@@ -1932,8 +1487,6 @@
     <string name="more_settings_pin_hint">Hold OK on a row to pin it to Quick</string>
     <!-- Translators: More › Settings: placeholder of the field that searches every setting. -->
     <string name="more_settings_search">Search all settings</string>
-    <!-- Translators: More › Settings, card under "Profile": what the group holds. -->
-    <string name="settings_card_profile">Viewers, kids mode, PIN locks</string>
     <!-- Translators: More › Settings, card under "Appearance": what the group holds. -->
     <string name="settings_card_appearance">Theme, accent, glass, text</string>
     <!-- Translators: More › Settings, card under "Layout": what the group holds. -->
@@ -1962,39 +1515,13 @@
     <string name="more_about_license">GPLv3 · free and open source</string>
     <!-- Translators: More › About: what the app is. -->
     <string name="more_about_description">Your own IPTV player for Android TV. It provides no channels or content; you bring your own legally accessible sources.</string>
-    <!-- Translators: Phone version of more_about_description: the paragraph on More › About. -->
-    <string name="more_about_description_mobile">Your own IPTV player for Android. It provides no channels or content; you bring your own legally accessible sources.</string>
     <!-- Translators: More › About, Telegram card: hint under the link. -->
     <string name="more_about_scan">Scan with your phone.</string>
-    <!-- Translators: Phone version of more_about_scan: under the Telegram QR code; the card can also be tapped to open the link. -->
-    <string name="more_about_scan_mobile">Scan, or tap to open</string>
-    <!-- Translators: More menu, under the profile name: how many playlists there are, e.g. "All playlists · 3 playlists". -->
-    <plurals name="more_playlist_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> playlist</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> playlists</item>
-    </plurals>
-    <!-- Translators: Backup warning card: how many favorites, e.g. "5 favorites". Part of a longer sentence. -->
-    <plurals name="more_count_favorites">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> favorite</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> favorites</item>
-    </plurals>
-    <!-- Translators: Backup warning card: how many watch-history entries, e.g. "209 history items". Part of a longer sentence. -->
-    <plurals name="more_count_history">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> history item</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> history items</item>
-    </plurals>
     <!-- Translators: More › About: chip with how many languages the app is in, e.g. "2 languages". -->
     <plurals name="more_about_languages">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> language</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> languages</item>
     </plurals>
-    <!-- Translators: Value on the More page's Settings row: how many settings are pinned to Quick. -->
-    <plurals name="more_settings_pinned_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> pinned</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> pinned</item>
-    </plurals>
-    <!-- Translators: Label for where the last backup file was written. -->
-    <string name="settings_backup_location">Location</string>
     <!-- Translators: Setting label for Multiview: several live channels on screen at once. -->
     <string name="settings_multiview">Multiview</string>
     <!-- Translators: Description of the Multiview setting. -->
@@ -2015,8 +1542,6 @@
     <string name="settings_app_icon">App icon</string>
     <!-- Translators: Subtitle under the App icon setting. -->
     <string name="settings_app_icon_summary">Color of the МОЁ ТВ icon and logo</string>
-    <!-- Translators: Settings › App › App icon sheet, under its title (phone). Choosing a new icon restarts the app once. -->
-    <string name="settings_app_icon_sheet_mobile">How МОЁ ТВ appears on your home screen. The app restarts once.</string>
     <!-- Translators: Settings, App group row: the app logo play triangle follows the accent color. -->
     <string name="settings_brand_accent">Accent-colored logo</string>
     <!-- Translators: Colour name of an app icon: a dark blue-green, like petrol. -->
@@ -2079,20 +1604,6 @@
     <string name="settings_nav_menu_items">Menu items</string>
     <!-- Translators: Explains the Menu items setting: Dynamic and Static are its two choices (settings_dynamic, settings_static); keep the same words. -->
     <string name="settings_nav_menu_items_desc">Dynamic: follows what the playlist has · Static: you pick them</string>
-    <!-- Translators: Small group label in the phone Navigation sheet, above the Labels / Icons only choice for the bottom bar. Shown in capitals by the style. -->
-    <string name="settings_nav_bar">Bar</string>
-    <!-- Translators: Phone bottom bar option: show a name under each icon. -->
-    <string name="settings_nav_labels">Labels</string>
-    <!-- Translators: Phone bottom bar option: icons without names. -->
-    <string name="settings_nav_icons_only">Icons only</string>
-    <!-- Translators: Phone setting: the bottom bar slides away while a list scrolls. -->
-    <string name="settings_nav_hide_scrolling">Hide while scrolling</string>
-    <!-- Translators: Description of settings_nav_hide_scrolling. -->
-    <string name="settings_nav_hide_scrolling_desc">The bar slides away as you scroll down, back on the way up</string>
-    <!-- Translators: Phone setting: show how many channels / titles each playlist or category has in the pickers. -->
-    <string name="settings_sheet_counts">Show counts</string>
-    <!-- Translators: Description of settings_sheet_counts. "Sheets" are the panels that slide up from the bottom. -->
-    <string name="settings_sheet_counts_desc">Channel and title counts in the sheets</string>
     <!-- Translators: Hidden keyword bag for the Navigation settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_navigation">rail, sidebar, menu, navigation, hide, floating, docked, size, compact, wide, length, full height</string>
     <!-- Translators: Small heading above a settings popup title: where the setting lives, e.g. "SETTINGS · LAYOUT". Keep the separator unless your language uses another one. -->
@@ -2164,10 +1675,6 @@
     <string name="settings_search_keywords_reminders">reminder remind alert notify program programme start switch</string>
     <!-- Translators: Search keywords for the Live TV opens in setting. Space-separated, lower case. -->
     <string name="settings_search_keywords_live_opens_in">live tv opens start list guide grid view</string>
-    <!-- Translators: Panel widths summary in the Cinematic layout: the categories sheet width and the details height, both in percent. -->
-    <string name="settings_panel_width_summary_cinematic">Categories sheet <xliff:g id="sheet">%1$d</xliff:g>%% · Details height <xliff:g id="height">%2$d</xliff:g>%%</string>
-    <!-- Translators: Under the Categories sheet stepper in the Cinematic layout: the sheet opens with Left over the posters. -->
-    <string name="settings_panel_width_cinematic_sheet_hint">How wide the categories open over the titles with Left.</string>
     <!-- Translators: Remote-key hint in the Settings explanation panel: OK (or ◀ ▶) changes this setting. -->
     <string name="settings_key_change">Change</string>
     <!-- Translators: Remote-key hint in the Settings explanation panel: OK turns this switch on or off. -->
@@ -2310,8 +1817,6 @@
     <string name="settings_line_measured_stats">Live fps, bitrate and dropped frames</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_logging">A full trace for bug reports</string>
-    <!-- Translators: Explanation of the Profile settings group, shown in the panel beside the profiles. -->
-    <string name="settings_help_profiles">Each viewer keeps their own favorites, watch history, resume points and Home rows. Kids mode shows only the categories you allow; a PIN stops anyone else from opening the profile.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_guide_days">How many days of programs the guide stores ahead. Fewer days make guide refreshes faster and the database smaller.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
@@ -2380,29 +1885,10 @@
     <string name="settings_key_palette">Palette</string>
     <!-- Translators: Note under the live preview in Settings › Appearance. -->
     <string name="settings_live_preview_note">Changes show here as you move, before you leave the row.</string>
-    <!-- Translators: When a playlist was last synced, e.g. “Synced today, 06:10”. “when” is a day and time. -->
-    <string name="settings_synced_at">Synced <xliff:g id="when">%1$s</xliff:g></string>
-    <!-- Translators: Line under the profile that is open now, in Settings › Profile; also its tag, shown in capitals. -->
-    <string name="settings_profile_in_use">In use</string>
-    <!-- Translators: Line under a kids profile in Settings › Profile. -->
-    <string name="settings_profile_kids">Kids mode</string>
-    <!-- Translators: Line under a profile that is locked with a PIN, in Settings › Profile. -->
-    <string name="settings_profile_pin_lock">PIN lock</string>
-    <!-- Translators: Line under a profile with no PIN, in Settings › Profile. -->
-    <string name="settings_profile_no_lock">No lock</string>
-    <!-- Translators: Last row in Settings › Profile: creates a new profile. -->
-    <string name="settings_profile_add">Add a profile</string>
-    <!-- Translators: Line under Add a profile in Settings › Profile. -->
-    <string name="settings_profile_add_line">A viewer with their own favorites, history and settings</string>
     <!-- Translators: Explanation shown in the panel beside the Language setting. The number is how many languages МОЁ ТВ ships in. -->
     <plurals name="settings_help_language">
         <item quantity="one">The language of every menu and message in МОЁ ТВ. <xliff:g id="count">%1$d</xliff:g> language; follows the TV’s own language until you pick one.</item>
         <item quantity="other">The language of every menu and message in МОЁ ТВ. <xliff:g id="count">%1$d</xliff:g> languages; follows the TV’s own language until you pick one.</item>
-    </plurals>
-    <!-- Translators: Count next to the Profile page title in Settings, e.g. “3 profiles”. -->
-    <plurals name="settings_profile_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> profile</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> profiles</item>
     </plurals>
     <!-- Translators: Short option in a two-way switch inside a Settings row, e.g. Stage | Separate. Keep it one short word. Categories, list and preview in separate panels. -->
     <string name="settings_seg_separate">Separate</string>
@@ -2412,11 +1898,6 @@
     <string name="settings_accent_yours">Yours</string>
     <!-- Translators: Hint under the color picker in the Accent color popup. The arrows are the remote's keys. -->
     <string name="settings_accent_picker_hint">OK on the field or the hue bar, then the arrows move it; OK or Back to finish.</string>
-    <!-- Translators: Value on the EPG Sources settings row: how many guide feeds are added, e.g. “2 feeds”. -->
-    <plurals name="settings_epg_feed_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> feed</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> feeds</item>
-    </plurals>
     <!-- Translators: Title of the Settings page for the top-right clock block: date, time and weather. -->
     <string name="settings_title_date_time_weather">Date, time &amp; weather</string>
     <!-- Translators: Short line under the Show weather row. -->
@@ -2470,56 +1951,8 @@
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> row</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> rows</item>
     </plurals>
-    <!-- Translators: Short line under From your phone. -->
-    <string name="settings_line_add_from_phone">Fill the form in a browser on another device</string>
-    <!-- Translators: Add a source: type the details on the TV with the remote. -->
-    <string name="settings_add_type_here">Type it here</string>
-    <!-- Translators: Short line under Type it here. -->
-    <string name="settings_line_add_type_here">Xtream, M3U or Stalker with the remote</string>
-    <!-- Translators: Panel text for From your phone. -->
-    <string name="settings_help_add_from_phone">Open the address or scan the code in a browser on any device on the same Wi-Fi — a phone, a computer or another TV — fill in your playlist there and send it here. Much faster than typing a URL with the remote.</string>
-    <!-- Translators: Panel text for Type it here. -->
-    <string name="settings_help_add_type_here">Type an Xtream login, an M3U address or a Stalker portal with the remote, then start the import from the panel.</string>
-    <!-- Translators: Row on From your phone while the TV waits for the phone to send the form. -->
-    <string name="settings_remote_waiting">Waiting for the other device</string>
-    <!-- Translators: Line under Waiting for your phone. -->
-    <string name="settings_remote_nothing_yet">Nothing received yet</string>
-    <!-- Translators: Row: start again with a new PIN. -->
-    <string name="settings_remote_new_pin">New PIN</string>
-    <!-- Translators: Line under New PIN: use it if someone else saw the current PIN. -->
-    <string name="settings_line_remote_new_pin">If someone else saw this one</string>
-    <!-- Translators: Panel heading above the QR code on From your phone. -->
-    <string name="settings_remote_scan">Scan or open in a browser</string>
-    <!-- Translators: Panel: before the address to open instead of scanning the QR code. -->
-    <string name="settings_remote_or_open">or open</string>
-    <!-- Translators: Panel note on From your phone. Start import is the button on the next page. -->
-    <string name="settings_remote_details_note">The details appear here; you press Start import with the remote.</string>
-    <!-- Translators: Note on the TV's Remote page while a playlist is being edited from another device. Save is the button on the edit screen. -->
-    <string name="settings_remote_edit_note">The changes fill the edit screen; you press Save with the remote.</string>
-    <!-- Translators: Explanation shown in the panel beside the Settings rows while "Edit from another device" has focus. -->
-    <string name="settings_help_edit_from_phone">Opens this playlist in a browser on a phone, tablet or computer on the same Wi-Fi. Passwords, MAC addresses and M3U playlist addresses are never shown there: leave them empty to keep them. What you send fills this screen, and nothing changes until you press Save.</string>
-    <!-- Translators: Key hint after Back on From your phone: stops the phone server and goes back. -->
-    <string name="settings_key_stop_back">Stop and go back</string>
-    <!-- Translators: Row on the Add source form: Xtream, M3U or Stalker. -->
-    <string name="settings_source_type">Type</string>
-    <!-- Translators: Line under Type on the Add source form. -->
-    <string name="settings_line_source_type">Xtream, M3U or Stalker portal</string>
-    <!-- Translators: Row on the M3U form: pick a playlist file stored on the TV. -->
-    <string name="settings_choose_local_file">Choose a local file…</string>
-    <!-- Translators: Line under Choose a local file. -->
-    <string name="settings_line_local_file">.m3u or .m3u8 on this TV</string>
-    <!-- Translators: Heading above the optional fields of a form. -->
-    <string name="settings_form_optional">Optional</string>
     <!-- Translators: Panel text for a text field. ▼ is the remote's down key. -->
     <string name="settings_form_field_help">OK opens the keyboard; ▼ moves to the next field.</string>
-    <!-- Translators: Panel text for the playlist address field (followed by the field help). -->
-    <string name="settings_help_playlist_url">The address of your .m3u or .m3u8 list.</string>
-    <!-- Translators: Line under Fill from playlist on the Add EPG form. -->
-    <string name="settings_line_fill_from_playlist">Use the guide address your playlist gives</string>
-    <!-- Translators: Line under Auto refresh on the Add EPG form. -->
-    <string name="settings_line_epg_auto_refresh">Keep the guide up to date</string>
-    <!-- Translators: Panel text for the guide's Name field (followed by the field help). -->
-    <string name="settings_help_epg_name">Shown in the guide list and in Pick EPG manually.</string>
     <!-- Translators: Title of the Glass & background page and its Appearance row. -->
     <string name="settings_glass_bg_title">Glass &amp; background</string>
     <!-- Translators: Line under Glass & background in Appearance. -->
@@ -2538,10 +1971,6 @@
     <string name="settings_bg_plain">Plain</string>
     <!-- Translators: Line under Picture when none is chosen. -->
     <string name="settings_line_bg_picture_none">Choose a picture from this TV or by Remote</string>
-    <!-- Translators: Phone version of settings_line_bg_picture_none: Glass & background › Picture with no picture chosen yet. -->
-    <string name="settings_line_bg_picture_none_mobile">Choose a picture from this phone</string>
-    <!-- Translators: Glass & background › Picture, line under the row: the chosen picture's file name, then where it came from. -->
-    <string name="settings_bg_picture_from_phone"><xliff:g id="file" example="sunset.jpg">%1$s</xliff:g> · from this phone</string>
     <!-- Translators: Value of the Picture row when one is set: OK opens the picker. -->
     <string name="settings_bg_change">Change</string>
     <!-- Translators: Value of the Picture row when none is set. -->
@@ -2582,8 +2011,6 @@
     <string name="settings_glass_section">Glass</string>
     <!-- Translators: Line under Glass. -->
     <string name="settings_line_glass_switch">Rail, sheets, menus and popups are frosted</string>
-    <!-- Translators: Phone version of settings_line_glass_switch: the phone has bars at the top and bottom instead of the TV's rail. -->
-    <string name="settings_line_glass_switch_mobile">Bars, sheets, menus and popups are frosted</string>
     <!-- Translators: Panel text for Glass and Glass opacity. -->
     <string name="settings_help_glass_chrome">Frosts the floating parts: the rail, the category sheets, menus, popups and the pills at the top. Lists and channel artwork stay flat.</string>
     <!-- Translators: Row title: how solid the glass is. -->
@@ -2594,86 +2021,4 @@
     <string name="settings_line_glass_reset">Stage colors, glass on, <xliff:g id="percent" example="56%">%1$s</xliff:g></string>
     <!-- Translators: Note under the live preview of Live TV. -->
     <string name="settings_bg_preview_note">Live TV with this background. Changes show as you move.</string>
-    <!-- Translators: Phone version of more_settings_pin_hint: line under the Settings title on a phone (touch: hold a row). -->
-    <string name="settings_root_hint_mobile">Hold a row to pin it to Quick</string>
-    <!-- Translators: Phone version of settings_card_layout: what the Layout group holds on a phone (no panels there). -->
-    <string name="settings_card_layout_mobile">Navigation, Home, lists, menus</string>
-    <!-- Translators: Phone version of settings_card_watching: what the Watching group holds on a phone. -->
-    <string name="settings_card_watching_mobile">Multiview, mini-player, picture-in-picture</string>
-    <!-- Translators: Phone version of settings_line_live_preview: line under the Live preview setting. The preview sits at the top of the Live TV list. -->
-    <string name="settings_line_live_preview_mobile">Play the chosen channel at the top of Live TV</string>
-    <!-- Translators: Phone version of settings_line_hw: line under Hardware decoding. -->
-    <string name="settings_line_hw_mobile">Use the phone’s own decoder</string>
-    <!-- Translators: Phone version of settings_line_surround: line under Surround sound. -->
-    <string name="settings_line_surround_mobile">5.1 and 7.1 as the phone gets them</string>
-    <!-- Translators: Phone version of settings_line_passthrough: line under the passthrough setting (sound sent undecoded to a receiver or soundbar). -->
-    <string name="settings_line_passthrough_mobile">Undecoded to a connected receiver</string>
-    <!-- Translators: Line under the Navigation setting on a phone: the bottom bar's options. -->
-    <string name="settings_line_navigation_mobile">The bar at the bottom: labels, hide while scrolling, items</string>
-    <!-- Translators: Settings row on a phone: how wide the TV Guide grid's time scale is. -->
-    <string name="settings_guide_size_mobile">TV Guide size</string>
-    <!-- Translators: Line under the TV Guide size setting. -->
-    <string name="settings_line_guide_size_mobile">How much time the grid shows at once</string>
-    <!-- Translators: Phone version of settings_help_add_from_phone: the Remote sheet when adding a playlist on a phone. -->
-    <string name="settings_help_add_from_phone_mobile">Open the address or scan the code in a browser on any device on the same Wi-Fi — a computer, a tablet or a TV — fill in your playlist there and send it here. Much faster than typing a URL on a phone.</string>
-    <!-- Translators: Phone version of settings_line_add_type_here: line under "Type it here" when adding a playlist. -->
-    <string name="settings_line_add_type_here_mobile">Xtream, M3U or Stalker</string>
-    <!-- Translators: Phone version of settings_line_local_file: under "Choose a local file…" in the add form. -->
-    <string name="setup_local_file_hint_mobile">.m3u or .m3u8 on this phone</string>
-    <!-- Translators: Settings › Customize, crumb under the title: how many categories the open section has, e.g. “24 categories”. -->
-    <plurals name="settings_customize_categories_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> category</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> categories</item>
-    </plurals>
-    <!-- Translators: Settings › Customize, note under the categories on a phone: what holding a row offers. -->
-    <string name="settings_customize_hold_note_mobile">Hold a row: Rename · Move · Hide · or start a span to change many at once.</string>
-    <!-- Translators: Value of the Browsing & lists setting when every section remembers both its last category and its last item. One short word. -->
-    <string name="settings_browsing_value_both">Both</string>
-    <!-- Translators: Value of the Home screen setting: how many rows Home shows, e.g. “6 rows”. -->
-    <plurals name="settings_home_rows_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> row</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> rows</item>
-    </plurals>
-    <!-- Translators: Value of the Customize setting: how many categories and items are hidden, e.g. “12 hidden”. -->
-    <plurals name="settings_customize_hidden_count">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> hidden</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> hidden</item>
-    </plurals>
-    <!-- Translators: Phone version of settings_line_quick_channel_numbers: line under Channel numbers in Quick (typing a channel number tunes to it). -->
-    <string name="settings_line_quick_channel_numbers_mobile">Type a number to tune</string>
-    <!-- Translators: Line under the Playlists setting on a phone. -->
-    <string name="settings_line_playlists_mobile">Add, re-sync or remove M3U / Xtream / Stalker</string>
-    <!-- Translators: Phone version of settings_line_accent: line under Accent color. -->
-    <string name="settings_line_accent_mobile">Tints buttons, highlights and bars everywhere</string>
-    <!-- Translators: Phone version of settings_line_glass_bg: line under Glass & background. -->
-    <string name="settings_line_glass_bg_mobile">Frosted bars and sheets, background picture</string>
-    <!-- Translators: Phone version of settings_line_popup_size: line under Popup size. -->
-    <string name="settings_line_popup_size_mobile">Scale sheets and menus without changing their text</string>
-    <!-- Translators: Phone version of settings_line_animations: line under Animations. -->
-    <string name="settings_line_animations_mobile">Off feels snappier on older phones</string>
-    <!-- Translators: Short line under Software decoding above 1080p on a phone. -->
-    <string name="settings_line_sw_decode_mobile">Above 1080p in software when the hardware decoder fails</string>
-    <!-- Translators: Short line under Picture-in-Picture. -->
-    <string name="settings_line_pip_mobile">Shrink the video into a window when you leave the app</string>
-    <!-- Translators: Short line under Window size (the floating window). -->
-    <string name="settings_line_pip_size_mobile">How large the floating window starts</string>
-    <!-- Translators: Short line under Snap to edges (the floating window). -->
-    <string name="settings_line_pip_snap_mobile">The window settles against the nearest edge</string>
-    <!-- Translators: Short line under Sound only when the screen turns off. -->
-    <string name="settings_line_audio_screen_off_mobile">Stop decoding video nobody can see</string>
-    <!-- Translators: Short line under Remember sound only per channel. -->
-    <string name="settings_line_audio_per_channel_mobile">Opens that way next time</string>
-    <!-- Translators: Short line under Gesture sensitivity. -->
-    <string name="settings_line_gesture_mobile">How far a swipe changes volume, brightness or position</string>
-    <!-- Translators: Line under Preferred subtitle language on a phone. -->
-    <string name="settings_line_sub_lang_mobile">Auto-select this subtitle track</string>
-    <!-- Translators: Line under Subtitle appearance on a phone. -->
-    <string name="settings_line_sub_style_mobile">Size, font, color, position, background</string>
-    <!-- Translators: Title of the Settings › Customize page on a phone. One short word. -->
-    <string name="settings_customize_short_mobile">Customize</string>
-    <!-- Translators: Settings › EPG sources, a feed’s line: how many programs its guide holds, e.g. “9,076 programs”. The number is already formatted. -->
-    <plurals name="settings_epg_line_programmes">
-        <item quantity="one"><xliff:g id="count">%1$s</xliff:g> program</item>
-        <item quantity="other"><xliff:g id="count">%1$s</xliff:g> programs</item>
-    </plurals>
 </resources>

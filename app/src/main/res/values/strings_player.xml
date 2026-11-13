@@ -30,10 +30,6 @@
     <string name="player_go_live">Go live</string>
     <!-- Translators: Action that tunes back to the channel watched before the current one, like a TV remote's "last channel" button. Shown in Remote shortcuts and read out for the phone player's button. -->
     <string name="player_previous_channel">Previous channel</string>
-    <!-- Translators: Phone live player button that steps to the next channel in the list being watched, wrapping round at the end. Read out by screen readers. -->
-    <string name="player_next_channel_in_list">Next channel</string>
-    <!-- Translators: Phone live player button that steps back one channel in the list being watched, wrapping round at the start. Must differ from "Previous channel" (player_previous_channel), which returns to the last channel watched; both buttons are on the same screen. -->
-    <string name="player_previous_channel_in_list">Previous channel in list</string>
     <!-- Translators: Label under the volume button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->
     <string name="player_tool_volume">Volume</string>
     <!-- Translators: Label under the brightness button on the phone player's control bar, and the label on the slider a vertical swipe on the left of the picture shows. Keep this very short (14 characters maximum) — it sits inside a small button. -->
@@ -44,8 +40,6 @@
     <string name="player_tool_subtitles">Subtitles</string>
     <!-- Translators: Label under the favourite button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->
     <string name="player_tool_favorite">Favorite</string>
-    <!-- Translators: Label under the playback-speed button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->
-    <string name="player_tool_speed">Speed</string>
     <!-- Translators: Label under the aspect-ratio/zoom button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->
     <string name="player_tool_aspect">Aspect</string>
     <!-- Translators: Player tool bar button and menu title: pick the picture quality (resolution) of the stream. -->
@@ -54,15 +48,12 @@
     <string name="player_tool_mini">Mini</string>
     <!-- Translators: Label under the audio-only button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->
     <string name="player_tool_audio_only">Audio only</string>
-    <!-- Translators: Label under the player button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->
-    <string name="player_tool_engine">Player</string>
     <!-- Translators: Label under the stream-info button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->
     <string name="player_tool_info">Info</string>
     <!-- Translators: Label under the report-stream button on the player control bar, shown when it has focus. Keep this very short (14 characters maximum) — it sits inside the button on the remote-driven player bar. -->
     <string name="player_tool_report">Report</string>
     <!-- Translators: Error text in the direct-tune channel number card when the entered number matches no known channel. -->
     <string name="player_channel_not_found">Channel not found</string>
-    <string name="player_channel_number_entry">Channel number</string>
     <!-- Translators: Error text in the direct-tune channel number card when the entered number matches multiple channels. -->
     <string name="player_multiple_channels">Multiple channels</string>
     <!-- Translators: Error text in the direct-tune channel number card when tuning fails for an unspecified reason. -->
@@ -89,8 +80,6 @@
     <string name="player_av_sync">A/V sync</string>
     <!-- Translators: Player audio menu action that stores the current A/V-sync offset for this item. -->
     <string name="player_av_sync_remember">Remember this delay</string>
-    <!-- Translators: Status text in the subtitle timing dialog when the delay is exactly 0ms. -->
-    <string name="player_no_offset">No offset</string>
     <!-- Translators: Formatted audio delay display in the A/V sync controls when delay is exactly 0ms. -->
     <string name="player_delay_zero">0 ms</string>
     <!-- Translators: Formatted audio delay display when delay is positive. The plus sign is intentional. "ms" means milliseconds. -->
@@ -287,8 +276,6 @@
     <string name="player_frame_rate_prompt_title">This channel may judder</string>
     <string name="player_frame_rate_prompt_description">It plays at <xliff:g id="fps">%1$d</xliff:g> fps while your TV is running at <xliff:g id="current_hz">%2$d</xliff:g> Hz, which can’t show those frames evenly — motion looks slightly jerky.\n\nAuto frame rate switches the TV to <xliff:g id="target_hz">%3$d</xliff:g> Hz while you watch and puts it back afterwards. Some TVs blank for a moment when the rate changes; you can turn it off again in Settings → Picture → Frame rate.</string>
     <string name="player_frame_rate_turn_on">Turn on</string>
-    <!-- Translators: Shown instead of the picture when the user has turned the data saver on and the phone is on mobile data. -->
-    <string name="player_error_data_saver">Data saver is on, so streaming over mobile data is off. Connect to Wi-Fi, or turn Data saver off in Settings.</string>
     <!-- Translators: Button on the sound-only player screen. Stops playback after a chosen time so the user can fall asleep to it. -->
     <string name="player_sleep_timer">Sleep timer</string>
     <!-- Translators: Sleep-timer option. Stop when the programme currently on air ends. -->
@@ -301,36 +288,23 @@
     <string name="player_sleep_timer_screen_off_explanation">Used only to turn the screen off when the sleep timer ends, never at any other time.</string>
     <!-- Translators: Short message when the device has no way to give the app that permission (some TVs). -->
     <string name="player_sleep_timer_screen_off_unavailable">This device does not let apps turn the screen off.</string>
-    <!-- Translators: Action on the floating mini-player. Return to the full-screen player. -->
-    <string name="player_pip_expand">Expand</string>
     <!-- Translators: Player error shown when a Chromecast-style receiver refuses the stream. The receiver decodes the stream itself, so a format it does not support cannot be cast at all. -->
     <string name="player_error_cast_unsupported">The device you\'re casting to can\'t play this stream. Many live channels use a format it doesn\'t support \u2014 play it on your phone instead.</string>
-    <!-- Translators: Player status while the stream plays on a Chromecast-style receiver instead of the phone. The placeholder is the receiver's own name, for example "Living Room TV". -->
-    <string name="player_cast_playing_on">Playing on <xliff:g id="device">%1$s</xliff:g></string>
     <!-- Translators: Player button that turns the fullscreen channel into a Multiview grid. -->
     <string name="multiview_button">Multiview</string>
     <!-- Translators: Placeholder on an empty Multiview tile. -->
     <string name="multiview_add_channel">Add channel</string>
     <!-- Translators: Shown on a tile the provider has no connection left for. -->
     <string name="multiview_refused_single">Your provider allows one stream at a time.</string>
-    <!-- Translators: As above, when a recording is holding the one connection. -->
-    <string name="multiview_refused_single_recording">Your provider allows one stream at a time, and a recording is using it.</string>
     <!-- Translators: Shown on a tile when every connection is in use. "count" is 2 or more. -->
     <plurals name="multiview_refused_all_in_use">
         <item quantity="one">Your provider allows <xliff:g id="count">%1$d</xliff:g> stream at a time, and it is in use.</item>
         <item quantity="other">Your provider allows <xliff:g id="count">%1$d</xliff:g> streams at a time, and they are all in use.</item>
     </plurals>
-    <!-- Translators: As above. "count" is the limit, "recording" how many are recording. -->
-    <plurals name="multiview_refused_all_in_use_recording">
-        <item quantity="one">Your provider allows <xliff:g id="count">%1$d</xliff:g> stream at a time. <xliff:g id="recording">%2$d</xliff:g> of them is recording.</item>
-        <item quantity="other">Your provider allows <xliff:g id="count">%1$d</xliff:g> streams at a time. <xliff:g id="recording">%2$d</xliff:g> of them are recording.</item>
-    </plurals>
     <!-- Translators: Shown when a recording is refused because the last connection is kept for watching. -->
     <string name="multiview_refused_reserved">One connection is kept free so you can keep watching. Change that in Settings to record on every connection.</string>
     <!-- Translators: Shown on a tile the device has no video decoder left for. -->
     <string name="multiview_decoder_exhausted">This TV can\'t decode another channel at the same time.</string>
-    <!-- Translators: Phone/tablet wording of multiview_decoder_exhausted. -->
-    <string name="multiview_decoder_exhausted_mobile">This device can\'t decode another channel at the same time.</string>
     <!-- Translators: Tile menu: pick a different channel for this tile. -->
     <string name="multiview_tile_change_channel">Change channel</string>
     <!-- Translators: Tile menu: make this tile the only thing on screen. -->

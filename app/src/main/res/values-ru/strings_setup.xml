@@ -34,8 +34,6 @@
     <string name="setup_create_profile_add_sources">Настроить встроенный каталог RuTube</string>
     <string name="setup_sync_device">С другого устройства</string>
     <string name="setup_sync_device_description">Скопируйте всё с другого устройства МОЁ ТВ по Wi-Fi</string>
-    <string name="setup_import">Импорт</string>
-    <string name="setup_restore">Восстановить</string>
     <string name="setup_restore_failed">Не удалось выполнить восстановление</string>
     <string name="setup_backup_read_failed">Не удалось прочитать файл резервной копии</string>
     <string name="setup_run_in_background">Продолжить в фоновом режиме</string>
@@ -46,7 +44,6 @@
     <string name="setup_continue">Продолжить</string>
     <string name="setup_import_failed">Не удалось выполнить импорт</string>
     <string name="setup_try_again_caps">Повторить</string>
-    <string name="setup_opening">Запуск…</string>
     <string name="setup_playlist_file_unavailable">Не удалось открыть файл плейлиста. Выберите его снова: возможно, он был перемещён.</string>
     <string name="setup_playlist_path_unsupported">Этот путь к локальному плейлисту не поддерживается.</string>
     <string name="companion_pin_page_title">МОЁ ТВ — ввод PIN</string>
@@ -56,28 +53,9 @@
     <string name="companion_pin_aria">PIN</string>
     <string name="companion_continue">Продолжить</string>
     <string name="companion_pin_mismatch">PIN не совпадает — повторите попытку.</string>
-    <string name="companion_service_config_empty">Введите ключ API, URL-адрес Worker или оба значения.</string>
-    <string name="companion_service_config_invalid_key">Этот ключ API выглядит недействительным.</string>
-    <string name="companion_service_config_invalid_url">Введите корректный URL-адрес Worker с HTTPS.</string>
-    <string name="companion_service_config_invalid_credentials">Эти данные учётной записи слишком длинные. Проверьте их и повторите попытку.</string>
-    <string name="companion_service_config_sent">Данные подключения ожидают на телевизоре. Проверьте и сохраните их там.</string>
-    <string name="companion_service_config_again">Отправить другие данные подключения</string>
-    <string name="companion_add_page_title">МОЁ ТВ — добавить источник</string>
-    <string name="companion_add_heading">Добавить источник</string>
-    <string name="companion_add_description">Заполните данные одного источника и нажмите «Отправить». Он появится на телевизоре — когда будете готовы, возьмите пульт ДУ и нажмите там «Начать импорт».</string>
-    <string name="companion_default_playlist">Плейлист по умолчанию</string>
     <string name="companion_send_to_tv">Отправить на телевизор</string>
-    <string name="companion_sync_xtream_hint">Что синхронизировать: «Сейчас» — импорт в первую очередь, «Позже» — синхронизация в фоновом режиме, «Выкл.» — данные не загружаются.</string>
     <string name="companion_saved_page_title">МОЁ ТВ — отправлено</string>
     <string name="companion_saved_heading">Отправлено на телевизор ✓</string>
-    <string name="companion_saved_source_body">Источник <xliff:g id="name">%1$s</xliff:g> теперь отображается на экране добавления источника на телевизоре. Проверьте там данные и нажмите «Начать импорт» на пульте ДУ.</string>
-    <string name="companion_saved_send_another">Отправить другой источник</string>
-    <string name="companion_edit_page_title">МОЁ ТВ — Изменить источник</string>
-    <string name="companion_edit_heading">Изменить <xliff:g id="name">%1$s</xliff:g></string>
-    <string name="companion_edit_description">Измените что нужно и нажмите «Отправить на телевизор». Пустое поле сохраняет текущее значение. Изменения появятся на телевизоре — нажмите там «Сохранить» на пульте.</string>
-    <string name="companion_keep_current">Оставьте пустым, чтобы сохранить текущее значение</string>
-    <string name="companion_saved_edit_body">Изменения для <xliff:g id="name">%1$s</xliff:g> уже на экране редактирования телевизора. Проверьте их там и нажмите «Сохранить» на пульте.</string>
-    <string name="companion_saved_edit_again">Изменить что-то ещё</string>
     <string name="companion_saved_backup_body">Резервная копия теперь находится на телевизоре. Возьмите пульт ДУ и выберите, какие данные восстановить.</string>
     <string name="companion_saved_backup_link">Отправить другой файл</string>
     <string name="companion_saved_image_body">Изображение теперь используется как фон на телевизоре.</string>
@@ -87,8 +65,6 @@
     <string name="companion_backup_description">Выберите файл резервной копии МОЁ ТВ (.own или более старый .json) и нажмите «Отправить». Он будет передан на телевизор — возьмите пульт ДУ и выберите там, какие данные восстановить.</string>
     <string name="companion_backup_file">Файл резервной копии</string>
     <string name="companion_choose_backup">Сначала выберите файл резервной копии.</string>
-    <string name="companion_playlist_file">Или загрузите файл плейлиста</string>
-    <string name="companion_playlist_url_or_file">Введите URL плейлиста или выберите файл.</string>
     <string name="companion_sending">Отправка…</string>
     <string name="companion_upload_failed">Не удалось загрузить файл (HTTP <xliff:g id="status">%1$d</xliff:g>). Проверьте PIN и повторите попытку.</string>
     <string name="companion_could_not_reach">Не удалось подключиться к телевизору. Оставайтесь в той же сети Wi-Fi и повторите попытку.</string>
@@ -112,7 +88,6 @@
     <string name="companion_error_empty_backup">Резервная копия пуста.</string>
     <string name="companion_error_image_too_large">Изображение слишком большое.</string>
     <string name="companion_error_invalid_image">Загруженный файл не является допустимым изображением.</string>
-    <string name="companion_error_missing_fields">Не заполнены обязательные поля.</string>
     <string name="companion_error_pair_failed">Не удалось выполнить сопряжение с этим устройством.</string>
     <string name="local_sync_browser_title">Локальная синхронизация МОЁ ТВ</string>
     <string name="local_sync_browser_body">Этот адрес предназначен для приложения МОЁ ТВ на другом устройстве. Откройте там локальную синхронизацию и выберите это устройство из списка.</string>
@@ -128,6 +103,5 @@
     <string name="setup_line_app_icon">Как МОЁ ТВ выглядит на главном экране телевизора</string>
     <string name="setup_device_appear">Здесь появятся устройства с включённым режимом синхронизации</string>
     <string name="setup_device_address_hint">или введите адрес другого устройства</string>
-    <string name="setup_create_profile">Создать профиль</string>
     <string name="setup_importing_title">Импорт: <xliff:g id="name">%1$s</xliff:g></string>
 </resources>

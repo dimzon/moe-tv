@@ -27,24 +27,16 @@
     <string name="common_on">On</string>
     <!-- Translators: Compact state label for "disabled" used in settings toggles and chips. This is a state, not a command. -->
     <string name="common_off">Off</string>
-    <!-- Translators: Button that opens the system share sheet (e.g. to send a backup file to another app). -->
-    <string name="common_share">Share</string>
     <!-- Translators: Compact label for an option that switches a time limit off entirely, i.e. "wait forever". Used as a choice alongside durations such as "15 seconds". -->
     <string name="common_never">Never</string>
     <!-- Translators: Generic exit action or button label. -->
     <string name="common_exit">Exit</string>
     <!-- Translators: Imperative button label to resume playback or resume a paused download. -->
     <string name="common_resume">Resume</string>
-    <!-- Translators: Button to restart content from the beginning. -->
-    <string name="common_start_over">Start over</string>
     <!-- Translators: Text-field label for a name input. -->
     <string name="common_name">Name</string>
-    <!-- Translators: Default user display name placeholder. -->
-    <string name="common_own_tv_user">МОЁ ТВ User</string>
     <!-- Translators: Short label for proxy settings or status. -->
     <string name="common_proxy">Proxy</string>
-    <!-- Translators: Text-field label for a title input. -->
-    <string name="common_title">Title</string>
     <!-- Translators: Search input field placeholder text. The ellipsis is part of the hint. -->
     <string name="common_search_hint">Search\u2026</string>
     <!-- Translators: Generic search button or section label. -->
@@ -57,8 +49,6 @@
     <string name="common_nav_live_tv">Live TV</string>
     <!-- Translators: Navigation label for the TV Guide screen in the sidebar. -->
     <string name="common_nav_guide">TV Guide</string>
-    <!-- Translators: The TV Guide place in the phone's bottom bar, a fifth of the screen wide. Keep it one short word if the full name is long (German: "Programm"). -->
-    <string name="common_nav_guide_short">TV Guide</string>
     <!-- Translators: Navigation label for the More tab on phones, which holds the items that do not fit the bottom bar. -->
     <string name="common_nav_more">More</string>
     <!-- Translators: Navigation label for the Settings screen in the sidebar. -->
@@ -71,10 +61,6 @@
     <string name="common_number_grouped"><xliff:g id="count">%1$,d</xliff:g></string>
     <!-- Translators: Formatted percentage display. The double percent (%%) is an XML escape for a literal %. -->
     <string name="common_percent"><xliff:g id="percent">%1$d</xliff:g>%%</string>
-    <!-- Translators: Time format for durations under one hour (mm:ss). "minutes" and "seconds" are integers. -->
-    <string name="common_timestamp_minutes"><xliff:g id="minutes">%1$d</xliff:g>:<xliff:g id="seconds">%2$02d</xliff:g></string>
-    <!-- Translators: Time format for durations of one hour or more (h:mm:ss). "hours", "minutes", and "seconds" are integers. -->
-    <string name="common_timestamp_hours"><xliff:g id="hours">%1$d</xliff:g>:<xliff:g id="minutes">%2$02d</xliff:g>:<xliff:g id="seconds">%3$02d</xliff:g></string>
 
     <!-- Translators: Error message when the device appears to be offline during a sync operation. -->
     <string name="sync_error_offline">You appear to be offline. Check your connection and try again.</string>
@@ -107,10 +93,6 @@
         <item quantity="one">Kept <xliff:g id="stored">%1$d</xliff:g> existing item \u2014 this import returned <xliff:g id="percent">%2$d</xliff:g>%% fewer. Sync again, or use Force clean sync if the provider really removed it.</item>
         <item quantity="other">Kept <xliff:g id="stored">%1$d</xliff:g> existing items \u2014 this import returned <xliff:g id="percent">%2$d</xliff:g>%% fewer. Sync again, or use Force clean sync if the provider really removed them.</item>
     </plurals>
-    <!-- Translators: Warning when the provider's single big catalog response was cut off mid-transfer and the app recovered the rest by asking for one category at a time. The catalog is complete; it just took longer. -->
-    <string name="sync_warning_bulk_truncated">The provider\'s list was cut off part-way, so the rest was fetched category by category. Everything is here, but this sync took longer than usual.</string>
-    <!-- Translators: Warning when the provider's catalog response was cut off and the recovery could not retrieve everything. Some titles are missing until the next sync. -->
-    <string name="sync_warning_bulk_truncated_partial">The provider\'s list was cut off part-way and not everything could be recovered. Some titles may be missing until the next sync.</string>
     <!-- Translators: Plural warning when source pages fail during sync. "count" is the number of failed pages. -->
     <plurals name="sync_warning_page_failures">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> source page failed; some content may be missing until the next sync.</item>
@@ -124,8 +106,6 @@
     <string name="sync_progress_connecting">Connecting to source\u2026</string>
     <!-- Translators: Status text during sync when syncing the catalog. -->
     <string name="sync_progress_syncing">Syncing catalog</string>
-    <!-- Translators: Sync progress with percentage. "percent" is the sync percentage. The double percent (%%) is an XML escape. -->
-    <string name="sync_progress_percent">Syncing <xliff:g id="percent">%1$d</xliff:g>%%</string>
     <!-- Translators: Sync status showing which source is being synced. "source" is the source name. -->
     <string name="sync_status_catalog">Syncing <xliff:g id="source">%1$s</xliff:g></string>
     <!-- Translators: Sync status with counts. "source" is the source name, "counts" is a formatted count string. -->
@@ -188,12 +168,6 @@
     <!-- Translators: shown on a guide source that fetched successfully and has programmes, but none of its channels is one of the playlist's channels, so nothing was kept. "TV Guide" and "Auto-match EPG" are the screen and button names used elsewhere in the app. -->
     <string name="sync_error_guide_no_matching_channels">None of this guide\'s channels match your playlist\'s yet. Open the TV Guide and use Auto-match EPG to pair them by name.</string>
 
-    <!-- Translators: Label above the number field in a minutes input dialog, e.g. the recording start-early and run-over times. -->
-    <string name="common_minutes">Minutes</string>
-    <!-- Translators: A size in megabytes, e.g. "120.5 MB". %1$s is the number, already formatted for the locale. Translate the unit if your language uses its own (French "Mo", Russian "МБ"); keep "MB" where it is the usual written form. -->
-    <string name="common_size_mb"><xliff:g id="size">%1$s</xliff:g> MB</string>
-    <!-- Translators: A file size in gigabytes, e.g. "3.1 GB". -->
-    <string name="common_size_gb"><xliff:g id="size">%1$s</xliff:g> GB</string>
     <!-- Translators: Plus symbol used as a button label in number input dialogs. This is a symbol, not a translatable word. -->
     <string name="common_plus">+</string>
     <!-- Translators: Minus symbol used as a button label in number input dialogs. This is a symbol, not a translatable word. -->
@@ -206,12 +180,8 @@
     <string name="common_qr_code_companion_url">QR code for the companion URL</string>
 
     <!-- Display-only brand fragments. They intentionally live in donottranslate.xml instead. -->
-    <!-- Translators: Under the profile name in the open navigation menu: the playlist being shown, then an invitation to switch profile. "playlist" is e.g. All playlists. -->
-    <string name="shell_rail_profile_line"><xliff:g id="playlist">%1$s</xliff:g> · switch</string>
     <!-- Translators: Line under Live TV in the widest menu: the last channel watched. -->
     <string name="shell_rail_detail_last">Last: <xliff:g id="title">%1$s</xliff:g></string>
-    <!-- Translators: Line under Series in the widest menu: the next episode, e.g. "Solo Leveling S1 · E3". -->
-    <string name="shell_rail_detail_next">Next: <xliff:g id="title">%1$s</xliff:g></string>
     <!-- Translators: Line under More in the widest menu: what More holds. -->
     <string name="shell_rail_detail_more">Settings, favorites, backup</string>
     <!-- Translators: Small tag after Now playing in the navigation menu while only the sound of a stream is playing (Audio mode). -->

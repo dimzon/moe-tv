@@ -9,10 +9,6 @@
     <string name="content_restore_incomplete_title">A restore didn\'t finish</string>
     <!-- Translators: Body text explaining that a restore was interrupted. "description" is a localized summary of what was being restored. Directs the user to Settings. -->
     <string name="content_restore_incomplete_message">The app closed while restoring <xliff:g id="description">%1$s</xliff:g>, so some of it may be missing. Nothing was deleted \u2014 run the same restore again from Settings \u2192 Backup &amp; Restore to fill in the rest.</string>
-    <!-- Translators: Global shell playlist picker dialog title. -->
-    <string name="content_playlist_picker_title">Show playlist</string>
-    <!-- Translators: Dialog title for the avatar picker in the profile editor. -->
-    <string name="content_avatar_picker_title">Choose your avatar</string>
     <!-- Translators: Screen title for the category browser on the Live TV screen. -->
     <string name="content_category_browser_title">Categories</string>
     <!-- Translators: Overlay title for the channel list overlay on the Live TV screen. -->
@@ -31,10 +27,6 @@
     <string name="content_add_favourite">Add to Favorites</string>
     <!-- Translators: Context-menu option to remove a movie/series/channel from Favorites. -->
     <string name="content_remove_favourite">Remove from Favorites</string>
-    <!-- Translators: Context-menu option to mark a movie/episode as watched. -->
-    <string name="content_mark_watched">Mark as watched</string>
-    <!-- Translators: Context-menu option to mark a movie/episode as unwatched. -->
-    <string name="content_mark_unwatched">Mark as unwatched</string>
     <!-- Translators: Context-menu option to reorder an item in a custom list. -->
     <string name="content_move">Move</string>
     <!-- Translators: Long-press menu entry on a category: undo the user's hides, moves and custom order inside it. -->
@@ -72,14 +64,6 @@
     <string name="content_remove_from_category">Remove from this category</string>
     <!-- Translators: Button or context-menu option to play content. -->
     <string name="content_play">Play</string>
-    <!-- Translators: Status chip indicating content has been favorited. This is a state, not a command. -->
-    <string name="content_favorited">Favorited</string>
-    <!-- Translators: Button to add content to Favorites. Contrasts with Favorited (the state). -->
-    <string name="content_favorite">Favorite</string>
-    <!-- Translators: Sort option to show oldest items first. -->
-    <string name="content_oldest_first">Oldest first</string>
-    <!-- Translators: Sort option to show newest items first. -->
-    <string name="content_newest_first">Newest first</string>
     <!-- Translators: Button to close a dialog or overlay. -->
     <string name="content_close">Close</string>
     <!-- Translators: Hint text in the rename dialog explaining the rename is local to this profile only. -->
@@ -87,14 +71,6 @@
     <!-- Translators: Current sort-mode label in the SortChip toggle. -->
     <string name="content_provider">Provider</string>
     <string name="content_provider_name">Provider: <xliff:g id="provider">%1$s</xliff:g></string>
-    <!-- Translators: Duration display for content longer than one hour. "hours" and "minutes" are integers. -->
-    <string name="content_duration_hours"><xliff:g id="hours">%1$d</xliff:g>h <xliff:g id="minutes">%2$d</xliff:g>m</string>
-    <!-- Translators: Duration display for content under one hour. "minutes" is an integer. -->
-    <string name="content_duration_minutes"><xliff:g id="minutes">%1$d</xliff:g>m</string>
-    <!-- Translators: Status chip when no EPG data is available for a channel. "EPG" is Electronic Program Guide. -->
-    <string name="content_no_epg">No EPG</string>
-    <!-- Translators: Label for catch-up (time-shifted) playback feature. -->
-    <string name="content_catchup">Catch-up</string>
     <!-- Translators: Context-menu option to play content in an external player. Shorter variant. -->
     <string name="content_play_external_short">Play in external player</string>
     <!-- Translators: Context-menu option to rename a Live TV channel. -->
@@ -119,10 +95,6 @@
     <string name="content_category_history">History</string>
     <!-- Translators: Predefined category name for the "All Channels" view. -->
     <string name="content_category_all_channels">All channels</string>
-    <!-- Translators: Empty-state action to add a source. Shown when no sources are configured. -->
-    <string name="content_add_source">Add a source</string>
-    <!-- Translators: Instructional text in the channel preview panel on the Live TV screen. -->
-    <string name="content_preview_select_channel">Select a channel to preview it here.</string>
     <!-- Translators: Banner shown when the device is offline. -->
     <string name="content_offline_banner">You\'re offline \u2014 playback and updates won\'t work until you reconnect.</string>
     <!-- Translators: Label for the playlist filter showing all playlists. -->
@@ -133,8 +105,6 @@
     <string name="content_action_resume">Resume</string>
     <!-- Translators: Action label for the "Last channel" item in the continue-watching row. -->
     <string name="content_action_last_channel">Last channel</string>
-    <!-- Translators: Progress percentage display. The double percent (%%) is an Android XML escape for a literal %. -->
-    <string name="content_progress_percent"><xliff:g id="percent">%1$d</xliff:g>%%</string>
     <!-- Translators: Time range display in the EPG programme info. "start" and "end" are times. The en-dash is a range indicator. -->
     <string name="content_live_time_range"><xliff:g id="start">%1$s</xliff:g> \u2013 <xliff:g id="end">%2$s</xliff:g></string>
     <!-- Translators: Remaining time display for a live programme. "end" is the programme's time slot, e.g. "20:10 – 21:42"; "minutes" is the minutes remaining. -->
@@ -147,65 +117,33 @@
     <string name="content_storage_removable">Removable storage</string>
     <!-- Translators: Storage location label for app-private storage. -->
     <string name="content_storage_app">App storage (no permission needed)</string>
-    <!-- Translators: Row in the download-options sheet that opens the system folder picker so the user can choose any folder on the device. The ellipsis signals that a chooser opens. -->
-    <string name="content_storage_choose_folder">Choose another folder…</string>
-    <!-- Translators: Label for a download folder the user picked with the system folder picker, shown above the folder's own name. -->
-    <string name="content_storage_chosen_folder">Chosen folder</string>
-    <!-- Translators: Shown when the folder the user had chosen for downloads can no longer be written to, because the permission was withdrawn or the storage was removed. -->
-    <string name="content_storage_folder_lost">That folder is no longer available. Choose it again, or pick another.</string>
-    <!-- Translators: Shown on the Downloads screen while the folder the user chose for downloads is missing (a USB stick removed, or its permission withdrawn). Downloads go to the app's own folder until it is back; the choice itself is kept. -->
-    <string name="content_storage_folder_fallback">Your download folder isn\'t available right now, so downloads are being saved to МОЁ ТВ\'s own folder until it\'s back.</string>
 
-    <!-- Translators: Empty-state message on the EPG screen when no profile exists. Directs the user to create one. -->
-    <string name="content_epg_create_profile">Create a profile to see the guide.</string>
-    <!-- Translators: Shown in the TV Guide when every channel is hidden by the chosen sort/filter (e.g. Favourites) rather than because there is no guide data. -->
-    <string name="content_epg_filter_hides_all">Every channel is hidden by the current filter. Change the sort to see the guide.</string>
     <!-- Translators: Empty-state message when the EPG channel search returns no results. "query" is the search text. -->
     <string name="content_epg_no_channels_query">No guide channels found for \u201c<xliff:g id="query">%1$s</xliff:g>\u201d.</string>
     <!-- Translators: Warning message when EPG data exists but channel IDs don\'t match. -->
     <string name="content_epg_mismatched_ids">Guide data is stored, but its channel ids don\'t match your channels\' EPG ids \u2014 this EPG feed may belong to a different provider lineup.</string>
     <!-- Translators: Screen title for the TV Guide / EPG screen. -->
     <string name="content_epg_title">TV Guide</string>
-    <!-- Translators: Empty-state message when no EPG source has been added. -->
-    <string name="content_epg_empty">No EPG added.</string>
     <!-- Translators: Status message when no guide data is available for a channel. -->
     <string name="content_epg_no_guide">No guide.</string>
     <!-- Translators: Status message when no programme is scheduled at the current time. -->
     <string name="content_epg_no_programme">No program at this time.</string>
-    <!-- Translators: Empty-state message on the EPG screen. Directs the user to add an EPG source. "EPG" and "XMLTV" are technical names. -->
-    <string name="content_epg_add_description">Add an EPG (XMLTV) source to fill the guide with programs.</string>
     <!-- Translators: Label for the guide category filter in the EPG screen. -->
     <string name="content_epg_guide_category">Guide category</string>
     <!-- Translators: Search hint text in the EPG channel browser. -->
     <string name="content_epg_search_hint">Search guide channels\u2026</string>
-    <!-- Translators: Button to add an EPG source. "EPG" is Electronic Program Guide. -->
-    <string name="content_epg_add">Add EPG</string>
     <!-- Translators: Context-menu option to add a channel to favorites from the EPG screen. -->
     <string name="content_epg_add_favourite">Add to favorites</string>
     <!-- Translators: Context-menu option to remove a channel from favorites from the EPG screen. -->
     <string name="content_epg_remove_favourite">Remove from favorites</string>
-    <!-- Translators: Button in the EPG screen to jump to the current time. -->
-    <string name="content_epg_jump_now">Jump to Now</string>
-    <!-- Translators: Time range display in the EPG programme info. "start" and "end" are times. The en-dash is a range indicator. -->
-    <string name="content_epg_time_range"><xliff:g id="start">%1$s</xliff:g> \u2013 <xliff:g id="end">%2$s</xliff:g></string>
-    <!-- Translators: Filter option to show all categories in the EPG. -->
-    <string name="content_epg_all">All</string>
     <!-- Translators: Sort option for alphabetical order in the EPG channel list. -->
     <string name="content_epg_sort_alpha">A\u2013Z</string>
     <!-- Translators: Sort option to sort EPG channels by provider. -->
     <string name="content_epg_sort_provider">Provider</string>
-    <!-- Translators: Sort option to sort EPG channels by favorites. -->
-    <string name="content_epg_sort_favorites">Favorites</string>
-    <!-- Translators: EPG auto-match suggestion row. "name" is the suggested guide channel; "percent" is the match confidence percentage. -->
-    <string name="content_epg_channel_score">\u2192 <xliff:g id="name">%1$s</xliff:g> \u00b7 <xliff:g id="percent">%2$d</xliff:g>%%</string>
     <!-- Translators: Visible middle-dot separator between EPG metadata segments. -->
     <string name="content_epg_bits_separator">" · "</string>
     <!-- Translators: Context-menu option in the EPG to tune to a live channel. -->
     <string name="content_epg_watch_channel">Watch channel</string>
-    <!-- Translators: Context-menu option in the EPG to add a channel to favorites. -->
-    <string name="content_epg_favourite">Favorite</string>
-    <!-- Translators: Context-menu option in the EPG to remove a channel from favorites. -->
-    <string name="content_epg_unfavourite">Unfavorite</string>
     <!-- Translators: Opens the per-channel adjustment that shifts guide programme times. -->
     <string name="content_epg_time_offset">EPG time offset</string>
     <!-- Translators: Compact signed EPG offset labels. "sign" is + or −; values are localized numbers. -->
@@ -217,10 +155,6 @@
     <string name="content_epg_offset_channel_only">This channel only · global is <xliff:g id="offset">%1$s</xliff:g></string>
     <string name="content_epg_offset_use_global">Use global</string>
     <string name="content_preview_single_stream">Preview off — your provider allows one stream at a time</string>
-    <!-- Translators: Subtitle of the playlist picker menu: the choice applies to every screen and is kept. -->
-    <string name="content_playlist_picker_subtitle">Applies everywhere and is remembered</string>
-    <!-- Translators: Footnote under the playlist switcher sheet. A "mark" is the short coloured badge (e.g. GOLD) naming the playlist a row comes from. -->
-    <string name="content_playlist_marks_note">With All playlists on, every row shows the mark of the playlist it comes from.</string>
     <!-- Translators: Placeholder of a search field that searches inside one category. "name" is the category name, e.g. Search Sky Cinema. -->
     <string name="content_search_in">Search <xliff:g id="name">%1$s</xliff:g></string>
     <!-- Translators: Live TV button that shows the channels as a TV guide grid. -->
@@ -304,10 +238,6 @@
     <string name="content_epg_show_empty">Channels without guide</string>
     <!-- Translators: TV Guide order menu: play the focused channel in the small video pane at the top of the Guide (On / Off). When off, the channel logo shows instead. -->
     <string name="content_epg_show_preview">Video preview</string>
-    <!-- Translators: TV Guide on a phone, the View choices Grid / On now / Timeline: one channel's programmes read top to bottom. Short, a segmented button. -->
-    <string name="content_epg_view_timeline">Timeline</string>
-    <!-- Translators: Group heading in the TV Guide order sheet (shown in capitals): Grid / On now / Timeline. -->
-    <string name="content_menu_group_view">View</string>
     <!-- Translators: Group label in a movie / series options menu above the details actions. Shown in capitals by the style. -->
     <string name="content_menu_group_details">Details</string>
     <!-- Translators: Menu item and popup: shows everything the guide knows about one TV programme (full title, times, categories, description). -->
@@ -316,6 +246,4 @@
     <string name="content_programmes_earlier">Earlier</string>
     <!-- Translators: Group heading on the Program details page: programmes still to come today, after the one on now. -->
     <string name="content_programmes_later">Later</string>
-    <!-- Translators: Episode options menu item: play the episode from the beginning, ignoring the resume point. -->
-    <string name="content_play_from_start">Play from start</string>
 </resources>
