@@ -109,10 +109,9 @@ abstract class OwnTVDatabase : RoomDatabase() {
          */
         val EXPECTED_NON_UNIQUE_INDEXES: Map<String, List<String>> = mapOf(
             "channels" to listOf(
-                "CREATE INDEX IF NOT EXISTS `index_channels_epgChannelId` ON `channels` (`epgChannelId`)",
-                "CREATE INDEX IF NOT EXISTS `index_channels_sourceId_name` ON `channels` (`sourceId`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_channels_sourceId_sortOrder_name` ON `channels` (`sourceId`, `sortOrder`, `name`)",
-                "CREATE INDEX IF NOT EXISTS `index_channels_sourceId_number` ON `channels` (`sourceId`, `number`)",
+                "CREATE INDEX IF NOT EXISTS `index_channels_name` ON `channels` (`name`)",
+                "CREATE INDEX IF NOT EXISTS `index_channels_sortOrder_name` ON `channels` (`sortOrder`, `name`)",
+                "CREATE INDEX IF NOT EXISTS `index_channels_number` ON `channels` (`number`)",
             ),
             "epg_programmes" to listOf(
                 "CREATE INDEX IF NOT EXISTS `index_epg_programmes_epgChannelId_startMs` ON `epg_programmes` (`epgChannelId`, `startMs`)",

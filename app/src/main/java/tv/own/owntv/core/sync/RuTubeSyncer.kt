@@ -43,6 +43,8 @@ internal class RuTubeSyncer(
 ) {
     suspend fun sync(s: SourceEntity, progress: SyncCounters, stats: SyncStatsCollector) =
         coroutineScope {
+            // The channel row carries no sourceId; whoever syncs is THE source for this process.
+            tv.own.owntv.core.database.SingleSource.id = s.id
             syncLive(s, progress, stats)
         }
 

@@ -1,5 +1,6 @@
 package tv.own.owntv.core.repository
 
+import tv.own.owntv.core.database.SingleSource
 import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.SourceType
@@ -32,11 +33,23 @@ object BuiltInSource {
      * Idempotent: call it on first run.
      */
     suspend fun ensure(sourceDao: SourceDao): SourceEntity {
-        sourceDao.rutubeSource()?.let { return it }
+        val existing = sourceDao.rutubeSource()
+        if (existing != null) {
+            // The channel row no longer carries a sourceId; a few callers still ask a channel
+            // "whose are you?" — answer with the one source's row id.
+            SingleSource.id = existing.id
+            return existing
+        }
         val id = sourceDao.insert(template())
+        SingleSource.id = id
         return template().copy(id = id)
     }
 
-    /** The built-in source, or null while it has not been created yet (cold-start guard). */
-    suspend fun current(sourceDao: SourceDao): SourceEntity? = sourceDao.rutubeSource()
+    /**
+     * The built-in source, or null while it has not been created yet (cold-start guard).
+     * Refreshes [tv.own.owntv.core.database.SingleSource] when it resolves.
+     */
+    suspend fun current(sourceDao: SourceDao): SourceEntity? = sourceDao.rutubeSource()?.also {
+        SingleSource.id = it.id
+    }
 }

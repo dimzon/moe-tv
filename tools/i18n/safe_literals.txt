@@ -1170,7 +1170,6 @@
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/BulkInsertHelper.kt	SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name='$table' AND sql IS NOT NULL
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/BulkInsertHelper.kt	SELECT sql FROM sqlite_master WHERE type='trigger' AND name='$triggerName'
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/BulkInsertHelper.kt	UNIQUE
-1	sql	app/src/main/java/tv/own/owntv/core/database/BulkInsertHelper.kt	UPDATE `channels` SET `streamUrl` = ? WHERE `sourceId` = ? AND `remoteId` = ? AND `streamUrl` != ?
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/BulkInsertHelper.kt	Unknown FTS table: $ftsTable
 2	room-schema	app/src/main/java/tv/own/owntv/core/database/BulkInsertHelper.kt	Unknown table: $table
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/BulkInsertHelper.kt	categories
@@ -1181,10 +1180,9 @@
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/BulkInsertHelper.kt	series_fts
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	,
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	?
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_channels_epgChannelId` ON `channels` (`epgChannelId`)
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_channels_sourceId_name` ON `channels` (`sourceId`, `name`)
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_channels_sourceId_number` ON `channels` (`sourceId`, `number`)
-1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_channels_sourceId_sortOrder_name` ON `channels` (`sourceId`, `sortOrder`, `name`)
+1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_channels_name` ON `channels` (`name`)
+1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_channels_number` ON `channels` (`number`)
+1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_channels_sortOrder_name` ON `channels` (`sortOrder`, `name`)
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_epg_channels_normName` ON `epg_channels` (`normName`)
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_epg_channels_sourceId` ON `epg_channels` (`sourceId`)
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX IF NOT EXISTS `index_epg_programmes_epgChannelId_startMs` ON `epg_programmes` (`epgChannelId`, `startMs`)
