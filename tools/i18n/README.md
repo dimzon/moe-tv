@@ -1,9 +1,10 @@
 # OwnTV TV app — i18n checks
 
-**The strings themselves are not in this repository.** Every `strings*.xml`, the language catalogue
-that owns them, the Weblate integration and the translator guide live in the core library repo:
-<https://github.com/ahXN00/OwnTV_Core> (`tools/i18n/README.md` there). Add, change or translate a
-string there, then bump `owntvCore` in `gradle/libs.versions.toml`.
+**The strings live in this repository.** Every `strings*.xml` under `app/src/main/res/values*` and the
+language catalogue that owns them are here. `tools/i18n/locales.json` is the authoritative catalogue;
+`app/src/main/java/tv/own/owntv/core/i18n/SupportedLocales.kt` is generated from it. The generator
+(`gen_supported_locales.py`) still lives in the core repo, so edit the catalogue and the generated
+file together, then run the checks below.
 
 What still runs here, on the TV app's own Kotlin:
 
@@ -20,9 +21,8 @@ python3 tools/i18n/check_number_locale.py
 python3 tools/i18n/check_text_overflow.py
 ```
 
-`locales.json` is kept here too, but only because the Gradle build reads its `packaged` entries to
-set `localeFilters`. **The core repo's copy is the authoritative one** — change it there first, then
-copy it across.
+`locales.json` is authoritative here: Gradle reads its `packaged` entries to set `localeFilters`, and
+`SupportedLocales.kt` mirrors it. Keep the two in sync when adding, promoting or removing a locale.
 
 ### Clearing a literal-inventory failure
 

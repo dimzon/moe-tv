@@ -75,8 +75,8 @@ class PluralResourceBoundaryTest {
     }
 
     @Test
-    fun arabic_polish_and_russian_quantity_requests_have_a_valid_fallback() {
-        listOf("ar", "pl", "ru").forEach { tag ->
+    fun english_and_russian_quantity_requests_have_a_valid_fallback() {
+        listOf("en-US", "ru").forEach { tag ->
             val context = localized(tag)
             listOf(0, 1, 2, 5, 21, 102).forEach { count ->
                 val text = context.resources.getQuantityString(

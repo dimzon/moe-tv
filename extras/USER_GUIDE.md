@@ -26,8 +26,8 @@ Welcome  →  Display  →  Disclaimer  →  Set up OwnTV  →  Profile
 Every step has the same frame: step dots at the top, **Back** / **Next** at the bottom, and the keys
 for that step shown in the corner.
 
-1. **Welcome** — the language picker is on this screen: one of 26, or keep **System default**.
-   Press **Get started**.
+1. **Welcome** — the language picker is on this screen: English or Russian, or keep **System
+   default**. Press **Get started**.
 2. **Display** — step UI Zoom and Font size while a sample row resizes, so you judge it from your
    sofa, and pick the **App icon**. Changeable later in Settings → Appearance and Settings → App.
 3. **Disclaimer** — OwnTV is a player; you bring the sources.

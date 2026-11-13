@@ -2,12 +2,11 @@
 
 > **Status:** approved implementation plan, **v2**. Phases 0-3 are implemented; Phase 4 remains planned.
 
-> **Current Phase 4 policy (supersedes older planning statements below):** `tools/i18n/locales.json`
-> contains the source, hidden en-GB override, original translated set, and 19 catalogue-only
-> community requests. Catalogue-only languages intentionally start at 0% with no resource directory,
-> are unshipped and absent from the picker, and become eligible for explicit manual packaging/picker
-> promotion at 70%. Visible community rows show coverage only below 100%. See
-> `tools/i18n/README.md` for the authoritative workflow and mappings.
+> **Current catalogue (2026-11-13):** `tools/i18n/locales.json` is authoritative. It contains the
+> English source (`en-US`) and the shipped Russian translation; Ukrainian, Estonian, Latvian and
+> Lithuanian remain catalogue-only ex-USSR backlog entries (0%, no resource directory, unshipped and
+> absent from the picker). Counts of 23/24 languages and 19 catalogue-only requests later in this
+> document are historical planning snapshots. See `tools/i18n/README.md` for the workflow.
 > Written 2026-07-27 against AGP 9.2.1, Compose BOM 2026.05.00 (compose-ui 1.11.1), minSdk
 > 26 / targetSdk 36. Revised through 2026-08-04, including the Phase 4a fallback and coverage policy.
 > v2 changes the localisation *boundary*, not the verified Android mechanics.

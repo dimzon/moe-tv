@@ -2379,7 +2379,7 @@
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> history item</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> history items</item>
     </plurals>
-    <!-- Translators: More › About: chip with how many languages the app is in, e.g. "26 languages". -->
+    <!-- Translators: More › About: chip with how many languages the app is in, e.g. "2 languages". -->
     <plurals name="more_about_languages">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> language</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> languages</item>

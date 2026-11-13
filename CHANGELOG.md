@@ -119,6 +119,7 @@
 - **⏺️ DVR recordings are removed**
 - **⬇️ Downloads are removed**
 - **🗄️ Database 55 → 56: player-engine preferences dropped**
+- **🌐 All interface languages except English and Russian are removed**
 
 ## v5.2.1 — 2026-10-21
 

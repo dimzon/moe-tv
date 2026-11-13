@@ -16,20 +16,13 @@ import org.junit.Test
 class SupportedLocalesTest {
 
     @Test
-    fun `catalogue has source override established translations and catalogue-only backlog`() {
-        // A catalogue-only language moves from tier 2 to tier 1 when it is promoted at the readiness
-        // threshold (tools/i18n/sync_translations.py), so only the total is fixed.
-        assertEquals(45, SupportedLocales.all.size)
-        assertEquals(44, SupportedLocales.all.count { it.tier == 1 || it.tier == 2 })
-        assertTrue(SupportedLocales.all.count { it.tier == 1 } >= 25)
-    }
-
-    @Test
-    fun `en-rGB is tier 0 and packaged but not picker-visible`() {
-        val gb = SupportedLocales.all.first { it.id == "en-GB" }
-        assertEquals(0, gb.tier)
-        assertTrue(gb.packaged)
-        assertFalse(gb.pickerVisible)
+    fun `catalogue has source and ex-USSR backlog`() {
+        // English is the source; Russian is the only shipped translation. Ukrainian, Estonian,
+        // Latvian and Lithuanian stay catalogue-only until a translation reaches the readiness
+        // threshold and a maintainer promotes them.
+        assertEquals(6, SupportedLocales.all.size)
+        assertEquals(6, SupportedLocales.all.count { it.tier == 1 || it.tier == 2 })
+        assertEquals(2, SupportedLocales.all.count { it.tier == 1 })
     }
 
     @Test
@@ -78,11 +71,12 @@ class SupportedLocalesTest {
 
     @Test
     fun `canonicalTag accepts only catalogue tags and canonicalizes case`() {
-        assertEquals("de", SupportedLocales.canonicalTag(" DE "))
-        assertEquals("hi", SupportedLocales.canonicalTag("HI"))
-        assertEquals("bn", SupportedLocales.canonicalTag("BN"))
-        assertEquals("pt-BR", SupportedLocales.canonicalTag("pt-br"))
+        assertEquals("ru", SupportedLocales.canonicalTag(" RU "))
+        assertEquals("uk", SupportedLocales.canonicalTag("UK"))
+        assertEquals("et", SupportedLocales.canonicalTag("ET"))
+        assertEquals("en-US", SupportedLocales.canonicalTag("en-us"))
         assertEquals("", SupportedLocales.canonicalTag("  "))
+        assertNull(SupportedLocales.canonicalTag("de"))
         assertNull(SupportedLocales.canonicalTag("und"))
         assertNull(SupportedLocales.canonicalTag("de-DE"))
         assertNull(SupportedLocales.canonicalTag("not-a-locale"))
@@ -90,40 +84,39 @@ class SupportedLocalesTest {
 
     @Test
     fun `scriptForTag returns the catalogue script for known tags`() {
-        assertEquals("Arab", SupportedLocales.scriptForTag("ar"))
-        assertEquals("Latn", SupportedLocales.scriptForTag("de"))
-        assertEquals("Hans", SupportedLocales.scriptForTag("zh-CN"))
-        assertEquals("Deva", SupportedLocales.scriptForTag("hi"))
-        assertEquals("Beng", SupportedLocales.scriptForTag("bn"))
-        assertEquals("Hant", SupportedLocales.scriptForTag("zh-TW"))
+        assertEquals("Latn", SupportedLocales.scriptForTag("en-US"))
         assertEquals("Cyrl", SupportedLocales.scriptForTag("ru"))
+        assertEquals("Cyrl", SupportedLocales.scriptForTag("uk"))
+        assertEquals("Latn", SupportedLocales.scriptForTag("et"))
+        assertEquals("Latn", SupportedLocales.scriptForTag("lv"))
+        assertEquals("Latn", SupportedLocales.scriptForTag("lt"))
     }
 
     @Test
     fun `scriptForTag returns null for unknown tags`() {
         // Tags not in the catalogue return null — the caller (LocalizedContent) then falls back to
         // ICU likely-subtags. A non-null return for an unknown tag would be a bug.
+        assertNull(SupportedLocales.scriptForTag("de"))
         assertNull(SupportedLocales.scriptForTag("de-DE"))
         assertNull(SupportedLocales.scriptForTag("unknown"))
         assertNull(SupportedLocales.scriptForTag(""))
     }
 
     @Test
-    fun `rtl is true only for RTL catalogue scripts`() {
-        assertTrue(SupportedLocales.isRtl("ar"))
-        assertTrue(SupportedLocales.isRtl("fa"))
-        assertTrue(SupportedLocales.isRtl("he"))
-        assertFalse(SupportedLocales.isRtl("de"))
-        assertFalse(SupportedLocales.isRtl("zh-CN"))
+    fun `no remaining locale is RTL`() {
+        // Every shipped or catalogued locale is Latin or Cyrillic; Arabic, Persian and Hebrew were
+        // removed with the non-ex-USSR translations.
+        assertFalse(SupportedLocales.all.any { it.rtl })
+        assertFalse(SupportedLocales.isRtl("ru"))
+        assertFalse(SupportedLocales.isRtl("ar"))
         assertFalse(SupportedLocales.isRtl("unknown"))
     }
 
     @Test
     fun `pickerRows excludes non-packaged and non-visible locales`() {
         val rows = SupportedLocales.pickerRows
-        // Grows by one with every promotion (see the catalogue test above).
-        assertTrue(rows.size >= 25)
-        assertFalse(rows.any { it.id == "en-GB" })
+        assertEquals(2, rows.size)
+        assertEquals(listOf("en-US", "ru"), rows.map { it.id })
         assertFalse(rows.any { it.tier == 2 })
         rows.forEach {
             assertTrue("${it.id} must be packaged", it.packaged)
@@ -144,13 +137,13 @@ class SupportedLocalesTest {
 
     @Test
     fun `100 percent visible community locale hides coverage badge`() {
-        val complete = SupportedLocales.all.first { it.id == "de" }.copy(coverage = 100)
+        val complete = SupportedLocales.all.first { it.id == "ru" }.copy(coverage = 100)
         assertNull(SupportedLocales.coverageBadgePercent(complete))
     }
 
     @Test
     fun `partial visible community locale shows badge while source and hidden locales do not`() {
-        val visible = SupportedLocales.all.first { it.id == "de" }.copy(coverage = 99)
+        val visible = SupportedLocales.all.first { it.id == "ru" }.copy(coverage = 99)
         val source = SupportedLocales.all.first { it.id == "en-US" }.copy(coverage = 99)
         val hidden = visible.copy(pickerVisible = false)
         val regionalOverride = visible.copy(tier = 0, pickerVisible = true)

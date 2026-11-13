@@ -232,8 +232,9 @@ android {
         // local.properties is developer-local and never committed (its Windows SDK path can't be
         // escaped without breaking the local tooling that writes it). CI has no such file at all.
         disable += "PropertyEscape"
-        // en-rGB is an intentional partial regional override of the canonical en-US source; its
-        // omitted keys fall back to values/ and must not make every default string a lint error.
+        // The shipped Russian translation is near-complete but omits a few keys (e.g.
+        // common_minutes); they fall back to values/ and must not make every default string a lint
+        // error.
         disable += "MissingTranslation"
         // Reports are what a failed CI run is inspected from. Since AGP 9.3 the HTML/XML/text
         // reports are always generated, so there is nothing left to switch on here.

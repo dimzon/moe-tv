@@ -29,7 +29,7 @@ Signature for stricter portals).
 |---|---|
 | **Player only** | No bundled content, no subscriptions, no paywalls |
 | **Remote-first** | D-pad navigation designed for a screen across the room |
-| **Language-first** | 26 packaged interface languages, chosen before anything else |
+| **Language-first** | 2 packaged interface languages (English, Russian), chosen before anything else |
 | **One fast engine** | Single ExoPlayer/Media3 engine tuned for near-instant Live TV |
 | **Built for scale** | Tested at ~50k channels |
 | **Open source** | GPLv3, original code, built with the help of AI |
@@ -402,9 +402,8 @@ their group.
 
 ## 8. Language & first run
 
-A fresh installation opens with a **language selector before Get Started**. English plus 25 packaged
-translations; further requested languages stay catalogue-only until they reach the reviewed
-readiness threshold. Every wizard step shares one frame (lockup, step dots, glass panel, Back / Next,
+A fresh installation opens with a **language selector before Get Started**. English plus Russian;
+further requested languages stay catalogue-only until they reach the reviewed readiness threshold. Every wizard step shares one frame (lockup, step dots, glass panel, Back / Next,
 key hints). The first run is welcome (which carries the language selector) → display (UI zoom and
 font steppers, app icon picker, a sample row) → disclaimer → **Set up OwnTV** → profile → **add a
 playlist** → the import → **All set**, whose **Add a TV guide** opens Settings → EPG sources → Add once

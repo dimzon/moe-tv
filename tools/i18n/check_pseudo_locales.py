@@ -62,20 +62,19 @@ def _catalogue_locale_qualifiers() -> set[str]:
 def _allowed_debug() -> set[str]:
     """Allowed locale configurations in the debug APK.
 
-    Includes the source locale (``en``), the regional override (``en-rGB``),
-    both pseudolocales, the unavoidable ``ar`` parent of ``ar-rXB``, and every
-    community locale declared in ``locales.json``.
+    Includes the source locale (``en``), both pseudolocales, the unavoidable
+    ``ar`` parent of ``ar-rXB``, and every locale declared in ``locales.json``.
     """
-    return {"en", "en-rGB", "en-rXA", "ar-rXB", "ar"} | _catalogue_locale_qualifiers()
+    return {"en", "en-rXA", "ar-rXB", "ar"} | _catalogue_locale_qualifiers()
 
 
 def _allowed_release() -> set[str]:
     """Allowed locale configurations in the release APK.
 
-    Includes ``en``, ``en-rGB``, and every community locale declared in
-    ``locales.json``.  Pseudolocales must never reach release.
+    Includes ``en`` and every locale declared in ``locales.json``. Pseudolocales
+    must never reach release.
     """
-    return {"en", "en-rGB"} | _catalogue_locale_qualifiers()
+    return {"en"} | _catalogue_locale_qualifiers()
 
 
 # Module-level snapshots for test compatibility (read once at import time;
@@ -114,7 +113,7 @@ _REGION = re.compile(r"^r[A-Z]{2}$")
 def _locale_configs(configs: set[str]) -> set[str]:
     """Extract the locale qualifier (``xx`` or ``xx-rYY``) from each aapt2 configuration line.
 
-    aapt2 prints full configs like ``en-rGB-w720dp-h1280dp-long-mdpi``; the locale is the leading
+    aapt2 prints full configs like ``ru-w720dp-h1280dp-long-mdpi``; the locale is the leading
     language tag optionally followed by an ``rYY`` region. Other leading qualifiers (``v26``,
     ``w720dp``, ``long``, ``port``, ...) are not locales and are ignored. The default unqualified
     config prints as a blank line and is already excluded by the caller.
