@@ -1,26 +1,33 @@
 # Чек-лист атрибуции: что ещё нужно изменить перед публикацией
 
-**Статус (13.11.2026).** Сверено с историей до коммита `ec31209` (17:59) включительно. После
+**Статус (13.11.2026).** Сверено с историей до коммита `fb83343` включительно. После
 `9562122` (атрибуция и лицензии) прошли `baa3d2b` (en/ru), `4a962f9` (удалён EPG-матчинг),
 `0d1bc0a` (AGENTS.md: ветки без прямого указания запрещены, работа в `main`), `cf8b0b5` (удалены
-TMDB/OpenSubtitles) и `ec31209` (удалены VOD, трейлеры, загрузки, настройки, зависимость
-android-youtube-player). **Все пять коммитов уже в `main`.** Юридические документы после них
-обновлены: [`NOTICE`](../NOTICE), [`THIRD_PARTY_LICENSES.md`](../THIRD_PARTY_LICENSES.md),
+TMDB/OpenSubtitles), `ec31209` (удалены VOD, трейлеры, загрузки, настройки, зависимость
+android-youtube-player) и `fb83343` (синхронизация юридических документов с live-only деревом).
+**Все коммиты уже в `main`.** Юридические документы после них обновлены:
+[`NOTICE`](../NOTICE), [`THIRD_PARTY_LICENSES.md`](../THIRD_PARTY_LICENSES.md),
 [`LICENSES/Apache-2.0.txt`](../LICENSES/Apache-2.0.txt), [`README.md`](../README.md),
 [`CONTRIBUTING.md`](../CONTRIBUTING.md), [`CHANGELOG.md`](../CHANGELOG.md).
 
 `LICENSE` оставлен **нетронутым** — это дословный текст GPLv3, менять его нельзя.
 
-**По решению владельца проекта код, ресурсы и CI намеренно НЕ изменялись.** Ниже зафиксирован
-полный список унаследованных от апстрима ссылок и формулировок, которые всё ещё создают ложное
-впечатление, что это оригинальный OwnTV, а также юридические пункты, требующие реализации в
-приложении. Публичного репозитория у форка пока нет: 13.11.2026 через `gh` создан **приватный**
-`github.com/dimzon/moe-tv`, `origin` настроен по SSH, код ещё **не запушен**. Поэтому в
-документах сохранены нейтральные формулировки («дерево исходников, из которого получена
-копия»). Приватный репозиторий **не заменяет** публичный Corresponding Source при
-распространении APK (GPLv3 §6).
+**Код приложения и строковые ресурсы намеренно НЕ изменялись** — разделы A и B ниже описывают
+правки, которые ещё предстоит сделать в исходниках. Конфигурация репозитория при этом приведена
+в порядок: `.github/` (воркфлоу, issue/PR-шаблоны, Dependabot), `extras/USER_GUIDE.md` и
+`.gitignore` — подробности в разделе C. Пользовательская и контрибьюторская документация
+(`README.md`, `CONTRIBUTING.md`, шаблоны, гайд) переведена на русский (C10). Ниже зафиксирован полный список унаследованных от
+апстрима ссылок и формулировок, которые создают ложное впечатление, что это оригинальный OwnTV,
+а также юридические пункты, требующие реализации в приложении. Публичного репозитория у форка
+пока нет: 13.11.2026 через `gh` создан **приватный** `github.com/dimzon/moe-tv`, `origin`
+настроен по SSH, код ещё **не запушен**. Ссылки в шаблонах уже ведут на `dimzon/moe-tv`, но
+станут живыми только после пуша и публикации. Поэтому в юридических документах сохранены
+нейтральные формулировки («дерево исходников, из которого получена копия»). Приватный
+репозиторий **не заменяет** публичный Corresponding Source при распространении APK (GPLv3 §6).
 
-> Все номера строк ниже — **на коммит `ec31209`**. При новой правке кода их надо пересчитать.
+> Номера строк в разделах A и B — **на коммит `ec31209`**; при новой правке кода их надо
+> пересчитать. В разделе C ссылки на `.github/` и `.gitignore` обновлены после правки
+> конфигурации.
 
 ---
 
@@ -55,14 +62,28 @@ android-youtube-player). **Все пять коммитов уже в `main`.** 
 
 | # | Где | Сейчас | Что сделать |
 |---|---|---|---|
-| C1 | `.github/ISSUE_TEMPLATE/bug_report.yml:20`, `feature_request.yml:15`, `.github/PULL_REQUEST_TEMPLATE.md:5` | `https://github.com/opentvproject/opentv/blob/main/extras/USER_GUIDE.md` | Ссылка на **совершенно другой проект** (`opentvproject/opentv`), не на OwnTV и не на форк. Заменить на локальный `extras/USER_GUIDE.md` или URL форка. |
-| C2 | `.github/workflows/android.yml:258`, `:262`, `:264` | `Name the APK (OwnTV-v<version>)`, `OUT="OwnTV-v…apk"`, `OUT="OwnTV-dev-…apk"` | Имя артефакта от апстрима; привести к имени форка (`MyOwnTV` / `МОЁ ТВ`). |
+| C1 | `.github/ISSUE_TEMPLATE/*`, `.github/PULL_REQUEST_TEMPLATE.md`, `extras/USER_GUIDE.md` | Ссылки на чужой проект `opentvproject/opentv` и сообщество `t.me/owntvplayer`, вопросы про Xtream/M3U/плейлисты/VOD в баг-репорте, 874 строки гайда про удалённые функции | **Закрыто.** Все ссылки ведут на `github.com/dimzon/moe-tv/blob/main/extras/USER_GUIDE.md`, контакт апстрима удалён. Формы переписаны под live-only RuTube: вместо «типа плейлиста» спрашивают канал/программу, версию приложения и устройство. В `extras/USER_GUIDE.md` добавлен актуальный раздел форка, а унаследованный текст явно помечен как исторический архив. Тексты переведены на русский (C10); needles `pr-checklist.yml` (`проверил **Настройки**`, `искал существующие issues/PR`) обновлены синхронно с PR-шаблоном. |
+| C2 | `.github/workflows/android.yml` | Имена артефактов и заголовок релиза от апстрима (`OwnTV-v…`, `OwnTV <tag>`) | **Закрыто.** `MyOwnTV-v<version>.apk`, `MyOwnTV-dev-<sha>.apk`, стабильные `MyOwnTV.apk` и `MyOwnTV-x86_64-v<version>.apk`, заголовок релиза `MyOwnTV <tag>`. Заодно `files:` у релиза заменён на `dist/*.apk`: раньше на debug-сборке без keystore он ссылался на несуществующий x86_64-файл. |
 | C3 | `settings.gradle.kts:25` | `rootProject.name = "MyOwnTV"` | Приложение переименовано в МОЁ ТВ (`applicationId com.github.dimzon.owntv`), имя проекта осталось старым. Косметика, но влияет на названия артефактов. |
-| C4 | `git remote -v` | `origin git@github.com:dimzon/moe-tv.git` — приватный репозиторий, **пустой** (коммиты не запушены) | `owner/repo` теперь известен: **`dimzon/moe-tv`**. Порядок: закоммитить 6 документов → запушить `main` → сделать репозиторий публичным → подставить URL в `NOTICE` §4, `README.md`, A1/A2/A6 и B1–B3. Пока репозиторий приватный, `NOTICE` корректно использует нейтральную формулировку Corresponding Source, но это **не заменяет** обязанность выдать исходники при распространении APK. |
+| C4 | `git remote -v` | `origin git@github.com:dimzon/moe-tv.git` — приватный репозиторий, **пустой** (коммиты не запушены) | `owner/repo` известен: **`dimzon/moe-tv`**. Шесть документов **уже закоммичены** в `main` (`fb83343`); осталось: запушить `main` → сделать репозиторий публичным → подставить URL в `NOTICE` §4, `README.md`, A1/A2/A6 и B1–B3. Пока репозиторий приватный, `NOTICE` корректно использует нейтральную формулировку Corresponding Source, но это **не заменяет** обязанность выдать исходники при распространении APK. |
 | C5 | Заголовки исходников | SPDX-заголовков нет ни у апстрима, ни у форка | Для новых файлов желательно `// SPDX-License-Identifier: GPL-3.0-only`. Массово переписывать унаследованные файлы не обязательно и не рекомендуется: достаточно `NOTICE` + `README` + `CHANGELOG` (§5(a)/(b)). |
-| C6 | `.gitignore:40–42`; `extras/branding/__pycache__/*.pyc` (3 файла, закоммичены в `cf8b0b5`) | Комментарий объясняет, почему не игнорируется `extras/worker/` — каталог удалён в `cf8b0b5`; три бинарных `.pyc` (~100 КБ) случайно попали в коммит | Обновить комментарий, добавить `__pycache__/` и снять `.pyc` с отслеживания (`git rm --cached`). Заодно решить, игнорировать ли `.workbuddy-ai/` (журнал проекта) — сейчас он не в `.gitignore` и попадёт при `git add -A`. |
+| C6 | `.gitignore`; `extras/branding/__pycache__/*.pyc` (3 файла) | Комментарий про несуществующий `extras/worker/` (удалён в `cf8b0b5`), три бинарных `.pyc` (~100 КБ) в индексе, локальный журнал агента не игнорировался | **Закрыто.** `.workbuddy-ai/`, `.p1contract/`, `.p2contract/`, `PHASE*_CONTRACT.md`, `__pycache__/`, `*.pyc` добавлены в `.gitignore` (проверено `git check-ignore -v`); комментарий про `/worker/` переписан; три `.pyc` сняты с отслеживания `git rm --cached` (на диске остались). |
 | C7 | `app/build.gradle.kts:450` | `implementation(libs.juniversalchardet)` объявлен, но ни один исходник его не импортирует после `ec31209` | Убрать зависимость из `build.gradle.kts`, `gradle/libs.versions.toml` и строку в `THIRD_PARTY_LICENSES.md` одним коммитом (правило зафиксировано в `CONTRIBUTING.md`). Пока она объявлена, tri-license и выбор GPL-3.0 остаются в перечне. |
 | C8 | `AGENTS.md:30–33` ↔ `CONTRIBUTING.md` | В `AGENTS.md` ветки без прямого указания запрещены, работа в `main`; `CONTRIBUTING.md` до этой правки предписывал `git checkout -b` и fork-and-PR | Приведено в соответствие: `CONTRIBUTING.md` теперь описывает коммиты в `main` и отсылает к `AGENTS.md`. Новые ветки не создавать. |
+| C9 | `.github/workflows/android.yml`, `i18n.yml`, `pr-checklist.yml`, `automerge-core-bump.yml`, `dependabot.yml` | Мёртвая логика внешнего `OwnTV_Core`: job `verify-pin`, исключения `bump/core-*`, секреты `OWNTV_EDGE_*`, комментарии про Maven-репозиторий и mpv; workflow, автоматически вливавший PR | **Закрыто.** Внешнего пина нет (`gradle/libs.versions.toml` не содержит `owntvCore`, исходники ядра лежат в `app/src/main/java/tv/own/owntv/**`), `OWNTV_EDGE_KEY` больше не читается `app/build.gradle.kts`. `verify-pin`, все исключения `bump/core-*` и `automerge-core-bump.yml` удалены; `check`/`build` и i18n-проверки работают без исключений. В `i18n.yml` добавлен `chmod +x ./gradlew` — в индексе `gradlew` имеет mode `100644`, без этого job `pseudo` падал бы. |
+| C10 | `README.md`, `CONTRIBUTING.md`, `extras/USER_GUIDE.md`, `.github/ISSUE_TEMPLATE/*`, `PULL_REQUEST_TEMPLATE.md`, `pr-checklist.yml`, `dependabot.yml` | Вся пользовательская и контрибьюторская документация была по-английски, хотя продукт и аудитория русскоязычные | **Закрыто.** Переведено на русский; правило зафиксировано в `CONTRIBUTING.md`. Намеренно оставлены в оригинале: `LICENSE` (дословный GPLv3), `NOTICE`, `THIRD_PARTY_LICENSES.md`, `LICENSES/*` (юридические тексты), исторический `CHANGELOG.md` (парсеры release notes ищут `## <тег>`), английские комментарии в CI и 874 строки архивного апстримового гайда. Якоря README (`#origins`, `#features`, `#install`, `#tech`, `#build`, `#legal`, `#license`) заданы тегами `<a id=...>`, поэтому не зависят от языка заголовков; needles `pr-checklist.yml` переведены синхронно с PR-шаблоном. |
+
+**Настройки репозитория (`gh api repos/dimzon/moe-tv`, 13.11.2026).** `private: true`,
+`default_branch: main`, `has_issues: true`, `has_projects: true`, `has_wiki: false`,
+`has_discussions: false`, все три способа слияния разрешены, `allow_auto_merge: false`,
+`delete_branch_on_merge: false`, `web_commit_signoff_required: false`. Actions включены
+(`allowed_actions: all`, `default_workflow_permissions` не задан), **секретов нет**: CI собирает
+debug-APK без подписи, а `KEYSTORE_*` нужно завести до первого релизного тега. **Branch protection
+и rulesets недоступны** — API отдаёт `403 Upgrade to GitHub Pro or make this repository public`,
+то есть проверки станут обязательными только после публикации репозитория (или Pro). Все теги
+экшенов в воркфлоу существуют: `checkout@v7`, `setup-java@v6`, `setup-python@v7`,
+`upload-artifact@v7`, `github-script@v9`, `setup-android@v4`, `setup-gradle@v6`,
+`action-gh-release@v3`; первый 404 по `setup-gradle@v6` был transient, `refs/tags/v6` есть.
 
 ---
 

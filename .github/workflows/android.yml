@@ -1,11 +1,13 @@
 name: Android CI
 
-# Three jobs:
-#   verify-pin — core pin bumps ONLY. Seconds, no build. See its own note.
-#   check      — unit tests + lint. Gates the build. Skipped on core pin bumps.
-#   build      — assembles the APK, and publishes a GitHub Release on v* tags. Never runs for a PR,
-#                so PR branches still don't produce APKs (the restriction added in ac33c65 is
-#                unchanged); they only get the test/lint verdict.
+# Two jobs:
+#   check — unit tests + lint. Gates the build on every push, tag and pull request.
+#   build — assembles the APK, and publishes a GitHub Release on v* tags. Never runs for a PR,
+#           so PR branches still don't produce APKs (the restriction added in ac33c65 is
+#           unchanged); they only get the test/lint verdict.
+#
+# All sources, including the former OwnTV_Core code and strings, are in this repository — there
+# is no external core artifact, Maven repository, pin or edge-key secret to resolve.
 on:
   push:
     branches: [ main ]
@@ -17,77 +19,17 @@ on:
 permissions:
   contents: write   # required so tag builds can create a Release
 
-# Core (tv.own.myowntv:core, :player-core) and the mpv engine (tv.own.myowntv:libmpv) resolve from OwnTV's
-# public Maven repository, https://ahxn00.github.io/OwnTV_Core/maven — no token, so fork pull requests
-# build exactly like the maintainer's. There is no owntv.corePath here: CI deliberately builds against
-# the PINNED artifact, which is what a release actually ships. Local builds use the composite.
+# Everything needed to build is in this repository; no external Maven repository, token or
+# secret is required to resolve dependencies.
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # A "Pin core x.y.z" pull request opened by core's bump-consumers workflow changes exactly two
-  # files and no application code. Running the unit tests, lint and the i18n checks on it re-verifies
-  # this repo's Kotlin, which is byte-identical to main — minutes of runner time that cannot report
-  # anything new. So those jobs step aside for these branches and this one runs instead.
-  #
-  # It also keeps the workflow run itself concluding "success". A run whose every job is skipped
-  # concludes as "skipped", and automerge-core-bump.yml requires success — skip everything and the
-  # pull request would sit open for ever.
-  #
-  # What is actually worth checking on such a pull request is that the numbers agree: seconds, no
-  # build, no Gradle, no Android SDK.
-  verify-pin:
-    if: ${{ github.event_name == 'pull_request' && startsWith(github.head_ref, 'bump/core-') }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: The pin must be core's newest release, and locales.json must match it
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HEAD_BRANCH: ${{ github.head_ref }}
-        run: |
-          set -euo pipefail
-
-          PIN=$(sed -n 's/^owntvCore = "\(.*\)"$/\1/p' gradle/libs.versions.toml)
-          [ -n "$PIN" ] || { echo "::error::Could not read owntvCore from gradle/libs.versions.toml."; exit 1; }
-
-          # The branch name carries the version too, so a mismatch means the two halves of the bump
-          # disagree about what is being pinned.
-          if [ "$HEAD_BRANCH" != "bump/core-$PIN" ]; then
-            echo "::error::Branch $HEAD_BRANCH does not match the pin $PIN."
-            exit 1
-          fi
-
-          # Core publishes the release only AFTER its tests pass and both artifacts are pushed, so a
-          # release existing is proof the version is real and installable.
-          LATEST=$(gh api repos/opentvproject/opentv_Core/releases/latest --jq .tag_name)
-          LATEST="${LATEST#core-}"
-          if [ "$PIN" != "$LATEST" ]; then
-            echo "::error::Pinned $PIN but core's newest release is $LATEST."
-            exit 1
-          fi
-
-          # The other file the bump touches. It is duplicated into every consumer because Gradle
-          # reads it at configure time to build localeFilters, and core's own copy never reaches
-          # here. A stale copy silently strips a language out of the APK with a green build.
-          curl -fsSL -o /tmp/locales.core.json \
-            "https://raw.githubusercontent.com/opentvproject/opentv_Core/core-$PIN/tools/i18n/locales.json"
-          if ! diff -u /tmp/locales.core.json tools/i18n/locales.json; then
-            echo "::error::tools/i18n/locales.json differs from core's copy at core-$PIN."
-            exit 1
-          fi
-
-          echo "Pin $PIN is core's newest release, the branch agrees, and locales.json matches."
-
   # Nothing was checking the unit tests or lint before, so both could rot silently while the APK
   # kept building. This job is the gate: if it is red, no APK is produced and no release is cut.
   check:
-    # Core pin bumps carry no application code — verify-pin above covers them instead.
-    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'bump/core-')) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -197,31 +139,6 @@ jobs:
             echo "No KEYSTORE_BASE64 secret set — building a debug-signed APK."
           fi
 
-      # Derives this release's edge key for the default metadata/subtitle service. Falls back to the
-      # static OWNTV_EDGE_KEY, then to "" — a fork has neither secret and the app uses its open base
-      # URL, exactly as before.
-      - name: Derive the release edge key
-        env:
-          OWNTV_EDGE_MASTER: ${{ secrets.OWNTV_EDGE_MASTER }}
-          OWNTV_EDGE_KEY: ${{ secrets.OWNTV_EDGE_KEY }}
-          VERSION_NAME: ${{ steps.ver.outputs.name }}
-        run: |
-          if [ -n "$OWNTV_EDGE_MASTER" ]; then
-            # No trailing newline in the input; the server derives it the same way.
-            KEY=$(printf '%s' "$VERSION_NAME" \
-              | openssl dgst -sha256 -hmac "$OWNTV_EDGE_MASTER" -hex \
-              | awk '{print $NF}')
-            echo "::add-mask::$KEY"
-            echo "OWNTV_EDGE_KEY=$KEY" >> "$GITHUB_ENV"
-            echo "Derived the edge key for $VERSION_NAME."
-          elif [ -n "$OWNTV_EDGE_KEY" ]; then
-            echo "::add-mask::$OWNTV_EDGE_KEY"
-            echo "OWNTV_EDGE_KEY=$OWNTV_EDGE_KEY" >> "$GITHUB_ENV"
-            echo "No OWNTV_EDGE_MASTER — using the static edge key."
-          else
-            echo "No edge secret configured (fork build) — the app will use the unprotected base URL."
-          fi
-
       - name: Build APK
         env:
           VERSION_NAME: ${{ steps.ver.outputs.name }}
@@ -229,8 +146,6 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          # OWNTV_EDGE_KEY is exported into $GITHUB_ENV by the step above; app/build.gradle.kts reads
-          # it as the env var it always did.
         run: |
           chmod +x ./gradlew
           if [ -n "$KEYSTORE_FILE" ]; then
@@ -255,13 +170,13 @@ jobs:
             echo "ARM_SRC=$SRC" >> "$GITHUB_ENV"
           fi
 
-      - name: Name the APK (OwnTV-v<version>)
+      - name: Name the APK (MyOwnTV-v<version>)
         run: |
           mkdir -p dist
           if [ "$IS_TAG" = "true" ]; then
-            OUT="OwnTV-v${{ steps.ver.outputs.name }}.apk"
+            OUT="MyOwnTV-v${{ steps.ver.outputs.name }}.apk"
           else
-            OUT="OwnTV-dev-${GITHUB_SHA::7}.apk"
+            OUT="MyOwnTV-dev-${GITHUB_SHA::7}.apk"
           fi
           cp "$ARM_SRC" "dist/$OUT"
           echo "APK_OUT=$OUT" >> "$GITHUB_ENV"
@@ -325,11 +240,10 @@ jobs:
         if: env.IS_TAG == 'true'
         uses: softprops/action-gh-release@v3
         with:
-          name: OwnTV ${{ github.ref_name }}
-          files: |
-            dist/${{ env.APK_OUT }}
-            dist/MyOwnTV.apk
-            dist/MyOwnTV-x86_64-v${{ steps.ver.outputs.name }}.apk
+          name: MyOwnTV ${{ github.ref_name }}
+          # A debug build without a keystore has no x86_64 artifact. A glob uploads only the APKs
+          # that were actually produced instead of failing on a hard-coded missing file.
+          files: dist/*.apk
           body_path: dist/RELEASE_NOTES.md
           # Must stay false: it appends GitHub's auto commit/PR list under the body, which buries the
           # short in-app notes the updater dialog shows.

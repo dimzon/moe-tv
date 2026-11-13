@@ -1,5 +1,4 @@
+# Telegram-группа апстримового OwnTV удалена: она относится к оригинальному проекту, а не к этому
+# форку. Когда у форка появится свой канал связи, добавьте сюда contact_links. Пока GitHub
+# предлагает только две настроенные формы issue (сообщение об ошибке / предложение).
 blank_issues_enabled: false
-contact_links:
-  - name: 💬 MyOwnTV Telegram group
-    url: https://t.me/owntvplayer
-    about: Quick questions, help and chat — often faster than opening an issue.

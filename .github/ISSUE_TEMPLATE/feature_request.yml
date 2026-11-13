@@ -1,41 +1,50 @@
-name: Feature request / idea
-description: Suggest an improvement for MyOwnTV
-title: "[Idea] "
+name: Предложение / идея
+description: Предложить улучшение для МОЁ ТВ / MyOwnTV
+title: "[Идея] "
 labels: [enhancement]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        У этого форка намеренно узкая задача: **прямой эфир из публичного каталога RuTube и
+        программа передач на Android TV, без аккаунта и настройки плейлистов**. Просьбы вернуть
+        провайдеров Xtream / M3U / Stalker, фильмы/сериалы, трейлеры, загрузки, catch-up или
+        профили здесь не рассматриваются — их стоит отнести в апстримовый
+        [OwnTV](https://github.com/ahXN00/OwnTV).
+
   - type: checkboxes
     id: mandatory_checks
     attributes:
-      label: Before you suggest this (required)
+      label: Перед отправкой (обязательно)
       description: >
-        Some ideas already exist in the app under a different name or in Settings. Please check first —
-        both boxes are mandatory.
+        Часть идей уже реализована в приложении под другим названием или в Настройках. Проверьте
+        сначала — оба пункта обязательны.
       options:
         - label: >
-            I read the **[User Guide](https://github.com/opentvproject/opentv/blob/main/extras/USER_GUIDE.md)**
-            and checked the app's **Settings** and existing **functions** — this isn't already possible.
+            Я прочитал **[Руководство пользователя](https://github.com/dimzon/moe-tv/blob/main/extras/USER_GUIDE.md)**
+            и проверил **Настройки** и существующие **функции** — этого в приложении ещё нет.
           required: true
-        - label: I searched existing issues and this isn't already requested.
+        - label: Я искал существующие issues и такую идею ещё не предлагали.
           required: true
 
   - type: textarea
     id: idea
     attributes:
-      label: The idea
-      description: What would you like MyOwnTV to do?
+      label: Идея
+      description: Что должно уметь МОЁ ТВ / MyOwnTV?
     validations:
       required: true
 
   - type: textarea
     id: why
     attributes:
-      label: Why — the problem it solves
-      description: What's painful today, or what would this make better?
+      label: Зачем — какую проблему это решает
+      description: Что сейчас неудобно или что станет лучше?
     validations:
       required: true
 
   - type: textarea
     id: how
     attributes:
-      label: How you'd expect it to work
-      description: "Optional: where it lives in the UI, how you'd trigger it, examples from other apps."
+      label: Как это должно работать
+      description: "Необязательно: где в интерфейсе, как вызывается, примеры из других приложений."

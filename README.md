@@ -1,244 +1,265 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: light)" srcset="extras/brand/app-logos/logo_eggshell_light.png">
-    <img src="extras/brand/app-logos/logo_eggshell.png" alt="MyOwnTV" width="360">
+    <img src="extras/brand/app-logos/logo_eggshell.png" alt="МОЁ ТВ" width="360">
   </picture>
 </p>
 
 <p align="center">
-  <b>MyOwnTV — your RuTube live-TV player for Android TV</b><br>
-  <sub>Fast · modern · remote-first — the public live catalogue and guide, no setup needed</sub>
+  <b>МОЁ ТВ / MyOwnTV — плеер прямого эфира RuTube для Android TV</b><br>
+  <sub>Быстро · современно · пульт прежде всего — публичный каталог эфира и программа передач, без настройки</sub>
 </p>
 
 <p align="center">
-  <img alt="Platform" src="https://img.shields.io/badge/platform-Android%20TV-3DDC84?logo=android&logoColor=white">
+  <img alt="Платформа" src="https://img.shields.io/badge/platform-Android%20TV-3DDC84?logo=android&logoColor=white">
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.4.20-7F52FF?logo=kotlin&logoColor=white">
-  <img alt="Compose for TV" src="https://img.shields.io/badge/Jetpack%20Compose-for%20TV-4285F4?logo=jetpackcompose&logoColor=white">
-  <img alt="Player" src="https://img.shields.io/badge/player-ExoPlayer%20%2F%20Media3-FB8C00">
-  <img alt="License" src="https://img.shields.io/badge/license-GPLv3-blue">
-  <img alt="Built with the help of AI" src="https://img.shields.io/badge/built%20with-the%20help%20of%20AI-8A2BE2">
+  <img alt="Compose для ТВ" src="https://img.shields.io/badge/Jetpack%20Compose-for%20TV-4285F4?logo=jetpackcompose&logoColor=white">
+  <img alt="Плеер" src="https://img.shields.io/badge/player-ExoPlayer%20%2F%20Media3-FB8C00">
+  <img alt="Лицензия" src="https://img.shields.io/badge/license-GPLv3-blue">
+  <img alt="Создано с помощью ИИ" src="https://img.shields.io/badge/built%20with-the%20help%20of%20AI-8A2BE2">
 </p>
 
 ---
 
-MyOwnTV is a native **Android TV** live-TV **player** built with Kotlin and Jetpack Compose for
-TV. It plays Live TV on **ExoPlayer (Media3)** for near-instant channel changes, and it is a
-*player only*: the channel list and the programme guide come from **RuTube's public API**, with no
-playlist, login or setup screen needed.
+МОЁ ТВ / MyOwnTV — нативный **плеер прямого эфира** для **Android TV** на Kotlin и Jetpack
+Compose for TV. Эфир воспроизводится через **ExoPlayer (Media3)**, переключение каналов почти
+мгновенное. Это **только плеер**: список каналов и программа передач приходят из **публичного API
+RuTube** — плейлисты, логин и экран первичной настройки не нужны.
 
-> ⚠️ MyOwnTV ships **no** channels, playlists, subscriptions or streams of its own. It plays
-> RuTube's publicly listed live streams. You are responsible for what you watch and for
-> complying with the laws and rights that apply to you.
+> ⚠️ МОЁ ТВ **не поставляет** собственных каналов, плейлистов, подписок и потоков. Приложение
+> воспроизводит публично доступные эфиры RuTube. Ответственность за то, что вы смотрите, и за
+> соблюдение применимых законов и прав лежит на вас.
 
-Open source, **GPL-3.0-only**, built with the help of AI. **Android TV only** — leanback launcher,
-D-pad first. **This is a derivative work**, not the original OwnTV — see below.
+Открытый исходный код, **GPL-3.0-only**, создано с помощью ИИ. **Только Android TV** — leanback-лаунчер,
+навигация пультом (D-pad). **Это производная работа**, а не оригинальный OwnTV — см. ниже.
+
+<a id="origins"></a>
 
 ---
 
-## 🧬 Origins & attribution
+## 🧬 Происхождение и атрибуция
 
-**MyOwnTV / МОЁ ТВ is a substantially modified version of
-[OwnTV](https://github.com/ahXN00/OwnTV)** by **ahXN00 and the OwnTV contributors**, licensed
-under the **GNU General Public License v3.0 only** (`GPL-3.0-only`). The upstream `main` snapshot
-was imported on **2026-11-09** (just after upstream v5.2.1, 2026-10-21) as this repository's root
-commit `214719f`; upstream history was squashed at the fork point.
+**МОЁ ТВ / MyOwnTV — существенно изменённая версия
+[OwnTV](https://github.com/ahXN00/OwnTV)** авторства **ahXN00 и участников OwnTV**, распространяемая
+под **GNU General Public License версии 3 только** (`GPL-3.0-only`). Снимок апстримовой ветки
+`main` импортирован **2026-11-09** (сразу после апстримового v5.2.1 от 2026-10-21) как корневой
+коммит этого репозитория `214719f`; история апстрима в точке ответвления схлопнута.
 
-It also incorporates source from **[OwnTV_Core](https://github.com/ahXN00/OwnTV_Core)**
-(likewise `GPL-3.0-only`), folded into `app/src/main/java/tv/own/owntv/**`: the database, sync,
-parsers, EPG and playback engine, **plus the translated UI strings** (upstream shipped 26 locales;
-this fork currently packages English and Russian). The docs,
-i18n tooling and upstream brand assets in `extras/brand/` are upstream-derived too; the
-TMDB/OpenSubtitles reference Workers (`extras/worker/`) and their logos were removed in this
-fork (commit `cf8b0b5`). Full legal notice: [NOTICE](NOTICE).
+Также использован код **[OwnTV_Core](https://github.com/ahXN00/OwnTV_Core)** (тоже
+`GPL-3.0-only`), включённый в `app/src/main/java/tv/own/owntv/**`: база данных, синхронизация,
+парсеры, EPG и движок воспроизведения, **а также переведённые строки интерфейса** (апстрим
+поставлял 26 локалей, этот форк — только английскую и русскую). Документация, инструменты i18n и
+апстримовые бренд-ассеты в `extras/brand/` тоже унаследованы; эталонные Workers для
+TMDB/OpenSubtitles (`extras/worker/`) и их логотипы удалены в этом форке (коммит `cf8b0b5`).
+Полное юридическое уведомление: [NOTICE](NOTICE).
 
-> **Modified since 2026-11-09 by Dmitry Alexandrov (dimzon).** Copyright (C) 2026 Dmitry
-> Alexandrov for the modifications and additions; the original portions remain © ahXN00 and the
-> OwnTV contributors. This is the prominent modification notice required by GPLv3 §5(a).
+> **THIS IS A SUBSTANTIALLY MODIFIED VERSION OF OwnTV / Это существенно изменённая версия OwnTV.**
+> Изменения вносятся с **2026-11-09** Дмитрием Александровым (dimzon). Copyright (C) 2026 Dmitry
+> Alexandrov — на изменения и дополнения; исходные части остаются © ahXN00 и участников OwnTV.
+> Это выделенное уведомление об изменении, требуемое GPLv3 §5(a).
 
-What changed:
+Что изменилось:
 
-- **RuTube-only live TV** — the channel catalogue and week-long programme guide now come from
-  RuTube's public API; Xtream / M3U / Stalker providers and their source model are gone.
-- **One playback engine** — the mpv / libmpv / FFmpeg engine was removed; playback is
-  ExoPlayer (Media3) only. VOD (movies/series), trailers, catch-up, downloads, profiles and the
-  file-backup UI were dropped (`ec31209`); the live-only database schema was rebuilt repeatedly
-  (v4–v8).
-- **External metadata services gone** — the TMDB and OpenSubtitles integrations, their reference
-  Workers (`extras/worker/`), logos and API keys were removed (`cf8b0b5`), as were the EPG
-  channel matcher and the player's channel "Sources" comparison (`4a962f9`). The unused
-  `android-youtube-player` dependency went with the trailer code.
-- **Two languages** — upstream shipped 26 translations; this fork packages English and Russian
-  only (`baa3d2b`). The upstream credits are retained in `NOTICE`.
-- **Rebrand** — МОЁ ТВ wordmark, launcher icons/banner, `applicationId com.github.dimzon.owntv`
-  and `moetv://` deep links; the new brand kit lives in `extras/branding/`.
-- Upstream screenshots in `extras/screenshots/` and the historical release notes in
-  `CHANGELOG.md` are retained for provenance; several depict features this fork no longer has.
+- **Только прямой эфир RuTube** — каталог каналов и недельная программа передач приходят из
+  публичного API RuTube; провайдеры Xtream / M3U / Stalker и их модель источников удалены.
+- **Один движок воспроизведения** — mpv / libmpv / FFmpeg убраны, остался только ExoPlayer
+  (Media3). Удалены VOD (фильмы/сериалы), трейлеры, catch-up, загрузки, профили и экран
+  файлового бэкапа (`ec31209`); схема базы под live-only пересобиралась неоднократно (v4–v8).
+- **Внешние сервисы метаданных удалены** — интеграции TMDB и OpenSubtitles, их эталонные Workers
+  (`extras/worker/`), логотипы и API-ключи (`cf8b0b5`), сопоставление каналов с EPG и сравнение
+  «Sources» в плеере (`4a962f9`). Неиспользуемая зависимость `android-youtube-player` ушла вместе
+  с кодом трейлеров.
+- **Два языка** — апстрим поставлял 26 переводов, форк упаковывает только английский и русский
+  (`baa3d2b`). Кредиты апстрима сохранены в `NOTICE`.
+- **Ребрендинг** — логотип МОЁ ТВ, иконки и баннер лаунчера,
+  `applicationId com.github.dimzon.owntv`, deep links `moetv://`; новый бренд-кит лежит в
+  `extras/branding/`.
+- Апстримовые скриншоты в `extras/screenshots/` и исторические заметки о релизах в
+  `CHANGELOG.md` сохранены для провенанса; часть из них изображает функции, которых в форке нет.
 
-MyOwnTV / МОЁ ТВ is **not affiliated with, endorsed by, sponsored by or connected to** the
-original OwnTV project, ahXN00 or its contributors. "OwnTV" is used here only to identify the
-work this one derives from. The complete list of links and texts still pointing at the upstream
-project (and awaiting a fork repository URL) is in
+МОЁ ТВ / MyOwnTV **не аффилировано, не одобрено, не спонсируется и не связано** с оригинальным
+проектом OwnTV, ahXN00 или его участниками. Название «OwnTV» используется здесь исключительно для
+обозначения работы, от которой произошёл форк. Полный список ссылок и текстов, всё ещё указывающих
+на апстрим (и ожидающих URL репозитория форка), — в
 [docs/attribution-checklist.md](docs/attribution-checklist.md).
 
+<a id="features"></a>
+
 ---
 
-## ✨ Features
+## ✨ Возможности
 
-### 🎬 Playback
-- **ExoPlayer (Media3)** — one playback engine tuned for instant Live TV zapping
-- **4K HDR** direct rendering, optional auto frame-rate matching for live TV (with the pre-Android-12 warning), surround sound, 150% volume boost
-- **Subtitles** — appearance controls (scale, font, colour, position, background) for the tracks a stream provides
-- Mini-player/PiP, picture-in-picture when you press Home, audio-only mode, live stream-info overlay
-- Media-session transport keys and proper audio focus — it behaves like a TV app
+### 🎬 Воспроизведение
+- **ExoPlayer (Media3)** — единственный движок, заточенный под мгновенное переключение каналов
+- **4K HDR** без промежуточной обработки, необязательное автосогласование частоты кадров для эфира
+  (с предупреждением для Android до 12), объёмный звук, усиление громкости до 150%
+- **Субтитры** — настройка вида (масштаб, шрифт, цвет, положение, фон) для дорожек, которые
+  предоставляет сам поток
+- Мини-плеер / PiP (картинка в картинке по нажатию Home), режим «только звук», оверлей с
+  информацией о потоке
+- Кнопки медиасессии и корректный audio focus — ведёт себя как настоящее ТВ-приложение
 
-### 📺 Live TV & guide
-- **RuTube live catalogue** — the public list (~250 channels) with categories, logos and
-  distinguishing names for duplicated brands
-- **A guide that stays put** — RuTube's schedule for a full week, fetched per day and upserted
-  so a failed refresh never wipes what you already have
-- “Now” and “next” everywhere, plus programme reminders
+### 📺 Прямой эфир и программа
+- **Каталог эфира RuTube** — публичный список (~250 каналов) с категориями, логотипами и
+  уточнёнными названиями для одноимённых брендов
+- **Программа, которая не пропадает** — расписание RuTube на неделю вперёд загружается по дням и
+  обновляется через upsert, поэтому неудачное обновление не стирает уже сохранённое
+- «Сейчас» и «далее» везде, плюс напоминания о передачах
 
-### 📚 Library & personalisation
-- Favourites, categories, hide channels, search with an on-screen keyboard
-- A category-lock PIN, and two UI languages (English, Russian) — profiles are gone
+### 📚 Медиатека и персонализация
+- Избранное, категории, скрытие каналов, поиск с экранной клавиатурой
+- PIN-код на категории и два языка интерфейса (русский, английский) — профилей больше нет
 
-## 🧱 Tech stack
+<a id="tech"></a>
 
-| Area | Choice |
+## 🧱 Технологии
+
+| Область | Технология |
 |------|--------|
-| Language | Kotlin 2.4.20 |
-| Build | AGP 9.4.0 / Gradle 9.8.2, KSP2, JDK 25 |
+| Язык | Kotlin 2.4.20 |
+| Сборка | AGP 9.4.0 / Gradle 9.8.2, KSP2, JDK 25 |
 | UI | Jetpack Compose for TV (`androidx.tv:tv-material`), Compose BOM 2026.08.00 |
-| Media | **ExoPlayer/Media3** |
-| Database | Room + Paging + FTS4 |
-| DI · Network · Images | Koin · OkHttp · Coil |
+| Медиа | **ExoPlayer/Media3** |
+| База данных | Room + Paging + FTS4 |
+| DI · сеть · изображения | Koin · OkHttp · Coil |
 
 `minSdk 26`, `targetSdk 36`, `applicationId com.github.dimzon.owntv` (Kotlin namespace
 `tv.own.myowntv`).
 
-### Project layout
+### Структура проекта
 
 ```
-MyOwnTV/  (this repo)
+MyOwnTV/  (этот репозиторий)
 tv.own.myowntv/
-├── player/      the TV player HUD, surfaces and mini-player
-├── ui/          theme + reusable components
+├── player/      HUD плеера для ТВ, поверхности и мини-плеер
+├── ui/          тема и переиспользуемые компоненты
 ├── features/    live, epg, home, more, search, settings, setup, shell, customize,
 │                pip, multiview, categorylock, autostart, recovery, update
-└── di/          Koin modules
+└── di/          Koin-модули
 ```
 
-The database, sync, parsers, EPG storage and the live playback engine live in this module under
-`tv/own/owntv/**` — one source tree, no separate library to fetch.
+База данных, синхронизация, парсеры, хранилище EPG и движок прямого эфира находятся в этом же
+модуле под `tv/own/owntv/**` — одно дерево исходников, никакой отдельной библиотеки подтягивать
+не нужно.
 
-The RuTube API contract, channel/EPG rules, database details and the native-library inventory are
-documented in [docs/rutube.md](docs/rutube.md).
+Контракт API RuTube, правила для каналов и EPG, устройство базы и перечень нативных библиотек
+описаны в [docs/rutube.md](docs/rutube.md).
 
-## 📥 Installing (Fire TV / Android TV)
+<a id="install"></a>
 
-1. Download the APK from this repository's **Releases** (once the fork has a public repository
-   — none is configured yet), or build it from source as described below.
-2. Install it — on Fire TV, use the **Downloader** app; elsewhere sideload from a USB drive,
-   *Send files to TV*, or `adb install MyOwnTV.apk`.
+## 📥 Установка (Fire TV / Android TV)
 
-> Each release ships **two APKs**: `MyOwnTV.apk` (arm — every real TV box) and
-> `MyOwnTV-x86_64.apk` (emulators and rare Intel boxes).
+1. Скачайте APK из раздела **Releases** этого репозитория (когда у форка появится публичный
+   репозиторий — сейчас его нет), либо соберите из исходников, как описано ниже.
+2. Установите: на Fire TV через приложение **Downloader**, в остальных случаях — с USB-накопителя,
+   через *Send files to TV* или `adb install MyOwnTV.apk`.
 
-## 🛠️ Building & running
+> Каждый релиз содержит **два APK**: `MyOwnTV.apk` (arm — для всех реальных ТВ-приставок) и
+> `MyOwnTV-x86_64.apk` (эмуляторы и редкие устройства на Intel).
 
-1. **Get the code** — `git clone <this repository>` (or download the ZIP).
-2. **Open it** in [Android Studio](https://developer.android.com/studio) and let Gradle sync.
-3. **Pick the build variant** — `standard` for real devices and arm emulators, `x86_64` for
-   x86_64 emulators.
-4. **Run** ▶. Minimum **Android 8.0 / API 26**.
+<a id="build"></a>
 
-Command line: `./gradlew assembleDebug` (`gradlew.bat` on Windows). The APK lands in
+## 🛠️ Сборка и запуск
+
+1. **Получите код** — `git clone <этот репозиторий>` (или скачайте ZIP).
+2. **Откройте** проект в [Android Studio](https://developer.android.com/studio) и дождитесь
+   синхронизации Gradle.
+3. **Выберите вариант сборки** — `standard` для реальных устройств и arm-эмуляторов, `x86_64` для
+   эмуляторов x86_64.
+4. **Запустите** ▶. Минимум — **Android 8.0 / API 26**.
+
+Из командной строки: `./gradlew assembleDebug` (`gradlew.bat` под Windows). APK окажется в
 `app/build/outputs/apk/`.
 
-## 🤝 Contributing
+## 🤝 Как участвовать
 
-Contributions, bug reports and ideas are welcome — open an issue or a pull request. Please keep
-the project's player-only positioning and match the existing code style.
+Приветствуются правки, сообщения об ошибках и идеи — заводите issue или pull request. Пожалуйста,
+сохраняйте позиционирование проекта как «только плеер» и следуйте принятому стилю кода.
+Пользовательская и контрибьюторская документация ведётся **по-русски** — подробности в
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
-## 🙏 Credits
+## 🙏 Благодарности
 
-### 🌍 Translations
+### 🌍 Переводы
 
-Upstream shipped 26 locales; this fork packages the English source strings and the Russian
-translation only (`baa3d2b`), while the other trees remain in the upstream repository. Most of
-those translations were made by volunteer translators on
-[Hosted Weblate](https://hosted.weblate.org/projects/owntv/), which hosts libre software free of
-charge. The strings themselves originate in
-[OwnTV_Core](https://github.com/ahXN00/OwnTV_Core). Thank you to Weblate and to every translator.
+Апстрим поставлял 26 локалей; этот форк упаковывает только исходные английские строки и русский
+перевод (`baa3d2b`), остальные деревья остались в репозитории апстрима. Большинство тех переводов
+сделано волонтёрами на [Hosted Weblate](https://hosted.weblate.org/projects/owntv/), который
+бесплатно предоставляет хостинг свободному ПО. Сами строки пришли из
+[OwnTV_Core](https://github.com/ahXN00/OwnTV_Core). Спасибо Weblate и всем переводчикам.
 
-### 🎨 Brand
+### 🎨 Бренд
 
-The lowercase **owntv** wordmark was designed for OwnTV by [@m3th0d93](https://github.com/m3th0d93)
-in [issue #227](https://github.com/ahXN00/OwnTV/issues/227); the upstream brand assets in
-`extras/brand/` remain © their authors. The **МОЁ ТВ** brand kit in `extras/branding/` is this
-fork's own work.
+Логотип **owntv** строчными буквами нарисован для OwnTV
+[@m3th0d93](https://github.com/m3th0d93) в [issue #227](https://github.com/ahXN00/OwnTV/issues/227);
+апстримовые бренд-ассеты в `extras/brand/` остаются © их авторов. Бренд-кит **МОЁ ТВ** в
+`extras/branding/` — собственная работа этого форка.
 
-### ▶️ Playback
+### ▶️ Воспроизведение
 
-- **[Media3 / ExoPlayer](https://github.com/androidx/media)** — the only playback engine, for
-  Live TV and HLS (Apache-2.0).
-- **mpv / libmpv / FFmpeg** powered the second engine in upstream OwnTV; **they are no longer
-  shipped** by this fork. The historical credits are preserved in [NOTICE](NOTICE) and
+- **[Media3 / ExoPlayer](https://github.com/androidx/media)** — единственный движок, для прямого
+  эфира и HLS (Apache-2.0).
+- **mpv / libmpv / FFmpeg** питали второй движок в апстримовом OwnTV; **в этом форке они больше не
+  поставляются**. Исторические кредиты сохранены в [NOTICE](NOTICE) и
   [CHANGELOG.md](CHANGELOG.md).
 
-### 🛰️ Third-party services
+### 🛰️ Сторонние сервисы
 
-- **TMDB** — upstream OwnTV used the [TMDB](https://www.themoviedb.org/) API for metadata and
-  trailers; **this fork removed that integration** and the upstream reference Worker. No TMDB
-  requests are made.
-- **OpenSubtitles** — upstream OwnTV used the [OpenSubtitles](https://www.opensubtitles.com/)
-  API for subtitle search; **this fork removed that integration**, the reference Worker and the
-  bundled logo. No OpenSubtitles requests are made.
+- **TMDB** — апстримовый OwnTV использовал [TMDB](https://www.themoviedb.org/) для метаданных и
+  трейлеров; **этот форк удалил интеграцию** и эталонный Worker. Запросов к TMDB нет.
+- **OpenSubtitles** — апстримовый OwnTV использовал
+  [OpenSubtitles](https://www.opensubtitles.com/) для поиска субтитров; **этот форк удалил
+  интеграцию**, эталонный Worker и встроенный логотип. Запросов к OpenSubtitles нет.
 
-### 🧩 Built with
+### 🧩 Используемые библиотеки
 
 [Jetpack Compose for TV](https://developer.android.com/jetpack/compose) ·
 [Room](https://developer.android.com/jetpack/androidx/releases/room) ·
 [Koin](https://insert-koin.io/) ·
 [OkHttp](https://square.github.io/okhttp/) ·
 [Coil](https://coil-kt.github.io/coil/) ·
-[ZXing](https://github.com/zxing/zxing) — and the wider Kotlin / AndroidX open-source ecosystem.
-Thank you to all their maintainers. Every license, copyright notice and bundled asset is listed
-in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+[ZXing](https://github.com/zxing/zxing) — и более широкий open-source мир Kotlin / AndroidX.
+Спасибо всем их мейнтейнерам. Все лицензии, уведомления об авторских правах и встроенные ассеты
+перечислены в [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
-## ⚖️ Legal
+<a id="legal"></a>
 
-MyOwnTV is a media **player** only, and an unofficial client: it is not affiliated with,
-endorsed by or connected to RuTube (ООО «Руформ»), to the original
-[OwnTV](https://github.com/ahXN00/OwnTV) project, or to any other service. "RuTube", "OwnTV",
-"TMDB", "OpenSubtitles" and other names and logos belong to their owners and are used only to
-describe origin and compatibility. It ships with no channels of its own and does not endorse or
-facilitate access to unauthorized streams.
+## ⚖️ Правовая информация
 
-## 📄 License
+МОЁ ТВ — это **только медиаплеер** и неофициальный клиент: оно не аффилировано, не одобрено и не
+связано с RuTube (ООО «Руформ»), с оригинальным проектом
+[OwnTV](https://github.com/ahXN00/OwnTV) и с любыми другими сервисами. Названия и логотипы
+«RuTube», «OwnTV», «TMDB», «OpenSubtitles» и прочие принадлежат их владельцам и используются
+только для описания происхождения и совместимости. Приложение не поставляет собственных каналов
+и не поощряет и не облегчает доступ к несанкционированным трансляциям.
 
-**GNU General Public License, version 3 only (`GPL-3.0-only`)** — see [LICENSE](LICENSE)
-(unmodified GPLv3 text), [NOTICE](NOTICE) (attribution and modification notice) and
+<a id="license"></a>
+
+## 📄 Лицензия
+
+**GNU General Public License, версия 3 только (`GPL-3.0-only`)** — см. [LICENSE](LICENSE)
+(неизменённый текст GPLv3), [NOTICE](NOTICE) (атрибуция и уведомление об изменении) и
 [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 
-This is a **modified version of OwnTV**, changed since **2026-11-09** (GPLv3 §5(a)). As required
-by §5(c), the entire derivative work — upstream portions and this fork's additions alike — is
-licensed under GPLv3. No additional terms under §7 are added. Upstream published GPLv3 without
-an "or later" clause, so no later version is offered here.
+Это **модифицированная версия OwnTV**, изменяемая с **2026-11-09** (GPLv3 §5(a)). Как того требует
+§5(c), **вся** производная работа — и унаследованные части, и дополнения форка — лицензирована под
+GPLv3. Дополнительные условия §7 не добавляются. Апстрим опубликовал GPLv3 без оговорки «or later»,
+поэтому здесь не предлагается никакая более поздняя версия.
 
-In short: you're free to use, study, modify and redistribute MyOwnTV, including commercially —
-but any redistributed version (including forks and commercial products built on it) must also be
-licensed under GPLv3, keep all copyright and attribution notices intact, and make its complete
-Corresponding Source available (§6). **There is NO WARRANTY** — see §§15–16 of [LICENSE](LICENSE).
+Коротко: вы свободно используете, изучаете, изменяете и распространяете МОЁ ТВ, в том числе
+коммерчески, — но любая распространяемая версия (включая форки и коммерческие продукты на её
+основе) тоже должна быть под GPLv3, сохранять все уведомления об авторских правах и атрибуцию и
+предоставлять полные **Соответствующие исходники (Corresponding Source)** (§6). **ГАРАНТИИ НЕТ** —
+см. §§15–16 [LICENSE](LICENSE).
 
-**Corresponding Source:** the complete source tree from which your copy was built, including
-`LICENSE`, `NOTICE`, `THIRD_PARTY_LICENSES.md`, the OFL font license texts and the Gradle build
-scripts. No public repository is configured for this fork yet; if you received a binary-only
-build, request the source from whoever distributed it. Before publishing an APK, see the
-[attribution checklist](docs/attribution-checklist.md).
+**Соответствующие исходники:** полное дерево исходников, из которого собрана ваша копия, включая
+`LICENSE`, `NOTICE`, `THIRD_PARTY_LICENSES.md`, тексты лицензий шрифтов OFL и Gradle-скрипты
+сборки. Публичного репозитория у форка пока нет; если вы получили только бинарную сборку, запросите
+исходники у того, кто её распространил. Перед публикацией APK пройдите
+[чек-лист атрибуции](docs/attribution-checklist.md).
 
 ---
 
-<sub>MyOwnTV / МОЁ ТВ — open-source, player-only, built with the help of AI. A substantially
-modified derivative of OwnTV (© ahXN00 and the OwnTV contributors, GPL-3.0-only); modifications
-© 2026 Dmitry Alexandrov, GPL-3.0-only.</sub>
+<sub>МОЁ ТВ / MyOwnTV — открытый исходный код, только плеер, создано с помощью ИИ. Существенно
+изменённая производная работа OwnTV (© ahXN00 и участники OwnTV, GPL-3.0-only); изменения
+© 2026 Дмитрий Александров, GPL-3.0-only.</sub>

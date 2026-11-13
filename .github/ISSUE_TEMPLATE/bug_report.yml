@@ -1,53 +1,58 @@
-name: Bug report
-description: Something not working in MyOwnTV (playback, EPG, import, UI…)
-title: "[Bug] "
+name: Сообщение об ошибке
+description: Что-то не работает в МОЁ ТВ / MyOwnTV (эфир, программа передач, навигация, настройки…)
+title: "[Баг] "
 labels: [bug]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for helping improve MyOwnTV! The more detail you give, the faster it gets fixed.
+        Спасибо, что помогаете улучшать МОЁ ТВ / MyOwnTV! Чем больше деталей — тем быстрее исправим.
+
+        **Этот форк — клиент только прямого эфира публичного каталога RuTube.** Здесь нет
+        плейлистов, провайдеров, аккаунтов, VOD, catch-up и профилей. Сообщения про
+        Xtream / M3U / Stalker / фильмы / сериалы относятся к апстримовому OwnTV, а не сюда.
 
   - type: checkboxes
     id: mandatory_checks
     attributes:
-      label: Before you open this (required)
+      label: Перед отправкой (обязательно)
       description: >
-        Most reports are already answered in the app or the User Guide. Please genuinely check
-        these — issues opened without them are usually closed. The last three boxes are mandatory.
+        Большинство вопросов уже раскрыто в самом приложении или в разделе форка в начале
+        Руководства пользователя. Пожалуйста, действительно проверьте — все три пункта обязательны.
       options:
         - label: >
-            I read the **[User Guide](https://github.com/opentvproject/opentv/blob/main/extras/USER_GUIDE.md)**
-            and checked the relevant **Settings** and **in-app functions** for this (e.g. the
-            top-bar playlist switcher, per-playlist Default, HDR, Surround, Catch-up time, Player).
+            Я прочитал **[Руководство пользователя](https://github.com/dimzon/moe-tv/blob/main/extras/USER_GUIDE.md)**
+            (раздел форка в начале) и проверил **Настройки** и нужные **функции приложения**.
           required: true
-        - label: I searched existing issues and this isn't a duplicate.
+        - label: Я искал существующие issues и это не дубликат.
           required: true
-        - label: I'm on the latest version (More → About) and tried re-syncing the playlist (and EPG, for guide issues).
+        - label: >
+            У меня последняя версия (Ещё → О приложении), я перезапустил приложение и дождался
+            обновления списка каналов и программы передач.
           required: true
 
   - type: textarea
     id: what_happens
     attributes:
-      label: What happens
-      description: Describe the problem. What did you expect, and what happened instead?
+      label: Что происходит
+      description: Опишите проблему. Что вы ожидали и что получилось вместо этого?
     validations:
       required: true
 
   - type: textarea
     id: onscreen_error
     attributes:
-      label: The on-screen error ⚠️ important
+      label: Ошибка на экране ⚠️ важно
       description: >
-        When playback fails, MyOwnTV shows a friendly message AND a small "err: ..." line at the bottom of
-        the player. Copy that EXACT "err: ..." text here (or photograph it).
+        При сбое воспроизведения плеер показывает понятное сообщение и маленькую строку
+        «err: ...» внизу. Скопируйте её ДОСЛОВНО сюда (или приложите фото).
       placeholder: "err: "
       render: text
 
   - type: textarea
     id: steps
     attributes:
-      label: Steps to reproduce
+      label: Шаги для воспроизведения
       placeholder: |
         1.
         2.
@@ -58,26 +63,26 @@ body:
   - type: textarea
     id: setup
     attributes:
-      label: Your setup
+      label: Ваша конфигурация
       value: |
-        - **Device & model:**
-        - **Fire OS / Android version:**
-        - **MyOwnTV version:**
-        - **Playlist type:** Xtream / M3U URL / local M3U file
-        - **Content type:** Live TV / Movie / Series / Catch-up / EPG
+        - **Устройство и модель:**
+        - **Версия Android TV / Fire OS:**
+        - **Версия приложения (Ещё → О приложении):**
+        - **Канал / передача:** (название канала RuTube или запись в программе)
+        - **Сеть:** Wi-Fi / Ethernet — воспроизводится ли тот же поток в приложении или на сайте RuTube?
     validations:
       required: true
 
   - type: textarea
     id: screenshot
     attributes:
-      label: Screenshot / photo
-      description: A screenshot, or a phone photo of the TV screen, helps a lot — especially the error screen.
+      label: Скриншот / фото
+      description: Скриншот или фото экрана телевизора очень помогают, особенно для экрана с ошибкой.
 
   - type: textarea
     id: logcat
     attributes:
-      label: Logcat (optional, but the most useful thing you can attach)
+      label: Logcat (необязательно, но полезнее всего)
       description: >
-        If you can, capture a logcat and attach it. Ask in the issue if you need the adb command.
-        ⚠️ Please remove your username/password from the log if they appear in any URL.
+        Если можете, снимите logcat и приложите. Нужную adb-команду можно спросить в issue.
+        ⚠️ Удалите из лога личные данные, токены и идентификаторы аккаунтов.

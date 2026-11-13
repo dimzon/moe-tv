@@ -1,7 +1,7 @@
-# Keeps the GitHub Actions used by the workflows current (checkout, setup-java, upload-artifact…),
-# so a version GitHub retires never breaks a build by surprise. One grouped PR a month, CI-checked
-# like any other; nothing here merges on its own. Gradle and app dependencies are deliberately
-# not covered — those are updated by hand.
+# Держит GitHub Actions в воркфлоу актуальными (checkout, setup-java, upload-artifact…), чтобы
+# внезапно снятая GitHub версия не сломала сборку. Один сгруппированный PR в месяц, проверяется CI
+# и вливается человеком — старый workflow автослияния удалён. Зависимости Gradle и приложения
+# намеренно не охватываются — они обновляются вручную.
 version: 2
 updates:
   - package-ecosystem: github-actions

@@ -1,28 +1,30 @@
-<!-- Thanks for contributing to MyOwnTV! Please fill this in so it's easy to review. -->
+<!-- Спасибо, что участвуете в МОЁ ТВ / MyOwnTV! Заполните шаблон — так ревью будет проще. -->
+<!-- Клиент только прямого эфира RuTube: без плейлистов, провайдеров, VOD, catch-up и профилей. -->
 
-## Before you open this PR (required)
-<!-- These are mandatory — PRs that duplicate an existing in-app feature are closed. -->
-- [ ] I read the **[User Guide](https://github.com/opentvproject/opentv/blob/main/extras/USER_GUIDE.md)** and checked the app's **Settings** and existing **functions** — this change isn't already possible in the app.
-- [ ] I searched existing issues/PRs and this isn't a duplicate.
+## Перед отправкой PR (обязательно)
+<!-- Пункты обязательны: PR, повторяющий уже существующую функцию, будет закрыт. -->
+- [ ] Я прочитал **[Руководство пользователя](https://github.com/dimzon/moe-tv/blob/main/extras/USER_GUIDE.md)** и проверил **Настройки** и существующие **функции** — этого в приложении ещё нет.
+- [ ] Я искал существующие issues/PR и это не дубликат.
 
-## What does this PR do?
-<!-- A clear summary of the change and how it works. -->
-
-
-## Which issue / improvement does it address?
-<!-- Link the issue it fixes ("Closes #12"), or describe the upgrade it makes and why it's worth it. -->
+## Что делает этот PR?
+<!-- Кратко: что изменено и как это работает. -->
 
 
-## How was it tested?
-<!-- IMPORTANT: MyOwnTV is a TV app — please test on a REAL Android TV / Fire TV device, not the emulator
-     only. The emulator misses a lot: HDR, hardware decoding, surround/passthrough, and real remote
-     (D-pad) behaviour. -->
-- **Device(s) tested on:** <!-- e.g. Fire TV Stick 4K Max, NVIDIA Shield, TCL Google TV -->
-- **What you exercised:** <!-- e.g. played a 4K HDR movie, switched audio track on live, EPG catch-up, D-pad nav -->
+## Какой issue / какую задачу закрывает?
+<!-- Ссылка на issue («Closes #12») либо описание улучшения и почему оно нужно. -->
 
-## Checklist
-- [ ] Builds locally (`./gradlew assembleDebug`) and CI is green
-- [ ] **Tested on a real Android TV / Fire TV device** (not emulator only) — D-pad/remote navigation works
-- [ ] No user data is wiped (Room migrations stay additive)
-- [ ] Keeps MyOwnTV player-only (no bundled channels/content)
-- [ ] Commit messages are clear (they become the release notes)
+
+## Как проверялось?
+<!-- ВАЖНО: это ТВ-приложение — проверяйте на РЕАЛЬНОМ Android TV / Fire TV, а не только в эмуляторе.
+     Эмулятор не покажет HDR, аппаратное декодирование, объёмный звук и поведение настоящего пульта. -->
+- **Устройство(а):** <!-- например Fire TV Stick 4K Max, NVIDIA Shield, TCL Google TV -->
+- **Что проверяли:** <!-- например переключение каналов, программу на неделю, напоминание, избранное/скрытие, навигацию пультом -->
+
+## Чек-лист
+- [ ] Собирается локально (`./gradlew assembleDebug`) и CI зелёный
+- [ ] **Проверено на реальном Android TV / Fire TV** (не только в эмуляторе) — навигация пультом работает
+- [ ] Пользовательские данные не стираются (миграции Room только additive)
+- [ ] Форк остаётся «только плеером»: без встроенных каналов и контента, каталог — публичный API RuTube
+- [ ] Новый/изменённый видимый пользователю текст лежит в `values/` **и** `values-ru/` (гейт i18n висит на `preBuild`)
+- [ ] Если функция или зависимость добавлена/удалена, в том же изменении обновлены `README.md`, `NOTICE`, `THIRD_PARTY_LICENSES.md` и `docs/attribution-checklist.md`
+- [ ] Сообщения коммитов понятные (из них собираются release notes)
