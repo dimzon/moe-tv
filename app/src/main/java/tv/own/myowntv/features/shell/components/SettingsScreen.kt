@@ -146,27 +146,6 @@ internal enum class TileTone { PRIMARY, SECONDARY, TERTIARY }
 
 private enum class SettingsTab { ROOT, LANGUAGE, LOCAL_SYNC, CUSTOMIZE, HOME, NETWORK, DNS, WEATHER, CH_NAV, PANEL_WIDTH, GUIDE_WIDTH, GLASS_EFFECT, CONTENT_MENUS, FONTS, BROWSING, SUBTITLE_STYLE }
 
-@Composable
-private fun epgShiftLabel(minutes: Int): String {
-    if (minutes == 0) return stringResource(R.string.common_off)
-    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: java.util.Locale.US
-    val number = java.text.NumberFormat.getIntegerInstance(locale)
-    val sign = if (minutes < 0) "−" else "+"
-    val absolute = kotlin.math.abs(minutes)
-    val hours = absolute / 60
-    val remainder = absolute % 60
-    return when {
-        hours == 0 -> stringResource(R.string.content_epg_shift_minutes, sign, number.format(remainder))
-        remainder == 0 -> stringResource(R.string.content_epg_shift_hours, sign, number.format(hours))
-        else -> stringResource(
-            R.string.content_epg_shift_hours_minutes,
-            sign,
-            number.format(hours),
-            number.format(remainder),
-        )
-    }
-}
-
 /**
  * The MD3 Settings screen (shown when [MainSection.SETTINGS] is active): grouped sections, each row
  * a tonal icon tile + title/description + a trailing chip or chevron. Theme / UI Zoom are live;
@@ -201,7 +180,6 @@ fun SettingsScreen(
     var showAccent by remember { mutableStateOf(false) }
     var showFocusHighlight by remember { mutableStateOf(false) }
     var showUpdate by remember { mutableStateOf(false) }
-    var showEpgOffset by remember { mutableStateOf(false) }
     var showGuideDays by remember { mutableStateOf(false) }
     var showAnimations by remember { mutableStateOf(false) }
     var showNavigation by remember { mutableStateOf(false) }
@@ -245,7 +223,6 @@ fun SettingsScreen(
     val appIconRowFocus = remember { FocusRequester() }
     val popupSizeRowFocus = remember { FocusRequester() }
     val updateRowFocus = remember { FocusRequester() }
-    val epgOffsetRowFocus = remember { FocusRequester() }
     val guideDaysRowFocus = remember { FocusRequester() }
     val animationsRowFocus = remember { FocusRequester() }
     val liveLayoutRowFocus = remember { FocusRequester() }
@@ -283,13 +260,13 @@ fun SettingsScreen(
         }
         onStartConsumed()
     }
-    val anyDialogOpen = showZoom || showPopupSize || showTheme || showAccent || showUpdate || showEpgOffset || showGuideDays || showAnimations || showStartup || showStartupChannelPicker || showRefreshPolicy || showAfrWarning || showLivePreviewPanelWarning || showBgImageChooser || showBgPicker || showAmbientGlow || showFocusHighlight || showBgRemote || showNavigation || showLiveLayout || stageSettings.open != null || settingsLock.open
+    val anyDialogOpen = showZoom || showPopupSize || showTheme || showAccent || showUpdate || showGuideDays || showAnimations || showStartup || showStartupChannelPicker || showRefreshPolicy || showAfrWarning || showLivePreviewPanelWarning || showBgImageChooser || showBgPicker || showAmbientGlow || showFocusHighlight || showBgRemote || showNavigation || showLiveLayout || stageSettings.open != null || settingsLock.open
     // When a dialog closes, restore focus to the row that opened it. NOTE: this restore crosses
     // INTO the root focus group from outside (the dialog), but onEnter does NOT fire for programmatic
     // requestsFocus (only for directional entry) — so dialogReturn must be cleared HERE, not in onEnter.
     // If it's left set, the next directional entry (e.g. sidebar→here) would re-route to a stale row.
     var dialogReturn by remember { mutableStateOf<FocusRequester?>(null) }
-    LaunchedEffect(showZoom, showPopupSize, showTheme, showAccent, showUpdate, showEpgOffset, showGuideDays, showAnimations, showStartup, showStartupChannelPicker, showRefreshPolicy, showAfrWarning, showLivePreviewPanelWarning, showBgImageChooser, showBgPicker, showAmbientGlow, showFocusHighlight, showBgRemote, showNavigation, showLiveLayout, stageSettings.open, settingsLock.open) {
+    LaunchedEffect(showZoom, showPopupSize, showTheme, showAccent, showUpdate, showGuideDays, showAnimations, showStartup, showStartupChannelPicker, showRefreshPolicy, showAfrWarning, showLivePreviewPanelWarning, showBgImageChooser, showBgPicker, showAmbientGlow, showFocusHighlight, showBgRemote, showNavigation, showLiveLayout, stageSettings.open, settingsLock.open) {
         // Only after a popup really closed: on first composition there is no opener, and holding a stale
         // offset for the settle frames bounced the page.
         if (!anyDialogOpen && dialogReturn != null) {
@@ -316,7 +293,6 @@ fun SettingsScreen(
     val updateCheckOnStart by settingsVm.updateCheckOnStart.collectAsStateWithLifecycle()
     val channelNumbers by settingsVm.directTune.collectAsStateWithLifecycle()
     val quickPinned by settingsVm.quickPinnedKeys.collectAsStateWithLifecycle()
-    val epgOffset by settingsVm.epgOffsetMinutes.collectAsStateWithLifecycle()
     val guideDays by settingsVm.guideDaysToKeep.collectAsStateWithLifecycle()
     val accent by settingsVm.accent.collectAsStateWithLifecycle()
     val customAccent by settingsVm.customAccent.collectAsStateWithLifecycle()
@@ -487,17 +463,9 @@ fun SettingsScreen(
             enabled = tv.own.owntv.core.CoreBuildInfo.UPDATES_ENABLED,
         ),
         // The guide's own settings (one RuTube source fills it, so there are no source lists above
-        // it any more): the guide-wide offset, reminders and how far ahead the guide is stored.
+        // it any more): reminders and how far ahead the guide is stored. The guide-wide offset is
+        // gone — a per-channel shift lives in the channel's own long-press menu.
         RootGroup("group_guide", stringResource(R.string.settings_part_guide_catchup), MyOwnTVIcon.EPG, ""),
-        RootRow(
-            "epg_offset", TileTone.SECONDARY, MyOwnTVIcon.EPG,
-            title = stringResource(R.string.content_epg_time_offset),
-            desc = stringResource(R.string.settings_epg_offset_root_description),
-            chip = epgShiftLabel(epgOffset),
-            chipTone = if (epgOffset == 0) TileTone.SECONDARY else TileTone.PRIMARY,
-            focus = epgOffsetRowFocus,
-            onClick = { saveScroll(); dialogReturn = epgOffsetRowFocus; showEpgOffset = true },
-        ),
         *stageGuideRows(settingsVm, stageSettings) { saveScroll(); dialogReturn = it }.toTypedArray(),
         // How far ahead the guide is stored. Global rather than per-source: it is one horizon that
         // every feed is trimmed to, so it sits beside the other guide-wide setting, not inside a feed.
@@ -665,6 +633,21 @@ fun SettingsScreen(
         // No "Data" group: Backup and Local sync are places, not preferences,
         // and are More rows now; Clear history moved onto the History screen it acts on; the download
         // folder moved to the Downloads screen. With all four gone the group had nothing left in it.
+        // Network lives in its own card: Proxy and DNS were buried two headings deep inside App.
+        RootGroup("group_network", stringResource(R.string.settings_group_network), MyOwnTVIcon.NETWORK, stringResource(R.string.settings_group_summary_network)),
+        RootRow(
+            tabRowKey(SettingsTab.NETWORK), TileTone.SECONDARY, MyOwnTVIcon.NETWORK,
+            title = stringResource(R.string.common_proxy), desc = stringResource(R.string.settings_proxy_description),
+            focus = rowFocus.getValue(SettingsTab.NETWORK),
+            onClick = { open(SettingsTab.NETWORK) },
+        ),
+        RootRow(
+            tabRowKey(SettingsTab.DNS), TileTone.SECONDARY, MyOwnTVIcon.DNS,
+            title = stringResource(R.string.settings_dns),
+            desc = stringResource(R.string.settings_dns_description),
+            focus = rowFocus.getValue(SettingsTab.DNS),
+            onClick = { open(SettingsTab.DNS) },
+        ),
         RootGroup("group_app", stringResource(R.string.settings_app_group), MyOwnTVIcon.INFO, stringResource(R.string.settings_group_summary_app)),
         RootRow(
             tabRowKey(SettingsTab.LANGUAGE), TileTone.PRIMARY, MyOwnTVIcon.LANGUAGE,
@@ -735,20 +718,6 @@ fun SettingsScreen(
             onClick = { settingsVm.setUpdateCheckOnStart(!updateCheckOnStart) },
             // Gated with the quick toggle above — the same CoreBuildInfo.UPDATES_ENABLED switch.
             enabled = tv.own.owntv.core.CoreBuildInfo.UPDATES_ENABLED,
-        ),
-        RootRow(
-            tabRowKey(SettingsTab.NETWORK), TileTone.SECONDARY, MyOwnTVIcon.NETWORK,
-            heading = stringResource(R.string.settings_group_network),
-            title = stringResource(R.string.common_proxy), desc = stringResource(R.string.settings_proxy_description),
-            focus = rowFocus.getValue(SettingsTab.NETWORK),
-            onClick = { open(SettingsTab.NETWORK) },
-        ),
-        RootRow(
-            tabRowKey(SettingsTab.DNS), TileTone.SECONDARY, MyOwnTVIcon.DNS,
-            title = stringResource(R.string.settings_dns),
-            desc = stringResource(R.string.settings_dns_description),
-            focus = rowFocus.getValue(SettingsTab.DNS),
-            onClick = { open(SettingsTab.DNS) },
         ),
         // About and the error log live in More. A page of facts and a log are
         // not preferences; both are More rows now, opening the very same dialogs.
@@ -905,8 +874,6 @@ fun SettingsScreen(
         val entries = listOfNotNull(
             SettingsSearchEntry(stringResource(R.string.settings_app_group), stringResource(R.string.settings_language), stringResource(R.string.settings_search_keywords_language), MyOwnTVIcon.LANGUAGE, TileTone.PRIMARY,
                 chip = languageChip, chipTone = TileTone.PRIMARY) { open(SettingsTab.LANGUAGE) },
-            SettingsSearchEntry(stringResource(R.string.settings_part_guide_catchup), stringResource(R.string.content_epg_time_offset), stringResource(R.string.settings_search_keywords_epg_offset), MyOwnTVIcon.EPG, TileTone.SECONDARY,
-                chip = epgShiftLabel(epgOffset), chipTone = if (epgOffset == 0) TileTone.SECONDARY else TileTone.PRIMARY) { saveScroll(); dialogReturn = searchFieldFocus; showEpgOffset = true },
             SettingsSearchEntry(stringResource(R.string.settings_part_guide_catchup), stringResource(R.string.settings_epg_guide_days), stringResource(R.string.settings_search_keywords_epg), MyOwnTVIcon.EPG, TileTone.SECONDARY,
                 chip = pluralStringResource(R.plurals.settings_epg_guide_days_value, guideDays, guideDays), chipTone = TileTone.PRIMARY) { saveScroll(); dialogReturn = searchFieldFocus; showGuideDays = true },
             SettingsSearchEntry(stringResource(R.string.settings_group_content_metadata), stringResource(R.string.settings_customize), stringResource(R.string.settings_search_keywords_customize), MyOwnTVIcon.SORT, TileTone.PRIMARY) { open(SettingsTab.CUSTOMIZE) },
@@ -985,8 +952,8 @@ fun SettingsScreen(
             SettingsSearchEntry(tv.own.myowntv.features.settings.videoRowPath("vp_live_latency"), stringResource(R.string.settings_live_latency), stringResource(R.string.settings_search_keywords_latency), MyOwnTVIcon.LIVE_TV, TileTone.TERTIARY) { jumpVideo("vp_live_latency", false) },
             SettingsSearchEntry(tv.own.myowntv.features.settings.videoRowPath("vp_preroll"), stringResource(R.string.settings_live_preroll), stringResource(R.string.settings_search_keywords_live_preroll), MyOwnTVIcon.LIVE_TV, TileTone.TERTIARY) { jumpVideo("vp_preroll", false) },
             SettingsSearchEntry(tv.own.myowntv.features.settings.videoRowPath("vp_logging"), stringResource(R.string.settings_detailed_playback_logging), stringResource(R.string.settings_search_keywords_detailed_logging), MyOwnTVIcon.INFO, TileTone.SECONDARY) { jumpVideo("vp_logging", false) },
-            SettingsSearchEntry(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_app), stringResource(R.string.settings_group_network)), stringResource(R.string.common_proxy), stringResource(R.string.settings_search_keywords_proxy), MyOwnTVIcon.NETWORK, TileTone.SECONDARY) { open(SettingsTab.NETWORK) },
-            SettingsSearchEntry(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_app), stringResource(R.string.settings_group_network)), stringResource(R.string.settings_dns), stringResource(R.string.settings_search_keywords_dns), MyOwnTVIcon.DNS, TileTone.SECONDARY) { open(SettingsTab.DNS) },
+            SettingsSearchEntry(stringResource(R.string.settings_group_network), stringResource(R.string.common_proxy), stringResource(R.string.settings_search_keywords_proxy), MyOwnTVIcon.NETWORK, TileTone.SECONDARY) { open(SettingsTab.NETWORK) },
+            SettingsSearchEntry(stringResource(R.string.settings_group_network), stringResource(R.string.settings_dns), stringResource(R.string.settings_search_keywords_dns), MyOwnTVIcon.DNS, TileTone.SECONDARY) { open(SettingsTab.DNS) },
             // Settings inside a sub-screen, by their own names (kept out of line: this function is at the JVM size limit).
             *subScreenSearchEntries { t -> open(t) }.toTypedArray(),
             SettingsSearchEntry(stringResource(R.string.settings_group_app), stringResource(R.string.settings_app_startup), stringResource(R.string.settings_search_keywords_startup), MyOwnTVIcon.POWER, TileTone.SECONDARY,
@@ -1049,9 +1016,9 @@ fun SettingsScreen(
         val screenRowEntries =
             rowsOf(stringResource(R.string.settings_breadcrumb, tv.own.myowntv.features.settings.videoRowPath("vp_sub_style"), stringResource(R.string.settings_subtitle_appearance)),
                 tv.own.myowntv.features.settings.SUBTITLE_APPEARANCE_SEARCH_ROWS, R.string.settings_search_keywords_subtitle_appearance, MyOwnTVIcon.SUBTITLE, jumpTo(subStyleRef)) +
-            rowsOf(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_app), stringResource(R.string.settings_group_network)), stringResource(R.string.common_proxy)),
+            rowsOf(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_network), stringResource(R.string.common_proxy)),
                 tv.own.myowntv.features.settings.PROXY_SEARCH_ROWS, R.string.settings_search_keywords_proxy, MyOwnTVIcon.NETWORK) { open(SettingsTab.NETWORK) } +
-            rowsOf(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_app), stringResource(R.string.settings_group_network)), stringResource(R.string.settings_dns)),
+            rowsOf(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_network), stringResource(R.string.settings_dns)),
                 tv.own.myowntv.features.settings.DNS_SEARCH_ROWS, R.string.settings_search_keywords_dns, MyOwnTVIcon.DNS) { open(SettingsTab.DNS) } +
             rowsOf(stringResource(R.string.settings_breadcrumb, stringResource(R.string.settings_group_layout), stringResource(R.string.settings_remote_shortcuts)),
                 tv.own.myowntv.features.settings.PLAYER_BUTTONS_SEARCH_ROWS, R.string.settings_search_keywords_ch, MyOwnTVIcon.CH_NAV) { open(SettingsTab.CH_NAV) }
@@ -1187,7 +1154,6 @@ fun SettingsScreen(
     if (showUpdate) {
         UpdateDialog(onDismiss = { showUpdate = false }, checkOnOpen = true)
     }
-    if (showEpgOffset) EpgOffsetRootDialog(settingsVm, epgOffset, onClose = { showEpgOffset = false })
     if (showGuideDays) GuideDaysDialog(settingsVm, guideDays, onClose = { showGuideDays = false })
     if (showTheme) ThemeDialogHost(settingsVm, themeMode, onClose = { showTheme = false })
     if (showStartup) StartupDialogHost(settingsVm, startupMode, onClose = { showStartup = false }, onPickChannel = { showStartupChannelPicker = true })
@@ -1450,17 +1416,6 @@ private fun AmbientGlowHost(settingsVm: SettingsViewModel, ambientGlowEnabled: B
         pulseEnabled = ambientGlowPulse,
         onToggleGlow = { settingsVm.setAmbientGlowEnabled(!ambientGlowEnabled) },
         onTogglePulse = { settingsVm.setAmbientGlowPulse(!ambientGlowPulse) },
-        onDismiss = onClose,
-    )
-}
-
-@Composable
-private fun EpgOffsetRootDialog(settingsVm: SettingsViewModel, epgOffset: Int, onClose: () -> Unit) {
-    EpgOffsetSettingDialog(
-        offsetMinutes = epgOffset,
-        offsetRange = settingsVm.epgOffsetRangeMinutes,
-        onAdjust = settingsVm::adjustEpgOffset,
-        onReset = { settingsVm.setEpgOffsetMinutes(0) },
         onDismiss = onClose,
     )
 }
@@ -2004,37 +1959,6 @@ private fun GlassEffectSettingsScreen(onBack: () -> Unit, modifier: Modifier = M
 }
 
 /**
- * Global guide shift. A guide can publish in a timezone the channels don't actually air in;
- * this moves every programme by a fixed amount. A per-channel override (channel long-press → EPG
- * time offset) wins over it — that's what a lineup carrying both East and West feeds needs, since
- * one global shift can only ever fix one of the two.
- */
-@Composable
-private fun EpgOffsetSettingDialog(
-    offsetMinutes: Int,
-    offsetRange: IntRange,
-    onAdjust: (Int) -> Unit,
-    onReset: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    // A number: in the page's panel on a settings page, a Stage popup elsewhere.
-    val stepper: @Composable () -> Unit = {
-        tv.own.myowntv.features.settings.PanelStepper(
-            value = epgShiftLabel(offsetMinutes),
-            onStep = { d -> onAdjust(d * 30) },
-            onReset = onReset,
-            onDone = onDismiss,
-        )
-    }
-    if (tv.own.myowntv.features.settings.panelEditor(onDismiss) { stepper() }) return
-    tv.own.myowntv.ui.stage.StagePopup(
-        onDismiss = onDismiss,
-        title = stringResource(R.string.content_epg_time_offset),
-        body = stringResource(R.string.settings_epg_offset_dialog_description),
-    ) { stepper() }
-}
-
-/**
  * One entry in the Settings root list, as data rather than as an inline call.
  *
  * The root is a lazy list, which needs a stable key per entry — and both focus restores (closing a
@@ -2126,7 +2050,6 @@ private fun RootRowStage(
     val unpin = stringResource(R.string.settings_key_unpin)
     val value = extra?.value ?: item.value ?: when {
         item.showChevron -> SettingValue.Opens(item.chip)
-        item.key == "epg_offset" -> SettingValue.Choice(item.chip.orEmpty())
         item.chip == on || item.chip == off -> SettingValue.Switch(item.chip == on)
         item.chip != null -> SettingValue.Choice(item.chip)
         else -> null

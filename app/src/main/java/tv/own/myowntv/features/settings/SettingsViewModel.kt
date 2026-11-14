@@ -256,21 +256,6 @@ class SettingsViewModel(
         viewModelScope.launch { settings.setTunneledPlayback(enabled) }
     }
 
-    /** Global guide shift in minutes (0 = off). Per-channel overrides live in the channel menu. */
-    val epgOffsetMinutes: StateFlow<Int> = settings.epgOffsetMinutes
-        .stateIn(viewModelScope, SharingStarted.Eagerly, 0)
-
-    val epgOffsetRangeMinutes: IntRange = settings.epgOffsetRangeMinutes
-
-    /** Nudge the global EPG offset by [deltaMinutes] (the picker's − / + steps), clamped to range. */
-    fun adjustEpgOffset(deltaMinutes: Int) {
-        viewModelScope.launch { settings.setEpgOffsetMinutes(epgOffsetMinutes.value + deltaMinutes) }
-    }
-
-    fun setEpgOffsetMinutes(minutes: Int) {
-        viewModelScope.launch { settings.setEpgOffsetMinutes(minutes) }
-    }
-
     /** How many days of upcoming guide to store — one value for every EPG source. */
     val guideDaysToKeep: StateFlow<Int> = settings.guideDaysToKeep
         .stateIn(viewModelScope, SharingStarted.Eagerly, tv.own.owntv.core.settings.GuideRetention.DEFAULT_DAYS)

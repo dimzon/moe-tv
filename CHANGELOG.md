@@ -22,6 +22,8 @@
 - **Video rendering: hardware plane (SurfaceView) or compatibility texture (TextureView)**
 - **RuTube live catalogue and week-long programme guide**
 - **Curated channel-name dictionary** (`assets/channel_renames.json`)
+- **Yandex DNS among the one-tap DNS presets**
+- **Settings: a Network card of its own — Proxy and DNS moved out of App**
 - **Rebrand to МОЁ ТВ** (`moetv://` deep links, launcher assets, `extras/branding/`)
 - **NOTICE, attribution and third-party license inventory**
 
@@ -32,8 +34,13 @@
 - **TMDB and OpenSubtitles integrations, Workers, logos and API keys**
 - **EPG channel matcher, guide candidates and channel "Sources"**
 - **Settings and player texts for the removed archive, catch-up, timeshift, recordings and seek step**
+- **Guide-wide EPG shift option (a per-channel shift stays in the channel's long-press menu)**
 - **android-youtube-player (MIT) dependency**
 - **Translation trees other than English and Russian**
+
+### 🩹 Fixes
+- **History: the channel logo stretches over its whole placeholder instead of a gray frame around it**
+- **DNS presets row no longer borrows the accent-picker wording ("готовые цвета") in Russian, Ukrainian and Belarusian**
 
 ### 🔧 Internals
 - **Live-only database schema rebuilt through v8**

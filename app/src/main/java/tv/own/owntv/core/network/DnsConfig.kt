@@ -50,7 +50,7 @@ data class DnsConfig(
 /**
  * Well-known DNS-over-HTTPS endpoints — offered as one-tap presets in the settings UI.
  *
- * Asked in the standard binary form (RFC 8484, `?dns=`), which all three answer. The JSON form these
+ * Asked in the standard binary form (RFC 8484, `?dns=`), which all four answer. The JSON form these
  * URLs were once used with works on Cloudflare only: Google and Quad9 answer it with HTTP 400 on
  * `/dns-query` (tested 2026-09-23).
  */
@@ -59,10 +59,14 @@ object DohPresets {
     val CLOUDFLARE = "https://cloudflare-dns.com/dns-query"
     val QUAD9 = "https://dns.quad9.net/dns-query"
 
+    // The host's name says DoT, but Yandex answers DoH on the same name at /dns-query.
+    val YANDEX = "https://common.dot.dns.yandex.net/dns-query"
+
     val all = listOf(
         "Google" to GOOGLE,
         "Cloudflare" to CLOUDFLARE,
         "Quad9" to QUAD9,
+        "Yandex" to YANDEX,
     )
 }
 

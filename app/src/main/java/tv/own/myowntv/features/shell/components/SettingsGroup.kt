@@ -43,7 +43,7 @@ import tv.own.myowntv.R
 import tv.own.myowntv.features.settings.VideoGroup
 
 /**
- * The eleven Settings groups, in the order of More › Settings' cards — a card's index is the
+ * The twelve Settings groups, in the order of More › Settings' cards — a card's index is the
  * group it opens. [video] marks the five groups whose rows are the Video player's.
  */
 internal enum class SettingsGroup(val titleRes: Int, val video: VideoGroup? = null) {
@@ -57,6 +57,7 @@ internal enum class SettingsGroup(val titleRes: Int, val video: VideoGroup? = nu
     SOUND(R.string.settings_group_sound_subtitles, VideoGroup.SOUND),
     LIVE(R.string.settings_live_tv, VideoGroup.LIVE),
     WATCHING(R.string.settings_group_watching_recording, VideoGroup.WATCHING),
+    NETWORK(R.string.settings_group_network),
     APP(R.string.settings_group_app),
     ;
 

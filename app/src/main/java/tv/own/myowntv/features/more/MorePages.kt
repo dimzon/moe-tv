@@ -105,6 +105,9 @@ import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.update.UpdateManager
 import tv.own.myowntv.features.home.ChannelPlate
 import tv.own.myowntv.features.home.OnNowCard
+import tv.own.myowntv.features.settings.SettingsViewModel
+import tv.own.myowntv.features.settings.VideoGroup
+import tv.own.myowntv.features.settings.videoGroupCount
 import tv.own.myowntv.features.shell.components.ClearHistoryDialog
 import tv.own.myowntv.features.shell.components.GITHUB_REPO
 import tv.own.myowntv.features.shell.components.SITE_LINK
@@ -234,13 +237,23 @@ private fun EmptyNote(title: String, body: String? = null) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Settings: Search and the eleven group cards
+// Settings: Search and the twelve group cards
 // ---------------------------------------------------------------------------------------------
 
 /**
- * The eleven Settings groups, in the order of `SettingsGroup`: a card's index is the group it opens.
+ * The twelve Settings groups, in the order of `SettingsGroup`: a card's index is the group it opens.
+ *
+ * The corner badge: video groups ([video]) count live from the player catalogue — the same number
+ * the group's own pane heads with. Root groups use the hand-written [count]; their rows are a
+ * static list in SettingsScreen. Quick has neither and shows the pinned count.
  */
-private data class SettingsGroupCard(val icon: MyOwnTVIcon, val nameRes: Int, val summaryRes: Int, val count: Int?)
+private data class SettingsGroupCard(
+    val icon: MyOwnTVIcon,
+    val nameRes: Int,
+    val summaryRes: Int,
+    val count: Int?,
+    val video: VideoGroup? = null,
+)
 
 private val SettingsCards = listOf(
     SettingsGroupCard(MyOwnTVIcon.SPARKLE, R.string.settings_group_quick, R.string.settings_group_summary_quick, null),
@@ -248,19 +261,34 @@ private val SettingsCards = listOf(
     SettingsGroupCard(MyOwnTVIcon.PALETTE, R.string.settings_group_appearance, R.string.settings_card_appearance, 9),
     SettingsGroupCard(MyOwnTVIcon.GRID, R.string.settings_group_layout, R.string.settings_card_layout, 10),
     SettingsGroupCard(MyOwnTVIcon.MOVIES, R.string.settings_group_content_metadata, R.string.settings_card_content, 3),
-    SettingsGroupCard(MyOwnTVIcon.PLAY_CIRCLE, R.string.settings_vp_cat_player, R.string.settings_card_player, 10),
-    SettingsGroupCard(MyOwnTVIcon.EXPAND, R.string.settings_vp_cat_picture, R.string.settings_card_picture, 9),
-    SettingsGroupCard(MyOwnTVIcon.HEADPHONES, R.string.settings_group_sound_subtitles, R.string.settings_card_sound, 12),
-    SettingsGroupCard(MyOwnTVIcon.LIVE_TV, R.string.settings_live_tv, R.string.settings_card_live, 12),
-    SettingsGroupCard(MyOwnTVIcon.REC, R.string.settings_group_watching_recording, R.string.settings_card_watching, 11),
-    SettingsGroupCard(MyOwnTVIcon.INFO, R.string.settings_group_app, R.string.settings_card_app, 10),
+    SettingsGroupCard(MyOwnTVIcon.PLAY_CIRCLE, R.string.settings_vp_cat_player, R.string.settings_card_player, null, VideoGroup.PLAYER),
+    SettingsGroupCard(MyOwnTVIcon.EXPAND, R.string.settings_vp_cat_picture, R.string.settings_card_picture, null, VideoGroup.PICTURE),
+    SettingsGroupCard(MyOwnTVIcon.HEADPHONES, R.string.settings_group_sound_subtitles, R.string.settings_card_sound, null, VideoGroup.SOUND),
+    SettingsGroupCard(MyOwnTVIcon.LIVE_TV, R.string.settings_live_tv, R.string.settings_card_live, null, VideoGroup.LIVE),
+    SettingsGroupCard(MyOwnTVIcon.REC, R.string.settings_group_watching_recording, R.string.settings_card_watching, null, VideoGroup.WATCHING),
+    SettingsGroupCard(MyOwnTVIcon.NETWORK, R.string.settings_group_network, R.string.settings_card_network, 2),
+    SettingsGroupCard(MyOwnTVIcon.INFO, R.string.settings_group_app, R.string.settings_card_app, 8),
 )
+
+/** The badge in a card's corner, kept in step with what the group's pane actually shows. */
+@Composable
+private fun cardBadge(card: SettingsGroupCard, settingsVm: SettingsViewModel, pinned: Int): Int = when {
+    card.video != null -> videoGroupCount(card.video, settingsVm) + if (card.video == VideoGroup.WATCHING) 4 else 0
+    card.count != null -> card.count
+    else -> pinned
+}
 
 /** The card last opened, so Back from its group lands on it again rather than on the search field. */
 private var lastOpenedCard: Int? = null
 
 @Composable
-internal fun SettingsPage(entry: FocusRequester, pinned: Int, onOpenGroup: (Int) -> Unit, onSearch: () -> Unit) {
+internal fun SettingsPage(
+    entry: FocusRequester,
+    settingsVm: SettingsViewModel,
+    pinned: Int,
+    onOpenGroup: (Int) -> Unit,
+    onSearch: () -> Unit,
+) {
     val back = lastOpenedCard
     Column(Modifier.fillMaxSize().focusGroup()) {
         PageHead(stringResource(R.string.common_nav_settings)) {
@@ -294,7 +322,7 @@ internal fun SettingsPage(entry: FocusRequester, pinned: Int, onOpenGroup: (Int)
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     MyOwnTVIcon(card.icon, if (focused) StageColors.Text else StageColors.Muted, Modifier.size(28.mpx))
                                     Spacer(Modifier.weight(1f))
-                                    Text((card.count ?: pinned).toString(), style = stageText(17, 700), color = StageColors.Dim)
+                                    Text(cardBadge(card, settingsVm, pinned).toString(), style = stageText(17, 700), color = StageColors.Dim)
                                 }
                                 Text(stringResource(card.nameRes), style = stageText(24, 800), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 14.mpx))
                                 Text(stringResource(card.summaryRes), style = stageText(16, 500), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.mpx))
@@ -435,7 +463,9 @@ internal fun HistoryPage(
                     onClick = { onPlayChannel(e.id) },
                     leading = {
                         Box(Modifier.size(176.mpx, 99.mpx).clip(RoundedCornerShape(14.mpx)).background(tv.own.myowntv.ui.stage.stageStillBack), contentAlignment = Alignment.Center) {
-                            if (e.channel != null) ChannelPlate(e.channel, Modifier.size(110.mpx, 70.mpx))
+                            // The plate fills the whole placeholder: a smaller tile inside it read as
+                            // a gray frame drawn around the logo.
+                            if (e.channel != null) ChannelPlate(e.channel, Modifier.fillMaxSize())
                             else MyOwnTVIcon(MyOwnTVIcon.LIVE_TV, StageColors.Dim, Modifier.size(36.mpx))
                         }
                     },

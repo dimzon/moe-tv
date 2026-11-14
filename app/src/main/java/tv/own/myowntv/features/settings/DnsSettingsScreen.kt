@@ -62,7 +62,7 @@ import tv.own.myowntv.ui.components.MyOwnTVIcon
 
 /** This screen's rows as Settings search finds them. */
 internal val DNS_SEARCH_ROWS: List<Int> =
-    listOf(R.string.settings_dns_use_custom, R.string.settings_presets, R.string.settings_dns_server, R.string.settings_dns_test)
+    listOf(R.string.settings_dns_use_custom, R.string.settings_dns_presets, R.string.settings_dns_server, R.string.settings_dns_test)
 
 @Composable
 fun DnsSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
@@ -134,7 +134,7 @@ fun DnsSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     }
     val rows = if (toggleOn) 5 else 1
     StageFullPage(
-        parents = listOf(stringResource(R.string.settings_group_app)),
+        parents = listOf(stringResource(R.string.settings_group_network)),
         title = stringResource(R.string.settings_dns),
         count = pluralStringResource(R.plurals.settings_setting_count, rows, rows),
         onBack = onBack,
@@ -156,7 +156,8 @@ fun DnsSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         if (toggleOn) {
             val presets = DohPresets.all
             val at = presets.indexOfFirst { it.second == server.trim() }
-            val presetTitle = stringResource(R.string.settings_presets)
+            // Not the shared settings_presets: its Russian is "готовые цвета", the accent picker's wording.
+            val presetTitle = stringResource(R.string.settings_dns_presets)
             val presetValue = SettingValue.Segmented(presets.map { it.first }, at)
             val pick: (Int) -> Unit = { i ->
                 server = presets[i].second

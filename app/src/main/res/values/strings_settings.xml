@@ -572,6 +572,7 @@
     <string name="settings_vp_cat_languages">Languages &amp; subtitles</string>
     <!-- Translators: Settings sheet summary line under the "App" group heading. -->
     <string name="settings_group_summary_app">Language, startup, updates and app info</string>
+    <string name="settings_group_summary_network">Proxy and DNS</string>
     <!-- Translators: Settings spine group holding the most-used toggles, pinned above the nine real groups. -->
     <string name="settings_group_quick">Quick</string>
     <!-- Translators: Settings sheet summary line under the "Quick" group heading. -->
@@ -1174,6 +1175,8 @@
     <string name="settings_dns_server_missing">Custom DNS is enabled but no server is configured. Enter a server address and select Save, or turn this off.</string>
     <!-- Translators: Text-field label for a custom DNS server. -->
     <string name="settings_dns_server">DNS server</string>
+    <!-- Translators: Row offering the built-in one-tap DNS servers (Google, Cloudflare, Quad9, Yandex). Not the color presets, which have their own string. -->
+    <string name="settings_dns_presets">Presets</string>
     <!-- Translators: Example of a plain DNS address or DNS-over-HTTPS URL. The addresses stay unchanged; translate only the word 'or'. -->
     <string name="settings_dns_server_hint">8.8.8.8 or https://dns.google/dns-query</string>
     <!-- Translators: Button that tests the configured DNS server. -->
@@ -1262,7 +1265,6 @@
     <string name="settings_guide_width_summary">Channel list <xliff:g id="channels">%1$d</xliff:g>%% · EPG timeline <xliff:g id="epg">%2$d</xliff:g>%%</string>
     <string name="settings_guide_width_help">• The channel list and EPG timeline share one row, so their percentages must add up to 100%%.\n• Widening the channel list shows less of the timeline at once; programme lengths and the time scale stay unchanged.\n• Both columns stay at 10%% or more.\n• Reset returns to 10%% channel list and 90%% EPG timeline.\n• Turning customization off restores the standard Guide layout without losing your values.</string>
     <string name="settings_guide_width_channels">Channel list</string>
-    <string name="settings_search_keywords_epg_offset">epg guide time offset shift timezone east west hours</string>
     <string name="settings_search_keywords_panel_width">panel width size resize category list preview column layout live</string>
     <string name="settings_detailed_playback_logging">Detailed playback logging</string>
     <string name="settings_search_keywords_detailed_logging">diagnostics verbose trace logcat debug report bug live engine</string>
@@ -1272,8 +1274,6 @@
     <string name="settings_export">Export</string>
     <string name="settings_detailed_playback_logging_description">Keep a full trace of what the live engine does — every tune, fallback and reconnect — in Logcat and in the exported report. Leave it off unless you are chasing a problem; it never changes playback, only how much is written down.</string>
     <string name="settings_video_seconds"><xliff:g id="seconds">%1$d</xliff:g>s of video</string>
-    <string name="settings_epg_offset_root_description">Shift the whole guide when a feed’s times don’t match what’s actually on. A single channel can be shifted on its own from its long-press menu (Live TV or Guide) — that’s the one for East/West versions sharing a guide.</string>
-    <string name="settings_epg_offset_dialog_description">Moves every programme in the guide. Use it when the whole feed is on the wrong clock; for a single channel (an East/West version sharing one guide), long-press the channel in Live TV or the Guide and set its own offset there.</string>
     <string name="settings_panel_width_summary">Category <xliff:g id="category">%1$d</xliff:g>%% · List <xliff:g id="list">%2$d</xliff:g>%% · <xliff:g id="preview_label">%3$s</xliff:g> <xliff:g id="preview">%4$d</xliff:g>%%</string>
     <string name="settings_panel_width_help">• The panels share one row, so their percentages must add up to 100%%.\n• Set the Preview panel to 0%% to hide it; Category and List stay at 10%% or more.\n• Widen one panel and you have to take the same amount off another before saving.\n• Reset puts a section back to the standard widths this screen started with.\n• Turning a section off restores its standard layout without losing your values.</string>
     <string name="settings_panel_width_preview">Preview</string>
@@ -1476,7 +1476,8 @@
     <!-- Translators: More › Settings, card under "Watching": what the group holds. -->
     <string name="settings_card_watching">Multiview, mini-player, picture-in-picture</string>
     <!-- Translators: More › Settings, card under "App": what the group holds. -->
-    <string name="settings_card_app">Language, updates, network, diagnostics</string>
+    <string name="settings_card_app">Language, updates, diagnostics</string>
+    <string name="settings_card_network">Proxy and DNS</string>
     <!-- Translators: More › Local sync: line under the title. -->
     <string name="more_sync_description">Share your data with your other device over Wi-Fi. Nothing leaves your home network.</string>
     <!-- Translators: More › Local sync: line on the Sync mode tile. -->
@@ -1665,8 +1666,6 @@
     <string name="settings_pinned_from">Pinned from <xliff:g id="group">%1$s</xliff:g></string>
     <!-- Translators: Action word on the Check for updates settings row: checks GitHub for a new version now. -->
     <string name="settings_check_now">Check now</string>
-    <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_epg_offset">Shift the whole guide when a feed’s times are off</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_reminders">What happens when a reminder is due</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->

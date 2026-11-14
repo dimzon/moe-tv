@@ -257,6 +257,7 @@
     <string name="settings_vp_cat_multiview_summary_mobile">Несколько каналов в эфире одновременно</string>
     <string name="settings_vp_cat_languages">Языки и субтитры</string>
     <string name="settings_group_summary_app">Язык, запуск, обновления и сведения о приложении</string>
+    <string name="settings_group_summary_network">Прокси и DNS</string>
     <string name="settings_group_quick">Быстрые</string>
     <string name="settings_group_summary_quick">Переключатели, которые нужны чаще всего</string>
     <string name="settings_group_sound_subtitles">Звук и субтитры</string>
@@ -593,6 +594,7 @@
     <string name="settings_dns_use_custom">Использовать пользовательский DNS</string>
     <string name="settings_dns_server_missing">Пользовательский DNS включён, но сервер не настроен. Введите адрес сервера и выберите «Сохранить» либо отключите эту функцию.</string>
     <string name="settings_dns_server">DNS-сервер</string>
+    <string name="settings_dns_presets">Готовые серверы</string>
     <string name="settings_dns_server_hint">8.8.8.8 или https://dns.google/dns-query</string>
     <string name="settings_dns_test">Проверить DNS</string>
     <string name="settings_dns_explanation">Пользовательский DNS может помочь обойти блокировку доменов на уровне интернет-провайдера или разблокировать контент по географическому признаку с помощью сервисов SmartDNS. Рекомендуется DNS-over-HTTPS (DoH) — он шифрует ваши запросы.</string>
@@ -637,7 +639,6 @@
     <string name="settings_panel_width">Настройка ширины панелей</string>
     <string name="settings_panel_width_description">Изменение размера панелей категорий, списка и предпросмотра в разделе «Прямой эфир».</string>
     <string name="settings_live_layout_separate">Отдельные панели</string>
-    <string name="settings_search_keywords_epg_offset">epg программа передач время смещение сдвиг часовой пояс восток запад часы</string>
     <string name="settings_search_keywords_panel_width">панель ширина размер изменить размер категория список предпросмотр колонка раскладка прямой эфир</string>
     <string name="settings_detailed_playback_logging">Подробный журнал воспроизведения</string>
     <string name="settings_search_keywords_detailed_logging">диагностика подробный трассировка logcat отладка отчёт об ошибке прямой эфир движок</string>
@@ -647,8 +648,6 @@
     <string name="settings_export">Экспорт</string>
     <string name="settings_detailed_playback_logging_description">Ведёт полную трассировку действий движка прямого эфира — каждое переключение, откат и переподключение — в Logcat и в экспортируемом отчёте. Оставляйте выключенным, если вы не ищете причину проблемы: эта опция не влияет на воспроизведение, а только увеличивает объём записываемых данных.</string>
     <string name="settings_video_seconds"><xliff:g id="seconds">%1$d</xliff:g> сек. видео</string>
-    <string name="settings_epg_offset_root_description">Сдвигает всю программу передач, если время в источнике не совпадает с тем, что реально идёт в эфире. Отдельный канал можно сдвинуть самостоятельно через меню долгого нажатия (в «Прямом эфире» или в «Программе передач») — это вариант для восточных/западных версий, использующих общую программу.</string>
-    <string name="settings_epg_offset_dialog_description">Сдвигает каждую передачу в программе передач. Используйте, когда весь источник показывает не то время; для отдельного канала (восточной/западной версии, использующей общую программу) удерживайте канал в «Прямом эфире» или «Программе передач» и задайте ему собственное смещение там.</string>
     <string name="settings_panel_width_summary">Категории <xliff:g id="category">%1$d</xliff:g>%% · Список <xliff:g id="list">%2$d</xliff:g>%% · <xliff:g id="preview_label">%3$s</xliff:g> <xliff:g id="preview">%4$d</xliff:g>%%</string>
     <string name="settings_panel_width_help">• Три панели занимают один ряд, поэтому их проценты должны в сумме давать 100%%.\n• Панель предпросмотра можно скрыть, поставив ей 0%%; «Категории» и «Список» остаются не меньше 10%%.\n• При расширении одной панели нужно убрать столько же с другой перед сохранением.\n• Сброс возвращает разделу стандартную ширину, с которой этот экран начинал работу.\n• Отключение раздела восстанавливает его стандартную раскладку без потери ваших значений.</string>
     <string name="settings_panel_width_preview">Предпросмотр</string>
@@ -808,7 +807,8 @@
     <string name="settings_card_sound">Громкость, объёмный звук, языки</string>
     <string name="settings_card_live">Предпросмотр, номера каналов, задержка, запуск</string>
     <string name="settings_card_watching">Мультиэкран, мини-плеер, картинка в картинке</string>
-    <string name="settings_card_app">Язык, обновления, сеть, диагностика</string>
+    <string name="settings_card_app">Язык, обновления, диагностика</string>
+    <string name="settings_card_network">Прокси и DNS</string>
     <string name="more_sync_description">Обменивайтесь данными с другим устройством по Wi-Fi. Ничего не покидает вашу домашнюю сеть.</string>
     <string name="more_sync_mode_description">Позволяет другим вашим устройствам найти это. Работает, пока открыта эта страница.</string>
     <string name="more_sync_unpair">Отвязать</string>
@@ -910,7 +910,6 @@
     <string name="settings_part_guide_catchup">Телегид</string>
     <string name="settings_pinned_from">Закреплено из раздела «<xliff:g id="group">%1$s</xliff:g>»</string>
     <string name="settings_check_now">Проверить</string>
-    <string name="settings_line_epg_offset">Сдвинуть весь телегид, если время в источнике неверное</string>
     <string name="settings_line_reminders">Что происходит, когда наступает напоминание</string>
     <string name="settings_line_reminder_lead">Как заранее приходит напоминание</string>
     <string name="settings_line_guide_days">На сколько дней вперёд хранится телегид</string>

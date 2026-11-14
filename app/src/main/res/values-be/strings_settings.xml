@@ -257,6 +257,7 @@
     <string name="settings_vp_cat_multiview_summary_mobile">Некалькі каналаў ў эфіры адначасова</string>
     <string name="settings_vp_cat_languages">Мовы і субтытры</string>
     <string name="settings_group_summary_app">Мова, запуск, абнаўленні і звесткі пра прыкладанне</string>
+    <string name="settings_group_summary_network">Проксі і DNS</string>
     <string name="settings_group_quick">Хуткія</string>
     <string name="settings_group_summary_quick">Пераключальнікі, якія патрэбны часцей за ўсё</string>
     <string name="settings_group_sound_subtitles">Гук і субтытры</string>
@@ -593,6 +594,7 @@
     <string name="settings_dns_use_custom">Выкарыстоўваць уласны DNS</string>
     <string name="settings_dns_server_missing">Карыстальніцкі DNS уключаны, але сервер не наладжаны. Увядзіце адрас сервера і выберыце «Захаваць» або адключыце гэтую функцыю.</string>
     <string name="settings_dns_server">DNS-сервер</string>
+    <string name="settings_dns_presets">Гатовыя серверы</string>
     <string name="settings_dns_server_hint">8.8.8.8 або https://dns.google/dns-query</string>
     <string name="settings_dns_test">Праверыць DNS</string>
     <string name="settings_dns_explanation">Карыстальніцкі DNS можа дапамагчы абыйсці блакаванне даменаў на ўзроўні інтэрнэт-пастаўшчыка або разблакаваць кантэнт па геаграфічнай прыкмеце з дапамогай сэрвісаў SmartDNS. Рэкамендуецца DNS-over-HTTPS (DoH) — ён шыфруе вашы запыты.</string>
@@ -637,7 +639,6 @@
     <string name="settings_panel_width">Налада шырыні панэляў</string>
     <string name="settings_panel_width_description">Змена памеру панэляў катэгорый, спіса і прадпрагляду ў раздзеле «Прамы эфір».</string>
     <string name="settings_live_layout_separate">Асобныя панэлі</string>
-    <string name="settings_search_keywords_epg_offset">epg тэлепрограма перадач час зрушэнне зсоў гадзінны пояс усход захад гадзіны</string>
     <string name="settings_search_keywords_panel_width">панэль шырыня памер змяніць памер катэгорыя спіс прадпрагляд калонка раскладка прамы эфір</string>
     <string name="settings_detailed_playback_logging">Падрабязны журнал прайгравання</string>
     <string name="settings_search_keywords_detailed_logging">дыягностыка падрабязны трасіроўка logcat адладка справаздача пра памылку прамы эфір рухавік</string>
@@ -647,8 +648,6 @@
     <string name="settings_export">Экспарт</string>
     <string name="settings_detailed_playback_logging_description">Вядзе поўную трасіроўку дзеянняў рухавіка прамога эфіру — кожнае пераключэнне, адкат і перападключэнне — у Logcat і ў экспартуемай справаздчы. Пакідайце выключаным, калі вы не шукаеце прычыну праблемы: гэтая опцыя не ўплывае на прайграванне, а толькі павялічвае аб\'ём запісываемых даных.</string>
     <string name="settings_video_seconds"><xliff:g id="seconds">%1$d</xliff:g> сек. відэа</string>
-    <string name="settings_epg_offset_root_description">Зсувае ўсю тэлепрограму, калі час у крыніцы не супадае з тым, што рэальна ідзе ў эфіры. Асобны канал можна зсунуць самастойна праз меню доўгага націску (у «Прамым эфіры» або ў «Тэлепрограме») — гэта варыянт для ўсходніх/заходніх версій, якія выкарыстоўваюць агульную тэлепрограму.</string>
-    <string name="settings_epg_offset_dialog_description">Зсувае кожную перадачу ў тэлепрограме. Выкарыстоўвайце, калі ўся крыніца паказвае не тое час; для асобнага канала (усходняй/заходняй версіі, якая выкарыстоўвае агульную тэлепрограму) утрымлівайце канал у «Прамым эфіры» або «Тэлепрограме» і задайце яму ўласнае зрушэнне там.</string>
     <string name="settings_panel_width_summary">Катэгорыі <xliff:g id="category">%1$d</xliff:g>%% · Спіс <xliff:g id="list">%2$d</xliff:g>%% · <xliff:g id="preview_label">%3$s</xliff:g> <xliff:g id="preview">%4$d</xliff:g>%%</string>
     <string name="settings_panel_width_help">• Тры панэлі займаюць адзін шэраг, таму іх працэнты павінны ў суме даваць 100%%.\n• Панэль прадпрагляду можна схаваць, паставіўшы ёй 0%%; «Катэгорыі» і «Спіс» застаюцца не менш за 10%%.\n• Пры пашырэнні адной панэлі трэба ўбраць столькі ж з іншай перад захаваннем.\n• Скінуць вяртае раздзелу стандартную шырыню, з якой гэты экран пачынаў працу.\n• Адключэнне раздзела аднаўляе яго стандартную раскладку без страты вашых значэнняў.</string>
     <string name="settings_panel_width_preview">Прадпрагляд</string>
@@ -808,7 +807,8 @@
     <string name="settings_card_sound">Гучнасць, аб\'ёмны гук, мовы</string>
     <string name="settings_card_live">Прадпрагляд, нумары каналаў, затрымка, запуск</string>
     <string name="settings_card_watching">Мультыэкран, мініплеер, выява ў выяве</string>
-    <string name="settings_card_app">Мова, абнаўленні, сетка, дыягностыка</string>
+    <string name="settings_card_app">Мова, абнаўленні, дыягностыка</string>
+    <string name="settings_card_network">Проксі і DNS</string>
     <string name="more_sync_description">Абменьвайцеся данымі з іншай прыладай па Wi-Fi. Нічога не пакідае вашу хатнюю сетку.</string>
     <string name="more_sync_mode_description">Дазваляе іншым вашым прыладам знайсці гэту. Працуе, пакуль адкрыта гэтая старонка.</string>
     <string name="more_sync_unpair">Адвязаць</string>
@@ -910,7 +910,6 @@
     <string name="settings_part_guide_catchup">Тэлепрограма</string>
     <string name="settings_pinned_from">Замацавана з раздзела «<xliff:g id="group">%1$s</xliff:g>»</string>
     <string name="settings_check_now">Праверыць</string>
-    <string name="settings_line_epg_offset">Зсунуць усю тэлепрограму, калі час у крыніцы няправільны</string>
     <string name="settings_line_reminders">Што адбываецца, калі настае нагадванне</string>
     <string name="settings_line_reminder_lead">Як загадзя прыходзіць нагадванне</string>
     <string name="settings_line_guide_days">На колькі дзён наперад захоўваецца тэлепрограма</string>

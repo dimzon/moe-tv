@@ -233,7 +233,7 @@ fun MoreScreen(
             val setEntry: (() -> Boolean) -> Unit = { pageEntry = it }
             when (selected) {
                 MoreItem.SETTINGS -> SettingsPage(
-                    entry = pageTarget, pinned = pinned.size,
+                    entry = pageTarget, settingsVm = settingsVm, pinned = pinned.size,
                     onOpenGroup = { onOpenSettings(it, false) },
                     onSearch = { onOpenSettings(null, true) },
                 )

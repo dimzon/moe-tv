@@ -109,7 +109,7 @@ fun NetworkSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     }
     val fieldHelp: @Composable (String) -> SettingHelp = { label -> SettingHelp(label, about, extra = notes) }
     StageFullPage(
-        parents = listOf(stringResource(R.string.settings_group_app)),
+        parents = listOf(stringResource(R.string.settings_group_network)),
         title = stringResource(R.string.common_proxy),
         count = pluralStringResource(R.plurals.settings_setting_count, 6, 6),
         onBack = onBack,
