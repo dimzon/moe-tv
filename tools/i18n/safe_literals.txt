@@ -1266,9 +1266,6 @@
 1	log	app/src/main/java/tv/own/owntv/core/reminder/ReminderScheduler.kt	could not arm reminder alarm id=$id: ${it.message}
 1	compiler	app/src/main/java/tv/own/owntv/core/repository/ActiveSources.kt	UNUSED_PARAMETER
 1	technical	app/src/main/java/tv/own/owntv/core/repository/BuiltInSource.kt	RuTube
-1	technical	app/src/main/java/tv/own/owntv/core/repository/EpgCacheFiles.kt	.xmltv
-1	technical	app/src/main/java/tv/own/owntv/core/repository/EpgCacheFiles.kt	.xmltv.tmp
-1	technical	app/src/main/java/tv/own/owntv/core/repository/EpgCacheFiles.kt	epg_
 1	technical	app/src/main/java/tv/own/owntv/core/repository/SourceRepository.kt	Cancelled
 1	technical	app/src/main/java/tv/own/owntv/core/repository/SourceRepository.kt	Failed
 1	log	app/src/main/java/tv/own/owntv/core/repository/SourceRepository.kt	SourceRepository

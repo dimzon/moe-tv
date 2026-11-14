@@ -268,7 +268,7 @@ class RutubePlaybackResolver(private val rutube: RutubeApi) {
 
 /**
  * EPG writer for RuTube. Writes directly into the shared EPG tables via [EpgRepository]'s
- * low-level DAO — never the XMLTV stream path ([EpgRepository.refreshUrl] stays for XMLTV).
+ * low-level DAO — there is no XMLTV stream path any more.
  *
  * Strategy (TVTube, live-tested):
  *  1. Brief-schedule seed phase: one `tvprogramm=true` pass seeds now/next for all channels.

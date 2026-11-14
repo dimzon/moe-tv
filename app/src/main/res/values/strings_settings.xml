@@ -580,7 +580,7 @@
     <string name="settings_group_sound_subtitles">Sound &amp; subtitles</string>
     <!-- Translators: Settings group name: multiview, mini-player and picture-in-picture. -->
     <string name="settings_group_watching_recording">Watching</string>
-    <!-- Translators: Hidden keyword bag for the EPG settings page. 'xmltv' is a technical format name. Translate as individual search terms. -->
+    <!-- Translators: Hidden keyword bag for the EPG settings page. Translate as individual search terms. -->
     <string name="settings_search_keywords_epg">guide feed program</string>
     <!-- Translators: Hidden keyword bag for the Customize Categories settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_customize">hide unhide rename reorder categories</string>
