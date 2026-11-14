@@ -261,7 +261,7 @@
     <string name="settings_group_summary_quick">Переключатели, которые нужны чаще всего</string>
     <string name="settings_group_sound_subtitles">Звук и субтитры</string>
     <string name="settings_group_watching_recording">Просмотр</string>
-    <string name="settings_search_keywords_epg">XMLTV программа передач лента телепередача</string>
+    <string name="settings_search_keywords_epg">программа передач лента телепередача</string>
     <string name="settings_search_keywords_customize">скрыть показать переименовать порядок категории</string>
     <string name="settings_search_keywords_ch">канал вверх вниз пропуск страница список категория канал</string>
     <string name="settings_search_keywords_browsing">запомнить позиция прокрутка категория последний канал прямой эфир сброс начало</string>
@@ -472,10 +472,6 @@
     <string name="settings_span_help">Удерживайте OK на «Переместить», «Переименовать» или «Скрыть» у первого элемента, затем нажмите то же у последнего. Всё между ними изменится вместе.</string>
     <string name="settings_span_ch_help">CH+ / CH− перелистывают страницу. Удерживайте CH+ / CH−, чтобы перейти к последнему или первому элементу.</string>
     <string name="settings_customize_metadata_separator">"  ·  "</string>
-    <string name="settings_sources_resync_title_full">Повторно синхронизировать «<xliff:g id="name">%1$s</xliff:g>»</string>
-    <string name="settings_sources_resync_now_full">Повторно синхронизировать сейчас</string>
-    <string name="settings_sources_resync_remove_full">Повторно синхронизировать и удалить отсутствующие материалы</string>
-    <string name="settings_sources_resync_description">При повторной синхронизации сейчас загружается актуальный каталог, а все уже сохранённые данные остаются.\n\nПовторная синхронизация с удалением отсутствующих материалов также позволяет удалить материалы, которых больше нет в списках поставщика. Избранное, история и позиции продолжения просмотра для материалов, которые по-прежнему доступны, сохраняются.</string>
     <string name="settings_epg_guide_days">Сколько дней телепрограммы хранить</string>
     <string name="settings_epg_guide_days_hint">Влево и вправо выбирают число дней, от <xliff:g id="min">%1$d</xliff:g> до <xliff:g id="max">%2$d</xliff:g>.</string>
     <plurals name="settings_epg_guide_days_value">

@@ -59,13 +59,11 @@
     <string name="player_error_audio_no_video">Гук прайграецца, але відэа не ўдалося паказаць на гэтай прыладзе.</string>
     <string name="player_error_decoder_busy">Відэадэкодэр гэтага тэлевізара заняты. Паўтарыце спробу праз некаторы час.</string>
     <string name="player_error_no_internet">Няма падключэння да інтэрнэту. Праверце сетку і паўтарыце спробу.</string>
-    <string name="player_error_stream_unavailable">Не ўдалося прайграць гэты паток. Магчыма, крыніца не ў сетцы або выкарыстоўвае непадтрымліваны фармат. <xliff:g id="hint">%1$s</xliff:g></string>
     <string name="player_error_account_in_use">Гэты ўліковы запіс ужо прайграе на іншай прыладзе або ў іншым прыкладанні. Спыніце прайграванне там і націсніце «Паўтарыць».</string>
     <string name="player_error_fairplay">Гэты паток абаронены Apple FairPlay, які прылады Android не могуць прайграць. Плейліст разлічаны на прылады Apple.</string>
     <string name="player_error_surround">Гэты гукавы выход не падтрымлівае шматканальны гук — выканана пераключэнне на стэрэа.</string>
     <string name="player_error_hardware_fallback">Фармат гэтага патока не ўдалося дэкадаваць апаратна на гэтым тэлевізары, таму было выкарыстана праграмнае дэкадаванне, якое не спраўляецца з <xliff:g id="resolution">%1$s</xliff:g> без перагрузкі тэлевізара. Пры гэтым тэлевізар можа нармальна прайграваць іншы кантэнт у 4K; праблема звязана з фарматам менавіта гэтага патока.</string>
     <string name="player_error_hardware_disabled">Апаратнае дэкадаванне адключана — праграмнае дэкадаванне не спраўляецца з відэа ў разрозненні <xliff:g id="resolution">%1$s</xliff:g>. Уключыце апаратнае дэкадаванне ў раздзеле «Налады → Відэаплеер».</string>
-    <string name="player_error_custom_user_agent">Магчыма, гэтаму пастаўшчыку патрабуецца ўласны User-Agent у наладах крыніцы.</string>
     <string name="player_reason_decoder_busy">Апаратны відэадэкодэр заняты або не спраўляецца з гэтым патокам</string>
     <string name="player_reason_decoder_transient">Часовая памылка апаратнага відэадэкодэра — паўтарыце спробу</string>
     <string name="player_reason_unsupported_video">Дэкодэр гэтай прылады не падтрымлівае дадзены фармат або профіль відэа (напрыклад, HEVC 10-bit)</string>

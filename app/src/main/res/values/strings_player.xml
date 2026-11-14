@@ -124,8 +124,6 @@
     <string name="player_error_decoder_busy">This TV\'s video decoder is busy. Try again in a moment.</string>
     <!-- Translators: Error when there is no internet connection. -->
     <string name="player_error_no_internet">No internet connection. Check your network and try again.</string>
-    <!-- Translators: Generic stream playback error with an optional hint. "hint" is a hint string (may be empty or contain player_error_custom_user_agent text). -->
-    <string name="player_error_stream_unavailable">Couldn\'t play this stream. The source may be offline or use an unsupported format. <xliff:g id="hint">%1$s</xliff:g></string>
     <!-- Translators: Error title when the provider refuses playback because the same account is already streaming elsewhere (HTTP 458). "Retry" is the button below it. -->
     <string name="player_error_account_in_use">This account is already playing on another device or app. Stop it there, then press Retry.</string>
     <!-- Translators: Player error for a channel or film the playlist marks as protected with Apple's FairPlay DRM. No Android device can decrypt FairPlay, so this is a limit of the device, not of the app or the provider. Keep "Apple FairPlay", "Android" and "Apple" as they are. -->
@@ -136,8 +134,6 @@
     <string name="player_error_hardware_fallback">This stream\'s format couldn\'t be hardware-decoded on this TV, so it fell back to software decoding \u2014 which can\'t sustain <xliff:g id="resolution">%1$s</xliff:g> without overloading the TV. The TV may still play other 4K content fine; this particular stream\'s format is the issue.</string>
     <!-- Translators: Error when hardware decoding is disabled in settings and the resolution is too high for software decoding. "resolution" is a string such as "4K". Directs the user to Settings. -->
     <string name="player_error_hardware_disabled">Hardware decoding is turned off \u2014 software decoding can\'t handle <xliff:g id="resolution">%1$s</xliff:g> video. Enable it in Settings \u2192 Video Player.</string>
-    <!-- Translators: Hint appended to player_error_stream_unavailable when the provider may require a custom User-Agent. Shown as a hint, not a standalone error. -->
-    <string name="player_error_custom_user_agent">This provider may require a custom User-Agent in source settings.</string>
     <!-- Translators: Technical failure reason shown in the player error overlay detail section. "HEVC 10-bit" is a video codec example. -->
     <string name="player_reason_decoder_busy">Hardware video decoder is busy or can\'t handle this stream</string>
     <!-- Translators: Technical failure reason in the player error overlay. -->

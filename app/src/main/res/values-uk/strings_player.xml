@@ -59,13 +59,11 @@
     <string name="player_error_audio_no_video">Звук відтворюється, але відео не вдалося показати на цьому пристрої.</string>
     <string name="player_error_decoder_busy">Відеодекодер цього телевізора зайнятий. Повторіть спробу через деякий час.</string>
     <string name="player_error_no_internet">Немає підключення до інтернету. Перевірте мережу та повторіть спробу.</string>
-    <string name="player_error_stream_unavailable">Не вдалося відтворити цей потік. Можливо, джерело не в мережі або використовує непідтримуваний формат. <xliff:g id="hint">%1$s</xliff:g></string>
     <string name="player_error_account_in_use">Цей обліковий запис уже відтворюється на іншому пристрої або в іншому застосунку. Зупиніть відтворення там і натисніть «Повторити».</string>
     <string name="player_error_fairplay">Цей потік захищено Apple FairPlay, який пристрої Android не можуть відтворити. Плейлист розрахований на пристрої Apple.</string>
     <string name="player_error_surround">Цей аудіовихід не підтримує об\'ємний звук — переключено на стерео.</string>
     <string name="player_error_hardware_fallback">Формат цього потоку не вдалося декодувати апаратно на цьому телевізорі, тому було використано програмне декодування, яке не справляється з <xliff:g id="resolution">%1$s</xliff:g> без перевантаження телевізора. При цьому телевізор може нормально відтворювати інший контент у 4K; проблема пов\'язана саме з форматом цього потоку.</string>
     <string name="player_error_hardware_disabled">Апаратне декодування вимкнено — програмне декодування не справляється з відео в роздільній здатності <xliff:g id="resolution">%1$s</xliff:g>. Увімкніть апаратне декодування в розділі «Налаштування → Відеопрогравач».</string>
-    <string name="player_error_custom_user_agent">Можливо, цьому постачальнику потрібен власний User-Agent у налаштуваннях джерела.</string>
     <string name="player_reason_decoder_busy">Апаратний відеодекодер зайнятий або не справляється з цим потоком</string>
     <string name="player_reason_decoder_transient">Тимчасова помилка апаратного відеодекодера — повторіть спробу</string>
     <string name="player_reason_unsupported_video">Декодер цього пристрою не підтримує цей формат або профіль відео (наприклад, HEVC 10-bit)</string>

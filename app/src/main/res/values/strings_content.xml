@@ -69,7 +69,7 @@
     <!-- Translators: Hint text in the rename dialog explaining the rename is local to this profile only. -->
     <string name="content_rename_hint">Only for this profile. Leave blank to restore the original name.</string>
     <!-- Translators: Current sort-mode label in the SortChip toggle. -->
-    <string name="content_provider">Provider</string>
+    <string name="content_provider">Original order</string>
     <string name="content_provider_name">Provider: <xliff:g id="provider">%1$s</xliff:g></string>
     <!-- Translators: Context-menu option to play content in an external player. Shorter variant. -->
     <string name="content_play_external_short">Play in external player</string>
@@ -119,7 +119,7 @@
     <!-- Translators: Empty-state message when the EPG channel search returns no results. "query" is the search text. -->
     <string name="content_epg_no_channels_query">No guide channels found for \u201c<xliff:g id="query">%1$s</xliff:g>\u201d.</string>
     <!-- Translators: Warning message when EPG data exists but channel IDs don\'t match. -->
-    <string name="content_epg_mismatched_ids">Guide data is stored, but its channel ids don\'t match your channels\' EPG ids \u2014 this EPG feed may belong to a different provider lineup.</string>
+    <string name="content_epg_mismatched_ids">The stored TV guide does not match the catalogue\'s channels — refresh the TV guide.</string>
     <!-- Translators: Screen title for the TV Guide / EPG screen. -->
     <string name="content_epg_title">TV Guide</string>
     <!-- Translators: Status message when no guide data is available for a channel. -->
@@ -137,7 +137,7 @@
     <!-- Translators: Sort option for alphabetical order in the EPG channel list. -->
     <string name="content_epg_sort_alpha">A\u2013Z</string>
     <!-- Translators: Sort option to sort EPG channels by provider. -->
-    <string name="content_epg_sort_provider">Provider</string>
+    <string name="content_epg_sort_provider">Original order</string>
     <!-- Translators: Visible middle-dot separator between EPG metadata segments. -->
     <string name="content_epg_bits_separator">" · "</string>
     <!-- Translators: Context-menu option in the EPG to tune to a live channel. -->

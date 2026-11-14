@@ -581,7 +581,7 @@
     <!-- Translators: Settings group name: multiview, mini-player and picture-in-picture. -->
     <string name="settings_group_watching_recording">Watching</string>
     <!-- Translators: Hidden keyword bag for the EPG settings page. 'xmltv' is a technical format name. Translate as individual search terms. -->
-    <string name="settings_search_keywords_epg">xmltv guide feed program</string>
+    <string name="settings_search_keywords_epg">guide feed program</string>
     <!-- Translators: Hidden keyword bag for the Customize Categories settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_customize">hide unhide rename reorder categories</string>
     <!-- Translators: Hidden keyword bag for the CH+ Key Paging settings. Translate as individual search terms. -->
@@ -982,14 +982,6 @@
     <string name="settings_span_ch_help">CH+ / CH− skip a page. Hold CH+ / CH− to jump to the last or first item.</string>
     <!-- Translators: Visible single middle-dot separator between metadata segments in the Customize screen. -->
     <string name="settings_customize_metadata_separator">"  ·  "</string>
-    <!-- Translators: Dialog title for resyncing a source. 'name' is the source name. -->
-    <string name="settings_sources_resync_title_full">Resync “<xliff:g id="name">%1$s</xliff:g>”</string>
-    <!-- Translators: Option to resync and keep existing data. -->
-    <string name="settings_sources_resync_now_full">Resync now</string>
-    <!-- Translators: Option to resync and remove titles no longer listed by the provider. -->
-    <string name="settings_sources_resync_remove_full">Resync and remove missing titles</string>
-    <!-- Translators: Description of the resync options and their effects. -->
-    <string name="settings_sources_resync_description">Resync now fetches the latest catalog and keeps everything already saved.\n\nResync and remove missing titles also allows removing titles the provider no longer lists. Your favorites, history and resume positions for titles that are still listed are kept.</string>
 
     <!-- Translators: Settings row: how many days of upcoming guide the app stores. Opens a day picker. -->
     <string name="settings_epg_guide_days">Guide days to keep</string>
@@ -1005,12 +997,12 @@
     <!-- Translators: EPG refresh interval: every 6 hours. -->
     <string name="settings_epg_refresh_6h">6 hours</string>
     <!-- Translators: Plural EPG programme count. 'programmes' is the number. -->
-    <plurals name="settings_epg_sources_status_count_programmes">
-        <item quantity="one">It contains <xliff:g id="programmes">%1$d</xliff:g> program.</item>
-        <item quantity="other">It contains <xliff:g id="programmes">%1$d</xliff:g> programs.</item>
-    </plurals>
 
     <!-- Translators: Button to continue the backup flow. -->
+    <plurals name="settings_epg_sources_status_count_programmes">
+        <item quantity="one"><xliff:g id="programmes">%1$d</xliff:g> set</item>
+        <item quantity="other"><xliff:g id="programmes">%1$d</xliff:g> set</item>
+    </plurals>
     <string name="settings_backup_continue">Continue</string>
     <!-- Translators: Backup content section: Favorites. -->
     <string name="settings_backup_section_favorites">Favorites</string>

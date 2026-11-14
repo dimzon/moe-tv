@@ -284,6 +284,5 @@
 1	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	'${channel.name}' — its ExoPlayer preview had already failed; trying the next rung
 1	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	tune '${channel.name}' -> ExoPlayer
 1	app/src/main/java/tv/own/owntv/player/PlaybackErrorLog.kt	[${stamp.format(java.util.Date(e.atMs))}] ${e.kind} · ${e.engine}
-1	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	\0
 1	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	429
 1	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	458

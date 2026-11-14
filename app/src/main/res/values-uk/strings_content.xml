@@ -44,7 +44,7 @@
     <string name="content_play">Відтворити</string>
     <string name="content_close">Закрити</string>
     <string name="content_rename_hint">Лише для цього профілю. Залиште поле порожнім, щоб відновити початкову назву.</string>
-    <string name="content_provider">Постачальник</string>
+    <string name="content_provider">Вихідна</string>
     <string name="content_provider_name">Постачальник: %1$s</string>
     <string name="content_play_external_short">Відтворити в зовнішньому програвачі</string>
     <string name="content_rename">Перейменувати</string>
@@ -68,7 +68,7 @@
     <string name="content_storage_removable">Знімне сховище</string>
     <string name="content_storage_app">Сховище застосунку (дозвіл не потрібен)</string>
     <string name="content_epg_no_channels_query">За запитом «<xliff:g id="query">%1$s</xliff:g>» канали телепрограми не знайдено.</string>
-    <string name="content_epg_mismatched_ids">Дані телепрограми збережено, але ідентифікатори її каналів не збігаються з ідентифікаторами EPG ваших каналів — можливо, це джерело EPG призначене для іншого набору каналів постачальника.</string>
+    <string name="content_epg_mismatched_ids">Збережена телепрограма не відповідає каналам каталогу — оновіть телепрограму.</string>
     <string name="content_epg_title">Телепрограма</string>
     <string name="content_epg_no_guide">Немає телепрограми.</string>
     <string name="content_epg_no_programme">На цей час телепередач немає.</string>
@@ -77,7 +77,7 @@
     <string name="content_epg_add_favourite">Додати до обраного</string>
     <string name="content_epg_remove_favourite">Видалити з обраного</string>
     <string name="content_epg_sort_alpha">А–Я</string>
-    <string name="content_epg_sort_provider">Постачальник</string>
+    <string name="content_epg_sort_provider">Вихідна</string>
     <string name="content_epg_bits_separator">" · "</string>
     <string name="content_epg_watch_channel">Дивитися канал</string>
     <string name="content_epg_time_offset">Зсув часу EPG</string>

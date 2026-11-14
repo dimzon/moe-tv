@@ -44,7 +44,7 @@
     <string name="content_play">Воспроизвести</string>
     <string name="content_close">Закрыть</string>
     <string name="content_rename_hint">Только для этого профиля. Оставьте поле пустым, чтобы восстановить исходное название.</string>
-    <string name="content_provider">Поставщик</string>
+    <string name="content_provider">Исходная</string>
     <string name="content_provider_name">Поставщик: %1$s</string>
     <string name="content_play_external_short">Воспроизвести во внешнем плеере</string>
     <string name="content_rename">Переименовать</string>
@@ -68,7 +68,7 @@
     <string name="content_storage_removable">Съёмное хранилище</string>
     <string name="content_storage_app">Хранилище приложения (разрешение не требуется)</string>
     <string name="content_epg_no_channels_query">По запросу «<xliff:g id="query">%1$s</xliff:g>» каналы программы передач не найдены.</string>
-    <string name="content_epg_mismatched_ids">Данные программы передач сохранены, но идентификаторы её каналов не совпадают с идентификаторами EPG ваших каналов — возможно, этот источник EPG предназначен для другого набора каналов поставщика.</string>
+    <string name="content_epg_mismatched_ids">Сохранённая телепрограмма не соответствует каналам каталога — обновите телепрограмму.</string>
     <string name="content_epg_title">Программа передач</string>
     <string name="content_epg_no_guide">Нет программы передач.</string>
     <string name="content_epg_no_programme">На это время телепередач нет.</string>
@@ -77,7 +77,7 @@
     <string name="content_epg_add_favourite">Добавить в избранное</string>
     <string name="content_epg_remove_favourite">Удалить из избранного</string>
     <string name="content_epg_sort_alpha">А–Я</string>
-    <string name="content_epg_sort_provider">Поставщик</string>
+    <string name="content_epg_sort_provider">Исходная</string>
     <string name="content_epg_bits_separator">" · "</string>
     <string name="content_epg_watch_channel">Смотреть канал</string>
     <string name="content_epg_time_offset">Смещение времени EPG</string>

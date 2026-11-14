@@ -125,7 +125,6 @@ sealed interface PlaybackFailure {
     data class HardwareFallback(val resolution: String) : PlaybackFailure
     data class HardwareDisabled(val resolution: String) : PlaybackFailure
     data class HardwareFormat(val resolution: String, val codec: String) : PlaybackFailure
-    data class StreamUnavailable(val customUserAgentHint: Boolean) : PlaybackFailure
     /**
      * A Cast receiver refused the stream. The receiver decodes it itself — no engine of ours is
      * involved — so a container it does not support (raw MPEG-TS, most of all) or a provider that
@@ -170,10 +169,6 @@ fun PlaybackFailure.describe(resolve: (Int, List<Any>) -> String): String {
         is PlaybackFailure.HardwareFallback -> str(R.string.player_error_hardware_fallback, resolution)
         is PlaybackFailure.HardwareDisabled -> str(R.string.player_error_hardware_disabled, resolution)
         is PlaybackFailure.HardwareFormat -> str(R.string.player_error_hardware_format, resolution, codec)
-        is PlaybackFailure.StreamUnavailable -> str(
-            R.string.player_error_stream_unavailable,
-            if (customUserAgentHint) str(R.string.player_error_custom_user_agent) else "",
-        )
         PlaybackFailure.CastUnsupported -> str(R.string.player_error_cast_unsupported)
         PlaybackFailure.AccountInUse -> str(R.string.player_error_account_in_use)
         PlaybackFailure.FairPlay -> str(R.string.player_error_fairplay)
