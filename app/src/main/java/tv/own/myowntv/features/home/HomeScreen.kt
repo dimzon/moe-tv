@@ -513,7 +513,7 @@ private fun StillArtwork(still: HomeStill) {
         is HomeStill.Logo -> Box(Modifier.fillMaxSize().background(tv.own.myowntv.ui.stage.stageStillBack), contentAlignment = Alignment.Center) {
             tv.own.myowntv.ui.components.ChannelLogoTile(
                 logoUrl = still.url,
-                modifier = Modifier.fillMaxSize(0.5f).clip(RoundedCornerShape(12.mpx)),
+                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.mpx)),
                 imageModifier = Modifier.fillMaxSize().padding(8.mpx),
                 fill = Color.Transparent,
             ) {}
