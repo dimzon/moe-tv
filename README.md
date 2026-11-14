@@ -177,27 +177,34 @@ tv.own.myowntv/
 
 ## 📥 Установка (Fire TV / Android TV)
 
-1. Скачайте APK из раздела **Releases** этого репозитория (когда у форка появится публичный
-   репозиторий — сейчас его нет), либо соберите из исходников, как описано ниже.
-2. Установите: на Fire TV через приложение **Downloader**, в остальных случаях — с USB-накопителя,
-   через *Send files to TV* или `adb install MyOwnTV.apk`.
+**Где релизы:** страница загрузки — <https://dimzon.github.io/moe-tv-site/>, сами APK —
+раздел **Releases** публичного репозитория **<https://github.com/dimzon/moe-tv-site/releases>**
+(код-репозиторий приватный, релизы публикуются в site-репозиторий).
 
-> Каждый релиз содержит **два APK**: `MyOwnTV.apk` (arm — для всех реальных ТВ-приставок) и
-> `MyOwnTV-x86_64.apk` (эмуляторы и редкие устройства на Intel).
+1. Скачайте APK со страницы загрузки или из Releases, либо соберите из исходников, как описано ниже.
+2. Установите: на Fire TV через приложение **Downloader**, в остальных случаях — с USB-накопителя,
+   через *Send files to TV* или `adb install MoeTV_<версия>_universal.apk`.
+
+> Каждый релиз содержит **один универсальный APK** `MoeTV_<версия>_universal.apk` — arm64-v8a,
+> armeabi-v7a и x86_64 в одном файле, подходит и приставкам, и эмуляторам.
+> Встроенная проверка обновлений («Настройки → О приложении → Проверить обновления») читает
+> последний релиз именно из `dimzon/moe-tv-site`.
 
 <a id="build"></a>
 
 ## 🛠️ Сборка и запуск
 
-1. **Получите код** — `git clone <этот репозиторий>` (или скачайте ZIP).
-2. **Откройте** проект в [Android Studio](https://developer.android.com/studio) и дождитесь
-   синхронизации Gradle.
-3. **Выберите вариант сборки** — `standard` для реальных устройств и arm-эмуляторов, `x86_64` для
-   эмуляторов x86_64.
-4. **Запустите** ▶. Минимум — **Android 8.0 / API 26**.
+Сборка — **только батниками** из корня репозитория и **только флейвор `universal`** (все ABI в одном
+APK):
 
-Из командной строки: `./gradlew assembleDebug` (`gradlew.bat` под Windows). APK окажется в
-`app/build/outputs/apk/`.
+- `build-debug.cmd universal` — debug-сборка;
+- `build-release.cmd universal` — release-сборка (R8, подпись из `keystore.properties`);
+- `publish.cmd <версия> [notes.md]` — release-сборка + публикация релиза `v<версия>` в
+  `dimzon/moe-tv-site` + обновление версии на странице загрузки.
+
+Задачи `assemble*` через `gradlew` напрямую не запускать; флейворы `standard`, `x86_64` и `all` не
+собирать. Минимум — **Android 8.0 / API 26**; APK окажется в `app/build/outputs/apk/universal/`.
+Для запуска из Android Studio выберите вариант `universalDebug`.
 
 ## 🤝 Как участвовать
 
