@@ -14,8 +14,7 @@
     <string name="common_stepper_plus" translatable="false">+</string>
     <!-- Typeface names in the font picker: proper nouns, identical in every language. -->
     <string name="settings_font_lora" translatable="false">Lora</string>
-    <string name="settings_font_playfair_display" translatable="false">Playfair Display</string>
-    <string name="settings_font_dancing_script" translatable="false">Dancing Script</string>
+    <string name="settings_font_play" translatable="false">Play</string>
     <string name="settings_font_poppins" translatable="false">Poppins</string>
     <string name="settings_font_plus_jakarta_sans" translatable="false">Plus Jakarta Sans</string>
     <!-- A picture height as a quality label, "1080p": a number and a letter, the same in every language. -->

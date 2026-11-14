@@ -5,8 +5,7 @@ enum class AppFontFamily {
     LORA,
     SYSTEM_SANS,
     MONOSPACE,
-    PLAYFAIR_DISPLAY,
-    DANCING_SCRIPT,
+    PLAY,
     POPPINS,
     PLUS_JAKARTA_SANS;
 

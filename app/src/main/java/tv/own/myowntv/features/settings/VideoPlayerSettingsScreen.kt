@@ -1566,8 +1566,7 @@ private fun subtitleFontFamilyLabel(family: AppFontFamily): String = stringResou
         AppFontFamily.LORA -> R.string.settings_font_lora
         AppFontFamily.SYSTEM_SANS -> R.string.settings_font_system_sans
         AppFontFamily.MONOSPACE -> R.string.settings_font_monospace
-        AppFontFamily.PLAYFAIR_DISPLAY -> R.string.settings_font_playfair_display
-        AppFontFamily.DANCING_SCRIPT -> R.string.settings_font_dancing_script
+        AppFontFamily.PLAY -> R.string.settings_font_play
         AppFontFamily.POPPINS -> R.string.settings_font_poppins
         AppFontFamily.PLUS_JAKARTA_SANS -> R.string.settings_font_plus_jakarta_sans
     },

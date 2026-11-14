@@ -68,20 +68,9 @@ private val LoraFamily = FontFamily(
     variableFont(R.font.lora_italic_variable, FontWeight.Bold, FontStyle.Italic),
 )
 
-private val PlayfairDisplayFamily = FontFamily(
-    variableFont(R.font.playfair_display_variable, FontWeight.Normal),
-    variableFont(R.font.playfair_display_variable, FontWeight.Medium),
-    variableFont(R.font.playfair_display_variable, FontWeight.SemiBold),
-    variableFont(R.font.playfair_display_variable, FontWeight.Bold),
-    variableFont(R.font.playfair_display_italic_variable, FontWeight.Normal, FontStyle.Italic),
-    variableFont(R.font.playfair_display_italic_variable, FontWeight.Bold, FontStyle.Italic),
-)
-
-private val DancingScriptFamily = FontFamily(
-    variableFont(R.font.dancing_script_variable, FontWeight.Normal),
-    variableFont(R.font.dancing_script_variable, FontWeight.Medium),
-    variableFont(R.font.dancing_script_variable, FontWeight.SemiBold),
-    variableFont(R.font.dancing_script_variable, FontWeight.Bold),
+private val PlayFamily = FontFamily(
+    Font(R.font.play_regular, FontWeight.Normal),
+    Font(R.font.play_bold, FontWeight.Bold),
 )
 
 // Stage's typeface: every weight it uses (400–800) from one variable file.
@@ -104,8 +93,7 @@ fun AppFontFamily.asComposeFamily(): FontFamily = when (this) {
     AppFontFamily.LORA -> LoraFamily
     AppFontFamily.SYSTEM_SANS -> FontFamily.SansSerif
     AppFontFamily.MONOSPACE -> FontFamily.Monospace
-    AppFontFamily.PLAYFAIR_DISPLAY -> PlayfairDisplayFamily
-    AppFontFamily.DANCING_SCRIPT -> DancingScriptFamily
+    AppFontFamily.PLAY -> PlayFamily
     AppFontFamily.POPPINS -> PoppinsFamily
     AppFontFamily.PLUS_JAKARTA_SANS -> PlusJakartaSansFamily
 }
@@ -121,8 +109,7 @@ fun AppFontFamily.asAndroidTypeface(context: android.content.Context): android.g
 val AppFontFamily.subtitleFontResource: Int
     get() = when (this) {
         AppFontFamily.LORA -> R.font.lora_variable
-        AppFontFamily.PLAYFAIR_DISPLAY -> R.font.playfair_display_variable
-        AppFontFamily.DANCING_SCRIPT -> R.font.dancing_script_variable
+        AppFontFamily.PLAY -> R.font.play_regular
         AppFontFamily.POPPINS -> R.font.poppins_regular
         AppFontFamily.PLUS_JAKARTA_SANS -> R.font.plus_jakarta_sans_variable
         AppFontFamily.SYSTEM_SANS,

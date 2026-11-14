@@ -51,7 +51,7 @@ distributed to end users.
 
 ## 2. Bundled fonts — SIL Open Font License 1.1
 
-`app/src/main/res/font/` ships 11 `.ttf` files from 6 families. Each is licensed under the
+`app/src/main/res/font/` ships 10 `.ttf` files from 5 families. Each is licensed under the
 **SIL Open Font License, Version 1.1**. The complete, unmodified license text and the copyright
 notice for each family live in `extras/font-licenses/` and **must accompany the font files in any
 redistribution** (including an APK-only release — either as app assets or in the release bundle).
@@ -59,10 +59,9 @@ Modified versions may not use a Reserved Font Name without permission.
 
 | Family | Bundled files | Copyright notice | License file |
 |---|---|---|---|
-| Dancing Script | `dancing_script_variable.ttf` | © 2016 The Dancing Script Project Authors (RFN: "Dancing Script") | `extras/font-licenses/OFL-Dancing-Script.txt` |
 | JetBrains Mono | `jetbrains_mono_semibold.ttf` | © 2020 The JetBrains Mono Project Authors | `extras/font-licenses/OFL-JetBrains-Mono.txt` |
 | Lora | `lora_variable.ttf`, `lora_italic_variable.ttf` | © 2011 The Lora Project Authors (RFN: "Lora") | `extras/font-licenses/OFL-Lora.txt` |
-| Playfair Display | `playfair_display_variable.ttf`, `playfair_display_italic_variable.ttf` | © 2017 The Playfair Display Project Authors (RFN: "Playfair Display") | `extras/font-licenses/OFL-Playfair-Display.txt` |
+| Play | `play_regular.ttf`, `play_bold.ttf` | © 2011 Jonas Hecksher, Playtypes, e-types AS (RFN: "Play", "Playtype", "Playtype Sans") | `extras/font-licenses/OFL-Play.txt` |
 | Plus Jakarta Sans | `plus_jakarta_sans_variable.ttf` | © 2020 The Plus Jakarta Sans Project Authors | `extras/font-licenses/OFL-Plus-Jakarta-Sans.txt` |
 | Poppins | `poppins_regular/medium/semibold/bold.ttf` | © 2020 The Poppins Project Authors | `extras/font-licenses/OFL-Poppins.txt` |
 
