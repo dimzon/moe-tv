@@ -100,7 +100,13 @@ def render_wordmark_layers(p, height=182):
 
 
 def render_splash_name(p, w, hh):
-    """Двухтонный wordmark «МОЁ»(ink) «ТВ»(accent) на прозрачном, под branding-image."""
+    """Двухтонный wordmark «МОЁ»(белый) «ТВ»(accent) на прозрачном, под branding-image.
+
+    Branding-image показывается только на тёмном фоне сплеша (@color/owntv_window_bg,
+    Android 12+), поэтому «МОЁ» всегда светлое — независимо от флага light варианта
+    (у светлых вариантов p.ink тёмный и рассчитан на светлые поверхности в приложении,
+    не на сплеш). Аналог INK_ON_DARK в tools/brand/render_brand_extras.py.
+    """
     img = Image.new("RGBA", (w, hh), (0, 0, 0, 0))
     font = ImageFont.truetype(FONT_BOLD, int(hh * 0.72))
     d = ImageDraw.Draw(img)
@@ -114,7 +120,7 @@ def render_splash_name(p, w, hh):
     total = w1 + tracking + w2
     x = (w - total) // 2
     yc = hh // 2
-    d.text((x, yc), moe, font=font, fill=(*p.ink, 255), anchor="lm")
+    d.text((x, yc), moe, font=font, fill=(255, 255, 255, 255), anchor="lm")
     d.text((x + w1 + tracking, yc), tv, font=font, fill=(*p.accent, 255), anchor="lm")
     return img
 
