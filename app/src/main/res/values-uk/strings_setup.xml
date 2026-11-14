@@ -92,7 +92,7 @@
     <string name="setup_step_terms">Умови</string>
     <string name="setup_key_previous_step">Попередній крок</string>
     <string name="setup_welcome_title">Вітаємо в МОЁ ТВ</string>
-    <string name="setup_welcome_sub">Ваш власний IPTV-програвач. Виберіть мову, щоб почати, — її можна змінити пізніше в налаштуваннях.</string>
+    <string name="setup_welcome_sub">Публічно доступні телеканали RuTube з телепрограмою. Виберіть мову, щоб почати, — її можна змінити пізніше в налаштуваннях.</string>
     <string name="setup_display_sub">Наскільки великими відображаються інтерфейс і текст на цьому телевізорі. Рядок нижче змінюється в процесі.</string>
     <string name="setup_line_zoom">Усе на екрані</string>
     <string name="setup_line_font">Лише текст</string>

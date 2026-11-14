@@ -1526,7 +1526,7 @@
     <!-- Translators: More › About: licence line after when updates were checked. -->
     <string name="more_about_license">GPLv3 · free and open source</string>
     <!-- Translators: More › About: what the app is. -->
-    <string name="more_about_description">Your own IPTV player for Android TV. It provides no channels or content; you bring your own legally accessible sources.</string>
+    <string name="more_about_description">An Android TV app that shows publicly available TV channels from the RuTube service: it takes both the live stream and the TV guide from the RuTube API. It provides no content of its own.</string>
     <!-- Translators: More › About, Telegram card: hint under the link. -->
     <string name="more_about_scan">Scan with your phone.</string>
     <!-- Translators: More › About: chip with how many languages the app is in, e.g. "2 languages". -->

@@ -839,7 +839,7 @@
     <string name="more_sync_mode_description">Позволяет другим вашим устройствам найти это. Работает, пока открыта эта страница.</string>
     <string name="more_sync_unpair">Отвязать</string>
     <string name="more_about_license">GPLv3 · бесплатно и с открытым кодом</string>
-    <string name="more_about_description">Ваш собственный IPTV-плеер для Android TV. Он не предоставляет каналов или контента; вы добавляете собственные легальные источники.</string>
+    <string name="more_about_description">Приложение для Android TV, которое показывает публично доступные телеканалы сервиса RuTube: прямую трансляцию и телепрограмму берёт из RuTube API. Собственного контента у него нет.</string>
     <string name="more_about_scan">Отсканируйте телефоном.</string>
     <plurals name="more_about_languages">
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> язык</item>

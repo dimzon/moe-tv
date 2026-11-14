@@ -196,7 +196,7 @@
     <!-- Translators: Title of the first setup step. -->
     <string name="setup_welcome_title">Welcome to МОЁ ТВ</string>
     <!-- Translators: Text under Welcome to МОЁ ТВ. -->
-    <string name="setup_welcome_sub">Your own IPTV player. Choose a language to begin — you can change it later in Settings.</string>
+    <string name="setup_welcome_sub">Publicly available RuTube TV channels with a TV guide. Choose a language to begin — you can change it later in Settings.</string>
     <!-- Translators: Text under the display size step's title. -->
     <string name="setup_display_sub">How big the interface and its text are on this TV. The row below changes as you go.</string>
     <!-- Translators: Line under UI zoom in setup. -->
