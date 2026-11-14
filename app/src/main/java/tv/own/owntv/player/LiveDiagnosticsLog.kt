@@ -2,9 +2,9 @@ package tv.own.owntv.player
 
 import android.content.Context
 import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
 import java.util.ArrayDeque
+import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -40,9 +40,11 @@ object LiveDiagnosticsLog {
     @Volatile private var maxFileBytes = MAX_FILE_BYTES
     private val ring = ArrayDeque<String>()
     private val lock = Any()
-    // Immutable and thread-safe: events arrive from the main, playback and loader threads at once, and
-    // the SimpleDateFormat this replaced could print a garbled timestamp when two of them overlapped.
-    private val timeFmt = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS", Locale.US)
+    // Guarded by [lock] (the ring's lock): SimpleDateFormat is not thread-safe, events arrive from
+    // the main, playback and loader threads at once, and two overlapping formats could print a
+    // garbled timestamp. `java.time`'s thread-safe formatter is API 26+, so the lock is the
+    // Android-7-safe substitute for it.
+    private val timeFmt = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US)
     // File I/O used to run on whichever thread logged the line — often the main thread. One thread, so
     // lines still land in the order they were logged.
     private val writer = Executors.newSingleThreadScheduledExecutor { Thread(it, "owntv-diag-log").apply { isDaemon = true } }
@@ -70,10 +72,11 @@ object LiveDiagnosticsLog {
     /** Record one diagnostic line. Always kept in the in-memory ring; also written to Logcat + the rolling
      *  file when [enabled]. [message] must already be redacted of URLs/credentials by the caller. */
     fun event(message: String) {
-        val line = "${timeFmt.format(LocalDateTime.now())} $message"
-        synchronized(lock) {
+        val line = synchronized(lock) {
+            val line = "${timeFmt.format(Date())} $message"
             ring.addLast(line)
             while (ring.size > MAX_EVENTS) ring.pollFirst()
+            line
         }
         if (enabled) {
             android.util.Log.i(TAG, message)

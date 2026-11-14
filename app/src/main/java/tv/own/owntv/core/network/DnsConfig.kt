@@ -257,8 +257,11 @@ class DnsConfigHolder(
 
         /** RFC 8484 GET: the query with ID 0, as the RFC asks, in base64url without padding. */
         fun dohWireUrl(dohUrl: String, hostname: String, qtype: Int): String {
-            val query = java.util.Base64.getUrlEncoder().withoutPadding()
-                .encodeToString(buildDnsQuery(hostname, qtype, id = 0))
+            // android.util.Base64, not java.util.Base64 (API 26+): Android 7 runs it without desugaring.
+            val query = android.util.Base64.encodeToString(
+                buildDnsQuery(hostname, qtype, id = 0),
+                android.util.Base64.URL_SAFE or android.util.Base64.NO_PADDING or android.util.Base64.NO_WRAP,
+            )
             val base = dohUrl.trimEnd('/')
             return "$base${if ('?' in base) '&' else '?'}dns=$query"
         }

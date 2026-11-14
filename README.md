@@ -153,7 +153,7 @@ TMDB/OpenSubtitles (`extras/worker/`) и их логотипы удалены в
 | База данных | Room + Paging + FTS4 |
 | DI · сеть · изображения | Koin · OkHttp · Coil |
 
-`minSdk 26`, `targetSdk 36`, `applicationId com.github.dimzon.owntv` (Kotlin namespace
+`minSdk 24` (Android 7), `targetSdk 36`, `applicationId com.github.dimzon.owntv` (Kotlin namespace
 `tv.own.myowntv`).
 
 ### Структура проекта

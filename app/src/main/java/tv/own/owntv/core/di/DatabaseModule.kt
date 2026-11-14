@@ -18,10 +18,11 @@ val databaseModule = module {
         Room.databaseBuilder(androidContext(), OwnTVDatabase::class.java, OwnTVDatabase.NAME)
             .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
             // The system SQLite, not the engine bundled in the APK — this drops libsqliteJni.so
-            // (~2.6 MB). minSdk 26 means an Android 8 device runs SQLite 3.18, which has no UPSERT
-            // (3.24) or window functions (3.25); the two places that used them were rewritten to be
-            // version-independent (the manual-order sort moved to Kotlin — see ManualOrdering — and
-            // the tombstone upsert to UPDATE + INSERT OR IGNORE). So the platform engine suffices.
+            // (~2.6 MB). minSdk 24 means an Android 7 device runs SQLite 3.9.2, which has no UPSERT
+            // (3.24), window functions (3.25) or anything newer than 3.9; the two places that used
+            // newer syntax were rewritten to be version-independent (the manual-order sort moved to
+            // Kotlin — see ManualOrdering — and the tombstone upsert to UPDATE + INSERT OR IGNORE).
+            // So the platform engine suffices.
             .setDriver(AndroidSQLiteDriver())
             // Redesign period, zero installed apps: the schema was reset to v1 without migrations,
             // so any pre-existing database (dev builds) is simply dropped and recreated.

@@ -44,6 +44,7 @@ import android.graphics.Rect
 import android.os.Build
 import android.util.Rational
 import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 
@@ -61,7 +62,10 @@ internal object PictureInPictureWindow {
 
     fun attach(activity: ComponentActivity, pip: PictureInPicture) {
         pip.onWindowChanged(activity.isInPictureInPictureMode)
-        if (!pip.supported) return
+        // pip.supported already folds in the API level (PictureInPictureParams is API 26+); the
+        // explicit SDK_INT is the guard lint's NewApi can see through, and the runCatching below
+        // stays the safety net for TV builds that list the feature but refuse the call.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || !pip.supported) return
         activity.addOnPictureInPictureModeChangedListener { info -> pip.onWindowChanged(info.isInPictureInPictureMode) }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             activity.addOnUserLeaveHintListener {
@@ -80,6 +84,7 @@ internal object PictureInPictureWindow {
         })
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun params(aspect: PipAspect?, playerBounds: PipBounds?): PictureInPictureParams {
         val builder = PictureInPictureParams.Builder()
         if (aspect != null) {

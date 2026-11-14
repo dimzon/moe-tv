@@ -117,8 +117,9 @@ class WakeListenerService : Service() {
         // The Application is wrapped in the chosen app language; this service's own context is not.
         val localized = applicationContext
         val title = localized.getString(R.string.auto_start_notification_channel)
+        // NotificationChannel is API 26+; below that a notification posts fine without one.
         // A refused channel must not keep the service from going foreground; the channel's defaults apply.
-        runCatching {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) runCatching {
             getSystemService(NotificationManager::class.java)?.createNotificationChannel(
                 NotificationChannel(CHANNEL_ID, title, NotificationManager.IMPORTANCE_MIN).apply { setShowBadge(false) },
             )

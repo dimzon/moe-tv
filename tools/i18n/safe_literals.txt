@@ -1510,7 +1510,6 @@
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube guide $videoId failed: ${it.message}
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube guide fallback failed $videoId: ${fallback.message}
 1	assertion	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube returned no live channels — refusing to wipe the catalogue
-1	locale	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	UTC
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	aa94512eff79ba985e79d473c2a1e90b
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	b2b32a7d6f2323f3a113ff44b0404bf2
 2	room-schema	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	channels
@@ -1531,7 +1530,7 @@
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v1/livestream/video/schedule/$videoId/
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=false
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=true
-1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/pangolin/api/tv/tvprogram/$videoId?client=tv&programDate=$day
+1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/pangolin/api/tv/tvprogram/$videoId?client=tv&programDate=$date
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	&referer=https%3A%2F%2Ftv-androidtv.rutube.ru
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	Accept
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	Referer
@@ -1539,6 +1538,7 @@
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	com.rutube.mobile/31.18.0 (Android 13)
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	https://rutube.ru
 3	empty	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	\0
+1	protocol	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	Z
 2	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	ageRating
 1	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	age_rating
 1	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	captions
@@ -1554,6 +1554,7 @@
 2	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	sub_id
 1	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	type
 1	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	vtt
+1	protocol	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	z
 2	technical	app/src/main/java/tv/own/owntv/core/sync/SyncManager.kt	${it.key}=${it.value}
 1	technical	app/src/main/java/tv/own/owntv/core/sync/SyncManager.kt	${it.key}=${it.value}ms
 1	technical	app/src/main/java/tv/own/owntv/core/sync/SyncManager.kt	Cancelled
@@ -1602,6 +1603,8 @@
 1	log	app/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	refreshCategories upsert sourceId=${s.id} type=$type rows=${entities.size}
 1	log	app/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	skippedDuplicates=$skippedDuplicates elapsedMs=${SystemClock.elapsedRealtime() - chunkRunStart}
 1	log	app/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	totalSkipped=$skippedDuplicates totalUnique=${total[0]} filterMs=$filterMs elapsedMs=${SystemClock.elapsedRealtime() - chunkRunStart}
+1	technical	app/src/main/java/tv/own/owntv/core/sync/UtcDates.kt	%04d-%02d-%02d
+1	locale	app/src/main/java/tv/own/owntv/core/sync/UtcDates.kt	UTC
 1	file-path	app/src/main/java/tv/own/owntv/core/sync/local/AutoSyncTransfer.kt	${UUID.randomUUID()}.own
 1	file-path	app/src/main/java/tv/own/owntv/core/sync/local/AutoSyncTransfer.kt	auto-sync
 1	file-path	app/src/main/java/tv/own/owntv/core/sync/local/AutoSyncTransfer.kt	auto-sync/${UUID.randomUUID()}
@@ -2084,7 +2087,7 @@
 1	technical	app/src/main/java/tv/own/owntv/player/HttpDiagnostics.kt	unknown
 1	technical	app/src/main/java/tv/own/owntv/player/HttpDiagnostics.kt	{
 4	empty	app/src/main/java/tv/own/owntv/player/LiveDiagnosticsLog.kt	\0
-1	log	app/src/main/java/tv/own/owntv/player/LiveDiagnosticsLog.kt	${timeFmt.format(LocalDateTime.now())} $message
+1	log	app/src/main/java/tv/own/owntv/player/LiveDiagnosticsLog.kt	${timeFmt.format(Date())} $message
 1	log	app/src/main/java/tv/own/owntv/player/LiveDiagnosticsLog.kt	MM-dd HH:mm:ss.SSS
 1	log	app/src/main/java/tv/own/owntv/player/LiveDiagnosticsLog.kt	OwnTV-LivePreviewEngine
 1	file-path	app/src/main/java/tv/own/owntv/player/LiveDiagnosticsLog.kt	diagnostics
@@ -2435,7 +2438,7 @@
 1	protocol	app/src/main/java/tv/own/owntv/player/PlaybackErrorLog.kt	wt
 1	file-path	app/src/main/java/tv/own/owntv/player/PlaybackErrorLog.kt	yyyy-MM-dd HH:mm:ss
 1	technical	app/src/main/java/tv/own/owntv/player/PlaybackErrorLog.kt	•
-1	technical	app/src/main/java/tv/own/owntv/player/PlaybackSession.kt	DEPRECATION
+3	compiler	app/src/main/java/tv/own/owntv/player/PlaybackSession.kt	DEPRECATION
 1	technical	app/src/main/java/tv/own/owntv/player/PlaybackSession.kt	OwnTV
 1	compiler	app/src/main/java/tv/own/owntv/player/PlaybackSettings.kt	UNCHECKED_CAST
 1	log	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	${e.tag}: ${e.text}

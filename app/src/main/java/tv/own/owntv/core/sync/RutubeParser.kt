@@ -2,8 +2,6 @@ package tv.own.owntv.core.sync
 
 import org.json.JSONArray
 import org.json.JSONObject
-import java.time.Instant
-import java.time.OffsetDateTime
 
 /**
  * Pure parsers for RuTube's public API JSON — ported from the TVTube app's
@@ -246,9 +244,54 @@ object RutubeParser {
 
     private fun parseMobileProgramme(obj: JSONObject?): RutubeProgramme? = parsePangolinProgramme(obj)
 
-    internal fun parseIsoMillis(raw: String): Long? = runCatching {
-        OffsetDateTime.parse(raw).toInstant().toEpochMilli()
-    }.getOrNull() ?: runCatching { Instant.parse(raw).toEpochMilli() }.getOrNull()
+    /**
+     * ISO-8601 → epoch millis, hand-rolled so it runs on Android 7's `java.text` (`java.time` is
+     * API 26+ and desugaring is deliberately off). The only real producer is the brief schedule
+     * API (`tvbroadcastinfo`): `2026-11-14T16:55:00+03:00` — fixed positions, no fractional
+     * seconds. Parsed defensively like the rest of this file: an optional fraction is accepted
+     * and dropped, the zone must be `Z`/`z` or `±HH:MM` (a missing zone is rejected, as
+     * `OffsetDateTime.parse` did), anything else returns null so one odd entry never costs the
+     * schedule.
+     */
+    internal fun parseIsoMillis(raw: String): Long? {
+        // "2026-11-14T16:55:00" is 19 chars; a zone suffix or ".fff…" extends it.
+        if (raw.length < 19 || raw[4] != '-' || raw[7] != '-' || raw[10] != 'T' ||
+            raw[13] != ':' || raw[16] != ':'
+        ) return null
+        val year = raw.substring(0, 4).toIntOrNull() ?: return null
+        val month = raw.substring(5, 7).toIntOrNull() ?: return null
+        val day = raw.substring(8, 10).toIntOrNull() ?: return null
+        val hour = raw.substring(11, 13).toIntOrNull() ?: return null
+        val minute = raw.substring(14, 16).toIntOrNull() ?: return null
+        val second = raw.substring(17, 19).toIntOrNull() ?: return null
+        // The optional fraction ".ddd…" sits between the seconds and the zone; skip over it.
+        var i = 19
+        if (i < raw.length && raw[i] == '.') {
+            i = raw.indexOfAny(ZONE_CHARS, i + 1)
+            if (i < 0) return null
+        }
+        val zone = raw.substring(i)
+        val offsetMinutes = when {
+            zone == "Z" || zone == "z" -> 0
+            zone.length == 6 && (zone[0] == '+' || zone[0] == '-') && zone[3] == ':' -> {
+                val zh = zone.substring(1, 3).toIntOrNull() ?: return null
+                val zm = zone.substring(4, 6).toIntOrNull() ?: return null
+                if (zh > 23 || zm > 59) return null
+                val magnitude = zh * 60 + zm
+                if (zone[0] == '+') magnitude else -magnitude
+            }
+            else -> return null
+        }
+        return runCatching {
+            // Non-lenient UTC calendar per thread (see UtcDates.calendarPool): Feb 31 or month 13
+            // must fail the way OffsetDateTime.parse did, not roll over.
+            val cal = UtcDates.borrowCalendar()
+            cal.set(year, month - 1, day, hour, minute, second)
+            cal.timeInMillis - offsetMinutes * 60_000L
+        }.getOrNull()
+    }
+
+    private val ZONE_CHARS = charArrayOf('+', '-', 'Z', 'z')
 
     private fun JSONObject.optEpochSeconds(key: String): Long? {
         if (!has(key)) return null

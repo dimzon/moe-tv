@@ -90,6 +90,8 @@ internal object EpgSyncNotifications {
     }
 
     private fun ensureChannel(context: Context, localized: Context) {
+        // NotificationChannel is API 26+; below that a notification posts fine without one.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
         val effectiveLocale = localized.resources.configuration.locales[0]?.toLanguageTag().orEmpty()
         val key = "$effectiveLocale:${localized.getString(R.string.common_nav_guide)}"

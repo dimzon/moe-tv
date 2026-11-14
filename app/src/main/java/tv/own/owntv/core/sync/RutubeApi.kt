@@ -3,8 +3,6 @@ package tv.own.owntv.core.sync
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tv.own.owntv.core.network.HttpClient
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 /**
  * Client for RuTube's public API — ported from TVTube's
@@ -55,14 +53,14 @@ class RutubeApi(
     }
 
     /**
-     * One channel's grid for one day (the bulk loader, ~40 KB per channel-day).
+     * One channel's grid for one day (the bulk loader, ~40 KB per channel-day). [date] is
+     * "yyyy-MM-dd" (UTC) — see [UtcDates].
      * HTTP 404 means "no schedule upstream" and returns an empty list — never retry the
      * 2 MB mobile fallback for it.
      */
-    suspend fun scheduleDay(videoId: String, date: LocalDate): List<RutubeProgramme> =
+    suspend fun scheduleDay(videoId: String, date: String): List<RutubeProgramme> =
         withContext(Dispatchers.IO) {
-            val day = date.format(DateTimeFormatter.ISO_LOCAL_DATE)
-            val url = "$baseUrl/pangolin/api/tv/tvprogram/$videoId?client=tv&programDate=$day"
+            val url = "$baseUrl/pangolin/api/tv/tvprogram/$videoId?client=tv&programDate=$date"
             try {
                 RutubeParser.parsePangolinDay(getText(url))
             } catch (e: HttpClient.HttpStatusException) {

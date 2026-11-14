@@ -59,7 +59,7 @@ android {
 
     defaultConfig {
         applicationId = "com.github.dimzon.owntv"
-        minSdk = 26
+        minSdk = 24
         targetSdk = 36
         // versionCode / versionName come from the top-level vals above (auto-incrementing build
         // number, reset to 1.0; CI can pin VERSION_CODE / VERSION_NAME).

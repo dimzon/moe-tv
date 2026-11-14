@@ -41,6 +41,7 @@ import tv.own.owntv.player.*
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,7 +63,10 @@ internal class PictureInPicture(context: Context) {
 
     private val prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
-    val supported: Boolean = context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+    // PictureInPictureParams (what PictureInPictureWindow hands Android) is API 26+ — on Android 7
+    // the feature flag can be present but the window would never open, so gate the API level too.
+    val supported: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+        context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
 
     private val _enabled = MutableStateFlow(prefs.getBoolean(KEY_ON_LEAVE, false))
     val enabled: StateFlow<Boolean> = _enabled.asStateFlow()

@@ -12,8 +12,6 @@ import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.parser.XtCategory
-import java.time.LocalDate
-import java.time.ZoneId
 
 /**
  * RuTube live-only syncer — the RuTube counterpart of [XtreamSyncer] (single-phase LIVE).
@@ -297,7 +295,7 @@ class RuTubeEpgSyncer(
         var channelsWithGuide = 0
         var programmesWritten = 0
         val semaphore = Semaphore(CONCURRENCY)
-        val today = LocalDate.now(ZoneId.of("UTC"))
+        val today = UtcDates.today()
         coroutineScope {
             val jobs = channelIds.map { videoId ->
                 async {
@@ -307,7 +305,7 @@ class RuTubeEpgSyncer(
                             var ok = true
                             for (offset in 0 until guideDays) {
                                 if (dayZeroEmpty) break
-                                val date = today.plusDays(offset.toLong())
+                                val date = UtcDates.iso(today + offset)
                                 val programmes = try {
                                     rutube.scheduleDay(videoId, date)
                                 } catch (e: CancellationException) {

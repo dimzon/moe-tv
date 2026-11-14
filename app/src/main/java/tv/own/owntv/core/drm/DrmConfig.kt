@@ -163,8 +163,11 @@ data class DrmConfig(
         }
 
         private fun base64UrlToHex(value: String): String? {
-            val bytes = runCatching { java.util.Base64.getUrlDecoder().decode(value.trimEnd('=')) }.getOrNull()
-                ?: return null
+            // android.util.Base64, not java.util.Base64 (API 26+): Android 7 runs it without
+            // desugaring. The decoder accepts the unpadded tail the way JWK keys are written.
+            val bytes = runCatching {
+                android.util.Base64.decode(value.trimEnd('='), android.util.Base64.URL_SAFE)
+            }.getOrNull() ?: return null
             return bytes.joinToString("") { "%02x".format(it) }
         }
 
