@@ -56,7 +56,7 @@
     <!-- Translators: Heading on the first-run disclaimer screen shown before the user can proceed. -->
     <string name="setup_before_you_start">Before you start</string>
     <!-- Translators: Body text on the first-run disclaimer screen. "МОЁ ТВ", "RuTube" are brand/protocol names that must not be translated. -->
-    <string name="setup_disclaimer">МОЁ ТВ is a media player only. It includes no channels, playlists, or content of its own. Its single source is the built-in, legally accessible RuTube live catalogue, and you are responsible for using it lawfully.</string>
+    <string name="setup_disclaimer">МОЁ ТВ is a media player only. Its single source is the built-in, legally accessible RuTube live catalogue, and you are responsible for using it lawfully.</string>
     <!-- Translators: Button on the first-run disclaimer screen to acknowledge and proceed. -->
     <string name="setup_i_understand">I Understand</string>
     <!-- Translators: Heading on the onboarding step that picks how often channels and the guide refresh. -->

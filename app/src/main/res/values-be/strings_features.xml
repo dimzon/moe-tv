@@ -14,8 +14,8 @@
     <string name="search_field_hint">Каналы і перадачы</string>
     <string name="search_voice">Галасавы пошук</string>
     <string name="search_voice_prompt">Назавіце канал або перадачу</string>
-    <string name="search_card_title">Знаходзіце ўсё ў сваіх плейлістах</string>
-    <string name="search_card_body">Каналы з паказанага плейліста. Выберыце вынік, каб адразу перайсці да яго і ўключыць яго або адкрыць яго параметры. Перадачы, якія ідуць зараз або пазней сёння, таксама знаходзяцца па назве.</string>
+    <string name="search_card_title">Шукайце ў каналах</string>
+    <string name="search_card_body">Выберыце вынік, каб адразу перайсці да яго і ўключыць яго або адкрыць яго параметры. Перадачы, якія ідуць зараз або пазней сёння, таксама знаходзяцца па назве.</string>
     <string name="search_nothing_found">Нічога не знойдзена па запыце «<xliff:g id="query">%1$s</xliff:g>»</string>
     <string name="search_nothing_found_body">Пошук ідзе па назвах каналаў і перадач у загружанай тэлепрограме. Схаваныя катэгорыі не праглядаюцца.</string>
     <string name="search_query_quoted">«<xliff:g id="query">%1$s</xliff:g>»</string>
@@ -87,7 +87,7 @@
     <string name="update_install_rejected">Сістэмны ўсталёўшчык адхіліў абнаўленне: <xliff:g id="reason">%1$s</xliff:g></string>
     <string name="update_ready">МОЁ ТВ v<xliff:g id="available">%1$s</xliff:g> гатовая да ўсталёўкі (у вас v<xliff:g id="current">%2$s</xliff:g>).</string>
     <string name="recovery_title">МОЁ ТВ не ўдалося адкрыць базу даных</string>
-    <string name="recovery_data_safe_full">Вашы профілі, плейлісты, абранае і гісторыя НЕ выдалены — адбыўся збой абнаўлення базы даных, а даныя ўсё яшчэ знаходзяцца на гэтай прыладзе.\n\nКалі ласка, паведаміце пра гэта, каб праблему можна было выправіць, і дадайце паведамленне ніжэй.</string>
+    <string name="recovery_data_safe_full">Адбыўся збой абнаўлення базы даных. Каналы загрузяцца з сервера зноў.\n\nКалі ласка, паведаміце пра гэта, каб праблему можна было выправіць, і дадайце паведамленне ніжэй.</string>
     <string name="recovery_retry">Паспрабаваць яшчэ раз</string>
     <string name="recovery_backup_hint">Калі ў вас ёсць файл рэзервовай копіі, можна скінуць даныя праграмы, а потым аднавіць іх. Пры скідзе выдаляецца ўсё, што захоўваецца на гэтай прыладзе.</string>
     <string name="recovery_confirm_reset">Пацвярджэнне: выдаліць усе даныя праграмы</string>

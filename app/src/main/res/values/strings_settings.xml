@@ -61,7 +61,7 @@
     <!-- Translators: Privacy notice about what the proxy provider can see. -->
     <string name="settings_proxy_privacy">Your proxy provider can see which servers you connect to, and the contents of any non-HTTPS traffic.</string>
     <!-- Translators: Technical limitation note about HTTP-only proxy support. -->
-    <string name="settings_proxy_limitations">HTTP proxy only for now — SOCKS and per-playlist proxies aren\'t supported yet.</string>
+    <string name="settings_proxy_limitations">HTTP proxy only for now; SOCKS isn\'t supported yet.</string>
     <!-- Translators: Proxy test success display showing latency. 'millis' is the response time in milliseconds. -->
     <string name="settings_proxy_connected"><xliff:g id="millis">%1$d</xliff:g> ms</string>
     <!-- Translators: Error when the proxy host/port is invalid. -->
@@ -486,7 +486,7 @@
     <!-- Translators: History scope option to clear all history. -->
     <string name="settings_all_history">All history</string>
     <!-- Translators: Description of what clearing history affects. -->
-    <string name="settings_choose_history">Choose what to remove for this profile. Playlists, favorites and downloads are not affected.</string>
+    <string name="settings_choose_history">Choose what to remove. Channels and favorites are not affected.</string>
     <!-- Translators: Confirmation dialog title for clearing history. 'scope' is the selected scope. -->
     <string name="settings_clear_history_confirm">Clear <xliff:g id="scope">%1$s</xliff:g> history?</string>
     <!-- Translators: Warning that the action cannot be undone. -->
@@ -798,7 +798,7 @@
     <!-- Translators: Warning header for the low zoom setting. The warning emoji is part of the display. -->
     <string name="settings_low_zoom_warning_title">⚠️ Low zoom warning</string>
     <!-- Translators: Warning about low zoom levels causing instability. 'zoom' is the zoom percentage, 'safe_zoom' is the recommended safe level. -->
-    <string name="settings_low_zoom_warning"><xliff:g id="zoom">%1$d</xliff:g>%% zoom shows many more items on screen at once. On devices with limited memory (for example, 2 GB TV sticks) this can make the app unstable or crash, especially with large playlists and EPG data.\n\nPress OK to continue, or Back to stay at <xliff:g id="safe_zoom">%2$d</xliff:g>%%.</string>
+    <string name="settings_low_zoom_warning"><xliff:g id="zoom">%1$d</xliff:g>%% zoom shows many more items on screen at once. On devices with limited memory (for example, 2 GB TV sticks) this can make the app unstable or crash.\n\nPress OK to continue, or Back to stay at <xliff:g id="safe_zoom">%2$d</xliff:g>%%.</string>
     <!-- Translators: Button to acknowledge the low zoom warning. -->
     <string name="settings_low_zoom_accept">I understand and accept the risk</string>
     <!-- Translators: Generic percentage readout used for both transparency and blur intensity. "percent" is the value. -->
@@ -940,9 +940,9 @@
     <!-- Translators: Compact new-category behavior button. 'label' is Show or Hide. Keep the trailing disclosure symbol. -->
     <string name="settings_customize_new_categories_button">New categories: <xliff:g id="label">%1$s</xliff:g> ▾</string>
     <!-- Translators: Option in Customize that undoes every hide, rename, move and custom order for the playlists shown. -->
-    <string name="settings_customize_restore_defaults">Restore playlist defaults</string>
-    <!-- Translators: Confirmation title. "section" is Live TV, Movies or Series; "playlist" is a playlist name or "All playlists". -->
-    <string name="settings_customize_restore_defaults_title">Restore <xliff:g id="section">%1$s</xliff:g> in <xliff:g id="playlist">%2$s</xliff:g> to playlist defaults?</string>
+    <string name="settings_customize_restore_defaults">Restore channel defaults</string>
+    <!-- Translators: Confirmation title. "section" is Live TV, Movies or Series; "source" is the source name. -->
+    <string name="settings_customize_restore_defaults_title">Restore settings: <xliff:g id="section">%1$s</xliff:g> (<xliff:g id="source">%2$s</xliff:g>)?</string>
     <!-- Translators: Confirmation text for restoring a section of the shown playlists to what the playlist provides. -->
     <string name="settings_customize_restore_defaults_description">Hidden categories and items show again, renames and custom order are cleared, and moved-out items return. Combined categories, favorites and guide matches are kept.</string>
     <!-- Translators: Hint text in the rename dialog. 'name' is the current category name. -->
@@ -1189,7 +1189,7 @@
     <!-- Translators: Explains possible reasons to use custom DNS. DNS-over-HTTPS and DoH stay unchanged. -->
     <string name="settings_dns_explanation">Custom DNS can help bypass ISP-level domain blocking or enable geo-unblocking via SmartDNS services. DNS-over-HTTPS (DoH) is recommended — it encrypts your lookups.</string>
     <!-- Translators: Technical limitation of custom DNS. Keep OkHttp, EPG, API and ExoPlayer unchanged. -->
-    <string name="settings_dns_limitations">This setting affects all the app’s network traffic: playlist sync, EPG, API calls, images and stream playback.</string>
+    <string name="settings_dns_limitations">This setting affects all the app’s network traffic: catalogue sync, EPG, API calls, images and stream playback.</string>
     <!-- Translators: DNS test success result. 'millis' is latency in milliseconds. -->
     <string name="settings_dns_resolved">Test passed ✓ (<xliff:g id="millis">%1$d</xliff:g> ms)</string>
     <!-- Translators: Validation error when custom DNS has no server host or DoH URL. DoH stays unchanged. -->
@@ -1357,8 +1357,6 @@
     <string name="local_sync_nothing_to_change">Both devices already hold the same thing. There is nothing to apply.</string>
     <!-- Translators: Note shown for the Merge direction, explaining that this device\'s data goes back afterwards. -->
     <string name="local_sync_merge_note">Your own data is sent back afterwards, so both devices end up the same.</string>
-    <!-- Translators: One counted change: how many playlists this device does not have yet. %1$d is a number. -->
-    <string name="local_sync_change_sources">New playlists: <xliff:g id="count">%1$d</xliff:g></string>
     <!-- Translators: One counted change: how many favorites would be added. %1$d is a number. -->
     <string name="local_sync_change_favorites">New favorites: <xliff:g id="count">%1$d</xliff:g></string>
     <!-- Translators: One counted change: how many watch history entries would be added. %1$d is a number. -->
@@ -1585,7 +1583,7 @@
     <!-- Translators: Setting: which items the navigation menu shows. -->
     <string name="settings_nav_menu_items">Menu items</string>
     <!-- Translators: Explains the Menu items setting: Dynamic and Static are its two choices (settings_dynamic, settings_static); keep the same words. -->
-    <string name="settings_nav_menu_items_desc">Dynamic: follows what the playlist has · Static: you pick them</string>
+    <string name="settings_nav_menu_items_desc">Dynamic: follows the channel list · Static: you pick them</string>
     <!-- Translators: Hidden keyword bag for the Navigation settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_navigation">rail, sidebar, menu, navigation, hide, floating, docked, size, compact, wide, length, full height</string>
     <!-- Translators: Small heading above a settings popup title: where the setting lives, e.g. "SETTINGS · LAYOUT". Keep the separator unless your language uses another one. -->
@@ -1830,7 +1828,7 @@
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_startup">What МОЁ ТВ shows when it starts: Home, the channel you watched last, your favorites, or a channel you pick.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
-    <string name="settings_help_check_updates">Looks on GitHub for a newer МОЁ ТВ now and offers to install it. Your playlists, favorites and settings stay as they are.</string>
+    <string name="settings_help_check_updates">Looks on GitHub for a newer МОЁ ТВ now and offers to install it. Your channels, favorites and settings stay as they are.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_update_startup">Looks for a new version each time МОЁ ТВ starts and tells you when there is one. Nothing is installed without asking.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. МОЁ ТВ is a brand name; App startup is the name of another setting. -->

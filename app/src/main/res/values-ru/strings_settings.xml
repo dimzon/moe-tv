@@ -745,7 +745,6 @@
     <string name="local_sync_confirm_hint">Пока ничего не изменено. Вот что произойдёт на этом устройстве после применения.</string>
     <string name="local_sync_nothing_to_change">На обоих устройствах уже одно и то же. Применять нечего.</string>
     <string name="local_sync_merge_note">Затем ваши данные отправляются обратно, и оба устройства становятся одинаковыми.</string>
-    <string name="local_sync_change_sources">Новые плейлисты: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_change_favorites">Новое в избранном: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_change_history">Новые записи истории: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_change_reorder">Изменения порядка: <xliff:g id="count">%1$d</xliff:g></string>

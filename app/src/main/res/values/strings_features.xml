@@ -32,9 +32,9 @@
     <!-- Translators: Prompt the system speech recogniser shows while it listens for a search. -->
     <string name="search_voice_prompt">Say a channel or programme</string>
     <!-- Translators: Title of the card shown on the empty search page. -->
-    <string name="search_card_title">Find anything in your playlists</string>
+    <string name="search_card_title">Search your channels</string>
     <!-- Translators: Text of the card shown on the empty search page. -->
-    <string name="search_card_body">Channels from the playlist you show. Pick a result to go straight to it and play or open its options. TV programs on now or later today are found by their title too.</string>
+    <string name="search_card_body">Pick a result to go straight to it and play or open its options. TV programs on now or later today are found by their title too.</string>
     <!-- Translators: Title when a search finds nothing. "query" is the typed text, in quotes. -->
     <string name="search_nothing_found">Nothing found for “<xliff:g id="query">%1$s</xliff:g>”</string>
     <!-- Translators: Line under "Nothing found" explaining what search looks in. -->
@@ -152,7 +152,7 @@
     <!-- Translators: Dialog title for the database recovery screen. "МОЁ ТВ" is a brand name. -->
     <string name="recovery_title">МОЁ ТВ could not open its database</string>
     <!-- Translators: Body text on the recovery screen explaining that data is safe and requesting a bug report. -->
-    <string name="recovery_data_safe_full">Your profiles, playlists, favorites and history have NOT been deleted \u2014 this is a database upgrade failure, and the data is still on this device.\n\nPlease report this so it can be fixed, and include the message below.</string>
+    <string name="recovery_data_safe_full">This is a database upgrade failure. Channels will be downloaded from the server again.\n\nPlease report this so it can be fixed, and include the message below.</string>
     <!-- Translators: Button on the recovery screen to retry opening the database. -->
     <string name="recovery_retry">Try again</string>
     <!-- Translators: Hint text on the recovery screen suggesting the user restore from a backup. -->

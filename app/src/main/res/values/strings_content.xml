@@ -30,7 +30,7 @@
     <!-- Translators: Context-menu option to reorder an item in a custom list. -->
     <string name="content_move">Move</string>
     <!-- Translators: Long-press menu entry on a category: undo the user's hides, moves and custom order inside it. -->
-    <string name="content_category_restore_playlist">Restore to playlist default</string>
+    <string name="content_category_restore_playlist">Restore to default</string>
     <!-- Translators: Same entry on a user-created category, which has no playlist default. -->
     <string name="content_category_restore_custom">Restore to default</string>
     <!-- Translators: Question above the list of what restoring a category to its default will change. -->

@@ -29,7 +29,7 @@
     <string name="settings_test_proxy">Праверыць проксі</string>
     <string name="settings_testing">Праверка…</string>
     <string name="settings_proxy_privacy">Пастаўшчык проксі можа бачыць, да якіх сервераў вы падлучаецеся, а таксама змесціва ўсяго трафіку без HTTPS.</string>
-    <string name="settings_proxy_limitations">Пакуль падтрымліваецца толькі HTTP-проксі — SOCKS і асобныя проксі для кожнага плейліста яшчэ не падтрымліваюцца.</string>
+    <string name="settings_proxy_limitations">Пакуль падтрымліваецца толькі HTTP-проксі, SOCKS яшчэ не падтрымліваецца.</string>
     <string name="settings_proxy_connected"><xliff:g id="millis">%1$d</xliff:g> мс</string>
     <string name="settings_proxy_invalid_address">Увядзіце дапушчальныя хост і порт (1–65535).</string>
     <string name="settings_proxy_host_unreachable">Не ўдалося звязацца з хостам проксі.</string>
@@ -213,7 +213,7 @@
     <string name="settings_startup_specific_channel">Выбраны канал</string>
     <string name="settings_startup_channel_unavailable">Стартавы канал недаступны. Адкрыты галоўны экран.</string>
     <string name="settings_all_history">Уся гісторыя</string>
-    <string name="settings_choose_history">Выберыце, што выдаліць для гэтага профілю. Плейлісты, абранае і спампоўкі закранутыя не будуць.</string>
+    <string name="settings_choose_history">Выберыце, што выдаліць. Каналы і абранае закранутыя не будуць.</string>
     <string name="settings_clear_history_confirm">Ачысціць гісторыю «<xliff:g id="scope">%1$s</xliff:g>»?</string>
     <string name="settings_cannot_undo">Гэта дзеянне нельга адмяніць.</string>
     <string name="settings_no">Не</string>
@@ -374,7 +374,7 @@
     <string name="settings_guide_sync_failed">Не ўдалося сінхранізаваць тэлепрограму</string>
     <string name="settings_ui_zoom_range">Маштаб усяго інтэрфейсу (<xliff:g id="min">%1$d</xliff:g>%%–<xliff:g id="max">%2$d</xliff:g>%%).</string>
     <string name="settings_low_zoom_warning_title">⚠️ Папярэджанне пра малы маштаб</string>
-    <string name="settings_low_zoom_warning">Пры маштабе <xliff:g id="zoom">%1$d</xliff:g>%% на экране адначасова адлюстроўваецца значна больш элементаў. На прыладах з невялікім аб\'ёмам памяці (напрыклад, ТВ-прыставак з 2 ГБ памяці) гэта можа прывесці да нестабільнай працы або збою прыкладання, асабліва пры вялікіх плейлістах і аб\'ёмах даных EPG.\n\nНацісніце OK, каб працягнуць, або «Назад», каб пакінуць маштаб <xliff:g id="safe_zoom">%2$d</xliff:g>%%.</string>
+    <string name="settings_low_zoom_warning">Пры маштабе <xliff:g id="zoom">%1$d</xliff:g>%% на экране адначасова адлюстроўваецца значна больш элементаў. На прыладах з невялікім аб\'ёмам памяці (напрыклад, ТВ-прыставак з 2 ГБ памяці) гэта можа прывесці да нестабільнай працы або збою прыкладання.\n\nНацісніце OK, каб працягнуць, або «Назад», каб пакінуць маштаб <xliff:g id="safe_zoom">%2$d</xliff:g>%%.</string>
     <string name="settings_low_zoom_accept">Я разумею і прымаю рызыку</string>
     <string name="settings_surface_transparency"><xliff:g id="percent">%1$d</xliff:g>%%</string>
     <string name="settings_pick_background_title">Выберыце фонавы малюнак</string>
@@ -447,7 +447,7 @@
     <string name="settings_customize_filter_visible">Бачныя</string>
     <string name="settings_customize_filter_hidden">Схаваныя</string>
     <string name="settings_customize_new_categories_button">Новыя катэгорыі: <xliff:g id="label">%1$s</xliff:g> ▾</string>
-    <string name="settings_customize_restore_defaults">Вярнуць налады плейлістаў</string>
+    <string name="settings_customize_restore_defaults">Вярнуць налады каналаў</string>
     <string name="settings_customize_restore_defaults_title">Вярнуць налады: <xliff:g id="section">%1$s</xliff:g> (<xliff:g id="playlist">%2$s</xliff:g>)?</string>
     <string name="settings_customize_restore_defaults_description">Схаваныя катэгорыі і элементы зноў з\'явяцца, перайменаванні і ўласны парадак будуць скінуты, а перамешчаныя элементы вернуцца. Аб\'яднаныя катэгорыі, абранае і прывязкі тэлепрограмы захаваюцца.</string>
     <string name="settings_customize_rename_hint">Толькі для гэтага профілю. Пакіньце поле пустым, каб вярнуць «<xliff:g id="name">%1$s</xliff:g>».</string>
@@ -745,7 +745,6 @@
     <string name="local_sync_confirm_hint">Пакуль нічога не зменена. Вось што адбудзецца на гэтай прыладзе пасля ўжывання.</string>
     <string name="local_sync_nothing_to_change">На абедзвюх прыладах ужо адно і тое ж. Ужываць нячога.</string>
     <string name="local_sync_merge_note">Затым вашы даныя дасылаюцца назад, і абедзве прылады становяцца аднолькавымі.</string>
-    <string name="local_sync_change_sources">Новыя плейлісты: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_change_favorites">Новае ў абраным: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_change_history">Новыя запісы гісторыі: <xliff:g id="count">%1$d</xliff:g></string>
     <string name="local_sync_change_reorder">Змены парадку: <xliff:g id="count">%1$d</xliff:g></string>
@@ -866,7 +865,7 @@
     <string name="settings_nav_menu_labels_summary">Падпісы: <xliff:g id="choice">%1$s</xliff:g></string>
     <string name="settings_search_keywords_menu_labels">падпісы, назвы, тэкст, толькі значкі, панэль, бакавая панэль, меню, пашыраць, шырокая</string>
     <string name="settings_nav_menu_items">Пункты меню</string>
-    <string name="settings_nav_menu_items_desc">Дынамічна: па змесціве плейліста · Уручную: выбіраеце вы</string>
+    <string name="settings_nav_menu_items_desc">Дынамічна: па спісе каналаў · Уручную: выбіраеце вы</string>
     <string name="settings_search_keywords_navigation">панэль, бакавая панэль, меню, навігацыя, схаваць, плаваючая, замацаваная, памер, кампактная, шырокая, даўжыня, уся вышыня</string>
     <string name="settings_breadcrumb_eyebrow"><xliff:g id="section">%1$s</xliff:g> · <xliff:g id="group">%2$s</xliff:g></string>
     <string name="settings_nav_size_desc">Кампактная: значкі · Звычайная: назвы · Шырокая: назвы і лічбы · Вельмі шырокая: з падрабязнасцямі</string>
@@ -992,7 +991,7 @@
     <string name="settings_help_app_icon">Значок МОЁ ТВ на галоўным экране тэлевізара. Лаунчару можа спатрэбіцца трошкі часу, каб паказаць змяненне.</string>
     <string name="settings_help_brand_accent">Лагатып МОЁ ТВ у меню, раздзеле «Аб прыкладанні» і наладзе паказвае трохвугольнік прайгравання ў вашым колеры акцэнту. Значок на галоўным экране захоўвае свае колеры.</string>
     <string name="settings_help_startup">Што МОЁ ТВ паказвае пры запуску: галоўную, апошні прагледжаны канал, абранае або выбраны вамі канал.</string>
-    <string name="settings_help_check_updates">Адразу ж шукае на GitHub новую версію МОЁ ТВ і прапануе ўсталяваць яе. Плейлісты, абранае і налады застаюцца ранейшымі.</string>
+    <string name="settings_help_check_updates">Адразу ж шукае на GitHub новую версію МОЁ ТВ і прапануе ўсталяваць яе. Каналы, абранае і налады застаюцца ранейшымі.</string>
     <string name="settings_help_update_startup">Шукае новую версію пры кожным запуску МОЁ ТВ і паведамляе, калі яна ёсць. Нічога не ўсталёўваецца без вашай згоды.</string>
     <string name="settings_help_auto_start_boot">Адкрывае МОЁ ТВ сам па сабе пасля загрузкі тэлевізара — на экране, выбраным у наладзе Запуск прыкладання. Android дазваляе прыкладанню адкрывацца самому, толькі калі яму можна паказвацца паверх іншых прыкладанняў, таму пры ўключэнні адкрываецца экран гэтага дазволу. На некаторых тэлевізарах яго няма, і там аўтазапуск працаваць не можа.</string>
     <string name="settings_help_auto_start_wake">Адкрывае МОЁ ТВ кожны раз, калі тэлевізар выходзіць са сну, нават калі яго разбудзілі дзеля іншага прыкладання. Калі Запуск прыкладання адкрывае канал, кожнае абуджэнне запускае гэты паток. Пакуль параметр уключаны, МОЁ ТВ трымае невялікую фонавую службу з бязгучным апавяшчэннем. Як і аўтазапуску пры ўключэнні, яму патрэбны дазвол на паказ паверх іншых прыкладанняў.</string>

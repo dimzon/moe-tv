@@ -26,7 +26,7 @@
     <string name="setup_get_started">Почати</string>
     <string name="setup_display_size_title">Налаштуйте зручний розмір</string>
     <string name="setup_before_you_start">Перед початком</string>
-    <string name="setup_disclaimer">МОЁ ТВ — це лише медіапрогравач. У ньому немає каналів, плейлистів або власного контенту. Єдине джерело — вбудований легально доступний каталог прямого ефіру RuTube; ви відповідаєте за законність його використання.</string>
+    <string name="setup_disclaimer">МОЁ ТВ — це лише медіапрогравач. Єдине джерело — вбудований легально доступний каталог прямого ефіру RuTube; ви відповідаєте за законність його використання.</string>
     <string name="setup_i_understand">Зрозуміло</string>
     <string name="setup_refresh_title">Автооновлення</string>
     <string name="setup_refresh_sub">Каталог каналів і телегід завантажуються автоматично. Як часто їх оновлювати?</string>

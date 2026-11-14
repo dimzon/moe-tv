@@ -14,8 +14,8 @@
     <string name="search_field_hint">Канали і передачі</string>
     <string name="search_voice">Голосовий пошук</string>
     <string name="search_voice_prompt">Назвіть канал або передачу</string>
-    <string name="search_card_title">Шукайте усе у своїх плейлистах</string>
-    <string name="search_card_body">Канали з поточного плейлиста. Виберіть результат, щоб одразу перейти до нього, увімкнути його або відкрити його параметри. Передачі, які йдуть зараз або пізніше сьогодні, також можна знайти за назвою.</string>
+    <string name="search_card_title">Шукайте у каналах</string>
+    <string name="search_card_body">Виберіть результат, щоб одразу перейти до нього, увімкнути його або відкрити його параметри. Передачі, які йдуть зараз або пізніше сьогодні, також можна знайти за назвою.</string>
     <string name="search_nothing_found">Нічого не знайдено за запитом «<xliff:g id="query">%1$s</xliff:g>»</string>
     <string name="search_nothing_found_body">Пошук виконується за назвами каналів і передач у завантаженій телепрограмі. Приховані категорії не переглядаються.</string>
     <string name="search_query_quoted">«<xliff:g id="query">%1$s</xliff:g>»</string>
@@ -87,7 +87,7 @@
     <string name="update_install_rejected">Системний інсталятор відхилив оновлення: <xliff:g id="reason">%1$s</xliff:g></string>
     <string name="update_ready">МОЁ ТВ v<xliff:g id="available">%1$s</xliff:g> готова до встановлення (у вас v<xliff:g id="current">%2$s</xliff:g>).</string>
     <string name="recovery_title">МОЁ ТВ не вдалося відкрити базу даних</string>
-    <string name="recovery_data_safe_full">Ваші профілі, плейлисти, обране та історія НЕ видалено — сталася помилка оновлення бази даних, а дані все ще перебувають на цьому пристрої.\n\nБудь ласка, повідомте про це, щоб проблему можна було усунути, і додайте наведене нижче повідомлення.</string>
+    <string name="recovery_data_safe_full">Сталася помилка оновлення бази даних. Канали завантажаться з сервера знову.\n\nБудь ласка, повідомте про це, щоб проблему можна було усунути, і додайте наведене нижче повідомлення.</string>
     <string name="recovery_retry">Спробувати ще раз</string>
     <string name="recovery_backup_hint">Якщо у вас є файл резервної копії, можна скинути дані застосунку, а потім відновити їх. Під час скидання видаляється усе, що зберігається на цьому пристрої.</string>
     <string name="recovery_confirm_reset">Підтвердження: видалити всі дані застосунку</string>
