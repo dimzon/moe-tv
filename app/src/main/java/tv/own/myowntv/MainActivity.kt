@@ -40,6 +40,7 @@ import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
@@ -48,6 +49,9 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -148,6 +152,9 @@ open class MainActivity : ComponentActivity() {
     private val localeStore: tv.own.owntv.core.i18n.LocaleStore by inject()
     private var pendingDeepLink by mutableStateOf<LauncherDeepLink?>(null)
 
+    /** The last collected Fullscreen-mode value, so [onResume] can re-apply it without reading DataStore. */
+    private var fullscreenRequested = true
+
     /**
      * Wrap the Activity base with the selected locale so its own `Resources` resolve correctly —
      * Application wrapping alone leaves the Activity wrong, because
@@ -197,7 +204,39 @@ open class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        // The bars may have come back while another app, a dialog or a hand-off held the focus — re-hide.
+        applyFullscreen(fullscreenRequested)
         handOff.onActivityResumed()
+    }
+
+    /**
+     * Immersive fullscreen: hide the system status + navigation bars — SmartRuTube's
+     * makeActivityFullscreen2 through the androidx compat wrappers, so one branch serves both the
+     * API 26–29 legacy SYSTEM_UI_FLAG_* mapping and the API 30+ WindowInsetsController. The setting
+     * lives in Settings › Appearance ("Fullscreen mode"); on a television there are no bars, so the
+     * whole call is a no-op there.
+     */
+    private fun applyFullscreen(enabled: Boolean) {
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        if (enabled) {
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+            // Transient bars: a swipe from the edge reveals them briefly, then they hide themselves.
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            if (Build.VERSION.SDK_INT >= 28) {
+                // Draw under the display cutout: without this a notched phone letterboxes the strip
+                // where the hidden status bar used to sit.
+                window.attributes.layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
+        } else {
+            controller.show(WindowInsetsCompat.Type.systemBars())
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+            if (Build.VERSION.SDK_INT >= 28) {
+                window.attributes.layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+            }
+        }
     }
 
     /** Every screen this activity opens (an external player, a system settings page) is a hand-off. */
@@ -306,6 +345,14 @@ open class MainActivity : ComponentActivity() {
             LaunchedEffect(keepAwake) {
                 if (keepAwake) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+
+            // Fullscreen mode (Settings › Appearance): hides the system bars while on. onResume
+            // re-applies [fullscreenRequested], so this effect only reacts to live setting changes.
+            val fullscreenMode by shellViewModel.fullscreenMode.collectAsStateWithLifecycle()
+            LaunchedEffect(fullscreenMode) {
+                fullscreenRequested = fullscreenMode
+                applyFullscreen(fullscreenMode)
             }
 
             val viewModel: ShellViewModel = koinViewModel()

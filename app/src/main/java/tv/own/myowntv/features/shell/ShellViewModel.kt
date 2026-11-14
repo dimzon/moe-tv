@@ -181,6 +181,11 @@ class ShellViewModel(
     val weatherFahrenheit: StateFlow<Boolean> = settings.weatherFahrenheit
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
+    /** Immersive fullscreen: hide the system status + navigation bars over the whole app.
+     *  Eagerly, so MainActivity applies the stored value before the first frame (no bar flash). */
+    val fullscreenMode: StateFlow<Boolean> = settings.fullscreenMode
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
     private val _selectedSection = MutableStateFlow(MainSection.HOME)
     val selectedSection: StateFlow<MainSection> = _selectedSection.asStateFlow()
 

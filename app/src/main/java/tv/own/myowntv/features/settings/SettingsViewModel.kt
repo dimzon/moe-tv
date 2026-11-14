@@ -681,6 +681,11 @@ class SettingsViewModel(
         settings.ambientGlowPulse.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
     fun setAmbientGlowPulse(enabled: Boolean) { viewModelScope.launch { settings.setAmbientGlowPulse(enabled) } }
 
+    // Immersive fullscreen over the whole app (phones/tablets; a television has no bars to hide).
+    val fullscreenMode: StateFlow<Boolean> =
+        settings.fullscreenMode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+    fun setFullscreenMode(enabled: Boolean) { viewModelScope.launch { settings.setFullscreenMode(enabled) } }
+
     // Weather chip: visibility toggle + manual location override (for VPN users).
     val weatherEnabled: StateFlow<Boolean> =
         settings.weatherEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)

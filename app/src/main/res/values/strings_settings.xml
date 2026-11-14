@@ -350,6 +350,10 @@
     <string name="settings_animations">Animations</string>
     <!-- Translators: Description of the Animations setting. -->
     <string name="settings_animations_description">Turn interface motion on or off — Off feels snappier on lower-end TV boxes</string>
+    <!-- Translators: Settings row for hiding the system status and navigation bars. -->
+    <string name="settings_fullscreen_mode">Fullscreen mode</string>
+    <!-- Translators: Description of the Fullscreen mode setting. -->
+    <string name="settings_fullscreen_mode_description">Hide the system status and navigation bars</string>
     <!-- Translators: Description of the Weather row in Settings › Appearance. -->
     <string name="settings_weather_description_root">Top-bar weather chip: show or hide, custom location, and Celsius / Fahrenheit.</string>
     <!-- Translators: Description of the Live preview setting. -->
@@ -595,6 +599,8 @@
     <string name="settings_search_keywords_zoom">scale interface size</string>
     <!-- Translators: Hidden keyword bag for the Animations settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_animation">motion snappier performance</string>
+    <!-- Translators: Hidden keyword bag for the Fullscreen mode settings. Translate as individual search terms. -->
+    <string name="settings_search_keywords_fullscreen">fullscreen immersive status bar navigation bar hide</string>
     <!-- Translators: Hidden keyword bag for the Weather settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_weather">top bar chip location celsius fahrenheit</string>
     <!-- Translators: Hidden keyword bag for the Live preview settings. Translate as individual search terms. -->

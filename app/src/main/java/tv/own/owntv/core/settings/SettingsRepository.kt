@@ -481,6 +481,9 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val DNS_HOST = stringPreferencesKey("dns_host")
         val DNS_PORT = intPreferencesKey("dns_port")
         val DNS_DOH_URL = stringPreferencesKey("dns_doh_url")
+        // Immersive fullscreen (phones/tablets): hide the system status + navigation bars
+        // (SmartRuTube-style). A television never has the bars, so it simply ignores this.
+        val FULLSCREEN_MODE = booleanPreferencesKey("fullscreen_mode")
         // Weather chip: show/hide + manual location override (blank = auto-detect from public IP).
         val WEATHER_ENABLED = booleanPreferencesKey("weather_enabled")
         val WEATHER_LOCATION = stringPreferencesKey("weather_location")
@@ -760,6 +763,15 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     suspend fun setAmbientGlowPulse(enabled: Boolean) {
         context.dataStore.edit { it[Keys.AMBIENT_GLOW_PULSE] = enabled }
+    }
+
+    // --- Fullscreen mode: hide the system status + navigation bars (phones/tablets) ---
+
+    /** Immersive fullscreen over the whole app (default ON; a television has no bars, so it is a no-op). */
+    val fullscreenMode: Flow<Boolean> = prefsFlow { it[Keys.FULLSCREEN_MODE] ?: true }
+
+    suspend fun setFullscreenMode(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.FULLSCREEN_MODE] = enabled }
     }
 
     // --- Weather chip (top bar): show/hide + manual location override for VPN users ---
@@ -2438,6 +2450,8 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             // Surround mode (Auto/Stereo only/Surround). The legacy boolean is in backupBoolKeys and stays
             // in sync, but the string is what is read first, so it has to travel too.
             Keys.SURROUND_MODE,
+            // Video surface (SURFACE_VIEW/TEXTURE_VIEW) — the same enum-name shape as surround mode.
+            Keys.VIDEO_SURFACE_MODE,
             // The mobility layer's two choices. Same reasoning as the touch-host booleans below: a phone
             // restored from a phone keeps them, a television never reads them.
             Keys.MINI_PLAYER_STYLE, Keys.PIP_SIZE,
@@ -2484,6 +2498,8 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             Keys.AUDIO_PER_CHANNEL,
             Keys.MULTIVIEW_ENABLED, Keys.MULTIVIEW_WARNING_ACCEPTED,
             Keys.AUDIO_PASSTHROUGH, Keys.NIGHT_MODE, Keys.VOLUME_LEVELLING, Keys.TUNNELED_PLAYBACK,
+            // Fullscreen mode: a television never reads it, a phone restored from a phone keeps it.
+            Keys.FULLSCREEN_MODE,
         )
         val floats = listOf(Keys.SUB_SCALE, Keys.SUB_SCALE_EXO)
 

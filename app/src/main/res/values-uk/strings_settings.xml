@@ -151,6 +151,8 @@
     <string name="settings_ui_zoom_description">Масштабування всього інтерфейсу</string>
     <string name="settings_animations">Анімації</string>
     <string name="settings_animations_description">Увімкнення або вимкнення анімації інтерфейсу — без неї інтерфейс швидше реагує на малопотужних ТВ-приставках</string>
+    <string name="settings_fullscreen_mode">Повноекранний режим</string>
+    <string name="settings_fullscreen_mode_description">Приховувати рядок стану та панель навігації</string>
     <string name="settings_weather_description_root">Чип погоди на верхній панелі: показ, інше розташування та градуси Цельсія або Фаренгейта.</string>
     <string name="settings_live_preview_description">Автоматично відтворювати канал при переведенні на нього фокуса</string>
     <string name="settings_preview_audio">Звук превью</string>
@@ -269,6 +271,7 @@
     <string name="settings_search_keywords_focus">фокус рамка межа виділення курсор контур</string>
     <string name="settings_search_keywords_zoom">масштаб інтерфейс розмір</string>
     <string name="settings_search_keywords_animation">рух швидкодія продуктивність</string>
+    <string name="settings_search_keywords_fullscreen">повний екран статусбар рядок стану панель навігації приховати</string>
     <string name="settings_search_keywords_weather">верхня панель чип розташування цельсій фаренгейт</string>
     <string name="settings_search_keywords_live_preview">автовідтворення фокус канал</string>
     <string name="settings_search_keywords_sound">звук прямий ефір превью</string>

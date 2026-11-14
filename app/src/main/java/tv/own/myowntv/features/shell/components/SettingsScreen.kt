@@ -322,6 +322,7 @@ fun SettingsScreen(
     val glassConfig by settingsVm.glassConfig.collectAsStateWithLifecycle()
     val glassOn = glassConfig.enabled
     val animationLevel by settingsVm.animationLevel.collectAsStateWithLifecycle()
+    val fullscreenMode by settingsVm.fullscreenMode.collectAsStateWithLifecycle()
     val ambientGlowEnabled by settingsVm.ambientGlowEnabled.collectAsStateWithLifecycle()
     val ambientGlowPulse by settingsVm.ambientGlowPulse.collectAsStateWithLifecycle()
     LaunchedEffect(glassOn, themeMode) {
@@ -578,6 +579,13 @@ fun SettingsScreen(
             chip = stringResource(animationLevel.labelRes), chipTone = TileTone.SECONDARY,
             focus = animationsRowFocus,
             onClick = { saveScroll(); dialogReturn = animationsRowFocus; showAnimations = true },
+        ),
+        RootRow(
+            "fullscreen_mode", TileTone.SECONDARY, MyOwnTVIcon.EXPAND,
+            title = stringResource(R.string.settings_fullscreen_mode), desc = stringResource(R.string.settings_fullscreen_mode_description),
+            chip = stringResource(if (fullscreenMode) R.string.common_on else R.string.common_off),
+            chipTone = if (fullscreenMode) TileTone.PRIMARY else TileTone.SECONDARY,
+            onClick = { settingsVm.setFullscreenMode(!fullscreenMode) },
         ),
         RootRow(
             tabRowKey(SettingsTab.WEATHER), TileTone.SECONDARY, MyOwnTVIcon.WEATHER,
@@ -938,6 +946,8 @@ fun SettingsScreen(
                 chip = stringResource(if (brandAccent) R.string.common_on else R.string.common_off), chipTone = TileTone.SECONDARY, showChevron = false) { settingsVm.setBrandAccentTriangle(!brandAccent) },
             SettingsSearchEntry(stringResource(R.string.settings_group_appearance), stringResource(R.string.settings_animations), stringResource(R.string.settings_search_keywords_animation), MyOwnTVIcon.MOTION, TileTone.SECONDARY,
                 chip = stringResource(animationLevel.labelRes), chipTone = TileTone.SECONDARY) { saveScroll(); dialogReturn = searchFieldFocus; showAnimations = true },
+            SettingsSearchEntry(stringResource(R.string.settings_group_appearance), stringResource(R.string.settings_fullscreen_mode), stringResource(R.string.settings_search_keywords_fullscreen), MyOwnTVIcon.EXPAND, TileTone.SECONDARY,
+                chip = if (fullscreenMode) stringResource(R.string.common_on) else stringResource(R.string.common_off), chipTone = if (fullscreenMode) TileTone.PRIMARY else TileTone.SECONDARY, showChevron = false) { settingsVm.setFullscreenMode(!fullscreenMode) },
             SettingsSearchEntry(stringResource(R.string.settings_group_appearance), stringResource(R.string.settings_weather), stringResource(R.string.settings_search_keywords_weather), MyOwnTVIcon.WEATHER, TileTone.SECONDARY,
                 chip = if (weatherEnabled) stringResource(R.string.common_on) else stringResource(R.string.common_off), chipTone = if (weatherEnabled) TileTone.PRIMARY else TileTone.SECONDARY) { open(SettingsTab.WEATHER) },
             SettingsSearchEntry(tv.own.myowntv.features.settings.videoRowPath("vp_live_preview"), stringResource(R.string.settings_quick_live_preview), stringResource(R.string.settings_search_keywords_live_preview), MyOwnTVIcon.LIVE_TV, TileTone.TERTIARY,
