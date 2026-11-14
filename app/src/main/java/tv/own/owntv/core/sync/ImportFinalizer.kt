@@ -3,6 +3,7 @@ package tv.own.owntv.core.sync
 import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import tv.own.owntv.core.database.BulkInsertHelper
 import androidx.room.execSQL
@@ -41,7 +42,7 @@ class ImportFinalizer(
 
     /** Current content counts (no EPG) — for the success message and the Playlists list rows. */
     suspend fun contentCounts(sourceId: Long): SyncCounts = SyncCounts(
-        channels = 0, // unused in the live-only single-source flow; the sync summary reports the real count
+        channels = channelDao.countAll().first(),
     )
 
     /**

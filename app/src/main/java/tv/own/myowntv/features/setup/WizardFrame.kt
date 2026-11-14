@@ -191,8 +191,8 @@ private fun StepDots(current: WizardStep, modifier: Modifier) {
 private val WizardStep.labelRes: Int get() = when (this) {
     WizardStep.LANGUAGE -> R.string.settings_language
     WizardStep.DISPLAY -> R.string.setup_step_display
-    WizardStep.PLAYLIST -> R.string.setup_step_playlist
-    WizardStep.READY -> R.string.setup_step_ready
+    WizardStep.PLAYLIST -> R.string.setup_step_data
+    WizardStep.READY -> R.string.setup_step_terms
 }
 
 /** One choice card of a step (`.tile2`): icon, 23 px title, 16 px line; focused = FX. */

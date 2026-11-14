@@ -15,6 +15,8 @@ class EpgRepository(
     private val channelDao: ChannelDao,
     /** RuTube's own API; null only in unit-test fixtures that never refresh. */
     private val rutube: tv.own.owntv.core.sync.RutubeApi? = null,
+    /** Records the attempt so the startup policy can tell "never tried" from "tried, no schedule". */
+    private val settings: tv.own.owntv.core.settings.SettingsRepository? = null,
 ) {
 
 
@@ -29,6 +31,9 @@ class EpgRepository(
         if (keys.isEmpty()) return 0
         onProgress(keys.size, 0)
         val summary = tv.own.owntv.core.sync.RuTubeEpgSyncer(api, epgDao).sync(keys)
+        // A completed pass counts as an attempt even with zero programmes (upstream has no schedule
+        // for these channels); otherwise every cold start would hammer RuTube with the same 404s.
+        settings?.markEpgSynced(System.currentTimeMillis())
         onProgress(summary.channelsWithGuide, summary.programmesWritten)
         return summary.programmesWritten
     }

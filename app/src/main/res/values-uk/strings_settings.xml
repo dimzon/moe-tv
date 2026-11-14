@@ -190,6 +190,8 @@
     <string name="settings_catalog_sync">Оновити канали</string>
     <string name="settings_catalog_sync_description">Заново завантажити каталог каналів RuTube</string>
     <string name="settings_catalog_syncing">Оновлення…</string>
+    <string name="settings_auto_refresh">Автооновлення</string>
+    <string name="settings_auto_refresh_description">Як часто оновлювати канали та телегід</string>
     <string name="settings_check_updates">Перевірити оновлення</string>
     <string name="settings_check_updates_description">Отримати останню версію з GitHub Releases</string>
     <string name="settings_update_startup">Перевіряти оновлення при запуску</string>
@@ -289,6 +291,7 @@
     <string name="settings_search_keywords_startup">запуск відкрити початковий екран</string>
     <string name="settings_search_keywords_updates">GitHub випуск версія</string>
     <string name="settings_search_keywords_catalog_sync">оновити канали каталог rutube синхронізація завантаження</string>
+    <string name="settings_search_keywords_auto_refresh">автооновлення розклад оновлення канали телегід epg</string>
     <string name="settings_search_keywords_update_auto">автоматично оновлення нова версія</string>
     <string name="settings_search_keywords_auto_start">завантаження увімкнення пробудження сон очікування автозапуск відкрити</string>
     <string name="settings_language_original">Мова оригіналу</string>

@@ -312,9 +312,7 @@
 1	technical	app/src/main/java/tv/own/myowntv/features/settings/lock/SettingsLockRows.kt	first
 1	technical	app/src/main/java/tv/own/myowntv/features/settings/lock/SettingsLockRows.kt	settings_lock
 1	technical	app/src/main/java/tv/own/myowntv/features/settings/lock/SettingsLockRows.kt	settings_lock_menus
-1	empty	app/src/main/java/tv/own/myowntv/features/setup/SetupWizard.kt	\0
 1	technical	app/src/main/java/tv/own/myowntv/features/setup/SetupWizard.kt	+
-1	technical	app/src/main/java/tv/own/myowntv/features/setup/SetupWizard.kt	RuTube
 3	technical	app/src/main/java/tv/own/myowntv/features/shell/ShellViewModel.kt	\0
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/AutoStartSettingsRows.kt	auto_start_boot
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/AutoStartSettingsRows.kt	auto_start_wake
@@ -337,6 +335,7 @@
 2	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	animations
 2	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	app_icon
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	app_startup
+1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	auto_refresh
 4	file-path	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	backgrounds
 2	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	bmp
 2	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	brand_accent
@@ -1477,6 +1476,7 @@
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	software_decode_above_1080p
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sort_guide
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sort_live
+1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	source_last_epg_sync_at
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	source_last_sync_at
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	stage_defaults_applied
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_font
@@ -1512,7 +1512,8 @@
 1	technical	app/src/main/java/tv/own/owntv/core/storage/StorageAccess.kt	untitled
 1	log	app/src/main/java/tv/own/owntv/core/sync/AutoRefresh.kt	OwnTVHome
 1	technical	app/src/main/java/tv/own/owntv/core/sync/AutoRefresh.kt	auto_refresh
-1	log	app/src/main/java/tv/own/owntv/core/sync/AutoRefresh.kt	checkAutoRefresh playlist sourceId=${source.id} mode=$mode — enqueuing
+1	log	app/src/main/java/tv/own/owntv/core/sync/AutoRefresh.kt	checkAutoRefresh catalogue sourceId=${source.id} missing=$catalogMissing mode=$playlistRefresh — enqueuing
+1	log	app/src/main/java/tv/own/owntv/core/sync/AutoRefresh.kt	checkAutoRefresh guide sourceId=${SingleSource.id} empty=$missing mode=$refresh — enqueuing
 1	log	app/src/main/java/tv/own/owntv/core/sync/ImportFinalizer.kt	ImportFinalizer
 1	technical	app/src/main/java/tv/own/owntv/core/sync/ImportFinalizer.kt	categories
 2	technical	app/src/main/java/tv/own/owntv/core/sync/ImportFinalizer.kt	channels

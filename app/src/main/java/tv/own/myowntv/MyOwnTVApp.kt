@@ -176,6 +176,10 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
             scope = appScope,
             settings = GlobalContext.get().get(),
         )
+        // The catalogue and the guide belong to the process, not to a screen: a wizard, a recovery
+        // screen or a home screen cannot decide whether missing data is allowed to load. This runs
+        // once per process, before and independently of onboarding.
+        GlobalContext.get().get<AutoRefresh>().start(appScope)
         // The Stage UI's own defaults, once per install: Docked · Compact rail, glass
         // on at 50%, the Stage background; Movies & Series keep an update's layout.
         appScope.launch {

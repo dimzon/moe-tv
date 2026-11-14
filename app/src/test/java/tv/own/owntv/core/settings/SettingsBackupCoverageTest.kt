@@ -31,6 +31,8 @@ class SettingsBackupCoverageTest {
         "last_update_check_at",
         // When this catalogue last synced here: a fact about this device, not a choice.
         "source_last_sync_at",
+        // Same for the guide: when this device last completed an EPG attempt.
+        "source_last_epg_sync_at",
         // A Room channel id — meaningless after the next sync.
         "last_live_channel",
         // Backed up in their own BackupManager blocks, remapped to this device's playlist.

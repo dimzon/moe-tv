@@ -140,6 +140,20 @@ class SettingsViewModel(
         }
     }
 
+    /**
+     * The one refresh choice shared by the catalogue and the guide, read from the two per-source maps
+     * that actually drive [tv.own.owntv.core.sync.AutoRefresh]. No entry at all means the 6-hour default.
+     */
+    val dataRefreshPolicy: StateFlow<DataRefreshPolicy> =
+        settings.dataRefreshPolicy(tv.own.owntv.core.database.SingleSource.id)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DataRefreshPolicy.DEFAULT)
+
+    fun setDataRefreshPolicy(policy: DataRefreshPolicy) {
+        viewModelScope.launch {
+            settings.setDataRefreshPolicy(tv.own.owntv.core.database.SingleSource.id, policy)
+        }
+    }
+
     val livePreviewEnabled: StateFlow<Boolean> = settings.livePreviewEnabled
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 

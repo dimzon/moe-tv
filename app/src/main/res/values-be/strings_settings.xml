@@ -190,6 +190,8 @@
     <string name="settings_catalog_sync">Абнавіць каналы</string>
     <string name="settings_catalog_sync_description">Зноў скачаць каталог каналаў RuTube</string>
     <string name="settings_catalog_syncing">Абнаўленне…</string>
+    <string name="settings_auto_refresh">Аўтаабнаўленне</string>
+    <string name="settings_auto_refresh_description">Як часта абнаўляць каналы і тэлегіда</string>
     <string name="settings_check_updates">Праверыць абнаўленні</string>
     <string name="settings_check_updates_description">Атрымаць апошнюю версію з GitHub Releases</string>
     <string name="settings_update_startup">Правяраць абнаўленні пры запуску</string>
@@ -289,6 +291,7 @@
     <string name="settings_search_keywords_startup">запуск адкрыць пачатковы экран</string>
     <string name="settings_search_keywords_updates">GitHub выпуск версія</string>
     <string name="settings_search_keywords_catalog_sync">абнавіць каналы каталог rutube сінхранізацыя загрузка</string>
+    <string name="settings_search_keywords_auto_refresh">аўтаабнаўленне расклад абнаўленне каналы тэлегіда epg</string>
     <string name="settings_search_keywords_update_auto">аўтаматычна абнаўленне новая версія</string>
     <string name="settings_search_keywords_auto_start">загрузка ўключэнне абуджэнне чаканне аўтазапуск адкрыць</string>
     <string name="settings_language_original">Мова арыгінала</string>

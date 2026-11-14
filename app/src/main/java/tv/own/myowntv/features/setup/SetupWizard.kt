@@ -61,53 +61,42 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import org.koin.androidx.compose.koinViewModel
 import tv.own.myowntv.R
 import tv.own.owntv.core.brand.AppIcon
-import tv.own.owntv.core.setup.SourceImporter
-import tv.own.owntv.core.sync.importProgressDisplay
 import tv.own.owntv.core.theme.UiFontScale
 import tv.own.owntv.core.theme.UiZoom
-import tv.own.myowntv.features.settings.EpgSyncDialog
 import tv.own.myowntv.features.settings.FirstRunLanguageSelector
 import tv.own.myowntv.features.settings.SettingValue
-import tv.own.myowntv.features.settings.SetupLocalSyncScreen
+import tv.own.myowntv.features.settings.StageRadio
 import tv.own.myowntv.features.settings.StageSettingRow
+import tv.own.myowntv.features.settings.dataRefreshPolicyLabel
+import tv.own.myowntv.features.settings.descriptionRes
 import tv.own.myowntv.ui.components.BrandMark
 import tv.own.myowntv.ui.components.MyOwnTVIcon
-import tv.own.myowntv.ui.components.detailText
-import tv.own.myowntv.ui.components.displayText
 import tv.own.myowntv.ui.format.localizedInteger
-import tv.own.myowntv.ui.components.primaryText
-import tv.own.myowntv.ui.components.remainderText
-import tv.own.myowntv.ui.components.summaryText
-import tv.own.myowntv.ui.components.warningText
 import tv.own.myowntv.ui.stage.stageBackground
 import tv.own.myowntv.ui.theme.StageColors
 import tv.own.myowntv.ui.theme.mpx
 import tv.own.myowntv.ui.theme.stageAccent
 import tv.own.myowntv.ui.theme.stageText
 
-private enum class Step { WELCOME, DISPLAY_SIZE, DISCLAIMER, SETUP_CHOICE, SYNC_DEVICE, IMPORTING }
+private enum class Step { WELCOME, DISPLAY_SIZE, REFRESH, DISCLAIMER }
 
 /**
- * First-run onboarding: language, screen size, disclaimer, then content — the built-in RuTube
- * source (attach + sync) or a sync from another television in the house. Sources are global —
- * there are no profiles. [onDone] enters the app. Every step is a [WizardFrame].
+ * First-run onboarding: language, screen size, how often the catalogue and guide refresh, and the
+ * disclaimer. Content is no longer imported here — the built-in RuTube source is a constant and the
+ * application process fills missing data before this wizard finishes, whatever policy is chosen.
+ * Sources are global — there are no profiles. [onDone] enters the app. Every step is a [WizardFrame].
  */
 @Composable
 fun Onboarding(onDone: () -> Unit, modifier: Modifier = Modifier) {
     val vm: SetupViewModel = koinViewModel()
+    val policy by vm.policy.collectAsStateWithLifecycle()
     var step by rememberSaveable { mutableStateOf(Step.WELCOME) }
-    val importState by vm.state.collectAsStateWithLifecycle()
-    val progress by vm.progress.collectAsStateWithLifecycle()
-    val epgSync by vm.epgSync.collectAsStateWithLifecycle()
-    // The source being imported, for "Importing <name>".
-    var importName by remember { mutableStateOf<String?>(null) }
 
     val accent = stageAccent.accent
     Box(modifier = modifier.fillMaxSize().stageBackground(accent)) {
@@ -115,59 +104,22 @@ fun Onboarding(onDone: () -> Unit, modifier: Modifier = Modifier) {
             Step.WELCOME -> WelcomeStep(onNext = { step = Step.DISPLAY_SIZE })
             // Before the disclaimer, which is the first screen with a paragraph of real text on it:
             // if the interface is too small to read, that is the screen it first hurts on.
-            Step.DISPLAY_SIZE -> DisplaySizeStep(onNext = { step = Step.DISCLAIMER }, onBack = { step = Step.WELCOME })
+            Step.DISPLAY_SIZE -> DisplaySizeStep(onNext = { step = Step.REFRESH }, onBack = { step = Step.WELCOME })
+            Step.REFRESH -> RefreshPolicyStep(
+                selected = policy,
+                onSelect = vm::setPolicy,
+                onNext = { step = Step.DISCLAIMER },
+                onBack = { step = Step.DISPLAY_SIZE },
+            )
             Step.DISCLAIMER -> WizardFrame(
-                step = WizardStep.DISPLAY,
+                step = WizardStep.READY,
                 title = stringResource(R.string.setup_before_you_start),
                 sub = stringResource(R.string.setup_disclaimer),
-                back = WizardAction(stringResource(R.string.common_back), { step = Step.DISPLAY_SIZE }),
-                next = WizardAction(stringResource(R.string.setup_i_understand), { step = Step.SETUP_CHOICE }, rememberFirstFocus()),
-            )
-            // First decision: pull down the built-in RuTube catalogue now, or bring everything back
-            // from another television in the house.
-            Step.SETUP_CHOICE -> {
-                val first = rememberFirstFocus()
-                WizardFrame(
-                    step = WizardStep.PLAYLIST,
-                    title = stringResource(R.string.setup_set_up_owntv),
-                    sub = stringResource(R.string.setup_setup_choice_description),
-                    back = WizardAction(stringResource(R.string.common_back), { step = Step.DISCLAIMER }),
-                    next = null,
-                ) {
-                    WizardCards(
-                        listOf(
-                            WizardCard(MyOwnTVIcon.PERSON, stringResource(R.string.setup_new_profile), stringResource(R.string.setup_create_profile_add_sources)) {
-                                importName = "RuTube"; vm.startRutube(); step = Step.IMPORTING
-                            },
-                            WizardCard(MyOwnTVIcon.PHONE, stringResource(R.string.setup_sync_device), stringResource(R.string.setup_sync_device_description)) { step = Step.SYNC_DEVICE },
-                        ),
-                        first,
-                    )
-                }
-            }
-            // A sync brings the other device's whole setup with it, so it finishes the wizard the
-            // same way the built-in source does: enter the app once the data has landed.
-            Step.SYNC_DEVICE -> SetupLocalSyncScreen(
-                onRestored = onDone,
-                onBack = { step = Step.SETUP_CHOICE },
-            )
-            Step.IMPORTING -> ImportProgressStep(
-                state = importState,
-                progress = progress,
-                name = importName,
-                onContinue = { vm.finish(onDone) }, // source + its guide synced (auto)
-                onRetry = { vm.reset(); step = Step.SETUP_CHOICE },
-                onCancel = { vm.cancelImport(); step = Step.SETUP_CHOICE },
-                onBackground = { vm.continueInBackground(onDone) }, // enter the app; sync keeps running
+                back = WizardAction(stringResource(R.string.common_back), { step = Step.REFRESH }),
+                next = WizardAction(stringResource(R.string.setup_i_understand), onDone, rememberFirstFocus()),
+                onBack = onDone,
             )
         }
-        // Semi-auto EPG: after the source lands, ask → sync (live count) → done (overlays "All set!").
-        EpgSyncDialog(
-            state = epgSync,
-            onSync = vm::syncPendingEpg,
-            onDismiss = vm::dismissPendingEpg,
-            onBackground = { vm.syncEpgInBackground(onDone) }, // enter the app; guide keeps downloading
-        )
     }
 }
 
@@ -190,6 +142,43 @@ private fun WelcomeStep(onNext: () -> Unit) {
         next = WizardAction(stringResource(R.string.setup_get_started), onNext),
     ) {
         FirstRunLanguageSelector(Modifier.focusRequester(rememberFirstFocus()))
+    }
+}
+
+/**
+ * The one content decision left: how often the catalogue and the guide refresh themselves. All three
+ * choices write the same policy into both per-source maps; the selected one shows a filled radio.
+ */
+@Composable
+private fun RefreshPolicyStep(
+    selected: DataRefreshPolicy,
+    onSelect: (DataRefreshPolicy) -> Unit,
+    onNext: () -> Unit,
+    onBack: () -> Unit,
+) {
+    val first = rememberFirstFocus()
+    val options = listOf(
+        DataRefreshPolicy.EVERY_6_HOURS to MyOwnTVIcon.REFRESH,
+        DataRefreshPolicy.STARTUP to MyOwnTVIcon.POWER,
+        DataRefreshPolicy.ONLY_FIRST to MyOwnTVIcon.DOWNLOADS,
+    )
+    WizardFrame(
+        step = WizardStep.PLAYLIST,
+        title = stringResource(R.string.setup_refresh_title),
+        sub = stringResource(R.string.setup_refresh_sub),
+        back = WizardAction(stringResource(R.string.common_back), onBack),
+        next = WizardAction(stringResource(R.string.setup_continue), onNext),
+    ) {
+        options.forEachIndexed { index, (policy, icon) ->
+            StageSettingRow(
+                icon = icon,
+                title = dataRefreshPolicyLabel(policy),
+                desc = stringResource(policy.descriptionRes()),
+                value = SettingValue.Custom { StageRadio(on = policy == selected) },
+                onClick = { onSelect(policy) },
+                modifier = if (index == 0) Modifier.focusRequester(first) else Modifier,
+            )
+        }
     }
 }
 
@@ -327,67 +316,5 @@ private fun AppIconSwatches(icons: List<AppIcon>, chosen: AppIcon) {
         if (icons.size > shown.size) {
             Text("+" + localizedInteger(icons.size - shown.size, grouping = false), style = stageText(17, 700), color = StageColors.Muted)
         }
-    }
-}
-
-/**
- * "Importing <name>" with the bar and where the import is, Cancel and Run in background; then
- * "All set!" with what arrived; or the failure with Back and Try again.
- */
-@Composable
-private fun ImportProgressStep(
-    state: SourceImporter.ImportState,
-    progress: tv.own.owntv.core.sync.ImportStage?,
-    name: String?,
-    onContinue: () -> Unit,
-    onRetry: () -> Unit,
-    onCancel: () -> Unit,
-    onBackground: () -> Unit,
-) {
-    when (state) {
-        // File-restore states are unreachable from the RuTube-only wizard; kept exhaustive.
-        is SourceImporter.ImportState.NeedPassword -> Unit
-        SourceImporter.ImportState.Running, SourceImporter.ImportState.Idle -> {
-            val display = progress?.importProgressDisplay()
-            WizardFrame(
-                step = WizardStep.PLAYLIST,
-                title = name?.let { stringResource(R.string.setup_importing_title, it) } ?: stringResource(R.string.setup_importing_catalog),
-                sub = stringResource(R.string.setup_watching_during_import),
-                back = WizardAction(stringResource(R.string.common_cancel), onCancel),
-                // Enter the app right away; the import keeps running (VM is activity-scoped) and channels
-                // appear as they land — no need to sit through a big catalogue sync.
-                next = WizardAction(stringResource(R.string.setup_run_in_background), onBackground, rememberFirstFocus()),
-            ) {
-                StageSettingRow(
-                    icon = MyOwnTVIcon.DOWNLOADS,
-                    title = display?.primaryText() ?: stringResource(R.string.setup_preparing_catalog),
-                    desc = display?.detailText(),
-                    value = null,
-                    onClick = {},
-                )
-            }
-        }
-        is SourceImporter.ImportState.Success -> {
-            val lines = listOfNotNull(
-                state.counts?.summaryText(includeEpg = true),
-                state.warnings.warningText(),
-                state.remainder.remainderText(),
-            )
-            WizardFrame(
-                step = WizardStep.READY,
-                title = stringResource(R.string.setup_all_set),
-                sub = lines.joinToString("\n"),
-                back = null,
-                next = WizardAction(stringResource(R.string.setup_continue), onContinue, rememberFirstFocus()),
-                onBack = onContinue,
-            )
-        }
-        is SourceImporter.ImportState.Failed -> WizardFrame(
-            step = WizardStep.PLAYLIST,
-            title = stringResource(R.string.setup_import_failed),
-            sub = state.failure.displayText(),
-            back = WizardAction(stringResource(R.string.common_back), onCancel),
-            next = WizardAction(stringResource(R.string.setup_try_again_caps), onRetry, rememberFirstFocus()),
-        )
     }
 }

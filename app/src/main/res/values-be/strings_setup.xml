@@ -28,22 +28,18 @@
     <string name="setup_before_you_start">Перад пачаткам</string>
     <string name="setup_disclaimer">МОЁ ТВ — гэта толькі медыяплеер. У ім няма каналаў, плейлістаў або ўласнага кантэнту. Адзіная крыніца — убудаваны легальна даступны каталог прамога эфіру RuTube; вы адказваеце за законнасць яго выкарыстання.</string>
     <string name="setup_i_understand">Зразумела</string>
-    <string name="setup_set_up_owntv">Налада МОЁ ТВ</string>
-    <string name="setup_setup_choice_description">Пачніце з нуля з убудаваным каталогам RuTube або скапіруйце даныя з іншай прылады МОЁ ТВ.</string>
-    <string name="setup_new_profile">Новая налада</string>
-    <string name="setup_create_profile_add_sources">Наладзіць убудаваны каталог RuTube</string>
+    <string name="setup_refresh_title">Аўтаабнаўленне</string>
+    <string name="setup_refresh_sub">Каталог каналаў і тэлегіда загружаюцца аўтаматычна. Як часта іх абнаўляць?</string>
+    <string name="refresh_policy_6h">Кожныя 6 гадзін</string>
+    <string name="refresh_policy_6h_description">Рэкамендуецца: каналы і тэлегіда застаюцца свежымі без лішніх запытаў.</string>
+    <string name="refresh_policy_startup">Пры запуску</string>
+    <string name="refresh_policy_startup_description">Правяраць абнаўленні адзін раз пры кожным халодным старце праграмы.</string>
+    <string name="refresh_policy_first">Толькі першае загружанне</string>
+    <string name="refresh_policy_first_description">Спампаваць адсутныя каналы і тэлегіду адзін раз і больш не абнаўляць аўтаматычна.</string>
     <string name="setup_sync_device">З іншай прылады</string>
-    <string name="setup_sync_device_description">Скапіруйце ўсё з іншай прылады МОЁ ТВ праз Wi-Fi</string>
     <string name="setup_restore_failed">Не ўдалося аднавіць</string>
     <string name="setup_backup_read_failed">Не ўдалося прачытаць файл рэзервовай копіі</string>
-    <string name="setup_run_in_background">Працягнуць у фонавым рэжыме</string>
-    <string name="setup_importing_catalog">Імпарт каталога…</string>
-    <string name="setup_preparing_catalog">Падрыхтоўка каталога</string>
-    <string name="setup_watching_during_import">Можна пачаць прагляд, пакуль загружаецца астатняя частка каталога.</string>
-    <string name="setup_all_set">Усё гатова!</string>
     <string name="setup_continue">Працягнуць</string>
-    <string name="setup_import_failed">Не ўдалося імпартаваць</string>
-    <string name="setup_try_again_caps">Паўтарыць</string>
     <string name="setup_playlist_file_unavailable">Не ўдалося адкрыць файл плейліста. Выберыце яго зноў: магчыма, ён быў перамешчаны.</string>
     <string name="setup_playlist_path_unsupported">Гэты шлях да лакальнага плейліста не падтрымліваецца.</string>
     <string name="companion_pin_page_title">МОЁ ТВ — увядзенне PIN</string>
@@ -92,8 +88,8 @@
     <string name="local_sync_browser_title">Лакальная сінхранізацыя МОЁ ТВ</string>
     <string name="local_sync_browser_body">Гэты адрас прызначаны для праграмы МОЁ ТВ на іншай прыладзе. Адкрыйце там лакальную сінхранізацыю і выберыце гэтую прыладу са спісу.</string>
     <string name="setup_step_display">Экран</string>
-    <string name="setup_step_playlist">Плейліст</string>
-    <string name="setup_step_ready">Гатова</string>
+    <string name="setup_step_data">Даныя</string>
+    <string name="setup_step_terms">Умовы</string>
     <string name="setup_key_previous_step">Папярэдні крок</string>
     <string name="setup_welcome_title">Вітаем у МОЁ ТВ</string>
     <string name="setup_welcome_sub">Ваш уласны IPTV-плеер. Выберыце мову, каб пачаць, — яе можна змяніць пазней у наладах.</string>
@@ -103,5 +99,4 @@
     <string name="setup_line_app_icon">Як МОЁ ТВ выглядае на галоўным экране тэлевізара</string>
     <string name="setup_device_appear">Тут з\'явяцца прылады з уключаным рэжымам сінхранізацыі</string>
     <string name="setup_device_address_hint">або ўвядзіце адрас іншай прылады</string>
-    <string name="setup_importing_title">Імпарт: <xliff:g id="name">%1$s</xliff:g></string>
 </resources>

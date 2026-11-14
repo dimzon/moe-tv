@@ -389,10 +389,6 @@ open class MainActivity : ComponentActivity() {
             // shell composes the moment onboarding ends — no restart.
             var onboarded by remember { mutableStateOf(isOnboarded()) }
 
-            // "Refresh on startup" — re-sync sources once the shell is the destination.
-            LaunchedEffect(onboarded) {
-                if (onboarded) viewModel.checkAutoRefresh(includeStartup = true)
-            }
 
             OwnTVTheme(
                 themeMode = themeMode,

@@ -59,38 +59,30 @@
     <string name="setup_disclaimer">МОЁ ТВ is a media player only. It includes no channels, playlists, or content of its own. Its single source is the built-in, legally accessible RuTube live catalogue, and you are responsible for using it lawfully.</string>
     <!-- Translators: Button on the first-run disclaimer screen to acknowledge and proceed. -->
     <string name="setup_i_understand">I Understand</string>
-    <!-- Translators: Heading on the setup-choice screen (first run only) where the user chooses between a new profile or restoring a backup. -->
-    <string name="setup_set_up_owntv">Set up МОЁ ТВ</string>
-    <!-- Translators: Description on the setup-choice screen. -->
-    <string name="setup_setup_choice_description">Start fresh with the built-in RuTube catalogue, or copy your data from another МОЁ ТВ device.</string>
-    <!-- Translators: ChoiceCard title on the setup-choice screen for a fresh setup. -->
-    <string name="setup_new_profile">Fresh start</string>
-    <!-- Translators: Description text beneath the "New profile" choice card on the setup-choice screen. -->
-    <string name="setup_create_profile_add_sources">Set up the built-in RuTube catalogue</string>
+    <!-- Translators: Heading on the onboarding step that picks how often channels and the guide refresh. -->
+    <string name="setup_refresh_title">Auto-refresh</string>
+    <!-- Translators: Description on the refresh-policy step. -->
+    <string name="setup_refresh_sub">The channel catalogue and the guide load automatically. How often should they update?</string>
+    <!-- Translators: Refresh schedule option. -->
+    <string name="refresh_policy_6h">Every 6 hours</string>
+    <!-- Translators: Description of the 6-hour refresh schedule. -->
+    <string name="refresh_policy_6h_description">Recommended: channels and the guide stay current without extra requests.</string>
+    <!-- Translators: Refresh schedule option: once each time the app starts. -->
+    <string name="refresh_policy_startup">On startup</string>
+    <!-- Translators: Description of the on-startup refresh schedule. -->
+    <string name="refresh_policy_startup_description">Check for updates once each time the app cold-starts.</string>
+    <!-- Translators: Refresh schedule option: fill missing data once, never refresh periodically. -->
+    <string name="refresh_policy_first">First download only</string>
+    <!-- Translators: Description of the first-download-only schedule. -->
+    <string name="refresh_policy_first_description">Download missing channels and guide once, then never refresh automatically.</string>
     <!-- Translators: ChoiceCard title on the setup-choice screen for copying everything from another МОЁ ТВ device on the same Wi-Fi. -->
     <string name="setup_sync_device">From another device</string>
-    <!-- Translators: Description text beneath the "From another device" choice card. "МОЁ ТВ" is the app name and must not be translated. -->
-    <string name="setup_sync_device_description">Copy everything from your other МОЁ ТВ device over Wi-Fi</string>
     <!-- Translators: Error heading on the import-progress screen when restore fails. -->
     <string name="setup_restore_failed">Restore failed</string>
     <!-- Translators: Error text when the backup file is unreadable or corrupted. -->
     <string name="setup_backup_read_failed">Couldn\'t read the backup file</string>
-    <!-- Translators: Button on the import-progress screen to continue watching while the catalog loads in the background. -->
-    <string name="setup_run_in_background">Run in background</string>
-    <!-- Translators: Status text shown above the spinner while the catalog is being imported. -->
-    <string name="setup_importing_catalog">Importing catalog\u2026</string>
-    <!-- Translators: Fallback progress text shown during import when no detailed progress data is available. -->
-    <string name="setup_preparing_catalog">Preparing catalog</string>
-    <!-- Translators: Hint text on the import-progress screen telling the user they can start watching immediately. -->
-    <string name="setup_watching_during_import">You can start watching while the rest of the catalog loads.</string>
-    <!-- Translators: Heading on the import-progress screen when import succeeds. -->
-    <string name="setup_all_set">All set!</string>
     <!-- Translators: Button on the import-success screen to finish setup. -->
     <string name="setup_continue">Continue</string>
-    <!-- Translators: Error heading on the import-progress screen when import fails. -->
-    <string name="setup_import_failed">Import failed</string>
-    <!-- Translators: Button on the import-failure screen to retry the import. Capitalized as a standalone button label. -->
-    <string name="setup_try_again_caps">Try Again</string>
 
 
     <!-- Translators: Error text when a local M3U playlist file cannot be opened. -->
@@ -195,10 +187,10 @@
 
     <!-- Translators: Setup step name in the step dots: the display size step. -->
     <string name="setup_step_display">Display</string>
-    <!-- Translators: Setup step name in the step dots: adding a playlist. -->
-    <string name="setup_step_playlist">Playlist</string>
-    <!-- Translators: Setup step name in the step dots: the last step, setup is finished. -->
-    <string name="setup_step_ready">Ready</string>
+    <!-- Translators: Setup step name in the step dots: the data refresh step. -->
+    <string name="setup_step_data">Data</string>
+    <!-- Translators: Setup step name in the step dots: the final terms/disclaimer step. -->
+    <string name="setup_step_terms">Terms</string>
     <!-- Translators: Key hint after Back in the setup wizard. -->
     <string name="setup_key_previous_step">Previous step</string>
     <!-- Translators: Title of the first setup step. -->
@@ -217,6 +209,4 @@
     <string name="setup_device_appear">Devices with Sync mode on appear here</string>
     <!-- Translators: Placeholder of the Address field when copying from another device. -->
     <string name="setup_device_address_hint">or type the other device’s address</string>
-    <!-- Translators: Title while a playlist imports. %1$s is the playlist's name. -->
-    <string name="setup_importing_title">Importing <xliff:g id="name">%1$s</xliff:g></string>
 </resources>

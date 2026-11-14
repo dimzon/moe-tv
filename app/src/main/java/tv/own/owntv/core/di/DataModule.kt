@@ -205,12 +205,13 @@ val dataModule = module {
     // Same idea for EPG: EpgSyncWorker reports started/progress/finished here so the pill also reflects
     // guide/EPG downloads (manual resync from Settings, auto startup refresh, …).
     single { tv.own.owntv.core.sync.EpgActivityTracker() }
-    // epgDao, channelDao, rutubeApi — the one provider's guide, written by RuTubeEpgSyncer.
+    // epgDao, channelDao, rutubeApi, settings — the one provider's guide, written by RuTubeEpgSyncer.
     single {
         EpgRepository(
             epgDao = get(),
             channelDao = get(),
             rutube = get(),
+            settings = get(),
         )
     }
     // Who currently holds a stream on which playlist. Multiview tiles and the main playback spend the
@@ -235,9 +236,9 @@ val dataModule = module {
     single { UpdateManager(androidContext(), get(), get()) }
     single { CatalogSyncScheduler(androidContext()) }
     single { EpgSyncScheduler(androidContext()) }
-    // settings, sourceRepository, catalogSyncScheduler, importFinalizer — the Auto refresh
-    // settings, run on start and resume.
-    single { tv.own.owntv.core.sync.AutoRefresh(get(), get(), get(), get()) }
+    // settings, sourceRepository, catalogSyncScheduler, epgSyncScheduler, channelDao, epgDao — the
+    // startup/resume maintenance for the catalogue and the guide, run by the application process.
+    single { tv.own.owntv.core.sync.AutoRefresh(get(), get(), get(), get(), get(), get()) }
     // sourceRepository, backup, connectivity, importFinalizer, catalogSyncScheduler — onboarding:
     // attach the built-in RuTube source (a DTO now), sync it, undo on failure. Factory, not single:
     // each wizard run owns its own state machine.

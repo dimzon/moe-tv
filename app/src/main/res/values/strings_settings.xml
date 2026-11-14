@@ -438,6 +438,10 @@
     <string name="settings_catalog_sync_description">Download the RuTube channel catalogue again</string>
     <!-- Translators: Chip while the channel catalogue is being downloaded. -->
     <string name="settings_catalog_syncing">Reloading…</string>
+    <!-- Translators: Setting label for the shared catalogue/guide refresh schedule. -->
+    <string name="settings_auto_refresh">Auto-refresh</string>
+    <!-- Translators: Description of the auto-refresh schedule. -->
+    <string name="settings_auto_refresh_description">How often to update channels and the guide</string>
     <!-- Translators: Setting label for checking for app updates. -->
     <string name="settings_check_updates">Check for updates</string>
     <!-- Translators: Description of the check-for-updates setting. 'GitHub Releases' is a brand name. -->
@@ -634,6 +638,8 @@
     <!-- Translators: Hidden keyword bag for the Check for updates settings. 'github' is a brand name. Translate as individual search terms. -->
     <string name="settings_search_keywords_updates">github release version</string>
     <string name="settings_search_keywords_catalog_sync">reload resync channels catalogue catalog rutube download</string>
+    <!-- Translators: Hidden keyword bag for the auto-refresh schedule. Translate as individual search terms. -->
+    <string name="settings_search_keywords_auto_refresh">auto refresh schedule update channels guide epg</string>
     <!-- Translators: Hidden keyword bag for the auto-update check settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_update_auto">auto update new version</string>
     <!-- Translators: Hidden keyword bag for the auto-start settings. Translate as individual search terms. -->

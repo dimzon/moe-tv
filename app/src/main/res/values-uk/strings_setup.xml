@@ -28,22 +28,18 @@
     <string name="setup_before_you_start">Перед початком</string>
     <string name="setup_disclaimer">МОЁ ТВ — це лише медіапрогравач. У ньому немає каналів, плейлистів або власного контенту. Єдине джерело — вбудований легально доступний каталог прямого ефіру RuTube; ви відповідаєте за законність його використання.</string>
     <string name="setup_i_understand">Зрозуміло</string>
-    <string name="setup_set_up_owntv">Налаштування МОЁ ТВ</string>
-    <string name="setup_setup_choice_description">Почніть з нуля зі вбудованим каталогом RuTube або скопіюйте дані з іншого пристрою МОЁ ТВ.</string>
-    <string name="setup_new_profile">Нове налаштування</string>
-    <string name="setup_create_profile_add_sources">Налаштувати вбудований каталог RuTube</string>
+    <string name="setup_refresh_title">Автооновлення</string>
+    <string name="setup_refresh_sub">Каталог каналів і телегід завантажуються автоматично. Як часто їх оновлювати?</string>
+    <string name="refresh_policy_6h">Кожні 6 годин</string>
+    <string name="refresh_policy_6h_description">Рекомендовано: канали й телегід залишаються свіжими без зайвих запитів.</string>
+    <string name="refresh_policy_startup">Під час запуску</string>
+    <string name="refresh_policy_startup_description">Перевіряти оновлення щоразу під час холодного старту застосунку.</string>
+    <string name="refresh_policy_first">Лише перше завантаження</string>
+    <string name="refresh_policy_first_description">Завантажити відсутні канали й телегід один раз і більше не оновлювати автоматично.</string>
     <string name="setup_sync_device">З іншого пристрою</string>
-    <string name="setup_sync_device_description">Скопіюйте усе з іншого пристрою МОЁ ТВ через Wi-Fi</string>
     <string name="setup_restore_failed">Не вдалося виконати відновлення</string>
     <string name="setup_backup_read_failed">Не вдалося прочитати файл резервної копії</string>
-    <string name="setup_run_in_background">Продовжити у фоновому режимі</string>
-    <string name="setup_importing_catalog">Імпорт каталогу…</string>
-    <string name="setup_preparing_catalog">Підготовка каталогу</string>
-    <string name="setup_watching_during_import">Можна почати перегляд, поки завантажується решта каталогу.</string>
-    <string name="setup_all_set">Усе готово!</string>
     <string name="setup_continue">Продовжити</string>
-    <string name="setup_import_failed">Не вдалося виконати імпорт</string>
-    <string name="setup_try_again_caps">Повторити</string>
     <string name="setup_playlist_file_unavailable">Не вдалося відкрити файл плейлиста. Виберіть його знову: можливо, його було переміщено.</string>
     <string name="setup_playlist_path_unsupported">Цей шлях до локального плейлиста не підтримується.</string>
     <string name="companion_pin_page_title">МОЁ ТВ — введення PIN</string>
@@ -92,8 +88,8 @@
     <string name="local_sync_browser_title">Локальна синхронізація МОЁ ТВ</string>
     <string name="local_sync_browser_body">Ця адреса призначена для застосунку МОЁ ТВ на іншому пристрої. Відкрийте там локальну синхронізацію та виберіть цей пристрій зі списку.</string>
     <string name="setup_step_display">Екран</string>
-    <string name="setup_step_playlist">Плейлист</string>
-    <string name="setup_step_ready">Готово</string>
+    <string name="setup_step_data">Дані</string>
+    <string name="setup_step_terms">Умови</string>
     <string name="setup_key_previous_step">Попередній крок</string>
     <string name="setup_welcome_title">Вітаємо в МОЁ ТВ</string>
     <string name="setup_welcome_sub">Ваш власний IPTV-програвач. Виберіть мову, щоб почати, — її можна змінити пізніше в налаштуваннях.</string>
@@ -103,5 +99,4 @@
     <string name="setup_line_app_icon">Як МОЁ ТВ виглядає на головному екрані телевізора</string>
     <string name="setup_device_appear">Тут з\'являться пристрої з увімкненим режимом синхронізації</string>
     <string name="setup_device_address_hint">або введіть адресу іншого пристрою</string>
-    <string name="setup_importing_title">Імпорт: <xliff:g id="name">%1$s</xliff:g></string>
 </resources>

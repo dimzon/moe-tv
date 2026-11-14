@@ -57,12 +57,12 @@ class PluralResourceBoundaryTest {
     @Test
     fun english_zero_one_two_use_plural_resources() {
         val context = localized("en-US")
-        val zero = context.resources.getQuantityString(R.plurals.settings_epg_sources_status_count_channels, 0, 0)
-        val one = context.resources.getQuantityString(R.plurals.settings_epg_sources_status_count_channels, 1, 1)
-        val two = context.resources.getQuantityString(R.plurals.settings_epg_sources_status_count_channels, 2, 2)
-        assertTrue(zero.contains("channels"))
-        assertTrue(one.contains("channel."))
-        assertTrue(two.contains("channels"))
+        val zero = context.resources.getQuantityString(R.plurals.settings_epg_sources_status_count_programmes, 0, 0)
+        val one = context.resources.getQuantityString(R.plurals.settings_epg_sources_status_count_programmes, 1, 1)
+        val two = context.resources.getQuantityString(R.plurals.settings_epg_sources_status_count_programmes, 2, 2)
+        assertTrue(zero.contains("programs"))
+        assertTrue(one.contains("program."))
+        assertTrue(two.contains("programs"))
     }
 
     @Test
@@ -80,7 +80,7 @@ class PluralResourceBoundaryTest {
             val context = localized(tag)
             listOf(0, 1, 2, 5, 21, 102).forEach { count ->
                 val text = context.resources.getQuantityString(
-                    R.plurals.settings_epg_sources_catchup,
+                    R.plurals.settings_epg_sources_status_count_programmes,
                     count,
                     count,
                 )

@@ -17,12 +17,12 @@ class SupportedLocalesTest {
 
     @Test
     fun `catalogue has source and ex-USSR backlog`() {
-        // English is the source; Russian is the only shipped translation. Ukrainian, Estonian,
-        // Latvian and Lithuanian stay catalogue-only until a translation reaches the readiness
-        // threshold and a maintainer promotes them.
-        assertEquals(6, SupportedLocales.all.size)
-        assertEquals(6, SupportedLocales.all.count { it.tier == 1 || it.tier == 2 })
-        assertEquals(2, SupportedLocales.all.count { it.tier == 1 })
+        // English is the source; Russian, Ukrainian and Belarusian have shipped translations.
+        // Estonian, Latvian and Lithuanian stay catalogue-only until a translation reaches the
+        // readiness threshold and a maintainer promotes them.
+        assertEquals(7, SupportedLocales.all.size)
+        assertEquals(7, SupportedLocales.all.count { it.tier == 1 || it.tier == 2 })
+        assertEquals(4, SupportedLocales.all.count { it.tier == 1 })
     }
 
     @Test
@@ -115,8 +115,8 @@ class SupportedLocalesTest {
     @Test
     fun `pickerRows excludes non-packaged and non-visible locales`() {
         val rows = SupportedLocales.pickerRows
-        assertEquals(2, rows.size)
-        assertEquals(listOf("en-US", "ru"), rows.map { it.id })
+        assertEquals(4, rows.size)
+        assertEquals(listOf("en-US", "ru", "uk", "be"), rows.map { it.id })
         assertFalse(rows.any { it.tier == 2 })
         rows.forEach {
             assertTrue("${it.id} must be packaged", it.packaged)

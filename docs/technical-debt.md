@@ -46,9 +46,9 @@
 11. **`ChannelNameCleanupDialog`/`ChannelNameCleanupViewModel` недостижимы** (нет вызова host-
     композабла), но сохранены и пишут глобальные ключи `channel_cleanup_*`. *Закрыть:* удалить
     UI (ядро `ChannelNameCleanup` можно оставить для будущего).
-12. **`ResyncChoiceDialog` и `EpgSyncScheduler.enqueueSync` не имеют вызывающих** — ручного
-    ресинка и отдельного планировщика EPG в UI больше нет. *Закрыть:* удалить мёртвый код или
-    вернуть точку входа «Обновить каталог».
+12. **`ResyncChoiceDialog` не имеет вызывающих** — ручной ресинк каталога идёт через «Обновить
+    каналы» в настройках, а `EpgSyncScheduler` теперь вызывает `AutoRefresh` на старте и при
+    возврате в приложение. *Закрыть:* удалить `ResyncChoiceDialog`.
 13. **`GuidePriority` — no-op обёртка** вокруг `EpgDedupe` (один guide-store). Оставлена как
     шов на случай второго фида. *Закрыть:* удалить и звать `EpgDedupe` напрямую.
 14. ~~**`EpgRepository.clear()` без вызывающих**~~ — закрыто: метод удалён вместе с multi-source

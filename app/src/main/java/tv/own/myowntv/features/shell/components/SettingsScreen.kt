@@ -50,6 +50,7 @@ import tv.own.myowntv.features.settings.StageSettingsPage
 import tv.own.myowntv.features.settings.StageSettingsHeading
 import tv.own.myowntv.features.settings.StageSettingsNote
 import tv.own.myowntv.features.settings.StageSearchResultRow
+import tv.own.myowntv.features.settings.descriptionRes
 import tv.own.myowntv.features.settings.VideoGroup
 import tv.own.myowntv.features.settings.VideoPlayerGroupRows
 import tv.own.myowntv.features.settings.settingHelp
@@ -211,6 +212,7 @@ fun SettingsScreen(
     val settingsLock = tv.own.myowntv.features.settings.lock.rememberSettingsLockState()
     var showStartup by remember { mutableStateOf(false) }
     var showStartupChannelPicker by remember { mutableStateOf(false) }
+    var showRefreshPolicy by remember { mutableStateOf(false) }
     var showAfrWarning by remember { mutableStateOf(false) }
     var showLivePreviewPanelWarning by remember { mutableStateOf(false) }
     var showBgImageChooser by remember { mutableStateOf(false) }
@@ -249,6 +251,7 @@ fun SettingsScreen(
     val liveLayoutRowFocus = remember { FocusRequester() }
     val navigationRowFocus = remember { FocusRequester() }
     val startupRowFocus = remember { FocusRequester() }
+    val refreshPolicyRowFocus = remember { FocusRequester() }
     val livePreviewQuickFocus = remember { FocusRequester() }
     val ambientGlowRowFocus = remember { FocusRequester() }
     // Hoisted list state for the root settings list. We snapshot its position the instant a row is
@@ -280,13 +283,13 @@ fun SettingsScreen(
         }
         onStartConsumed()
     }
-    val anyDialogOpen = showZoom || showPopupSize || showTheme || showAccent || showUpdate || showEpgOffset || showGuideDays || showAnimations || showStartup || showStartupChannelPicker || showAfrWarning || showLivePreviewPanelWarning || showBgImageChooser || showBgPicker || showAmbientGlow || showFocusHighlight || showBgRemote || showNavigation || showLiveLayout || stageSettings.open != null || settingsLock.open
+    val anyDialogOpen = showZoom || showPopupSize || showTheme || showAccent || showUpdate || showEpgOffset || showGuideDays || showAnimations || showStartup || showStartupChannelPicker || showRefreshPolicy || showAfrWarning || showLivePreviewPanelWarning || showBgImageChooser || showBgPicker || showAmbientGlow || showFocusHighlight || showBgRemote || showNavigation || showLiveLayout || stageSettings.open != null || settingsLock.open
     // When a dialog closes, restore focus to the row that opened it. NOTE: this restore crosses
     // INTO the root focus group from outside (the dialog), but onEnter does NOT fire for programmatic
     // requestsFocus (only for directional entry) — so dialogReturn must be cleared HERE, not in onEnter.
     // If it's left set, the next directional entry (e.g. sidebar→here) would re-route to a stale row.
     var dialogReturn by remember { mutableStateOf<FocusRequester?>(null) }
-    LaunchedEffect(showZoom, showPopupSize, showTheme, showAccent, showUpdate, showEpgOffset, showGuideDays, showAnimations, showStartup, showStartupChannelPicker, showAfrWarning, showLivePreviewPanelWarning, showBgImageChooser, showBgPicker, showAmbientGlow, showFocusHighlight, showBgRemote, showNavigation, showLiveLayout, stageSettings.open, settingsLock.open) {
+    LaunchedEffect(showZoom, showPopupSize, showTheme, showAccent, showUpdate, showEpgOffset, showGuideDays, showAnimations, showStartup, showStartupChannelPicker, showRefreshPolicy, showAfrWarning, showLivePreviewPanelWarning, showBgImageChooser, showBgPicker, showAmbientGlow, showFocusHighlight, showBgRemote, showNavigation, showLiveLayout, stageSettings.open, settingsLock.open) {
         // Only after a popup really closed: on first composition there is no opener, and holding a stale
         // offset for the settle frames bounced the page.
         if (!anyDialogOpen && dialogReturn != null) {
@@ -303,6 +306,7 @@ fun SettingsScreen(
     val currentLocaleTag by languageVm.currentTag.collectAsStateWithLifecycle()
     val languageChip = languageChipText(currentLocaleTag)
     val catalogSyncRunning by settingsVm.catalogSyncRunning.collectAsStateWithLifecycle()
+    val dataRefreshPolicy by settingsVm.dataRefreshPolicy.collectAsStateWithLifecycle()
     val livePreview by settingsVm.livePreviewEnabled.collectAsStateWithLifecycle()
     val livePreviewPanelActive by settingsVm.livePreviewPanelActive.collectAsStateWithLifecycle()
     val previewAudio by settingsVm.livePreviewAudio.collectAsStateWithLifecycle()
@@ -682,6 +686,16 @@ fun SettingsScreen(
             onClick = { settingsVm.resyncCatalog() },
         ),
         RootRow(
+            "auto_refresh", TileTone.SECONDARY, MyOwnTVIcon.CLOCK,
+            heading = stringResource(R.string.settings_group_app),
+            title = stringResource(R.string.settings_auto_refresh),
+            desc = stringResource(R.string.settings_auto_refresh_description),
+            chip = tv.own.myowntv.features.settings.dataRefreshPolicyLabel(dataRefreshPolicy),
+            chipTone = TileTone.PRIMARY,
+            focus = refreshPolicyRowFocus,
+            onClick = { saveScroll(); dialogReturn = refreshPolicyRowFocus; showRefreshPolicy = true },
+        ),
+        RootRow(
             "app_icon", TileTone.SECONDARY, MyOwnTVIcon.PALETTE,
             title = stringResource(R.string.settings_app_icon), desc = stringResource(R.string.settings_app_icon_summary),
             chip = stringResource(appIcon.label), chipTone = TileTone.SECONDARY,
@@ -981,6 +995,8 @@ fun SettingsScreen(
             *tv.own.myowntv.features.settings.lock.settingsLockSearchEntries(settingsLock, settingsLockVm) { saveScroll(); dialogReturn = searchFieldFocus }.toTypedArray(),
             SettingsSearchEntry(stringResource(R.string.settings_group_app), stringResource(R.string.settings_catalog_sync), stringResource(R.string.settings_search_keywords_catalog_sync), MyOwnTVIcon.REFRESH, TileTone.SECONDARY,
                 chip = if (catalogSyncRunning) stringResource(R.string.settings_catalog_syncing) else null, chipTone = TileTone.PRIMARY, showChevron = false) { settingsVm.resyncCatalog() },
+            SettingsSearchEntry(stringResource(R.string.settings_group_app), stringResource(R.string.settings_auto_refresh), stringResource(R.string.settings_search_keywords_auto_refresh), MyOwnTVIcon.CLOCK, TileTone.SECONDARY,
+                chip = tv.own.myowntv.features.settings.dataRefreshPolicyLabel(dataRefreshPolicy), chipTone = TileTone.PRIMARY) { saveScroll(); dialogReturn = searchFieldFocus; showRefreshPolicy = true },
             SettingsSearchEntry(stringResource(R.string.settings_group_app), stringResource(R.string.settings_check_updates), stringResource(R.string.settings_search_keywords_updates), MyOwnTVIcon.REFRESH, TileTone.PRIMARY,
                 chip = "v${tv.own.myowntv.BuildConfig.VERSION_NAME}") { saveScroll(); dialogReturn = searchFieldFocus; showUpdate = true },
             SettingsSearchEntry(stringResource(R.string.settings_group_app), stringResource(R.string.settings_update_startup), stringResource(R.string.settings_search_keywords_update_auto), MyOwnTVIcon.REFRESH, TileTone.SECONDARY,
@@ -1175,6 +1191,7 @@ fun SettingsScreen(
     if (showGuideDays) GuideDaysDialog(settingsVm, guideDays, onClose = { showGuideDays = false })
     if (showTheme) ThemeDialogHost(settingsVm, themeMode, onClose = { showTheme = false })
     if (showStartup) StartupDialogHost(settingsVm, startupMode, onClose = { showStartup = false }, onPickChannel = { showStartupChannelPicker = true })
+    if (showRefreshPolicy) RefreshPolicyDialogHost(settingsVm, dataRefreshPolicy, onClose = { showRefreshPolicy = false })
     if (showStartupChannelPicker) StartupChannelPickerHost(settingsVm, startupChannel, onClose = { showStartupChannelPicker = false })
     if (showAnimations) AnimationsDialogHost(settingsVm, animationLevel, onClose = { showAnimations = false })
     if (showNavigation) {
@@ -1397,6 +1414,20 @@ private fun ThemeDialogHost(settingsVm: SettingsViewModel, themeMode: ThemeMode,
         options = ThemeMode.entries.map { it.name to themeLabel(it) },
         selected = themeMode.name,
         onSelect = { settingsVm.setThemeMode(ThemeMode.valueOf(it)); onClose() },
+        onDismiss = { onClose() },
+    )
+}
+
+@Composable
+private fun RefreshPolicyDialogHost(settingsVm: SettingsViewModel, current: DataRefreshPolicy, onClose: () -> Unit) {
+    val options = DataRefreshPolicy.entries
+    tv.own.myowntv.features.settings.PickerDialog(
+        title = stringResource(R.string.settings_auto_refresh),
+        subtitle = stringResource(R.string.settings_auto_refresh_description),
+        options = options.map { it.name to tv.own.myowntv.features.settings.dataRefreshPolicyLabel(it) },
+        descriptions = options.associate { it.name to stringResource(it.descriptionRes()) },
+        selected = current.name,
+        onSelect = { settingsVm.setDataRefreshPolicy(DataRefreshPolicy.valueOf(it)); onClose() },
         onDismiss = { onClose() },
     )
 }

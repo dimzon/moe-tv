@@ -364,6 +364,9 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         // These lived on the built-in source's row; the row is gone (schema v5), so the last
         // successful catalogue sync and the "clean channel names" choice live here.
         val SOURCE_LAST_SYNC_AT = longPreferencesKey("source_last_sync_at")
+        // The guide's own last successful attempt. Kept apart from the catalogue's timestamp: the two
+        // refresh on their own schedules and one failing must not make the other look stale.
+        val SOURCE_LAST_EPG_SYNC_AT = longPreferencesKey("source_last_epg_sync_at")
         val CHANNEL_CLEANUP_ENABLED = booleanPreferencesKey("channel_cleanup_enabled")
         val CHANNEL_CLEANUP_STRIP = stringPreferencesKey("channel_cleanup_strip")
         // v4.1.6 one-shot: reset live latency to the safe Balanced preset. Subsequent user changes are
@@ -2191,6 +2194,20 @@ class SettingsRepository(private val context: Context, private val localeStore: 
 
     suspend fun markSourceSynced(atMs: Long) {
         context.dataStore.edit { it[Keys.SOURCE_LAST_SYNC_AT] = atMs }
+    }
+
+    /**
+     * Epoch ms of the last successful guide sync attempt; null = never attempted.
+     *
+     * Recorded even when RuTube returned no programmes: the attempt itself is what the refresh
+     * policy measures, so a channel without a schedule is not retried every time the app starts.
+     */
+    val sourceLastEpgSyncAt: Flow<Long?> = prefsFlow { prefs ->
+        prefs[Keys.SOURCE_LAST_EPG_SYNC_AT]?.takeIf { it > 0L }
+    }
+
+    suspend fun markEpgSynced(atMs: Long) {
+        context.dataStore.edit { it[Keys.SOURCE_LAST_EPG_SYNC_AT] = atMs }
     }
 
     /** Global "Clean channel names" choice, replacing the per-source row it used to live on. */
