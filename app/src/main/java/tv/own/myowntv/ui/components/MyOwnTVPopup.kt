@@ -63,6 +63,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
+import tv.own.myowntv.ui.LocalFullscreenMode
+import tv.own.myowntv.ui.applyFullscreen
 import tv.own.myowntv.ui.theme.PopupFontTheme
 
 /**
@@ -107,6 +109,9 @@ fun MyOwnTVPopup(
         ),
     ) {
         val dialogView = LocalView.current
+        // The dialog window owns an insets controller of its own: while it holds the focus the
+        // system consults it, not the activity's, so the bars would come back over every modal.
+        val fullscreenMode = LocalFullscreenMode.current
         var parent = dialogView.parent
         var provider: DialogWindowProvider? = null
         while (parent != null && provider == null) {
@@ -128,6 +133,10 @@ fun MyOwnTVPopup(
             // Compose/OEM code can update dialog attributes after initial attachment.
             dialogWindow?.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
             dialogWindow?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
+            // Every recomposition re-asserts it, so a live setting toggle while the dialog is open
+            // applies too. Nothing to restore on dismiss: the window dies and the activity's own
+            // window, whose controller still requests hidden bars, regains the focus.
+            dialogWindow?.applyFullscreen(fullscreenMode)
         }
 
         val watcher = remember(dialogView) { TvImeWatcher(dialogView) }
