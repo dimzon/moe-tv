@@ -784,7 +784,7 @@
     <string name="local_auto_sync_timing_immediately">При каждом открытии или закрытии одного из приложений</string>
     <string name="local_auto_sync_timing_daily">Ежедневно</string>
     <string name="local_auto_sync_timing_weekly">Еженедельно</string>
-    <string name="local_auto_sync_note">Автосинхронизация объединяет в обе стороны, а удалённое остаётся удалённым. Каждое устройство само решает, что пропускать: плейлисты с их данными входа и настройки передаются только туда, где они отмечены.</string>
+    <string name="local_auto_sync_note">Автосинхронизация объединяет избранное, порядок, историю и напоминания в обе стороны, а удалённое остаётся удалённым. Что передавать, каждая сторона решает сама: галочки «Отдавать» и «Читать» на каждом устройстве.</string>
     <string name="local_auto_sync_last_run">Последняя автосинхронизация: <xliff:g id="when">%1$s</xliff:g></string>
     <string name="local_auto_sync_turned_off">Автосинхронизация выключена на <xliff:g id="device">%1$s</xliff:g></string>
     <string name="local_auto_sync_unreachable">Не удалось связаться с <xliff:g id="device">%1$s</xliff:g>, повтор позже</string>

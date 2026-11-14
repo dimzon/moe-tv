@@ -784,7 +784,7 @@
     <string name="local_auto_sync_timing_immediately">При кожному відкритті або закритті одного із застосунків</string>
     <string name="local_auto_sync_timing_daily">Щодня</string>
     <string name="local_auto_sync_timing_weekly">Щотижня</string>
-    <string name="local_auto_sync_note">Автосинхронізація об\'єднує в обидва боки, а видалене залишається видаленим. Кожен пристрій сам вирішує, що пропускати: плейлисти з їхніми даними входу та налаштування передаються лише туди, де вони позначені.</string>
+    <string name="local_auto_sync_note">Автосинхронізація об\'єднує обране, порядок, історію та нагадування в обидва боки, а видалене залишається видаленим. Що передавати, кожна сторона вирішує сама: галочки «Віддавати» і «Читати» на кожному пристрої.</string>
     <string name="local_auto_sync_last_run">Остання автосинхронізація: <xliff:g id="when">%1$s</xliff:g></string>
     <string name="local_auto_sync_turned_off">Автосинхронізацію вимкнено на <xliff:g id="device">%1$s</xliff:g></string>
     <string name="local_auto_sync_unreachable">Не вдалося зв\'язатися з <xliff:g id="device">%1$s</xliff:g>, повтор пізніше</string>

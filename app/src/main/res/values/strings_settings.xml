@@ -1428,7 +1428,7 @@
     <!-- Translators: Timing choice: at most once a week. -->
     <string name="local_auto_sync_timing_weekly">Weekly</string>
     <!-- Translators: Note at the bottom of one device's Auto-sync settings. -->
-    <string name="local_auto_sync_note">Auto-sync merges both ways, and deletions stay deleted. Each device decides what it lets through: playlists with their logins and Settings travel only where they are ticked.</string>
+    <string name="local_auto_sync_note">Auto-sync merges favorites, order, history and reminders both ways, and deletions stay deleted. What travels, each side decides for itself: the Give and Read ticks on each device.</string>
     <!-- Translators: Line under a paired device's row: when the last automatic sync with it completed. %1$s is a relative time such as “2 hours ago”. -->
     <string name="local_auto_sync_last_run">Last auto-sync: <xliff:g id="when">%1$s</xliff:g></string>
     <!-- Translators: Line under a paired device's row: the other device turned auto-sync off. -->

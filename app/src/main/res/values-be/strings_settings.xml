@@ -784,7 +784,7 @@
     <string name="local_auto_sync_timing_immediately">Пры кожным адкрыцці або закрыцці аднаго з прыкладанняў</string>
     <string name="local_auto_sync_timing_daily">Штодня</string>
     <string name="local_auto_sync_timing_weekly">Штотыдзень</string>
-    <string name="local_auto_sync_note">Аўтасінхранізацыя аб\'ядноўвае ў абодва бакі, а выдаленае застаецца выдаленым. Кожная прылада сама вырашае, што прапускаць: плейлісты з іх данымі ўваходу і налады перадаюцца толькі туды, дзе яны адзначаны.</string>
+    <string name="local_auto_sync_note">Аўтасінхранізацыя аб\'ядноўвае абранае, парадак, гісторыю і напаміны ў абодва бакі, а выдаленае застаецца выдаленым. Што перадаваць, кожная прылада вырашае сама: галочкі «Аддаваць» і «Чытаць» на кожнай прыладзе.</string>
     <string name="local_auto_sync_last_run">Апошняя аўтасінхранізацыя: <xliff:g id="when">%1$s</xliff:g></string>
     <string name="local_auto_sync_turned_off">Аўтасінхранізацыя выключана на <xliff:g id="device">%1$s</xliff:g></string>
     <string name="local_auto_sync_unreachable">Не ўдалося звязацца з <xliff:g id="device">%1$s</xliff:g>, паўтор пазней</string>
