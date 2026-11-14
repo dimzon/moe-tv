@@ -62,4 +62,10 @@ class ImageCacheSizingTest {
     fun `low-RAM keeps 10 percent with no floor`() {
         assertEquals((128L * mb * 0.10).toLong(), imageMemoryCacheBytes(128L * mb, lowRam = true))
     }
+
+    @Test
+    fun `largeHeap must not grow the low-RAM image cache past 16 MB`() {
+        assertEquals(16L * mb, imageMemoryCacheBytes(256L * mb, lowRam = true))
+        assertEquals(16L * mb, imageMemoryCacheBytes(1024L * mb, lowRam = true))
+    }
 }

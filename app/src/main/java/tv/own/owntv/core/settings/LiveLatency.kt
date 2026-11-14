@@ -105,6 +105,8 @@ object LiveBuffer {
         )
     }
 
+    private const val MIN_HEAP_BUFFER_BYTES = 2L * 1024 * 1024
+
     /**
      * Byte cap for the live buffer. The default (24 MB / 16 MB low-RAM) is reached at ~7 s on a
      * 25 Mbps UHD stream, which is what keeps that socket reading continuously — but it also means a
@@ -119,11 +121,39 @@ object LiveBuffer {
      *
      * [lowSpec] caps the scaling at 2× instead of 3×: on a 2 GB TV a 3× buffer would push the player
      * heap against the rest of the app's budget.
+     *
+     * [maxBytes] is the process's heap ceiling ([targetBufferCapBytes]) and wins over both the default
+     * and the scale-up: ExoPlayer allocates its chunks as Java `byte[]`s, so a target above the heap is
+     * not a bigger buffer — it is the next OutOfMemoryError.
      */
-    fun targetBufferBytes(bufferSecs: Int?, prerollSecs: Int, defaultBytes: Int, lowSpec: Boolean = false): Int {
+    fun targetBufferBytes(
+        bufferSecs: Int?,
+        prerollSecs: Int,
+        defaultBytes: Int,
+        lowSpec: Boolean = false,
+        maxBytes: Int = Int.MAX_VALUE,
+    ): Int {
         val depthSecs = maxOf(bufferSecs ?: BALANCED_SECS, prerollSecs.coerceAtLeast(0))
-        if (depthSecs <= BALANCED_SECS) return defaultBytes
-        val scaled = defaultBytes.toLong() * depthSecs / BALANCED_SECS
-        return scaled.coerceAtMost(defaultBytes.toLong() * if (lowSpec) 2 else 3).toInt()
+        val bytes = if (depthSecs <= BALANCED_SECS) {
+            defaultBytes.toLong()
+        } else {
+            (defaultBytes.toLong() * depthSecs / BALANCED_SECS)
+                .coerceAtMost(defaultBytes.toLong() * if (lowSpec) 2 else 3)
+        }
+        return bytes.coerceAtMost(maxBytes.toLong()).toInt()
     }
+
+    /**
+     * Ceiling for [targetBufferBytes], from the Java heap the process may actually use
+     * (`Runtime.maxMemory()`, which honours `largeHeap`). A quarter of the heap leaves room for
+     * Compose, bitmaps and diagnostics; the 2 MiB floor keeps the arithmetic sane on a tiny heap.
+     *
+     * This matters on TV boxes with a small growth limit: the crash report that prompted it had
+     * 16 MiB total, where the old fixed 16 MiB low-RAM target let the player alone fill the heap.
+     */
+    fun targetBufferCapBytes(heapLimitBytes: Long): Int =
+        (heapLimitBytes / 4)
+            .coerceAtLeast(MIN_HEAP_BUFFER_BYTES)
+            .coerceAtMost(Int.MAX_VALUE.toLong())
+            .toInt()
 }

@@ -3512,18 +3512,35 @@ class LivePreviewEngine(
         val lc = LiveBuffer.loadControlFor(effectiveLiveBufferSecs(), effectivePrerollSecs()).also { builtLoadControl = it }
         val lowRam = budget.lowSpec || memoryPressure
         builtLowRam = lowRam
-        val defaultBytes = if (lowRam) LOW_RAM_TARGET_BYTES else TARGET_BUFFER_BYTES
+        // DefaultAllocator keeps the live buffer as Java byte[]s, so the byte target is a heap reservation,
+        // not a network knob. On a box with a 16 MB growth limit the old fixed 16 MB low-RAM target let the
+        // player alone fill the whole process heap (the 2026-11-14 crash report: OOM on the next Compose
+        // frame after rapid zapping). Cap it by the heap actually available — largeHeap included — and
+        // leave the rest to Compose, bitmaps and diagnostics.
+        val heapLimitBytes = Runtime.getRuntime().maxMemory()
+        val heapCapBytes = LiveBuffer.targetBufferCapBytes(heapLimitBytes)
+        val baseBytes = if (lowRam) LOW_RAM_TARGET_BYTES else TARGET_BUFFER_BYTES
+        val defaultBytes = minOf(baseBytes, heapCapBytes)
+        val targetBufferBytes = LiveBuffer.targetBufferBytes(
+            effectiveLiveBufferSecs(),
+            effectivePrerollSecs(),
+            defaultBytes,
+            lowSpec = budget.lowSpec,
+            maxBytes = heapCapBytes,
+        )
         LiveDiagnosticsLog.event(
             "load_control min=${lc.minBufferMs} max=${lc.maxBufferMs} start=${lc.bufferForPlaybackMs} " +
                 "restart=${lc.bufferForPlaybackAfterRebufferMs} preroll=${effectivePrerollSecs()}s " +
-                "latencySec=${liveBufferSecs ?: -1}",
+                "latencySec=${liveBufferSecs ?: -1} heap=${heapLimitBytes shr 20}MiB " +
+                "cap=${heapCapBytes shr 20}MiB target=${targetBufferBytes shr 20}MiB",
         )
         // Also to Logcat unconditionally: the diagnostics log is off in a release build, and these numbers
         // are the only way to tell "the setting didn't apply" from "the buffer filled that fast".
         android.util.Log.i(
             LiveDiagnosticsLog.TAG,
             "live_buffer preroll=${effectivePrerollSecs()}s start=${lc.bufferForPlaybackMs}ms " +
-                "min=${lc.minBufferMs}ms max=${lc.maxBufferMs}ms latency=${liveBufferSecs ?: -1}",
+                "min=${lc.minBufferMs}ms max=${lc.maxBufferMs}ms latency=${liveBufferSecs ?: -1} " +
+                "heap=${heapLimitBytes shr 20}MiB cap=${heapCapBytes shr 20}MiB target=${targetBufferBytes shr 20}MiB",
         )
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(
@@ -3532,7 +3549,7 @@ class LivePreviewEngine(
                 lc.bufferForPlaybackMs,
                 lc.bufferForPlaybackAfterRebufferMs,
             )
-            .setTargetBufferBytes(LiveBuffer.targetBufferBytes(effectiveLiveBufferSecs(), effectivePrerollSecs(), defaultBytes, lowSpec = budget.lowSpec))
+            .setTargetBufferBytes(targetBufferBytes)
             .build()
         // Decode-path config is shared with the other ExoPlayer engines — see [ownTVRenderers].
         // The audio sink is pinned to stereo PCM when the user asked for "Stereo only" or when the

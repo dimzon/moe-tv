@@ -139,4 +139,27 @@ class LiveBufferTest {
             LiveBuffer.targetBufferBytes(justDeeper, 0, lowRam, lowSpec = true),
         )
     }
+
+    @Test
+    fun `the buffer ceiling never exceeds a quarter of the real java heap`() {
+        val mib = 1024L * 1024
+        // The Amlogic box from the 2026-11-14 crash report: 16 MB growth limit -> 4 MB buffer.
+        assertEquals((4 * mib).toInt(), LiveBuffer.targetBufferCapBytes(16 * mib))
+        // largeHeap on the same box lifts the heap; the cap follows instead of pinning 16 MB.
+        assertEquals((64 * mib).toInt(), LiveBuffer.targetBufferCapBytes(256 * mib))
+        // Tiny/unknown heaps keep a sane floor rather than rounding down to zero.
+        assertEquals((2 * mib).toInt(), LiveBuffer.targetBufferCapBytes(mib))
+    }
+
+    @Test
+    fun `a heap ceiling clamps both the default and the scaled target`() {
+        val default = 16 * 1024 * 1024
+        // Balanced: the low-RAM default itself is already above a 4 MB heap share.
+        assertEquals(4 * 1024 * 1024, LiveBuffer.targetBufferBytes(null, 0, default, maxBytes = 4 * 1024 * 1024))
+        // STABLE + lowSpec would scale 16 MB up to 30 MB; the heap ceiling still wins.
+        assertEquals(
+            8 * 1024 * 1024,
+            LiveBuffer.targetBufferBytes(15, 0, default, lowSpec = true, maxBytes = 8 * 1024 * 1024),
+        )
+    }
 }

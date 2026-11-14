@@ -2189,6 +2189,7 @@
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	buffered but never started playing ($detail)
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	buffering stalled
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	building tunneled player (N19)
+1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	cap=${heapCapBytes shr 20}MiB target=${targetBufferBytes shr 20}MiB
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	connection pool evict failed: ${it.javaClass.simpleName}
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	critical memory pressure — next tune rebuilds with the low-RAM buffer
 1	protocol	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	dash
@@ -2213,6 +2214,7 @@
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	hardware
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	hardware decoding is ON but '$decoderName' is a software decoder —
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	health posMs=$pos bufferMs=${p.totalBufferedDuration} liveOffsetMs=${liveOffset ?: -1}
+1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	heap=${heapLimitBytes shr 20}MiB cap=${heapCapBytes shr 20}MiB target=${targetBufferBytes shr 20}MiB
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	hevc
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	hls
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	hls_playlist ($reason) mediaSeq=${playlist.mediaSequence} segs=${playlist.segments.size}
@@ -2226,7 +2228,7 @@
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	kind unknown
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	knownHlsHost=$knownHls knownDashHost=$knownDashHost
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	lang=$it
-1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	latencySec=${liveBufferSecs ?: -1}
+1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	latencySec=${liveBufferSecs ?: -1} heap=${heapLimitBytes shr 20}MiB
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	learned HLS route could not parse this channel — retrying it as TS
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	length=${response.body.contentLength()} signature=${HttpDiagnostics.mediaSignature(prefix)}
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	liveOffsetMs=${p.currentLiveOffset.takeUnless { it == C.TIME_UNSET } ?: -1}

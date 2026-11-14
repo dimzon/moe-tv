@@ -280,8 +280,12 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
     }
 }
 
-/** 15% of the heap, capped at 64 MB; low-RAM devices keep 10%. */
+/**
+ * 15% of the heap, capped at 64 MB; low-RAM devices keep 10% but never more than 16 MB. largeHeap
+ * lifts `Runtime.maxMemory()` on exactly the TVs this low-RAM branch exists for, and channel logos
+ * must not grow into the memory the video pipeline needs.
+ */
 internal fun imageMemoryCacheBytes(heapBytes: Long, lowRam: Boolean): Long {
-    if (lowRam) return (heapBytes * 0.10).toLong()
+    if (lowRam) return minOf((heapBytes * 0.10).toLong(), 16L * 1024 * 1024)
     return minOf((heapBytes * 0.15).toLong(), 64L * 1024 * 1024)
 }

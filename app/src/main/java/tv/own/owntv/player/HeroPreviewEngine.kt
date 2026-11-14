@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import tv.own.owntv.core.network.HttpClient
+import tv.own.owntv.core.settings.LiveBuffer
 
 /**
  * ExoPlayer engine for the Home screen hero preview.
@@ -206,8 +207,13 @@ class HeroPreviewEngine(
         val dataSource = OkHttpDataSource.Factory(streamingHttp.client)
             .setUserAgent(ua)
             .setDefaultRequestProperties(headers)
+        // The preview buffers on the Java heap too. Media3's default target (64 MB) would let a silent
+        // home-screen preview take a small TV's whole heap; a few seconds of preview never needs that.
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(2_000, 8_000, 1_000, 2_000)
+            .setTargetBufferBytes(
+                minOf(HERO_TARGET_BUFFER_BYTES, LiveBuffer.targetBufferCapBytes(Runtime.getRuntime().maxMemory())),
+            )
             .build()
         return ExoPlayer.Builder(context)
             // Shares the decode-path config of the real engines ([ownTVRenderers]) instead of a stock
@@ -237,6 +243,9 @@ class HeroPreviewEngine(
 
     companion object {
         private const val TAG = "HeroPreviewEngine"
+
+        /** A few seconds of preview; also the ceiling on what the silent hero may pin on the heap. */
+        private const val HERO_TARGET_BUFFER_BYTES = 8 * 1024 * 1024
 
         /** No first frame within this window → give up and leave the poster showing. Armed at load;
          *  see [NoFrameWatchdog] for why the budget is 12 s. */
