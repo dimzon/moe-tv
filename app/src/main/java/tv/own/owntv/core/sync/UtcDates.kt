@@ -38,7 +38,7 @@ internal object UtcDates {
         val cal = borrowCalendar()
         cal.timeInMillis = epochDay * MILLIS_PER_DAY
         return String.format(
-            Locale.US,
+            Locale.ROOT,
             "%04d-%02d-%02d",
             cal.get(Calendar.YEAR),
             cal.get(Calendar.MONTH) + 1,
