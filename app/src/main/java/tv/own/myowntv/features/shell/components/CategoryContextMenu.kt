@@ -166,10 +166,8 @@ private fun RestoreConfirmPopup(
     onDismiss: () -> Unit,
 ) {
     val focus = remember { FocusRequester() }
-    val nothing = lines?.isEmpty() == true
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
-    // Again when the lines arrive: the first button changes from Restore to Cancel (or back).
-    LaunchedEffect(lines?.isEmpty()) {
+    LaunchedEffect(Unit) {
         withFrameNanos { }
         focusManager.clearFocus(force = true)
         withFrameNanos { }
@@ -184,10 +182,7 @@ private fun RestoreConfirmPopup(
             tv.own.myowntv.ui.stage.StageMenu(Modifier.width(520.mpx).trapAllFocusExit().focusGroup()) {
                 tv.own.myowntv.ui.stage.StageMenuHeader(title = categoryName, subtitle = null)
                 Text(
-                    stringResource(
-                        if (nothing) tv.own.myowntv.R.string.content_category_restore_nothing
-                        else tv.own.myowntv.R.string.content_category_restore_question,
-                    ),
+                    stringResource(tv.own.myowntv.R.string.content_category_restore_question),
                     style = tv.own.myowntv.ui.theme.stageText(18, 600),
                     color = tv.own.myowntv.ui.theme.StageColors.MenuItemText,
                     modifier = Modifier.padding(start = 14.mpx, end = 14.mpx, top = 8.mpx, bottom = 12.mpx),
@@ -207,17 +202,15 @@ private fun RestoreConfirmPopup(
                 }
                 // Room between what will change and what to do about it.
                 androidx.compose.foundation.layout.Spacer(Modifier.height(18.mpx))
-                // Restore is only offered once the lines are known and there is something to undo.
-                if (!lines.isNullOrEmpty()) {
-                    tv.own.myowntv.ui.stage.StageMenuItem(
-                        restoreLabel ?: stringResource(tv.own.myowntv.R.string.common_reset), onClick = onRestore,
-                        icon = MyOwnTVIcon.REFRESH, modifier = Modifier.focusRequester(focus),
-                    )
-                }
+                // Restoring an already-default category changes nothing — that is success, so the
+                // button is offered from the start, while the preview lines are still loading.
+                tv.own.myowntv.ui.stage.StageMenuItem(
+                    restoreLabel ?: stringResource(tv.own.myowntv.R.string.common_reset), onClick = onRestore,
+                    icon = MyOwnTVIcon.REFRESH, modifier = Modifier.focusRequester(focus),
+                )
                 tv.own.myowntv.ui.stage.StageMenuItem(
                     stringResource(tv.own.myowntv.R.string.common_cancel), onClick = onDismiss,
                     icon = MyOwnTVIcon.CLOSE,
-                    modifier = if (lines.isNullOrEmpty()) Modifier.focusRequester(focus) else Modifier,
                 )
             }
         }

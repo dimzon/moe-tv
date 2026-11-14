@@ -30,7 +30,6 @@
         <item quantity="other">Вернуцца <xliff:g id="count">%1$d</xliff:g> перамешчаных элементаў</item>
     </plurals>
     <string name="content_category_restore_order">Ваш парадак будзе скінуты</string>
-    <string name="content_category_restore_nothing">Катэгорыя ўжо ў зыходным стане плейліста</string>
     <string name="content_category_lock">Заблакаваць PIN-кодам</string>
     <string name="content_category_locked_placeholder">Гэтая катэгорыя заблакавана</string>
     <plurals name="content_category_pin_wait">

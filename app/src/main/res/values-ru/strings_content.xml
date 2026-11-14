@@ -30,7 +30,6 @@
         <item quantity="other">Вернутся <xliff:g id="count">%1$d</xliff:g> перемещённых элементов</item>
     </plurals>
     <string name="content_category_restore_order">Ваш порядок будет сброшен</string>
-    <string name="content_category_restore_nothing">Категория уже в исходном состоянии плейлиста</string>
     <string name="content_category_lock">Заблокировать PIN-кодом</string>
     <string name="content_category_locked_placeholder">Эта категория заблокирована</string>
     <plurals name="content_category_pin_wait">
