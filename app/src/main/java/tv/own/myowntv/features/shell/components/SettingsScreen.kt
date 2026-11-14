@@ -482,9 +482,9 @@ fun SettingsScreen(
             chip = stringResource(if (updateCheckOnStart) R.string.common_on else R.string.common_off),
             chipTone = if (updateCheckOnStart) TileTone.PRIMARY else TileTone.SECONDARY,
             onClick = { settingsVm.setUpdateCheckOnStart(!updateCheckOnStart) },
-            // Locked off: update checking is force-disabled (SettingsRepository) — the app is
-            // sideloaded apartment-only, there is nothing to check against. Greyed, non-interactive.
-            enabled = false,
+            // Gated by the single CoreBuildInfo.UPDATES_ENABLED switch: greyed when update
+            // checking is locked off.
+            enabled = tv.own.owntv.core.CoreBuildInfo.UPDATES_ENABLED,
         ),
         // The guide's own settings (one RuTube source fills it, so there are no source lists above
         // it any more): the guide-wide offset, reminders and how far ahead the guide is stored.
@@ -733,8 +733,8 @@ fun SettingsScreen(
             chip = if (updateCheckOnStart) stringResource(R.string.common_on) else stringResource(R.string.common_off),
             chipTone = if (updateCheckOnStart) TileTone.PRIMARY else TileTone.SECONDARY,
             onClick = { settingsVm.setUpdateCheckOnStart(!updateCheckOnStart) },
-            // Locked off with the quick toggle above — same force-disabled update check.
-            enabled = false,
+            // Gated with the quick toggle above — the same CoreBuildInfo.UPDATES_ENABLED switch.
+            enabled = tv.own.owntv.core.CoreBuildInfo.UPDATES_ENABLED,
         ),
         RootRow(
             tabRowKey(SettingsTab.NETWORK), TileTone.SECONDARY, MyOwnTVIcon.NETWORK,

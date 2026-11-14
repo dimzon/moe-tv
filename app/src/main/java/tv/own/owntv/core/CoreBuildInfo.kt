@@ -68,4 +68,14 @@ object CoreBuildInfo {
      * marker, which both repositories' release names carry.
      */
     var releaseRepo: String = "dimzon/moe-tv-site"
+
+    /**
+     * The single switch for update checking — change it here and nowhere else.
+     *
+     * `true`: the startup check runs (per the user's Settings toggle) and the "Check for updates"
+     * rows work. `false`: both toggle rows are drawn greyed and non-interactive, the startup check
+     * never runs and the stored preference is ignored; the manual "Check for updates" button keeps
+     * working, since it is an explicit user action.
+     */
+    const val UPDATES_ENABLED = true
 }

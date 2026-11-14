@@ -28,6 +28,7 @@
 1	app/src/main/java/tv/own/myowntv/features/live/LiveViewModel.kt	play-link resolve failed channelId=${channel.id}
 1	app/src/main/java/tv/own/myowntv/features/more/MorePages.kt	https://$SITE_LINK/
 1	app/src/main/java/tv/own/myowntv/features/more/MorePages.kt	jm
+1	app/src/main/java/tv/own/myowntv/features/more/MoreScreen.kt	${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})
 8	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	\0
 1	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	${cfg.host}$p
 1	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	:${cfg.port}
@@ -144,7 +145,6 @@
 1	app/src/main/java/tv/own/owntv/core/settings/CustomizePinSettings.kt	settingsPinHash
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsImportRules.kt	startup_mode
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	\0
-1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	UNUSED_PARAMETER
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	auto_frame_rate_reset_416
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	dns_doh_url
 1	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	dns_enabled

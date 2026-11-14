@@ -502,7 +502,7 @@
     <!-- Translators: Button to confirm the selected color from the picker. -->
     <string name="settings_use_color">Use this color</string>
     <!-- Translators: Version display on the About screen. 'version' is the version string. -->
-    <string name="settings_about_version">Version <xliff:g id="version">%1$s</xliff:g></string>
+    <string name="settings_about_version">Version <xliff:g id="version">%1$s</xliff:g> (<xliff:g id="build">%2$d</xliff:g>)</string>
     <!-- Translators: Link label on the About screen for the project download page. -->
     <string name="more_about_download_page">Download page</string>
     <!-- Translators: Accessibility label for the download page QR code. -->

@@ -857,15 +857,19 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         context.dataStore.edit { it[Keys.EPG_OFFSET_MIN] = minutes.coerceIn(epgOffsetRangeMinutes) }
     }
 
-    // Update checking is force-disabled and locked off: the app is not published anywhere a device
-    // could pull a newer build from (apartment-only, sideloaded), so there is nothing to check and no
-    // where to. The stored key is ignored and the setter is a no-op — the toggle can never be turned
-    // on, and the startup check never runs. (Re-enable by restoring a prefsFlow read here.)
-    val updateCheckOnStart: Flow<Boolean> = flowOf(false)
+    /**
+     * Automatically check GitHub Releases for a newer version shortly after launch.
+     *
+     * Gated by [tv.own.owntv.core.CoreBuildInfo.UPDATES_ENABLED]: while it is off the stored key is
+     * ignored and the toggle can never be turned on.
+     */
+    val updateCheckOnStart: Flow<Boolean> =
+        if (!tv.own.owntv.core.CoreBuildInfo.UPDATES_ENABLED) flowOf(false)
+        else prefsFlow { it[Keys.UPDATE_CHECK_ON_START] ?: true }
 
-    @Suppress("UNUSED_PARAMETER")
     suspend fun setUpdateCheckOnStart(enabled: Boolean) {
-        // Locked off — deliberately does nothing.
+        if (!tv.own.owntv.core.CoreBuildInfo.UPDATES_ENABLED) return
+        context.dataStore.edit { it[Keys.UPDATE_CHECK_ON_START] = enabled }
     }
 
     // --- Nav menu customization (v4.3.0) ---

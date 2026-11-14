@@ -221,7 +221,7 @@
     <string name="settings_presets">Готові кольори</string>
     <string name="settings_hex_code">Шістнадцятковий код</string>
     <string name="settings_use_color">Використовувати цей колір</string>
-    <string name="settings_about_version">Версія <xliff:g id="version">%1$s</xliff:g></string>
+    <string name="settings_about_version">Версія <xliff:g id="version">%1$s</xliff:g> (<xliff:g id="build">%2$d</xliff:g>)</string>
     <string name="more_about_download_page">Сторінка завантаження</string>
     <string name="more_about_download_qr">QR-код сторінки завантаження</string>
     <string name="settings_contributions">Ми вітаємо внесок у проєкт, повідомлення про помилки та зірки на GitHub.</string>

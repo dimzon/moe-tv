@@ -210,7 +210,7 @@ fun MoreScreen(
             item(MoreItem.LOCAL_SYNC, MyOwnTVIcon.PHONE, stringResource(R.string.local_sync_title), stringResource(if (sync.listening) R.string.common_on else R.string.common_off), false)
             GroupLabel(stringResource(R.string.settings_app_group))
             item(MoreItem.ERROR_LOG, MyOwnTVIcon.WARNING, stringResource(R.string.settings_playback_error_log), logCount.toString(), false)
-            item(MoreItem.ABOUT, MyOwnTVIcon.INFO, stringResource(R.string.settings_about), BuildConfig.VERSION_NAME, false)
+            item(MoreItem.ABOUT, MyOwnTVIcon.INFO, stringResource(R.string.settings_about), "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})", false)
             Spacer(Modifier.weight(1f))
             StageKeyHints(
                 listOf(

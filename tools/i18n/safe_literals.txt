@@ -1900,6 +1900,7 @@
 1	json	app/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	tag_name
 1	log	app/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	truncated: got $copied of $total bytes
 1	uri	app/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	tv.own.owntv.UPDATE_INSTALL_STATUS
+1	technical	app/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	universal
 1	log	app/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	unparseable APK (${apk.length()} bytes)
 1	log	app/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	update check failed: ${error.message}
 1	log	app/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	update download failed: ${error.message}
