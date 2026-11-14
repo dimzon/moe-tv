@@ -456,7 +456,7 @@ fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             title = stringResource(
                 R.string.settings_customize_restore_defaults_title,
                 stringResource(R.string.settings_live_tv),
-                restorePlaylist ?: stringResource(R.string.content_all_playlists),
+                restorePlaylist ?: BuiltInSource.current.name,
             ),
             message = stringResource(R.string.settings_customize_restore_defaults_description),
             confirmLabel = stringResource(R.string.common_reset),

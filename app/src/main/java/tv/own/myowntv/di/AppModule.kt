@@ -60,7 +60,6 @@ import tv.own.myowntv.features.live.LiveViewModel
 import tv.own.myowntv.features.search.SearchViewModel
 import tv.own.myowntv.features.settings.LocalAutoSyncViewModel
 import tv.own.myowntv.features.settings.LocalSyncViewModel
-import tv.own.myowntv.features.settings.ChannelNameCleanupViewModel
 import tv.own.myowntv.features.settings.HomeSettingsViewModel
 import tv.own.myowntv.features.settings.LanguageSettingsViewModel
 import tv.own.myowntv.features.settings.PlayerButtonsSettingsViewModel
@@ -166,7 +165,6 @@ val appModule = module {
     viewModelOf(::CustomizeViewModel)
     viewModelOf(::SettingsPinViewModel)
     viewModelOf(::CustomizeItemsViewModel)
-    viewModelOf(::ChannelNameCleanupViewModel)
     // The counts the More rows and the Favourites / History tabs carry.
     viewModelOf(::MoreCountsViewModel)
     // The counts beside the sections in the open Stage rail.

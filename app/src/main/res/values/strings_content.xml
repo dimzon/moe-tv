@@ -97,8 +97,6 @@
     <string name="content_category_all_channels">All channels</string>
     <!-- Translators: Banner shown when the device is offline. -->
     <string name="content_offline_banner">You\'re offline \u2014 playback and updates won\'t work until you reconnect.</string>
-    <!-- Translators: Label for the playlist filter showing all playlists. -->
-    <string name="content_all_playlists">All playlists</string>
     <!-- Translators: Search hint text in the category browser. -->
     <string name="content_search_categories">Search categories\u2026</string>
     <!-- Translators: Imperative action in the clickable top-bar Continue chip. -->

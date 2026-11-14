@@ -85,10 +85,6 @@
     <string name="setup_continue">Continue</string>
 
 
-    <!-- Translators: Error text when a local M3U playlist file cannot be opened. -->
-    <string name="setup_playlist_file_unavailable">Couldn\'t open the playlist file. Pick it again; it may have moved.</string>
-    <!-- Translators: Error text when a local playlist path uses an unsupported URI scheme. -->
-    <string name="setup_playlist_path_unsupported">This local playlist path is not supported.</string>
 
 
     <!-- Companion web UI is rendered outside Compose but still resolves through Android resources. -->

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="settings_sort_playlist">Плейлист</string>
     <string name="settings_sort_alpha">А–Я</string>
     <string name="settings_mini_player">Мініплеєр</string>
     <string name="settings_mini_player_description">Невеликий плаваючий програвач, який з\'являється, коли ви закріплюєте канал у режимі PiP під час перегляду каталогу. Змініть ці параметри тут або прямо під час перегляду за допомогою кнопок зміни розміру й переміщення на самому мініплеєрі.</string>
@@ -286,6 +285,7 @@
     <string name="settings_search_keywords_video">декодер субтитри синхронізація</string>
     <string name="settings_search_keywords_subtitle_appearance">субтитри розмір колір положення прозорість фон непрозорість</string>
     <string name="settings_search_keywords_latency">прямий ефір буфер затримка низька затримка секунди поточна позиція ефіру</string>
+    <string name="settings_search_keywords_live_preroll">передбуферизація преролл пре-ролл буферизація буфер перед відтворенням повторна буферизація переривання зависання</string>
     <string name="settings_search_keywords_proxy">HTTP трафік маршрут</string>
     <string name="settings_search_keywords_dns">домен пошук резолвер DoH DNS-over-HTTPS</string>
     <string name="settings_search_keywords_startup">запуск відкрити початковий екран</string>
@@ -472,12 +472,6 @@
     <string name="settings_span_help">Утримуйте OK на «Перемістити», «Перейменувати» або «Сховати» у першого елемента, потім натисніть те саме в останнього. Все між ними зміниться разом.</string>
     <string name="settings_span_ch_help">CH+ / CH− перегортають сторінку. Утримуйте CH+ / CH−, щоб перейти до останнього або першого елемента.</string>
     <string name="settings_customize_metadata_separator">"  ·  "</string>
-    <string name="settings_sources_clean_names_title">Назви каналів у «<xliff:g id="name">%1$s</xliff:g>»</string>
-    <string name="settings_sources_clean_names_description">Коротші назви каналів на всіх екранах. Телепрограма як і раніше зіставляє назви, які надсилає постачальник, а канали, перейменовані в «Налаштуванні», зберігають вашу назву. Збереження оновлює плейлист.</string>
-    <string name="settings_sources_clean_names_toggle">Очищати назви каналів</string>
-    <string name="settings_sources_clean_names_example">Прибирає префікс країни та позначку якості в кінці: «UK| News One HD» показується як «News One»</string>
-    <string name="settings_sources_clean_names_custom">Також видаляти</string>
-    <string name="settings_sources_clean_names_custom_hint">Слова через ; наприклад VIP; Backup</string>
     <string name="settings_sources_resync_title_full">Повторно синхронізувати «<xliff:g id="name">%1$s</xliff:g>»</string>
     <string name="settings_sources_resync_now_full">Повторно синхронізувати зараз</string>
     <string name="settings_sources_resync_remove_full">Повторно синхронізувати та видалити відсутні матеріали</string>
@@ -640,18 +634,6 @@
     <string name="settings_live_preroll_description">Накопичує такий об\'єм відео перед початком відтворення каналу прямого ефіру та ще раз після переривання. Це об\'єм відео, а не зворотний відлік. Режим «Вимк.» забезпечує максимально швидкий запуск.</string>
     <string name="settings_live_tune_timeout">Припиняти спроби через</string>
     <string name="settings_live_tune_timeout_description">Якщо за цей час на прямому каналі не з\'явилося зображення, МОЁ ТВ припиняє спроби та повідомляє вам про це, замість того щоб тримати чорний екран, перебираючи всі свої програвачі. «Ніколи» продовжує спроби, а на каналі, видаленому постачальником, це може зайняти помітно більше хвилини. Очікування, про яке просить сам постачальник, не враховується.</string>
-    <string name="settings_live_preroll_per_playlist">Передбуферизація для плейлиста</string>
-    <string name="settings_live_preroll_per_playlist_description">Перевизначає вказане вище налаштування для одного плейлиста, зберігаючи швидкий запуск інших плейлистів.</string>
-    <string name="settings_live_latency_per_playlist">Затримка прямого ефіру для плейлиста</string>
-    <string name="settings_live_latency_per_playlist_description">Перевизначає вказане вище налаштування для одного плейлиста — для постачальника, якому потрібен більший або менший буфер, ніж іншим.</string>
-    <string name="settings_live_tune_timeout_per_playlist">Припиняти спроби через, для плейлиста</string>
-    <string name="settings_live_tune_timeout_per_playlist_description">Замінює налаштування вище для одного плейлиста — для постачальника, чиї канали довго запускаються або часто не працюють.</string>
-    <plurals name="settings_live_preroll_overrides">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> набір</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> набори</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> наборів</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> наборів</item>
-    </plurals>
     <string name="settings_surround_stereo">Лише стерео</string>
     <string name="settings_surround_auto_description">Авто — пробувати об\'ємний звук Dolby/DTS і автоматично повертатися до стерео, якщо телевізор або саундбар його не відтворює. Рекомендується.</string>
     <string name="settings_surround_stereo_description">Лише стерео — завжди декодувати в застосунку та передавати звичайний звук 2.0. Використовуйте на вбудованих динаміках телевізора або стерео-саундбарі, а також якщо звук відстає від картинки.</string>
@@ -661,7 +643,6 @@
     <string name="settings_live_layout_separate">Окремі панелі</string>
     <string name="settings_search_keywords_epg_offset">epg телепрограма час зміщення зсув часовий пояс схід захід годинник</string>
     <string name="settings_search_keywords_panel_width">панель ширина розмір змінити розмір категорія список превью колонка розкладка прямий ефір</string>
-    <string name="settings_search_keywords_live_preroll">передбуферизація преролл пре-ролл буферизація буфер перед відтворенням повторна буферизація переривання зависання для плейлиста</string>
     <string name="settings_detailed_playback_logging">Детальний журнал відтворення</string>
     <string name="settings_search_keywords_detailed_logging">діагностика детальний трасування logcat налагодження звіт про помилку прямий ефір рушій</string>
     <string name="settings_playback_kind_error">Помилка</string>
@@ -669,8 +650,6 @@
     <string name="settings_playback_kind_report">Звіт</string>
     <string name="settings_export">Експорт</string>
     <string name="settings_detailed_playback_logging_description">Веде повне трасування дій рушія прямого ефіру — кожне перемикання, відкат і перепідключення — у Logcat та в експортованому звіті. Лишайте вимкненим, якщо ви не шукаєте причину проблеми: ця опція не впливає на відтворення, а лише збільшує об\'єм даних, що записуються.</string>
-    <string name="settings_live_preroll_playlist_picker">Який плейлист?</string>
-    <string name="settings_live_preroll_follow">Як у налаштуваннях</string>
     <string name="settings_video_seconds"><xliff:g id="seconds">%1$d</xliff:g> сек. відео</string>
     <string name="settings_epg_offset_root_description">Зсуває всю телепрограму, якщо час у джерелі не збігається з тим, що реально йде в ефірі. Окремий канал можна зсунути самостійно через меню довгого натискання (у «Прямому ефірі» або в «Телепрограмі») — це варіант для східних/западних версій, що використовують спільну програму.</string>
     <string name="settings_epg_offset_dialog_description">Зсуває кожну передачу в телепрограмі. Використовуйте, коли все джерело показує не той час; для окремого каналу (східної/западної версії, що використовує спільну програму) утримуйте канал у «Прямому ефірі» або «Телепрограмі» та задайте йому власне зміщення там.</string>
@@ -940,7 +919,6 @@
     <string name="settings_line_reminders">Що відбувається, коли настає нагадування</string>
     <string name="settings_line_reminder_lead">Наскільки заздалегідь приходить нагадування</string>
     <string name="settings_line_guide_days">На скільки днів уперед зберігається телепрограма</string>
-    <string name="settings_line_override_playlist">Своє значення для одного плейлиста</string>
     <string name="settings_line_accent">Забарвлює кнопки, виділення та акценти всюди</string>
     <string name="settings_line_fonts">Один шрифт для інтерфейсу та вікон</string>
     <string name="settings_line_popup_size">Масштаб вікон і меню без зміни тексту</string>

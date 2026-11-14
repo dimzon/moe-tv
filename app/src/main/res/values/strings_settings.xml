@@ -2,7 +2,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"
            xmlns:tools="http://schemas.android.com/tools">
     <!-- Translators: Fallback label for the playlist sort mode in the SortChip toggle. -->
-    <string name="settings_sort_playlist">Playlist</string>
     <!-- Translators: Sort option for alphabetical order. -->
     <string name="settings_sort_alpha">A–Z</string>
     <!-- Translators: Section header for mini-player settings. -->
@@ -629,6 +628,7 @@
     <string name="settings_search_keywords_subtitle_appearance">subtitle size color colour position transparency background opacity</string>
     <!-- Translators: Hidden keyword bag for the Live latency settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_latency">live buffer latency delay low latency seconds close to live edge</string>
+    <string name="settings_search_keywords_live_preroll">prebuffer preroll pre-roll buffering buffer before playing rebuffer stutter freeze</string>
     <!-- Translators: Hidden keyword bag for the HTTP Proxy settings. Translate as individual search terms. -->
     <string name="settings_search_keywords_proxy">http traffic route</string>
     <!-- Translators: Hidden keyword bag for DNS settings. 'DNS' and 'DNS-over-HTTPS' are technical terms. -->
@@ -982,18 +982,6 @@
     <string name="settings_span_ch_help">CH+ / CH− skip a page. Hold CH+ / CH− to jump to the last or first item.</string>
     <!-- Translators: Visible single middle-dot separator between metadata segments in the Customize screen. -->
     <string name="settings_customize_metadata_separator">"  ·  "</string>
-    <!-- Translators: Dialog title for a playlist's channel-name options. 'name' is the playlist name. -->
-    <string name="settings_sources_clean_names_title">Channel names in “<xliff:g id="name">%1$s</xliff:g>”</string>
-    <!-- Translators: Description in the channel-name dialog. "Customize" is the app's Customize screen. -->
-    <string name="settings_sources_clean_names_description">Shorter channel names on every screen. The guide still matches the names your provider sends, and channels you renamed in Customize keep your name. Saving refreshes the playlist.</string>
-    <!-- Translators: Switch in the channel-name dialog that turns the cleanup on or off for this playlist. -->
-    <string name="settings_sources_clean_names_toggle">Clean channel names</string>
-    <!-- Translators: Line under the "Clean channel names" switch. The quoted names are examples; translate "News One" freely but keep the country code and quality tag. -->
-    <string name="settings_sources_clean_names_example">Removes a country prefix and a quality tag at the end: “UK| News One HD” shows as “News One”</string>
-    <!-- Translators: Label of a text field in the channel-name dialog: extra words to remove from the start or end of every channel name. -->
-    <string name="settings_sources_clean_names_custom">Also remove</string>
-    <!-- Translators: Placeholder of the "Also remove" field. Keep the semicolon: it separates the words. -->
-    <string name="settings_sources_clean_names_custom_hint">Words separated by ; e.g. VIP; Backup</string>
     <!-- Translators: Dialog title for resyncing a source. 'name' is the source name. -->
     <string name="settings_sources_resync_title_full">Resync “<xliff:g id="name">%1$s</xliff:g>”</string>
     <!-- Translators: Option to resync and keep existing data. -->
@@ -1269,21 +1257,6 @@
     <string name="settings_live_tune_timeout">Give up on a channel after</string>
     <!-- Translators: Description under the row above. "Never" is the option named common_never. Keep it short and plain. -->
     <string name="settings_live_tune_timeout_description">If a live channel has shown no picture by this time, МОЁ ТВ stops trying and tells you, instead of leaving a black screen while it works through every player it has. Never keeps trying, which can take well over a minute on a channel your provider has removed. Waits your provider asks for are not counted.</string>
-    <string name="settings_live_preroll_per_playlist">Pre-buffer per playlist</string>
-    <string name="settings_live_preroll_per_playlist_description">Override the setting above for one playlist while keeping your other playlists fast.</string>
-    <!-- Translators: Title of the per-playlist Live latency override row. -->
-    <string name="settings_live_latency_per_playlist">Live latency per playlist</string>
-    <!-- Translators: Description of the per-playlist Live latency override row. -->
-    <string name="settings_live_latency_per_playlist_description">Override the setting above for one playlist, for a provider that needs a deeper or shallower buffer than the others.</string>
-    <!-- Translators: Title of the per-playlist override of "Give up on a channel after" (settings_live_tune_timeout). -->
-    <string name="settings_live_tune_timeout_per_playlist">Give up after, per playlist</string>
-    <!-- Translators: Description of the per-playlist "Give up after" override row. -->
-    <string name="settings_live_tune_timeout_per_playlist_description">Override the setting above for one playlist, for a provider whose channels are slow to start or often dead.</string>
-    <!-- Translators: Number of playlists with a custom pre-buffer override. -->
-    <plurals name="settings_live_preroll_overrides">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> set</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> set</item>
-    </plurals>
     <string name="settings_surround_stereo">Stereo only</string>
     <string name="settings_surround_auto_description">Auto — try Dolby/DTS surround, and switch back to stereo automatically if the TV or soundbar does not play it. Recommended.</string>
     <string name="settings_surround_stereo_description">Stereo only — always decode in the app and send plain 2.0 sound. Use this on TV speakers or a stereo soundbar, or if audio lags behind the picture.</string>
@@ -1299,7 +1272,6 @@
     <string name="settings_guide_width_channels">Channel list</string>
     <string name="settings_search_keywords_epg_offset">epg guide time offset shift timezone east west hours</string>
     <string name="settings_search_keywords_panel_width">panel width size resize category list preview column layout live</string>
-    <string name="settings_search_keywords_live_preroll">prebuffer preroll pre-roll buffering buffer before playing rebuffer stutter freeze per playlist</string>
     <string name="settings_detailed_playback_logging">Detailed playback logging</string>
     <string name="settings_search_keywords_detailed_logging">diagnostics verbose trace logcat debug report bug live engine</string>
     <string name="settings_playback_kind_error">Error</string>
@@ -1307,8 +1279,6 @@
     <string name="settings_playback_kind_report">Report</string>
     <string name="settings_export">Export</string>
     <string name="settings_detailed_playback_logging_description">Keep a full trace of what the live engine does — every tune, fallback and reconnect — in Logcat and in the exported report. Leave it off unless you are chasing a problem; it never changes playback, only how much is written down.</string>
-    <string name="settings_live_preroll_playlist_picker">Which playlist?</string>
-    <string name="settings_live_preroll_follow">Follow setting</string>
     <string name="settings_video_seconds"><xliff:g id="seconds">%1$d</xliff:g>s of video</string>
     <string name="settings_epg_offset_root_description">Shift the whole guide when a feed’s times don’t match what’s actually on. A single channel can be shifted on its own from its long-press menu (Live TV or Guide) — that’s the one for East/West versions sharing a guide.</string>
     <string name="settings_epg_offset_dialog_description">Moves every programme in the guide. Use it when the whole feed is on the wrong clock; for a single channel (an East/West version sharing one guide), long-press the channel in Live TV or the Guide and set its own offset there.</string>
@@ -1713,8 +1683,6 @@
     <string name="settings_line_reminder_lead">How early a reminder comes</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_guide_days">How many days ahead the guide keeps</string>
-    <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_override_playlist">Override for one playlist</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_accent">Tints buttons, focus and highlights everywhere</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->

@@ -20,8 +20,4 @@ data class SourcePreferences(
     val liveTuneTimeoutSecs: Int,
     /** Epoch ms of the last complete catalogue sync; null = never synced. */
     val lastSyncAt: Long?,
-    /** Global "Clean channel names" toggle. */
-    val cleanChannelNames: Boolean,
-    /** The user's own words for the cleanup, `;`-separated. */
-    val channelNameStrip: String?,
 )

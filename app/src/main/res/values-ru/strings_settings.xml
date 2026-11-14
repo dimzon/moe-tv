@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="settings_sort_playlist">Плейлист</string>
     <string name="settings_sort_alpha">А–Я</string>
     <string name="settings_mini_player">Мини-плеер</string>
     <string name="settings_mini_player_description">Небольшой плавающий плеер, который появляется, когда вы закрепляете канал в режиме PiP во время просмотра каталога. Измените эти параметры здесь или прямо во время просмотра с помощью кнопок изменения размера и перемещения на самом мини-плеере.</string>
@@ -30,7 +29,7 @@
     <string name="settings_test_proxy">Проверить прокси</string>
     <string name="settings_testing">Проверка…</string>
     <string name="settings_proxy_privacy">Поставщик прокси может видеть, к каким серверам вы подключаетесь, а также содержимое всего трафика без HTTPS.</string>
-    <string name="settings_proxy_limitations">Пока поддерживается только HTTP-прокси — SOCKS и отдельные прокси для каждого плейлиста ещё не поддерживаются.</string>
+    <string name="settings_proxy_limitations">Пока поддерживается только HTTP-прокси, SOCKS ещё не поддерживается.</string>
     <string name="settings_proxy_connected"><xliff:g id="millis">%1$d</xliff:g> мс</string>
     <string name="settings_proxy_invalid_address">Введите допустимые хост и порт (1–65535).</string>
     <string name="settings_proxy_host_unreachable">Не удалось связаться с хостом прокси.</string>
@@ -214,7 +213,7 @@
     <string name="settings_startup_specific_channel">Выбранный канал</string>
     <string name="settings_startup_channel_unavailable">Стартовый канал недоступен. Открыт главный экран.</string>
     <string name="settings_all_history">Вся история</string>
-    <string name="settings_choose_history">Выберите, что удалить для этого профиля. Плейлисты, избранное и загрузки затронуты не будут.</string>
+    <string name="settings_choose_history">Выберите, что удалить. Каналы и избранное затронуты не будут.</string>
     <string name="settings_clear_history_confirm">Очистить историю «<xliff:g id="scope">%1$s</xliff:g>»?</string>
     <string name="settings_cannot_undo">Это действие нельзя отменить.</string>
     <string name="settings_no">Нет</string>
@@ -286,6 +285,7 @@
     <string name="settings_search_keywords_video">декодер субтитры синхронизация</string>
     <string name="settings_search_keywords_subtitle_appearance">субтитры размер цвет положение прозрачность фон непрозрачность</string>
     <string name="settings_search_keywords_latency">прямой эфир буфер задержка низкая задержка секунды текущая позиция эфира</string>
+    <string name="settings_search_keywords_live_preroll">предбуферизация преролл пре-ролл буферизация буфер перед воспроизведением повторная буферизация прерывание зависание</string>
     <string name="settings_search_keywords_proxy">HTTP трафик маршрут</string>
     <string name="settings_search_keywords_dns">домен поиск резолвер DoH DNS-over-HTTPS</string>
     <string name="settings_search_keywords_startup">запуск открыть начальный экран</string>
@@ -374,7 +374,7 @@
     <string name="settings_guide_sync_failed">Не удалось синхронизировать программу передач</string>
     <string name="settings_ui_zoom_range">Масштаб всего интерфейса (<xliff:g id="min">%1$d</xliff:g>%%–<xliff:g id="max">%2$d</xliff:g>%%).</string>
     <string name="settings_low_zoom_warning_title">⚠️ Предупреждение о малом масштабе</string>
-    <string name="settings_low_zoom_warning">При масштабе <xliff:g id="zoom">%1$d</xliff:g>%% на экране одновременно отображается гораздо больше элементов. На устройствах с небольшим объёмом памяти (например, ТВ-приставках с 2 ГБ памяти) это может привести к нестабильной работе или сбою приложения, особенно при больших плейлистах и объёмах данных EPG.\n\nНажмите OK, чтобы продолжить, или «Назад», чтобы оставить масштаб <xliff:g id="safe_zoom">%2$d</xliff:g>%%.</string>
+    <string name="settings_low_zoom_warning">При масштабе <xliff:g id="zoom">%1$d</xliff:g>%% на экране одновременно отображается гораздо больше элементов. На устройствах с небольшим объёмом памяти (например, ТВ-приставках с 2 ГБ памяти) это может привести к нестабильной работе или сбою приложения.\n\nНажмите OK, чтобы продолжить, или «Назад», чтобы оставить масштаб <xliff:g id="safe_zoom">%2$d</xliff:g>%%.</string>
     <string name="settings_low_zoom_accept">Я понимаю и принимаю риск</string>
     <string name="settings_surface_transparency"><xliff:g id="percent">%1$d</xliff:g>%%</string>
     <string name="settings_pick_background_title">Выберите фоновое изображение</string>
@@ -447,7 +447,7 @@
     <string name="settings_customize_filter_visible">Видимые</string>
     <string name="settings_customize_filter_hidden">Скрытые</string>
     <string name="settings_customize_new_categories_button">Новые категории: <xliff:g id="label">%1$s</xliff:g> ▾</string>
-    <string name="settings_customize_restore_defaults">Вернуть настройки плейлистов</string>
+    <string name="settings_customize_restore_defaults">Вернуть настройки каналов</string>
     <string name="settings_customize_restore_defaults_title">Вернуть настройки: <xliff:g id="section">%1$s</xliff:g> (<xliff:g id="playlist">%2$s</xliff:g>)?</string>
     <string name="settings_customize_restore_defaults_description">Скрытые категории и элементы снова появятся, переименования и свой порядок будут сброшены, а перемещённые элементы вернутся. Объединённые категории, избранное и привязки программы передач сохранятся.</string>
     <string name="settings_customize_rename_hint">Только для этого профиля. Оставьте поле пустым, чтобы восстановить «<xliff:g id="name">%1$s</xliff:g>».</string>
@@ -472,12 +472,6 @@
     <string name="settings_span_help">Удерживайте OK на «Переместить», «Переименовать» или «Скрыть» у первого элемента, затем нажмите то же у последнего. Всё между ними изменится вместе.</string>
     <string name="settings_span_ch_help">CH+ / CH− перелистывают страницу. Удерживайте CH+ / CH−, чтобы перейти к последнему или первому элементу.</string>
     <string name="settings_customize_metadata_separator">"  ·  "</string>
-    <string name="settings_sources_clean_names_title">Названия каналов в «<xliff:g id="name">%1$s</xliff:g>»</string>
-    <string name="settings_sources_clean_names_description">Более короткие названия каналов на всех экранах. Телегид по-прежнему сопоставляет названия, которые присылает провайдер, а каналы, переименованные в «Настройке», сохраняют ваше название. Сохранение обновляет плейлист.</string>
-    <string name="settings_sources_clean_names_toggle">Очищать названия каналов</string>
-    <string name="settings_sources_clean_names_example">Убирает префикс страны и отметку качества в конце: «UK| News One HD» показывается как «News One»</string>
-    <string name="settings_sources_clean_names_custom">Также удалять</string>
-    <string name="settings_sources_clean_names_custom_hint">Слова через ; например VIP; Backup</string>
     <string name="settings_sources_resync_title_full">Повторно синхронизировать «<xliff:g id="name">%1$s</xliff:g>»</string>
     <string name="settings_sources_resync_now_full">Повторно синхронизировать сейчас</string>
     <string name="settings_sources_resync_remove_full">Повторно синхронизировать и удалить отсутствующие материалы</string>
@@ -640,18 +634,6 @@
     <string name="settings_live_preroll_description">Собирает такой объём видео перед началом воспроизведения канала прямого эфира и ещё раз после прерывания. Это объём видео, а не обратный отсчёт. Режим «Выкл.» обеспечивает максимально быстрый запуск.</string>
     <string name="settings_live_tune_timeout">Прекращать попытки через</string>
     <string name="settings_live_tune_timeout_description">Если за это время на прямом канале не появилось изображение, МОЁ ТВ прекращает попытки и сообщает вам об этом, вместо того чтобы держать чёрный экран, перебирая все свои плееры. «Никогда» продолжает попытки, а на канале, удалённом провайдером, это может занять заметно больше минуты. Ожидание, о котором просит сам провайдер, не учитывается.</string>
-    <string name="settings_live_preroll_per_playlist">Предварительная буферизация для плейлиста</string>
-    <string name="settings_live_preroll_per_playlist_description">Переопределяет указанную выше настройку для одного плейлиста, сохраняя быстрый запуск остальных плейлистов.</string>
-    <string name="settings_live_latency_per_playlist">Задержка прямого эфира для плейлиста</string>
-    <string name="settings_live_latency_per_playlist_description">Переопределяет указанную выше настройку для одного плейлиста — для провайдера, которому нужен больший или меньший буфер, чем остальным.</string>
-    <string name="settings_live_tune_timeout_per_playlist">Прекращать попытки через, для плейлиста</string>
-    <string name="settings_live_tune_timeout_per_playlist_description">Заменяет настройку выше для одного плейлиста — для провайдера, чьи каналы долго запускаются или часто не работают.</string>
-    <plurals name="settings_live_preroll_overrides">
-        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> набор</item>
-        <item quantity="few"><xliff:g id="count">%1$d</xliff:g> набора</item>
-        <item quantity="many"><xliff:g id="count">%1$d</xliff:g> наборов</item>
-        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> наборов</item>
-    </plurals>
     <string name="settings_surround_stereo">Только стерео</string>
     <string name="settings_surround_auto_description">Авто — пробовать объёмный звук Dolby/DTS и автоматически возвращаться к стерео, если телевизор или саундбар его не воспроизводит. Рекомендуется.</string>
     <string name="settings_surround_stereo_description">Только стерео — всегда декодировать в приложении и передавать обычный звук 2.0. Используйте на встроенных динамиках телевизора или стерео-саундбаре, а также если звук отстаёт от картинки.</string>
@@ -661,7 +643,6 @@
     <string name="settings_live_layout_separate">Отдельные панели</string>
     <string name="settings_search_keywords_epg_offset">epg программа передач время смещение сдвиг часовой пояс восток запад часы</string>
     <string name="settings_search_keywords_panel_width">панель ширина размер изменить размер категория список предпросмотр колонка раскладка прямой эфир</string>
-    <string name="settings_search_keywords_live_preroll">предбуферизация преролл пре-ролл буферизация буфер перед воспроизведением повторная буферизация прерывание зависание для плейлиста</string>
     <string name="settings_detailed_playback_logging">Подробный журнал воспроизведения</string>
     <string name="settings_search_keywords_detailed_logging">диагностика подробный трассировка logcat отладка отчёт об ошибке прямой эфир движок</string>
     <string name="settings_playback_kind_error">Ошибка</string>
@@ -669,8 +650,6 @@
     <string name="settings_playback_kind_report">Отчёт</string>
     <string name="settings_export">Экспорт</string>
     <string name="settings_detailed_playback_logging_description">Ведёт полную трассировку действий движка прямого эфира — каждое переключение, откат и переподключение — в Logcat и в экспортируемом отчёте. Оставляйте выключенным, если вы не ищете причину проблемы: эта опция не влияет на воспроизведение, а только увеличивает объём записываемых данных.</string>
-    <string name="settings_live_preroll_playlist_picker">Какой плейлист?</string>
-    <string name="settings_live_preroll_follow">Как в настройках</string>
     <string name="settings_video_seconds"><xliff:g id="seconds">%1$d</xliff:g> сек. видео</string>
     <string name="settings_epg_offset_root_description">Сдвигает всю программу передач, если время в источнике не совпадает с тем, что реально идёт в эфире. Отдельный канал можно сдвинуть самостоятельно через меню долгого нажатия (в «Прямом эфире» или в «Программе передач») — это вариант для восточных/западных версий, использующих общую программу.</string>
     <string name="settings_epg_offset_dialog_description">Сдвигает каждую передачу в программе передач. Используйте, когда весь источник показывает не то время; для отдельного канала (восточной/западной версии, использующей общую программу) удерживайте канал в «Прямом эфире» или «Программе передач» и задайте ему собственное смещение там.</string>
@@ -887,7 +866,7 @@
     <string name="settings_nav_menu_labels_summary">Подписи: <xliff:g id="choice">%1$s</xliff:g></string>
     <string name="settings_search_keywords_menu_labels">подписи, названия, текст, только значки, панель, боковая панель, меню, расширять, широкая</string>
     <string name="settings_nav_menu_items">Пункты меню</string>
-    <string name="settings_nav_menu_items_desc">Динамически: по содержимому плейлиста · Вручную: выбираете вы</string>
+    <string name="settings_nav_menu_items_desc">Динамически: по списку каналов · Вручную: выбираете вы</string>
     <string name="settings_search_keywords_navigation">панель, боковая панель, меню, навигация, скрыть, плавающая, закреплённая, размер, компактная, широкая, длина, вся высота</string>
     <string name="settings_breadcrumb_eyebrow"><xliff:g id="section">%1$s</xliff:g> · <xliff:g id="group">%2$s</xliff:g></string>
     <string name="settings_nav_size_desc">Компактная: значки · Обычная: названия · Широкая: названия и числа · Очень широкая: с подробностями</string>
@@ -940,7 +919,6 @@
     <string name="settings_line_reminders">Что происходит, когда наступает напоминание</string>
     <string name="settings_line_reminder_lead">Как заранее приходит напоминание</string>
     <string name="settings_line_guide_days">На сколько дней вперёд хранится телегид</string>
-    <string name="settings_line_override_playlist">Своё значение для одного плейлиста</string>
     <string name="settings_line_accent">Окрашивает кнопки, выделение и акценты везде</string>
     <string name="settings_line_fonts">Один шрифт для интерфейса и окон</string>
     <string name="settings_line_popup_size">Масштаб окон и меню без изменения текста</string>
@@ -1014,7 +992,7 @@
     <string name="settings_help_app_icon">Значок МОЁ ТВ на главном экране телевизора. Лаунчеру может понадобиться немного времени, чтобы показать изменение.</string>
     <string name="settings_help_brand_accent">Логотип МОЁ ТВ в меню, разделе «О приложении» и настройке показывает треугольник воспроизведения в вашем цвете акцента. Значок на главном экране сохраняет свои цвета.</string>
     <string name="settings_help_startup">Что МОЁ ТВ показывает при запуске: главную, последний просмотренный канал, избранное или выбранный вами канал.</string>
-    <string name="settings_help_check_updates">Сейчас же ищет на GitHub новую версию МОЁ ТВ и предлагает установить её. Плейлисты, избранное и настройки останутся прежними.</string>
+    <string name="settings_help_check_updates">Сейчас же ищет на GitHub новую версию МОЁ ТВ и предлагает установить её. Каналы, избранное и настройки останутся прежними.</string>
     <string name="settings_help_update_startup">Ищет новую версию при каждом запуске МОЁ ТВ и сообщает, если она есть. Ничего не устанавливается без вашего согласия.</string>
     <string name="settings_help_auto_start_boot">Открывает МОЁ ТВ сам по себе после загрузки телевизора — на экране, выбранном в настройке Запуск приложения. Android разрешает приложению открываться самому, только если ему можно показываться поверх других приложений, поэтому при включении открывается экран этого разрешения. На некоторых телевизорах его нет, и там автозапуск работать не может.</string>
     <string name="settings_help_auto_start_wake">Открывает МОЁ ТВ каждый раз, когда телевизор выходит из спящего режима, даже если его разбудили ради другого приложения. Если Запуск приложения открывает канал, каждое пробуждение запускает этот поток. Пока параметр включён, МОЁ ТВ держит небольшую фоновую службу с беззвучным уведомлением. Как и автозапуску при включении, ему нужно разрешение на показ поверх других приложений.</string>

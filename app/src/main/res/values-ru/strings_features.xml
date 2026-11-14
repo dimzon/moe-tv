@@ -14,8 +14,8 @@
     <string name="search_field_hint">Каналы и передачи</string>
     <string name="search_voice">Голосовой поиск</string>
     <string name="search_voice_prompt">Назовите канал или передачу</string>
-    <string name="search_card_title">Находите всё в своих плейлистах</string>
-    <string name="search_card_body">Каналы из показываемого плейлиста. Выберите результат, чтобы сразу перейти к нему и включить его или открыть его параметры. Передачи, которые идут сейчас или позже сегодня, тоже находятся по названию.</string>
+    <string name="search_card_title">Ищите в каналах</string>
+    <string name="search_card_body">Выберите результат, чтобы сразу перейти к нему и включить его или открыть его параметры. Передачи, которые идут сейчас или позже сегодня, тоже находятся по названию.</string>
     <string name="search_nothing_found">Ничего не найдено по запросу «<xliff:g id="query">%1$s</xliff:g>»</string>
     <string name="search_nothing_found_body">Поиск идёт по названиям каналов и передач в загруженной телепрограмме. Скрытые категории не просматриваются.</string>
     <string name="search_query_quoted">«<xliff:g id="query">%1$s</xliff:g>»</string>
@@ -87,7 +87,7 @@
     <string name="update_install_rejected">Системный установщик отклонил обновление: <xliff:g id="reason">%1$s</xliff:g></string>
     <string name="update_ready">МОЁ ТВ v<xliff:g id="available">%1$s</xliff:g> готова к установке (у вас v<xliff:g id="current">%2$s</xliff:g>).</string>
     <string name="recovery_title">МОЁ ТВ не удалось открыть базу данных</string>
-    <string name="recovery_data_safe_full">Ваши профили, плейлисты, избранное и история НЕ удалены — произошёл сбой обновления базы данных, а данные всё ещё находятся на этом устройстве.\n\nПожалуйста, сообщите об этом, чтобы проблему можно было устранить, и приложите сообщение ниже.</string>
+    <string name="recovery_data_safe_full">Произошёл сбой обновления базы данных. Каналы загрузятся с сервера заново.\n\nПожалуйста, сообщите об этом, чтобы проблему можно было устранить, и приложите сообщение ниже.</string>
     <string name="recovery_retry">Попробовать ещё раз</string>
     <string name="recovery_backup_hint">Если у вас есть файл резервной копии, можно сбросить данные приложения, а затем восстановить их. При сбросе удаляется всё, что хранится на этом устройстве.</string>
     <string name="recovery_confirm_reset">Подтверждение: удалить все данные приложения</string>

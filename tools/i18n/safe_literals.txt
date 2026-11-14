@@ -219,7 +219,6 @@
 1	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_external
 1	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_hdr
 3	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_hw
-1	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_latency_sources
 1	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_live_latency
 2	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_live_preview
 2	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_logging
@@ -233,7 +232,6 @@
 1	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_passthrough
 2	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_pip
 1	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_preroll
-1	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_preroll_sources
 2	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_preview_audio
 2	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_preview_on_ok
 2	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_reset_audio_delay
@@ -245,7 +243,6 @@
 1	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_surround
 1	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_sw_above_1080p
 1	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_tune_timeout
-1	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_tune_timeout_sources
 2	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_tunneled
 2	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_volume
 1	technical	app/src/main/java/tv/own/myowntv/features/settings/SettingsHelpTable.kt	vp_volume_leveling
@@ -266,9 +263,7 @@
 1	log	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	setAndroidTvHomeEnabled enabled=$enabled
 1	protocol	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	timed out
 1	protocol	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	unknown host
-13	empty	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	\0
-3	technical	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	${src.name} · $value
-1	technical	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	-1
+9	empty	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	\0
 4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_afr_live
 4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_audio_lang
 4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_audio_sync
@@ -276,7 +271,6 @@
 3	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_external
 3	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_hdr
 3	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_hw
-4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_latency_sources
 4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_live_latency
 4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_live_preview
 3	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_logging
@@ -290,7 +284,6 @@
 3	technical	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_passthrough
 4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_pip
 4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_preroll
-4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_preroll_sources
 3	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_preview_audio
 4	technical	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_preview_on_ok
 4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_reset_audio_delay
@@ -301,7 +294,6 @@
 3	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_surround
 3	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_sw_above_1080p
 4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_tune_timeout
-4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_tune_timeout_sources
 4	technical	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_tunneled
 4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_video_surface
 4	preference-key	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	vp_volume
@@ -684,13 +676,6 @@
 1	sql	app/src/main/java/tv/own/owntv/core/content/SearchReader.kt	$it*
 1	technical	app/src/main/java/tv/own/owntv/core/content/SearchReader.kt	[^\\p{L}\\p{Nd}]+
 1	empty	app/src/main/java/tv/own/owntv/core/customize/BulkRenameSession.kt	\0
-1	regex	app/src/main/java/tv/own/owntv/core/customize/ChannelNameCleanup.kt	$SEPARATORS(?<![\\p{L}\\p{N}])(?:$words)$SEPARATORS$
-1	regex	app/src/main/java/tv/own/owntv/core/customize/ChannelNameCleanup.kt	${RenameRules.COUNTRY_TAG_PATTERN}$SEPARATORS
-1	regex	app/src/main/java/tv/own/owntv/core/customize/ChannelNameCleanup.kt	(?:$SEPARATORS(?<![\\p{L}\\p{N}])[\\[(]?(?:$QUALITY_TOKENS)[\\])]?)+$SEPARATORS$
-1	regex	app/src/main/java/tv/own/owntv/core/customize/ChannelNameCleanup.kt	4K|8K|UHD|FHD|QHD|HD|SD|HDR|HEVC|H265|H264|2160P|1080P|1080I|720P|576P|480P
-1	regex	app/src/main/java/tv/own/owntv/core/customize/ChannelNameCleanup.kt	[\\s|:\\-–—·]*
-1	regex	app/src/main/java/tv/own/owntv/core/customize/ChannelNameCleanup.kt	^$SEPARATORS(?:$words)(?![\\p{L}\\p{N}])$SEPARATORS
-1	regex	app/src/main/java/tv/own/owntv/core/customize/ChannelNameCleanup.kt	|
 2	json	app/src/main/java/tv/own/owntv/core/customize/CustomizationJson.kt	catNames
 2	json	app/src/main/java/tv/own/owntv/core/customize/CustomizationJson.kt	catPos
 2	json	app/src/main/java/tv/own/owntv/core/customize/CustomizationJson.kt	customCats
@@ -1348,8 +1333,6 @@
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	ch_nav_down_skip
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	ch_nav_enabled
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	ch_nav_up_skip
-1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	channel_cleanup_enabled
-1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	channel_cleanup_strip
 1	technical	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	clock_date_color
 1	technical	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	clock_time_color
 1	technical	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	clock_weather_color
@@ -1944,7 +1927,6 @@
 2	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	ECONNREFUSED
 1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	END_TAG
 2	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	Failed to connect
-1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	Guide channels match no playlist channel
 1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	HTTP 401
 1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	HTTP 403
 1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	HTTP 404
@@ -1974,8 +1956,6 @@
 1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	XmlPull
 1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	no programmes in the guide window
 1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	no valid MAC
-1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	playlist_file_unavailable
-1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	playlist_path_unsupported
 1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	portal API endpoint
 1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	returned no cmd
 2	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	stream was reset

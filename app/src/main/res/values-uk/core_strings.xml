@@ -106,7 +106,6 @@
     <string name="sync_error_secure">Не вдалося встановити захищене з\'єднання — можливо, сертифікат сервера недійсний.</string>
     <string name="sync_error_malformed_guide">Дані телепрограми, отримані від сервера, мають неправильний формат. Можливо, частина даних усе ж завантажилася — повторіть спробу або перевірте URL EPG.</string>
     <string name="sync_error_guide_empty">Ця телепрограма зараз порожня. Можливо, постачальник ще не опублікував її — повторіть спробу пізніше.</string>
-    <string name="sync_error_guide_no_matching_channels">Жоден канал цієї телепрограми поки не збігається з каналами вашого плейлиста. Відкрийте «Телепрограму» та використайте «Автозіставлення EPG», щоб зіставити їх за назвою.</string>
     <string name="common_plus">+</string>
     <string name="common_minus">–</string>
     <string name="common_hide">Приховати</string>

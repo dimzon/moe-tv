@@ -748,7 +748,6 @@ private fun ConfirmBlock(vm: LocalSyncViewModel, step: LocalSyncViewModel.Step.C
         } else {
             Text(stringResource(R.string.local_sync_confirm_hint), style = stageText(18, 400), color = StageColors.Muted)
             Spacer(Modifier.height(14.mpx))
-            Change(R.string.local_sync_change_sources, preview.newSources)
             Change(R.string.local_sync_change_favorites, preview.newFavorites)
             Change(R.string.local_sync_change_history, preview.newHistory)
             Change(R.string.local_sync_change_reorder, preview.newReorder)

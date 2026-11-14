@@ -48,10 +48,6 @@ data class SourceEntity(
     val liveTuneTimeoutSecs: Int? = null,
     /** An HTTP `Referer` this provider's streams require. RuTube needs none. */
     val httpReferer: String? = null,
-    /** "Clean channel names": tidy the channel names at sync. Settings-backed; off by default. */
-    val cleanChannelNames: Boolean = false,
-    /** MANUAL [cleanChannelNames]'s own words also removed, `;`-separated. Null = none. */
-    val channelNameStrip: String? = null,
     /** Whether this channel list is subscription-only. Always false for the free RuTube catalogue. */
     val isPaid: Boolean = false,
 ) {

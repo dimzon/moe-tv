@@ -367,8 +367,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         // The guide's own last successful attempt. Kept apart from the catalogue's timestamp: the two
         // refresh on their own schedules and one failing must not make the other look stale.
         val SOURCE_LAST_EPG_SYNC_AT = longPreferencesKey("source_last_epg_sync_at")
-        val CHANNEL_CLEANUP_ENABLED = booleanPreferencesKey("channel_cleanup_enabled")
-        val CHANNEL_CLEANUP_STRIP = stringPreferencesKey("channel_cleanup_strip")
         // v4.1.6 one-shot: reset live latency to the safe Balanced preset. Subsequent user changes are
         // preserved across every later update.
         val LIVE_LATENCY_RESET_416 = booleanPreferencesKey("live_latency_reset_416")
@@ -2210,23 +2208,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         context.dataStore.edit { it[Keys.SOURCE_LAST_EPG_SYNC_AT] = atMs }
     }
 
-    /** Global "Clean channel names" choice, replacing the per-source row it used to live on. */
-    val channelCleanupEnabled: Flow<Boolean> = prefsFlow { prefs ->
-        prefs[Keys.CHANNEL_CLEANUP_ENABLED] ?: false
-    }
-
-    val channelNameStrip: Flow<String?> = prefsFlow { prefs ->
-        prefs[Keys.CHANNEL_CLEANUP_STRIP]?.takeIf { it.isNotBlank() }
-    }
-
-    suspend fun setChannelNameCleanup(enabled: Boolean, strip: String?) {
-        context.dataStore.edit { prefs ->
-            prefs[Keys.CHANNEL_CLEANUP_ENABLED] = enabled
-            val words = strip?.trim()?.takeIf { it.isNotEmpty() }
-            if (words == null) prefs.remove(Keys.CHANNEL_CLEANUP_STRIP) else prefs[Keys.CHANNEL_CLEANUP_STRIP] = words
-        }
-    }
-
     /**
      * Everything [tv.own.owntv.core.repository.BuiltInSource] folds into its DTO, as one snapshot.
      * Combines the global values one source now uses; a source's former per-playlist overrides are
@@ -2245,13 +2226,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             liveLatencyCustomSecs = latencyCustom,
             liveTuneTimeoutSecs = tuneTimeout,
             lastSyncAt = lastSync,
-            cleanChannelNames = false,
-            channelNameStrip = null,
         )
-    }.combine(channelCleanupEnabled) { prefs, cleanup ->
-        prefs.copy(cleanChannelNames = cleanup)
-    }.combine(channelNameStrip) { prefs, strip ->
-        prefs.copy(channelNameStrip = strip)
     }.distinctUntilChanged()
 
     /** Effective live buffer in seconds the player applies (null = keep its defaults, i.e. Balanced). */
@@ -2445,8 +2420,6 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             Keys.NAV_STYLE, Keys.NAV_SIZE, Keys.NAV_LENGTH, Keys.NAV_WIDEN,
             // The chosen icon colour. After a restore the app compares it with the applied icon and offers a restart.
             Keys.APP_ICON,
-            // The user's own words for "Clean channel names" (the toggle is a bool key).
-            Keys.CHANNEL_CLEANUP_STRIP,
             // Docked mini-player position rides with settings backup (size is an int key, see backupIntKeys).
             Keys.MINI_PLAYER_POSITION,
             // Live TV latency preset (custom seconds is an int key, see backupIntKeys).
@@ -2498,7 +2471,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             Keys.MEASURED_STREAM_STATS, Keys.DETAILED_DIAGNOSTICS, Keys.DIRECT_TUNE,
             Keys.EXTERNAL_PLAYER_LIVE, Keys.UPDATE_CHECK_ON_START, Keys.SURROUND_SOUND, Keys.PROXY_ENABLED,
             Keys.WEATHER_ENABLED, Keys.WEATHER_FAHRENHEIT, Keys.RESUME_LAST_CHANNEL, Keys.CH_NAV_ENABLED, Keys.PLAYER_SWAP_CHANNEL_KEYS, Keys.PLAYER_NUMBER_KEYS_TUNE,
-            Keys.HIDE_NEW_CATEGORIES, Keys.CHANNEL_CLEANUP_ENABLED,
+            Keys.HIDE_NEW_CATEGORIES,
             Keys.DNS_ENABLED,
             Keys.REMEMBER_LAST_LIVE,
             Keys.REMEMBER_CAT_LIVE, Keys.GUIDE_FOLLOWS_LIVE_CATEGORY,

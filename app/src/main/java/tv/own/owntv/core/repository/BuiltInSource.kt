@@ -48,8 +48,6 @@ object BuiltInSource {
         liveTuneTimeoutSecs = prefs.liveTuneTimeoutSecs
             .takeIf { it != tv.own.owntv.core.player.PlaybackDefaults.LIVE_TUNE_BUDGET_SECS },
         lastSyncAt = prefs.lastSyncAt,
-        cleanChannelNames = prefs.cleanChannelNames,
-        channelNameStrip = prefs.channelNameStrip,
     )
 
     /** The DTO with no Settings applied — first-run callers that only need identity. */

@@ -114,15 +114,6 @@ class SettingsViewModel(
         }
     }
 
-    /** The sources (the built-in RuTube one today); null until the first read, so a count never
-     *  shows 0 while loading. */
-    val loadedSources: StateFlow<List<SourceEntity>?> = sourceRepository.observeSources()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
-
-    val sources: StateFlow<List<SourceEntity>> = loadedSources
-        .map { it.orEmpty() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
     /** True while the built-in catalogue is being downloaded again from RuTube. */
     val catalogSyncRunning: StateFlow<Boolean> = sourceImporter.state
         .map { it is SourceImporter.ImportState.Running }
@@ -639,29 +630,6 @@ class SettingsViewModel(
         settings.liveTuneTimeoutSecs.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.player.LiveLadder.DEFAULT_BUDGET_SECS)
     fun setLiveTuneTimeoutSecs(secs: Int) {
         viewModelScope.launch { settings.setLiveTuneTimeoutSecs(secs) }
-    }
-
-    /**
-     * The old "per-playlist override" of the above. With one built-in source its overrides ARE the
-     * global settings (schema v5), so this writes the global value: `-1` = back to Off.
-     */
-    fun setSourcePreroll(sourceId: Long, secs: Int) {
-        viewModelScope.launch { settings.setLivePrerollSecs(if (secs < 0) 0 else secs) }
-    }
-
-    /** One source: `null` = its "follow global" sentinel → the global default budget. */
-    fun setSourceTuneTimeout(sourceId: Long, secs: Int?) {
-        viewModelScope.launch {
-            settings.setLiveTuneTimeoutSecs(secs ?: tv.own.owntv.core.player.PlaybackDefaults.LIVE_TUNE_BUDGET_SECS)
-        }
-    }
-
-    /** One source: `null` mode = back to the default preset, which is what "follow global" means. */
-    fun setSourceLiveLatency(sourceId: Long, mode: String?, customSecs: Int) {
-        viewModelScope.launch {
-            settings.setLiveLatencyMode(mode ?: tv.own.owntv.core.settings.LiveLatency.DEFAULT.name)
-            settings.setLiveLatencyCustomSecs(customSecs)
-        }
     }
 
     val animationLevel: StateFlow<tv.own.owntv.core.theme.AnimationLevel> =
