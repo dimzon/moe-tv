@@ -84,6 +84,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -106,7 +107,7 @@ import tv.own.myowntv.features.home.ChannelPlate
 import tv.own.myowntv.features.home.OnNowCard
 import tv.own.myowntv.features.shell.components.ClearHistoryDialog
 import tv.own.myowntv.features.shell.components.GITHUB_REPO
-import tv.own.myowntv.features.shell.components.TELEGRAM_LINK
+import tv.own.myowntv.features.shell.components.SITE_LINK
 import tv.own.myowntv.features.shell.components.playbackDisplayName
 import tv.own.myowntv.features.update.UpdateDialog
 import tv.own.owntv.player.PlaybackErrorLog
@@ -599,14 +600,18 @@ internal fun AboutPage(vm: MoreCountsViewModel, entry: FocusRequester, onOpenLan
             modifier = Modifier.padding(top = 10.mpx, bottom = 24.mpx).widthIn(max = 860.mpx))
         StageTile(Modifier.width(640.mpx)) {
             Row(horizontalArrangement = Arrangement.spacedBy(20.mpx), verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(R.drawable.telegram_qr),
-                    contentDescription = stringResource(R.string.settings_telegram_qr),
-                    modifier = Modifier.size(150.mpx).clip(RoundedCornerShape(14.mpx)).background(Color.White),
-                )
+                // Generated from the link itself, so the QR can never encode an old address.
+                val siteQr = remember { CompanionLink.renderQr("https://$SITE_LINK/", sizePx = 512) }
+                if (siteQr != null) {
+                    Image(
+                        bitmap = siteQr.asImageBitmap(),
+                        contentDescription = stringResource(R.string.more_about_download_qr),
+                        modifier = Modifier.size(150.mpx).clip(RoundedCornerShape(14.mpx)).background(Color.White),
+                    )
+                }
                 Column {
-                    Text(stringResource(R.string.settings_join_telegram), style = stageText(22, 800), color = StageColors.Text)
-                    Text(TELEGRAM_LINK, style = stageText(17, 500), color = accent, modifier = Modifier.padding(top = 4.mpx))
+                    Text(stringResource(R.string.more_about_download_page), style = stageText(22, 800), color = StageColors.Text)
+                    Text(SITE_LINK, style = stageText(17, 500), color = accent, modifier = Modifier.padding(top = 4.mpx))
                     Text(stringResource(R.string.more_about_scan), style = stageText(15.5f, 500), color = StageColors.Muted, modifier = Modifier.padding(top = 8.mpx))
                 }
             }

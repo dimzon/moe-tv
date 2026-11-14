@@ -68,7 +68,7 @@ object CrashUploader {
                 setRequestProperty("Content-Type", "application/json; charset=utf-8")
                 setRequestProperty("Accept", "application/json")
                 setRequestProperty("Origin", "https://github.com")
-                setRequestProperty("Referer", "https://github.com/ahXN00/OwnTV")
+                setRequestProperty("Referer", "https://github.com/dimzon/moe-tv-site")
                 setRequestProperty("User-Agent", "MOETV/" + CoreBuildInfo.versionName)
             }
             connection.outputStream.use { it.write(bytes) }

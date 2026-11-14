@@ -6,6 +6,7 @@
 
 1	app/src/main/java/tv/own/myowntv/MainActivity.kt	onboarded
 1	app/src/main/java/tv/own/myowntv/MainActivity.kt	setup_state
+1	app/src/main/java/tv/own/myowntv/MyOwnTVApp.kt	dimzon/moe-tv-site
 1	app/src/main/java/tv/own/myowntv/features/categorylock/LockPinDialogs.kt	\0
 1	app/src/main/java/tv/own/myowntv/features/customize/BulkRenameDialogs.kt	\0
 1	app/src/main/java/tv/own/myowntv/features/customize/BulkRenameDialogs.kt	ADD
@@ -25,6 +26,7 @@
 1	app/src/main/java/tv/own/myowntv/features/live/LiveViewModel.kt	ensurePlaying history channelId=${channel.id}
 1	app/src/main/java/tv/own/myowntv/features/live/LiveViewModel.kt	ensurePlaying history record failed channelId=${channel.id}
 1	app/src/main/java/tv/own/myowntv/features/live/LiveViewModel.kt	play-link resolve failed channelId=${channel.id}
+1	app/src/main/java/tv/own/myowntv/features/more/MorePages.kt	https://$SITE_LINK/
 1	app/src/main/java/tv/own/myowntv/features/more/MorePages.kt	jm
 8	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	\0
 1	app/src/main/java/tv/own/myowntv/features/settings/DnsSettingsScreen.kt	${cfg.host}$p
@@ -44,6 +46,8 @@
 1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	shell-composed
 1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	startup-settled
 1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	·
+1	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	dimzon.github.io/moe-tv-site
+1	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	github.com/dimzon/moe-tv-site
 1	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	group_guide
 1	app/src/main/java/tv/own/myowntv/features/shell/components/StageStatus.kt	\0
 1	app/src/main/java/tv/own/myowntv/player/PlayerHud.kt	\0
@@ -64,6 +68,7 @@
 1	app/src/main/java/tv/own/myowntv/ui/components/TvImeMetrics.kt	poll
 1	app/src/main/java/tv/own/myowntv/ui/components/TvImeMetrics.kt	requested
 2	app/src/main/java/tv/own/myowntv/ui/theme/MyOwnTVColors.kt	\0
+1	app/src/main/java/tv/own/owntv/core/CoreBuildInfo.kt	dimzon/moe-tv-site
 1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	$mapped:${contextKey.substringAfter(':')}
 1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	Restore done items=$count
 1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	kind
@@ -260,7 +265,6 @@
 1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	false
 1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	https://formsubmit.co/ajax/44e36d25fc0b0a147876d92d6807267f
 1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	https://github.com
-1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	https://github.com/ahXN00/OwnTV
 1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	report
 1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	success
 1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	table

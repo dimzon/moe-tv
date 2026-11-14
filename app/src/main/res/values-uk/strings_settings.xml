@@ -222,8 +222,8 @@
     <string name="settings_hex_code">Шістнадцятковий код</string>
     <string name="settings_use_color">Використовувати цей колір</string>
     <string name="settings_about_version">Версія <xliff:g id="version">%1$s</xliff:g></string>
-    <string name="settings_join_telegram">Приєднуйтеся до нас у Telegram</string>
-    <string name="settings_telegram_qr">QR-код групи Telegram</string>
+    <string name="more_about_download_page">Сторінка завантаження</string>
+    <string name="more_about_download_qr">QR-код сторінки завантаження</string>
     <string name="settings_contributions">Ми вітаємо внесок у проєкт, повідомлення про помилки та зірки на GitHub.</string>
     <string name="settings_playback_error_description_full">Останній збій застосунку та останні помилки відтворення (спершу найновіші). Додайте ці відомості, повідомляючи про проблему.</string>
     <string name="settings_no_playback_errors">Помилки відтворення не зареєстровано.</string>

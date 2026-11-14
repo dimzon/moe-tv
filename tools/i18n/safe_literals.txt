@@ -34,7 +34,6 @@
 1	log	app/src/main/java/tv/own/myowntv/MainActivity.kt	onCreate deepLinkHost=${intent.data?.host} deepLinkType=${pendingDeepLink?.javaClass?.simpleName ?: "none"}
 1	log	app/src/main/java/tv/own/myowntv/MainActivity.kt	onNewIntent deepLinkHost=${intent.data?.host} deepLinkType=${pendingDeepLink?.javaClass?.simpleName ?: "none"}
 1	compiler	app/src/main/java/tv/own/myowntv/MyOwnTVApp.kt	DEPRECATION
-1	technical	app/src/main/java/tv/own/myowntv/MyOwnTVApp.kt	ahXN00/OwnTV
 1	file-path	app/src/main/java/tv/own/myowntv/MyOwnTVApp.kt	image_cache
 1	performance	app/src/main/java/tv/own/myowntv/MyOwnTVApp.kt	koin-started
 3	empty	app/src/main/java/tv/own/myowntv/core/i18n/LocalizedContent.kt	\0
@@ -340,7 +339,6 @@
 2	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	focus_highlight
 2	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	fonts
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	fullscreen_mode
-1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	github.com/ahXN00/OwnTV
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	group_app
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	group_appearance
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	group_content_metadata
@@ -367,7 +365,6 @@
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	quick_preview_sound
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	reminder_lead
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	reminders
-1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	t.me/owntvplayer
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	tab_
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	tab_${tab.name}
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	tab_DNS
@@ -469,7 +466,6 @@
 1	technical	app/src/main/java/tv/own/myowntv/ui/theme/Glass.kt	glassPosition
 2	empty	app/src/main/java/tv/own/myowntv/ui/theme/Theme.kt	\0
 1	empty	app/src/main/java/tv/own/owntv/core/CoreBuildInfo.kt	\0
-1	technical	app/src/main/java/tv/own/owntv/core/CoreBuildInfo.kt	ahXN00/OwnTV
 1	log	app/src/main/java/tv/own/owntv/core/CorePerf.kt	OwnTVPerf
 2	technical	app/src/main/java/tv/own/owntv/core/backup/BackupContainer.kt	..
 2	technical	app/src/main/java/tv/own/owntv/core/backup/BackupContainer.kt	Corrupt backup header
@@ -1916,6 +1912,7 @@
 1	file-path	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	diagnostics
 1	file-path	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	last_crash.txt
 1	technical	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	yyyy-MM-dd HH:mm:ss
+1	technical	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	https://github.com/dimzon/moe-tv-site
 2	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	Authorization failed
 1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	CertPath
 1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	CertificateException

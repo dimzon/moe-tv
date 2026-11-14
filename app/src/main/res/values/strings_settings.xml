@@ -503,10 +503,10 @@
     <string name="settings_use_color">Use this color</string>
     <!-- Translators: Version display on the About screen. 'version' is the version string. -->
     <string name="settings_about_version">Version <xliff:g id="version">%1$s</xliff:g></string>
-    <!-- Translators: Link label to join the Telegram community group. 'Telegram' is a brand name. -->
-    <string name="settings_join_telegram">Join us on Telegram</string>
-    <!-- Translators: Accessibility label for the Telegram group QR code. -->
-    <string name="settings_telegram_qr">Telegram group QR code</string>
+    <!-- Translators: Link label on the About screen for the project download page. -->
+    <string name="more_about_download_page">Download page</string>
+    <!-- Translators: Accessibility label for the download page QR code. -->
+    <string name="more_about_download_qr">Download page QR code</string>
     <!-- Translators: Information about contributing to the project. 'GitHub' is a brand name. -->
     <string name="settings_contributions">Contributions, bug reports &amp; stars are welcome on GitHub.</string>
     <!-- Translators: Description of the error log content. -->
