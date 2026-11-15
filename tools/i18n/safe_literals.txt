@@ -134,6 +134,7 @@
 1	log	app/src/main/java/tv/own/myowntv/features/live/ZapTuneDelay.kt	rapid (previous press ${nowMs - (lastPressMs ?: nowMs)}ms ago)$panel
 1	technical	app/src/main/java/tv/own/myowntv/features/more/MorePages.kt	\0
 1	technical	app/src/main/java/tv/own/myowntv/features/more/MorePages.kt	dMMM
+1	url	app/src/main/java/tv/own/myowntv/features/more/MorePages.kt	https://$FORUM_LINK
 1	technical	app/src/main/java/tv/own/myowntv/features/more/MoreScreen.kt	▶
 1	preference-key	app/src/main/java/tv/own/myowntv/features/pip/PictureInPicture.kt	on_leave
 1	preference-key	app/src/main/java/tv/own/myowntv/features/pip/PictureInPicture.kt	owntv_pip
@@ -319,6 +320,7 @@
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	#F5B400
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	#FFFFFF
 1	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	${proxy.host}:${proxy.port}
+1	url	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	4pda.to/forum/index.php?showtopic=1129572
 2	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	accent
 2	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	ambient_glow
 2	technical	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	animations

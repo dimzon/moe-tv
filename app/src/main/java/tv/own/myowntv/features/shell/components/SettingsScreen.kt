@@ -1687,6 +1687,8 @@ data class SettingsStart(val group: Int?, val search: Boolean)
 internal const val GITHUB_REPO = "github.com/dimzon/moe-tv-site"
 /** The download page the About screen's QR code opens. */
 internal const val SITE_LINK = "dimzon.github.io/moe-tv-site"
+/** The 4PDA forum thread the About screen's second QR code opens. */
+internal const val FORUM_LINK = "4pda.to/forum/index.php?showtopic=1129572"
 
 /**
  * Read-only viewer for the persisted playback error history: the last ~10 failures with their

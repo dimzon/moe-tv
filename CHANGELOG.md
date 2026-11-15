@@ -18,6 +18,7 @@
 > commit messages and in [NOTICE](NOTICE) §2.
 
 ### ✨ New features
+- **About: a 4PDA forum card next to the download page, with its own QR code**
 - **Ukrainian and Belarusian UI languages, selectable in Settings › App › Language**
 - **Video rendering: hardware plane (SurfaceView) or compatibility texture (TextureView)**
 - **RuTube live catalogue and week-long programme guide**

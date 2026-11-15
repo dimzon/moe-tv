@@ -507,6 +507,10 @@
     <string name="more_about_download_page">Download page</string>
     <!-- Translators: Accessibility label for the download page QR code. -->
     <string name="more_about_download_qr">Download page QR code</string>
+    <!-- Translators: Link label on the About screen for the app's forum thread. '4PDA' is a brand name. -->
+    <string name="more_about_forum">4PDA forum</string>
+    <!-- Translators: Accessibility label for the forum thread QR code. '4PDA' is a brand name. -->
+    <string name="more_about_forum_qr">4PDA forum QR code</string>
     <!-- Translators: Information about contributing to the project. 'GitHub' is a brand name. -->
     <string name="settings_contributions">Contributions, bug reports &amp; stars are welcome on GitHub.</string>
     <!-- Translators: Description of the error log content. -->

@@ -224,6 +224,8 @@
     <string name="settings_about_version">Версія <xliff:g id="version">%1$s</xliff:g> (<xliff:g id="build">%2$d</xliff:g>)</string>
     <string name="more_about_download_page">Сторінка завантаження</string>
     <string name="more_about_download_qr">QR-код сторінки завантаження</string>
+    <string name="more_about_forum">Тема на 4PDA</string>
+    <string name="more_about_forum_qr">QR-код теми на 4PDA</string>
     <string name="settings_contributions">Ми вітаємо внесок у проєкт, повідомлення про помилки та зірки на GitHub.</string>
     <string name="settings_playback_error_description_full">Останній збій застосунку та останні помилки відтворення (спершу найновіші). Додайте ці відомості, повідомляючи про проблему.</string>
     <string name="settings_no_playback_errors">Помилки відтворення не зареєстровано.</string>

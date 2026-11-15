@@ -109,6 +109,7 @@ import tv.own.myowntv.features.settings.SettingsViewModel
 import tv.own.myowntv.features.settings.VideoGroup
 import tv.own.myowntv.features.settings.videoGroupCount
 import tv.own.myowntv.features.shell.components.ClearHistoryDialog
+import tv.own.myowntv.features.shell.components.FORUM_LINK
 import tv.own.myowntv.features.shell.components.GITHUB_REPO
 import tv.own.myowntv.features.shell.components.SITE_LINK
 import tv.own.myowntv.features.shell.components.playbackDisplayName
@@ -628,24 +629,26 @@ internal fun AboutPage(vm: MoreCountsViewModel, entry: FocusRequester, onOpenLan
             modifier = Modifier.padding(top = 26.mpx).widthIn(max = 860.mpx))
         Text(stringResource(R.string.settings_contributions), style = stageText(16, 500), color = StageColors.Dim,
             modifier = Modifier.padding(top = 10.mpx, bottom = 24.mpx).widthIn(max = 860.mpx))
-        StageTile(Modifier.width(640.mpx)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(20.mpx), verticalAlignment = Alignment.CenterVertically) {
-                // Generated from the link itself, so the QR can never encode an old address.
-                val siteQr = remember { CompanionLink.renderQr("https://$SITE_LINK/", sizePx = 512) }
-                if (siteQr != null) {
-                    Image(
-                        bitmap = siteQr.asImageBitmap(),
-                        contentDescription = stringResource(R.string.more_about_download_qr),
-                        modifier = Modifier.size(150.mpx).clip(RoundedCornerShape(14.mpx)).background(Color.White),
-                    )
-                }
-                Column {
-                    Text(stringResource(R.string.more_about_download_page), style = stageText(22, 800), color = StageColors.Text)
-                    Text(SITE_LINK, style = stageText(17, 500), color = accent, modifier = Modifier.padding(top = 4.mpx))
-                    Text(stringResource(R.string.more_about_scan), style = stageText(15.5f, 500), color = StageColors.Muted, modifier = Modifier.padding(top = 8.mpx))
-                }
-            }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(20.mpx)) {
+            AboutQrCard(
+                url = "https://$SITE_LINK/",
+                title = stringResource(R.string.more_about_download_page),
+                shown = SITE_LINK,
+                qrDescription = stringResource(R.string.more_about_download_qr),
+                accent = accent,
+                modifier = Modifier.weight(1f),
+            )
+            AboutQrCard(
+                url = "https://$FORUM_LINK",
+                title = stringResource(R.string.more_about_forum),
+                shown = FORUM_LINK,
+                qrDescription = stringResource(R.string.more_about_forum_qr),
+                accent = accent,
+                modifier = Modifier.weight(1f),
+            )
         }
+        Text(stringResource(R.string.more_about_scan), style = stageText(15.5f, 500), color = StageColors.Muted,
+            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 10.mpx))
         Row(Modifier.padding(top = 22.mpx), horizontalArrangement = Arrangement.spacedBy(10.mpx)) {
             // The link is for reading: a TV has no browser to open it in.
             Row(
@@ -662,5 +665,37 @@ internal fun AboutPage(vm: MoreCountsViewModel, entry: FocusRequester, onOpenLan
     }
     if (showUpdate) {
         UpdateDialog(onDismiss = { showUpdate = false }, checkOnOpen = true)
+    }
+}
+
+/**
+ * One "scan this" card on About: a QR rendered from [url] itself, the label and the link in readable
+ * form. A TV has no browser to open the link in, so the address stays a label and the QR is the door.
+ */
+@Composable
+private fun AboutQrCard(
+    url: String,
+    title: String,
+    shown: String,
+    qrDescription: String,
+    accent: Color,
+    modifier: Modifier = Modifier,
+) {
+    StageTile(modifier) {
+        Row(horizontalArrangement = Arrangement.spacedBy(20.mpx), verticalAlignment = Alignment.CenterVertically) {
+            // Generated from the link itself, so the QR can never encode an old address.
+            val qr = remember(url) { CompanionLink.renderQr(url, sizePx = 512) }
+            if (qr != null) {
+                Image(
+                    bitmap = qr.asImageBitmap(),
+                    contentDescription = qrDescription,
+                    modifier = Modifier.size(150.mpx).clip(RoundedCornerShape(14.mpx)).background(Color.White),
+                )
+            }
+            Column {
+                Text(title, style = stageText(22, 800), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(shown, style = stageText(17, 500), color = accent, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.mpx))
+            }
+        }
     }
 }
