@@ -31,13 +31,16 @@ class RutubeApi(
     }
 
     /**
-     * The full live catalogue: RuTube's unfiltered TV list **plus** every genre list.
+     * The curated TV list plus its genre buckets — the part of the catalogue that carries RuTube's
+     * channel numbering and `broadcast_category` membership.
      *
      * The unfiltered `tvbroadcastinfo` list is a curated TV line-up and can lag behind the genre
      * buckets: on 2026-11-14 «ЛУЧШИЕ ФАНТАСТИЧЕСКИЕ ФИЛЬМЫ» (`54de765aeea96a73d23a24b4e2cab07d`,
      * live and on air) was in `category=5` but absent from the unfiltered list of every client
      * (`tv`/`web`/`androidtv`). Merging the genre lists by `videoId` — first occurrence wins, so the
-     * curated order is preserved and duplicates collapse — makes the catalogue complete.
+     * curated order is preserved and duplicates collapse — keeps that part complete.
+     *
+     * The official TV feed in [liveChannels] has many more channels; the syncer merges both.
      *
      * `per_page=500` returns each list in a single page today (the largest is ~90 rows); the loop
      * still follows `next` so a future server-side cap cannot truncate the catalogue. A genre
@@ -70,6 +73,51 @@ class RutubeApi(
                 }
             }
             out.values.toList()
+        }
+
+    /**
+     * The official TV feed the RUTUBE app itself renders on its «ТВ-эфиры» screen:
+     * `pangolin/api/tv/feeds/live_smarttv/` → tabs → rows (`resource/<slug>/<id>`), each row a
+     * group of live channel cards. It returns ~325 channels against ~240 in the curated
+     * `tvbroadcastinfo` list, including channels that never reach that list (SKY SPORTS TENNIS,
+     * «Прямой эфир Record | Радио Супердискотека 90-х», regional and radio channels).
+     *
+     * Feed cards carry no `broadcast_category`, so the row name is translated to the same genre id
+     * the rest of the app uses ([LIVE_GROUP_ALIAS]); a channel in several rows keeps every genre.
+     * Rows without a genre mapping still yield channels — they appear in «Все» only. A failed row is
+     * logged and skipped, exactly like a failed genre list above.
+     */
+    suspend fun liveChannels(categories: List<RutubeCategory>): List<RutubeChannel> =
+        withContext(Dispatchers.IO) {
+            val rows = RutubeParser.parseLiveFeedRows(getText("$baseUrl$LIVE_FEED_PATH"))
+            val byId = LinkedHashMap<String, RutubeChannel>()
+            for (row in rows) {
+                val categoryId = categoryIdFor(row.name, categories)
+                var next: String? = withClient(row.url)
+                val visited = HashSet<String>()
+                while (!next.isNullOrBlank() && visited.size < MAX_PAGES && visited.add(next)) {
+                    val page = try {
+                        RutubeParser.parseChannelPage(getText(next))
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.w(TAG, "RuTube feed row «${row.name}» failed: ${e.message}")
+                        break
+                    }
+                    for (channel in page.results) {
+                        val existing = byId[channel.videoId]
+                        byId[channel.videoId] = when {
+                            existing == null ->
+                                if (categoryId != null) channel.copy(categoryIds = listOf(categoryId)) else channel
+                            categoryId != null ->
+                                existing.copy(categoryIds = (existing.categoryIds + categoryId).distinct())
+                            else -> existing
+                        }
+                    }
+                    next = page.nextUrl?.let(::withClient)
+                }
+            }
+            byId.values.toList()
         }
 
     suspend fun briefSchedules(): Map<String, List<RutubeProgramme>> = withContext(Dispatchers.IO) {
@@ -132,6 +180,16 @@ class RutubeApi(
         }
     }
 
+    /** Feed row name → genre alias of `api/livestream/categories/` (server-provided names). */
+    private fun categoryIdFor(name: String, categories: List<RutubeCategory>): Int? {
+        val alias = LIVE_GROUP_ALIAS[name.trim().lowercase()] ?: return null
+        return categories.firstOrNull { it.alias.equals(alias, ignoreCase = true) }?.id
+    }
+
+    /** Feed rows come without `client=tv`; the TV query is required for the Pangolin TV routes. */
+    private fun withClient(url: String): String =
+        if (url.contains("client=")) url else url + (if ('?' in url) "&" else "?") + "client=tv"
+
     private suspend fun getText(url: String): String = http.getText(
         url = url,
         userAgent = userAgent,
@@ -149,5 +207,14 @@ class RutubeApi(
 
         /** Category 1 is "Все прямые эфиры" — the unfiltered list, already fetched as the base. */
         private const val ALL_CATEGORY_ID = 1
+
+        /** The official app's «ТВ-эфиры» feed; `client=tv` is the only accepted TV client. */
+        private const val LIVE_FEED_PATH = "/pangolin/api/tv/feeds/live_smarttv/?client=tv"
+
+        /**
+         * Feed group names → genre aliases, parsed once from `rutube_live_groups.json` in this
+         * class's static initializer (see [RutubeLiveGroups]).
+         */
+        private val LIVE_GROUP_ALIAS: Map<String, String> = RutubeLiveGroups.load()
     }
 }

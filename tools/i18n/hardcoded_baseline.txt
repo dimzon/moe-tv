@@ -207,7 +207,6 @@
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	live_streams
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	m3u8
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	m3u8_m4s
-4	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	name
 2	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	next
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	order_number
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	origin_type
@@ -221,7 +220,6 @@
 2	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	subtitle
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	thumbnail_url
 4	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	title
-1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	url
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	video_balancer
 1	app/src/main/java/tv/own/owntv/core/sync/SyncManager.kt	Result: $result | Duration: ${duration}ms
 1	app/src/main/java/tv/own/owntv/core/sync/SyncManager.kt	RuTube provider not wired

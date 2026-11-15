@@ -1499,33 +1499,22 @@
 1	log	app/src/main/java/tv/own/owntv/core/sync/ImportFinalizer.kt	ensureContentIndexes end ms=${SystemClock.elapsedRealtime() - startedAt}
 1	log	app/src/main/java/tv/own/owntv/core/sync/ImportFinalizer.kt	ensureContentIndexes failed ms=${SystemClock.elapsedRealtime() - startedAt}
 1	log	app/src/main/java/tv/own/owntv/core/sync/ImportFinalizer.kt	ensureContentIndexes start
+1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	$label catalogue tv=${tvChannels.size} feed=${feedChannels.size} merged=${allChannels.size} ruTube
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	$label phase end sourceId=${s.id} unique=${total[0]} ruTube
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	$label phase start sourceId=${s.id} fresh=$freshSource ruTube
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	%s · %s
-1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	21452175b89b01e0fb3ef72878d7259d
-1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	49848b06c0fe2dae124419ffce1a1bab
-1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	54395b96ad1a7b49966f46a6eee370a4
-1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	75957f55ed1e9b4e0ec00f8dd9594fcc
-1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	92198c96552e3ee4a62cc1735a98ee54
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube EPG prune failed: ${it.message}
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube brief seed failed: ${e.message}
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube guide $videoId failed: ${it.message}
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube guide fallback failed $videoId: ${fallback.message}
 1	assertion	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube returned no live channels — refusing to wipe the catalogue
-1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	aa94512eff79ba985e79d473c2a1e90b
-1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	b2b32a7d6f2323f3a113ff44b0404bf2
 2	room-schema	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	channels
 1	room-schema	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	channels_fts
-1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	d1318878c58e59ecb5b3d167f2c33f6d
-1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	d5a20f38240b01ab8e4019a78f7d6a81
-1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	eda2da42eea89951e4135141a30915f7
-1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	f1c3b0bbf26ad010d999e19147e3924f
-1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	f785d738a845cc80658e887843a18ed9
-1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	ffc110c6785e57f4c329179b555547b4
 1	protocol	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	rutube://
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	Прямая трансляция
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	Прямое включение
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	Прямой эфир
+1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl$LIVE_FEED_PATH
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/livestream/categories/
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/play/options/$videoId/?no_404=true&pver=v2
@@ -1534,16 +1523,27 @@
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=false&per_page=$PER_PAGE
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=true
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/pangolin/api/tv/tvprogram/$videoId?client=tv&programDate=$date
+1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	&
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	&referer=https%3A%2F%2Ftv-androidtv.rutube.ru
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	&tvprogramm=false&category=$id&per_page=$PER_PAGE
+1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	/pangolin/api/tv/feeds/live_smarttv/?client=tv
+1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	?
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	Accept
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	Referer
 1	log	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	RuTube category $id catalogue failed: ${e.message}
+1	log	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	RuTube feed row «${row.name}» failed: ${e.message}
 1	log	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	RutubeApi
 1	mime	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	application/json
+1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	client=
+1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	client=tv
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	com.rutube.mobile/31.18.0 (Android 13)
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	https://rutube.ru
-3	empty	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	\0
+1	log	app/src/main/java/tv/own/owntv/core/sync/RutubeLiveGroups.kt	$RESOURCE malformed — feed rows add no genres
+1	log	app/src/main/java/tv/own/owntv/core/sync/RutubeLiveGroups.kt	$RESOURCE unreadable — feed rows add no genres
+1	file-path	app/src/main/java/tv/own/owntv/core/sync/RutubeLiveGroups.kt	/$RESOURCE
+1	log	app/src/main/java/tv/own/owntv/core/sync/RutubeLiveGroups.kt	RutubeLiveGroups
+1	file-path	app/src/main/java/tv/own/owntv/core/sync/RutubeLiveGroups.kt	rutube_live_groups.json
+4	empty	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	\0
 1	protocol	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	Z
 2	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	ageRating
 1	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	age_rating
@@ -1555,10 +1555,14 @@
 1	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	is_autogenerated
 1	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	langTitle
 2	protocol	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	login_required
+5	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	name
 1	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	null
+1	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	resources
 1	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	srt
 2	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	sub_id
+1	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	tabs
 1	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	type
+2	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	url
 1	json	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	vtt
 1	protocol	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	z
 2	technical	app/src/main/java/tv/own/owntv/core/sync/SyncManager.kt	${it.key}=${it.value}

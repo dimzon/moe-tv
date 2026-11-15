@@ -21,6 +21,29 @@ object RutubeParser {
         }
     }
 
+    /**
+     * Rows of the official TV feed (`pangolin/api/tv/feeds/live_smarttv/`): every tab lists
+     * `resources`, and each resource is a group ("Федеральные", "Спортивные", "Киноэфиры", …)
+     * whose [RutubeLiveRow.url] returns the channel cards. Duplicate URLs are collapsed because a
+     * group can appear in more than one tab; the first (tab order) name wins.
+     */
+    fun parseLiveFeedRows(body: String): List<RutubeLiveRow> {
+        val root = runCatching { JSONObject(body) }.getOrNull() ?: return emptyList()
+        val tabs = root.optJSONArray("tabs") ?: return emptyList()
+        val out = ArrayList<RutubeLiveRow>()
+        val seen = HashSet<String>()
+        for (i in 0 until tabs.length()) {
+            val resources = tabs.optJSONObject(i)?.optJSONArray("resources") ?: continue
+            for (j in 0 until resources.length()) {
+                val row = resources.optJSONObject(j) ?: continue
+                val url = row.str("url") ?: continue
+                if (!seen.add(url)) continue
+                out += RutubeLiveRow(name = row.str("name") ?: "", url = url)
+            }
+        }
+        return out
+    }
+
     fun parseChannelPage(body: String): RutubeChannelPage {
         val root = runCatching { JSONObject(body) }.getOrNull()
             ?: return RutubeChannelPage(emptyList(), null)

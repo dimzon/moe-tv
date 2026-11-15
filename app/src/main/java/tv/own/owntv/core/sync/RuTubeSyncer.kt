@@ -51,20 +51,24 @@ internal class RuTubeSyncer(
         Log.i(TAG, "$label phase start sourceId=${s.id} fresh=$freshSource ruTube")
         progress.update(SyncPhase.LIVE, 0)
 
-        // Categories first: they also drive the per-genre catalogue pass — RuTube's unfiltered list
-        // can omit a live channel that its genre bucket still carries (see RutubeApi.channels).
+        // Categories first: they also drive the two catalogue passes below.
         val rawCategories = rutube.categories()
-        val allChannels = rutube.channels(rawCategories.map { it.id })
-        // Two kinds of row never enter the catalogue:
-        //  - subscription channels (Premier/SPORT/…): `is_paid` is false everywhere, the real signal
-        //    is `common_subscription_product_codes`; play/options answers 244/404 and nothing plays
-        //    without the package. The app has no purchase flow, so they are simply not offered.
-        //  - verified broken channels (hls404 / empty master / player stub), mirroring SmartRuTube's
-        //    filter. Both filters run before naming, so duplicate-name disambiguation only sees the
-        //    channels that remain.
-        val channels = allChannels
-            .filterNot { it.isPaid }
-            .filterNot { it.videoId in KNOWN_BROKEN_IDS }
+        // The curated TV list carries RuTube's numbering and genres; the official TV feed carries
+        // the channels that list omits (SKY SPORTS TENNIS, radio streams, regional channels, …).
+        val tvChannels = rutube.channels(rawCategories.map { it.id })
+        val feedChannels = rutube.liveChannels(rawCategories)
+        val allChannels = mergeRutubeChannels(tvChannels, feedChannels)
+        Log.i(
+            TAG,
+            "$label catalogue tv=${tvChannels.size} feed=${feedChannels.size} merged=${allChannels.size} ruTube",
+        )
+        // Subscription channels (Premier/SPORT/…) never enter the catalogue: `is_paid` is false
+        // everywhere, the real signal is `common_subscription_product_codes`; play/options answers
+        // 244/404 and nothing plays without the package. The app has no purchase flow.
+        // Upstream "broken stream" ids are deliberately not hardcoded any more: availability is
+        // dynamic and the official app still lists those channels (РБК-Уфа, CTV, …), so the app
+        // mirrors the feed and lets an unavailable stream fail at tune time instead of hiding it.
+        val channels = allChannels.filterNot { it.isPaid }
         // The shipped rename dictionary (hex videoId → name): mirrored wholesale, then applied at
         // both ends — to the fresh rows below, and to already-stored rows by the apply pass after
         // the commit, so a dictionary change reaches a channel whose content did not change.
@@ -180,31 +184,6 @@ internal class RuTubeSyncer(
 
     internal companion object {
         private const val TAG = SyncSupport.TAG
-
-        /**
-         * Channels whose stream is confirmed broken upstream, so they are not inserted at all.
-         * Source: SmartRuTube `RuTubeChannelFilter.BAD_CHANNEL_IDS` (verified 2026-10-29 with the
-         * mobile UA). Temporary — remove an id when the channel plays again.
-         */
-        val KNOWN_BROKEN_IDS: Set<String> = setOf(
-            // hls404
-            "75957f55ed1e9b4e0ec00f8dd9594fcc", // Прямой эфир РБК-Уфа
-            "f785d738a845cc80658e887843a18ed9", // Прямой эфир телеканала CTV
-            // empty_hls (master exists, child playlist is empty)
-            "eda2da42eea89951e4135141a30915f7", // Прямой эфир ИЛЛИ ТВ
-            // no_hls
-            "49848b06c0fe2dae124419ffce1a1bab", // Домашний
-            "b2b32a7d6f2323f3a113ff44b0404bf2", // Пятый канал
-            "54395b96ad1a7b49966f46a6eee370a4", // РЕН ТВ
-            "ffc110c6785e57f4c329179b555547b4", // СТС
-            "92198c96552e3ee4a62cc1735a98ee54", // ТВ Центр
-            // player_stub
-            "21452175b89b01e0fb3ef72878d7259d", // КИНОПРЕМЬЕРА
-            "d1318878c58e59ecb5b3d167f2c33f6d", // КИНОСВИДАНИЕ
-            "aa94512eff79ba985e79d473c2a1e90b", // КИНОСЕМЬЯ
-            "f1c3b0bbf26ad010d999e19147e3924f", // Кинохит
-            "d5a20f38240b01ab8e4019a78f7d6a81", // Мужское кино
-        )
 
         private val PREFIXES = listOf(
             "Прямой эфир",

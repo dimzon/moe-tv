@@ -13,6 +13,37 @@ data class RutubeChannel(
 
 data class RutubeCategory(val id: Int, val name: String, val alias: String)
 
+/** One row of the official TV feed (`pangolin/api/tv/feeds/live_smarttv/`): its group name and list URL. */
+data class RutubeLiveRow(val name: String, val url: String)
+
+/**
+ * Merges the curated `tvbroadcastinfo` catalogue with the official TV feed.
+ *
+ * The primary row wins metadata (name, title, logo, order number) because it carries RuTube's TV
+ * numbering; genres are unioned so a channel keeps every bucket either source knows about. A paid
+ * flag anywhere wins. Feed-only channels arrive with `orderNumber = null`, so they sort after the
+ * numbered ones instead of inventing channel numbers.
+ */
+internal fun mergeRutubeChannels(
+    primary: List<RutubeChannel>,
+    extra: List<RutubeChannel>,
+): List<RutubeChannel> {
+    val byId = LinkedHashMap<String, RutubeChannel>()
+    for (channel in primary) byId[channel.videoId] = channel
+    for (channel in extra) {
+        val existing = byId[channel.videoId]
+        byId[channel.videoId] = if (existing == null) {
+            channel
+        } else {
+            existing.copy(
+                categoryIds = (existing.categoryIds + channel.categoryIds).distinct(),
+                isPaid = existing.isPaid || channel.isPaid,
+            )
+        }
+    }
+    return byId.values.toList()
+}
+
 data class RutubeProgramme(
     val title: String,
     val subtitle: String? = null,
