@@ -44,6 +44,7 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
 import androidx.room.useWriterConnection
+import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -162,6 +163,35 @@ open class MainActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: android.content.Context) {
         val tag = tv.own.owntv.core.i18n.LocaleStore.from(newBase).readBlocking()
         super.attachBaseContext(tv.own.owntv.core.i18n.AppLocale.wrap(newBase, tag))
+    }
+
+    /**
+     * scrcpy and USB keyboards send Esc; TV remotes never do. Translate it to Back — the same
+     * mapping SmartRuTube's `GlobalKeyTranslator` applies (`KEYCODE_ESCAPE -> KEYCODE_BACK`) — so
+     * Esc inherits every existing Back path, including the shell's first-press focus exit.
+     *
+     * The synthetic UP carries the tracking flag itself: `Activity.onKeyDown` starts tracking the
+     * synthetic DOWN object, and a freshly built UP would be dropped as untracked, so
+     * `onBackPressed()` would never run.
+     */
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.keyCode == KeyEvent.KEYCODE_ESCAPE) {
+            val back = KeyEvent(
+                event.downTime,
+                event.eventTime,
+                event.action,
+                KeyEvent.KEYCODE_BACK,
+                event.repeatCount,
+                event.metaState,
+                event.deviceId,
+                event.scanCode,
+                event.flags,
+                event.source,
+            )
+            if (event.action == KeyEvent.ACTION_UP) back.startTracking()
+            return super.dispatchKeyEvent(back)
+        }
+        return super.dispatchKeyEvent(event)
     }
 
     override fun onNewIntent(intent: Intent) {
