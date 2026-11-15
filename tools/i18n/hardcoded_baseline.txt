@@ -188,6 +188,8 @@
 1	app/src/main/java/tv/own/owntv/core/sync/ChannelRenameSeeds.kt	ChannelRenameSeeds
 1	app/src/main/java/tv/own/owntv/core/sync/ChannelRenameSeeds.kt	channel_renames.json
 1	app/src/main/java/tv/own/owntv/core/sync/ChannelRenameSeeds.kt	rename dictionary is malformed — shipping no renames
+1	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=wdp&tvprogramm=false&per_page=$PER_PAGE
+2	app/src/main/java/tv/own/owntv/core/sync/RutubeModels.kt	\0
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	$url${sep}size=l&picture_type=ios
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	alias
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	author
@@ -199,7 +201,6 @@
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	hls
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	http://$cdn
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	https://$cdn
-3	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	id
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	iframe_url
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	ifrm
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	is_paid
@@ -208,8 +209,6 @@
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	m3u8
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	m3u8_m4s
 2	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	next
-1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	order_number
-1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	origin_type
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	pic.rtbcdn.ru/
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	preview_picture_url
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	result

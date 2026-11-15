@@ -14,7 +14,7 @@ import org.junit.Test
 class RutubeLiveCatalogueTest {
 
     @Test
-    fun `feed rows keep their names and collapse duplicate urls`() {
+    fun `feed rows keep their names and collapse duplicate groups`() {
         val rows = RutubeParser.parseLiveFeedRows(
             """{"tabs":[
                  {"name":"Главная","resources":[
@@ -29,6 +29,19 @@ class RutubeLiveCatalogueTest {
             rows.map { it.name },
         )
         assertEquals(3, rows.map { it.url }.distinct().size)
+    }
+
+    @Test
+    fun `feed rows follow tab and resource order numbers`() {
+        val rows = RutubeParser.parseLiveFeedRows(
+            """{"tabs":[
+                 {"order_number":2,"resources":[
+                   {"order_number":2,"name":"Спорт","url":"https://rutube.ru/pangolin/api/tv/resource/live_smarttv/2"},
+                   {"order_number":1,"name":"Кино","url":"https://rutube.ru/pangolin/api/tv/resource/live_smarttv/1"}]},
+                 {"order_number":1,"resources":[
+                   {"order_number":1,"name":"Федеральные","url":"https://rutube.ru/pangolin/api/tv/resource/live_smarttv/0"}]}]}""",
+        )
+        assertEquals(listOf("Федеральные", "Кино", "Спорт"), rows.map { it.name })
     }
 
     @Test
@@ -51,6 +64,8 @@ class RutubeLiveCatalogueTest {
         assertEquals("https://pic.rtbcdn.ru/video/59/a9/x.jpg?size=l&picture_type=ios", channel.logoUrl)
         assertTrue(channel.categoryIds.isEmpty())
         assertEquals(null, channel.orderNumber)
+        assertEquals(67464793L, channel.authorId)
+        assertEquals(null, channel.originType)
         assertFalse(channel.isPaid)
     }
 
@@ -94,4 +109,58 @@ class RutubeLiveCatalogueTest {
         assertTrue("a paid flag from either source wins", first.isPaid)
         assertEquals("Live. Спортивные трансляции", merged[1].name)
     }
+
+    @Test
+    fun `merge sorts by guide order and appends feed-only channels`() {
+        val first = channel("first", "Первый", 1)
+        val late = channel("late", "Поздний", 100)
+        val early = channel("early", "Ранний", 3)
+        val feedOnly = channel("feed", "Feed only", null)
+
+        val merged = mergeRutubeChannels(listOf(late, first, early), listOf(feedOnly))
+
+        assertEquals(listOf("first", "early", "late", "feed"), merged.map { it.videoId })
+    }
+
+    @Test
+    fun `playable duplicate uses the filtered placeholder order`() {
+        val playable = channel("playable", "СТС", 999, authorId = 42)
+        val placeholder = channel("placeholder", "СТС", 12, originType = "ifrm", authorId = 42)
+        val late = channel("late", "Поздний", 20)
+
+        val merged = mergeRutubeChannels(listOf(playable, placeholder, late), emptyList())
+
+        assertEquals(listOf("playable", "placeholder", "late"), merged.map { it.videoId })
+    }
+
+    @Test
+    fun `feed-only twin inherits placeholder order`() {
+        val placeholder = channel("placeholder", "РЕН ТВ. Новости", 10, originType = "ifrm", categoryIds = listOf(2))
+        val late = channel("late", "Поздний", 20)
+        val feed = channel("feed", "РЕН ТВ", null, originType = "rst", categoryIds = listOf(4))
+
+        val merged = mergeRutubeChannels(listOf(placeholder, late), listOf(feed))
+
+        assertEquals(listOf("placeholder", "feed", "late"), merged.map { it.videoId })
+        assertEquals(listOf(4, 2), merged[1].categoryIds)
+    }
+
+    private fun channel(
+        id: String,
+        name: String,
+        order: Int?,
+        originType: String? = null,
+        authorId: Long? = null,
+        categoryIds: List<Int> = emptyList(),
+    ) = RutubeChannel(
+        videoId = id,
+        name = name,
+        title = null,
+        logoUrl = null,
+        categoryIds = categoryIds,
+        orderNumber = order,
+        isPaid = false,
+        originType = originType,
+        authorId = authorId,
+    )
 }

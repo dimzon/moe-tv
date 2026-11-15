@@ -24,21 +24,30 @@ object RutubeParser {
     /**
      * Rows of the official TV feed (`pangolin/api/tv/feeds/live_smarttv/`): every tab lists
      * `resources`, and each resource is a group ("Федеральные", "Спортивные", "Киноэфиры", …)
-     * whose [RutubeLiveRow.url] returns the channel cards. Duplicate URLs are collapsed because a
-     * group can appear in more than one tab; the first (tab order) name wins.
+     * whose [RutubeLiveRow.url] returns the channel cards. Tabs and rows are sorted by
+     * `order_number`; duplicate row names are collapsed because the same group appears in
+     * several tabs — the first (canonical) occurrence wins.
      */
     fun parseLiveFeedRows(body: String): List<RutubeLiveRow> {
         val root = runCatching { JSONObject(body) }.getOrNull() ?: return emptyList()
         val tabs = root.optJSONArray("tabs") ?: return emptyList()
+        val orderedTabs = (0 until tabs.length())
+            .mapNotNull { i -> tabs.optJSONObject(i) }
+            .sortedBy { it.optInt("order_number", 0) }
         val out = ArrayList<RutubeLiveRow>()
         val seen = HashSet<String>()
-        for (i in 0 until tabs.length()) {
-            val resources = tabs.optJSONObject(i)?.optJSONArray("resources") ?: continue
-            for (j in 0 until resources.length()) {
-                val row = resources.optJSONObject(j) ?: continue
+
+        for (tab in orderedTabs) {
+            val resources = tab.optJSONArray("resources") ?: continue
+            val orderedRows = (0 until resources.length())
+                .mapNotNull { i -> resources.optJSONObject(i) }
+                .sortedBy { it.optInt("order_number", 0) }
+
+            for (row in orderedRows) {
+                val name = row.str("name")?.trim().orEmpty()
                 val url = row.str("url") ?: continue
-                if (!seen.add(url)) continue
-                out += RutubeLiveRow(name = row.str("name") ?: "", url = url)
+                if (name.isEmpty() || !seen.add(name)) continue
+                out += RutubeLiveRow(name = name, url = url)
             }
         }
         return out
@@ -218,6 +227,8 @@ object RutubeParser {
             categoryIds = categoryIds,
             orderNumber = obj.optInt("order_number", Int.MIN_VALUE).takeIf { it != Int.MIN_VALUE },
             isPaid = obj.optBoolean("is_paid", false) || hasSubscription,
+            originType = obj.str("origin_type"),
+            authorId = author?.optLong("id", Long.MIN_VALUE)?.takeIf { it != Long.MIN_VALUE },
         )
     }
 

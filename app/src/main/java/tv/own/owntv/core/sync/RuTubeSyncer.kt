@@ -65,10 +65,16 @@ internal class RuTubeSyncer(
         // Subscription channels (Premier/SPORT/…) never enter the catalogue: `is_paid` is false
         // everywhere, the real signal is `common_subscription_product_codes`; play/options answers
         // 244/404 and nothing plays without the package. The app has no purchase flow.
-        // Upstream "broken stream" ids are deliberately not hardcoded any more: availability is
-        // dynamic and the official app still lists those channels (РБК-Уфа, CTV, …), so the app
-        // mirrors the feed and lets an unavailable stream fail at tune time instead of hiding it.
-        val channels = allChannels.filterNot { it.isPaid }
+        // Iframe rows are editorial placeholders, not streams: they exist to carry order/category
+        // for a playable feed twin and must never reach the catalogue themselves.
+        // The curated-only tail gets a liveness probe: RuTube keeps deleted videos in the guide
+        // (e.g. the old CTV card), while feed-backed channels are live by definition.
+        val feedIds = feedChannels.mapTo(HashSet()) { it.videoId }
+        val channels = allChannels
+            .filterNot { it.isPaid || it.originType == "ifrm" }
+            .filter {
+                it.videoId in feedIds || feedChannels.isEmpty() || rutube.isVideoAvailable(it.videoId)
+            }
         // The shipped rename dictionary (hex videoId → name): mirrored wholesale, then applied at
         // both ends — to the fresh rows below, and to already-stored rows by the apply pass after
         // the commit, so a dictionary change reaches a channel whose content did not change.

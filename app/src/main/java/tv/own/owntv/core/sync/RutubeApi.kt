@@ -58,12 +58,12 @@ class RutubeApi(
                     next = page.nextUrl
                 }
             }
-            collect("$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=false&per_page=$PER_PAGE")
+            collect("$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=wdp&tvprogramm=false&per_page=$PER_PAGE")
             for (id in categoryIds) {
                 if (id == ALL_CATEGORY_ID) continue
                 try {
                     collect(
-                        "$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv" +
+                        "$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=wdp" +
                             "&tvprogramm=false&category=$id&per_page=$PER_PAGE",
                     )
                 } catch (e: CancellationException) {
@@ -150,6 +150,25 @@ class RutubeApi(
 
     suspend fun scheduleAllDays(videoId: String): List<RutubeProgramme> = withContext(Dispatchers.IO) {
         RutubeParser.parseMobileSchedule(getText("$baseUrl/api/v1/livestream/video/schedule/$videoId/"))
+    }
+
+    /**
+     * Lightweight liveness probe for a curated-only channel that was not present in the official
+     * feed. `api/video/<id>/` answers 403/404 for a deleted/removed video; other failures return
+     * true so a transient network error never hides a channel. This mirrors SmartRuTube's
+     * curated-only check and is called for the small tail only, not the whole catalogue.
+     */
+    suspend fun isVideoAvailable(videoId: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            getText("$baseUrl/api/video/$videoId/")
+            true
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: HttpClient.HttpStatusException) {
+            e.code != 403 && e.code != 404
+        } catch (e: Exception) {
+            true
+        }
     }
 
     suspend fun playUrl(videoId: String): RutubePlayback = withContext(Dispatchers.IO) {
