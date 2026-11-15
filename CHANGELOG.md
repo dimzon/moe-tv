@@ -42,6 +42,7 @@
 ### 🩹 Fixes
 - **History: the channel logo stretches over its whole placeholder instead of a gray frame around it**
 - **DNS presets row no longer borrows the accent-picker wording ("готовые цвета") in Russian, Ukrainian and Belarusian**
+- **Live TV: channels missing from RuTube's «all» list are synced from the genre lists**
 
 ### 🔧 Internals
 - **Live-only database schema rebuilt through v8**

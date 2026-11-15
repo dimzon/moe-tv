@@ -1530,12 +1530,16 @@
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/livestream/categories/
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/play/options/$videoId/?no_404=true&pver=v2
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v1/livestream/video/schedule/$videoId/
-1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=false
+1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv
+1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=false&per_page=$PER_PAGE
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=true
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	$baseUrl/pangolin/api/tv/tvprogram/$videoId?client=tv&programDate=$date
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	&referer=https%3A%2F%2Ftv-androidtv.rutube.ru
+1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	&tvprogramm=false&category=$id&per_page=$PER_PAGE
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	Accept
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	Referer
+1	log	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	RuTube category $id catalogue failed: ${e.message}
+1	log	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	RutubeApi
 1	mime	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	application/json
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	com.rutube.mobile/31.18.0 (Android 13)
 1	url	app/src/main/java/tv/own/owntv/core/sync/RutubeApi.kt	https://rutube.ru

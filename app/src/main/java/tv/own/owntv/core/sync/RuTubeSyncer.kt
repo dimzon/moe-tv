@@ -51,7 +51,10 @@ internal class RuTubeSyncer(
         Log.i(TAG, "$label phase start sourceId=${s.id} fresh=$freshSource ruTube")
         progress.update(SyncPhase.LIVE, 0)
 
-        val allChannels = rutube.channels()
+        // Categories first: they also drive the per-genre catalogue pass — RuTube's unfiltered list
+        // can omit a live channel that its genre bucket still carries (see RutubeApi.channels).
+        val rawCategories = rutube.categories()
+        val allChannels = rutube.channels(rawCategories.map { it.id })
         // Two kinds of row never enter the catalogue:
         //  - subscription channels (Premier/SPORT/…): `is_paid` is false everywhere, the real signal
         //    is `common_subscription_product_codes`; play/options answers 244/404 and nothing plays
@@ -69,7 +72,6 @@ internal class RuTubeSyncer(
             renameSeeds.map { (hex, name) -> tv.own.owntv.core.database.ChannelRenameEntity(remoteId = hex, name = name) },
         )
         val renames = renameSeeds
-        val rawCategories = rutube.categories()
         if (channels.isEmpty()) {
             throw IllegalStateException("RuTube returned no live channels — refusing to wipe the catalogue")
         }

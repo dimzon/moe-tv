@@ -1,5 +1,7 @@
 package tv.own.owntv.core.sync
 
+import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tv.own.owntv.core.network.HttpClient
@@ -28,17 +30,47 @@ class RutubeApi(
         RutubeParser.parseCategories(getText("$baseUrl/api/livestream/categories/"))
     }
 
-    suspend fun channels(): List<RutubeChannel> = withContext(Dispatchers.IO) {
-        val out = ArrayList<RutubeChannel>()
-        var url: String? = "$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=false"
-        val visited = HashSet<String>()
-        while (!url.isNullOrBlank() && visited.size < MAX_PAGES && visited.add(url)) {
-            val page = RutubeParser.parseChannelPage(getText(url))
-            out += page.results
-            url = page.nextUrl
+    /**
+     * The full live catalogue: RuTube's unfiltered TV list **plus** every genre list.
+     *
+     * The unfiltered `tvbroadcastinfo` list is a curated TV line-up and can lag behind the genre
+     * buckets: on 2026-11-14 «ЛУЧШИЕ ФАНТАСТИЧЕСКИЕ ФИЛЬМЫ» (`54de765aeea96a73d23a24b4e2cab07d`,
+     * live and on air) was in `category=5` but absent from the unfiltered list of every client
+     * (`tv`/`web`/`androidtv`). Merging the genre lists by `videoId` — first occurrence wins, so the
+     * curated order is preserved and duplicates collapse — makes the catalogue complete.
+     *
+     * `per_page=500` returns each list in a single page today (the largest is ~90 rows); the loop
+     * still follows `next` so a future server-side cap cannot truncate the catalogue. A genre
+     * failure is logged and skipped: the base list must never be lost to one bad bucket.
+     */
+    suspend fun channels(categoryIds: Collection<Int> = emptyList()): List<RutubeChannel> =
+        withContext(Dispatchers.IO) {
+            val out = LinkedHashMap<String, RutubeChannel>()
+            suspend fun collect(url: String) {
+                var next: String? = url
+                val visited = HashSet<String>()
+                while (!next.isNullOrBlank() && visited.size < MAX_PAGES && visited.add(next)) {
+                    val page = RutubeParser.parseChannelPage(getText(next))
+                    for (channel in page.results) out.putIfAbsent(channel.videoId, channel)
+                    next = page.nextUrl
+                }
+            }
+            collect("$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=false&per_page=$PER_PAGE")
+            for (id in categoryIds) {
+                if (id == ALL_CATEGORY_ID) continue
+                try {
+                    collect(
+                        "$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv" +
+                            "&tvprogramm=false&category=$id&per_page=$PER_PAGE",
+                    )
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.w(TAG, "RuTube category $id catalogue failed: ${e.message}")
+                }
+            }
+            out.values.toList()
         }
-        out
-    }
 
     suspend fun briefSchedules(): Map<String, List<RutubeProgramme>> = withContext(Dispatchers.IO) {
         val out = HashMap<String, List<RutubeProgramme>>()
@@ -109,6 +141,13 @@ class RutubeApi(
     companion object {
         const val BASE_URL = "https://rutube.ru"
         const val USER_AGENT = "com.rutube.mobile/31.18.0 (Android 13)"
+        private const val TAG = "RutubeApi"
         private const val MAX_PAGES = 60
+
+        /** RuTube honours `per_page`; 500 covers every catalogue list in one request today. */
+        private const val PER_PAGE = 500
+
+        /** Category 1 is "Все прямые эфиры" — the unfiltered list, already fetched as the base. */
+        private const val ALL_CATEGORY_ID = 1
     }
 }
