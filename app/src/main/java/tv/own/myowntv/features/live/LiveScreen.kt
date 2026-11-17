@@ -787,7 +787,14 @@ fun LiveScreen(
                             key = channels.itemKey { it.id },
                             contentType = channels.itemContentType { "channel" },
                         ) { index ->
-                            val channel = channels[index]
+                            // Paging's get() throws while a category switch has installed an empty
+                            // page store but the LazyColumn still measures the previous count;
+                            // treat that as the documented out-of-bounds null instead of crashing.
+                            val channel = try {
+                                channels[index]
+                            } catch (_: IndexOutOfBoundsException) {
+                                null
+                            }
                             if (channel != null) {
                                 val isPreviewed by remember(channel.id) {
                                     androidx.compose.runtime.derivedStateOf { previewChannel?.id == channel.id }

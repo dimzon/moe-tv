@@ -69,6 +69,7 @@ import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
@@ -166,9 +167,15 @@ fun CustomizeItemsScreen(
 
     LaunchedEffect(items.itemCount) {
         if (firstLanding && items.itemCount > 0) {
-            firstLanding = false
             kotlinx.coroutines.delay(60)
-            items[0]?.let { rowFocusers[it.key] }?.let { runCatching { it.requestFocus() } }
+            // Re-read after the delay: the Pager restarts whenever the filter, order or
+            // customizations change, and the restarted store is empty for a moment. Focusing a
+            // row that is no longer in the snapshot must wait for the next snapshot instead.
+            val first = items.snapshotRow(0)
+            if (first != null) {
+                firstLanding = false
+                rowFocusers[first.key]?.let { runCatching { it.requestFocus() } }
+            }
         } else if (firstLanding && items.itemCount == 0) {
             // Empty custom categories are valid. Their screen still needs a deterministic focus
             // owner while Paging is empty (and the first row takes over later if data arrives).
@@ -181,7 +188,7 @@ fun CustomizeItemsScreen(
             if (items.itemCount == 0) {
                 runCatching { backFocus.requestFocus() }
             } else {
-                items[items.itemCount - 1]?.let { rowFocusers[it.key] }?.let { runCatching { it.requestFocus() } }
+                items.snapshotRow(items.itemCount - 1)?.let { rowFocusers[it.key] }?.let { runCatching { it.requestFocus() } }
             }
         }
     }
@@ -254,7 +261,7 @@ fun CustomizeItemsScreen(
                             currentTargetIndex = { focusedItemIndex },
                             onJumpToIndex = { idx ->
                                 scope.jumpLazyListTo(listState, idx) {
-                                    items[idx]?.let { rowFocusers[it.key] }?.let { runCatching { it.requestFocus() } }
+                                    items.snapshotRow(idx)?.let { rowFocusers[it.key] }?.let { runCatching { it.requestFocus() } }
                                 }
                             },
                         ),
@@ -264,7 +271,15 @@ fun CustomizeItemsScreen(
                         key = items.itemKey { it.key },
                         contentType = items.itemContentType(),
                     ) { index ->
-                        val row = items[index] ?: return@items
+                        // Keep items[index]: it reports the viewport hint that drives prefetching.
+                        // A restarted Pager briefly has an empty page store while the LazyColumn
+                        // still measures the previous count, and paging's get() throws for that —
+                        // treat it like the documented out-of-bounds null and let recomposition retry.
+                        val row = try {
+                            items[index]
+                        } catch (_: IndexOutOfBoundsException) {
+                            null
+                        } ?: return@items
                         val inMoveRange = rangeAnchorKey != null && rangeMode == SpanSelector.Mode.MOVE
                         val inRenameRange = rangeAnchorKey != null && rangeMode == SpanSelector.Mode.RENAME
                         val isInSpan = row.key in rangeSelectedKeys || renaming?.key == row.key
@@ -481,3 +496,15 @@ private fun ItemRow(
             .onFocusChanged { if (it.isFocused) onRowFocused() },
     )
 }
+
+/**
+ * Row [index] from the paging snapshot that [LazyPagingItems.itemCount] is derived from.
+ *
+ * `items[index]` looks up the presenter's live page store first. Every Pager restart — a filter,
+ * hide/show, reorder or customization change — installs an empty store until its first page
+ * arrives, and [androidx.paging.PageStore] throws `IndexOutOfBoundsException("Index: 0, Size: 0")`
+ * for it even though `itemCount` still reports the previous snapshot. Focus restoration runs after
+ * a delay, so it must read the snapshot and never the store that is mid-refresh.
+ */
+private fun <T : Any> LazyPagingItems<T>.snapshotRow(index: Int): T? =
+    itemSnapshotList.getOrNull(index)
