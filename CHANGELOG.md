@@ -40,6 +40,7 @@
 - **Translation trees other than English and Russian**
 
 ### 🩹 Fixes
+- **CALL/CAMERA/SEARCH keys no longer crash the app on Android 10+**
 - **History: the channel logo stretches over its whole placeholder instead of a gray frame around it**
 - **DNS presets row no longer borrows the accent-picker wording ("готовые цвета") in Russian, Ukrainian and Belarusian**
 - **Live TV: the catalogue follows the official RUTUBE TV feed — sport, radio and regional channels missing from the curated list are back**

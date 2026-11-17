@@ -86,6 +86,21 @@ import tv.own.myowntv.ui.theme.OwnTVTheme
 import tv.own.owntv.core.theme.UiFontScale
 import tv.own.owntv.core.theme.UiZoom
 
+/**
+ * Keys that make Android's fallback key handler call `closeSystemDialogs()` on an unhandled press.
+ *
+ * `PhoneFallbackEventHandler` handles CALL, CAMERA and SEARCH; each of its long-press/up branches
+ * calls `PhoneWindow.sendCloseSystemWindows()`, which broadcasts `ACTION_CLOSE_SYSTEM_DIALOGS`.
+ * Since API 29 that broadcast needs the signature-only `BROADCAST_CLOSE_SYSTEM_DIALOGS` permission,
+ * so an app that lets one of these keys reach the fallback handler crashes with a SecurityException
+ * on the main thread. OwnTV has no use for them, so [MainActivity.dispatchKeyEvent] consumes the
+ * unconsumed ones. Kept pure so the policy is unit-testable without an Activity.
+ */
+internal fun swallowsSystemDialogKey(keyCode: Int): Boolean =
+    keyCode == KeyEvent.KEYCODE_CALL ||
+        keyCode == KeyEvent.KEYCODE_CAMERA ||
+        keyCode == KeyEvent.KEYCODE_SEARCH
+
 open class MainActivity : ComponentActivity() {
     companion object {
         private const val TAG = "OwnTVHome"
@@ -191,7 +206,14 @@ open class MainActivity : ComponentActivity() {
             if (event.action == KeyEvent.ACTION_UP) back.startTracking()
             return super.dispatchKeyEvent(back)
         }
-        return super.dispatchKeyEvent(event)
+        val consumed = super.dispatchKeyEvent(event)
+        // If nothing in the app wanted the key, ViewRootImpl hands it to PhoneFallbackEventHandler.
+        // For CALL/CAMERA/SEARCH that handler calls PhoneWindow.sendCloseSystemWindows() ->
+        // ActivityManager.closeSystemDialogs(), which since API 29 needs the signature-only
+        // BROADCAST_CLOSE_SYSTEM_DIALOGS permission and crashes any third-party app that lets the
+        // key fall through (field report: API 31). Swallow only the unconsumed ones so a real
+        // handler — a bound remote shortcut, a Compose onKeyEvent — still wins.
+        return consumed || swallowsSystemDialogKey(event.keyCode)
     }
 
     override fun onNewIntent(intent: Intent) {
