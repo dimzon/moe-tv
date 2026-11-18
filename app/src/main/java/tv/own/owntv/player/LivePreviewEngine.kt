@@ -77,7 +77,9 @@ class LivePreviewEngine(
     @Volatile private var measuredStatsEnabled = settings.measuredStreamStatsDefault
     /** Every setting this engine reads, as one process-wide snapshot — see [PlaybackSettings]. */
     private val playbackSettings = PlaybackSettings.of(settings)
-    private val settingsScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main.immediate)
+    private val settingsScope = kotlinx.coroutines.CoroutineScope(
+        kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main.immediate,
+    )
 
     /** Everything this tune must forget when the next channel starts — see [TuneState]. One assignment
      *  in [play] resets the lot, which is what stops a field being left out of the reset by accident. */
@@ -3465,21 +3467,44 @@ class LivePreviewEngine(
     }
 
     /**
-     * One advertised sidecar as single-sample text: the URL downloaded as a standalone subtitle track
-     * carrying its language and label. MIME literals mirror the server spellings (`srt`/`vtt` —
-     * mostly-lowercase, case tolerated) that the reference client maps the same way.
+     * One advertised sidecar as a parsed cue track.
+     *
+     * `SingleSampleMediaSource` produced *legacy* subtitle samples (`text/vtt` / `application/x-subrip`)
+     * that the default `TextRenderer` refuses unless legacy decoding is enabled globally — which this
+     * app never does — so the track failed at render time. Build the same source Media3's own
+     * `DefaultMediaSourceFactory` builds for a subtitle configuration: a [SubtitleExtractor] driven by
+     * [DefaultSubtitleParserFactory], which emits `application/x-media3-cues` the renderer understands.
      */
     private fun captionSource(caption: tv.own.owntv.core.sync.RutubeCaption): MediaSource {
-        val configuration = androidx.media3.common.MediaItem.SubtitleConfiguration.Builder(
-            android.net.Uri.parse(caption.file),
-        )
-            .setMimeType(if (caption.format.equals("vtt", ignoreCase = true)) "text/vtt" else "application/x-subrip")
-            .setLabel(caption.langTitle ?: caption.format)
+        val mime = if (caption.format.equals("vtt", ignoreCase = true)) {
+            androidx.media3.common.MimeTypes.TEXT_VTT
+        } else {
+            androidx.media3.common.MimeTypes.APPLICATION_SUBRIP
+        }
+        val label = caption.langTitle ?: caption.format
+        val language = caption.langTitle?.takeIf { it.isNotBlank() }
+        val parserFactory = androidx.media3.extractor.text.DefaultSubtitleParserFactory()
+        // The parser keys off sampleMimeType; the other fields travel to the renderer for track picking.
+        val parserFormat = Format.Builder()
+            .setSampleMimeType(mime)
+            .setLanguage(language)
+            .setLabel(label)
             .setId(caption.subId.toString())
-            .apply { if (!caption.langTitle.isNullOrBlank()) setLanguage(caption.langTitle) }
+            .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+            .setRoleFlags(C.ROLE_FLAG_SUBTITLE)
             .build()
-        return androidx.media3.exoplayer.source.SingleSampleMediaSource.Factory(cachedHttpDataSource!!)
-            .createMediaSource(configuration, C.TIME_UNSET)
+        val extractorsFactory = androidx.media3.extractor.ExtractorsFactory {
+            arrayOf(
+                androidx.media3.extractor.text.SubtitleExtractor(
+                    parserFactory.create(parserFormat),
+                    parserFormat,
+                ),
+            )
+        }
+        return androidx.media3.exoplayer.source.ProgressiveMediaSource.Factory(
+            cachedHttpDataSource!!,
+            extractorsFactory,
+        ).createMediaSource(androidx.media3.common.MediaItem.fromUri(caption.file))
     }
 
     private fun build(): ExoPlayer {

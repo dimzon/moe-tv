@@ -26,6 +26,7 @@
 1	log	app/src/main/java/tv/own/myowntv/BlurredBackdropLoader.kt	blur: produceState failed: ${it.javaClass.simpleName}: ${it.message}
 1	log	app/src/main/java/tv/own/myowntv/MainActivity.kt	OwnTVHome
 1	compiler	app/src/main/java/tv/own/myowntv/MainActivity.kt	RememberReturnType
+1	compiler	app/src/main/java/tv/own/myowntv/MainActivity.kt	RestrictedApi
 1	log	app/src/main/java/tv/own/myowntv/MainActivity.kt	database probe failed: $error
 1	performance	app/src/main/java/tv/own/myowntv/MainActivity.kt	db-probed
 1	performance	app/src/main/java/tv/own/myowntv/MainActivity.kt	destination-ready
@@ -1079,6 +1080,9 @@
 1	log	app/src/main/java/tv/own/owntv/core/network/BoundedDns.kt	${HttpClient.redactHost(hostname)}: no DNS answer in time
 1	log	app/src/main/java/tv/own/owntv/core/network/BoundedDns.kt	dns ${HttpClient.redactHost(hostname)} failed (${failure.javaClass.simpleName}) — using its last known addresses
 1	technical	app/src/main/java/tv/own/owntv/core/network/BoundedDns.kt	owntv-dns
+1	log	app/src/main/java/tv/own/owntv/core/network/ConnectivityObserver.kt	ConnectivityObserver
+1	log	app/src/main/java/tv/own/owntv/core/network/ConnectivityObserver.kt	could not watch the default network
+1	log	app/src/main/java/tv/own/owntv/core/network/ConnectivityObserver.kt	could not watch the network
 1	url	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	$base${if ('?' in base) '&' else '?'}dns=$query
 1	technical	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	${cfg.dohUrl}|${cfg.host}:${cfg.port}|$hostname
 2	technical	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	Accept
@@ -1472,6 +1476,7 @@
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	weather_enabled
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	weather_fahrenheit
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	weather_location
+1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	work_constraints_cleared
 2	technical	app/src/main/java/tv/own/owntv/core/settings/SourceOverrides.kt	Referer
 1	technical	app/src/main/java/tv/own/owntv/core/setup/SourceImporter.kt	fresh_add
 1	technical	app/src/main/java/tv/own/owntv/core/setup/SourceImporter.kt	restore
@@ -1793,6 +1798,7 @@
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	live
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	liveActive
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	liveProcessed
+1	log	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	offline, deferring catalog sync sourceId=$sourceId
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	reason
 1	log	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	sinceLastMs=${now - lastEmitAtMs}
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	sourceId
@@ -1817,6 +1823,7 @@
 1	log	app/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	auto refresh waiting for playback to stop sourceId=$sourceId
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	baseProgrammes
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	channels
+1	log	app/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	offline, deferring EPG sync sourceId=$sourceId
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	programmes
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	reason
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	sourceId
@@ -2191,7 +2198,6 @@
 1	mime	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	application/dash+xml
 1	mime	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	application/vnd.apple.mpegurl
 1	mime	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	application/x-mpegurl
-1	mime	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	application/x-subrip
 2	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	audio
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	audio decoder released: $decoderName
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	audio format: ${format.sampleMimeType} ${format.sampleRate}Hz ${format.channelCount}ch
@@ -2339,7 +2345,6 @@
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	targetDurSec=${playlist.targetDurationUs / 1_000_000.0} windowSec=${playlist.durationUs / 1_000_000.0}
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	targetOffsetSec=${targetOffsetSecs ?: -1}
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	text
-1	mime	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	text/vtt
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	the renderer fell back after the hardware one failed
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	tracks: audio=${audio.size} text=${text.size}
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	trying direct_source: ${HttpClient.redactUrl(target)}
