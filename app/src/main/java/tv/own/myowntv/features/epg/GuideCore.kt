@@ -92,7 +92,8 @@ internal fun ProgrammeStripCanvas(
     programmes: List<EpgProgrammeEntity>,
     windowStart: Long,
     windowEnd: Long,
-    now: Long,
+    /** Read while drawing, not in composition: a 30-second tick redraws the strip, not every row. */
+    now: () -> Long,
     focusTime: Long?,
     reminderStarts: Set<Long>,
     /** How far the timeline is scrolled, shared by every row and the ruler. Read only while drawing. */
@@ -119,6 +120,7 @@ internal fun ProgrammeStripCanvas(
     // Clipped at the timeline's left edge only, so a focused cell's glow still spills up and down.
     Canvas(Modifier.fillMaxSize()) {
         val scrollPx = scrollPx()
+        val currentNow = now()
         clipRect(left = 0f, top = -size.height, right = size.width + 40 * px, bottom = size.height * 2) {
         // The focused cell's ring. In light the focus colour is the accent, the cell's own fill, so the
         // ring stands off it with a page-coloured gap first (`.mine.light .gcell.f`: 2.5 page + 2.5 accent).
@@ -164,8 +166,8 @@ internal fun ProgrammeStripCanvas(
             if (w <= 0f || x + w <= 0f || x >= viewW) return@forEachIndexed
             drawnAny = true
             val focused = focusTime != null && focusTime in p.startMs until p.stopMs
-            val isNow = now in p.startMs until p.stopMs
-            val fade = if (!focused && p.stopMs <= now) 0.5f else 1f
+            val isNow = currentNow in p.startMs until p.stopMs
+            val fade = if (!focused && p.stopMs <= currentNow) 0.5f else 1f
             val box = androidx.compose.ui.geometry.Rect(x, 0f, x + w, h)
             if (focused) {
                 drawBoxShadow(a.accent.copy(alpha = 0.4f), 34 * px, r.x, dy = 12 * px, bounds = box)

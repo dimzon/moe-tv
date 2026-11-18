@@ -538,7 +538,9 @@ internal fun ErrorLogPage(setEntry: (() -> Boolean) -> Unit, onCountChanged: () 
             list == null -> Unit
             list.isEmpty() -> EmptyNote(stringResource(R.string.settings_no_playback_errors))
             else -> LazyColumn(Modifier.padding(top = 22.mpx).fillMaxSize(), contentPadding = PaddingValues(bottom = 40.mpx)) {
-                itemsIndexed(list) { i, e ->
+                // atMs is millisecond precision and several entries can land in the same millisecond
+                // from the same engine — without the index the key would collide and LazyColumn throws.
+                itemsIndexed(list, key = { i, e -> e.atMs.toString() + e.engine + i.toString() }) { i, e ->
                     val kind = when (e.kind) {
                         PlaybackErrorLog.Kind.ERROR -> stringResource(R.string.settings_playback_kind_error) to StageColors.Danger
                         PlaybackErrorLog.Kind.EVENT -> stringResource(R.string.settings_playback_kind_event) to StageColors.TagText

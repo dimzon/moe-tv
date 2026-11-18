@@ -271,6 +271,11 @@ fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     )
                     Spacer(Modifier.height(6.mpx))
                 }
+                // Sorting a map's entries inside the LazyColumn DSL rebuilt the list on every
+                // recomposition and gave each row a fresh instance.
+                val hiddenSorted = remember(hiddenChannels) {
+                    hiddenChannels.entries.sortedBy { it.value.lowercase() }
+                }
                 LazyColumn(
                     state = listState,
                     verticalArrangement = Arrangement.spacedBy(6.mpx),
@@ -305,7 +310,7 @@ fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                             )
                         }
                         itemsIndexed(
-                            hiddenChannels.entries.sortedBy { it.value.lowercase() },
+                            hiddenSorted,
                             key = { _, entry -> "hid:${entry.key}" },
                         ) { hiddenIndex, (key, label) ->
                             val unhide = stringResource(R.string.settings_customize_unhide)

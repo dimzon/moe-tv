@@ -757,7 +757,11 @@ fun SettingsScreen(
             onClick = binding?.onToggle ?: jump,
         )
     }
-    val categories: List<Pair<RootGroup, List<RootRow>>> = remember(rootItems, quickPinned, deepReturnKey, videoDeepRows) {
+    // Computed inline, not `remember`-ed: rootItems/videoDeepRows carry fresh click lambdas on every
+    // recomposition, so a remember keyed on them would be invalidated anyway — and a custom equals
+    // that ignored the lambdas would silently keep stale callbacks. The slicing is cheap; correctness
+    // beats a cache that can never hit.
+    val categories: List<Pair<RootGroup, List<RootRow>>> = run {
         val sliced: List<Pair<RootGroup, List<RootRow>>> = buildList {
             rootItems.forEach { item ->
                 when (item) {
@@ -784,8 +788,8 @@ fun SettingsScreen(
         if (kept.size < quickPinned.size) settingsVm.setQuickPinnedKeys(kept)
     }
     /** Which category each row key lives in, so a Back from a sub-screen can reselect its group. */
-    val groupOfKey: Map<String, Int> = remember(categories) {
-        buildMap { categories.forEachIndexed { g, (_, rows) -> rows.forEach { if (g != 0) put(it.key, g) } } }
+    val groupOfKey: Map<String, Int> = buildMap {
+        categories.forEachIndexed { g, (_, rows) -> rows.forEach { if (g != 0) put(it.key, g) } }
     }
     val selectedRows = categories.getOrNull(selectedGroup)?.second.orEmpty()
     // The row whose hold-OK menu is open, or null.

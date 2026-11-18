@@ -39,6 +39,7 @@ import tv.own.owntv.core.util.*
 import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
@@ -66,6 +67,11 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
@@ -166,6 +172,9 @@ open class MainActivity : ComponentActivity() {
     private val localeStore: tv.own.owntv.core.i18n.LocaleStore by inject()
     private var pendingDeepLink by mutableStateOf<LauncherDeepLink?>(null)
 
+    /** True while the async database probe is running — the splash must outlive its own 2s deadline. */
+    private var probePending by mutableStateOf(true)
+
     /** The last collected Fullscreen-mode value, so [onResume] can re-apply it without reading DataStore. */
     private var fullscreenRequested = true
 
@@ -188,7 +197,14 @@ open class MainActivity : ComponentActivity() {
      * The synthetic UP carries the tracking flag itself: `Activity.onKeyDown` starts tracking the
      * synthetic DOWN object, and a freshly built UP would be dropped as untracked, so
      * `onBackPressed()` would never run.
+     *
+     * RestrictedApi: the method overridden here is a public framework `Activity` method, but
+     * `androidx.core.app.ComponentActivity` — the base of the `androidx.activity.ComponentActivity`
+     * this activity extends — is itself `@RestrictTo(LIBRARY_GROUP_PREFIX)`, which makes lint flag
+     * the override and its `super` calls. `super.dispatchKeyEvent` is still called, so androidx's
+     * own before-hierarchy key dispatch stays in the chain; no androidx-internal API is used.
      */
+    @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (event.keyCode == KeyEvent.KEYCODE_ESCAPE) {
             val back = KeyEvent(
@@ -283,20 +299,18 @@ open class MainActivity : ComponentActivity() {
      * is work the first query would have done anyway. A timeout is treated as "healthy" so a slow
      * device never sits on a blank window.
      */
-    private fun probeDatabase(): String? {
-        var error: String? = null
-        val worker = Thread {
-            // Core configures a SQLiteDriver, and `openHelper` throws outright
-            // once one is set. Opening a connection is what this probe was always really doing —
-            // forcing Room to run the migration chain now rather than inside the first query.
-            runCatching {
-                kotlinx.coroutines.runBlocking {
-                    get<tv.own.owntv.core.database.OwnTVDatabase>().useWriterConnection { }
-                }
-            }.onFailure { error = it.message ?: it.javaClass.simpleName }
+    private suspend fun probeDatabase(): String? {
+        // Core configures a SQLiteDriver, so opening a writer connection is what forces Room to run
+        // its migration chain now rather than inside the first query. IO + timeout keep the main
+        // thread free: an old `worker.join(5_000)` stalled the first frame on slow eMMC boxes.
+        val failure = withTimeoutOrNull(DB_PROBE_TIMEOUT_MS) {
+            withContext(Dispatchers.IO) {
+                runCatching { get<tv.own.owntv.core.database.OwnTVDatabase>().useWriterConnection { } }
+                    .exceptionOrNull()
+            }
         }
-        worker.start()
-        worker.join(DB_PROBE_TIMEOUT_MS)
+        // A timeout is treated as "healthy" — a slow device must never sit on a blank window.
+        val error = failure?.let { it.message ?: it.javaClass.simpleName }
         if (error != null) Log.e(TAG, "database probe failed: $error")
         return error
     }
@@ -315,14 +329,20 @@ open class MainActivity : ComponentActivity() {
         var readyAt = 0L
         splash.setKeepOnScreenCondition {
             val now = SystemClock.uptimeMillis()
-            if (!contentReady) return@setKeepOnScreenCondition now < splashDeadline
+            // The probe can outlive SPLASH_TIMEOUT_MS on slow storage; holding the branded splash
+            // until it finishes avoids a blank window between splash and setContent.
+            if (!contentReady) return@setKeepOnScreenCondition probePending || now < splashDeadline
             if (readyAt == 0L) readyAt = now
             // Then until the shell is on the start-up screen, so Home does not flash first.
             !startupSettled && now < readyAt + STARTUP_SETTLE_TIMEOUT_MS
         }
         pendingDeepLink = LauncherDeepLink.parse(intent.data)
         Log.d(TAG, "onCreate deepLinkHost=${intent.data?.host} deepLinkType=${pendingDeepLink?.javaClass?.simpleName ?: "none"}")
+        // The probe runs on IO with a bounded timeout; onCreate returns immediately and the splash
+        // stays up until contentReady flips inside this coroutine.
+        lifecycleScope.launch {
         val dbError = probeDatabase()
+        probePending = false
         if (dbError != null) {
             contentReady = true // the recovery screen IS the destination — don't hold the splash over it
             startupSettled = true
@@ -338,9 +358,9 @@ open class MainActivity : ComponentActivity() {
                     },
                 )
             }
-            return
+            return@launch
         }
-        Perf.stamp("db-probed") // main thread was blocked here: everything above is pre-composition
+        Perf.stamp("db-probed")
         // The destination needs no asynchronous data any more: one stored flag says wizard or shell,
         // and the splash is never held over a decision that was already made.
         contentReady = true
@@ -513,6 +533,7 @@ open class MainActivity : ComponentActivity() {
                 }
             }
         }
+        } // end lifecycleScope.launch (content composed after the bounded DB probe)
     }
 }
 

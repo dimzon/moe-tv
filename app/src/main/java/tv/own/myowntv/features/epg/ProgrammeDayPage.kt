@@ -194,7 +194,9 @@ internal fun ProgrammeDayPage(
         }
     }
     val listState = rememberLazyListState()
-    LaunchedEffect(index, lines) {
+    // Key on the loaded data, not on `lines`: `lines` is rebuilt by the 30-second `now` ticker,
+    // so including it made a long list scroll itself back every half minute.
+    LaunchedEffect(index, list) {
         val line = lines.indexOfFirst { it is PageLine.Programme && it.index == index }
         if (line >= 0) runCatching { listState.animateScrollToItem((line - 2).coerceAtLeast(0)) }
     }

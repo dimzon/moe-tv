@@ -244,7 +244,10 @@ fun LiveScreen(
     // "Remember last item per category": ON → each category keeps its own scroll position via a per-category
     // state map (so A→B→A lands back where you were in A). OFF → reset the shared state to the top whenever
     // the category changes (fixes the cross-category scroll-leak bug).
-    val perCategoryStates = remember { mutableStateMapOf<LiveKey, androidx.compose.foundation.lazy.LazyListState>() }
+    // A plain map: writing `getOrPut` during composition must not write snapshot state. The stored
+    // LazyListState is itself observable, so scroll changes still recompose — the map only needs to
+    // keep one state per category across switches.
+    val perCategoryStates = remember { mutableMapOf<LiveKey, androidx.compose.foundation.lazy.LazyListState>() }
     val perCategoryChannelIds = remember { mutableStateMapOf<LiveKey, String>() }
     val effectiveListState =
         if (rememberLive) perCategoryStates.getOrPut(selectedKey) { androidx.compose.foundation.lazy.LazyListState() }

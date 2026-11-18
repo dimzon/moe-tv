@@ -217,12 +217,16 @@ fun EpgScreen(
     // Live TV's view model: its preview player (no second decoder), its category list and playlist marks.
     val liveVm: LiveViewModel = koinViewModel()
     val state by vm.state.collectAsStateWithLifecycle()
-    val liveNow by produceState(initialValue = System.currentTimeMillis()) {
+    val liveNowState = produceState(initialValue = System.currentTimeMillis()) {
         while (true) {
             delay(30_000L)
             value = System.currentTimeMillis()
         }
     }
+    val liveNow = liveNowState.value
+    // Stable provider with the same shape as `scrollPx`: ProgrammeStripCanvas reads it while
+    // drawing, so a 30-second tick redraws the strips instead of recomposing every guide row.
+    val nowProvider: () -> Long = remember(liveNowState) { { liveNowState.value } }
     val query by vm.query.collectAsStateWithLifecycle()
     val sortGuide by vm.sortGuide.collectAsStateWithLifecycle()
     val categoryFilter by vm.categoryFilter.collectAsStateWithLifecycle()
@@ -601,7 +605,7 @@ fun EpgScreen(
                                     numberWidth = numberWidth,
                                     windowStart = state.windowStart,
                                     windowEnd = state.windowEnd,
-                                    now = liveNow,
+                                    now = nowProvider,
                                     scrollPx = readScrollPx,
                                     focusRequester = rowFocus(index),
                                     selectedRow = focus.selectedRow,
@@ -785,7 +789,7 @@ private fun GuideRow(
     numberWidth: androidx.compose.ui.unit.Dp,
     windowStart: Long,
     windowEnd: Long,
-    now: Long,
+    now: () -> Long,
     scrollPx: () -> Int,
     focusRequester: FocusRequester,
     selectedRow: Boolean,

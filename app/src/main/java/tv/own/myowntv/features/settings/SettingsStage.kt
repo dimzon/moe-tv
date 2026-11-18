@@ -75,6 +75,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -422,7 +423,17 @@ fun panelEditor(onDismiss: () -> Unit, content: @Composable androidx.compose.fou
     val panel = LocalSettingsPanel.current
     if (panel == null) return false
     val token = remember { Any() }
-    val editor = PanelEditor(token, onDismiss, content)
+    // A fresh editor on every recomposition made the host (which reads panel.editor) recompose too,
+    // and could loop. Keep one editor per open session while its callbacks stay current.
+    val dismissState = rememberUpdatedState(onDismiss)
+    val contentState = rememberUpdatedState(content)
+    val editor = remember(token) {
+        PanelEditor(
+            token,
+            { dismissState.value() },
+            { help -> contentState.value(this, help) },
+        )
+    }
     androidx.compose.runtime.SideEffect { panel.editor = editor }
     androidx.compose.runtime.DisposableEffect(panel) { onDispose { if (panel.editor?.owner === token) panel.editor = null } }
     return true
