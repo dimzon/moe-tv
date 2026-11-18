@@ -199,7 +199,7 @@ fun LanguageSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     }
 
     val systemName = remember {
-        val system = android.content.res.Resources.getSystem().configuration.locales[0]
+        val system = android.content.res.Resources.getSystem().configuration.firstLocaleCompat()
         system.getDisplayName(system).replaceFirstChar { it.titlecase(system) }
     }
     val hints = listOf(

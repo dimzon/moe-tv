@@ -54,7 +54,8 @@ class RutubeApi(
                 val visited = HashSet<String>()
                 while (!next.isNullOrBlank() && visited.size < MAX_PAGES && visited.add(next)) {
                     val page = RutubeParser.parseChannelPage(getText(next))
-                    for (channel in page.results) out.putIfAbsent(channel.videoId, channel)
+                    // Map.putIfAbsent is API 24; keep the first occurrence explicitly.
+                    for (channel in page.results) if (channel.videoId !in out) out[channel.videoId] = channel
                     next = page.nextUrl
                 }
             }

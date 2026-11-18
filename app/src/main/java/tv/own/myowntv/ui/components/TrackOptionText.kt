@@ -56,7 +56,7 @@ import java.util.Locale
 @Composable
 fun TrackOption.displayLabel(): String {
     val configuration = LocalResources.current.configuration
-    val locale = if (configuration.locales.isEmpty) Locale.ENGLISH else configuration.locales[0]
+    val locale = if (LocaleCompat.listOf(configuration).isEmpty) Locale.ENGLISH else configuration.firstLocaleCompat()
     val raw = label.takeIf { it.isNotBlank() }
     val language = lang
         ?.takeIf { it.isNotBlank() && !it.equals("und", ignoreCase = true) }

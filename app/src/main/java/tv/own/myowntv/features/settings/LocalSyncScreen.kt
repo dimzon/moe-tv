@@ -236,7 +236,7 @@ fun LocalSyncScreen(
             Column(Modifier.weight(1f)) {
                 if (paired.isNotEmpty()) {
                     Text(
-                        stringResource(R.string.local_sync_paired_devices).uppercase(androidx.compose.ui.platform.LocalConfiguration.current.locales[0]),
+                        stringResource(R.string.local_sync_paired_devices).uppercase(androidx.compose.ui.platform.LocalConfiguration.current.firstLocaleCompat()),
                         style = stageText(13, 800, 0.13.em), color = StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(top = 30.mpx, bottom = 12.mpx),
                     )
@@ -477,7 +477,7 @@ private fun StepPopup(onDismiss: () -> Unit, content: @Composable ColumnScope.()
     // on its own first control without each block naming one. Retried per frame: the popup's window
     // does not own focus for the first frame or two after it opens.
     LaunchedEffect(Unit) { restoreAfterDialogClose(panel) }
-    tv.own.myowntv.ui.stage.StagePopup(onDismiss = onDismiss, title = null, eyebrow = stringResource(R.string.local_sync_title).uppercase(androidx.compose.ui.platform.LocalConfiguration.current.locales[0]), width = 880.mpx) {
+    tv.own.myowntv.ui.stage.StagePopup(onDismiss = onDismiss, title = null, eyebrow = stringResource(R.string.local_sync_title).uppercase(androidx.compose.ui.platform.LocalConfiguration.current.firstLocaleCompat()), width = 880.mpx) {
         Column(Modifier.focusGroup().focusRequester(panel), verticalArrangement = Arrangement.spacedBy(2.mpx), content = content)
     }
 }

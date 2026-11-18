@@ -99,7 +99,7 @@ fun NavigationSettingsPopup(
     val first = remember { FocusRequester() }
     LaunchedEffect(Unit) { runCatching { first.requestFocus() } }
     BackHandler { onDismiss() }
-    val locale = LocalConfiguration.current.locales[0]
+    val locale = LocalConfiguration.current.firstLocaleCompat()
     val eyebrow = stringResource(
         R.string.settings_breadcrumb_eyebrow,
         stringResource(R.string.settings_title),

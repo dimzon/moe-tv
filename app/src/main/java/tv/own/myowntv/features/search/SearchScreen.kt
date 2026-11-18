@@ -531,7 +531,7 @@ private fun Launcher(
     onClearRecent: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.firstLocaleCompat()
     Column(modifier.focusGroup()) {
         GroupHeading(stringResource(R.string.search_jump_to).uppercase(locale), Modifier.padding(top = 8.mpx, bottom = 10.mpx))
         Row(horizontalArrangement = Arrangement.spacedBy(10.mpx)) {

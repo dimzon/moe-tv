@@ -106,7 +106,7 @@ private fun VoiceSearchButton(onQuery: (String) -> Unit, modifier: Modifier = Mo
     if (!available) return
     val label = stringResource(R.string.search_voice)
     val prompt = stringResource(R.string.search_voice_prompt)
-    val language = LocalConfiguration.current.locales[0].toLanguageTag()
+    val language = LocalConfiguration.current.firstLocaleCompat().toLanguageTag()
     StageTool(
         text = null,
         icon = MyOwnTVIcon.MIC,

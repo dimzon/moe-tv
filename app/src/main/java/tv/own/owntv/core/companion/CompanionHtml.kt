@@ -1,4 +1,5 @@
 package tv.own.owntv.core.companion
+import tv.own.owntv.core.i18n.firstLocaleCompat
 
 import android.content.Context
 import androidx.annotation.StringRes
@@ -113,7 +114,7 @@ internal object CompanionHtml {
         // AppLocale.wrap() resolves the effective device locale when the stored tag is empty.
         // Advertise that effective locale to browser screen readers and choose the matching writing
         // direction; never use the persisted empty tag itself as the HTML language.
-        val locale = context.resources.configuration.locales[0]
+        val locale = context.resources.configuration.firstLocaleCompat()
             ?: java.util.Locale.getDefault()
         val lang = locale.toLanguageTag().ifBlank { "en" }
         val dir = if (context.resources.configuration.layoutDirection == android.view.View.LAYOUT_DIRECTION_RTL) "rtl" else "ltr"

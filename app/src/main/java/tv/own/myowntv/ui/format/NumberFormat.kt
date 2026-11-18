@@ -48,7 +48,7 @@ import java.text.NumberFormat
 
 @Composable
 fun rememberLocalizedIntegerFormatter(grouping: Boolean = true): (Int) -> String {
-    val locale = LocalConfiguration.current.locales[0]
+    val locale = LocalConfiguration.current.firstLocaleCompat()
     val formatter = remember(locale, grouping) {
         NumberFormat.getIntegerInstance(locale).apply { isGroupingUsed = grouping }
     }
@@ -64,7 +64,7 @@ fun rememberLocalizedDecimalFormatter(
     minimumFractionDigits: Int = 0,
     maximumFractionDigits: Int = 2,
 ): (Double) -> String {
-    val locale = LocalConfiguration.current.locales[0]
+    val locale = LocalConfiguration.current.firstLocaleCompat()
     val formatter = remember(locale, minimumFractionDigits, maximumFractionDigits) {
         NumberFormat.getNumberInstance(locale).apply {
             isGroupingUsed = false

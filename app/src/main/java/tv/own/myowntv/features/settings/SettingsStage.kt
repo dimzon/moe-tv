@@ -292,7 +292,7 @@ fun StageSettingsPage(
     val searching = searchQuery.isNotBlank()
     androidx.compose.runtime.LaunchedEffect(searching) { if (searching) panel.help = null }
     // Popups opened from this page are labelled with its path, "SETTINGS · PLAYER".
-    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.firstLocaleCompat()
     val from = ((if (settingsRoot) listOf(stringResource(R.string.common_nav_settings)) else emptyList()) + parents).lastOrNull()
     val eyebrow = (if (from != null) stringResource(R.string.settings_breadcrumb_eyebrow, from, group) else group).uppercase(locale)
     CompositionLocalProvider(LocalSettingsPanel provides panel, tv.own.myowntv.ui.stage.LocalPopupEyebrow provides eyebrow) {

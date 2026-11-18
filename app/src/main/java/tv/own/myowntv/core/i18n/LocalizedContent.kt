@@ -104,7 +104,7 @@ fun LocalizedContent(
     // Activity alive across uiMode/density/screen changes, and wrap() copies the configuration at
     // call time — so without this key the screens would keep the old dark/light mode and density.
     val hostConfig = LocalConfiguration.current
-    val hostLocaleKey = hostConfig.locales.toLanguageTags()
+    val hostLocaleKey = hostConfig.localeTagsCompat()
     val wrapped = remember(hostContext, tag, hostConfig) { AppLocale.wrapForCompose(hostContext, tag) }
     val layoutDirection = remember(tag, hostLocaleKey) {
         if (wrapped.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL) {
@@ -148,7 +148,7 @@ internal fun sameScriptFamily(a: String, b: String): Boolean = scriptForTag(a) =
 internal fun scriptForTag(tag: String): String {
     val trimmed = tag.trim()
     if (trimmed.isEmpty()) {
-        val list = android.content.res.Resources.getSystem().configuration.locales
+        val list = tv.own.owntv.core.i18n.LocaleCompat.listOf(android.content.res.Resources.getSystem().configuration)
         val device = if (list.isEmpty) null else list[0]
         val deviceTag = device?.toLanguageTag() ?: ""
         return SupportedLocales.scriptForTag(deviceTag) ?: likelyScript(deviceTag)
@@ -164,6 +164,12 @@ internal fun scriptForTag(tag: String): String {
  */
 private fun likelyScript(tag: String): String {
     if (tag.isBlank()) return ""
+    // ULocale.addLikelySubtags is API 24+; on API 23 fall back to the tag's explicit script (if any).
+    // SupportedLocales already knows thescripts of every shipped language, so this only affects
+    // arbitrary tags typed by the user and must never throw.
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N) {
+        return tag.substringAfter('-').takeIf { it.length == 4 }?.replaceFirstChar { it.uppercase() }.orEmpty()
+    }
     return runCatching {
         val u = android.icu.util.ULocale.forLanguageTag(tag)
         android.icu.util.ULocale.addLikelySubtags(u).script

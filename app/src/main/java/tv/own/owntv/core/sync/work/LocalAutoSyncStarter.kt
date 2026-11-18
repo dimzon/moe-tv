@@ -81,8 +81,11 @@ class LocalAutoSyncStarter(
                 server.onLan.value = false
             }
         }
-        runCatching { manager.registerDefaultNetworkCallback(callback) }
-            .onFailure { Log.w(TAG, "could not watch the network", it) }
+        // registerDefaultNetworkCallback is API 24; the periodic runner works without it on API 23.
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            runCatching { manager.registerDefaultNetworkCallback(callback) }
+                .onFailure { Log.w(TAG, "could not watch the network", it) }
+        }
     }
 
     private fun run(reason: String) {

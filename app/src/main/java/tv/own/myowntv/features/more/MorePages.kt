@@ -553,7 +553,7 @@ internal fun ErrorLogPage(setEntry: (() -> Boolean) -> Unit, onCountChanged: () 
                         titleSize = 21,
                         leading = {
                             Text(
-                                kind.first.uppercase(androidx.compose.ui.platform.LocalConfiguration.current.locales[0]),
+                                kind.first.uppercase(androidx.compose.ui.platform.LocalConfiguration.current.firstLocaleCompat()),
                                 style = stageText(13, 800, 0.05.em), color = kind.second, maxLines = 1, overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.widthIn(min = 72.mpx)
                                     .background(if (kind.second == StageColors.TagText) StageColors.Ink.copy(alpha = 0.08f) else kind.second.copy(alpha = 0.16f), RoundedCornerShape(6.mpx))
@@ -613,7 +613,7 @@ internal fun AboutPage(vm: MoreCountsViewModel, entry: FocusRequester, onOpenLan
                         else -> null
                     }
                     tag?.let {
-                        Text(it.uppercase(androidx.compose.ui.platform.LocalConfiguration.current.locales[0]), style = stageText(13, 800, 0.05.em), color = accent, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        Text(it.uppercase(androidx.compose.ui.platform.LocalConfiguration.current.firstLocaleCompat()), style = stageText(13, 800, 0.05.em), color = accent, maxLines = 1, overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.background(accent.copy(alpha = 0.2f), RoundedCornerShape(6.mpx)).padding(horizontal = 7.mpx, vertical = 3.mpx))
                     }
                 }

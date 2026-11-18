@@ -84,7 +84,7 @@ fun rememberBestDateFormatter(
     skeleton: String,
 ): (Long) -> String {
     val configuration = LocalConfiguration.current
-    val locale = configuration.locales[0]
+    val locale = configuration.firstLocaleCompat()
     val timeZone = TimeZone.getDefault()
     val key = DateFormatterKey(locale, skeleton, timeZone.id)
     val formatter = remember(key) {
@@ -101,7 +101,7 @@ fun formatBestDate(
     skeleton: String,
     ms: Long,
 ): String {
-    val locale = context.resources.configuration.locales[0]
+    val locale = context.resources.configuration.firstLocaleCompat()
     return bestDateFormatter(locale, skeleton, TimeZone.getDefault()).format(Date(ms))
 }
 

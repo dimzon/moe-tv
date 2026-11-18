@@ -428,13 +428,13 @@ private val SUB_SIZES = listOf(0.8f to R.string.settings_subtitle_small, 1.0f to
 private fun langName(code: String): String = when (code) {
     "" -> stringResource(R.string.settings_none_auto)
     TrackLanguages.ORIGINAL -> stringResource(R.string.settings_language_original)
-    else -> TrackLanguages.displayName(code, LocalConfiguration.current.locales[0])
+    else -> TrackLanguages.displayName(code, LocalConfiguration.current.firstLocaleCompat())
 }
 
 /** No preference first, then (audio only) the title's original language, then every language by name. */
 @Composable
 private fun languageOptions(withOriginal: Boolean): List<Pair<String, String>> {
-    val display = LocalConfiguration.current.locales[0]
+    val display = LocalConfiguration.current.firstLocaleCompat()
     val codes = listOf("") + listOfNotNull(TrackLanguages.ORIGINAL.takeIf { withOriginal }) +
         remember(display) { TrackLanguages.sortedFor(display) }
     return codes.map { it to langName(it) }

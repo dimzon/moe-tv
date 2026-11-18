@@ -1,4 +1,5 @@
 package tv.own.owntv.core.sync.work
+import tv.own.owntv.core.i18n.firstLocaleCompat
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -93,7 +94,7 @@ internal object EpgSyncNotifications {
         // NotificationChannel is API 26+; below that a notification posts fine without one.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
-        val effectiveLocale = localized.resources.configuration.locales[0]?.toLanguageTag().orEmpty()
+        val effectiveLocale = localized.resources.configuration.firstLocaleCompat().toLanguageTag()
         val key = "$effectiveLocale:${localized.getString(R.string.common_nav_guide)}"
         if (key == lastChannelLocaleKey) return
         synchronized(channelLock) {

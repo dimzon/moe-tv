@@ -98,7 +98,7 @@ fun LocalAutoSyncSheet(device: PairedDevice, onDismiss: () -> Unit) {
 
     val panel = remember { FocusRequester() }
     LaunchedEffect(Unit) { restoreAfterDialogClose(panel) }
-    val locale = LocalConfiguration.current.locales[0]
+    val locale = LocalConfiguration.current.firstLocaleCompat()
     val dismiss = {
         vm.cancelEnable()
         onDismiss()

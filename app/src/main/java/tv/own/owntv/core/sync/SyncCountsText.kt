@@ -1,4 +1,5 @@
 package tv.own.owntv.core.sync
+import tv.own.owntv.core.i18n.firstLocaleCompat
 
 import android.content.res.Resources
 import android.icu.text.CompactDecimalFormat
@@ -37,9 +38,16 @@ fun SyncProgressCounts.displayText(res: Resources): String {
     return parts.joinToString(res.getString(R.string.sync_counts_separator))
 }
 
-/** Android ICU compact notation keeps the pill readable without losing the raw plural quantity. */
+/**
+ * Compact notation keeps the pill readable without losing the raw plural quantity.
+ * `CompactDecimalFormat` is API 24+; on Android 6 plain grouping is used instead (e.g. "12,345"
+ * rather than "12K") — still readable, never a crash.
+ */
 fun compactCount(res: Resources, value: Int): String {
-    val locale = res.configuration.locales[0] ?: java.util.Locale.getDefault()
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N) {
+        return java.text.NumberFormat.getIntegerInstance(res.configuration.firstLocaleCompat()).format(value.toLong())
+    }
+    val locale = res.configuration.firstLocaleCompat()
     return CompactDecimalFormat.getInstance(locale, CompactDecimalFormat.CompactStyle.SHORT)
         .format(value.toLong())
 }

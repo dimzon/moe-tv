@@ -58,10 +58,14 @@ class ConnectivityObserver(private val context: Context) {
         val manager = cm
         // Some Android TV ROMs reject registerDefaultNetworkCallback with a SecurityException.
         // Never let that escape on a collection thread; fall back to the same polling isOnline uses.
-        val registered = runCatching {
-            manager?.registerDefaultNetworkCallback(callback)
-            manager != null
-        }.onFailure { Log.w(TAG, "could not watch the default network", it) }.getOrDefault(false)
+        // registerDefaultNetworkCallback is API 24; on API 23 skip straight to polling.
+        val registered = if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.N || manager == null) {
+            false
+        } else {
+            runCatching { manager.registerDefaultNetworkCallback(callback) }
+                .onFailure { Log.w(TAG, "could not watch the default network", it) }
+                .isSuccess
+        }
         val pollJob = if (registered) null else launch {
             while (isActive) { delay(20_000); trySend(isMeteredNow()) }
         }

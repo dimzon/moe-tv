@@ -17,7 +17,11 @@ data class PlaylistMark(val text: String, val argb: Long) {
          * The colour comes from [Palette] by [index] (the playlist's position), so marks
          * stay distinct and never change while the playlists do not.
          */
-        fun of(name: String, index: Int): PlaylistMark = PlaylistMark(textOf(name), Palette[Math.floorMod(index, Palette.size)])
+        // Math.floorMod is API 24; the plain remainder works on Android 6 once normalised to >= 0.
+        fun of(name: String, index: Int): PlaylistMark {
+            val wrapped = (index % Palette.size + Palette.size) % Palette.size
+            return PlaylistMark(textOf(name), Palette[wrapped])
+        }
 
         internal fun textOf(name: String): String {
             val words = name.split(Regex("[^\\p{L}\\p{N}]+")).filter { it.isNotEmpty() }

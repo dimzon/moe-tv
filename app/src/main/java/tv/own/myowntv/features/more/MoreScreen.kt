@@ -268,7 +268,7 @@ fun MoreScreen(
 @Composable
 private fun GroupLabel(text: String) {
     Text(
-        text.uppercase(androidx.compose.ui.platform.LocalConfiguration.current.locales[0]),
+        text.uppercase(androidx.compose.ui.platform.LocalConfiguration.current.firstLocaleCompat()),
         style = stageText(12.5f, 800, 0.13.em), color = StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis,
         modifier = Modifier.padding(start = 16.mpx, end = 16.mpx, top = 16.mpx, bottom = 6.mpx),
     )

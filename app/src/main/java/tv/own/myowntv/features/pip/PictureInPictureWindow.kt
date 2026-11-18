@@ -61,11 +61,11 @@ import androidx.lifecycle.LifecycleOwner
 internal object PictureInPictureWindow {
 
     fun attach(activity: ComponentActivity, pip: PictureInPicture) {
-        pip.onWindowChanged(activity.isInPictureInPictureMode)
         // pip.supported already folds in the API level (PictureInPictureParams is API 26+); the
         // explicit SDK_INT is the guard lint's NewApi can see through, and the runCatching below
         // stays the safety net for TV builds that list the feature but refuse the call.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || !pip.supported) return
+        pip.onWindowChanged(activity.isInPictureInPictureMode)
         activity.addOnPictureInPictureModeChangedListener { info -> pip.onWindowChanged(info.isInPictureInPictureMode) }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             activity.addOnUserLeaveHintListener {

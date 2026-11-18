@@ -163,7 +163,7 @@ fun StageClock(weatherInfo: WeatherInfo?, fahrenheit: Boolean, colors: ClockColo
     val dateColor = clockColor(colors.date, StageColors.Muted)
     val weatherColor = clockColor(colors.weather, StageColors.Muted)
     val context = LocalContext.current
-    val locale = LocalConfiguration.current.locales[0]
+    val locale = LocalConfiguration.current.firstLocaleCompat()
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) { while (true) { delay(15_000); now = System.currentTimeMillis() } }
     val time = remember(now) { DateFormat.getTimeFormat(context).format(Date(now)) }

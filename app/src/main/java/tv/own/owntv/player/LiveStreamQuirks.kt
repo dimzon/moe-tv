@@ -123,14 +123,14 @@ object LiveStreamQuirks {
         ),
     )
 
-    private val hlsRedirectHosts = ConcurrentHashMap.newKeySet<String>()
+    private val hlsRedirectHosts = java.util.Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
     private val hlsRedirectStreams = urlLessonSet()
-    private val mixedHlsHosts = ConcurrentHashMap.newKeySet<String>()
-    private val dashRedirectHosts = ConcurrentHashMap.newKeySet<String>()
-    private val singleSessionHosts = ConcurrentHashMap.newKeySet<String>()
+    private val mixedHlsHosts = java.util.Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
+    private val dashRedirectHosts = java.util.Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
+    private val singleSessionHosts = java.util.Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
     private val noHlsVariantStreams = urlLessonSet()
     private val prerollDefeatedStreams = urlLessonSet()
-    private val uaBlockingHosts = ConcurrentHashMap.newKeySet<String>()
+    private val uaBlockingHosts = java.util.Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
     private val providerMessages = ConcurrentHashMap<String, Pair<Int, String>>()
 
     /**

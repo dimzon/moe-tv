@@ -59,7 +59,7 @@ android {
 
     defaultConfig {
         applicationId = "com.github.dimzon.owntv"
-        minSdk = 24
+        minSdk = 23
         targetSdk = 36
         // versionCode / versionName come from the top-level vals above (auto-incrementing build
         // number, reset to 1.0; CI can pin VERSION_CODE / VERSION_NAME).
@@ -245,6 +245,10 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // API 23 lacks the Java 8 default methods on Map/ConcurrentHashMap (compute, merge,
+        // putIfAbsent, newKeySet, ...). Core library desugaring supplies them as Jetpack's
+        // desugar_jdk_libs so the existing code runs unchanged on Android 6.
+        isCoreLibraryDesugaringEnabled = true
     }
 }
 
@@ -388,6 +392,7 @@ dependencies {
     // an external artifact anymore — playback runs on Media3/ExoPlayer, declared below.
 
     // Core
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.kotlinx.coroutines.android)
@@ -404,10 +409,10 @@ dependencies {
     implementation(libs.androidx.tv.material)
     implementation(libs.androidx.tvprovider)
 
-    // Lifecycle / Navigation
+    // Lifecycle. Navigation Compose is intentionally absent: the shell owns section switching, and
+    // navigation-compose 2.10 requires minSdk 24, which would block Android 6 support at manifest merge.
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.navigation.compose)
 
     // Preferences
     implementation(libs.androidx.datastore.preferences)

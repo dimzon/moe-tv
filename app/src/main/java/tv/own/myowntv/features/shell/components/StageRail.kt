@@ -326,7 +326,7 @@ fun StageRail(
                 RailItem(
                     icon = section.stageIcon,
                     label = stringResource(section.labelRes),
-                    trailing = if (counts) count(section)?.let { NumberFormat.getIntegerInstance(LocalConfiguration.current.locales[0]).format(it) } else null,
+                    trailing = if (counts) count(section)?.let { NumberFormat.getIntegerInstance(LocalConfiguration.current.firstLocaleCompat()).format(it) } else null,
                     detail = if (details) detail(section) else null,
                     open = shown,
                     namesAlpha = namesAlpha,
