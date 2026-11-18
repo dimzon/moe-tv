@@ -167,12 +167,12 @@ class SearchReader(
         return when (intent) {
             SearchIntent.CONTINUE -> SearchResults(
                 channels = channelDao.recentlyWatched(limit).first()
-                    .filter { it.sourceId in sources.liveSourceIds && tv.own.owntv.core.database.ChannelMembership.allExcluded(it, live.sealedCategoryIds) }
+                    .filter { isCuratedChannel(it, sources.liveSourceIds, live.sealedCategoryIds) }
                     .map { ChannelSearchResult(it, null) },
             )
             SearchIntent.CHANNELS -> SearchResults(
                 channels = channelDao.favoritesListAlpha().first()
-                    .filter { it.sourceId in sources.liveSourceIds && tv.own.owntv.core.database.ChannelMembership.allExcluded(it, live.sealedCategoryIds) }
+                    .filter { isCuratedChannel(it, sources.liveSourceIds, live.sealedCategoryIds) }
                     .take(limit)
                     .map { ChannelSearchResult(it, null) },
             )

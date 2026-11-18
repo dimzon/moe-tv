@@ -91,14 +91,16 @@ class RailCountsViewModel(
             customize.sealedCategoryIds(MediaType.LIVE),
         ) { h, cust, sealed -> Triple(h, cust, sealed) }
             .map { (h, cust, sealed) ->
-                // A channel's title shows only when its category is neither hidden in Customize nor
-                // sealed by a lock; with the section's customizations, so a rename shows here too.
-                h?.let { channelDao.getById(it.itemId) }?.takeIf { ch ->
-                    val cats = tv.own.owntv.core.database.ChannelMembership.catsOf(ch) ?: emptySet()
-                    // Visible only when not every category is sealed, and none of its categories is hidden.
-                    tv.own.owntv.core.database.ChannelMembership.allExcluded(ch, sealed) &&
-                        cats.none { cid -> categoryDao.getById(cid)?.let(CustomizeKeys::category) in cust.hiddenCategories }
-                }?.let { cust.displayName(it) }
+                // The title shows only when the channel is reachable through at least one open
+                // category and none of its categories is hidden in Customize; with the section's
+                // customizations, so a rename shows here too.
+                h?.let { channelDao.getById(it.itemId) }
+                    ?.takeIf { ch ->
+                        canShowLastChannelTitle(ch, sealed, cust.hiddenCategories) { cid ->
+                            categoryDao.getById(cid)?.let(CustomizeKeys::category)
+                        }
+                    }
+                    ?.let { cust.displayName(it) }
             }
             .map { RailDetails(lastChannel = it) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RailDetails())

@@ -148,7 +148,11 @@ class HomeViewModel(
 
     init {
         viewModelScope.launch {
-            reloadRequests.collectLatest { loadHomeData() }
+            reloadRequests.collectLatest {
+                // A failed rail load (DB/IO) must not reach the thread's uncaught handler: the Home
+                // screen is shared and a single bad query used to take the whole app down.
+                runCatching { loadHomeData() }.onFailureReport()
+            }
         }
         // A lock closing or opening (the relock on leaving the app, a PIN entry) changes which channels
         // the rows may show. drop(1): the shell asks for the first load.
@@ -172,7 +176,7 @@ class HomeViewModel(
         h: tv.own.owntv.core.database.entity.WatchHistoryEntity,
         cust: SectionCustomizations,
     ): ContinueTarget? = channelDao.getById(h.itemId)?.let { c ->
-        if (!tv.own.owntv.core.database.ChannelMembership.allExcluded(c, customize.sealedCategoryIds(MediaType.LIVE).first())) {
+        if (!canContinueWatching(c, customize.sealedCategoryIds(MediaType.LIVE).first())) {
             return@let null
         }
         ContinueTarget(ContinueKind.LIVE, cust.displayName(c), ContinueAction.LAST_CHANNEL, channelId = c.id)
@@ -222,7 +226,7 @@ class HomeViewModel(
         // One built-in source: its identity and UA are the hardcoded singleton DTO.
         val source = tv.own.owntv.core.repository.BuiltInSource.current
         heroPreviewEngine.play(
-            hero.channel.streamUrl, 0L, source?.userAgent,
+            hero.channel.streamUrl, 0L, source.userAgent,
             tv.own.owntv.core.settings.SourceOverrides.headersWithReferer(hero.channel.httpHeaders, source),
         )
     }
