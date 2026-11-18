@@ -99,7 +99,7 @@ class PlaybackSession(
     /** See [FocusPolicy.onTransientLoss]. NOTHING on a `CAN_DUCK` means the platform attenuates us. */
     internal enum class FocusReaction { NOTHING, DUCK, PAUSE }
 
-    private val scope = CoroutineScope(Dispatchers.Main.immediate)
+    private val scope = CoroutineScope(kotlinx.coroutines.SupervisorJob() + Dispatchers.Main.immediate)
     private val audioManager by lazy { context.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
 
     private var engine: PlaybackEngine? = null

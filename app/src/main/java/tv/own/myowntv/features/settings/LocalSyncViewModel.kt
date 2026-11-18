@@ -153,14 +153,16 @@ class LocalSyncViewModel(
         // same arriving container twice.
         if (incomingWatcher?.isActive != true) incomingWatcher = viewModelScope.launch {
             sync.incoming.collect { file ->
-                val payload = sync.previewIncoming(file).getOrNull() ?: return@collect
-                step = Step.Confirm(
-                    device = null,
-                    direction = SyncDirection.RECEIVE,
-                    file = payload.file,
-                    preview = payload.preview,
-                    password = payload.password,
-                )
+                runCatching {
+                    val payload = sync.previewIncoming(file).getOrNull() ?: return@runCatching
+                    step = Step.Confirm(
+                        device = null,
+                        direction = SyncDirection.RECEIVE,
+                        file = payload.file,
+                        preview = payload.preview,
+                        password = payload.password,
+                    )
+                }.onFailureReport()
             }
         }
     }
@@ -173,7 +175,9 @@ class LocalSyncViewModel(
         discovery?.cancel()
         discovery = viewModelScope.launch {
             sync.discover().collect { device ->
-                if (found.none { it.address == device.address }) found = found + device
+                runCatching {
+                    if (found.none { it.address == device.address }) found = found + device
+                }.onFailureReport()
             }
         }
     }

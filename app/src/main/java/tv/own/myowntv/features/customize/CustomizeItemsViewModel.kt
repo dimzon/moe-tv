@@ -225,7 +225,7 @@ class CustomizeItemsViewModel(
     fun applyRange(endRow: CustomizeItemRow, hidden: Boolean) {
         val keys = span.keysInRange(endRow) ?: return
         val ci = _catInfo.value ?: return
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             val labels = loadedRows.value.filter { it.key in keys }.associate { it.key to it.originalName }
             customize.setItemsHidden(ci.mediaType, labels, hidden)
         }
@@ -262,7 +262,7 @@ class CustomizeItemsViewModel(
     /** Moves a single item one step up/down and persists the resulting order. */
     fun move(row: CustomizeItemRow, up: Boolean) {
         val ci = _catInfo.value ?: return
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             runMove(ci) { snapshot ->
                 val index = snapshot.indexOfFirst { it.second == row.key }
                 if (index < 0) return@runMove null
@@ -275,7 +275,7 @@ class CustomizeItemsViewModel(
     /** Jumps a single item straight to the top or bottom and persists the resulting order. */
     fun moveToEdge(row: CustomizeItemRow, top: Boolean) {
         val ci = _catInfo.value ?: return
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             runMove(ci) { snapshot ->
                 val index = snapshot.indexOfFirst { it.second == row.key }
                 if (index < 0) return@runMove null
@@ -291,7 +291,7 @@ class CustomizeItemsViewModel(
         val ci = _catInfo.value ?: return
         val anchorKey = span.anchorKey.value ?: return
         val endKey = span.endKey.value ?: endRow.key
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             runMove(ci) { snapshot ->
                 val anchorIndex = snapshot.indexOfFirst { it.second == anchorKey }
                 val endIndex = snapshot.indexOfFirst { it.second == endKey }
@@ -347,7 +347,7 @@ class CustomizeItemsViewModel(
 
     fun setItemHidden(row: CustomizeItemRow, hidden: Boolean) {
         val ci = _catInfo.value ?: return
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             customize.setItemHidden(ci.mediaType, row.key, row.originalName, hidden)
         }
     }
@@ -355,7 +355,7 @@ class CustomizeItemsViewModel(
     /** Rename an item (a Live TV channel). */
     fun renameItem(row: CustomizeItemRow, name: String?) {
         val ci = _catInfo.value ?: return
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             customize.renameItem(ci.mediaType, row.key, name)
         }
     }
@@ -425,7 +425,7 @@ class CustomizeItemsViewModel(
     /** Creates a custom category — the Move dialog's "＋ New category…" flow. */
     fun createCustomCategory(name: String) {
         val ci = _catInfo.value ?: return
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             customize.createCustomCategory(ci.mediaType, name)
         }
     }
@@ -440,7 +440,7 @@ class CustomizeItemsViewModel(
      *  provider folder into here, it goes back there — the same as deleting the whole category does. */
     fun removeFromCategory(row: CustomizeItemRow) {
         val ci = _catInfo.value?.takeIf { it.isCustom } ?: return
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             userDataWriter.removeCustomCategoryMember(ci.contextKey, row.itemId)
             customize.observe(ci.mediaType).first().movedFromOrigin[row.key]?.let { origin ->
                 customize.setItemMovedFromOrigin(ci.mediaType, row.key, origin, moved = false)
@@ -451,7 +451,7 @@ class CustomizeItemsViewModel(
     fun moveTo(row: CustomizeItemRow, targetId: String, keepInOrigin: Boolean) {
         val ci = _catInfo.value ?: return
         if (targetId == ci.contextKey) return
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             customCategoryDao.appendItem(targetId, row.itemId)
             if (!keepInOrigin) {
                 when {

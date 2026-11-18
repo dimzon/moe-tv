@@ -3,6 +3,7 @@ package tv.own.owntv.core.sync
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 /**
  * App-wide "a catalog sync is running" signal for the shell's unobtrusive status pill. Every sync —
@@ -25,16 +26,19 @@ class SyncActivityTracker {
     val lastCompleted: StateFlow<CompletedSync?> = _lastCompleted.asStateFlow()
 
     fun started(sourceId: Long, sourceName: String) {
-        _active.value = _active.value + (sourceId to ActiveSync(sourceId, sourceName))
+        _active.update { it + (sourceId to ActiveSync(sourceId, sourceName)) }
     }
 
     fun progress(sourceId: Long, stage: ImportStage) {
-        val existing = _active.value[sourceId] ?: return
-        _active.value = _active.value + (sourceId to existing.copy(stage = stage))
+        // Started/progress/finished arrive from WorkManager IO and from Main — update{} keeps a
+        // concurrent report from dropping another one's map entry.
+        _active.update { current ->
+            current[sourceId]?.let { current + (sourceId to it.copy(stage = stage)) } ?: current
+        }
     }
 
     fun finished(sourceId: Long, sourceName: String, result: SyncResult) {
-        _active.value = _active.value - sourceId
+        _active.update { it - sourceId }
         _lastCompleted.value = CompletedSync(sourceId, sourceName, result, android.os.SystemClock.elapsedRealtime())
     }
 

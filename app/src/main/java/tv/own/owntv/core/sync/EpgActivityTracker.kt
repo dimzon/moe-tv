@@ -3,6 +3,7 @@ package tv.own.owntv.core.sync
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 /**
  * App-wide "an EPG sync is running" signal for the shell's status pill. Mirrors [SyncActivityTracker]:
@@ -25,15 +26,19 @@ class EpgActivityTracker {
     val active: StateFlow<Map<Long, ActiveEpgSync>> = _active.asStateFlow()
 
     fun started(sourceId: Long, sourceName: String) {
-        _active.value = _active.value + (sourceId to ActiveEpgSync(sourceId, sourceName))
+        _active.update { it + (sourceId to ActiveEpgSync(sourceId, sourceName)) }
     }
 
     fun progress(sourceId: Long, channels: Int, programmes: Int) {
-        val existing = _active.value[sourceId] ?: return
-        _active.value = _active.value + (sourceId to existing.copy(channels = channels, programmes = programmes))
+        // Started/progress/finished are called from WorkManager IO and from Main — update{} keeps
+        // concurrent reports from overwriting each other's map entry.
+        _active.update { current ->
+            current[sourceId]?.let { current + (sourceId to it.copy(channels = channels, programmes = programmes)) }
+                ?: current
+        }
     }
 
     fun finished(sourceId: Long) {
-        _active.value = _active.value - sourceId
+        _active.update { it - sourceId }
     }
 }

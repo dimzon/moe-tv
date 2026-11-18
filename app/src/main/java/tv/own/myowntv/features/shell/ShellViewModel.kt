@@ -117,7 +117,7 @@ class ShellViewModel(
 
     /** The Auto refresh settings — core's [tv.own.owntv.core.sync.AutoRefresh], shared with the phone. */
     fun checkAutoRefresh(includeStartup: Boolean) {
-        viewModelScope.launch { autoRefresh.check(includeStartup) }
+        viewModelScope.launchGuarded { autoRefresh.check(includeStartup) }
     }
 
     val themeMode: StateFlow<ThemeMode> = settings.themeMode
@@ -231,15 +231,15 @@ class ShellViewModel(
     }
 
     fun setThemeMode(mode: ThemeMode) {
-        viewModelScope.launch { settings.setThemeMode(mode) }
+        viewModelScope.launchGuarded { settings.setThemeMode(mode) }
     }
 
     fun setUiZoom(percent: Int) {
-        viewModelScope.launch { settings.setUiZoomPercent(UiZoom.clamp(percent)) }
+        viewModelScope.launchGuarded { settings.setUiZoomPercent(UiZoom.clamp(percent)) }
     }
 
     fun setFontCustomization(value: FontCustomization) {
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             settings.setFontCustomization(
                 value.copy(
                     sizePercent = UiFontScale.clamp(value.sizePercent),
@@ -251,6 +251,6 @@ class ShellViewModel(
     }
 
     fun setAccent(accent: AccentColor) {
-        viewModelScope.launch { settings.setAccent(accent) }
+        viewModelScope.launchGuarded { settings.setAccent(accent) }
     }
 }

@@ -11,6 +11,7 @@ import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,10 +39,16 @@ class HeroPreviewEngine(
      *  time; a change rebuilds on the next preview (see the decode-path check in [play]). */
     @Volatile private var hwDecodingEnabled = true
 
+    /** Owns the settings subscription below. Without a stored, cancelled scope every preview engine
+     *  ever created kept collecting `hwDecoding` — and the engine — alive for the process lifetime. */
+    private val settingsScope = kotlinx.coroutines.CoroutineScope(
+        kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main.immediate,
+    )
+
     init {
         settings?.hwDecoding
             ?.onEach { hwDecodingEnabled = it }
-            ?.launchIn(kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main.immediate))
+            ?.launchIn(settingsScope)
     }
 
     enum class State { IDLE, LOADING, PLAYING, ERROR }
@@ -188,6 +195,7 @@ class HeroPreviewEngine(
     }
 
     fun release() {
+        settingsScope.cancel()
         noFrameWatchdog.disarm()
         player?.run {
             removeListener(listener)

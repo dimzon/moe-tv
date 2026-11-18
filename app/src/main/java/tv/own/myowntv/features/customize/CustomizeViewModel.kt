@@ -140,6 +140,8 @@ class CustomizeViewModel(
     /** Set (or with null: remove) the category lock PIN. Removing it also drops every
      *  category lock: without the PIN nothing could open them again. */
     fun setPin(pin: String?) {
+        // Deliberately NOT guarded: a failed PIN write must surface. Swallowing it would close the
+        // dialog as if the lock were enabled while the old hash (or none) is still stored.
         viewModelScope.launch {
             if (pin == null) customize.clearCategoryLocks()
             settings.setCustomizePin(pin)
@@ -220,7 +222,7 @@ class CustomizeViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     fun setHideNewCategories(hidden: Boolean) {
-        viewModelScope.launch { settings.setHideNewCategoriesDefault(hidden) }
+        viewModelScope.launchGuarded { settings.setHideNewCategoriesDefault(hidden) }
     }
 
     // --- Sort (reuses SettingsRepository.SortMode — the same value the Live TV browse uses) ---
@@ -230,7 +232,7 @@ class CustomizeViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsRepository.SortMode.PLAYLIST)
 
     fun setSort(mode: SettingsRepository.SortMode) {
-        viewModelScope.launch { settings.setSortLive(mode) }
+        viewModelScope.launchGuarded { settings.setSortLive(mode) }
     }
 
     // --- Items screen navigation ---
@@ -258,7 +260,7 @@ class CustomizeViewModel(
 
     /** Creates a custom category for the selected section — the "＋ New category" pill. */
     fun createCustomCategory(name: String) {
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             customize.createCustomCategory(_section, name)
         }
     }
@@ -270,7 +272,7 @@ class CustomizeViewModel(
      */
     fun deleteCustomCategory(row: CustomizeCatRow) {
         if (!CustomizeKeys.isCustom(row.key)) return
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             val type = _section
             // Capture stable member keys first so deleting a destination restores any provider
             // origins those items left when they were moved here.
@@ -300,7 +302,7 @@ class CustomizeViewModel(
      * selected source ids; "custom:…" keys never match.
      */
     fun restoreSectionDefaults() {
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             val type = _section
             val ids = ctx.value.sourceIdsFor(type).toSet()
             fun mine(key: String) = key.substringBefore(':').toLongOrNull() in ids
@@ -321,14 +323,14 @@ class CustomizeViewModel(
     }
 
     fun setCategoryHidden(row: CustomizeCatRow, hidden: Boolean) {
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             customize.setCategoryHidden(_section, row.key, hidden)
         }
     }
 
     /** Blank name restores the provider's original. */
     fun renameCategory(row: CustomizeCatRow, name: String?) {
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             customize.renameCategory(_section, row.key, name)
         }
     }
@@ -342,7 +344,7 @@ class CustomizeViewModel(
         moveSingle(row, if (top) MoveKind.TOP else MoveKind.BOTTOM)
 
     private fun moveSingle(row: CustomizeCatRow, kind: MoveKind) {
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             moveMutex.withLock {
                 val current = rows.value
                 val index = current.indexOfFirst { it.key == row.key }
@@ -356,7 +358,7 @@ class CustomizeViewModel(
 
 
     fun unhideChannel(key: String) {
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             customize.setItemHidden(_section, key, "", false)
         }
     }
@@ -370,7 +372,7 @@ class CustomizeViewModel(
 
     fun applyRange(endRow: CustomizeCatRow, hidden: Boolean) {
         val keys = span.keysInRange(endRow) ?: return
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             customize.setCategoriesHidden(_section, keys, hidden)
         }
         span.cancel()
@@ -379,7 +381,7 @@ class CustomizeViewModel(
     fun moveRange(endRow: CustomizeCatRow, kind: MoveKind) {
         val anchorKey = span.anchorKey.value ?: return
         val endKey = span.endKey.value ?: endRow.key
-        viewModelScope.launch {
+        viewModelScope.launchGuarded {
             moveMutex.withLock {
                 val current = rows.value
                 val anchorIndex = current.indexOfFirst { it.key == anchorKey }

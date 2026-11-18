@@ -251,13 +251,16 @@ class EpgViewModel(
         if (next.isEmpty()) return
         prefetchJob?.cancel()
         prefetchJob = viewModelScope.launch {
-            val s = _state.value
-            for (ahead in next) {
-                val key = cacheKey(ahead, shiftFor(ahead))
-                if (cachedRow(key) != null) continue
-                guideReader.row(ahead, custom.value, epgOffset.value, s.windowStart, s.windowEnd)
-                    .takeIf { it.isNotEmpty() }?.let { putRow(key, it) }
-            }
+            // Best-effort: a bad row read must not crash the app while the user scrolls the guide.
+            runCatching {
+                val s = _state.value
+                for (ahead in next) {
+                    val key = cacheKey(ahead, shiftFor(ahead))
+                    if (cachedRow(key) != null) continue
+                    guideReader.row(ahead, custom.value, epgOffset.value, s.windowStart, s.windowEnd)
+                        .takeIf { it.isNotEmpty() }?.let { putRow(key, it) }
+                }
+            }.onFailureReport()
         }
     }
 
@@ -477,8 +480,14 @@ class EpgViewModel(
     fun load() {
         val previous = loadJob
         loadJob = viewModelScope.launch {
-            previous?.cancelAndJoin()
-            loadMutex.withLock { runLoad() }
+            runCatching {
+                previous?.cancelAndJoin()
+                loadMutex.withLock { runLoad() }
+            }.onFailureReport {
+                // Without this, a DAO failure before runLoad()'s final state write left the spinner
+                // up forever AND crashed the process via the uncaught handler.
+                _state.value = _state.value.copy(loading = false, refreshing = false)
+            }
         }
     }
 

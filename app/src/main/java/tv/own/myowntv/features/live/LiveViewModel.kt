@@ -717,21 +717,27 @@ class LiveViewModel(
         // (Settings → Browsing & lists), on by default.
         viewModelScope.launch {
             ctx.distinctUntilChanged { a, b -> a.sourceIds == b.sourceIds }
-                .collect { c -> categoryMemory.restore({ rememberedCategory() }, { completeRail(c) }, ::place) }
+                .collect { c ->
+                    runCatching { categoryMemory.restore({ rememberedCategory() }, { completeRail(c) }, ::place) }
+                        .onFailureReport()
+                }
         }
         // A hidden All — at a cold start, from a remembered key, after a playlist switch or
         // when switched off in Settings — is never left selected: it moves to fallbackKey.
         viewModelScope.launch {
-            reconcileHiddenSelection(railItems, defaultRail, settings.liveBuiltIns, _selected) { lockedKey != null }
+            runCatching { reconcileHiddenSelection(railItems, defaultRail, settings.liveBuiltIns, _selected) { lockedKey != null } }
+                .onFailureReport()
         }
         // One source, so a folder can only disappear if the provider dropped it: fall back to All
         // instead of leaving the selection on a category the rail no longer lists.
         viewModelScope.launch {
-            val stale = _selected.value
-            if (lockedKey == null && stale is LiveKey.Folder && categoryDao.getById(stale.id) == null) {
-                val next = fallbackAfterSwitch(railItems, defaultRail, stale)
-                if (_selected.value == stale) _selected.value = next
-            }
+            runCatching {
+                val stale = _selected.value
+                if (lockedKey == null && stale is LiveKey.Folder && categoryDao.getById(stale.id) == null) {
+                    val next = fallbackAfterSwitch(railItems, defaultRail, stale)
+                    if (_selected.value == stale) _selected.value = next
+                }
+            }.onFailureReport()
         }
         // Persist the last focused/interacted channel (debounced), and restore it once at startup so opening
         // Live TV lands focus back on it. Restore leaves the preview disarmed (no auto-preview on launch).
@@ -741,16 +747,18 @@ class LiveViewModel(
         viewModelScope.launch {
             // A browse behind the mini player is not a channel watched: the playing one stays saved.
             _previewChannel.drop(1).filterNotNull().map { it.id }.debounce(800).filter { miniPlaying == null }.distinctUntilChanged()
-                .collect { settings.setLastLiveChannelId(it) }
+                .collect { id -> runCatching { settings.setLastLiveChannelId(id) }.onFailureReport() }
         }
         // The remembered channel is restored once at startup: it is disarmed for preview (no
         // auto-preview on launch) and left alone while the mini player plays.
         viewModelScope.launch {
-            if (!settings.rememberLastLive.first() || miniPlaying != null || _previewChannel.value != null) return@launch
-            val saved = settings.lastLiveChannelId.first().takeIf { it.isNotEmpty() }
-                ?.let { channelDao.getById(it) }
-                ?.takeIf { !tv.own.owntv.core.database.ChannelMembership.allExcluded(it, customize.sealedCategoryIds(MediaType.LIVE).first()) }
-            if (saved != null && _previewChannel.value == null) _previewChannel.value = saved
+            runCatching {
+                if (!settings.rememberLastLive.first() || miniPlaying != null || _previewChannel.value != null) return@runCatching
+                val saved = settings.lastLiveChannelId.first().takeIf { it.isNotEmpty() }
+                    ?.let { channelDao.getById(it) }
+                    ?.takeIf { !tv.own.owntv.core.database.ChannelMembership.allExcluded(it, customize.sealedCategoryIds(MediaType.LIVE).first()) }
+                if (saved != null && _previewChannel.value == null) _previewChannel.value = saved
+            }.onFailureReport()
         }
     }
 
@@ -783,7 +791,10 @@ class LiveViewModel(
             val inRail = folder != null &&
                 kotlinx.coroutines.withTimeoutOrNull(2_000) { railItems.first { list -> list.any { it.key == folder } } } != null
             for (key in listOfNotNull(folder.takeIf { inRail }, fallbackKey(railItems.value)).distinct()) {
-                val position = pagingSource(key, c, "", sort).positionOf(channel.id, { it.id }) ?: continue
+                // positionOf walks the whole source (up to tens of thousands of rows) in memory.
+                val position = withContext(Dispatchers.IO) {
+                    pagingSource(key, c, "", sort).positionOf(channel.id, { it.id })
+                } ?: continue
                 show(key)
                 _reveal.value = tv.own.myowntv.features.search.Reveal(key, channel.id, position)
                 return@launch
@@ -1217,9 +1228,9 @@ class LiveViewModel(
     /**
      * Direct-tune: resolve a provider channel number to a channel and tune it.
      *
-     * Two-stage lookup: the playing channel's source first, then other active Live sources only when
-     * the current source has zero visible matches. Duplicate numbers are resolved via zap-context
-     * tiebreaker. Hidden channels/categories are excluded.
+     * Single source, single lookup: the channel list is queried by number, duplicate numbers are
+     * resolved via the zap-context tiebreaker, and hidden/sealed channels are excluded. (The app has
+     * one built-in provider, so the old "fall back to another source" stage no longer applies.)
      *
      * What happens after resolution — immediate playback, the guarded background rebuild of the
      * bounded window, and the CH+/- anchor that covers the gap — is [LiveZapList.directTune].
@@ -1238,43 +1249,21 @@ class LiveViewModel(
 
             // DB queries on IO; playback on Main (ExoPlayer requires the main thread).
             val resolved = withContext(Dispatchers.IO) {
-                // Resolve hidden categories for sources not in the active set (source may have been removed).
-                val activeHiddenCats = hiddenCategoryIds.value.toMutableSet()
-                if (false) {
-                    val cats = categoryDao.observe().first()
-                    val cust = custom.value
-                    if (cust.hiddenCategories.isNotEmpty()) {
-                        cats.filter { CustomizeKeys.category(it) in cust.hiddenCategories }.forEach { activeHiddenCats += it.id }
-                    }
-                }
+                val activeHiddenCats = hiddenCategoryIds.value
                 val currentCustom = custom.value
-
-                // Stage 1: query the currently playing source.
-                val currentSourceCandidates = channelDao.findByNumber(number)
+                val candidates = channelDao.findByNumber(number)
                     .filter { isChannelVisible(it, currentCustom, activeHiddenCats) }
 
-                if (currentSourceCandidates.isNotEmpty()) {
-                    val resolvedId = tv.own.myowntv.player.resolveDirectTuneCandidate(
-                        currentSourceCandidates.map { it.id },
-                        snapshotZapList.map { it.id }.toSet(),
-                    )
-                    val r = resolvedId?.let { id -> currentSourceCandidates.first { it.id == id } }
-                        ?: return@withContext ChannelNumberLookupResult.Ambiguous(currentSourceCandidates.size)
-                    val customName = currentCustom.itemNames[CustomizeKeys.channel(r)]
-                    return@withContext ChannelNumberLookupResult.Found(customName?.let { r.copy(name = it) } ?: r)
-                }
+                if (candidates.isEmpty()) return@withContext ChannelNumberLookupResult.NotFound
 
-                // Stage 2: fallback to other active Live sources.
-                val fallbackCandidates = emptyList<ChannelEntity>()
-                if (fallbackCandidates.isEmpty()) return@withContext ChannelNumberLookupResult.NotFound
-
-                val r = tv.own.myowntv.player.resolveDirectTuneCandidate(
-                    fallbackCandidates.map { it.id },
+                val resolvedId = tv.own.myowntv.player.resolveDirectTuneCandidate(
+                    candidates.map { it.id },
                     snapshotZapList.map { it.id }.toSet(),
-                )?.let { id -> fallbackCandidates.first { it.id == id } }
-                    ?: return@withContext ChannelNumberLookupResult.Ambiguous(fallbackCandidates.size)
-                val customName = currentCustom.itemNames[CustomizeKeys.channel(r)]
-                ChannelNumberLookupResult.Found(customName?.let { r.copy(name = it) } ?: r)
+                )
+                val channel = resolvedId?.let { id -> candidates.first { it.id == id } }
+                    ?: return@withContext ChannelNumberLookupResult.Ambiguous(candidates.size)
+                val customName = currentCustom.itemNames[CustomizeKeys.channel(channel)]
+                ChannelNumberLookupResult.Found(customName?.let { channel.copy(name = it) } ?: channel)
             }
 
             // Dispatch the lookup outcome.
@@ -1365,7 +1354,7 @@ class LiveViewModel(
             val source = tv.own.owntv.core.repository.BuiltInSource.current
             val url = if (streamUrlResolver.needsResolve(source)) {
                 withContext(Dispatchers.IO) {
-                    runCatching { streamUrlResolver.resolve(source!!, channel.streamUrl) }
+                    runCatching { streamUrlResolver.resolve(source, channel.streamUrl) }
                         .onFailure { Log.w(TAG, "play-link resolve failed channelId=${channel.id}", it) }
                         .getOrNull()
                 } ?: return@launch
@@ -1375,7 +1364,7 @@ class LiveViewModel(
             externalPlayerLauncher.launch(
                 url = url,
                 title = channel.name,
-                userAgent = source?.userAgent,
+                userAgent = source.userAgent,
                 httpHeaders = SourceOverrides.headersWithReferer(channel.httpHeaders, source),
             )
             recordLiveHistory(channel, immediate = true)
