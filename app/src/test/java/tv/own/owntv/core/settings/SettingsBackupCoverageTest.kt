@@ -22,6 +22,8 @@ class SettingsBackupCoverageTest {
         "refresh_migration_done", "epg_refill_checked",
         "restore_in_progress", "font_jakarta_migrated", "list_orders_reset", "live_latency_reset_416", "auto_frame_rate_reset_416",
         "auto_frame_rate_reset_pre12", "stage_defaults_applied",
+        // A one-shot cleanup of stale WorkManager rows: device-local, never a user choice.
+        "work_constraints_cleared",
         // A fact about this device's decoders (tunneled playback failed here), not a choice.
         "tunneling_failed",
         // The latency of this device's own outputs; another device's HDMI or Bluetooth path differs.

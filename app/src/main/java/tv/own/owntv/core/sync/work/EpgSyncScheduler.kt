@@ -1,9 +1,7 @@
 package tv.own.owntv.core.sync.work
 
 import android.content.Context
-import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -22,11 +20,9 @@ class EpgSyncScheduler(private val context: Context) {
                     EpgSyncWorker.KEY_BASE_PROGRAMMES to baseProgrammes,
                 ),
             )
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build(),
-            )
+            // No NetworkType constraint: WorkManager tracks it by registering a default network
+            // callback, which throws SecurityException on some Android TV ROMs. EpgSyncWorker defers
+            // itself with isOnlineNow() instead.
             .addTag(TAG_EPG_SYNC)
             .addTag("epg-source-$sourceId")
             .build()

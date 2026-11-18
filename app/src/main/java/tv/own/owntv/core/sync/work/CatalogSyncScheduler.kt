@@ -1,9 +1,7 @@
 package tv.own.owntv.core.sync.work
 
 import android.content.Context
-import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -39,11 +37,9 @@ class CatalogSyncScheduler(private val context: Context) {
                 CatalogSyncWorker.KEY_COMPLETES_INITIAL_SYNC to completesInitialSync,
                 CatalogSyncWorker.KEY_FORCE_PRUNE to forcePrune,
             ))
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
-            )
+            // No NetworkType constraint: WorkManager tracks it by registering a default network
+            // callback, which throws SecurityException on some Android TV ROMs. CatalogSyncWorker
+            // defers itself with isOnlineNow() instead.
             .addTag(TAG_CATALOG_SYNC)
             .addTag("source-$sourceId")
             .build()

@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.work.WorkManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -34,6 +35,9 @@ import tv.own.owntv.core.theme.FontCustomization
 import tv.own.owntv.core.theme.PopupFontScale
 import tv.own.owntv.core.theme.PopupSizeScale
 import tv.own.owntv.core.theme.ThemeMode
+import tv.own.owntv.core.sync.work.CatalogSyncScheduler
+import tv.own.owntv.core.sync.work.EpgSyncScheduler
+import tv.own.owntv.core.sync.work.LocalAutoSyncScheduler
 import tv.own.owntv.core.theme.UiFontScale
 import tv.own.owntv.core.theme.UiZoom
 
@@ -372,6 +376,9 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val LIVE_LATENCY_RESET_416 = booleanPreferencesKey("live_latency_reset_416")
         // Stage (2026-09-30): moved a saved System Sans to Plus Jakarta Sans once. Device-local, never backed up.
         val FONT_JAKARTA_MIGRATED = booleanPreferencesKey("font_jakarta_migrated")
+        // One-shot: drop WorkManager rows enqueued by older versions with a NetworkType constraint.
+        // Those specs survive an update and keep registering a default network callback on boot.
+        val WORK_CONSTRAINTS_CLEARED = booleanPreferencesKey("work_constraints_cleared")
         val LIST_ORDERS_RESET = booleanPreferencesKey("list_orders_reset")
         // Stage (2026-10-02): the TV app's new-UI defaults written once (applyStageDefaults). Device-local.
         val STAGE_DEFAULTS_APPLIED = booleanPreferencesKey("stage_defaults_applied")
@@ -2087,6 +2094,25 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         runCatching { migrateAutoFrameRatePre12() }
         runCatching { migrateLiveLatency416() }
         runCatching { migrateSystemSansToJakarta() }
+        runCatching { cancelLegacyConstrainedWork() }
+    }
+
+    /**
+     * WorkManager keeps enqueued work in its own DB across an app update. Rows written by an older
+     * build still carry `NetworkType.CONNECTED`/`UNMETERED`, and merely changing the scheduler code
+     * does not rewrite them — their constraint tracker keeps calling
+     * `ConnectivityManager.registerDefaultNetworkCallback`, which throws SecurityException on some
+     * Android TV ROMs. One-shot and device-local: cancel the three tagged work families once.
+     */
+    private suspend fun cancelLegacyConstrainedWork() {
+        if (context.dataStore.data.first()[Keys.WORK_CONSTRAINTS_CLEARED] == true) return
+        val manager = WorkManager.getInstance(context)
+        listOf(
+            CatalogSyncScheduler.TAG_CATALOG_SYNC,
+            EpgSyncScheduler.TAG_EPG_SYNC,
+            LocalAutoSyncScheduler.TAG,
+        ).forEach { tag -> manager.cancelAllWorkByTag(tag) }
+        context.dataStore.edit { it[Keys.WORK_CONSTRAINTS_CLEARED] = true }
     }
 
     /** Whether the one-time drop of old list orders (see `ContentOrderDao.dropListOrdersExcept`) has run. */

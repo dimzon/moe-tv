@@ -46,6 +46,7 @@
 - **DNS presets row no longer borrows the accent-picker wording ("готовые цвета") in Russian, Ukrainian and Belarusian**
 - **Live TV: the catalogue follows the official RUTUBE TV feed — sport, radio and regional channels missing from the curated list are back**
 - **Esc from a USB keyboard or scrcpy works as Back**
+- **Sync no longer crashes at startup on TV boxes that reject WorkManager's network callback**
 
 ### 🔧 Internals
 - **Live-only database schema rebuilt through v8**

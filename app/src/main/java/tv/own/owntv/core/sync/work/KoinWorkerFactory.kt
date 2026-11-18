@@ -42,6 +42,7 @@ class KoinWorkerFactory : WorkerFactory() {
                 appContext,
                 workerParameters,
                 koin.get(),
+                koin.get(),
             )
             else -> null
         }

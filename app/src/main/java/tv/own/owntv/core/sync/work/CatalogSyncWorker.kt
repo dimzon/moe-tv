@@ -33,6 +33,14 @@ class CatalogSyncWorker(
         val baseItemCount = inputData.getInt(KEY_BASE_ITEM_COUNT, 0)
         if (sourceId < 0) return Result.failure()
 
+        // The NetworkType.CONNECTED constraint is gone: WorkManager tracks it through a default
+        // network callback, which throws SecurityException on some Android TV ROMs. Defer here
+        // instead — retry with WorkManager's backoff until the device is online again.
+        if (!connectivity.isOnlineNow()) {
+            Log.i(TAG, "offline, deferring catalog sync sourceId=$sourceId")
+            return Result.retry()
+        }
+
         val contentTypes = SyncContentTypes(
             live = inputData.getBoolean(KEY_LIVE, true),
         )

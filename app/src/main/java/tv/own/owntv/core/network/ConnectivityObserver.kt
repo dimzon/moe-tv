@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -55,8 +56,19 @@ class ConnectivityObserver(private val context: Context) {
         }
         trySend(isMeteredNow())
         val manager = cm
-        manager?.registerDefaultNetworkCallback(callback)
-        awaitClose { runCatching { manager?.unregisterNetworkCallback(callback) } }
+        // Some Android TV ROMs reject registerDefaultNetworkCallback with a SecurityException.
+        // Never let that escape on a collection thread; fall back to the same polling isOnline uses.
+        val registered = runCatching {
+            manager?.registerDefaultNetworkCallback(callback)
+            manager != null
+        }.onFailure { Log.w(TAG, "could not watch the default network", it) }.getOrDefault(false)
+        val pollJob = if (registered) null else launch {
+            while (isActive) { delay(20_000); trySend(isMeteredNow()) }
+        }
+        awaitClose {
+            pollJob?.cancel()
+            runCatching { manager?.unregisterNetworkCallback(callback) }
+        }
     }.distinctUntilChanged()
 
     private fun NetworkCapabilities.hasInternet(): Boolean =
@@ -84,11 +96,16 @@ class ConnectivityObserver(private val context: Context) {
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
         val manager = cm
-        manager?.registerNetworkCallback(request, callback)
+        runCatching { manager?.registerNetworkCallback(request, callback) }
+            .onFailure { Log.w(TAG, "could not watch the network", it) }
         // Poll every 20s — on devices where a network interface stays "up" forever
         // (Ethernet without cable, some TV firmwares), callbacks never fire. This
         // ensures the offline banner still appears when internet is unreachable.
         val pollJob = launch { while (isActive) { delay(20_000); trySend(isOnlineNow()) } }
         awaitClose { pollJob.cancel(); runCatching { manager?.unregisterNetworkCallback(callback) } }
     }.distinctUntilChanged()
+
+    private companion object {
+        const val TAG = "ConnectivityObserver"
+    }
 }

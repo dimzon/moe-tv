@@ -49,6 +49,14 @@ class EpgSyncWorker(
         val reason = inputData.getString(KEY_REASON) ?: "unknown"
         if (sourceId == Long.MIN_VALUE) return Result.failure()
 
+        // The NetworkType.CONNECTED constraint is gone: WorkManager tracks it through a default
+        // network callback, which throws SecurityException on some Android TV ROMs. Defer here
+        // instead — retry with WorkManager's backoff until the device is online again.
+        if (!connectivity.isOnlineNow()) {
+            Log.i(TAG, "offline, deferring EPG sync sourceId=$sourceId")
+            return Result.retry()
+        }
+
         // One built-in source: the DTO needs no row lookup, so a stale source id can't skip the run.
         val source = tv.own.owntv.core.repository.BuiltInSource.current
 
