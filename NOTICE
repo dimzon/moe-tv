@@ -110,15 +110,11 @@ tree that produced it, including this NOTICE, LICENSE,
 THIRD_PARTY_LICENSES.md, LICENSES/Apache-2.0.txt, the OFL font license
 texts in extras/font-licenses/, the Gradle build scripts and all resources.
 
-No public source repository is configured for this fork at the time of
-writing. A private repository exists at https://github.com/dimzon/moe-tv,
-but a private repository does not by itself satisfy GPLv3 section 6 for a
-binary conveyed to a third party. Accordingly: the source is the tree from
-which your copy was obtained; if you received a binary-only build, the party
-that conveyed it must provide the Corresponding Source (or a valid written
-offer) under GPLv3 section 6. Before publishing any APK, configure the fork's own source
-repository URL and ship these notice files with the release — see
-docs/attribution-checklist.md.
+The fork's public source repository is https://github.com/dimzon/moe-tv.
+Together with this NOTICE, LICENSE, THIRD_PARTY_LICENSES.md,
+LICENSES/Apache-2.0.txt and the OFL font license texts it constitutes the
+Corresponding Source for GPLv3 section 6. A copy of these notice files must
+accompany every APK release — see docs/attribution-checklist.md.
 
 
 5. Credits retained from the upstream project
