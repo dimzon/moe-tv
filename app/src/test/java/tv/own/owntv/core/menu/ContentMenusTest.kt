@@ -27,14 +27,20 @@ class ContentMenusTest {
     @Test
     fun `the live catalogue starts with what the popup puts first`() {
         assertEquals(
-            listOf("programme_details", "add_to_multiview", "play_external", "favourite"),
+            listOf("programme_details", "add_to_multiview", "home_screen", "play_external"),
             keys(ContentMenu.LIVE).take(4),
         )
     }
 
     @Test
     fun `the phone's list leaves out the TV-only actions`() {
-        assertEquals(keys(ContentMenu.LIVE).drop(1), phoneCatalogue(ContentMenu.LIVE).map { it.key })
+        // The TV-only keys are pinned here on purpose: a new tvOnly action must trip this test so
+        // the phone's Customize list gets revisited rather than silently offering a TV-only key.
+        val tvOnly = setOf("programme_details", "home_screen")
+        assertEquals(
+            keys(ContentMenu.LIVE).filterNot { it in tvOnly },
+            phoneCatalogue(ContentMenu.LIVE).map { it.key },
+        )
     }
 
     @Test
