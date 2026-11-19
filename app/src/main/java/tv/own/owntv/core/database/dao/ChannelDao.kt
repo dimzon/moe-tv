@@ -151,6 +151,10 @@ interface ChannelDao {
     @Query("SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY sortOrder ASC, name ASC")
     suspend fun channelsInCategory(categoryId: Long): List<ChannelEntity>
 
+    /** The A–Z variant of [channelsInCategory] — the ALPHA sort chip's order. */
+    @Query("SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY name ASC")
+    suspend fun channelsInCategoryAlpha(categoryId: Long): List<ChannelEntity>
+
     @Query("SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY sortOrder ASC, name ASC")
     fun pagingByCategory(categoryId: Long): PagingSource<Int, ChannelEntity>
 

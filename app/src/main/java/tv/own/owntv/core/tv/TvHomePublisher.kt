@@ -28,6 +28,9 @@ import tv.own.myowntv.R
 import tv.own.owntv.core.CoreBuildInfo
 import tv.own.owntv.core.brand.AppIconSwitcher
 import tv.own.owntv.core.customize.CustomizationStore
+import tv.own.owntv.core.customize.CustomizeKeys
+import tv.own.owntv.core.customize.railCategories
+import tv.own.owntv.core.database.ManualOrdering
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.TvProviderProgramDao
@@ -36,6 +39,8 @@ import tv.own.owntv.core.database.entity.TvProviderProgramEntity
 import tv.own.owntv.core.i18n.AppLocale
 import tv.own.owntv.core.i18n.LocaleStore
 import tv.own.owntv.core.launcher.LauncherDeepLink
+import tv.own.owntv.core.live.LiveKey
+import tv.own.owntv.core.live.isChannelVisible
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.settings.SettingsRepository
 import java.nio.ByteBuffer
@@ -62,6 +67,8 @@ class TvHomePublisher(
     private val context: Context,
     private val channelDao: ChannelDao,
     private val categoryDao: CategoryDao,
+    private val contentOrderDao: tv.own.owntv.core.database.dao.ContentOrderDao,
+    private val customCategoryDao: tv.own.owntv.core.database.dao.CustomCategoryDao,
     private val providerDao: TvProviderProgramDao,
     private val settings: SettingsRepository,
     private val customize: CustomizationStore,
@@ -159,14 +166,38 @@ class TvHomePublisher(
         reload()
     }
 
+    /**
+     * Everything the launcher rows must mirror from the browse lists, resolved once per sync: the
+     * sort chip (A–Z / playlist), the visible-once customizations (locks folded in), the resolved
+     * hidden-category ids, and the folder contexts that carry a manual order.
+     */
+    private data class ListState(
+        val alpha: Boolean,
+        val cust: tv.own.owntv.core.customize.SectionCustomizations,
+        val hiddenCats: Set<Long>,
+        val manualContexts: Set<String>,
+    )
+
+    private suspend fun listState(): ListState {
+        val cust = customize.observeVisible(MediaType.LIVE).first()
+        return ListState(
+            alpha = settings.sortLive.first() == SettingsRepository.SortMode.ALPHA,
+            cust = cust,
+            hiddenCats = tv.own.owntv.core.content.AdultCategoryClassifier
+                .hiddenCategoryIds(categoryDao.observe().first(), cust.hiddenCategories),
+            manualContexts = contentOrderDao.observeContextKeys().first().toSet(),
+        )
+    }
+
     private suspend fun syncLocked(requestBrowsable: Boolean) {
-        syncPinnedLocked(requestBrowsable)
-        syncCategoriesLocked()
+        val state = listState()
+        syncPinnedLocked(requestBrowsable, state)
+        syncCategoriesLocked(state)
     }
 
     // --- PINNED -------------------------------------------------------------------
 
-    private suspend fun syncPinnedLocked(requestBrowsable: Boolean) {
+    private suspend fun syncPinnedLocked(requestBrowsable: Boolean, state: ListState) {
         val rows = providerDao.getForSurface(TvProviderSurface.PINNED_LIVE)
         val existingChannelRow = rows.firstOrNull { it.groupId == CHANNEL_GROUP_ID }
         if (rows.none { it.groupId != CHANNEL_GROUP_ID }) {
@@ -193,17 +224,26 @@ class TvHomePublisher(
             return
         }
 
-        val customizations = customize.observe(MediaType.LIVE).first()
         val byId = rows.filter { it.groupId != CHANNEL_GROUP_ID }
             .mapNotNull { row -> channelDao.findByRemote(row.targetItemId)?.let { row to it } }
+        // The pinned row mirrors the All list: the current sort chip, and only channels that would
+        // survive there (hidden channel, hidden/locked provider folder).
+        val ordered = byId
+            .filter { (row, channel) ->
+                isChannelVisible(channel, state.cust, state.hiddenCats, LiveKey.All)
+            }
+            .let { list ->
+                if (state.alpha) list.sortedWith(compareBy({ it.second.name.lowercase() }))
+                else list.sortedWith(compareBy({ it.second.sortOrder }, { it.second.name.lowercase() }))
+            }
+        val desiredKeys = ordered.mapTo(HashSet()) { it.first.groupId }
         for (row in rows) {
             if (row.groupId == CHANNEL_GROUP_ID) continue
-            if (byId.none { it.first.groupId == row.groupId }) {
+            if (row.groupId !in desiredKeys) {
                 deletePlatformRow(row)
                 providerDao.delete(TvProviderSurface.PINNED_LIVE, row.groupId)
             }
         }
-        val ordered = byId.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.second.name })
         ordered.forEachIndexed { index, (row, channel) ->
             publishProgram(
                 surface = TvProviderSurface.PINNED_LIVE,
@@ -211,8 +251,8 @@ class TvHomePublisher(
                 programGroupId = stableGroupId(channel.id),
                 channel = channel,
                 row = row,
-                label = customizations.displayName(channel),
-                description = channel.name.takeIf { it != customizations.displayName(channel) }.orEmpty(),
+                label = state.cust.displayName(channel),
+                description = channel.name.takeIf { it != state.cust.displayName(channel) }.orEmpty(),
                 weight = ordered.size - index,
             )
         }
@@ -221,33 +261,63 @@ class TvHomePublisher(
 
     // --- CATEGORIES (SmartRuTube-style) -------------------------------------------
 
-    private suspend fun syncCategoriesLocked() {
+    /**
+     * Rows mirror the Live rail exactly: the same [railCategories] order (renames, hides, manual
+     * moves, A–Z chip), custom categories included, and per row the same channel order and visibility
+     * the browse list applies ([isChannelVisible], manual order, moved-out items). Sealed categories
+     * are skipped: their channels are behind the PIN, and launcher cards would leak them.
+     */
+    private suspend fun syncCategoriesLocked(state: ListState) {
         val res = renderContext()
-        val customizations = customize.observe(MediaType.LIVE).first()
         val categories = runCatching { categoryDao.observe().first() }.getOrDefault(emptyList())
-            .sortedBy { it.sortOrder }
+        val rail = runCatching { categories.railCategories(state.cust, alphabetical = state.alpha) }
+            .getOrDefault(emptyList())
         val desiredRows = HashSet<Long>()
         val desiredPrograms = HashSet<Long>()
 
-        for (category in categories) {
-            val rowGroup = stableGroupId("cat:${category.id}")
-            val title = customizations.categoryNames[category.remoteId] ?: category.name
+        for (entry in rail) {
+            // A PIN-sealed category hides its channels from every list this session; publishing
+            // them here would leak what the lock protects. Locked-but-open rows are fine.
+            if (entry.sealed) continue
+            val listKey: LiveKey
+            val channels: List<ChannelEntity> = when {
+                entry.categoryId != null -> {
+                    listKey = LiveKey.Folder(entry.categoryId)
+                    val contextKey = entry.key
+                    val base = if (contextKey in state.manualContexts) {
+                        ManualOrdering.order(channelDao.baseByCategoryManual(entry.categoryId, contextKey), state.alpha)
+                    } else if (state.alpha) channelDao.channelsInCategoryAlpha(entry.categoryId)
+                    else channelDao.channelsInCategory(entry.categoryId)
+                    base.filter { ch ->
+                        isChannelVisible(ch, state.cust, state.hiddenCats, listKey) &&
+                            (state.cust.movedFromOrigin[CustomizeKeys.channel(ch)]
+                                ?.let { it != contextKey } ?: true)
+                    }
+                }
+                entry.customId != null -> {
+                    listKey = LiveKey.Custom(entry.customId)
+                    ManualOrdering.order(customCategoryDao.baseChannelsManual(entry.customId), state.alpha)
+                        .filter { ch -> isChannelVisible(ch, state.cust, state.hiddenCats, listKey) }
+                }
+                else -> continue
+            }
+            if (channels.isEmpty()) continue
+
+            val rowGroup = stableGroupId("catrow:${entry.key}")
             val row = ensureChannelRow(
                 surface = TvProviderSurface.CATEGORY_ROW,
                 groupId = rowGroup,
                 existing = providerDao.find(TvProviderSurface.CATEGORY_ROW, rowGroup),
-                displayName = title,
+                displayName = entry.displayName,
                 description = res.getString(R.string.launcher_category_description),
                 appLink = LauncherDeepLink.OpenLiveSection.toUri(),
-                internalId = "owntv:category:${category.id}",
+                internalId = "owntv:category:${entry.key}",
                 requestBrowsable = true,
             ) ?: continue
             desiredRows.add(rowGroup)
 
-            val channels = runCatching { channelDao.channelsInCategory(category.id) }
-                .getOrDefault(emptyList())
             channels.forEachIndexed { index, channel ->
-                val programGroup = stableGroupId("catprog:${category.id}:${channel.id}")
+                val programGroup = stableGroupId("catprog:${entry.key}:${channel.id}")
                 desiredPrograms.add(programGroup)
                 val programRow = providerDao.find(TvProviderSurface.CATEGORY_PROGRAM, programGroup)
                     ?: TvProviderProgramEntity(
@@ -261,8 +331,8 @@ class TvHomePublisher(
                     programGroupId = programGroup,
                     channel = channel,
                     row = programRow,
-                    label = customizations.displayName(channel),
-                    description = channel.name.takeIf { it != customizations.displayName(channel) }.orEmpty(),
+                    label = state.cust.displayName(channel),
+                    description = channel.name.takeIf { it != state.cust.displayName(channel) }.orEmpty(),
                     weight = channels.size - index,
                 )
             }

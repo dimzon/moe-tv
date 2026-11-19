@@ -782,7 +782,7 @@
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (:epgKeys)
 2	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId)
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) AND name LIKE '%' || :query || '%' ORDER BY sortOrder ASC, name ASC
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY name ASC
+2	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY name ASC
 2	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY sortOrder ASC, name ASC
 2	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM channels
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId)
@@ -1846,8 +1846,8 @@
 1	technical	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	SHA-256
 1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	TvHomePublisher
 1	uri	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	android.resource://${context.packageName}/${AppIconSwitcher.applied(context).banner}
-1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	cat:${category.id}
-1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	catprog:${category.id}:${channel.id}
+1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	catprog:${entry.key}:${channel.id}
+1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	catrow:${entry.key}
 1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	deletePlatformRow failed id=$id
 2	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	ensureChannel publish failed
 1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	ensureChannel published id=$channelId browsableRequest=$requestBrowsable
@@ -1856,7 +1856,7 @@
 1	url	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	http://
 1	url	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	https://
 1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	owntv:${surface.name.lowercase()}:${hex(programGroupId)}
-1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	owntv:category:${category.id}
+1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	owntv:category:${entry.key}
 1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	owntv:pinned-live:$CHANNEL_STABLE_KEY
 1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	pinned-live
 1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	publishProgram channel=${channel.id} providerId=$newId weight=$weight
