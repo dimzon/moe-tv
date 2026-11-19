@@ -1819,8 +1819,16 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         return org.json.JSONObject(map.toMap()).toString()
     }
 
-    /** Whether focusing a channel auto-plays it in the Live preview pane. */
-    val livePreviewEnabled: Flow<Boolean> = prefsFlow { it[Keys.LIVE_PREVIEW] ?: true }
+    /**
+     * Whether focusing a channel auto-plays it in the Live preview pane. Defaults off on a low-RAM
+     * device: the pane holds a second hardware decoder and reconfigures it on every focused channel,
+     * and on weak TV silicon that mediaserver churn is what restarts the box. A viewer who turns it
+     * on explicitly still gets it — only the untouched default changes.
+     */
+    val livePreviewEnabled: Flow<Boolean> = prefsFlow { it[Keys.LIVE_PREVIEW] ?: livePreviewDefault }
+
+    /** The value [livePreviewEnabled] reports until the user picks one (see [heroPreviewDefault]). */
+    val livePreviewDefault: Boolean get() = !lowSpecDevice
 
     /** False only while a saved, enabled Live layout has intentionally hidden its preview panel. */
     val livePreviewPanelActive: Flow<Boolean> = prefsFlow { !livePreviewPanelHidden(it) }

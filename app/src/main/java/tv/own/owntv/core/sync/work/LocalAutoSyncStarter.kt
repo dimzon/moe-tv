@@ -64,7 +64,10 @@ class LocalAutoSyncStarter(
             }
         })
         watchNetwork()
-        if (periodic) scheduler.schedulePeriodic() else scheduler.cancel()
+        // WorkManager keeps its own Room DB; the first getInstance() on a TV that removed the
+        // default initializer opens it right here. Cancel off main — this observer registration above
+        // still happens synchronously, as this entry point requires.
+        if (periodic) scheduler.schedulePeriodic() else scope.launch { scheduler.cancel() }
     }
 
     private fun watchNetwork() {

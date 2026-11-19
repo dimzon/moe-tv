@@ -220,10 +220,11 @@ val dataModule = module {
     // What the user is actually watching. Separate from the register above on purpose — see the
     // class doc: that one is the connection budget, this one is a playback signal.
     single { tv.own.owntv.core.live.WatchSession() }
-    // Programme reminders: context, reminderDao — then reminderDao, scheduler. Eager so every launch
-    // re-arms, whether or not BOOT_COMPLETED arrived.
+    // Programme reminders: context, reminderDao — then reminderDao, scheduler. Not eager: the app
+    // warms this on an IO scope at launch so every launch still re-arms, without opening the DB and
+    // AlarmManager during startKoin on the main thread (see MyOwnTVApp).
     single { tv.own.owntv.core.reminder.ReminderScheduler(androidContext(), get()) }
-    single(createdAtStart = true) { tv.own.owntv.core.reminder.ReminderManager(get(), get()) }
+    single { tv.own.owntv.core.reminder.ReminderManager(get(), get()) }
     // settings, userDataResolver — the four-section backup container (favorites / history / manual
     // reorder / reminders). The customizations, the settings block and the wallpaper left the
     // payload with the sync matrix; sources are not backed up: the one RuTube row is recreated on demand.

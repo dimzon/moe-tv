@@ -841,6 +841,9 @@ class LiveViewModel(
     // dead — otherwise "no preview" looks like a broken channel.
     val previewBlockedSingleSession: StateFlow<Boolean> = live.previewBlockedSingleSession
 
+    /** Critical pressure stopped every decoder; focus must not start another one for this process. */
+    val previewBlockedByMemory: StateFlow<Boolean> = previewEngine.autoPreviewSuppressed
+
     /** In-pane preview playback (no history) — triggered by the UI after the focus settles. */
     fun playPreview(channel: ChannelEntity) {
         // Recorded even when it cannot play (a hidden folder, a one-stream panel): a second OK on it

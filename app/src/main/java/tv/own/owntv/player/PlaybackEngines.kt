@@ -80,6 +80,9 @@ class PlaybackEngines(
 
     private fun applyPressure(pressure: Pressure) {
         if (pressure != Pressure.CRITICAL) return
+        // Every decoder is released now, not left parked until the next tune: the Home hero holds
+        // one too, and on a low-end TV a live codec left alive is what takes mediaserver down.
+        heroPreview?.stop()
         livePreview.onMemoryPressure()
         pool.onMemoryPressure()
     }

@@ -179,7 +179,14 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
         // The catalogue and the guide belong to the process, not to a screen: a wizard, a recovery
         // screen or a home screen cannot decide whether missing data is allowed to load. This runs
         // once per process, before and independently of onboarding.
-        GlobalContext.get().get<AutoRefresh>().start(appScope)
+        // Resolving AutoRefresh pulls in the sync graph — OkHttp/SSL setup and the rename dictionary —
+        // which is exactly the work that must not sit on the main thread before the first frame.
+        // appScope is IO; start() only schedules the checks, it needs no UI state.
+        appScope.launch { runCatching { GlobalContext.get().get<AutoRefresh>().start(appScope) } }
+        // Reminders used to be an eager Koin singleton, so their Flow subscription and alarm re-arm
+        // ran during startKoin on main, competing with the splash's own DB open. Keep the re-arm on
+        // every launch, just move it off the launch path.
+        appScope.launch { runCatching { GlobalContext.get().get<tv.own.owntv.core.reminder.ReminderManager>() } }
         // The Stage UI's own defaults, once per install: Docked · Compact rail, glass
         // on at 50%, the Stage background; Movies & Series keep an update's layout.
         appScope.launch {

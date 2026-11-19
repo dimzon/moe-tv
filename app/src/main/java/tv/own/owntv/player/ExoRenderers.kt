@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
+import tv.own.owntv.core.player.PlayerBudget
 
 /**
  * The one place every in-app ExoPlayer's renderers are configured.
@@ -55,8 +56,12 @@ fun ownTVRenderers(
         .forceDisableMediaCodecAsynchronousQueueing()
         // If the chosen decoder fails to initialise or throws while configuring, try the next one the
         // device offers (usually the software decoder) instead of surfacing the error. A free rung on
-        // the rescue ladder: without it one bad vendor decoder ends playback outright.
-        .setEnableDecoderFallback(true)
+        // the rescue ladder: without it one bad vendor decoder ends playback outright. On a low-RAM TV
+        // that rescue is too expensive — a software decoder for a live stream eats the CPU and heap the
+        // rest of the app needs, and on the boxes this targets it ends in a mediaserver restart. Fail
+        // the load and let the ladder/format choice answer instead. A viewer who explicitly switched
+        // hardware decoding off keeps the fallback, since software decoding was the deliberate choice.
+        .setEnableDecoderFallback(!PlayerBudget.of(context).lowSpec || softwareFirst)
         .apply {
             if (softwareFirst) {
                 // Hardware stays in the list as a backstop — Media3 walks the decoder list in order

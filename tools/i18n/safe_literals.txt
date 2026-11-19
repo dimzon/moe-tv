@@ -2133,6 +2133,7 @@
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	$kind codec: ${e.message ?: e.javaClass.simpleName}
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	$kind codec: ${it.diagnosticInfo}
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	$name=${v.second}
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	$reason — full decoder release+rebuild
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	${Math.round(it)} FPS
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	${buffered}ms buffered (needs ${startMs}ms) after ${waitedMs}ms, no frame,
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	${error.errorCodeName} again after playing — this stream's content is unplayable on ExoPlayer
@@ -2187,7 +2188,7 @@
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	STEREO
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	Server
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	Set-Cookie
-1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	UHD channel left — full decoder release+rebuild
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	UHD channel left
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	UNKNOWN($playbackState)
 2	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	User-Agent
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	VP9
@@ -2212,7 +2213,8 @@
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	building tunneled player (N19)
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	cap=${heapCapBytes shr 20}MiB target=${targetBufferBytes shr 20}MiB
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	connection pool evict failed: ${it.javaClass.simpleName}
-1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	critical memory pressure — next tune rebuilds with the low-RAM buffer
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	critical memory pressure
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	critical memory pressure — stopping preview, suppressing auto-preview
 1	protocol	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	dash
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	dataType=${mediaLoadData.dataType} canceled=$wasCanceled
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	decoder exhausted — no MediaCodec instance available
@@ -2319,7 +2321,7 @@
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	recovered after the ladder gave up — clearing the error
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	redirected .ts response is HLS — retrying with HlsMediaSource
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	release() — intentional
-1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	releaseDecoderForUhd(): releasing the 4K decoder + surface
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	releaseDecoderForUhd(): releasing the decoder + surface ($reason)
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	renderers=unreported
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	reqCookie=${request.header("Cookie") != null} reqAuth=${request.header("Authorization") != null}
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	reqRange=${request.header("Range") != null} ua=${request.header("User-Agent").orEmpty()}

@@ -1,6 +1,7 @@
 package tv.own.owntv.core.sync.local
 
 import java.io.File
+import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.flow.first
@@ -48,7 +49,8 @@ class AutoSyncTransfer(
  * (this device's runner, or the other device's request) finds it taken and is answered "busy".
  */
 class AutoSyncLocks {
-    private val held = ConcurrentHashMap.newKeySet<String>()
+    // newKeySet() is Java 8 / API 24; desugaring does not cover it and this must still run on API 23.
+    private val held: MutableSet<String> = Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
 
     fun tryLock(deviceId: String): Boolean = held.add(deviceId)
 

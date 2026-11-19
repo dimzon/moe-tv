@@ -169,6 +169,7 @@ fun LiveScreen(
     val previewCategoryName by vm.previewCategoryName.collectAsStateWithLifecycle()
     val previewArmed by vm.previewArmed.collectAsStateWithLifecycle()
     val previewBlockedSingleSession by vm.previewBlockedSingleSession.collectAsStateWithLifecycle()
+    val previewBlockedByMemory by vm.previewBlockedByMemory.collectAsStateWithLifecycle()
     val nowNext by vm.nowNext.collectAsStateWithLifecycle()
     val searchQuery by vm.searchQuery.collectAsStateWithLifecycle()
     /** The search field's keyboard is open — ◀ then moves the text cursor, not to Categories. */
@@ -211,10 +212,11 @@ fun LiveScreen(
 
     // In-pane preview: play the focused channel after the focus settles (700ms). Disabled while the
     // fullscreen/mini player owns the surface (previewEnabled=false) to avoid two surfaces fighting.
-    LaunchedEffect(previewChannel?.id, effectivePreview, previewArmed, previewOnOk) {
+    LaunchedEffect(previewChannel?.id, effectivePreview, previewArmed, previewOnOk, previewBlockedByMemory) {
         // previewArmed gates the case where the last channel was restored on startup — we don't auto-preview
-        // it until the user actually focuses a channel (then it plays normally).
-        if (previewOnOk || !effectivePreview || !previewArmed) return@LaunchedEffect
+        // it until the user actually focuses a channel (then it plays normally). Critical pressure keeps
+        // focus from starting a new decoder for the rest of the process; OK still plays explicitly.
+        if (previewOnOk || !effectivePreview || !previewArmed || previewBlockedByMemory) return@LaunchedEffect
         val ch = previewChannel ?: return@LaunchedEffect
         delay(700)
         vm.playPreview(ch)

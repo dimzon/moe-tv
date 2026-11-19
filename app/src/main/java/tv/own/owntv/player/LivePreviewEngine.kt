@@ -104,17 +104,28 @@ class LivePreviewEngine(
     @Volatile private var memoryPressure = false
     /** Whether the current [player] was built with the low-RAM byte target. */
     @Volatile private var builtLowRam = false
+    /**
+     * Critical pressure also stops the current stream and keeps focus from starting another one:
+     * a parked decoder still holds mediaserver buffers on the boxes where pressure ends in a reboot.
+     * Lasts for the process — a device that hit it once is likely to again. An explicit OK still plays.
+     */
+    private val _autoPreviewSuppressed = MutableStateFlow(false)
+    val autoPreviewSuppressed: StateFlow<Boolean> = _autoPreviewSuppressed.asStateFlow()
 
     /**
      * The OS reported critical memory pressure. A built LoadControl cannot shrink, so the next tune
-     * rebuilds the player with the low-RAM byte target (the same check that rebuilds on a changed
-     * buffer setting); the channel playing now is left alone rather than cut. Lasts for the life of
-     * this engine — a device that hit critical pressure once is likely to again.
+     * rebuilds with the low-RAM byte target. This one stops the stream right away, drops a pending
+     * background restore, and tells the UI to stop auto-previewing on focus for the rest of the
+     * process: on weak TV silicon a decoder merely parked here is what mediaserver dies from. An
+     * explicit OK still opens a channel, so the box stays watchable.
      */
     fun onMemoryPressure() {
         if (memoryPressure) return
         memoryPressure = true
-        LiveDiagnosticsLog.event("critical memory pressure — next tune rebuilds with the low-RAM buffer")
+        _autoPreviewSuppressed.value = true
+        LiveDiagnosticsLog.event("critical memory pressure — stopping preview, suppressing auto-preview")
+        discardBackgroundRestore()
+        stop()
     }
     /** The pre-roll this tune should use — zero for a stream already caught unable to satisfy one
      *  ([LiveStreamQuirks.defeatsPreroll]), otherwise the per-playlist override or the global setting. */
@@ -1611,12 +1622,13 @@ class LivePreviewEngine(
      *  second frame (measured on the TCL: Realtek's HEVC decoder logs "surface changed" and stops). With
      *  no surface Media3 starts the codec on a placeholder and moves it the same way, so [play] also holds
      *  its prepare until the replacement arrives through [setSurface]. */
-    fun releaseDecoderForUhd() {
-        if (!sawUhd) return // only pay the rebuild when leaving a genuine UHD stream
+    fun releaseDecoderForUhd(force: Boolean = false) {
+        if (!sawUhd && !force) return // only pay the rebuild when leaving a genuine UHD stream
         sawUhd = false
         if (player == null) return
-        android.util.Log.i(LiveDiagnosticsLog.TAG, "releaseDecoderForUhd(): releasing the 4K decoder + surface")
-        LiveDiagnosticsLog.event("UHD channel left — full decoder release+rebuild")
+        val reason = if (force) "critical memory pressure" else "UHD channel left"
+        android.util.Log.i(LiveDiagnosticsLog.TAG, "releaseDecoderForUhd(): releasing the decoder + surface ($reason)")
+        LiveDiagnosticsLog.event("$reason — full decoder release+rebuild")
         player?.run { removeListener(listener); release() }
         player = null
         videoRenderer = null
@@ -2012,8 +2024,10 @@ class LivePreviewEngine(
         _buffering.value = false
         player?.run { stop(); clearMediaItems() }
         releaseHttpConnections()
-        // Leaving a UHD channel (back / exit fullscreen / background): fully release the 4K decoder.
-        releaseDecoderForUhd()
+        // Leaving a UHD channel (back / exit fullscreen / background) fully releases the 4K decoder.
+        // The same full release applies after critical pressure, even for SD/HD: a parked decoder
+        // keeps its mediaserver buffers, which is what restarts the weak boxes.
+        releaseDecoderForUhd(force = memoryPressure)
     }
 
     /**

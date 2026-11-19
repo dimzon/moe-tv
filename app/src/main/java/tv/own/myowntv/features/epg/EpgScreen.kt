@@ -238,6 +238,7 @@ fun EpgScreen(
     val livePreviewSetting by liveVm.livePreviewEnabled.collectAsStateWithLifecycle()
     val previewChannel by liveVm.previewChannel.collectAsStateWithLifecycle()
     val previewArmed by liveVm.previewArmed.collectAsStateWithLifecycle()
+    val previewBlockedByMemory by liveVm.previewBlockedByMemory.collectAsStateWithLifecycle()
     val guidePreview by vm.guidePreview.collectAsStateWithLifecycle()
 
     // Live TV's Guide view shows Live TV's own category; the TV Guide keeps its own choice. With "TV Guide
@@ -265,8 +266,9 @@ fun EpgScreen(
     }
     // Switching the Guide's own preview off stops what is already playing, not only the next channel.
     LaunchedEffect(guidePreview) { if (!guidePreview && previewEnabled) liveVm.stopPreview() }
-    LaunchedEffect(previewChannel?.id, effectivePreview, previewArmed) {
-        if (!effectivePreview || !previewArmed) return@LaunchedEffect
+    LaunchedEffect(previewChannel?.id, effectivePreview, previewArmed, previewBlockedByMemory) {
+        // Critical pressure stopped every decoder; don't let a guide focus create another one.
+        if (!effectivePreview || !previewArmed || previewBlockedByMemory) return@LaunchedEffect
         val ch = previewChannel ?: return@LaunchedEffect
         if (!previewOnOk) delay(700) // following the highlight: only once it settles
         liveVm.playPreview(ch)
@@ -577,8 +579,12 @@ fun EpgScreen(
                 state.channels.isEmpty() -> GuideEmpty(title = state.message?.let { epgMessageText(it) } ?: stringResource(R.string.content_epg_no_guide))
                 else -> {
                     val gx = fx(48) + labelW
-                    // The number column fits the longest channel number (38 = three digits).
-                    val numberWidth = maxOf(38f, (state.channels.maxOfOrNull { it.number?.toString()?.length ?: 0 } ?: 0) * 11f).mpx
+                    // The number column fits the longest channel number (38 = three digits). The scan
+                    // allocates a String per channel, so it must not run on every focus/cursor step —
+                    // the channel list only changes on load.
+                    val numberWidth = remember(state.channels) {
+                        maxOf(38f, (state.channels.maxOfOrNull { it.number?.toString()?.length ?: 0 } ?: 0) * 11f)
+                    }.mpx
                     GuideRuler(
                         windowStart = state.windowStart, windowEnd = state.windowEnd, now = liveNow, scrollPx = readScrollPx,
                         modifier = Modifier.padding(start = gx).width(timelineW).height(40.mpx),
