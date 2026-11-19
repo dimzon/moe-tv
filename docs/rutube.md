@@ -308,7 +308,7 @@ GET https://rutube.ru/api/play/options/{videoId}/
 | `libandroidx.graphics.path.so` | Compose UI | ~0.01 MiB | Нет смысла — нужна Compose |
 | `libdatastore_shared_counter.so` | DataStore | ~0.01 MiB | Нет смысла — нужна DataStore |
 
-ZXing (QR), juniversalchardet, OkHttp, Coil, Koin, Room, Media3 — чистый Java/Kotlin, без `.so`.
+ZXing (QR), OkHttp, Coil, Koin, Room, Media3 — чистый Java/Kotlin, без `.so`.
 
 > Удалён AAR `tv.own.owntv:libmpv` (~21.8 MiB: `libmpv.so`, `libavcodec/format/util/filter/
 > swscale/swresample`, `libc++_shared`, `libplayer`, `libowntvffmpeg`) вместе с mpv-движком.

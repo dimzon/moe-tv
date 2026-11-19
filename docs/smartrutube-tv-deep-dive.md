@@ -110,8 +110,7 @@ Section.TV
 (`RuTubeEpgService.java:141-152`). По проверенным ответам `total≈252`,
 `per_page=20`, то есть около 13 последовательных запросов. Поле `next` —
 **непрозрачный URL**, его нельзя заменять на `?page=2` вручную: при запросе
-с `video_id` `next` может указывать на следующий канал, а не на страницу
-(`docs/rutube-reverse-2026-10-27.md:1173-1175`).
+с `video_id` `next` может указывать на следующий канал, а не на страницу.
 
 **Что приходит в канале `tvbroadcastinfo`:**
 
@@ -219,8 +218,7 @@ Section.LIVE
 
 `topic/1` — это ТВ-топик «Все прямые эфиры». По проверенным данным:
 ~250 каналов, 3 страницы по 100, `origin=rst`, `is_livestream=true`,
-на последней странице встречаются `is_on_air=false`
-(`docs/rutube-reverse-2026-10-27.md:1340`).
+на последней странице встречаются `is_on_air=false`.
 
 **Пагинация:**
 
@@ -280,8 +278,7 @@ Section.LIVE
 
 **Id топиков ТВ Онлайн** (проверено): 1=Все, 2=Развлекательные, 3=Новости,
 4=Федеральные, 5=Кино и сериалы, 6=Спорт, 7=Детские, 8=Музыка, 9=Региональные,
-10=Познавательные, 11=Телемагазин, 12=Мультфильмы, 14=Религия, 15=18+
-(`docs/rutube-reverse-2026-10-27.md:1341`).
+10=Познавательные, 11=Телемагазин, 12=Мультфильмы, 14=Религия, 15=18+.
 
 ### 2.4. Чего в приложении нет
 
@@ -422,9 +419,7 @@ GET /api/play/options/{videoId}/
 | `referer` | `https://tv-androidtv.rutube.ru` | **query-параметр**, не заголовок; отключает рекламное расписание на сервере |
 
 Проверено: `pver=v2&referer=https://tv-androidtv.rutube.ru` даёт `advert: []`;
-`no_404=true` 404 не обходит, только глушит
-(`docs/rearutube-reference-2026-10-30.md:18-30`,
-`docs/rutube-uwp-reverse-2026-10-30.md:150-158`).
+`no_404=true` 404 не обходит, только глушит.
 
 **Авторизация:** TV-клиент создаётся с `useAuthorization=false`
 (`RetrofitHelper.java:33-35`), Bearer не добавляется. Live-ТВ играет без токена.
@@ -511,8 +506,7 @@ else                                  → оверлей + reloadVideo(30_000)
 
 Зачем: RuTube отдаёт master-манифест, где каждый вариант качества продублирован
 (два CDN-зеркала), а аудио-рендиции `#EXT-X-MEDIA` идут без `NAME`/`LANGUAGE`.
-Единственный источник имён — `audiotracks` из play options
-(`docs/rutube-hls-urls-2026-11-07.md:45-80`).
+Единственный источник имён — `audiotracks` из play options.
 
 В форке ExoPlayer также ослаблен парсер: `#EXT-X-MEDIA` без `NAME` больше не
 валит весь плейлист (`HlsPlaylistParser.java:392-396`, коммит `1f2155ad`).
@@ -583,12 +577,10 @@ by it) and no auth token» (`RetrofitHelper.java:31-32`).
 
 Живые проверки: на некоторых live-каналах `play/options` с обычным
 `Mozilla/5.0` возвращает `244 blocking_rule`, а с UA, содержащим `Android`, —
-`200` + HLS. `no_404` эту блокировку не снимает
-(`docs/rutube-uwp-reverse-2026-10-30.md:150-158`).
+`200` + HLS. `no_404` эту блокировку не снимает.
 
 Также важно: запросы к RuTube нужно делать **без системного прокси** — он даёт
-ложные `blocking_rule` и пустые `live_streams`
-(`docs/rutube-reverse-2026-10-27.md:1326-1334`).
+ложные `blocking_rule` и пустые `live_streams`.
 
 ---
 
@@ -826,13 +818,13 @@ return isBadChannelId(id) ||
    в обход списков, будет циклически перезагружаться.
 6. **iframe не поддерживается.** В `RuTubePlayOptions` нет `iframe_url`, `has_video`,
    `origin_type`; нативные TV/мобильные клиенты RuTube тоже не играют iframe
-   (`docs/rutube-reverse-2026-10-27.md:1308-1320`). Фильтр прячет такие каналы
+   Фильтр прячет такие каналы
    из списков, но плеер их не умеет.
 7. **Полная сетка на день не подключена.** `getEpgObserve`/`getProgramsForDayObserve`
    реализованы, но UI их не вызывает; используется только ближайшая сетка
    из `tvbroadcastinfo`.
 8. **`programDate` и таймзона.** Точная таймзона `programDate` в `pangolin` не
-   подтверждена (`docs/rutube-reverse-2026-10-27.md:1367-1369`). Для `tvbroadcastinfo`
+   подтверждена. Для `tvbroadcastinfo`
    время приходит с явным смещением, для `tvprogram` — Unix-секунды.
 9. **`category` в `tvbroadcastinfo` не используется.** API умеет фильтровать по
    категории, приложение группирует локально. Это не ошибка, но при переносе кода
@@ -847,7 +839,7 @@ return isBadChannelId(id) ||
 13. **Master-манифест нестабилен.** RuTube случайно отдаёт то muxed-вариант, то
     демукс с 36 аудио-рендициями без `NAME`; парсер форка и кастомная фабрика
     это переживают, но полагаться на структуру нельзя
-    (`docs/rutube-hls-urls-2026-11-07.md:94-110`).
+    .
 14. **Подпись VOD-манифеста.** Голый `bl.rutube.ru/route/<id>.m3u8` всегда 403;
     играет только подписанный URL из `video_balancer.m3u8`. В логе
     `VideoLoaderController.stripQuery` показывает голый URL — это не значит, что
@@ -926,17 +918,12 @@ return isBadChannelId(id) ||
 
 **Документы репозитория:**
 
-- `docs/rutube-reverse-2026-10-27.md` — живые ответы API, `tvbroadcastinfo`,
-  `tvprogram`, топики, iframe, `blocking_rule`, прокси.
-- `docs/rutube-hls-urls-2026-11-07.md` — HLS, подпись VOD, master-манифест,
-  аудиодорожки, `TRACK_INDEX`, UA/параметры.
-- `docs/rutube-uwp-reverse-2026-10-30.md` — UA-гейт `play/options`,
-  `no_404` не обходит блокировку.
-- `docs/rearutube-reference-2026-10-30.md` — TV-режим play options,
-  `advert: []` с `pver=v2&referer=...`.
-- `docs/rutube-mobile-tvonline-2026-10-29.md` — EPG в мобильном RuTube.
-- `docs/rutube-official-php-client-2026-10-30.md` — `referer` как официальный
-  query-параметр play options.
+- [docs/rutube.md](rutube.md) — описание API RuTube, правил для каналов и EPG, базы и нативных библиотек.
+- [docs/rutube-live-subtitles.md](rutube-live-subtitles.md) — субтитры прямого эфира.
+- [docs/live-only-redesign.md](live-only-redesign.md) — исторический контракт перехода на live-only.
+
+Старые заметки по ревёрс-инженерии (`rutube-reverse-*`, `rutube-hls-urls-*`,
+`rutube-uwp-reverse-*`, `rearutube-reference-*` и подобные) в этот репозиторий не входят.
 
 **Проверенные сырые ответы:** `C:\Work\tools\noproxy_play_*.json`,
 `noproxy_epg_*.json`, `noproxy_chat_*.json`, `noproxy_goya_online_*.json`.

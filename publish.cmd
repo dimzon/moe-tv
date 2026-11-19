@@ -30,7 +30,7 @@ if not defined VER goto :usage
 
 where gh >nul 2>nul || (echo gh CLI not found in PATH & exit /b 1)
 
-set "SITE_DIR=C:\Work\moe-tv-site"
+if not defined SITE_DIR set "SITE_DIR=%~dp0..\moe-tv-site"
 set "SITE_REPO=dimzon/moe-tv-site"
 set "APK=app\build\outputs\apk\universal\release\app-universal-release.apk"
 set "ASSET=%TEMP%\MoeTV_%VER%_universal.apk"

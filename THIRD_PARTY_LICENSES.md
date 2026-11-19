@@ -26,7 +26,6 @@ combined derivative work as a whole (GPLv3 section 5(c)). Test- and build-time-o
 | Coil 3 (`coil-compose`, `coil-network-okhttp`) | 3.6.0 | **Apache-2.0** | © 2026 Coil Contributors. |
 | Koin (`koin-android`, `koin-androidx-compose`, BOM) | 4.2.2 | **Apache-2.0** | © 2017–present Arnaud Giuliani. |
 | ZXing (`com.google.zxing:core`) | 3.5.4 | **Apache-2.0** | QR generation only. |
-| `com.github.albfernandez:juniversalchardet` | 2.5.0 | **MPL-1.1 / GPL-3.0 / LGPL-3.0 (tri-license)** | This project elects **GPL-3.0** (MPL-1.1 alone is not GPL-compatible). © Alberto Fernández; source: <https://github.com/albfernandez/juniversalchardet>. Declared for local subtitle charset detection, but **no source file imports it** after the VOD/subtitle cleanup (`ec31209`); drop the `implementation(...)` line and this row together when the dependency is removed. |
 | SIL Open Font License fonts in `app/src/main/res/font/` | — | **OFL-1.1** | See section 2. Font files are bundled in the APK. |
 
 **Apache-2.0 section 4 obligations**: a copy of the license and the retained attribution notices

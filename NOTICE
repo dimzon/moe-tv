@@ -26,7 +26,7 @@ Original work:
   Its sources are folded into app/src/main/java/tv/own/owntv/** — the
   database, sync, parsers, EPG and playback engine — together with the
   translated UI strings and the i18n tooling. Upstream shipped 26
-  locales; this fork currently packages only English and Russian (en, ru).
+  locales; this fork packages four languages: English, Russian, Ukrainian and Belarusian (en, ru, uk, be).
   The other translation trees were removed here (baa3d2b) but remain
   available in the upstream repository.
 
@@ -67,7 +67,8 @@ Principal changes (all after the import; commit ids refer to this repository):
     "Sources" comparison were removed (4a962f9). The unused
     android-youtube-player dependency went with the trailer code (ec31209).
   * The database schema was rebuilt repeatedly (v4 through v8) and the
-    packaged locale set was reduced to English and Russian (baa3d2b).
+    packaged locale set was reduced to English and Russian (baa3d2b), then
+    extended to four languages with Ukrainian and Belarusian (a1d246c).
   * The app was rebranded to МОЁ ТВ with a new applicationId
     (com.github.dimzon.owntv), launcher assets and moetv:// deep links;
     the current brand kit in extras/brand/ and its generators in

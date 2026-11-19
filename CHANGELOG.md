@@ -1,6 +1,6 @@
 # MyOwnTV — Changelog
 
-> MyOwnTV / МОЁ ТВ 0.1.0 — a **substantially modified derivative** of [OwnTV](https://github.com/ahXN00/OwnTV) (© ahXN00 and the OwnTV contributors, GPL-3.0-only) and [OwnTV_Core](https://github.com/ahXN00/OwnTV_Core) (GPL-3.0-only). Upstream `main` snapshot imported **2026-11-09** as root commit `214719f`, history squashed; **modified since that date by Dmitry Alexandrov, © 2026**. Reworked so the channel list and programme guide come from **RuTube's public API** instead of Xtream/M3U/Stalker providers; mpv, VOD, trailers, downloads, catch-up, profiles, backups, the TMDB/OpenSubtitles integrations and EPG channel matching removed; database rebuilt through schema v8; translations trimmed to English and Russian; rebranded. Full attribution: [NOTICE](NOTICE); dependency licenses: [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+> MyOwnTV / МОЁ ТВ 0.1.0 — a **substantially modified derivative** of [OwnTV](https://github.com/ahXN00/OwnTV) (© ahXN00 and the OwnTV contributors, GPL-3.0-only) and [OwnTV_Core](https://github.com/ahXN00/OwnTV_Core) (GPL-3.0-only). Upstream `main` snapshot imported **2026-11-09** as root commit `214719f`, history squashed; **modified since that date by Dmitry Alexandrov, © 2026**. Reworked so the channel list and programme guide come from **RuTube's public API** instead of Xtream/M3U/Stalker providers; mpv, VOD, trailers, downloads, catch-up, profiles, backups, the TMDB/OpenSubtitles integrations and EPG channel matching removed; database rebuilt through schema v8; translations trimmed to four languages (en, ru, uk, be); rebranded. Full attribution: [NOTICE](NOTICE); dependency licenses: [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
 >
 > The release history below describes the **upstream import point** (up to v5.2.1), not this fork: its feature and community-PR credits belong to the original OwnTV project. See [docs/attribution-checklist.md](docs/attribution-checklist.md).
 
@@ -37,7 +37,7 @@
 - **Settings and player texts for the removed archive, catch-up, timeshift, recordings and seek step**
 - **Guide-wide EPG shift option (a per-channel shift stays in the channel's long-press menu)**
 - **android-youtube-player (MIT) dependency**
-- **Translation trees other than English and Russian**
+- **Translation trees other than English, Russian, Ukrainian and Belarusian**
 
 ### 🩹 Fixes
 - **CALL/CAMERA/SEARCH keys no longer crash the app on Android 10+**
@@ -165,7 +165,7 @@
 - **⏺️ DVR recordings are removed**
 - **⬇️ Downloads are removed**
 - **🗄️ Database 55 → 56: player-engine preferences dropped**
-- **🌐 All interface languages except English and Russian are removed**
+- **🌐 All interface languages except English, Russian, Ukrainian and Belarusian are removed**
 
 ## v5.2.1 — 2026-10-21
 

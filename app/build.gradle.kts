@@ -53,7 +53,7 @@ android {
     // the repo. Gradle only reads gradle.properties from GRADLE_USER_HOME or the project dir, so this
     // one is loaded by hand. Declared here because defaultConfig below already needs it.
     val localSigningProps = Properties().apply {
-        val f = File("E:/MEGA/CODE/OwnTV_Gradle/owntv-signing.properties")
+        val f = File(System.getProperty("user.home"), ".gradle/owntv-signing.properties")
         if (f.isFile) f.inputStream().use { load(it) }
     }
 
@@ -123,7 +123,7 @@ android {
     // properties as a local fallback. Put the local ones in the USER-WIDE file — never in the repo:
     //
     //   C:\Users\<you>\.gradle\gradle.properties
-    //     owntv.keystoreFile=E:\\MEGA\\CODE\\Github_Keystore\\owntv.keystore
+    //     owntv.keystoreFile=/path/to/owntv.keystore
     //     owntv.keystorePassword=...
     //     owntv.keyAlias=...
     //     owntv.keyPassword=...
@@ -452,7 +452,6 @@ dependencies {
     // Networking
     implementation(libs.okhttp)
     implementation(libs.zxing.core) // QR generation for the Remote (companion) add-source flow
-    implementation(libs.juniversalchardet) // local subtitle charset detection
 
     // Media playback — Media3 / ExoPlayer is the app's single playback engine. The external prebuilt
     // engine AAR it used to pair with is gone, and with it the FFmpeg software audio decoder: audio
