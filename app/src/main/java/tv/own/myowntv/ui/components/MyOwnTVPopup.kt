@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
+import tv.own.myowntv.consumeSystemDialogKeys
 import tv.own.myowntv.ui.LocalFullscreenMode
 import tv.own.myowntv.ui.applyFullscreen
 import tv.own.myowntv.ui.theme.PopupFontTheme
@@ -133,6 +134,12 @@ fun MyOwnTVPopup(
             // Compose/OEM code can update dialog attributes after initial attachment.
             dialogWindow?.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
             dialogWindow?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
+            // The dialog window ends its key dispatch with its own ViewRootImpl fallback policy;
+            // a CALL/CAMERA/SEARCH press that falls through here crashes the process on API 31+
+            // (see [swallowsSystemDialogKey] in SystemDialogKeys.kt). Re-asserted like the flags
+            // above, so a callback replaced mid-flight gets wrapped again. Nothing to restore on
+            // dismiss: the window dies.
+            dialogWindow?.consumeSystemDialogKeys()
             // Every recomposition re-asserts it, so a live setting toggle while the dialog is open
             // applies too. Nothing to restore on dismiss: the window dies and the activity's own
             // window, whose controller still requests hidden bars, regains the focus.

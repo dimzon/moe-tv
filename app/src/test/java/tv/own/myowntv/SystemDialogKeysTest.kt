@@ -5,7 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class MainActivitySystemDialogKeyTest {
+class SystemDialogKeysTest {
 
     @Test
     fun `keys whose fallback handler closes system dialogs are swallowed`() {
