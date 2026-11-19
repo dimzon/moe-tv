@@ -31,6 +31,12 @@ __pycache__/
 keystore.properties
 signing.properties
 
+# Local-only agent instructions and device/stand inventory. These files contain internal host
+# addresses, SSH key paths and VM/container procedures: keep them on disk for development, but never
+# commit them (especially once the repository is public).
+/AGENTS.md
+/DEVICES.md
+
 # Internal planning documents — kept local, never committed. `future_work/` is the core repo's name
 # for the same thing; it is listed here too so the same folder name is safe to use anywhere in the
 # suite and can never become a committed leak.
