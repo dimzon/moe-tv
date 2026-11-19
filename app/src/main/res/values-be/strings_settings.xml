@@ -14,7 +14,7 @@
     <string name="settings_hero_preview">Прайграваць відэа ў галоўным шэрагу</string>
     <string name="settings_hero_preview_description">Відэа вылучанага элемента запускаецца праз імгненне. Адключыце, каб эканоміць энергію і памяць пры праглядзе галоўнага экрана.</string>
     <string name="settings_android_tv_home">Галоўны экран Android TV</string>
-    <string name="settings_android_tv_home_description">Паказваць на галоўным экране тэлевізара шэрагі «Працягнуць прагляд» і нядаўніх каналаў прамога эфіру.</string>
+    <string name="settings_android_tv_home_description">Паказваць на галоўным экране тэлевізара карткі каналаў, замацаваныя праз меню па ўтрымванні OK.</string>
     <string name="settings_hidden">Схавана</string>
     <string name="settings_static">Статычнае</string>
     <string name="settings_dynamic">Дынамічнае</string>

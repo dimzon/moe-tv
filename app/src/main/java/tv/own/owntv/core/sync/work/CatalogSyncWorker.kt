@@ -25,6 +25,7 @@ class CatalogSyncWorker(
     private val connectivity: ConnectivityObserver,
     private val settings: SettingsRepository,
     private val watchSession: tv.own.owntv.core.live.WatchSession,
+    private val tvHomePublisher: tv.own.owntv.core.tv.TvHomePublisher,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
@@ -103,6 +104,10 @@ class CatalogSyncWorker(
                 if (deferIndexes) {
                     catalogSyncScheduler.enqueueContentIndexBuild(reason = "fresh_sync")
                 }
+                // A re-sync can rename a channel, change its logo or drop it from the playlist. Pinned
+                // launcher cards must follow the catalog, not keep pointing at a stale name/art.
+                runCatching { tvHomePublisher.refresh() }
+                    .onFailure { Log.w(TAG, "launcher card refresh failed after catalog sync", it) }
                 Result.success()
             }
             is SyncResult.Failed -> {

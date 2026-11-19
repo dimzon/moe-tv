@@ -14,7 +14,7 @@
     <string name="settings_hero_preview">Відтворювати відео в головному рядку</string>
     <string name="settings_hero_preview_description">Відео вибраного елемента запускається через мить. Вимкніть, щоб заощаджувати енергію та пам\'ять під час перегляду головного екрана.</string>
     <string name="settings_android_tv_home">Головний екран Android TV</string>
-    <string name="settings_android_tv_home_description">Показувати на головному екрані телевізора рядки «Продовжити перегляд» і нещодавніх каналів прямого ефіру.</string>
+    <string name="settings_android_tv_home_description">Показувати на головному екрані телевізора картки каналів, закріплені через меню з утриманням OK.</string>
     <string name="settings_hidden">Сховано</string>
     <string name="settings_static">Статичне</string>
     <string name="settings_dynamic">Динамічне</string>

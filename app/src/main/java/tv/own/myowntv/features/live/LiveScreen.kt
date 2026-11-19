@@ -163,6 +163,7 @@ fun LiveScreen(
     val selectedKey by vm.selectedKey.collectAsStateWithLifecycle()
     val count by vm.count.collectAsStateWithLifecycle()
     val favoriteIds by vm.favoriteIds.collectAsStateWithLifecycle()
+    val homePinnedIds by vm.homePinnedIds.collectAsStateWithLifecycle()
     val showChannelNumbers by vm.showChannelNumbers.collectAsStateWithLifecycle()
     val externalPlayerOn by vm.externalPlayerOn.collectAsStateWithLifecycle()
     val previewChannel by vm.previewChannel.collectAsStateWithLifecycle()
@@ -965,10 +966,22 @@ fun LiveScreen(
             title = ch.name,
             subtitle = listOfNotNull(headerLabel, vm.sourceNameOf(ch.sourceId)).joinToString(" · "),
             isFavorite = favoriteIds.contains(ch.id),
+            isHomePinned = homePinnedIds.contains(ch.id),
             epgShiftMinutes = vm.currentEpgShift(ch),
             canMove = selectedKey is LiveKey.Folder || selectedKey is LiveKey.Custom || selectedKey == LiveKey.Favorites,
             isHistory = selectedKey == LiveKey.History,
             onToggleFavorite = { vm.toggleFavorite(ch); contextChannel = null },
+            onToggleHomeScreen = {
+                scope.launch {
+                    val pinned = vm.toggleHomeScreen(ch)
+                    multiviewToast.show(
+                        multiviewRes.getString(
+                            if (pinned) R.string.content_home_screen_added else R.string.content_home_screen_removed,
+                        ),
+                    )
+                }
+                contextChannel = null
+            },
             onRename = { renaming = ch; contextChannel = null },
             onHide = { vm.hideChannel(ch); contextChannel = null },
             onEpgOffset = { offsettingEpg = ch; contextChannel = null },
@@ -1099,10 +1112,12 @@ private fun ChannelContextMenu(
     title: String,
     subtitle: String?,
     isFavorite: Boolean,
+    isHomePinned: Boolean,
     canMove: Boolean,
     isHistory: Boolean,
     epgShiftMinutes: Int?,
     onToggleFavorite: () -> Unit,
+    onToggleHomeScreen: () -> Unit,
     onRename: () -> Unit,
     onHide: () -> Unit,
     onEpgOffset: () -> Unit,
@@ -1130,6 +1145,15 @@ private fun ChannelContextMenu(
         if (onAddToMultiview != null) {
             add(MenuAction("add_to_multiview", stringResource(R.string.multiview_add_to), MyOwnTVIcon.MULTIVIEW, group = watch, onClick = onAddToMultiview))
         }
+        add(
+            MenuAction(
+                "home_screen",
+                stringResource(if (isHomePinned) R.string.content_remove_home_screen else R.string.content_add_home_screen),
+                MyOwnTVIcon.HOME,
+                group = watch,
+                onClick = onToggleHomeScreen,
+            ),
+        )
         // Always offered, regardless of the Live TV external-player default — this is the per-channel
         // escape hatch for a stream the in-app live engine can't open.
         add(MenuAction("play_external", stringResource(R.string.content_play_external_short), MyOwnTVIcon.EXTERNAL, group = watch, onClick = onPlayExternal))

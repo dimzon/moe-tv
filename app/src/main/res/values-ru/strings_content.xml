@@ -137,4 +137,11 @@
     <string name="content_programme_details">О телепередаче</string>
     <string name="content_programmes_earlier">Ранее</string>
     <string name="content_programmes_later">Позже</string>
+    <string name="content_add_home_screen">Вынести на главный экран</string>
+    <string name="content_remove_home_screen">Убрать с главного экрана</string>
+    <string name="content_home_screen_added">Канал вынесен на главный экран телевизора</string>
+    <string name="content_home_screen_removed">Канал убран с главного экрана телевизора</string>
+    <string name="launcher_pinned_live_title">Закреплённые</string>
+    <string name="launcher_pinned_live_description">Закреплённые каналы прямого эфира</string>
+    <string name="launcher_category_description">Каналы прямого эфира этой категории</string>
 </resources>

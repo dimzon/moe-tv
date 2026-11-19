@@ -105,6 +105,7 @@
 2	technical	app/src/main/java/tv/own/myowntv/features/live/LiveScreen.kt	epg_offset
 1	preference-key	app/src/main/java/tv/own/myowntv/features/live/LiveScreen.kt	favourite
 1	preference-key	app/src/main/java/tv/own/myowntv/features/live/LiveScreen.kt	hide
+1	protocol	app/src/main/java/tv/own/myowntv/features/live/LiveScreen.kt	home_screen
 1	preference-key	app/src/main/java/tv/own/myowntv/features/live/LiveScreen.kt	move
 1	preference-key	app/src/main/java/tv/own/myowntv/features/live/LiveScreen.kt	move_to_category
 1	preference-key	app/src/main/java/tv/own/myowntv/features/live/LiveScreen.kt	play_external
@@ -261,6 +262,7 @@
 1	log	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	catalogue resync failed
 1	url	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	https://www.gstatic.com/generate_204
 1	log	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	setAndroidTvHomeEnabled enabled=$enabled
+1	log	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	setAndroidTvHomeEnabled launcher sync failed
 1	protocol	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	timed out
 1	protocol	app/src/main/java/tv/own/myowntv/features/settings/SettingsViewModel.kt	unknown host
 9	empty	app/src/main/java/tv/own/myowntv/features/settings/VideoPlayerSettingsScreen.kt	\0
@@ -781,7 +783,7 @@
 2	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId)
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) AND name LIKE '%' || :query || '%' ORDER BY sortOrder ASC, name ASC
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY name ASC
-1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY sortOrder ASC, name ASC
+2	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY sortOrder ASC, name ASC
 2	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM channels
 1	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId)
 2	sql	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM favorites f INNER JOIN channels c ON c.remoteId = f.itemId
@@ -1064,6 +1066,7 @@
 1	preference-key	app/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	epg_offset
 1	preference-key	app/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	favourite
 1	preference-key	app/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	hide
+1	protocol	app/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	home_screen
 1	preference-key	app/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	move
 1	preference-key	app/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	move_to_category
 1	preference-key	app/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	play_external
@@ -1795,6 +1798,7 @@
 1	log	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	contentTypes=$contentTypes effective=$effective baseItemCount=$baseItemCount forcePrune=$forcePrune
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	forcePrune
 1	technical	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	fresh_sync
+1	log	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	launcher card refresh failed after catalog sync
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	live
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	liveActive
 1	preference-key	app/src/main/java/tv/own/owntv/core/sync/work/CatalogSyncWorker.kt	liveProcessed
@@ -1838,6 +1842,32 @@
 1	log	app/src/main/java/tv/own/owntv/core/sync/work/LocalAutoSyncWorker.kt	hourly
 1	empty	app/src/main/java/tv/own/owntv/core/theme/Background.kt	\0
 1	technical	app/src/main/java/tv/own/owntv/core/theme/Palette.kt	#
+1	compiler	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	RestrictedApi
+1	technical	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	SHA-256
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	TvHomePublisher
+1	uri	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	android.resource://${context.packageName}/${AppIconSwitcher.applied(context).banner}
+1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	cat:${category.id}
+1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	catprog:${category.id}:${channel.id}
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	deletePlatformRow failed id=$id
+2	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	ensureChannel publish failed
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	ensureChannel published id=$channelId browsableRequest=$requestBrowsable
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	ensureChannel read failed id=${existing.providerProgramId}
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	ensureChannel: platform row ${existing.providerProgramId} is gone
+1	url	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	http://
+1	url	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	https://
+1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	owntv:${surface.name.lowercase()}:${hex(programGroupId)}
+1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	owntv:category:${category.id}
+1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	owntv:pinned-live:$CHANNEL_STABLE_KEY
+1	protocol	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	pinned-live
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	publishProgram channel=${channel.id} providerId=$newId weight=$weight
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	publishProgram insert failed ${channel.id}
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	publishProgram insert returned null ${channel.id}
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	publishProgram update failed ${channel.id}
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	requestChannelBrowsable failed
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	syncCategories categories=${desiredRows.size} cards=${desiredPrograms.size}
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	syncLocked channelId=$channelId pinned=${ordered.size}
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	syncLocked: no launcher channel available
+1	log	app/src/main/java/tv/own/owntv/core/tv/TvHomePublisher.kt	toggle pin skipped: already at $MAX_PINNED channels
 1	empty	app/src/main/java/tv/own/owntv/core/ui/stage/PlaylistMark.kt	\0
 1	technical	app/src/main/java/tv/own/owntv/core/ui/stage/PlaylistMark.kt	IPTV
 1	technical	app/src/main/java/tv/own/owntv/core/ui/stage/PlaylistMark.kt	TV

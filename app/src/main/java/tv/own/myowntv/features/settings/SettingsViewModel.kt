@@ -86,6 +86,7 @@ class SettingsViewModel(
     private val companion: tv.own.owntv.core.companion.CompanionController,
     private val playbackPrefs: tv.own.owntv.core.player.PlaybackPrefsStore,
     private val sourceImporter: SourceImporter,
+    private val tvHomePublisher: tv.own.owntv.core.tv.TvHomePublisher,
 ) : ViewModel() {
     companion object {
         private const val TAG = "OwnTVHome"
@@ -271,6 +272,10 @@ class SettingsViewModel(
         viewModelScope.launch {
             Log.d(TAG, "setAndroidTvHomeEnabled enabled=$enabled")
             settings.setAndroidTvHomeEnabled(enabled)
+            // The gate is read again inside the publisher, so the same call both publishes the pinned
+            // cards when switched on and removes every row/card when the user switches it off.
+            runCatching { if (enabled) tvHomePublisher.refresh() else tvHomePublisher.clearAll() }
+                .onFailure { Log.w(TAG, "setAndroidTvHomeEnabled launcher sync failed", it) }
         }
     }
 

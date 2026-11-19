@@ -167,6 +167,11 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
         // A chosen icon colour ("Later", the first-run pick, a restore) reaches the launcher when the app
         // is next in the background, never while it is on screen.
         tv.own.owntv.core.brand.AppIconSwitcher.start(this, GlobalContext.get().get())
+        // Pinned channel cards live in the Android TV launcher, not in this process: refresh them once
+        // per launch so a rename while the app was closed and a playlist that lost a channel are both
+        // reflected on the home screen. IO scope, fully guarded — a TV with no writable launcher
+        // provider simply keeps no cards.
+        appScope.launch { runCatching { GlobalContext.get().get<tv.own.owntv.core.tv.TvHomePublisher>().refresh() } }
         // Auto start on wake-up: a force stop ends the wake listener, so the next app start brings it back.
         tv.own.myowntv.features.autostart.AutoStart.onAppStarted(this)
         // Diagnostics switch and the one-shot settings migrations — core's, shared with the phone, which

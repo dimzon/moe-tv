@@ -45,6 +45,9 @@ private val LIVE_ACTIONS = listOf(
     // app, because this list is what both apps arrange by and what Customize lets the user reorder
     // and hide — a key that is not here is dropped by the arrangement.
     MenuActionRef("add_to_multiview", R.string.multiview_add_to),
+    // Pin this channel as a card in the Android TV launcher's home row. TV-only: a phone launcher
+    // cannot show a Live Channels card, so the phone's Customize list must not offer the key.
+    MenuActionRef("home_screen", R.string.content_add_home_screen, tvOnly = true),
     MenuActionRef("play_external", R.string.content_play_external_short),
     MenuActionRef("favourite", R.string.content_add_favourite),
     MenuActionRef("rename", R.string.content_rename),

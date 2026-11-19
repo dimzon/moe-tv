@@ -241,4 +241,18 @@
     <string name="content_programmes_earlier">Earlier</string>
     <!-- Translators: Group heading on the Program details page: programmes still to come today, after the one on now. -->
     <string name="content_programmes_later">Later</string>
+    <!-- Translators: Long-press channel menu: pin this channel as a card on the Android TV home screen. -->
+    <string name="content_add_home_screen">Add to home screen</string>
+    <!-- Translators: Long-press channel menu, shown for a channel already pinned to the TV home screen. -->
+    <string name="content_remove_home_screen">Remove from home screen</string>
+    <!-- Translators: In-app toast after a channel card was published to the Android TV home screen. -->
+    <string name="content_home_screen_added">Channel added to the TV home screen</string>
+    <!-- Translators: In-app toast after a channel card was removed from the Android TV home screen. -->
+    <string name="content_home_screen_removed">Channel removed from the TV home screen</string>
+    <!-- Translators: Title of the app-owned row/channel the pinned channel cards live in on Android TV. -->
+    <string name="launcher_pinned_live_title">Pinned</string>
+    <!-- Translators: Description of the app-owned launcher row holding pinned channel cards. -->
+    <string name="launcher_pinned_live_description">Your pinned live channels</string>
+    <!-- Translators: Description of a launcher row that holds the live channels of one category. The row title is the category name. -->
+    <string name="launcher_category_description">Live channels in this category</string>
 </resources>

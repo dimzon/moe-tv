@@ -31,7 +31,7 @@
     <!-- Translators: Used as both a group heading and toggle-row title for Android TV home integration. -->
     <string name="settings_android_tv_home">Android TV home</string>
     <!-- Translators: Description of the Android TV home screen integration. -->
-    <string name="settings_android_tv_home_description">Show Continue Watching and recent live channels on the TV home screen.</string>
+    <string name="settings_android_tv_home_description">Show the channel cards you pinned from the long-press menu on the TV home screen.</string>
     <!-- Translators: Status label for a hidden item. This is a state, not a command. -->
     <string name="settings_hidden">Hidden</string>
     <!-- Translators: Navigation behavior option where icons are manually chosen. -->

@@ -142,7 +142,22 @@ class LiveViewModel(
     private val streamUrlResolver: tv.own.owntv.core.stalker.StreamUrlResolver,
     private val epgRepository: tv.own.owntv.core.repository.EpgRepository,
     private val externalPlayerLauncher: tv.own.owntv.core.player.ExternalPlayerLauncher,
+    /** Cards the user pinned to the Android TV home screen (core's TvHomePublisher). */
+    private val tvHomePublisher: TvHomePublisher,
 ) : ViewModel() {
+
+    /** Ids of the channels already on the TV home screen — drives the long-press menu label. */
+    val homePinnedIds: StateFlow<Set<String>> = tvHomePublisher.pinnedIds
+
+    init {
+        viewModelScope.launch { runCatching { tvHomePublisher.reload() } }
+    }
+
+    /** Pin/unpin a channel card on the Android TV launcher. Returns the new pinned state. */
+    suspend fun toggleHomeScreen(channel: ChannelEntity): Boolean {
+        tvHomePublisher.toggle(channel)
+        return homePinnedIds.value.contains(channel.id)
+    }
 
     data class ChannelMoveState(val items: List<ChannelEntity>, val activeIndex: Int, val contextKey: String, val carried: Set<String> = emptySet())
     private val _moveState = MutableStateFlow<ChannelMoveState?>(null)

@@ -137,4 +137,11 @@
     <string name="content_programme_details">Пра тэлеперадачу</string>
     <string name="content_programmes_earlier">Раней</string>
     <string name="content_programmes_later">Пазней</string>
+    <string name="content_add_home_screen">Вынесці на галоўны экран</string>
+    <string name="content_remove_home_screen">Прыбраць з галоўнага экрана</string>
+    <string name="content_home_screen_added">Канал вынесены на галоўны экран тэлевізара</string>
+    <string name="content_home_screen_removed">Канал прыбраны з галоўнага экрана тэлевізара</string>
+    <string name="launcher_pinned_live_title">Замацаваныя</string>
+    <string name="launcher_pinned_live_description">Замацаваныя каналы прамога эфіру</string>
+    <string name="launcher_category_description">Каналы прамога эфіру гэтай катэгорыі</string>
 </resources>

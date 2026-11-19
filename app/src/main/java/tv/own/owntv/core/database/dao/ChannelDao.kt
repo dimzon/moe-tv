@@ -147,6 +147,10 @@ interface ChannelDao {
     suspend fun deleteByRemoteIds(remoteIds: List<String>)
 
     // --- Browsing (each list has a playlist-order and an A–Z variant; the sort chip picks one) ---
+    /** One-shot snapshot for launcher category rows (no PagingSource involved). */
+    @Query("SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY sortOrder ASC, name ASC")
+    suspend fun channelsInCategory(categoryId: Long): List<ChannelEntity>
+
     @Query("SELECT * FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId) ORDER BY sortOrder ASC, name ASC")
     fun pagingByCategory(categoryId: Long): PagingSource<Int, ChannelEntity>
 

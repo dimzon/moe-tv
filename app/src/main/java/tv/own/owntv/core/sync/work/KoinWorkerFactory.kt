@@ -32,6 +32,7 @@ class KoinWorkerFactory : WorkerFactory() {
                 koin.get(),
                 koin.get(),
                 koin.get(),
+                koin.get(), // tvHomePublisher
             )
             ContentIndexWorker::class.java.name -> ContentIndexWorker(
                 appContext,

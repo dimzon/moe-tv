@@ -117,6 +117,7 @@ val appModule = module {
             get(), // streamUrlResolver
             get(), // epgRepository
             get(), // externalPlayerLauncher
+            get(), // tvHomePublisher
         )
     }
     viewModelOf(::PlayerButtonsSettingsViewModel)
@@ -138,6 +139,7 @@ val appModule = module {
             companion = get(),
             playbackPrefs = get(),
             sourceImporter = get(),
+            tvHomePublisher = get(),
         )
     }
     viewModelOf(::LocalSyncViewModel)
