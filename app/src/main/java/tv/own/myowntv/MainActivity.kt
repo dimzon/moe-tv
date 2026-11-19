@@ -522,7 +522,12 @@ open class MainActivity : ComponentActivity() {
                                 pendingDeepLink = pendingDeepLink,
                                 onDeepLinkConsumed = { pendingDeepLink = null },
                                 isOffline = !isOnline,
-                                onExitApp = { finish() },
+                                // "Exit" moves the task behind the launcher instead of finishing it:
+                                // pausing while finishing crashes Android 10 vendor firmwares (Allwinner
+                                // H616 boxes) whose completePauseLocked lost the stock AOSP null guard,
+                                // so every finish() there died with an NPE in system_server. The engines
+                                // release in onStop (see [onVisibility]) exactly as they do for Home.
+                                onExitApp = { moveTaskToBack(true) },
                                 onStartupSettled = { startupSettled = true },
                                 modifier = Modifier.fillMaxSize(),
                             )
