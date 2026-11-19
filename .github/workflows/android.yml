@@ -2,9 +2,10 @@ name: Android CI
 
 # Two jobs:
 #   check — unit tests + lint. The gate on EVERY push, tag and pull request.
-#   build — assembles the APK and publishes a GitHub Release on v* tags; also runs on a manual
-#           workflow_dispatch when a dev APK is needed. It does NOT run on ordinary pushes to
-#           main or on PRs: assembleDebug takes ~11 minutes, and running it on every commit
+#   build — assembles the universal APK on v* tags and manual workflow_dispatch as a build check
+#           + CI artifact. It does NOT publish binaries: APKs are shipped only from the separate
+#           dimzon/moe-tv-site releases (publish.cmd). It does NOT run on ordinary pushes to main
+#           or on PRs: assembleUniversalDebug takes ~11 minutes, and running it on every commit
 #           made each new push cancel the previous build (and left the run red).
 #
 # All sources, including the former OwnTV_Core code and strings, are in this repository — there
@@ -18,7 +19,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # required so tag builds can create a Release
+  contents: read    # this workflow only builds and uploads CI artifacts; it publishes no Release
 
 # Everything needed to build is in this repository; no external Maven repository, token or
 # secret is required to resolve dependencies.
@@ -180,8 +181,7 @@ jobs:
           cp "$SRC" "dist/$OUT"
           echo "APK_OUT=$OUT" >> "$GITHUB_ENV"
           echo "Packaged dist/$OUT (arm64-v8a + armeabi-v7a + x86_64)"
-          # Stable-named copy so a fixed URL always serves the latest signed release:
-          # https://github.com/<repo>/releases/latest/download/MoeTV.apk
+          # Stable-named copy inside the CI artifact only — no public download URL is published here.
           if [ "$IS_TAG" = "true" ]; then
             cp "$SRC" "dist/MoeTV.apk"
           fi
@@ -194,49 +194,3 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
-      - name: Extract release notes from CHANGELOG.md
-        if: env.IS_TAG == 'true'
-        env:
-          TAG: ${{ github.ref_name }}
-        run: |
-          # The release body is what the in-app updater shows as "What's new", so it must be the
-          # SHORT, bullet-only notes from CHANGELOG.md (the only changelog; detail lives in commits).
-          #
-          # This runs here rather than only in release-notes.yml because a release published by
-          # GITHUB_TOKEN does not trigger other workflows, so that job never fires for tag builds.
-          # It stays as a fallback for releases published by hand from the GitHub UI.
-          #
-          # Take "## <tag>" up to the next "## v" header; the header may carry a date/"unreleased"
-          # tail ("## v4.1.5 — 2026-07-26") or nothing at all, so match the version as a whole word.
-          if [ -f CHANGELOG.md ]; then
-            awk -v ver="$TAG" '
-              $0 ~ ("^## " ver "([ \t]|$)") { flag=1; next }
-              /^## v/ && flag { flag=0 }
-              flag { print }
-            ' CHANGELOG.md > dist/RELEASE_NOTES.md || true
-            # Trim leading/trailing blank lines.
-            sed -i -e '/./,$!d' dist/RELEASE_NOTES.md
-            awk 'NF{p=NR} {a[NR]=$0} END{for(i=1;i<=p;i++) print a[i]}' \
-              dist/RELEASE_NOTES.md > dist/RELEASE_NOTES.trimmed.md
-            mv dist/RELEASE_NOTES.trimmed.md dist/RELEASE_NOTES.md
-          fi
-          if [ ! -s dist/RELEASE_NOTES.md ]; then
-            echo "::warning::No CHANGELOG.md section for $TAG — publishing a placeholder body."
-            echo "See the commits for $TAG for details." \
-              > dist/RELEASE_NOTES.md
-          fi
-          echo "--- Release notes ---"
-          cat dist/RELEASE_NOTES.md
-
-      - name: Publish GitHub Release
-        if: env.IS_TAG == 'true'
-        uses: softprops/action-gh-release@v3
-        with:
-          name: МОЁ ТВ ${{ github.ref_name }}
-          # Every build produces exactly one universal APK; the glob also picks up the stable-named
-          # copy on tags.
-          files: dist/*.apk
-          body_path: dist/RELEASE_NOTES.md
-          # Must stay false: it appends GitHub's auto commit/PR list under the body, which buries the
-          # short in-app notes the updater dialog shows.
-          generate_release_notes: false
