@@ -54,17 +54,17 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      # One variant, not `test`/`lint` across every flavor: standard+debug is the variant the JVM
-      # tests are written against, and the ABI flavors differ only in the packaged native libs.
+      # One variant, not `test`/`lint` across every flavor: universal+debug is the variant we ship,
+      # so the gate must exercise the exact flavor that reaches users.
       - name: Unit tests
         run: |
           chmod +x ./gradlew
-          ./gradlew testStandardDebugUnitTest --stacktrace
+          ./gradlew testUniversalDebugUnitTest --stacktrace
 
       # abortOnError = true in app/build.gradle.kts, so this fails the job on a lint error.
       - name: Lint
         if: always()   # report both verdicts in one run instead of one failure at a time
-        run: ./gradlew lintStandardDebug --stacktrace
+        run: ./gradlew lintUniversalDebug --stacktrace
 
       - name: Upload test and lint reports
         if: always()   # the reports matter most when the step above failed
@@ -132,19 +132,21 @@ jobs:
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          # Runs for every build job (tags and manual runs) so dev builds are also signed
-          # RELEASE builds — required since R8 was enabled: only assembleRelease exercises
-          # shrinking/keep rules, and a release-signed dev APK installs straight over a
-          # published release for testing. Without the secret it falls back to a debug build.
+          # Release tags MUST be signed: fail fast if the keystore secret is missing so a tag can
+          # never publish a debug-signed APK as a release. Manual/dev runs may fall back to a
+          # universal debug APK for testing.
           if [ -n "$KEYSTORE_BASE64" ]; then
             echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
             echo "KEYSTORE_FILE=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
             echo "Release signing configured."
+          elif [ "$IS_TAG" = "true" ]; then
+            echo "::error::Release tag requires KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS and KEY_PASSWORD secrets."
+            exit 1
           else
-            echo "No KEYSTORE_BASE64 secret set — building a debug-signed APK."
+            echo "No KEYSTORE_BASE64 secret set — building a debug-signed dev APK."
           fi
 
-      - name: Build APK
+      - name: Build APK (universal)
         env:
           VERSION_NAME: ${{ steps.ver.outputs.name }}
           VERSION_CODE: ${{ steps.ver.outputs.code }}
@@ -153,56 +155,41 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           chmod +x ./gradlew
+          # One flavor, one APK: universal bundles arm64-v8a, armeabi-v7a and x86_64. No ABI
+          # splits, no second artifact — this is the exact APK users download and publish.cmd ships.
           if [ -n "$KEYSTORE_FILE" ]; then
-            echo "Building signed release APKs (both ABI flavors)"
-            ./gradlew assembleRelease --stacktrace
-            # Product flavors split the output by flavor subfolder:
-            #   standard/release  -> arm (arm64-v8a + armeabi-v7a) — the main download
-            #   x86_64/release    -> x86_64 — emulator / rare x86 box
-            ARM_SRC=$(ls app/build/outputs/apk/standard/release/*.apk | head -n1)
-            X86_SRC=$(ls app/build/outputs/apk/x86_64/release/*.apk | head -n1)
-            echo "Built arm:    $ARM_SRC"
-            echo "Built x86_64: $X86_SRC"
-            echo "ARM_SRC=$ARM_SRC" >> "$GITHUB_ENV"
-            echo "X86_SRC=$X86_SRC" >> "$GITHUB_ENV"
+            echo "Building signed universal release APK"
+            ./gradlew assembleUniversalRelease --stacktrace
+            SRC=$(ls app/build/outputs/apk/universal/release/*.apk | head -n1)
           else
-            echo "Building debug APK"
-            ./gradlew assembleDebug
-            # Debug also builds both flavors; standard (arm) is the one most likely to be tested on a
-            # real device. Surface it as the primary artifact; x86_64 debug is still in its folder.
-            SRC=$(ls app/build/outputs/apk/standard/debug/*.apk | head -n1)
-            echo "Built: $SRC"
-            echo "ARM_SRC=$SRC" >> "$GITHUB_ENV"
+            echo "Building universal debug APK"
+            ./gradlew assembleUniversalDebug --stacktrace
+            SRC=$(ls app/build/outputs/apk/universal/debug/*.apk | head -n1)
           fi
+          echo "Built: $SRC"
+          echo "SRC=$SRC" >> "$GITHUB_ENV"
 
-      - name: Name the APK (MyOwnTV-v<version>)
+      - name: Name the APK (MoeTV_<version>_universal)
         run: |
           mkdir -p dist
           if [ "$IS_TAG" = "true" ]; then
-            OUT="MyOwnTV-v${{ steps.ver.outputs.name }}.apk"
+            OUT="MoeTV_${{ steps.ver.outputs.name }}_universal.apk"
           else
-            OUT="MyOwnTV-dev-${GITHUB_SHA::7}.apk"
+            OUT="MoeTV-dev-${GITHUB_SHA::7}_universal.apk"
           fi
-          cp "$ARM_SRC" "dist/$OUT"
+          cp "$SRC" "dist/$OUT"
           echo "APK_OUT=$OUT" >> "$GITHUB_ENV"
-          echo "Packaged dist/$OUT (arm: arm64-v8a + armeabi-v7a)"
-          # Tag builds also ship a stable-named copy so a fixed URL always serves the latest signed
-          # release: https://github.com/<repo>/releases/latest/download/MyOwnTV.apk
-          # (used by the Fire TV Downloader code and any "always-latest" sideload link).
+          echo "Packaged dist/$OUT (arm64-v8a + armeabi-v7a + x86_64)"
+          # Stable-named copy so a fixed URL always serves the latest signed release:
+          # https://github.com/<repo>/releases/latest/download/MoeTV.apk
           if [ "$IS_TAG" = "true" ]; then
-            cp "$ARM_SRC" "dist/MyOwnTV.apk"
-            # Separate x86_64 build for emulators / rare Intel boxes. Pinned to the version only —
-            # no always-latest copy, since real devices (the Downloader audience) don't need it.
-            if [ -n "$X86_SRC" ]; then
-              cp "$X86_SRC" "dist/MyOwnTV-x86_64-v${{ steps.ver.outputs.name }}.apk"
-              echo "Packaged dist/MyOwnTV-x86_64-v${{ steps.ver.outputs.name }}.apk"
-            fi
+            cp "$SRC" "dist/MoeTV.apk"
           fi
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v7
         with:
-          # Upload the whole dist/ so both the arm APK and the x86_64 APK are captured.
+          # dist/ holds the single universal APK (plus the stable-named copy on tags).
           name: ${{ env.APK_OUT }}
           path: dist/*
           if-no-files-found: error
@@ -245,9 +232,9 @@ jobs:
         if: env.IS_TAG == 'true'
         uses: softprops/action-gh-release@v3
         with:
-          name: MyOwnTV ${{ github.ref_name }}
-          # A debug build without a keystore has no x86_64 artifact. A glob uploads only the APKs
-          # that were actually produced instead of failing on a hard-coded missing file.
+          name: МОЁ ТВ ${{ github.ref_name }}
+          # Every build produces exactly one universal APK; the glob also picks up the stable-named
+          # copy on tags.
           files: dist/*.apk
           body_path: dist/RELEASE_NOTES.md
           # Must stay false: it appends GitHub's auto commit/PR list under the body, which buries the

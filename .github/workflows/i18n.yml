@@ -97,16 +97,16 @@ jobs:
           # 'tools' is obsolete and Google removed it from the SDK repository; the
           # action still asks for it by default, which fails the whole setup step.
           packages: 'platform-tools'
-      - name: Assemble standard debug + release APKs
+      - name: Assemble universal debug + release APKs
         # gradlew is tracked with mode 100644, so it is not executable after checkout.
         run: |
           chmod +x ./gradlew
-          ./gradlew :app:assembleStandardDebug :app:assembleStandardRelease --console=plain
+          ./gradlew :app:assembleUniversalDebug :app:assembleUniversalRelease --console=plain
       - name: Verify pseudolocale packaging
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
         run: |
-          DBG=$(ls app/build/outputs/apk/standard/debug/*.apk | head -1)
-          REL=$(ls app/build/outputs/apk/standard/release/*.apk | head -1)
+          DBG=$(ls app/build/outputs/apk/universal/debug/*.apk | head -1)
+          REL=$(ls app/build/outputs/apk/universal/release/*.apk | head -1)
           python3 tools/i18n/check_pseudo_locales.py --apk "$DBG" --mode debug
           python3 tools/i18n/check_pseudo_locales.py --apk "$REL" --mode release

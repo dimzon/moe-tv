@@ -5,17 +5,17 @@ cd /d "%~dp0"
 rem ---------------------------------------------------------------------------
 rem  MyOwnTV - debug build (cmd.exe)
 rem
-rem  Usage: build-debug.cmd [standard|x86_64|universal|all]
-rem    standard   arm64-v8a + armeabi-v7a (real Android TV / Fire TV); default
-rem    x86_64     x86_64 emulator
-rem    universal  all ABIs in one APK
+rem  Usage: build-debug.cmd [universal|standard|x86_64|all]
+rem    universal  all ABIs in one APK — the shipped flavor; DEFAULT
+rem    standard   arm64-v8a + armeabi-v7a (legacy, not published)
+rem    x86_64     x86_64 emulator (legacy, not published)
 rem    all        every ABI flavor (:app:assembleDebug)
 rem
 rem  Output: app\build\outputs\apk\<flavor>\debug\
 rem ---------------------------------------------------------------------------
 
 set "FLAVOR=%~1"
-if not defined FLAVOR set "FLAVOR=standard"
+if not defined FLAVOR set "FLAVOR=universal"
 
 if /I "%FLAVOR%"=="all"       goto :flavor_all
 if /I "%FLAVOR%"=="standard"  goto :flavor_standard
