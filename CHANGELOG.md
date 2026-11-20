@@ -41,6 +41,8 @@
 
 ### 🩹 Fixes
 - **CALL/CAMERA/SEARCH keys no longer crash the app on Android 10+**
+- **Volume keys no longer open the player controls before changing the volume**
+- **Customize: the Move arrows keep focus, so items can be shifted several positions in a row**
 - **Customize: a category list no longer crashes while its first row is focused during a refresh**
 - **History: the channel logo stretches over its whole placeholder instead of a gray frame around it**
 - **DNS presets row no longer borrows the accent-picker wording ("готовые цвета") in Russian, Ukrainian and Belarusian**

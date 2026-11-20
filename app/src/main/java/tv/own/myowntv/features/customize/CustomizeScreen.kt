@@ -170,10 +170,18 @@ fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     }
     // Index (within `rows`) of the category row that currently holds focus — the paging anchor.
     var focusedCatIndex by remember { mutableIntStateOf(0) }
+    // Keep the action panel on the same category after a move: indices change, the key does not.
+    var focusedCatKey by remember { mutableStateOf<String?>(null) }
     val rowFocusers = remember { mutableMapOf<String, FocusRequester>() }
     // LazyColumn items before the category rows (hidden-items header + hidden rows + "Categories"
     // header) — the offset that maps a category index to its LazyColumn item index.
     val headerOffset = if (hiddenChannels.isNotEmpty()) hiddenChannels.size + 2 else 0
+
+    LaunchedEffect(rows, focusedCatKey) {
+        val key = focusedCatKey ?: return@LaunchedEffect
+        val index = rows.indexOfFirst { it.key == key }
+        if (index >= 0 && index != focusedCatIndex) focusedCatIndex = index
+    }
 
     LaunchedEffect(Unit) {
         vm.setVisibilityFilter(CustomizeVisibilityFilter.ALL)
@@ -342,8 +350,8 @@ fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                             focusRequester = remember(row.key) { rowFocusers.getOrPut(row.key) { FocusRequester() } },
                             upFocusRequester = firstFocus.takeIf { index == 0 && hiddenChannels.isEmpty() },
                             actionsFocus = actionsFocus,
-                            keepPanel = index == focusedCatIndex,
-                            onRowFocused = { focusedCatIndex = index },
+                            keepPanel = row.key == focusedCatKey,
+                            onRowFocused = { focusedCatIndex = index; focusedCatKey = row.key },
                             // While a move span is active every arrow acts on the whole block, not this row.
                             onMoveUp = { if (inMoveRange) vm.moveRange(row, MoveKind.UP) else vm.move(row, up = true) },
                             onMoveDown = { if (inMoveRange) vm.moveRange(row, MoveKind.DOWN) else vm.move(row, up = false) },

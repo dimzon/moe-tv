@@ -143,6 +143,10 @@ fun CustomizeItemsScreen(
     val scope = rememberCoroutineScope()
     var listPaneFocused by remember { mutableStateOf(false) }
     var focusedItemIndex by remember { mutableIntStateOf(0) }
+    // Panel ownership must follow row identity, not index: a reorder changes indices but not which
+    // row's actions the panel shows. An index-only anchor handed the panel to the row that moved
+    // into the old index, disposing the focused Move pill after a single press.
+    var focusedItemKey by remember { mutableStateOf<String?>(null) }
     var renaming by remember { mutableStateOf<CustomizeItemRow?>(null) }
     var showFilterPicker by remember { mutableStateOf(false) }
     // The item whose Hide button was clicked to close a range — opens the Show/Hide/Cancel prompt.
@@ -182,15 +186,25 @@ fun CustomizeItemsScreen(
             kotlinx.coroutines.delay(60)
             runCatching { backFocus.requestFocus() }
         } else if (!firstLanding && focusedItemIndex >= items.itemCount) {
-            // The focused row left the list (removed from this category): its actions must not stay
-            // in the panel, and focus must not stay on them.
+            // A reorder restarts the Pager and briefly reports a smaller/empty snapshot. Re-read
+            // after the settle delay: only a row that really left the list may take focus out of
+            // the panel. Moving focus on a transient drop was what killed repeated Move presses.
             kotlinx.coroutines.delay(60)
+            if (focusedItemIndex < items.itemCount) return@LaunchedEffect
             if (items.itemCount == 0) {
                 runCatching { backFocus.requestFocus() }
             } else {
                 items.snapshotRow(items.itemCount - 1)?.let { rowFocusers[it.key] }?.let { runCatching { it.requestFocus() } }
             }
         }
+    }
+
+    // CH+/CH- paging anchors on the row, not on the slot it used to occupy. After a move the same
+    // row has a new index; keep the anchor in step once the restarted snapshot contains it again.
+    LaunchedEffect(items.itemCount, focusedItemKey) {
+        val key = focusedItemKey ?: return@LaunchedEffect
+        val index = (0 until items.itemCount).firstOrNull { items.snapshotRow(it)?.key == key }
+        if (index != null && index != focusedItemIndex) focusedItemIndex = index
     }
 
     // Customize › the category. Its tool row above the list, the items as rows and the panel
@@ -226,7 +240,14 @@ fun CustomizeItemsScreen(
             // The page's own panel: with the last row gone nothing else replaces its actions.
             val pagePanel = tv.own.myowntv.features.settings.LocalSettingsPanel.current
             val emptied = !firstLanding && items.itemCount == 0
-            LaunchedEffect(emptied) { if (emptied) pagePanel?.help = null }
+            LaunchedEffect(emptied) {
+                if (emptied) {
+                    // A reorder's restarted Pager is empty for a moment. Keep the panel — and the
+                    // focused action pill in it — until the snapshot is really empty.
+                    kotlinx.coroutines.delay(60)
+                    if (items.itemCount == 0) pagePanel?.help = null
+                }
+            }
             Column(pos) {
                 if (rangeAnchorKey != null) {
                     StageSettingRow(
@@ -292,8 +313,8 @@ fun CustomizeItemsScreen(
                             focusRequester = remember(row.key) { rowFocusers.getOrPut(row.key) { FocusRequester() } },
                             upFocusRequester = backFocus.takeIf { index == 0 },
                             actionsFocus = actionsFocus,
-                            keepPanel = index == focusedItemIndex,
-                            onRowFocused = { focusedItemIndex = index },
+                            keepPanel = row.key == focusedItemKey,
+                            onRowFocused = { focusedItemIndex = index; focusedItemKey = row.key },
                             // While a move span is active every arrow acts on the whole block, not this row.
                             onMoveUp = { if (inMoveRange) vm.moveRange(row, MoveKind.UP) else vm.move(row, up = true) },
                             onMoveDown = { if (inMoveRange) vm.moveRange(row, MoveKind.DOWN) else vm.move(row, up = false) },

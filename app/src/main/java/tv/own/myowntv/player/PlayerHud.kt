@@ -520,7 +520,12 @@ fun PlayerHud(
         if (!controlsVisible) {
             Box(
                 Modifier.fillMaxSize().focusRequester(catchFocus).focusable()
-                    .onKeyEvent { e -> if (e.type == KeyEventType.KeyDown && e.key != Key.Back) { controlsVisible = true; true } else false },
+                    .onKeyEvent { e ->
+                        if (e.type == KeyEventType.KeyDown && revealsPlayerHudOn(e.key)) {
+                            controlsVisible = true
+                            true
+                        } else false
+                    },
             )
         }
 
