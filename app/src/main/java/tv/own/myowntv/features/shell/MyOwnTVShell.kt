@@ -170,6 +170,10 @@ fun MyOwnTVShell(
     val homeFirstRowFocus = remember { FocusRequester() }
     var focusedLayer by remember { mutableStateOf(ShellLayer.SIDEBAR) }
     var showExit by remember { mutableStateOf(false) }
+    // One-shot hand-off from the exit dialog. The dialog's window must be detached before the task
+    // is moved to the back: moveTaskToBack keeps every window alive, so a still-mounted dialog would
+    // be restored on the next launch and flash until MainActivity's relaunch recomposition removed it.
+    var exitPending by remember { mutableStateOf(false) }
     // Held by the Activity-scoped ShellViewModel, so a recreation (a script-family language switch)
     // does not close the channel that is playing.
     val shellVm = org.koin.androidx.compose.koinViewModel<ShellViewModel>()
@@ -1462,7 +1466,20 @@ fun MyOwnTVShell(
     // The Settings PIN before a long-press change, when the Settings lock asks for it.
     tv.own.myowntv.features.settings.lock.MenuChangeGateHost()
     if (showExit) {
-        ExitDialog(onConfirm = onExitApp, onDismiss = { showExit = false })
+        ExitDialog(
+            onConfirm = { exitPending = true; showExit = false },
+            onDismiss = { showExit = false },
+        )
+    }
+    if (exitPending) {
+        // Runs in the apply phase of the very recomposition that removed the dialog above. Compose
+        // applies changes in composition order, so the Dialog's own disposal — which synchronously
+        // detaches its window — has already happened by the time this calls onExitApp. Confirming
+        // exit must never leave the dialog mounted when moveTaskToBack sends the task to the back.
+        DisposableEffect(Unit) {
+            onExitApp()
+            onDispose { }
+        }
     }
 
 

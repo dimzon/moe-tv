@@ -150,12 +150,12 @@ open class MainActivity : ComponentActivity() {
     /**
      * "Exit" moves the task to the back instead of finishing it (see [onExitApp]), so the Activity,
      * its ViewModels and the Compose tree stay alive. A launcher relaunch then only delivers
-     * [onNewIntent], never a fresh [onCreate], and would restore the still-open exit dialog and the
-     * section the user was on. Set on exit, consumed on the next [onStart].
+     * [onNewIntent], never a fresh [onCreate], and would resume on the section the user was on.
+     * Set on exit, consumed on the next [onStart].
      */
     private var exitedToBackground = false
 
-    /** Bumped on a relaunch so the shell's local state — including the exit dialog — is recreated. */
+    /** Bumped on a relaunch so the shell's local state is recreated from cold-launch defaults. */
     private var relaunchKey by mutableStateOf(0)
 
     /**
@@ -167,7 +167,7 @@ open class MainActivity : ComponentActivity() {
         if (!exitedToBackground) return
         exitedToBackground = false
         shellViewModel.resetForRelaunch()
-        relaunchKey++ // disposes the shell's local state, including the still-mounted exit dialog
+        relaunchKey++ // disposes the shell's local state so the startup action and focus start fresh
     }
 
     private val livePreview: tv.own.owntv.player.LivePreviewEngine by inject()
@@ -291,9 +291,9 @@ open class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         // Exit moved the task to the back rather than finishing it (see onExitApp), so a relaunch
-        // never recreates the shell: reset it here, before the first frame, or the exit dialog and
-        // the last section come back with us. A normal Home/another-app visit keeps its state —
-        // only an explicit Exit raises exitedToBackground. onNewIntent may have reset already.
+        // never recreates the shell: reset it here so the start-up action runs again and the last
+        // section does not carry over. A normal Home/another-app visit keeps its state — only an
+        // explicit Exit raises exitedToBackground. onNewIntent may have reset already.
         resetShellAfterExitIfNeeded()
         // Paired with onStop (see [onVisibility]); notably the TV screensaver, which kicks in during a long pause.
         visibility.activityStarted()
@@ -521,8 +521,8 @@ open class MainActivity : ComponentActivity() {
                         } else {
                             LaunchedEffect(Unit) { Perf.stamp("destination-ready") } // splash hand-off — the number startup work moves
                             // Keyed so a relaunch after "Exit" disposes the old composition: the shell's
-                            // local state (the exit dialog above all) cannot survive moveTaskToBack, which
-                            // keeps this Activity alive and delivers only onNewIntent on relaunch.
+                            // local state cannot survive moveTaskToBack, which keeps this Activity alive
+                            // and delivers only onNewIntent on relaunch.
                             androidx.compose.runtime.key(relaunchKey) {
                                 MyOwnTVShell(
                                     selectedSection = selectedSection,
@@ -545,7 +545,9 @@ open class MainActivity : ComponentActivity() {
                                     // so every finish() there died with an NPE in system_server. The engines
                                     // release in onStop (see [onVisibility]) exactly as they do for Home.
                                     // Flag the exit so the next onStart can recreate the shell — without
-                                    // a fresh Activity the exit dialog and last section would survive.
+                                    // a fresh Activity the last section and player state would survive.
+                                    // The dialog is dismissed by MyOwnTVShell before this runs, so its
+                                    // window does not come back with the task.
                                     onExitApp = {
                                         exitedToBackground = true
                                         moveTaskToBack(true)

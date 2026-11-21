@@ -203,8 +203,7 @@ class ShellViewModel(
      * Exit uses [tv.own.myowntv.MainActivity]'s `moveTaskToBack` (calling `finish()` there crashes
      * some Android 10 vendor firmwares), so the Activity, this ViewModel and the Compose tree all
      * stay alive in the background. A launcher relaunch therefore only gets `onNewIntent`, never a
-     * fresh Activity/ViewModel — without this the shell resumes at the section it was exited on and,
-     * when it was exited from the confirmation dialog, with that dialog still mounted.
+     * fresh Activity/ViewModel — without this the shell resumes at the section it was exited on.
      *
      * Restore the cold-launch defaults so the start-up action runs from the same state it would
      * have had after `finish()`: no player, no armed zap source, Home selected.

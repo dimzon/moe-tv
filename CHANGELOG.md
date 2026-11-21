@@ -40,6 +40,7 @@
 - **Translation trees other than English, Russian, Ukrainian and Belarusian**
 
 ### 🩹 Fixes
+- **Exit dialog no longer flashes when the app is relaunched**
 - **CALL/CAMERA/SEARCH keys no longer crash the app on Android 10+**
 - **Volume keys no longer open the player controls before changing the volume**
 - **Customize: the Move arrows keep focus, so items can be shifted several positions in a row**
