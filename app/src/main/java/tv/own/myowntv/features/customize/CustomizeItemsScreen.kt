@@ -155,6 +155,9 @@ fun CustomizeItemsScreen(
     // new-category name prompt.
     var movingItem by remember { mutableStateOf<CustomizeItemRow?>(null) }
     var creatingCategory by remember { mutableStateOf(false) }
+    // Set only after the new category is actually written, so the re-opened Move dialog can
+    // select it instead of showing an apparently empty target list.
+    var preselectMoveTarget by remember { mutableStateOf<String?>(null) }
     val backFocus = remember { FocusRequester() }
     val filterFocus = remember { FocusRequester() }
     val rowFocusers = remember { mutableMapOf<String, FocusRequester>() }
@@ -402,7 +405,13 @@ fun CustomizeItemsScreen(
             hint = stringResource(R.string.settings_customize_new_category_description),
             confirmLabel = stringResource(R.string.common_create),
             allowBlank = false,
-            onConfirm = { vm.createCustomCategory(it); creatingCategory = false },
+            onConfirm = { name ->
+                scope.launch {
+                    val createdId = vm.createCustomCategory(name)
+                    creatingCategory = false
+                    preselectMoveTarget = createdId
+                }
+            },
             onDismiss = { creatingCategory = false },
         )
     } else {
@@ -410,12 +419,17 @@ fun CustomizeItemsScreen(
             MoveToCategoryDialog(
                 moveTargets = moveTargets,
                 originName = selectedCategory?.displayName ?: stringResource(R.string.settings_customize_this_category),
+                preselectedTargetId = preselectMoveTarget,
                 onNewCategory = { creatingCategory = true },
                 onMove = { targetId, keepInOrigin ->
                     vm.moveTo(row, targetId, keepInOrigin)
+                    preselectMoveTarget = null
                     movingItem = null
                 },
-                onDismiss = { movingItem = null },
+                onDismiss = {
+                    preselectMoveTarget = null
+                    movingItem = null
+                },
             )
         }
     }

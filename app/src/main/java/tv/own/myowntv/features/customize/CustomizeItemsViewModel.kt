@@ -422,12 +422,13 @@ class CustomizeItemsViewModel(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    /** Creates a custom category — the Move dialog's "＋ New category…" flow. */
-    fun createCustomCategory(name: String) {
-        val ci = _catInfo.value ?: return
-        viewModelScope.launchGuarded {
-            customize.createCustomCategory(ci.mediaType, name)
-        }
+    /** Creates a custom category — the Move dialog's "＋ New category…" flow. Returns its id so
+     *  the dialog can select the new target only after the write has actually landed. */
+    suspend fun createCustomCategory(name: String): String? {
+        val ci = _catInfo.value ?: return null
+        val created = runCatching { customize.createCustomCategory(ci.mediaType, name) }
+        created.onFailureReport { }
+        return created.getOrNull()?.id
     }
 
     /**

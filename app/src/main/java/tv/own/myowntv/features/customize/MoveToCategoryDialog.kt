@@ -82,6 +82,8 @@ data class MoveTarget(val id: String, val displayName: String, val count: Int)
 fun MoveToCategoryDialog(
     moveTargets: List<MoveTarget>,
     originName: String,
+    /** A category just created from this dialog: select it once it appears in [moveTargets]. */
+    preselectedTargetId: String? = null,
     onNewCategory: () -> Unit,
     onMove: (targetId: String, keepInOrigin: Boolean) -> Unit,
     onDismiss: () -> Unit,
@@ -89,6 +91,12 @@ fun MoveToCategoryDialog(
     var selectedTarget by remember { mutableStateOf<String?>(null) }
     var keepInOrigin by remember { mutableStateOf(false) }
     val newCatFocus = remember { FocusRequester() }
+    // Creating a category from this dialog writes it asynchronously; the re-opened dialog can
+    // compose before the new target reaches moveTargets. Pick it up as soon as it does.
+    LaunchedEffect(preselectedTargetId, moveTargets) {
+        val id = preselectedTargetId
+        if (id != null && moveTargets.any { it.id == id }) selectedTarget = id
+    }
     LaunchedEffect(Unit) { runCatching { newCatFocus.requestFocus() } }
     BackHandler { onDismiss() }
     tv.own.myowntv.ui.stage.StagePopup(
