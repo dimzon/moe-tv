@@ -173,7 +173,7 @@
     <string name="settings_volume_leveling">Выравнивание громкости</string>
     <string name="settings_volume_leveling_description">Постепенно приводит каждый канал к одной громкости, чтобы при переключении она не скакала.</string>
     <string name="settings_max_video_quality">Максимальное качество видео</string>
-    <string name="settings_max_video_quality_description">Самое высокое качество изображения, если канал предлагает несколько. Экономит трафик и разгружает декодер.</string>
+    <string name="settings_max_video_quality_description">Не подниматься выше этой высоты картинки, если канал предлагает несколько, — это ограничение, а не минимум: «Авто» по-прежнему подстраивается под сеть. Выбор качества в меню плеера его перекрывает.</string>
     <string name="settings_tunneled_playback">Туннельное воспроизведение (экспериментально)</string>
     <string name="settings_tunneled_playback_description">Прямой эфир в ExoPlayer: аппаратура телевизора сама держит изображение и звук вместе, меньше нагружая процессор. Работает только на некоторых телевизорах и отключается само, если канал с ним даёт сбой. Пока оно включено, синхронизацию звука подстроить нельзя.</string>
     <string name="settings_tunneled_playback_failed">Отключено после сбоя канала с ним на этом устройстве.</string>
@@ -941,7 +941,8 @@
     <string name="settings_line_prefer_sdr">SDR, если в потоке есть оба</string>
     <string name="settings_line_external">VLC, MX Player… для каждого раздела</string>
     <string name="settings_line_hw">Использовать декодер телевизора</string>
-    <string name="settings_line_max_quality">Наивысшее качество, если вариантов несколько</string>
+    <string name="settings_line_max_quality">Ограничение высоты картинки; выбор качества в плеере его перекрывает</string>
+    <string name="settings_video_quality_maximum">Максимальное (лучший вариант)</string>
     <string name="settings_line_tunneled">Экспериментально · прямой эфир в ExoPlayer</string>
     <string name="settings_line_zoom">Формат и масштаб при запуске</string>
     <string name="settings_line_saved_zoom">Масштаб, изменённый в плеере</string>

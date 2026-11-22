@@ -173,7 +173,7 @@
     <string name="settings_volume_leveling">Вирівнювання гучності</string>
     <string name="settings_volume_leveling_description">Поступово приводить кожен канал до однієї гучності, щоб при перемиканні вона не стрибала.</string>
     <string name="settings_max_video_quality">Максимальна якість відео</string>
-    <string name="settings_max_video_quality_description">Найвища якість зображення, якщо канал пропонує кілька. Заощаджує трафік і розвантажує декодер.</string>
+    <string name="settings_max_video_quality_description">Не підніматися вище цієї висоти картинки, якщо канал пропонує кілька, — це обмеження, а не мінімум: «Авто» надалі підлаштовується під мережу. Вибір якості в меню плеєра його перекриває.</string>
     <string name="settings_tunneled_playback">Тунельне відтворення (експериментально)</string>
     <string name="settings_tunneled_playback_description">Прямий ефір в ExoPlayer: апаратура телевізора сама тримає зображення й звук разом, менше навантажуючи процесор. Працює лише на деяких телевізорах і вимикається сам, якщо канал із ним дає збій. Поки воно увімкнене, синхронізацію звуку підлаштувати не можна.</string>
     <string name="settings_tunneled_playback_failed">Вимкнено після збою каналу з ним на цьому пристрої.</string>
@@ -941,7 +941,8 @@
     <string name="settings_line_prefer_sdr">SDR, якщо в потоці є обидва</string>
     <string name="settings_line_external">VLC, MX Player… для кожного розділу</string>
     <string name="settings_line_hw">Використовувати декодер телевізора</string>
-    <string name="settings_line_max_quality">Найвища якість, якщо варіантів кілька</string>
+    <string name="settings_line_max_quality">Обмеження висоти картинки; вибір якості в плеєрі його перекриває</string>
+    <string name="settings_video_quality_maximum">Максимальна (найкращий варіант)</string>
     <string name="settings_line_tunneled">Експериментально · прямий ефір в ExoPlayer</string>
     <string name="settings_line_zoom">Формат і масштаб при запуску</string>
     <string name="settings_line_saved_zoom">Масштаб, змінений у програвачі</string>

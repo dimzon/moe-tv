@@ -1434,6 +1434,7 @@
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	proxy_pass
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	proxy_port
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	proxy_user
+1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	quality_pick
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	quick_autoplay
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	quick_channel_numbers
 1	preference-key	app/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	quick_check_update

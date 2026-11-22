@@ -373,12 +373,12 @@ internal fun BottomBar(
                                 value = stringResource(zoomMode.labelRes),
                                 onLongClick = { onOpenDialog(HudDialog.ZOOM) },
                             ) { player.setZoomModeByUser(ZoomMode.entries[(zoomMode.ordinal + 1) % ZoomMode.entries.size]) }
-                        // Only when this stream offers several; tinted while a pick overrides Auto.
+                        // Only when this stream offers several; tinted while the pick is not Auto.
                         PlayerControl.QUALITY -> {
                             val qualities by player.videoQualities.collectAsStateWithLifecycle()
                             val pick by player.videoQualityPick.collectAsStateWithLifecycle()
                             if (qualities.isNotEmpty()) {
-                                CtrlButton(MyOwnTVIcon.VIDEO, active = pick != null, label = stringResource(R.string.player_tool_quality)) { onOpenDialog(HudDialog.QUALITY) }
+                                CtrlButton(MyOwnTVIcon.VIDEO, active = pick != VideoQuality.AUTO, label = stringResource(R.string.player_tool_quality)) { onOpenDialog(HudDialog.QUALITY) }
                             }
                         }
                         PlayerControl.MINI_PLAYER -> if (onPip != null) {

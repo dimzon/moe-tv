@@ -406,7 +406,7 @@
     <!-- Translators: Settings › Picture. Picker: the highest picture resolution played (Auto, 2160p, 1080p, 720p, 480p). -->
     <string name="settings_max_video_quality">Maximum video quality</string>
     <!-- Translators: Description of settings_max_video_quality. -->
-    <string name="settings_max_video_quality_description">The highest picture played when a channel offers several. Saves bandwidth and eases the decoder.</string>
+    <string name="settings_max_video_quality_description">The picture height not to play above when a channel offers several — a limit, not a floor, so Auto still adapts to the network. The player\'s Quality pick overrides it.</string>
     <!-- Translators: Settings › Picture. Toggle for an experimental decoder mode ("tunneled playback") where the TV hardware syncs picture and sound. -->
     <string name="settings_tunneled_playback">Tunneled playback (experimental)</string>
     <!-- Translators: Description of settings_tunneled_playback. -->
@@ -1729,7 +1729,8 @@
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_hw">Use the TV’s own decoder</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_max_quality">The highest picture when there are several</string>
+    <string name="settings_line_max_quality">A limit on the picture height; the player\'s Quality pick overrides it</string>
+    <string name="settings_video_quality_maximum">Maximum (best variant)</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_tunneled">Experimental · Live TV on ExoPlayer</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->

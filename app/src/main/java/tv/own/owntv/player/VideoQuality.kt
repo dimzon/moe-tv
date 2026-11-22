@@ -5,17 +5,22 @@ import android.media.MediaCodecList
 import androidx.media3.common.C
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
+import tv.own.owntv.core.settings.QualityPick
 
 /**
  * Which picture a stream that offers several (HLS / DASH variants) plays at.
  *
- * Two inputs: the Settings limit ([cap]: "Maximum video quality", and on a metered connection the
- * phone's mobile-data limit, the lower wins), and a pick in the player's Quality menu, which beats the
- * limit for the item it was made on and is forgotten at the next one. An engine's own layout limit
- * (Multiview tiles, the 720p preview pane on a 2 GB TV) is combined with [lower], so it can only
- * lower the result.
+ * Three inputs: the Settings limit ([cap]: "Maximum video quality", and on a metered connection the
+ * phone's mobile-data limit, the lower wins), the persisted Quality pick ([QualityPick]: Auto,
+ * Maximum, or a height — every channel plays at it), and a per-stream resolution when the pick is
+ * [QualityPick.MAXIMUM]. An engine's own layout limit (Multiview tiles, the 720p preview pane on a
+ * 2 GB TV) is combined with [lower], so it can only lower the result.
  */
 object VideoQuality {
+
+    /** The Quality-menu picks, as [QualityPick] spells them. */
+    const val AUTO = QualityPick.AUTO
+    const val MAXIMUM = QualityPick.MAXIMUM
 
     /** The Settings limit in lines, or null for none. [metered]: the connection costs money. */
     fun cap(maxHeight: Int, mobileDataMaxHeight: Int, metered: Boolean): Int? =
@@ -40,6 +45,9 @@ object VideoQuality {
             (0 until g.length).filter { g.isTrackSupported(it, true) }.map { g.getTrackFormat(it).height }
         },
     )
+
+    /** The best playable height [tracks] offers — what [MAXIMUM] forces. Null when there is no choice. */
+    fun topHeightOf(tracks: Tracks): Int? = heightsOf(tracks).firstOrNull()
 
     /** ExoPlayer: force the best-bitrate playable track of exactly [height], or null when none has it. */
     fun overrideFor(tracks: Tracks, height: Int): TrackSelectionOverride? {

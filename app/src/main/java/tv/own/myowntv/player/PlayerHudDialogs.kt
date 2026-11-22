@@ -306,25 +306,33 @@ internal fun ZoomDialog(current: ZoomMode, onSelect: (ZoomMode) -> Unit, onDismi
     }
 }
 
-/** Auto (Settings → Maximum video quality), then every height this stream offers, highest first. */
+/** Auto, Maximum (each stream's best variant), then every height this stream offers, highest first. */
 @Composable
-internal fun QualityDialog(heights: List<Int>, current: Int?, onSelect: (Int?) -> Unit, onDismiss: () -> Unit) {
+internal fun QualityDialog(heights: List<Int>, current: Int, onSelect: (Int) -> Unit, onDismiss: () -> Unit) {
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { requestFocusRetrying(focus) }
     BackHandler { onDismiss() }
-    val options: List<Int?> = listOf<Int?>(null) + heights
+    val options: List<Int> = listOf(VideoQuality.AUTO, VideoQuality.MAXIMUM) + heights
     val selectedIndex = options.indexOf(current).coerceAtLeast(0)
     DialogScaffold(title = stringResource(R.string.player_tool_quality), onDismiss = onDismiss) {
         items(options.size) { index ->
-            val height = options[index]
+            val pick = options[index]
             OptionRow(
-                label = if (height == null) stringResource(R.string.settings_auto) else stringResource(R.string.settings_video_quality_lines, height),
-                selected = height == current,
+                label = qualityPickLabel(pick),
+                selected = pick == current,
                 modifier = if (index == selectedIndex) Modifier.focusRequester(focus) else Modifier,
-                onClick = { onSelect(height) },
+                onClick = { onSelect(pick) },
             )
         }
     }
+}
+
+/** "Auto", "Maximum (best variant)", "1080p". */
+@Composable
+internal fun qualityPickLabel(pick: Int): String = when (pick) {
+    VideoQuality.AUTO -> stringResource(R.string.settings_auto)
+    VideoQuality.MAXIMUM -> stringResource(R.string.settings_video_quality_maximum)
+    else -> stringResource(R.string.settings_video_quality_lines, pick)
 }
 
 @Composable

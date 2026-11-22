@@ -15,6 +15,7 @@ import androidx.media3.exoplayer.DefaultLoadControl
 import tv.own.owntv.core.player.PlayerBudget
 import tv.own.owntv.core.player.SurroundMode
 import tv.own.owntv.core.settings.LiveBuffer
+import tv.own.owntv.core.settings.QualityPick
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.Renderer
 import androidx.media3.exoplayer.hls.DefaultHlsExtractorFactory
@@ -157,8 +158,8 @@ class LivePreviewEngine(
     private val connectivityNow = connectivity
     private val _videoQualities = MutableStateFlow<List<Int>>(emptyList())
     override val videoQualities: StateFlow<List<Int>> = _videoQualities.asStateFlow()
-    private val _videoQualityPick = MutableStateFlow<Int?>(null)
-    override val videoQualityPick: StateFlow<Int?> = _videoQualityPick.asStateFlow()
+    private val _videoQualityPick = MutableStateFlow(VideoQuality.AUTO)
+    override val videoQualityPick: StateFlow<Int> = _videoQualityPick.asStateFlow()
     /** Settings → background playback; picks the player's wake mode. */
     @Volatile private var backgroundPlayback = true
     /** The setting, whether this engine may tunnel at all (a Multiview tile may not), and what the
@@ -327,6 +328,12 @@ class LivePreviewEngine(
         // A track-selection limit, so it applies in place.
         playbackSettings.field { it.maxVideoHeight to it.mobileDataMaxVideoHeight }.onEach { (max, mobile) ->
             qualityMaxHeight = max; qualityMobileMaxHeight = mobile
+            applyMaxVideoHeight()
+        }.launchIn(settingsScope)
+        // The Quality pick lives in settings, so every engine and every channel plays at it; a change
+        // applies in place.
+        playbackSettings.field { it.qualityPick }.onEach { pick ->
+            _videoQualityPick.value = pick
             applyMaxVideoHeight()
         }.launchIn(settingsScope)
         // The mobile-data limit follows a Wi-Fi ⇄ mobile switch mid-play; with no limit set nothing
@@ -1732,7 +1739,8 @@ class LivePreviewEngine(
             preMuteVolume = null // a HUD mute's level belongs to the channel it was made on
             applyAudioDelay(baseAudioDelayMs)
             _audioDelayRemembered.value = false
-            _videoQualityPick.value = null // a Quality pick belongs to the channel it was made on
+            // The Quality pick is NOT reset here: it is stored in settings, so the next channel
+            // plays at it too — that is the whole point of the pick.
         }
         _videoQualities.value = emptyList()
         applyRememberedPrefs(meta.contentKey ?: url)
@@ -1836,7 +1844,7 @@ class LivePreviewEngine(
 
     /**
      * The video limit this engine applies: the lower of its own ([maxVideoHeight]) and the Settings one
-     * (re-read for a metered connection on every call), plus a Quality-menu pick as an override —
+     * (re-read for a metered connection on every call), plus the persisted Quality pick as an override —
      * one the engine's own limit does not forbid.
      */
     private fun applyMaxVideoHeight() {
@@ -1845,26 +1853,43 @@ class LivePreviewEngine(
             maxVideoHeight,
             VideoQuality.cap(qualityMaxHeight, qualityMobileMaxHeight, connectivityNow.isMeteredNow()),
         )
-        val pick = _videoQualityPick.value?.takeIf { h -> maxVideoHeight.let { it == null || h <= it } }
         p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
             .apply {
                 if (height == null) clearVideoSizeConstraints() else setMaxVideoSize(Int.MAX_VALUE, height)
                 clearOverridesOfType(C.TRACK_TYPE_VIDEO)
-                pick?.let { VideoQuality.overrideFor(p.currentTracks, it) }?.let { addOverride(it) }
+                forcedQualityPick()?.let { VideoQuality.overrideFor(p.currentTracks, it) }?.let { addOverride(it) }
             }
             .build()
     }
 
-    /** The Quality menu: [height] for this channel, or null for Auto (the Settings limit). */
-    override fun selectVideoQuality(height: Int?) {
-        _videoQualityPick.value = height
+    /**
+     * The height the persisted Quality pick forces on the current stream: [VideoQuality.MAXIMUM]
+     * resolves to the stream's best playable height. Dropped when it exceeds this engine's own
+     * layout limit (the preview pane, a Multiview tile); null = follow the adaptive player.
+     */
+    private fun forcedQualityPick(): Int? {
+        val pick = _videoQualityPick.value
+        if (pick == VideoQuality.AUTO) return null
+        val wanted = if (pick == VideoQuality.MAXIMUM) {
+            VideoQuality.topHeightOf(player?.currentTracks ?: return null)
+        } else {
+            pick
+        }
+        return wanted?.takeIf { h -> maxVideoHeight.let { it == null || h <= it } }
+    }
+
+    /** The Quality menu: [pick] plays here at once and on every channel after this one; see [QualityPick]. */
+    override fun selectVideoQuality(pick: Int) {
+        val stored = QualityPick.normalize(pick)
+        _videoQualityPick.value = stored
+        settingsScope.launch { settingsRepo.setQualityPick(stored) }
         applyMaxVideoHeight()
     }
 
     /** A pick made before this stream's tracks were known (a retry of the same channel) lands here. */
     private fun ensureQualityPick(tracks: androidx.media3.common.Tracks) {
         val p = player ?: return
-        if (_videoQualityPick.value == null) return
+        if (_videoQualityPick.value == VideoQuality.AUTO) return
         if (p.trackSelectionParameters.overrides.keys.any { it.type == C.TRACK_TYPE_VIDEO }) return
         if (tracks.groups.none { it.type == C.TRACK_TYPE_VIDEO }) return
         applyMaxVideoHeight()

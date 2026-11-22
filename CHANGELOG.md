@@ -18,6 +18,7 @@
 > commit messages and in [NOTICE](NOTICE) §2.
 
 ### ✨ New features
+- **The player's Quality pick is remembered for every channel, with a Maximum choice that always plays the stream's best variant**
 - **Channel numbers on the Favourites and Recent cards, on Home and in More › Favourites**
 - **About: a 4PDA forum card next to the download page, with its own QR code**
 - **Ukrainian and Belarusian UI languages, selectable in Settings › App › Language**
@@ -41,6 +42,7 @@
 - **Translation trees other than English, Russian, Ukrainian and Belarusian**
 
 ### 🩹 Fixes
+- **The "Maximum video quality" setting is described as the limit it actually is**
 - **Channels RuTube leaves unnumbered (ТВ «Известия», the feed tail) get an app-assigned sequential number, so direct tune and the number column work for every channel**
 - **The 99999 "no slot" placeholder no longer shows up as a channel number**
 - **Favourite heart is a clear red in channel rows and the player instead of a pale pink**

@@ -173,7 +173,7 @@
     <string name="settings_volume_leveling">Выраўноўванне гучнасці</string>
     <string name="settings_volume_leveling_description">Паступова прыводзіць кожны канал да адной гучнасці, каб пры пераключэнні яна не скакала.</string>
     <string name="settings_max_video_quality">Максімальная якасць відэа</string>
-    <string name="settings_max_video_quality_description">Самая высокая якасць малюнка, калі канал прапануе некалькі. Эканоміць трафік і разгружае дэкодэр.</string>
+    <string name="settings_max_video_quality_description">Не падымацца вышэй гэтай вышыні малюнка, калі канал прапануе некалькі, — гэта абмежаванне, а не мінімум: «Аўта» далей падладжваецца пад сетку. Выбар якасці ў меню плеера яго перакрывае.</string>
     <string name="settings_tunneled_playback">Тунэльнае прайграванне (эксперыментальна)</string>
     <string name="settings_tunneled_playback_description">Прамы эфір у ExoPlayer: апаратура тэлевізара сама трымае малюнак і гук разам, менш нагружаючы працэсар. Працуе толькі на некаторых тэлевізарах і адключаецца сама, калі канал з ім дае збой. Пакуль яно ўключана, сінхранізацыю гука падстроіць нельга.</string>
     <string name="settings_tunneled_playback_failed">Адключана пасля збою канала з ім на гэтай прыладзе.</string>
@@ -941,7 +941,8 @@
     <string name="settings_line_prefer_sdr">SDR, калі ў патоку ёсць абодва</string>
     <string name="settings_line_external">VLC, MX Player… для кожнага раздзела</string>
     <string name="settings_line_hw">Выкарыстоўваць дэкодэр тэлевізара</string>
-    <string name="settings_line_max_quality">Найвышэйшая якасць, калі варыянтаў некалькі</string>
+    <string name="settings_line_max_quality">Абмежаванне вышыні малюнка; выбар якасці ў плееры яго перакрывае</string>
+    <string name="settings_video_quality_maximum">Максімальная (найлепшы варыянт)</string>
     <string name="settings_line_tunneled">Эксперыментальна · прамы эфір у ExoPlayer</string>
     <string name="settings_line_zoom">Фармат і маштаб пры запуску</string>
     <string name="settings_line_saved_zoom">Маштаб, зменены ў плееры</string>

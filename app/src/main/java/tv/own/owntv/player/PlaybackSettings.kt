@@ -56,6 +56,8 @@ data class PlaybackSettings(
     val maxVideoHeight: Int,
     val mobileDataMaxVideoHeight: Int,
     val tunneledPlayback: Boolean,
+    /** The Quality pick every channel plays at ([QualityPick.AUTO]/[QualityPick.MAXIMUM]/height). */
+    val qualityPick: Int,
     /** Keep CPU and Wi-Fi awake while ExoPlayer plays. */
     val backgroundPlayback: Boolean,
 ) {
@@ -83,6 +85,7 @@ data class PlaybackSettings(
                 s.defaultZoom, s.defaultVolume, s.liveTuneTimeoutSecs,
                 s.audioPassthrough, s.nightMode, s.volumeLevelling,
                 s.maxVideoHeight, s.mobileDataMaxVideoHeight, s.tunneledPlayback, s.backgroundPlayback,
+                s.qualityPick,
             )
             return combine(sources) { v ->
                 PlaybackSettings(
@@ -107,6 +110,7 @@ data class PlaybackSettings(
                     mobileDataMaxVideoHeight = v[18] as Int,
                     tunneledPlayback = v[19] as Boolean,
                     backgroundPlayback = v[20] as Boolean,
+                    qualityPick = v[21] as Int,
                 )
             }.stateIn(CoroutineScope(SupervisorJob() + Dispatchers.Default), SharingStarted.Eagerly, null)
         }

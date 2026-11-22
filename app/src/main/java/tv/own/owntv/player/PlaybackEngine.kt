@@ -97,9 +97,10 @@ interface PlaybackEngine {
     /** The picture heights this stream offers, highest first; empty when there is nothing to choose
      *  between (the player's Quality button shows only then). */
     val videoQualities: StateFlow<List<Int>>
-    /** The Quality-menu pick for this stream, or null for Auto (Settings → Maximum video quality). */
-    val videoQualityPick: StateFlow<Int?>
-    fun selectVideoQuality(height: Int?)
+    /** The Quality pick every channel plays at: [VideoQuality.AUTO], [VideoQuality.MAXIMUM] or a height. */
+    val videoQualityPick: StateFlow<Int>
+    /** Store the Quality pick; it applies to this channel at once and to every one after it. */
+    fun selectVideoQuality(pick: Int)
 
     /** Live technical readout (label → value) for the stream-info overlay — codec, resolution, fps, HDR,
      *  bitrate, decoder, audio, buffer, source. A snapshot; the overlay re-reads it periodically.

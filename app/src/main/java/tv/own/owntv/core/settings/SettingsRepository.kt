@@ -390,6 +390,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val VOLUME_LEVELLING = booleanPreferencesKey("volume_levelling")
         val MAX_VIDEO_HEIGHT = intPreferencesKey("max_video_height")
         val MOBILE_DATA_MAX_VIDEO_HEIGHT = intPreferencesKey("mobile_data_max_video_height")
+        val QUALITY_PICK = intPreferencesKey("quality_pick")
         val TUNNELED_PLAYBACK = booleanPreferencesKey("tunneled_playback")
         val TUNNELING_FAILED = booleanPreferencesKey("tunneling_failed")
         // v4.1.6 one-shot: AFR caused visible HDMI re-handshakes on some TVs. Existing installs are
@@ -1315,6 +1316,15 @@ class SettingsRepository(private val context: Context, private val localeStore: 
     suspend fun setMaxVideoHeight(height: Int) {
         context.dataStore.edit { it[Keys.MAX_VIDEO_HEIGHT] = height.takeIf { v -> v in maxVideoHeightChoices } ?: 0 }
     }
+
+    /** The player's Quality pick, played on every channel: Auto, Maximum, or a height; see
+     *  [QualityPick] and [tv.own.owntv.player.VideoQuality]. */
+    val qualityPick: Flow<Int> = prefsFlow { QualityPick.normalize(it[Keys.QUALITY_PICK] ?: 0) }
+
+    suspend fun setQualityPick(pick: Int) {
+        context.dataStore.edit { it[Keys.QUALITY_PICK] = QualityPick.normalize(pick) }
+    }
+
 
     /** The choices for the mobile-data limit (lines; 0 = Off, the same as on Wi-Fi). */
     val mobileDataMaxVideoHeightChoices: List<Int> = listOf(0, 1080, 720, 480)
@@ -2502,7 +2512,9 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             // Multiview's tile count (the reader clamps it).
             Keys.MULTIVIEW_TILES,
             // The two quality limits; the readers accept only their own choices.
-            Keys.MAX_VIDEO_HEIGHT, Keys.MOBILE_DATA_MAX_VIDEO_HEIGHT)
+            Keys.MAX_VIDEO_HEIGHT, Keys.MOBILE_DATA_MAX_VIDEO_HEIGHT,
+            // The player's Quality pick (Auto / Maximum / height) — a user choice.
+            Keys.QUALITY_PICK)
         val bools = listOf(
             Keys.GUIDE_SHOW_EMPTY, Keys.GUIDE_PREVIEW,
             Keys.LIVE_PREVIEW, Keys.LIVE_PREVIEW_AUDIO, Keys.GUIDE_PREVIEW_ON_OK, Keys.LIVE_PREVIEW_ON_OK, Keys.HERO_PREVIEW, Keys.PREFER_SDR, Keys.AUTO_FRAME_RATE_LIVE, Keys.AUTO_FRAME_RATE_PROMPTED, Keys.ANDROID_TV_HOME, Keys.HW_DECODING, Keys.SOFTWARE_DECODE_ABOVE_1080P,
@@ -2817,5 +2829,20 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             it[Keys.DNS_DOH_URL] = dohUrl.trim()
         }
     }
+}
+
+/**
+ * The player's Quality pick ([SettingsRepository.qualityPick]), played on every channel — the
+ * answer to "I don't want to pick a quality each time": pick once anywhere, it sticks.
+ *
+ * [AUTO] is the adaptive player's own choice within the Settings limit; [MAXIMUM] forces the best
+ * variant each stream offers; a height forces exactly that variant when the stream has one.
+ */
+object QualityPick {
+    const val AUTO = 0
+    const val MAXIMUM = -1
+
+    /** A stored pick worth applying: Auto, Maximum, or a height above 0. Anything else collapses to Auto. */
+    fun normalize(pick: Int): Int = if (pick == MAXIMUM || pick > 0) pick else AUTO
 }
 
