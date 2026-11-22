@@ -57,6 +57,7 @@
 - **Live TV: the catalogue follows the official RUTUBE TV feed — sport, radio and regional channels missing from the curated list are back**
 - **Esc from a USB keyboard or scrcpy works as Back**
 - **Sync no longer crashes at startup on TV boxes that reject WorkManager's network callback**
+- **An Android 14 TV platform crash — accessibility switched off as a window is closing — no longer kills the app**
 
 ### 🔧 Internals
 - **Live-only database schema rebuilt through v8**

@@ -3,6 +3,7 @@ package tv.own.owntv.core.util
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
+import android.os.Looper
 import android.os.Process
 import android.os.SystemClock
 import tv.own.owntv.core.CoreBuildInfo
@@ -23,6 +24,11 @@ import kotlin.system.exitProcess
  * The trace from a release build is obfuscated: retrace it with the `mapping.txt` of the matching
  * release. Line numbers are kept (`-keepattributes SourceFile,LineNumberTable`), so a retraced
  * trace names the exact line.
+ *
+ * One documented exception to "every crash dies": a recognized platform crash on the main thread
+ * ([isRecoverablePlatformCrash]) is recorded with a `survived:` marker and the main loop is
+ * re-entered, so the process keeps running — a crash that has to be guessed at is also one that
+ * does not have to be died to, when the bug is the platform's and the app is only the bystander.
  */
 object CrashRecorder {
 
@@ -36,11 +42,44 @@ object CrashRecorder {
      */
     var diagnostics: (() -> String)? = null
 
+    /**
+     * Fuse for the platform-crash recovery in [install]: a process survives at most this many
+     * recognized platform crashes. Each recovery re-enters the main message loop, nesting one more
+     * loop on the main thread's stack — bounded on purpose.
+     */
+    private const val MAX_PLATFORM_RECOVERIES = 3
+
+    private val platformRecoveries = java.util.concurrent.atomic.AtomicInteger()
+
+    /**
+     * The line [write] marks a survived platform crash with. [CrashUploader] keys off it to keep
+     * these reports out of the mail entirely — a diagnosed platform bug is not actionable, the
+     * record stays on disk for manual exports only.
+     */
+    const val SURVIVED_LINE =
+        "survived: platform crash recognized — main loop re-entered, the app kept running"
+
     /** Install from `Application.onCreate`, before anything else can throw. */
     fun install(context: Context) {
         val app = context.applicationContext
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, error ->
+            // The one documented exception to "the original handler still gets the original
+            // throwable": a recognized platform crash on the main thread is survived instead of
+            // delegating, because delegating means dying to a framework cleanup race we cannot
+            // prevent (see [isRecoverablePlatformCrash]).
+            if (
+                thread === Looper.getMainLooper().thread &&
+                platformRecoveries.get() < MAX_PLATFORM_RECOVERIES &&
+                isRecoverablePlatformCrash(error)
+            ) {
+                platformRecoveries.incrementAndGet()
+                runCatching { write(app, thread, error, survived = true) }
+                // The message that crashed is already dispatched and gone; everything queued after
+                // it is healthy. The loop does not return — the exit below is a safety net.
+                Looper.loop()
+                exitProcess(2)
+            }
             // Never let the recorder itself be the reason the process dies differently than it would
             // have: whatever happens here, the original handler still gets the original throwable.
             runCatching { write(app, thread, error) }
@@ -90,7 +129,7 @@ object CrashRecorder {
         return java.math.BigInteger(1, digest).toString(16).padStart(64, '0').take(8)
     }
 
-    private fun write(context: Context, thread: Thread, error: Throwable) {
+    private fun write(context: Context, thread: Thread, error: Throwable, survived: Boolean = false) {
         val stamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
             .format(java.util.Date())
         val appName = runCatching {
@@ -103,6 +142,9 @@ object CrashRecorder {
             appendLine(environment(context))
             appendLine("Crashed $stamp on thread \"${thread.name}\"")
             appendLine("signature ${signature(error)}")
+            if (survived) {
+                appendLine(SURVIVED_LINE)
+            }
             appendLine()
             appendLine(android.util.Log.getStackTraceString(error))
             val live = runCatching { diagnostics?.invoke() }.getOrNull().orEmpty()

@@ -1976,6 +1976,7 @@
 1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	environment unavailable: ${it.javaClass.simpleName}
 1	file-path	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	last_crash.txt
 1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	signature ${signature(error)}
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	survived: platform crash recognized — main loop re-entered, the app kept running
 1	technical	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	yyyy-MM-dd HH:mm:ss
 1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	· RAM ${mem.totalMem shr 20} MiB, free ${mem.availMem shr 20} MiB
 1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	· uptime ${SystemClock.elapsedRealtime() / 1000} s
@@ -2037,6 +2038,12 @@
 1	technical	app/src/main/java/tv/own/owntv/core/util/Pin.kt	:
 1	technical	app/src/main/java/tv/own/owntv/core/util/Pin.kt	SHA-256
 1	regex	app/src/main/java/tv/own/owntv/core/util/Pin.kt	^[0-9a-fA-F]{16}:[0-9a-fA-F]{64}$
+4	technical	app/src/main/java/tv/own/owntv/core/util/PlatformCrashFilter.kt	android.view.ViewRootImpl
+1	technical	app/src/main/java/tv/own/owntv/core/util/PlatformCrashFilter.kt	getAccessibilityFocusedRect
+1	technical	app/src/main/java/tv/own/owntv/core/util/PlatformCrashFilter.kt	handleMessageImpl
+1	technical	app/src/main/java/tv/own/owntv/core/util/PlatformCrashFilter.kt	setAccessibilityFocus
+1	technical	app/src/main/java/tv/own/owntv/core/util/PlatformCrashFilter.kt	tv.own
+1	technical	app/src/main/java/tv/own/owntv/core/util/PlatformCrashFilter.kt	updateKeepClearForAccessibilityFocusRect
 1	protocol	app/src/main/java/tv/own/owntv/core/weather/WeatherData.kt	clearNight
 2	protocol	app/src/main/java/tv/own/owntv/core/weather/WeatherData.kt	cloudy
 1	protocol	app/src/main/java/tv/own/owntv/core/weather/WeatherData.kt	drizzle

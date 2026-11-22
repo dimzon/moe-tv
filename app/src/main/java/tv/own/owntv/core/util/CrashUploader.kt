@@ -20,6 +20,10 @@ import java.net.URL
  * Uploaded once per crash: a sibling marker records the crash file's size+mtime, so relaunching does
  * not re-send the same report. The crash file itself is kept (Settings → Error log → Export still
  * works). Called from `Application.onCreate` on a daemon thread — network is never on the launch path.
+ *
+ * A survived platform crash ([CrashRecorder.SURVIVED_LINE]) is **never mailed**: it is an already
+ * diagnosed framework bug that no report can change, so it never reaches the inbox. The record
+ * stays on disk and shows up in Error log → Export if a user ever asks about a hiccup.
  */
 object CrashUploader {
     private const val TAG = "OwnTV-CrashUploader"
@@ -47,6 +51,9 @@ object CrashUploader {
         if (marker.isFile && marker.readText() == stamp) return
 
         val report = CrashRecorder.read(app) ?: return
+        // A survived platform crash is a diagnosed framework bug the report cannot change: it is
+        // never mailed. The record stays on disk for manual exports only.
+        if (report.contains(CrashRecorder.SURVIVED_LINE)) return
         val signature = report.lineSequence()
             .firstOrNull { it.startsWith("signature ") }
             ?.substringAfter(' ')
