@@ -41,6 +41,8 @@
 - **Translation trees other than English, Russian, Ukrainian and Belarusian**
 
 ### 🩹 Fixes
+- **Channels RuTube leaves unnumbered (ТВ «Известия», the feed tail) get an app-assigned sequential number, so direct tune and the number column work for every channel**
+- **The 99999 "no slot" placeholder no longer shows up as a channel number**
 - **Favourite heart is a clear red in channel rows and the player instead of a pale pink**
 - **Exit dialog no longer flashes when the app is relaunched**
 - **CALL/CAMERA/SEARCH keys no longer crash the app on Android 10+**

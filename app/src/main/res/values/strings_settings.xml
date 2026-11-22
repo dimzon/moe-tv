@@ -730,7 +730,7 @@
     <!-- Translators: Setting label for showing channel numbers. -->
     <string name="settings_channel_numbers">Channel numbers</string>
     <!-- Translators: Description of the channel numbers setting. -->
-    <string name="settings_channel_numbers_description">Show your provider\'s channel number beside the name in the Live TV list, the channel-list overlay and the player — and type a number on the remote during full-screen playback to jump straight to that channel (OK tunes at once, Back cancels). Off hides every number and ignores the number keys; nothing is lost, and turning it back on restores them.</string>
+    <string name="settings_channel_numbers_description">Show your provider\'s channel number beside the name in the Live TV list, the channel-list overlay and the player — and type a number on the remote during full-screen playback to jump straight to that channel (OK tunes at once, Back cancels). Channels the provider leaves unnumbered get the app\'s own sequential number after the provider\'s highest one, so every channel keeps a number and can be tuned by it. Off hides every number and ignores the number keys; nothing is lost, and turning it back on restores them.</string>
     <!-- Translators: Section header for diagnostic settings. -->
     <string name="settings_diagnostics">Diagnostics</string>
     <!-- Translators: Toggle label for showing measured stream statistics. -->
@@ -1771,7 +1771,7 @@
     <!-- Translators: Name of a setting on a Settings page. -->
     <string name="settings_title_saved_audio_sync">Saved audio sync</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
-    <string name="settings_line_channel_numbers">The provider’s number beside the name</string>
+    <string name="settings_line_channel_numbers">The provider’s number beside the name; channels without one get an app-assigned number</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
     <string name="settings_line_live_preview">Play the focused channel</string>
     <!-- Translators: One-line description under a setting's name on a Settings page; keep it short, it is cut to one line. -->
@@ -1837,7 +1837,7 @@
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_volume">The volume every channel starts at. Above 100%% quiet streams are amplified. A volume you change in the player is kept for that channel until you reset it.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
-    <string name="settings_help_channel_numbers">Shows your provider’s channel number beside the name in the Live TV list, the channel-list overlay and the player, and lets you type a number on the remote in full screen to jump to that channel.</string>
+    <string name="settings_help_channel_numbers">Shows your provider’s channel number beside the name in the Live TV list, the channel-list overlay and the player, and lets you type a number on the remote in full screen to jump to that channel. Channels the provider leaves unnumbered get an app-assigned sequential number.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->
     <string name="settings_help_seek_step">How far rewind and forward jump in a stream with one press. Holding the key keeps jumping.</string>
     <!-- Translators: Explanation shown in the panel beside the Settings rows while this setting has focus. -->

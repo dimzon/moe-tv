@@ -22,6 +22,35 @@ data class RutubeLiveRow(val name: String, val url: String)
 
 private const val TAIL_ORDER = 1_000_000
 
+/** RuTube's `order_number` "no slot" markers: the plain tail and the wide one six rows carry. */
+private const val NO_NUMBER = 999
+private const val NO_NUMBER_WIDE = 99999
+
+/** The provider number when RuTube carries one; null for the rows it leaves unnumbered. */
+internal fun RutubeChannel.providerNumber(): Int? =
+    orderNumber?.takeUnless { it <= 0 || it == NO_NUMBER || it == NO_NUMBER_WIDE }
+
+/**
+ * Numbers for the whole catalogue. A real `order_number` when RuTube carries one; every row it
+ * leaves unnumbered (ТВ «Известия», the regional tail, feed-only channels) gets the app's own
+ * sequential number after the highest provider number, skipping any number the catalogue already
+ * uses — so the number column is never blank and direct tune reaches every channel. The values
+ * move when the catalogue changes: they are ours, not the provider's.
+ */
+internal fun rutubeChannelNumbers(channels: List<RutubeChannel>): Map<String, Int> {
+    val taken = channels.mapNotNull { it.providerNumber() }.toSet()
+    var next = (taken.maxOrNull() ?: 0) + 1
+    val numbers = HashMap<String, Int>(channels.size)
+    for (channel in channels) {
+        numbers[channel.videoId] = channel.providerNumber() ?: run {
+            while (next in taken) next++
+            next++
+        }
+    }
+    return numbers
+}
+
+
 /**
  * Merges the curated `tvbroadcastinfo` catalogue with the official TV feed.
  *

@@ -104,9 +104,10 @@ internal class RuTubeSyncer(
         // Disambiguation needs the full list first (duplicate author-name groups).
         val duplicateNames = channels.groupBy { it.name }.filterValues { it.size > 1 }.keys
         val sortedChannels = channels.sortedWith(
-            compareBy<RutubeChannel> { it.orderNumber?.takeIf { n -> n != 999 } ?: Int.MAX_VALUE }
+            compareBy<RutubeChannel> { it.providerNumber() ?: Int.MAX_VALUE }
                 .thenBy { it.name },
         )
+        val numbers = rutubeChannelNumbers(sortedChannels)
 
         var order = 0
         val entities = sortedChannels.map { ch ->
@@ -120,7 +121,7 @@ internal class RuTubeSyncer(
                 // A curated rename wins over the provider's name and the disambiguation suffix.
                 name = renames[ch.videoId] ?: displayName,
                 logoUrl = ch.logoUrl,
-                number = ch.orderNumber?.takeIf { it != 999 },
+                number = numbers[ch.videoId],
                 remoteId = ch.videoId,
                 sortOrder = order++,
             )
