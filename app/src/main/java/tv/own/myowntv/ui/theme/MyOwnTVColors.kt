@@ -87,7 +87,10 @@ data class MyOwnTVColors(
     // Focus / status
     val focusBorder: Color,
     val focusGlow: Color,
+    /** The filled heart that marks a favourite — a clear red, independent of the current accent. */
     val favorite: Color,
+    /** Material's error role: destructive buttons and validation. Kept distinct from [favorite]. */
+    val error: Color,
     /**
      * The accent as it must look on the player's chrome, which is always dark scrim over video no
      * matter which theme the app is in. [primary] can't be used there: on the light theme it is the
@@ -198,7 +201,8 @@ fun ownTvColors(
             onTertiaryContainer = DarkOnTertiaryContainer,
             focusBorder = focus,
             focusGlow = focus.copy(alpha = 0.40f),
-            favorite = DarkError,
+            favorite = DarkFavorite,
+            error = DarkError,
             accentOnVideo = onVideoRoles.primary,
             onAccentOnVideo = onVideoRoles.onPrimary,
         )
@@ -230,7 +234,8 @@ fun ownTvColors(
             onTertiaryContainer = LightOnTertiaryContainer,
             focusBorder = focus,
             focusGlow = focus.copy(alpha = 0.28f),
-            favorite = LightError,
+            favorite = LightFavorite,
+            error = LightError,
             accentOnVideo = onVideoRoles.primary,
             onAccentOnVideo = onVideoRoles.onPrimary,
         )

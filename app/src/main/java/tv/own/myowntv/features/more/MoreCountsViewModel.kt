@@ -125,6 +125,10 @@ class MoreCountsViewModel(
     localSync: LocalSyncManager,
 ) : ViewModel() {
 
+    /** "Channel numbers": More › Favourites also shows the provider number beside each channel. */
+    val showChannelNumbers: StateFlow<Boolean> = settings.directTune
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
     /** Local sync, read-only: the page's own view model owns hosting (see LocalSyncScreen). */
     val sync: StateFlow<SyncSnapshot> = combine(localSync.hostState, localSync.pairedDevices) { host, devices ->
         SyncSnapshot(listening = host is CompanionServerState.Listening, devices = devices)

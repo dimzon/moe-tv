@@ -310,7 +310,7 @@ fun AudioNowPlayingBar(
                     AudioBtn(2, MyOwnTVIcon.SKIP_NEXT, active && enabled[2], enabled[2], requesters, { focusedSlot = it }) {
                         onNext()
                     }
-                    // The heart keeps its coral wherever it appears in the app, so one colour still
+                    // The heart keeps its red wherever it appears in the app, so one colour still
                     // means "favourite" here as it does on a poster.
                     AudioBtn(3, MyOwnTVIcon.FAVORITE, active && enabled[3], enabled[3], requesters, { focusedSlot = it }, favorite = favorite) {
                         onToggleFavorite?.invoke()

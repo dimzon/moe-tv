@@ -18,6 +18,7 @@
 > commit messages and in [NOTICE](NOTICE) §2.
 
 ### ✨ New features
+- **Channel numbers on the Favourites and Recent cards, on Home and in More › Favourites**
 - **About: a 4PDA forum card next to the download page, with its own QR code**
 - **Ukrainian and Belarusian UI languages, selectable in Settings › App › Language**
 - **Video rendering: hardware plane (SurfaceView) or compatibility texture (TextureView)**
@@ -40,6 +41,7 @@
 - **Translation trees other than English, Russian, Ukrainian and Belarusian**
 
 ### 🩹 Fixes
+- **Favourite heart is a clear red in channel rows and the player instead of a pale pink**
 - **Exit dialog no longer flashes when the app is relaunched**
 - **CALL/CAMERA/SEARCH keys no longer crash the app on Android 10+**
 - **Volume keys no longer open the player controls before changing the volume**

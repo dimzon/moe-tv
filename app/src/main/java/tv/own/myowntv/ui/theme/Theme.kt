@@ -98,7 +98,7 @@ private fun schemeFrom(c: MyOwnTVColors): ColorScheme =
             surfaceVariant = c.surfaceContainerHigh,
             onSurfaceVariant = c.onSurfaceVariant,
             border = c.outline,
-            error = c.favorite,
+            error = c.error,
         )
     } else {
         lightColorScheme(
@@ -121,7 +121,7 @@ private fun schemeFrom(c: MyOwnTVColors): ColorScheme =
             surfaceVariant = c.surfaceContainerHigh,
             onSurfaceVariant = c.onSurfaceVariant,
             border = c.outline,
-            error = c.favorite,
+            error = c.error,
         )
     }
 

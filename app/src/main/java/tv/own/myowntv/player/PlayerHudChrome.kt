@@ -333,7 +333,7 @@ internal fun BottomBar(
                             CtrlButton(MyOwnTVIcon.SUBTITLE, badge = subCount.takeIf { it > 0 }, label = stringResource(R.string.player_tool_subtitles)) { onOpenDialog(HudDialog.SUBS) }
                         PlayerControl.AUDIO ->
                             CtrlButton(MyOwnTVIcon.AUDIO, badge = audioCount.takeIf { it > 1 }, label = stringResource(R.string.player_tool_audio)) { onOpenDialog(HudDialog.AUDIO) }
-                        // Favorite the current channel without leaving the stream (coral heart = on,
+                        // Favorite the current channel without leaving the stream (red heart = on,
                         // the same colour the marker has in browse rows).
                         PlayerControl.FAVOURITE -> if (onToggleFavorite != null) {
                             CtrlButton(MyOwnTVIcon.FAVORITE, active = favorite, activeTint = OwnTVTheme.colors.favorite, label = stringResource(R.string.player_tool_favorite)) { onToggleFavorite() }

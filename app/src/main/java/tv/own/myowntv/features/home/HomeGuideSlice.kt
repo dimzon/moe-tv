@@ -89,7 +89,8 @@ import tv.own.myowntv.ui.theme.stageText
 /**
  * A live rail on Home (Favourite channels, Recent channels): one `.oncard` per channel, 336 × 132 —
  * the logo on its plate, the name, and in "On now" mode the programme, the time left and its
- * progress. "Cards" mode is the same card with the name only.
+ * progress. "Cards" mode is the same card with the name only. [showNumber] follows the app's
+ * "Channel numbers" setting: Favourites is also where you look a channel's number up quickly.
  */
 @Composable
 fun HomeLiveRow(
@@ -103,6 +104,7 @@ fun HomeLiveRow(
     start: Dp,
     track: (FocusRequester) -> Unit,
     modifier: Modifier = Modifier,
+    showNumber: Boolean = true,
 ) {
     val onNow = mode == HomeLiveRowMode.ON_NOW
     val shown = if (onNow) guide.channels else channels
@@ -119,6 +121,7 @@ fun HomeLiveRow(
                     channel = channel,
                     programme = if (onNow) currentProgramme(guide.programmes[channel.id].orEmpty(), guide.now) else null,
                     now = guide.now,
+                    showNumber = showNumber,
                     onClick = { onChannelClick(channel.id, shown) },
                     modifier = Modifier
                         .then(if (index == 0 && firstItemFocusRequester != null) Modifier.focusRequester(firstItemFocusRequester) else Modifier)
@@ -144,6 +147,8 @@ internal fun OnNowCard(
     width: Dp = 336.mpx,
     oneLine: Boolean = false,
     onLongClick: (() -> Unit)? = null,
+    /** The provider's number, shown before the name when "Channel numbers" is on. */
+    showNumber: Boolean = true,
 ) {
     val a = stageAccent
     StageSurface(
@@ -161,7 +166,19 @@ internal fun OnNowCard(
         ) {
             ChannelPlate(channel, Modifier.size(84.mpx, 60.mpx))
             Column(Modifier.weight(1f).fillMaxHeight()) {
-                Text(channel.name, style = stageText(20, 700), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.mpx),
+                ) {
+                    if (showNumber) channel.number?.let { number ->
+                        Text(number.toString(), style = stageText(16, 700), color = StageColors.Muted, maxLines = 1)
+                    }
+                    Text(
+                        channel.name, style = stageText(20, 700), color = StageColors.Text,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f),
+                    )
+                }
                 if (programme != null) {
                     val left = timeLeftText(((programme.stopMs - now).coerceAtLeast(0L) + 59_999L) / 60_000L)
                     Spacer(Modifier.height(3.mpx))

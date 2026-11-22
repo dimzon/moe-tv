@@ -81,6 +81,7 @@ val DarkOnTertiary = Color(OwnTVPalette.DarkOnTertiary)
 val DarkTertiaryContainer = Color(OwnTVPalette.DarkTertiaryContainer)
 val DarkOnTertiaryContainer = Color(OwnTVPalette.DarkOnTertiaryContainer)
 val DarkError = Color(OwnTVPalette.DarkError)
+val DarkFavorite = Color(OwnTVPalette.DarkFavorite)
 
 // ---------------- LIGHT (M3 light) ----------------
 val LightBackground = Color(OwnTVPalette.LightBackground)
@@ -103,3 +104,4 @@ val LightOnTertiary = Color(OwnTVPalette.LightOnTertiary)
 val LightTertiaryContainer = Color(OwnTVPalette.LightTertiaryContainer)
 val LightOnTertiaryContainer = Color(OwnTVPalette.LightOnTertiaryContainer)
 val LightError = Color(OwnTVPalette.LightError)
+val LightFavorite = Color(OwnTVPalette.LightFavorite)

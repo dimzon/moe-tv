@@ -144,6 +144,7 @@ fun HomeScreen(
     val engineState by heroPreviewEngine.state.collectAsStateWithLifecycle()
     val isPreviewActive by vm.isPreviewActive.collectAsStateWithLifecycle()
     val lastInteractionMs by vm.lastHeroInteractionMs.collectAsStateWithLifecycle()
+    val showChannelNumbers by vm.showChannelNumbers.collectAsStateWithLifecycle()
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     val homeScope = rememberCoroutineScope()
     val heroFocus = remember { FocusRequester() }
@@ -373,6 +374,7 @@ fun HomeScreen(
                                 mode = state.config.recentLiveMode,
                                 channels = state.recentLive,
                                 guide = state.recentGuide,
+                                showNumber = showChannelNumbers,
                                 onChannelClick = onPlayChannel,
                                 onFocus = onNonHeroFocused,
                                 firstItemFocusRequester = firstItemFocusRequester,
@@ -386,6 +388,7 @@ fun HomeScreen(
                                 mode = state.config.favoriteLiveMode,
                                 channels = state.favoriteLive,
                                 guide = state.favoriteGuide,
+                                showNumber = showChannelNumbers,
                                 onChannelClick = onPlayChannel,
                                 onFocus = onNonHeroFocused,
                                 firstItemFocusRequester = firstItemFocusRequester,

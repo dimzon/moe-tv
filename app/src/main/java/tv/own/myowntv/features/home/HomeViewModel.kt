@@ -132,6 +132,10 @@ class HomeViewModel(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    /** "Channel numbers": the Favourites and Recent cards show the provider number with the name. */
+    val showChannelNumbers: StateFlow<Boolean> = settings.directTune
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
     /**
      * Single entry point for "rebuild the Home rails". Every trigger goes through here rather than
      * calling loadHomeData directly, because there is more than one of them and on a cold start they

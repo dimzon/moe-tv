@@ -45,6 +45,8 @@ object OwnTVPalette {
     const val DarkTertiaryContainer = 0xFF294B5DL
     const val DarkOnTertiaryContainer = 0xFFC5E7FFL
     const val DarkError = 0xFFFFB4ABL
+    /** Filled favourite marker: a clear red on dark surfaces, unlike the pale M3 [DarkError]. */
+    const val DarkFavorite = 0xFFFF6B6BL
 
     // ---------------- LIGHT (M3 light) ----------------
     const val LightBackground = 0xFFF5FBF8L
@@ -69,6 +71,8 @@ object OwnTVPalette {
     const val LightTertiaryContainer = 0xFFC5E7FFL
     const val LightOnTertiaryContainer = 0xFF001E2FL
     const val LightError = 0xFFBA1A1AL
+    /** Favourite marker on light surfaces: readable red without being as dark as [LightError]. */
+    const val LightFavorite = 0xFFD32F2FL
 }
 
 /**

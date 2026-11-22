@@ -350,6 +350,7 @@ internal fun FavouritesPage(
     val counts by vm.favorites.collectAsStateWithLifecycle()
     val lists by vm.favouriteLists.collectAsStateWithLifecycle()
     val move by vm.move.collectAsStateWithLifecycle()
+    val showChannelNumbers by vm.showChannelNumbers.collectAsStateWithLifecycle()
     // Hold OK: the item whose small menu is open, and the card to return to when it closes.
     var menu by remember { mutableStateOf<Triple<MediaType, String, String>?>(null) }
     val itemFocus = remember { HashMap<Pair<MediaType, String>, FocusRequester>() }
@@ -376,6 +377,7 @@ internal fun FavouritesPage(
                     val f = focusOf(MediaType.LIVE, ch.id)
                     OnNowCard(
                         channel = ch, programme = lists.onNow[ch.id]?.now, now = lists.now,
+                        showNumber = showChannelNumbers,
                         onClick = { onPlayChannel(ch.id) },
                         onLongClick = { returnTo = f; menu = Triple(MediaType.LIVE, ch.id, ch.name) },
                         width = 420.mpx, oneLine = true,

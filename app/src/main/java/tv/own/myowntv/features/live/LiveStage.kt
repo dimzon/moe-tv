@@ -125,6 +125,7 @@ import tv.own.myowntv.ui.stage.drawBoxShadow
 import tv.own.myowntv.ui.stage.drawInnerRing
 import tv.own.myowntv.ui.stage.stageGlass
 import tv.own.myowntv.ui.stage.stageSelectedBar
+import tv.own.myowntv.ui.theme.OwnTVTheme
 import tv.own.myowntv.ui.theme.StageColors
 import tv.own.myowntv.ui.theme.StageRadii
 import tv.own.myowntv.ui.theme.mpx
@@ -222,7 +223,7 @@ internal fun LiveStageRow(
         if (trailing != null) trailing()
         else Row(horizontalArrangement = Arrangement.spacedBy(8.mpx), verticalAlignment = Alignment.CenterVertically) {
             name.tags.forEach { StageTag(it) }
-            if (isFavorite) MyOwnTVIcon(MyOwnTVIcon.FAVORITE, stageAccent.accent, Modifier.size(22.mpx), filled = true)
+            if (isFavorite) MyOwnTVIcon(MyOwnTVIcon.FAVORITE, OwnTVTheme.colors.favorite, Modifier.size(22.mpx), filled = true)
         }
     }
 }
