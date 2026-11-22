@@ -181,6 +181,18 @@ jobs:
           cp "$SRC" "dist/$OUT"
           echo "APK_OUT=$OUT" >> "$GITHUB_ENV"
           echo "Packaged dist/$OUT (arm64-v8a + armeabi-v7a + x86_64)"
+          # R8 retrace data belongs with the exact APK it describes. Debug builds (no keystore)
+          # are not minified, so their mapping is simply absent.
+          MAPPING=app/build/outputs/mapping/universalRelease/mapping.txt
+          if [ -f "$MAPPING" ]; then
+            if [ "$IS_TAG" = "true" ]; then
+              MAP_OUT="MoeTV_${{ steps.ver.outputs.name }}_${{ steps.ver.outputs.code }}_mapping.txt"
+            else
+              MAP_OUT="MoeTV-dev-${GITHUB_SHA::7}_mapping.txt"
+            fi
+            cp "$MAPPING" "dist/$MAP_OUT"
+            echo "Packaged dist/$MAP_OUT (R8 retrace map)"
+          fi
           # Stable-named copy inside the CI artifact only — no public download URL is published here.
           if [ "$IS_TAG" = "true" ]; then
             cp "$SRC" "dist/MoeTV.apk"
@@ -189,7 +201,8 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v7
         with:
-          # dist/ holds the single universal APK (plus the stable-named copy on tags).
+          # dist/ holds the single universal APK, the stable-named tag copy, and the R8 mapping
+          # whenever the build was minified.
           name: ${{ env.APK_OUT }}
           path: dist/*
           if-no-files-found: error

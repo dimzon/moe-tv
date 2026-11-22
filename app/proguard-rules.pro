@@ -19,3 +19,10 @@
 #     EpgAutoRefresh, PlaylistAutoRefresh, ...) round-trip through Enum.name/valueOf.
 #     Renaming a constant would silently reset settings and break old backups. ---
 -keep enum tv.own.myowntv.** { *; }
+
+# --- media3 analytics bookkeeping: FlagSet$Builder owns a mutable SparseBooleanArray. R8's class
+#     merging folded it into an unrelated Room class and erased that field to Object. On the cheap
+#     Android 11 vendor ROMs (Amlogic S905W2, reported as Google W2/Stick) the merged path appeared
+#     in anonymous reports as a corrupted SparseBooleanArray. Keep it a standalone class: renaming
+#     and obfuscation are fine, merging/optimization of this class are not. ---
+-keep,allowobfuscation class androidx.media3.common.FlagSet$Builder { *; }

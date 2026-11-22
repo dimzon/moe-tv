@@ -3557,7 +3557,7 @@ class LivePreviewEngine(
         // frame after rapid zapping). Cap it by the heap actually available — largeHeap included — and
         // leave the rest to Compose, bitmaps and diagnostics.
         val heapLimitBytes = Runtime.getRuntime().maxMemory()
-        val heapCapBytes = LiveBuffer.targetBufferCapBytes(heapLimitBytes)
+        val heapCapBytes = LiveBuffer.targetBufferCapBytes(heapLimitBytes, lowSpec = lowRam)
         val baseBytes = if (lowRam) LOW_RAM_TARGET_BYTES else TARGET_BUFFER_BYTES
         val defaultBytes = minOf(baseBytes, heapCapBytes)
         val targetBufferBytes = LiveBuffer.targetBufferBytes(

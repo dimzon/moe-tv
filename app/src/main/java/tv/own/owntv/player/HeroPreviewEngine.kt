@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import tv.own.owntv.core.network.HttpClient
+import tv.own.owntv.core.player.PlayerBudget
 import tv.own.owntv.core.settings.LiveBuffer
 
 /**
@@ -220,7 +221,13 @@ class HeroPreviewEngine(
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(2_000, 8_000, 1_000, 2_000)
             .setTargetBufferBytes(
-                minOf(HERO_TARGET_BUFFER_BYTES, LiveBuffer.targetBufferCapBytes(Runtime.getRuntime().maxMemory())),
+                minOf(
+                    HERO_TARGET_BUFFER_BYTES,
+                    LiveBuffer.targetBufferCapBytes(
+                        Runtime.getRuntime().maxMemory(),
+                        lowSpec = PlayerBudget.of(context).lowSpec,
+                    ),
+                ),
             )
             .build()
         return ExoPlayer.Builder(context)

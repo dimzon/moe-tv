@@ -108,6 +108,12 @@ object LiveBuffer {
     private const val MIN_HEAP_BUFFER_BYTES = 2L * 1024 * 1024
 
     /**
+     * Heaps at or below this are treated as constrained even when the RAM tier says otherwise:
+     * `largeHeap` on a cheap TV box gives 384 MiB, while the ROM's growth limit is often 16 MiB.
+     */
+    private const val HEAP_CONSTRAINED_BYTES = 512L * 1024 * 1024
+
+    /**
      * Byte cap for the live buffer. The default (24 MB / 16 MB low-RAM) is reached at ~7 s on a
      * 25 Mbps UHD stream, which is what keeps that socket reading continuously — but it also means a
      * user who asked for a 15 s buffer would silently get 7. Scale the cap with the depth so the
@@ -145,15 +151,21 @@ object LiveBuffer {
 
     /**
      * Ceiling for [targetBufferBytes], from the Java heap the process may actually use
-     * (`Runtime.maxMemory()`, which honours `largeHeap`). A quarter of the heap leaves room for
-     * Compose, bitmaps and diagnostics; the 2 MiB floor keeps the arithmetic sane on a tiny heap.
+     * (`Runtime.maxMemory()`, which honours `largeHeap`). A healthy device leaves a quarter of the
+     * heap to Compose, bitmaps and diagnostics; a heap-constrained one ([lowSpec] or at most
+     * [HEAP_CONSTRAINED_BYTES]) leaves an eighth. The 2 MiB floor keeps the arithmetic sane on a
+     * tiny heap.
      *
      * This matters on TV boxes with a small growth limit: the crash report that prompted it had
      * 16 MiB total, where the old fixed 16 MiB low-RAM target let the player alone fill the heap.
+     * `largeHeap` lifts the limit to 384 MiB on those boxes, but a quarter of that (96 MiB) is still
+     * more than the rest of the process can spare, so they take the eighth tier.
      */
-    fun targetBufferCapBytes(heapLimitBytes: Long): Int =
-        (heapLimitBytes / 4)
+    fun targetBufferCapBytes(heapLimitBytes: Long, lowSpec: Boolean = false): Int {
+        val divisor = if (lowSpec || heapLimitBytes <= HEAP_CONSTRAINED_BYTES) 8L else 4L
+        return (heapLimitBytes / divisor)
             .coerceAtLeast(MIN_HEAP_BUFFER_BYTES)
             .coerceAtMost(Int.MAX_VALUE.toLong())
             .toInt()
+    }
 }

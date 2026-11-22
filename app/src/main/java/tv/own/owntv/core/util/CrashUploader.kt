@@ -47,11 +47,18 @@ object CrashUploader {
         if (marker.isFile && marker.readText() == stamp) return
 
         val report = CrashRecorder.read(app) ?: return
+        val signature = report.lineSequence()
+            .firstOrNull { it.startsWith("signature ") }
+            ?.substringAfter(' ')
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?: "unknown"
         val body = if (report.length > MAX_CHARS) report.substring(0, MAX_CHARS) + "\n...[truncated]" else report
 
         val json = JSONObject()
-            // Name + version in the subject, as required.
-            .put("_subject", subject(app))
+            // Name, version and crash signature in the subject: the version separates releases and
+            // the signature threads repeated reports of one crash in a mail client's conversation view.
+            .put("_subject", subject(app, signature))
             .put("_captcha", "false")
             .put("_template", "table")
             .put("report", body)
@@ -88,10 +95,14 @@ object CrashUploader {
         }
     }
 
-    /** "МОЁ ТВ 1.0 (2) crash" — the app's launcher label plus the version it was built with. */
-    private fun subject(app: Context): String {
+    /**
+     * "МОЁ ТВ 1.9 (114) crash 1a2b3c4d" — the app's launcher label, the version it was built with,
+     * and the crash signature. Mail clients thread identical subjects, so every report of the same
+     * crash on the same release lands in one conversation.
+     */
+    private fun subject(app: Context, signature: String): String {
         val name = runCatching { app.packageManager.getApplicationLabel(app.applicationInfo).toString() }
             .getOrDefault("МОЁ ТВ")
-        return "$name ${CoreBuildInfo.versionName} (${CoreBuildInfo.versionCode}) crash"
+        return "$name ${CoreBuildInfo.versionName} (${CoreBuildInfo.versionCode}) crash $signature"
     }
 }

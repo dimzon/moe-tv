@@ -13,10 +13,11 @@ rem
 rem  Does, in order:
 rem    1. builds the universal release APK (VERSION_NAME=<version>,
 rem       VERSION_CODE still auto-increments from versioncode.txt);
-rem    2. copies it to %TEMP%\MoeTV_<version>_universal.apk;
+rem    2. archives mapping.txt in build\mapping\ and copies it next to the APK in
+rem       %TEMP% - without the matching R8 map a crash report cannot be retraced;
 rem    3. creates (or updates) the GitHub release v<version> on the public
-rem       download-site repo and uploads the APK there - the app's in-app
-rem       updater reads exactly that release;
+rem       download-site repo and uploads the APK and the mapping there - the app's
+rem       in-app updater reads exactly that release;
 rem    4. when the site checkout below exists, puts <version> on the download
 rem       page and pushes it.
 rem
@@ -41,6 +42,15 @@ set "VERSION_NAME=%VER%"
 call gradlew.bat :app:assembleUniversalRelease || exit /b 1
 if not exist "%APK%" (echo APK not found: %APK% & exit /b 1)
 
+set "VC="
+if exist "versioncode.txt" set /p VC=<versioncode.txt
+if not defined VC set "VC=unknown"
+set "MAPPING=app\build\outputs\mapping\universalRelease\mapping.txt"
+set "MAPASSET=%TEMP%\MoeTV_%VER%_%VC%_universal_mapping.txt"
+if not exist "%MAPPING%" (echo R8 mapping not found: %MAPPING% & exit /b 1)
+call "%~dp0tools\archive-mapping.cmd" universalRelease || exit /b 1
+copy /y "%MAPPING%" "%MAPASSET%" >nul || exit /b 1
+
 copy /y "%APK%" "%ASSET%" >nul || exit /b 1
 
 if defined NOTES (
@@ -53,10 +63,10 @@ if defined NOTES (
 echo === Publishing v%VER% to %SITE_REPO% ===
 gh release view v%VER% --repo %SITE_REPO% >nul 2>nul
 if errorlevel 1 (
-  gh release create v%VER% "%ASSET%" --repo %SITE_REPO% --title "МОЁ ТВ %VER%" --notes-file "%BODY%" || exit /b 1
+  gh release create v%VER% "%ASSET%" "%MAPASSET%" --repo %SITE_REPO% --title "МОЁ ТВ %VER%" --notes-file "%BODY%" || exit /b 1
 ) else (
-  echo Release v%VER% exists - replacing its APK asset.
-  gh release upload v%VER% "%ASSET%" --repo %SITE_REPO% --clobber || exit /b 1
+  echo Release v%VER% exists - replacing its APK and mapping assets.
+  gh release upload v%VER% "%ASSET%" "%MAPASSET%" --repo %SITE_REPO% --clobber || exit /b 1
 )
 
 if exist "%SITE_DIR%\index.html" (

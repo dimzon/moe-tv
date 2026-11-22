@@ -30,21 +30,25 @@ goto :usage
 :flavor_all
 set "TASK=assembleRelease"
 set "OUTDIR=app\build\outputs\apk"
+set "MAPVARIANTS=standardRelease universalRelease x86_64Release"
 goto :run
 
 :flavor_standard
 set "TASK=assembleStandardRelease"
 set "OUTDIR=app\build\outputs\apk\standard\release"
+set "MAPVARIANTS=standardRelease"
 goto :run
 
 :flavor_x86
 set "TASK=assembleX86_64Release"
 set "OUTDIR=app\build\outputs\apk\x86_64\release"
+set "MAPVARIANTS=x86_64Release"
 goto :run
 
 :flavor_universal
 set "TASK=assembleUniversalRelease"
 set "OUTDIR=app\build\outputs\apk\universal\release"
+set "MAPVARIANTS=universalRelease"
 goto :run
 
 :usage
@@ -79,6 +83,15 @@ if errorlevel 1 (
 echo.
 echo BUILT APK:
 for /r "%OUTDIR%" %%F in (*.apk) do echo   %%~fF  [%%~zF bytes]
+
+echo.
+echo Archiving R8 mapping (needed to retrace crash reports):
+call "%~dp0tools\archive-mapping.cmd" %MAPVARIANTS%
+if errorlevel 1 (
+    echo.
+    echo MAPPING ARCHIVE FAILED - retrace information was not preserved.
+    exit /b 1
+)
 
 set "VC="
 if exist "versioncode.txt" set /p VC=<versioncode.txt

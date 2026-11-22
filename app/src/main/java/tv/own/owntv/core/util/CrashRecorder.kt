@@ -1,7 +1,10 @@
 package tv.own.owntv.core.util
 
+import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
+import android.os.Process
+import android.os.SystemClock
 import tv.own.owntv.core.CoreBuildInfo
 import java.io.File
 import kotlin.system.exitProcess
@@ -53,6 +56,40 @@ object CrashRecorder {
     fun crashFile(context: Context): File =
         File(File(context.applicationContext.filesDir, "diagnostics"), FILE_NAME)
 
+    /**
+     * Device facts an anonymous report otherwise cannot supply: the crash mail has no reply channel,
+     * so the ROM fingerprint, ABI/bitness, heap class and RAM are recorded at write time. They tell
+     * "the same vendor firmware again" apart from a random sample, and show whether the universal
+     * APK ran its 32-bit slice.
+     */
+    private fun environment(context: Context): String = runCatching {
+        val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val mem = ActivityManager.MemoryInfo().also { am.getMemoryInfo(it) }
+        val processBits = if (Process.is64Bit()) "64-bit" else "32-bit"
+        val heapMiB = Runtime.getRuntime().maxMemory() shr 20
+        "ABIs ${Build.SUPPORTED_ABIS.joinToString()} · $processBits process · heap ${heapMiB} MiB" +
+            " (class ${am.memoryClass}/${am.largeMemoryClass} MiB, lowRam=${am.isLowRamDevice})" +
+            " · RAM ${mem.totalMem shr 20} MiB, free ${mem.availMem shr 20} MiB" +
+            " · uptime ${SystemClock.elapsedRealtime() / 1000} s"
+    }.getOrElse { "environment unavailable: ${it.javaClass.simpleName}" }
+
+    /**
+     * Short grouping key for the crash mail: the throwable class plus the first frames of its stack.
+     * Obfuscated names are stable within a release, and the version in the mail subject separates
+     * releases, so identical reports thread together without exposing the whole trace in the subject.
+     */
+    private fun signature(error: Throwable): String {
+        val key = buildString {
+            append(error.javaClass.name)
+            for (frame in error.stackTrace.take(8)) {
+                append('|').append(frame.className).append('#').append(frame.methodName)
+            }
+        }
+        val digest = java.security.MessageDigest.getInstance("SHA-256")
+            .digest(key.toByteArray(Charsets.UTF_8))
+        return java.math.BigInteger(1, digest).toString(16).padStart(64, '0').take(8)
+    }
+
     private fun write(context: Context, thread: Thread, error: Throwable) {
         val stamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)
             .format(java.util.Date())
@@ -61,8 +98,11 @@ object CrashRecorder {
         }.getOrDefault("МОЁ ТВ")
         val text = buildString {
             appendLine("$appName ${CoreBuildInfo.versionName} (${CoreBuildInfo.versionCode})")
-            appendLine("${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
+            appendLine("${Build.MANUFACTURER} ${Build.MODEL} (${Build.DEVICE}) · Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}, patch ${Build.VERSION.SECURITY_PATCH})")
+            appendLine("build ${Build.FINGERPRINT}")
+            appendLine(environment(context))
             appendLine("Crashed $stamp on thread \"${thread.name}\"")
+            appendLine("signature ${signature(error)}")
             appendLine()
             appendLine(android.util.Log.getStackTraceString(error))
             val live = runCatching { diagnostics?.invoke() }.getOrNull().orEmpty()

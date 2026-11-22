@@ -234,10 +234,8 @@
 2	app/src/main/java/tv/own/owntv/core/sync/local/DeviceIdentity.kt	name
 1	app/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	EPG sync failed sourceId=${source.id} reason=$reason message=$rawMessage
 1	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	$appName ${CoreBuildInfo.versionName} (${CoreBuildInfo.versionCode})
-1	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})
 1	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	--- live diagnostics leading up to the crash ---
 1	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	МОЁ ТВ
-1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	$name ${CoreBuildInfo.versionName} (${CoreBuildInfo.versionCode}) crash
 1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	${crash.length()}:${crash.lastModified()}
 1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	...[truncated]
 1	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	.uploaded

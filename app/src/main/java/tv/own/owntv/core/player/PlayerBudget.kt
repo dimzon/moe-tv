@@ -58,7 +58,10 @@ data class PlayerBudget(
             val info = ActivityManager.MemoryInfo().also { am.getMemoryInfo(it) }
             val totalGb = info.totalMem / (1024.0 * 1024.0 * 1024.0)
             return when {
-                am.isLowRamDevice || totalGb < 3.0 -> PlayerBudget(
+                // A low growth limit is its own kind of low memory: many cheap TV boxes report
+                // several GB of RAM but cap the per-app heap at 16–32 MiB (the 2026-11-14 Amlogic
+                // W2 report), so the RAM tier alone would give them the mid/high player budget.
+                am.isLowRamDevice || totalGb < 3.0 || am.memoryClass in 1..32 -> PlayerBudget(
                     // TV-class (1.5–2.5 GB total): keep the whole player well under ~180 MB PSS.
                     demuxerMaxBytes = "48MiB", demuxerBackBytes = "16MiB",
                     readaheadSecs = "10", cacheSecs = "30", lowSpec = true,

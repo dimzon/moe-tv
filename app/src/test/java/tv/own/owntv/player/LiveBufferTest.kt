@@ -141,12 +141,16 @@ class LiveBufferTest {
     }
 
     @Test
-    fun `the buffer ceiling never exceeds a quarter of the real java heap`() {
+    fun `heap-constrained devices leave an eighth of the java heap to the rest of the app`() {
         val mib = 1024L * 1024
-        // The Amlogic box from the 2026-11-14 crash report: 16 MB growth limit -> 4 MB buffer.
-        assertEquals((4 * mib).toInt(), LiveBuffer.targetBufferCapBytes(16 * mib))
-        // largeHeap on the same box lifts the heap; the cap follows instead of pinning 16 MB.
-        assertEquals((64 * mib).toInt(), LiveBuffer.targetBufferCapBytes(256 * mib))
+        // The Amlogic box from the 2026-11-14 crash report: 16 MB growth limit -> 2 MB buffer.
+        assertEquals((2 * mib).toInt(), LiveBuffer.targetBufferCapBytes(16 * mib))
+        // largeHeap on the same box lifts the heap but not the ROM: 384 MB -> 48 MB, not 96 MB.
+        assertEquals((48 * mib).toInt(), LiveBuffer.targetBufferCapBytes(384 * mib))
+        assertEquals((32 * mib).toInt(), LiveBuffer.targetBufferCapBytes(256 * mib))
+        // A healthy heap keeps the quarter unless the device tier itself is low-spec.
+        assertEquals((256 * mib).toInt(), LiveBuffer.targetBufferCapBytes(1024 * mib))
+        assertEquals((128 * mib).toInt(), LiveBuffer.targetBufferCapBytes(1024 * mib, lowSpec = true))
         // Tiny/unknown heaps keep a sane floor rather than rounding down to zero.
         assertEquals((2 * mib).toInt(), LiveBuffer.targetBufferCapBytes(mib))
     }

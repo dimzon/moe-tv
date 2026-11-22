@@ -1963,11 +1963,25 @@
 1	technical	app/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	v
 1	log	app/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	wrong package ${info.packageName}
 2	technical	app/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	x86_64
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	${Build.MANUFACTURER} ${Build.MODEL} (${Build.DEVICE}) · Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}, patch ${Build.VERSION.SECURITY_PATCH})
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	(class ${am.memoryClass}/${am.largeMemoryClass} MiB, lowRam=${am.isLowRamDevice})
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	32-bit
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	64-bit
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	ABIs ${Build.SUPPORTED_ABIS.joinToString()} · $processBits process · heap ${heapMiB} MiB
 1	technical	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	Crashed $stamp on thread "${thread.name}"
+1	technical	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	SHA-256
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	build ${Build.FINGERPRINT}
 1	file-path	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	diagnostics
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	environment unavailable: ${it.javaClass.simpleName}
 1	file-path	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	last_crash.txt
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	signature ${signature(error)}
 1	technical	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	yyyy-MM-dd HH:mm:ss
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	· RAM ${mem.totalMem shr 20} MiB, free ${mem.availMem shr 20} MiB
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	· uptime ${SystemClock.elapsedRealtime() / 1000} s
+1	technical	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	$name ${CoreBuildInfo.versionName} (${CoreBuildInfo.versionCode}) crash $signature
 1	technical	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	https://github.com/dimzon/moe-tv-site
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	signature
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	unknown
 2	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	Authorization failed
 1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	CertPath
 1	protocol	app/src/main/java/tv/own/owntv/core/util/ErrorMessages.kt	CertificateException
