@@ -23,6 +23,19 @@ import tv.own.owntv.core.CoreBuildInfo
 import java.io.File
 import java.io.IOException
 
+/** The system installer could not be opened — e.g. "install unknown apps" was not granted. */
+internal open class InstallException(cause: Throwable) : IOException(cause)
+
+/** [InstallException] caused by Android refusing the install request (missing permission). */
+internal class InstallPermissionException(cause: SecurityException) : InstallException(cause)
+
+/** Maps only installer exceptions; everything else stays with the caller's download/check mapping. */
+internal fun installFailureFor(error: Throwable): UpdateManager.Failure? = when (error) {
+    is InstallPermissionException -> UpdateManager.Failure.InstallPermission
+    is InstallException -> UpdateManager.Failure.Install
+    else -> null
+}
+
 /**
  * In-app updates straight from GitHub Releases: checks the repo's latest release, compares its tag
  * with the installed version, downloads the release APK, and hands it to the system installer.
@@ -47,6 +60,9 @@ class UpdateManager(
         data object EmptyDownload : Failure
         data object DownloadNetwork : Failure
         data object Install : Failure
+
+        /** Android refused to start the installer, usually because unknown-app installs are off. */
+        data object InstallPermission : Failure
 
         /** Internal storage cannot hold the APK twice (download + install session). */
         data class NotEnoughSpace(val requiredBytes: Long) : Failure
@@ -188,7 +204,7 @@ class UpdateManager(
                 _state.value = State.Available(info) // dialog stays sane if the user cancels install
             }.onFailure { error ->
                 Log.w(TAG, "update download failed: ${error.message}", error)
-                val failure = if (error is InstallException) Failure.Install else failureFor(error, checking = false)
+                val failure = installFailureFor(error) ?: failureFor(error, checking = false)
                 _state.value = State.Failed(failure, retryInfo = info)
             }
         }
@@ -218,19 +234,23 @@ class UpdateManager(
         registerInstallReceiver()
         val installer = context.packageManager.packageInstaller
         val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
-        val sessionId = try {
-            installer.createSession(params)
+        try {
+            val sessionId = installer.createSession(params)
+            installer.openSession(sessionId).use { session ->
+                session.openWrite(SESSION_ENTRY, 0, apk.length()).use { output ->
+                    apk.inputStream().use { it.copyTo(output) }
+                    session.fsync(output)
+                }
+                val intent = Intent(INSTALL_STATUS_ACTION).setPackage(context.packageName)
+                val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                session.commit(PendingIntent.getBroadcast(context, 0, intent, flags).intentSender)
+            }
+        } catch (e: SecurityException) {
+            // API 26+ requires the "install unknown apps" grant for this app; without it
+            // createSession() throws SecurityException, which used to be shown as a network failure.
+            throw InstallPermissionException(e)
         } catch (e: IOException) {
             throw InstallException(e)
-        }
-        installer.openSession(sessionId).use { session ->
-            session.openWrite(SESSION_ENTRY, 0, apk.length()).use { output ->
-                apk.inputStream().use { it.copyTo(output) }
-                session.fsync(output)
-            }
-            val intent = Intent(INSTALL_STATUS_ACTION).setPackage(context.packageName)
-            val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-            session.commit(PendingIntent.getBroadcast(context, 0, intent, flags).intentSender)
         }
         apk.delete() // the session owns its own copy now
     }
@@ -301,8 +321,6 @@ class UpdateManager(
         }
         return false
     }
-
-    private class InstallException(cause: Throwable) : IOException(cause)
 
     companion object {
         private const val TAG = "UpdateManager"

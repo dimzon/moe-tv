@@ -58,6 +58,7 @@ internal fun updateFailureText(failure: UpdateManager.Failure): String = when (f
     UpdateManager.Failure.EmptyDownload -> stringResource(R.string.update_empty_download)
     UpdateManager.Failure.DownloadNetwork -> stringResource(R.string.update_failed_download)
     UpdateManager.Failure.Install -> stringResource(R.string.update_install_failed)
+    UpdateManager.Failure.InstallPermission -> stringResource(R.string.update_install_permission)
     is UpdateManager.Failure.NotEnoughSpace -> stringResource(
         R.string.update_not_enough_space,
         Formatter.formatShortFileSize(LocalContext.current, failure.requiredBytes),

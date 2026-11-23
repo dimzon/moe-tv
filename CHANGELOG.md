@@ -51,6 +51,7 @@
 - **Volume keys no longer open the player controls before changing the volume**
 - **Customize: the Move arrows keep focus, so items can be shifted several positions in a row**
 - **Channel numbers are no longer cut to their first digit in channel lists**
+- **A refused installer permission is reported as such instead of a network failure**
 - **A category created inside "Move to…" is selected there as soon as it is saved**
 - **Customize: a category list no longer crashes while its first row is focused during a refresh**
 - **History: the channel logo stretches over its whole placeholder instead of a gray frame around it**

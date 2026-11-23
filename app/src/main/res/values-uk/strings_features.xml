@@ -82,6 +82,7 @@
     <string name="update_failed_download_http">Під час завантаження оновлення отримано помилку HTTP <xliff:g id="code">%1$s</xliff:g>.</string>
     <string name="update_empty_download">Сервер оновлень повернув порожній файл APK.</string>
     <string name="update_install_failed">Системному інсталятору не вдалося відкрити завантажене оновлення.</string>
+    <string name="update_install_permission">Android не дозволив запустити інсталятор. Дозвольте встановлення невідомих застосунків для МОЁ ТВ у «Налаштування → Застосунки» і спробуйте знову.</string>
     <string name="update_not_enough_space">Недостатньо вільного місця для оновлення. Звільніть близько <xliff:g id="size">%1$s</xliff:g> і повторіть спробу.</string>
     <string name="update_damaged_download">Оновлення завантажилося не повністю. Перевірте з\'єднання та повторіть спробу.</string>
     <string name="update_install_rejected">Системний інсталятор відхилив оновлення: <xliff:g id="reason">%1$s</xliff:g></string>

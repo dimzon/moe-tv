@@ -140,6 +140,8 @@
     <string name="update_empty_download">The update server returned an empty APK.</string>
     <!-- Translators: Error when the system installer cannot open the downloaded update. -->
     <string name="update_install_failed">The downloaded update could not be opened by the system installer.</string>
+    <!-- Translators: Android refused to start the installer until "install unknown apps" is allowed for this app. -->
+    <string name="update_install_permission">Android would not start the installer. Allow installing unknown apps for МОЁ ТВ in Settings › Apps, then try again.</string>
     <!-- Translators: Error when there is not enough free storage to download the update. "size" is a formatted size such as "114 MB". -->
     <string name="update_not_enough_space">Not enough free storage for the update. Free up about <xliff:g id="size">%1$s</xliff:g> and try again.</string>
     <!-- Translators: Error when the downloaded update file is incomplete or corrupted. -->
