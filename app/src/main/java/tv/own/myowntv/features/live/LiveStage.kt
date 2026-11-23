@@ -165,9 +165,17 @@ internal fun LiveHeader(category: String, count: Int?, showChevron: Boolean, mod
 }
 
 /**
- * `.chrow`: 84 high, 20 padding, 18 gap — number (50, right-aligned, 20/600 dim), white logo plate
- * 76×54, name 22/700, "programme · time left" 17 muted (the time part at 60%), a 300×4 progress line;
- * then the provider tags and ♥ when a favourite. Focused = FX.
+ * Width of the channel-number column: the base 50 mpx, widened to fit the longest number actually
+ * in the list. A fixed column ellipsized four-digit numbers ("only the first digit is visible").
+ * Mirrors the guide's label column, which is sized from the longest number rather than a constant.
+ */
+internal fun liveNumberWidth(numbers: List<Int?>, fontScale: Float = 1f): androidx.compose.ui.unit.Dp =
+    maxOf(50f, (numbers.maxOfOrNull { it?.toString()?.length ?: 0 } ?: 0) * 13f * fontScale).mpx
+
+/**
+ * `.chrow`: 84 high, 20 padding, 18 gap — number (sized by [liveNumberWidth], right-aligned,
+ * 20/600 dim), white logo plate 76×54, name 22/700, "programme · time left" 17 muted (the time part
+ * at 60%), a 300×4 progress line; then the provider tags and ♥ when a favourite. Focused = FX.
  * [trailing] replaces that end group (the player's History sheet shows when each was watched).
  */
 @Composable
@@ -178,6 +186,7 @@ internal fun LiveStageRow(
     nowTitle: String?,
     isFavorite: Boolean,
     showNumber: Boolean,
+    numberWidth: androidx.compose.ui.unit.Dp = 50.mpx,
     onFocus: () -> Unit,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -195,8 +204,9 @@ internal fun LiveStageRow(
                 channel.number?.toString().orEmpty(),
                 style = stageText(20, 600).copy(textAlign = TextAlign.End, fontFeatureSettings = Tabular),
                 color = if (focused) stageTone(Color(0xFFE6F2EE), StageColors.FxLine) else StageColors.Dim,
-                maxLines = 1, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.width(50.mpx),
+                // Always the whole number: the column is sized from the longest value in the list.
+                maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.width(numberWidth),
             )
         }
         LivePlate(channel.logoUrl, 76.mpx, 54.mpx)

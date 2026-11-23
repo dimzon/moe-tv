@@ -192,6 +192,12 @@ fun LiveScreen(
     // in a large category was a dozen chunked queries a minute to learn nothing new.
     val nowPlaying by vm.nowPlaying.collectAsStateWithLifecycle()
     val loadedChannels = channels.itemSnapshotList.items.filterNotNull()
+    // One shared number column for the whole list: a four-digit fallback number must not be clipped
+    // just because another row has a short one. Recomputed only when the loaded channels change.
+    val numberFontScale = androidx.compose.ui.platform.LocalDensity.current.fontScale
+    val numberWidth = remember(loadedChannels, numberFontScale) {
+        liveNumberWidth(loadedChannels.map { it.number }, numberFontScale)
+    }
     LaunchedEffect(loadedChannels.size, loadedChannels.firstOrNull()?.id, loadedChannels.lastOrNull()?.id) {
         vm.ensureNowPlaying(loadedChannels)
     }
@@ -818,6 +824,7 @@ fun LiveScreen(
                                     nowTitle = nowPlaying[channel.id],
                                     isFavorite = favoriteIds.contains(channel.id),
                                     showNumber = showChannelNumbers,
+                                    numberWidth = numberWidth,
                                     modifier = Modifier.gridFocusTarget(
                                         itemId = channel.id, index = index,
                                         contextId = contextChannelId, contextFocus = contextFocus,

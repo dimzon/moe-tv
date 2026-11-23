@@ -85,6 +85,7 @@ import tv.own.owntv.core.i18n.horizontalDirection
 import tv.own.owntv.core.parser.XtEpgEntry
 import tv.own.myowntv.features.home.relativeLastWatchedLabel
 import tv.own.myowntv.features.live.LiveStageRow
+import tv.own.myowntv.features.live.liveNumberWidth
 import tv.own.owntv.core.live.ProviderTags
 import tv.own.myowntv.features.settings.SettingsViewModel
 import tv.own.myowntv.ui.components.chNavPaging
@@ -211,6 +212,9 @@ internal fun ChannelListPanel(
     val layoutDirection = LocalLayoutDirection.current
     val history = watchedAt != null
     val playingIndex = remember(channels, currentId) { channels.indexOfFirst { it.id == currentId } }
+    // One number column for the overlay too, sized by the longest number in this list.
+    val numberFontScale = androidx.compose.ui.platform.LocalDensity.current.fontScale
+    val numberWidth = remember(channels, numberFontScale) { liveNumberWidth(channels.map { it.number }, numberFontScale) }
     val listState = rememberLazyListState()
     // The row that owns [focusTarget]: the entry row at first, then wherever paging jumped to.
     var targetIndex by remember(channels, entryIndex) { mutableIntStateOf(entryIndex) }
@@ -309,6 +313,7 @@ internal fun ChannelListPanel(
                     nowTitle = nowPlaying[ch.id],
                     isFavorite = ch.id in favoriteIds,
                     showNumber = showNumbers,
+                    numberWidth = numberWidth,
                     onFocus = { focusedIndex = index; onFocusChannel(ch) },
                     onClick = { onSelect(ch) },
                     onLongClick = {},
