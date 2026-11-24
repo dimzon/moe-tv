@@ -173,7 +173,7 @@ fun SearchScreen(
     val recent by vm.recentSearches.collectAsStateWithLifecycle()
     val kinds by vm.kinds.collectAsStateWithLifecycle()
     val nowPlaying by liveVm.nowPlaying.collectAsStateWithLifecycle()
-    val nowNext by liveVm.nowNext.collectAsStateWithLifecycle()
+    val keyedNowNext by liveVm.keyedNowNext.collectAsStateWithLifecycle()
     val livePreviewSetting by liveVm.livePreviewEnabled.collectAsStateWithLifecycle()
     val singleSessionBlocked by liveVm.previewBlockedSingleSession.collectAsStateWithLifecycle()
 
@@ -422,7 +422,7 @@ fun SearchScreen(
                 LiveStagePane(
                     channel = activeCh,
                     channelName = ProviderTags.parse(activeCh.name).name,
-                    nowNext = nowNext,
+                    nowNext = nowNextForChannel(keyedNowNext, activeCh.id),
                     previewEngine = liveVm.previewEngine,
                     showVideo = previewOn,
                     singleSessionBlocked = singleSessionBlocked,

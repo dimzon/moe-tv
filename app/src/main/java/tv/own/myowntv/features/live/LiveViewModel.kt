@@ -304,25 +304,24 @@ class LiveViewModel(
     private val epgRefresh = MutableStateFlow(0)
 
 
-    /** Now/next for the focused channel, fetched (debounced) — each answer with the id of the channel it
-     *  was looked up for, so [zapGuide] can tell a stale one. [nowNext] is the answer alone. */
-    private val keyedNowNext: StateFlow<Pair<String?, EpgNowNext?>> = combine(_previewChannel, epgRefresh) { ch, tick -> ch to tick }
+    /** Now/next for the focused channel, fetched (debounced), together with the id it was read for.
+     *  While the debounced read for a newly focused channel is pending, the pair still holds the
+     *  previous channel's answer — every reader must check the id ([nowNextForChannel],
+     *  [rowProgramme]) before putting a programme under a channel. */
+    val keyedNowNext: StateFlow<Pair<String?, EpgNowNext?>> = combine(_previewChannel, epgRefresh) { ch, tick -> ch to tick }
         .debounce(350)
         .distinctUntilChanged { a, b -> a.first?.id == b.first?.id && a.second == b.second }
         .mapLatest { (ch, _) -> ch?.id to ch?.let { epgReader.nowNext(it, custom.value, epgOffset.value) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null to null)
 
-    val nowNext: StateFlow<EpgNowNext?> = keyedNowNext.map { it.second }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
-
-    /**
-     * Now/next for the channel-change banner. Null until the answer is for the channel actually on
-     * screen: [nowNext] is debounced, so for a moment after a zap it still holds the previous channel's
-     * programme, and the banner would otherwise name the new channel over the old one's show.
-     */
-    val zapGuide: StateFlow<EpgNowNext?> = combine(keyedNowNext, _previewChannel) { (id, epg), ch ->
-        epg.takeIf { id != null && id == ch?.id }
+    /** Null until the debounced answer belongs to the channel in focus: after a zap the old
+     *  channel's programme must not appear under the new one, in the list, the pane or the HUD. */
+    val nowNext: StateFlow<EpgNowNext?> = combine(keyedNowNext, _previewChannel) { keyed, ch ->
+        nowNextForChannel(keyed, ch?.id)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** The channel-change banner reads the same guarded answer as the rows and the pane. */
+    val zapGuide: StateFlow<EpgNowNext?> get() = nowNext
 
     /**
      * The focused channel's REAL primary category name — resolved from its membership's first

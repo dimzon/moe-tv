@@ -171,7 +171,7 @@ fun LiveScreen(
     val previewArmed by vm.previewArmed.collectAsStateWithLifecycle()
     val previewBlockedSingleSession by vm.previewBlockedSingleSession.collectAsStateWithLifecycle()
     val previewBlockedByMemory by vm.previewBlockedByMemory.collectAsStateWithLifecycle()
-    val nowNext by vm.nowNext.collectAsStateWithLifecycle()
+    val keyedNowNext by vm.keyedNowNext.collectAsStateWithLifecycle()
     val searchQuery by vm.searchQuery.collectAsStateWithLifecycle()
     /** The search field's keyboard is open — ◀ then moves the text cursor, not to Categories. */
     var searchEditing by remember { mutableStateOf(false) }
@@ -808,9 +808,6 @@ fun LiveScreen(
                                 null
                             }
                             if (channel != null) {
-                                val isPreviewed by remember(channel.id) {
-                                    androidx.compose.runtime.derivedStateOf { previewChannel?.id == channel.id }
-                                }
                                 val isTarget by remember(channel.id) {
                                     androidx.compose.runtime.derivedStateOf { targetChannelIdState.value == channel.id }
                                 }
@@ -818,9 +815,9 @@ fun LiveScreen(
                                 LiveStageRow(
                                     channel = channel,
                                     name = parsed,
-                                    // The channel under the cursor answers from the preview itself, so the row
-                                    // and the stage beside it can never disagree.
-                                    now = if (isPreviewed) nowNext?.now ?: nowProgrammes[channel.id] else nowProgrammes[channel.id],
+                                    // The focused row takes the preview's answer only once it is keyed to this
+                                    // channel; until then, and for every other row, use its own guide entry.
+                                    now = rowProgramme(keyedNowNext, channel.id, nowProgrammes),
                                     nowTitle = nowPlaying[channel.id],
                                     isFavorite = favoriteIds.contains(channel.id),
                                     showNumber = showChannelNumbers,
@@ -901,7 +898,9 @@ fun LiveScreen(
             LiveStagePane(
                 channel = videoChannel,
                 channelName = videoChannel?.let { ProviderTags.parse(it.name).name },
-                nowNext = nowNext,
+                // With "OK previews first" the picture stays on the channel OK chose, but the
+                // programme below still follows the highlighted row.
+                nowNext = nowNextForChannel(keyedNowNext, previewChannel?.id),
                 previewEngine = vm.previewEngine,
                 showVideo = effectivePreview && (!previewOnOk || paneChannel != null),
                 singleSessionBlocked = previewBlockedSingleSession,

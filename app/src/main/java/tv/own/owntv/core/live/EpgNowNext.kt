@@ -17,3 +17,22 @@ data class EpgNowNext(
      *  null on the short-EPG path, which carries none. */
     val nowDetails: tv.own.owntv.core.parser.EpgDetails? = null,
 )
+
+/**
+ * The now/next answer only when it was looked up for [channelId]. The focused-channel read is
+ * debounced, so while the highlight moves on the key still names the previous channel: showing
+ * that answer under the new channel is what made the row briefly name the wrong programme.
+ */
+internal fun nowNextForChannel(keyed: Pair<String?, EpgNowNext?>, channelId: String?): EpgNowNext? =
+    keyed.second.takeIf { channelId != null && keyed.first == channelId }
+
+/**
+ * What a channel row prints: the fresh answer for that channel when it has arrived, otherwise the
+ * batched per-channel guide. The keyed guard keeps a stale answer from ever reaching another row.
+ */
+internal fun rowProgramme(
+    keyed: Pair<String?, EpgNowNext?>,
+    channelId: String,
+    perChannel: Map<String, XtEpgEntry>,
+): XtEpgEntry? =
+    nowNextForChannel(keyed, channelId)?.now ?: perChannel[channelId]
