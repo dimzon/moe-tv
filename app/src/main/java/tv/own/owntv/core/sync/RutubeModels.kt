@@ -37,21 +37,33 @@ internal fun RutubeChannel.providerNumber(): Int? =
     orderNumber?.takeUnless { it <= 0 || it == NO_NUMBER || it == NO_NUMBER_WIDE }
 
 /**
- * Numbers for the whole catalogue. A real `order_number` when RuTube carries one; every row it
- * leaves unnumbered (ТВ «Известия», the regional tail, feed-only channels) gets the app's own
- * sequential number after the highest provider number, skipping any number the catalogue already
- * uses — so the number column is never blank and direct tune reaches every channel. The values
- * move when the catalogue changes: they are ours, not the provider's.
+ * Numbers for the whole catalogue. The first channel for a real `order_number` keeps it; a duplicate
+ * gets the first free number after it (so RuTube's two channel-1 rows become 1 and 2). Rows RuTube
+ * leaves unnumbered (ТВ «Известия», the regional tail, feed-only channels) get an app-owned number
+ * after the highest provider number. Every number is unique, so the column never shows two channels
+ * under one number and direct tune has one target. Fallback values move with the catalogue.
  */
 internal fun rutubeChannelNumbers(channels: List<RutubeChannel>): Map<String, Int> {
-    val taken = channels.mapNotNull { it.providerNumber() }.toSet()
-    var next = (taken.maxOrNull() ?: 0) + 1
+    val providerNumbers = channels.mapNotNull { it.providerNumber() }.toSet()
+    var tail = (providerNumbers.maxOrNull() ?: 0) + 1
+    val used = HashSet<Int>(channels.size)
     val numbers = HashMap<String, Int>(channels.size)
     for (channel in channels) {
-        numbers[channel.videoId] = channel.providerNumber() ?: run {
-            while (next in taken) next++
-            next++
+        val provider = channel.providerNumber()
+        val number = when {
+            provider != null && provider !in used -> provider
+            provider != null -> {
+                var candidate = provider + 1
+                while (candidate in providerNumbers || candidate in used) candidate++
+                candidate
+            }
+            else -> {
+                while (tail in used) tail++
+                tail++
+            }
         }
+        numbers[channel.videoId] = number
+        used += number
     }
     return numbers
 }

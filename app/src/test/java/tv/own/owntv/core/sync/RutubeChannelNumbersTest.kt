@@ -30,6 +30,29 @@ class RutubeChannelNumbersTest {
     }
 
     @Test
+    fun `duplicate provider numbers get unique app-assigned fallbacks`() {
+        val numbers = rutubeChannelNumbers(
+            listOf(channel("first", 1), channel("tnt", 1), channel("high", 1501), channel("unnumbered", 999)),
+        )
+        assertEquals(1, numbers["first"])
+        assertEquals(2, numbers["tnt"])
+        assertEquals(1501, numbers["high"])
+        assertEquals(1502, numbers["unnumbered"])
+        assertEquals(4, numbers.values.toSet().size)
+    }
+
+    @Test
+    fun `duplicate fallback skips provider numbers and earlier fallbacks`() {
+        val numbers = rutubeChannelNumbers(
+            listOf(channel("first", 1), channel("tnt", 1), channel("channel2", 2), channel("another", 1)),
+        )
+        assertEquals(1, numbers["first"])
+        assertEquals(2, numbers["channel2"])
+        assertEquals(3, numbers["tnt"])
+        assertEquals(4, numbers["another"])
+    }
+
+    @Test
     fun `the 999 and 99999 placeholders and a missing number all mean unnumbered`() {
         val numbers = rutubeChannelNumbers(
             listOf(channel("izvestia", 999), channel("ural1", 99999), channel("sky", null)),
