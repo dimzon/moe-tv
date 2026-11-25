@@ -144,4 +144,5 @@
     <string name="launcher_pinned_live_title">Замацаваныя</string>
     <string name="launcher_pinned_live_description">Замацаваныя каналы прамога эфіру</string>
     <string name="launcher_category_description">Каналы прамога эфіру гэтай катэгорыі</string>
+    <string name="launcher_favorites_description">Абраныя каналы прамога эфіру</string>
 </resources>

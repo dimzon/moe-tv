@@ -6,6 +6,8 @@ enum class TvProviderSurface {
     RECENT_LIVE,
     /** Cards the user explicitly pinned to the Android TV launcher (see TvHomePublisher). */
     PINNED_LIVE,
+    /** The Live Favorites row and its channel cards on the Android TV launcher. */
+    FAVORITES_LIVE,
     /** Launcher row (PreviewChannel) for one TV category — SmartRuTube-style category publishing. */
     CATEGORY_ROW,
     /** A channel card (PreviewProgram) inside a category row. */

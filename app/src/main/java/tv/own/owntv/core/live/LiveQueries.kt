@@ -94,9 +94,18 @@ fun liveCountFlow(
  * merit, so hiding its provider folder must not empty it (the Guide already worked this way). A
  * locked category is stricter: its channels stay out of every list until the PIN opens it.
  */
-fun isChannelVisible(ch: ChannelEntity, cust: SectionCustomizations, hiddenCats: Set<Long>, key: LiveKey? = null): Boolean =
-    CustomizeKeys.channel(ch) !in cust.hiddenItems && !tv.own.owntv.core.database.ChannelMembership.allExcluded(ch, cust.sealedCategoryIds) && !cust.seals(key) &&
-        (!hiddenCategoryApplies(key) || tv.own.owntv.core.database.ChannelMembership.visible(ch, hiddenCats))
+fun isChannelVisible(
+    ch: ChannelEntity,
+    cust: SectionCustomizations,
+    hiddenCats: Set<Long>,
+    key: LiveKey? = null,
+    membership: Map<String, Set<Long>> = tv.own.owntv.core.database.ChannelMembership.snapshot,
+): Boolean {
+    val categories = membership[ch.remoteId]
+    val sealed = !categories.isNullOrEmpty() && categories.all { it in cust.sealedCategoryIds }
+    val hidden = hiddenCategoryApplies(key) && !categories.isNullOrEmpty() && categories.all { it in hiddenCats }
+    return CustomizeKeys.channel(ch) !in cust.hiddenItems && !sealed && !cust.seals(key) && !hidden
+}
 
 /** Whether a hidden provider category filters the list shown for [key] (see [isChannelVisible]). */
 fun hiddenCategoryApplies(key: LiveKey?): Boolean =

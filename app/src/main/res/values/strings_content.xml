@@ -255,4 +255,6 @@
     <string name="launcher_pinned_live_description">Your pinned live channels</string>
     <!-- Translators: Description of a launcher row that holds the live channels of one category. The row title is the category name. -->
     <string name="launcher_category_description">Live channels in this category</string>
+    <!-- Translators: Description of the launcher row holding the user's favorite live channels. -->
+    <string name="launcher_favorites_description">Your favorite live channels</string>
 </resources>

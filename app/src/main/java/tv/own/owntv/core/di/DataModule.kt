@@ -247,5 +247,5 @@ val dataModule = module {
     factory { tv.own.owntv.core.setup.SourceImporter(get(), get(), get(), get(), get()) }
     // Android TV launcher cards for pinned live channels. One singleton so the menu, Settings and the
     // startup refresh all share the same pin set and the same mutex around the platform provider.
-    single { tv.own.owntv.core.tv.TvHomePublisher(androidContext(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    single { tv.own.owntv.core.tv.TvHomePublisher(androidContext(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 }

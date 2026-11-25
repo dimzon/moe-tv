@@ -723,6 +723,11 @@ fun MyOwnTVShell(
                 onSelectSection(MainSection.LIVE_TV)
                 onDeepLinkConsumed()
             }
+            LauncherDeepLink.OpenFavoritesSection -> {
+                onSelectSection(MainSection.LIVE_TV)
+                liveVm.show(LiveKey.Favorites)
+                onDeepLinkConsumed()
+            }
             else -> {
                 // Live links resolve through the live view model; old movie/episode/show links
                 // predate the live-only app and are consumed silently.

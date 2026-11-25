@@ -87,6 +87,19 @@ class CategoryLockRulesTest {
     }
 
     @Test
+    fun `launcher visibility can use a directly loaded membership map`() {
+        val ch = ChannelEntity(name = "X", remoteId = "c1")
+        ChannelMembership.snapshot = emptyMap()
+        val sealed = SectionCustomizations(sealedCategories = setOf(keyOf(3)), sealedCategoryIds = setOf(3L))
+        assertFalse(
+            isChannelVisible(
+                ch, sealed, emptySet(), LiveKey.Favorites,
+                membership = mapOf("c1" to setOf(3L)),
+            ),
+        )
+    }
+
+    @Test
     fun `nothing in a sealed custom category shows while it is open on screen`() {
         val ch = ChannelEntity( name = "Y", remoteId = "c2")
         val c = SectionCustomizations(sealedCategories = setOf("custom:x"))

@@ -11,6 +11,10 @@ sealed interface LauncherDeepLink {
         override fun toUri(): Uri = Uri.parse("moetv://open/live")
     }
 
+    data object OpenFavoritesSection : LauncherDeepLink {
+        override fun toUri(): Uri = Uri.parse("moetv://open/favorites")
+    }
+
     data class Live(
         val sourceId: Long? = null,
         val remoteId: String? = null,
@@ -31,6 +35,7 @@ sealed interface LauncherDeepLink {
             return when (uri.host) {
                 "open" -> when (uri.pathSegments.firstOrNull()) {
                     "live" -> OpenLiveSection
+                    "favorites" -> OpenFavoritesSection
                     else -> null
                 }
                 "play" -> when (uri.pathSegments.firstOrNull()) {

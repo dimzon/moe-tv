@@ -144,4 +144,5 @@
     <string name="launcher_pinned_live_title">Закріплені</string>
     <string name="launcher_pinned_live_description">Закріплені канали прямої ефіру</string>
     <string name="launcher_category_description">Канали прямої ефіру цієї категорії</string>
+    <string name="launcher_favorites_description">Улюблені канали прямого ефіру</string>
 </resources>

@@ -221,6 +221,15 @@ interface ChannelDao {
     )
     suspend fun snapshotFavoritesManual(contextKey: String, limit: Int): List<ChannelEntity>
 
+    /** Live Favorites in the same manual order as the TV rail; observes membership, order and channels. */
+    @Query(
+        "SELECT c.* FROM channels c " +
+            "INNER JOIN favorites f ON f.itemId = c.remoteId " +
+            "LEFT JOIN content_order o ON o.itemId = c.remoteId AND o.contextKey = :contextKey " +
+            "ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, f.addedAt DESC",
+    )
+    fun observeFavoritesManual(contextKey: String): Flow<List<ChannelEntity>>
+
     // --- Counts ---
     @Query("SELECT COUNT(*) FROM channels WHERE remoteId IN (SELECT channelHexId FROM channel_category WHERE categoryId = :categoryId)")
     fun countByCategory(categoryId: Long): Flow<Int>

@@ -19,6 +19,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -30,11 +32,14 @@ import tv.own.owntv.core.brand.AppIconSwitcher
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.customize.railCategories
+import tv.own.owntv.core.database.ChannelCategoryDao
+import tv.own.owntv.core.database.ChannelMembership
 import tv.own.owntv.core.database.ManualOrdering
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.TvProviderProgramDao
 import tv.own.owntv.core.database.entity.ChannelEntity
+import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.database.entity.TvProviderProgramEntity
 import tv.own.owntv.core.i18n.AppLocale
 import tv.own.owntv.core.i18n.LocaleStore
@@ -49,8 +54,9 @@ import java.security.MessageDigest
 /**
  * Mirrors live channels into the Android TV launcher.
  *
- * Two kinds of rows are published, both through `androidx.tvprovider`:
+ * Three kinds of rows are published, both through `androidx.tvprovider`:
  * - one row of cards the user explicitly pinned from the channel menu ([TvProviderSurface.PINNED_LIVE]);
+ * - one row for Live Favorites ([TvProviderSurface.FAVORITES_LIVE]);
  * - one row per TV category ([TvProviderSurface.CATEGORY_ROW]) holding a card for every channel in that
  *   category ([TvProviderSurface.CATEGORY_PROGRAM]) — the same shape SmartRuTube uses for its categories.
  *
@@ -67,6 +73,7 @@ class TvHomePublisher(
     private val context: Context,
     private val channelDao: ChannelDao,
     private val categoryDao: CategoryDao,
+    private val channelCategoryDao: ChannelCategoryDao,
     private val contentOrderDao: tv.own.owntv.core.database.dao.ContentOrderDao,
     private val customCategoryDao: tv.own.owntv.core.database.dao.CustomCategoryDao,
     private val providerDao: TvProviderProgramDao,
@@ -85,6 +92,13 @@ class TvHomePublisher(
 
     init {
         scope.launch { runCatching { reload() } }
+        scope.launch {
+            runCatching {
+                channelDao.observeFavoritesManual(ContentOrderEntity.FAV_CONTEXT)
+                    .conflate()
+                    .collect { refreshFavorites() }
+            }.onFailure { logW("favorites observation failed", it) }
+        }
     }
 
     companion object {
@@ -92,6 +106,7 @@ class TvHomePublisher(
         /** groupId of the bookkeeping row for the app-owned pinned row. */
         private const val CHANNEL_GROUP_ID = 0L
         private const val CHANNEL_STABLE_KEY = "pinned-live"
+        private const val FAVORITES_STABLE_KEY = "favorites-live"
         private const val MAX_PINNED = 30
     }
 
@@ -154,6 +169,7 @@ class TvHomePublisher(
         mutex.withLock {
             listOf(
                 TvProviderSurface.PINNED_LIVE,
+                TvProviderSurface.FAVORITES_LIVE,
                 TvProviderSurface.CATEGORY_ROW,
                 TvProviderSurface.CATEGORY_PROGRAM,
             ).forEach { surface ->
@@ -176,6 +192,7 @@ class TvHomePublisher(
         val cust: tv.own.owntv.core.customize.SectionCustomizations,
         val hiddenCats: Set<Long>,
         val manualContexts: Set<String>,
+        val memberships: Map<String, Set<Long>>,
     )
 
     private suspend fun listState(): ListState {
@@ -186,12 +203,14 @@ class TvHomePublisher(
             hiddenCats = tv.own.owntv.core.content.AdultCategoryClassifier
                 .hiddenCategoryIds(categoryDao.observe().first(), cust.hiddenCategories),
             manualContexts = contentOrderDao.observeContextKeys().first().toSet(),
+            memberships = ChannelMembership.mapOf(channelCategoryDao.observeAll().first()),
         )
     }
 
     private suspend fun syncLocked(requestBrowsable: Boolean) {
         val state = listState()
         syncPinnedLocked(requestBrowsable, state)
+        syncFavoritesLocked(state)
         syncCategoriesLocked(state)
     }
 
@@ -230,7 +249,7 @@ class TvHomePublisher(
         // survive there (hidden channel, hidden/locked provider folder).
         val ordered = byId
             .filter { (row, channel) ->
-                isChannelVisible(channel, state.cust, state.hiddenCats, LiveKey.All)
+                isChannelVisible(channel, state.cust, state.hiddenCats, LiveKey.All, state.memberships)
             }
             .let { list ->
                 if (state.alpha) list.sortedWith(compareBy({ it.second.name.lowercase() }))
@@ -257,6 +276,71 @@ class TvHomePublisher(
             )
         }
         logD("syncLocked channelId=$channelId pinned=${ordered.size}")
+    }
+
+    // --- FAVORITES -----------------------------------------------------------------
+
+    /** Targeted refresh for favorite add/remove/reorder and restore/sync bursts. */
+    private suspend fun refreshFavorites() = withContext(Dispatchers.IO) {
+        if (!enabled()) return@withContext
+        mutex.withLock { syncFavoritesLocked(listState()) }
+    }
+
+    /** Mirrors Live → Favorites, including its manual order and locked-channel visibility. */
+    private suspend fun syncFavoritesLocked(state: ListState) {
+        val rows = providerDao.getForSurface(TvProviderSurface.FAVORITES_LIVE)
+        val existingChannelRow = rows.firstOrNull { it.groupId == CHANNEL_GROUP_ID }
+        val favorites = channelDao.observeFavoritesManual(ContentOrderEntity.FAV_CONTEXT).first()
+            .filter { isChannelVisible(it, state.cust, state.hiddenCats, LiveKey.Favorites, state.memberships) }
+        if (favorites.isEmpty()) {
+            rows.forEach { row ->
+                deletePlatformRow(row)
+                providerDao.delete(TvProviderSurface.FAVORITES_LIVE, row.groupId)
+            }
+            return
+        }
+
+        val res = renderContext()
+        val channelRow = ensureChannelRow(
+            surface = TvProviderSurface.FAVORITES_LIVE,
+            groupId = CHANNEL_GROUP_ID,
+            existing = existingChannelRow,
+            displayName = res.getString(R.string.content_category_favorites),
+            description = res.getString(R.string.launcher_favorites_description),
+            appLink = LauncherDeepLink.OpenFavoritesSection.toUri(),
+            internalId = "owntv:favorites-live:$FAVORITES_STABLE_KEY",
+            requestBrowsable = true,
+        ) ?: return
+        val channelId = channelRow.providerProgramId ?: return
+
+        val desiredKeys = favorites.mapTo(HashSet()) { stableGroupId(it.id) }
+        for (row in rows) {
+            if (row.groupId == CHANNEL_GROUP_ID) continue
+            if (row.groupId !in desiredKeys) {
+                deletePlatformRow(row)
+                providerDao.delete(TvProviderSurface.FAVORITES_LIVE, row.groupId)
+            }
+        }
+        favorites.forEachIndexed { index, channel ->
+            val programGroupId = stableGroupId(channel.id)
+            val row = providerDao.find(TvProviderSurface.FAVORITES_LIVE, programGroupId)
+                ?: TvProviderProgramEntity(
+                    surface = TvProviderSurface.FAVORITES_LIVE,
+                    groupId = programGroupId,
+                    targetItemId = channel.id,
+                )
+            publishProgram(
+                surface = TvProviderSurface.FAVORITES_LIVE,
+                channelRow = channelRow,
+                programGroupId = programGroupId,
+                channel = channel,
+                row = row,
+                label = state.cust.displayName(channel),
+                description = channel.name.takeIf { it != state.cust.displayName(channel) }.orEmpty(),
+                weight = favorites.size - index,
+            )
+        }
+        logD("syncFavorites channelId=$channelId cards=${favorites.size}")
     }
 
     // --- CATEGORIES (SmartRuTube-style) -------------------------------------------
@@ -289,7 +373,7 @@ class TvHomePublisher(
                     } else if (state.alpha) channelDao.channelsInCategoryAlpha(entry.categoryId)
                     else channelDao.channelsInCategory(entry.categoryId)
                     base.filter { ch ->
-                        isChannelVisible(ch, state.cust, state.hiddenCats, listKey) &&
+                        isChannelVisible(ch, state.cust, state.hiddenCats, listKey, state.memberships) &&
                             (state.cust.movedFromOrigin[CustomizeKeys.channel(ch)]
                                 ?.let { it != contextKey } ?: true)
                     }
@@ -297,7 +381,7 @@ class TvHomePublisher(
                 entry.customId != null -> {
                     listKey = LiveKey.Custom(entry.customId)
                     ManualOrdering.order(customCategoryDao.baseChannelsManual(entry.customId), state.alpha)
-                        .filter { ch -> isChannelVisible(ch, state.cust, state.hiddenCats, listKey) }
+                        .filter { ch -> isChannelVisible(ch, state.cust, state.hiddenCats, listKey, state.memberships) }
                 }
                 else -> continue
             }
@@ -367,7 +451,7 @@ class TvHomePublisher(
     ): TvProviderProgramEntity? {
         // Built once: an already published category row is refreshed with the same values (including
         // the input id and TYPE_PREVIEW the launcher needs), not merely left as it was.
-        val categoryValues = if (surface == TvProviderSurface.CATEGORY_ROW) {
+        val categoryValues = if (surface == TvProviderSurface.CATEGORY_ROW || surface == TvProviderSurface.FAVORITES_LIVE) {
             Channel.Builder()
                 .setType(TvContractCompat.Channels.TYPE_PREVIEW)
                 .setDisplayName(displayName)
@@ -380,7 +464,7 @@ class TvHomePublisher(
         } else null
         // Same idea for the pinned row: its title/description/logo must follow the current locale and
         // branding, so an existing row is updated rather than left with whatever it was first given.
-        val previewChannel = if (surface != TvProviderSurface.CATEGORY_ROW) {
+        val previewChannel = if (surface != TvProviderSurface.CATEGORY_ROW && surface != TvProviderSurface.FAVORITES_LIVE) {
             PreviewChannel.Builder()
                 .setDisplayName(displayName)
                 .setDescription(description)
@@ -390,7 +474,7 @@ class TvHomePublisher(
                 .build()
         } else null
         if (existing?.providerProgramId != null) {
-            val present = if (surface == TvProviderSurface.CATEGORY_ROW) {
+            val present = if (surface == TvProviderSurface.CATEGORY_ROW || surface == TvProviderSurface.FAVORITES_LIVE) {
                 runCatching {
                     resolver.query(TvContractCompat.buildChannelUri(existing.providerProgramId), null, null, null, null)
                         ?.use { true } ?: false
@@ -416,7 +500,7 @@ class TvHomePublisher(
             logW("ensureChannel: platform row ${existing.providerProgramId} is gone")
         }
 
-        val channelId = if (surface == TvProviderSurface.CATEGORY_ROW) {
+        val channelId = if (surface == TvProviderSurface.CATEGORY_ROW || surface == TvProviderSurface.FAVORITES_LIVE) {
             // SmartRuTube publishes categories as real Channels (TYPE_PREVIEW + input id), not as
             // PreviewChannels; that is the shape the TV launcher treats as a browsable row.
             runCatching {
@@ -513,7 +597,8 @@ class TvHomePublisher(
         val id = row.providerProgramId ?: return
         runCatching {
             when {
-                row.surface == TvProviderSurface.CATEGORY_ROW ->
+                row.surface == TvProviderSurface.CATEGORY_ROW ||
+                    (row.surface == TvProviderSurface.FAVORITES_LIVE && row.groupId == CHANNEL_GROUP_ID) ->
                     resolver.delete(TvContractCompat.buildChannelUri(id), null, null)
                 row.surface == TvProviderSurface.PINNED_LIVE && row.groupId == CHANNEL_GROUP_ID ->
                     channelHelper.deletePreviewChannel(id)
