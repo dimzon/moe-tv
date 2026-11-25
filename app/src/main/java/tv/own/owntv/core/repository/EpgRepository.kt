@@ -31,8 +31,17 @@ class EpgRepository(
         if (keys.isEmpty()) return 0
         onProgress(keys.size, 0)
         val summary = tv.own.owntv.core.sync.RuTubeEpgSyncer(api, epgDao).sync(keys)
-        // A completed pass counts as an attempt even with zero programmes (upstream has no schedule
-        // for these channels); otherwise every cold start would hammer RuTube with the same 404s.
+        if (summary.hasFailures) {
+            // IOException keeps WorkManager's transient-failure classification: HTTP 5xx, timeouts and
+            // incomplete passes must retry instead of being treated as a terminal programmer error.
+            throw java.io.IOException(
+                "EPG sync incomplete: failedChannels=${summary.failedChannels}, " +
+                    "failedWrites=${summary.failedWrites}, failedSeed=${summary.failedSeed}",
+            )
+        }
+        // A completed pass counts as an attempt even with zero programmes (all channels returned 404);
+        // otherwise every cold start would hammer RuTube with the same 404s. Any failed channel/write
+        // above leaves the timestamp untouched so the worker reports/retries the incomplete pass.
         settings?.markEpgSynced(System.currentTimeMillis())
         onProgress(summary.channelsWithGuide, summary.programmesWritten)
         return summary.programmesWritten

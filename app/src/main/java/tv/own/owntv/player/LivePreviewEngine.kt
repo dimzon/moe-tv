@@ -73,6 +73,10 @@ class LivePreviewEngine(
     private val playbackPrefs: tv.own.owntv.core.player.PlaybackPrefsStore,
 ) : PlaybackEngine {
 
+    /** A pool tile is terminal once released: a late resolve must never rebuild its player. */
+    @Volatile var released: Boolean = false
+        private set
+
     // Escape-hatch toggle (Settings → App → Diagnostics). When off, no live fps/bitrate
     // measuring runs on this engine — declared values only. Never affects the playback pipeline.
     @Volatile private var measuredStatsEnabled = settings.measuredStreamStatsDefault
@@ -1670,6 +1674,7 @@ class LivePreviewEngine(
          *  advertised, which is every broadcast the scans found so far. */
         captions: List<tv.own.owntv.core.sync.RutubeCaption> = emptyList(),
     ) {
+        if (released) return
         LiveDiagnosticsLog.event("play() engine=$engineId url=${HttpClient.redactUrl(url)} muted=$muted")
         // THE reset. Everything a new channel must not inherit from the previous one lives in
         // [TuneState], so forgetting it is one assignment that cannot be partially done.
@@ -2007,6 +2012,7 @@ class LivePreviewEngine(
     /** Foregrounded: re-tune the live channel that was freed while backgrounded (at the live edge), so it
      *  resumes instead of sitting on a dead/empty stream. No-op if something is already playing. */
     fun onAppForegrounded() {
+        if (released) return
         val r = backgroundRestore ?: return
         backgroundRestore = null
         if (currentUrl != null) return
@@ -2082,6 +2088,8 @@ class LivePreviewEngine(
 
     fun release() {
         LiveDiagnosticsLog.event("release() — intentional")
+        released = true
+        discardBackgroundRestore()
         releaseLoudness()
         tune.stoppingIntentionally = true
         cancelProviderBackOff(); tune.providerBackOffs = 0

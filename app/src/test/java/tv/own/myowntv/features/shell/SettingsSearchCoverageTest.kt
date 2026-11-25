@@ -71,7 +71,22 @@ class SettingsSearchCoverageTest {
         val from = source.indexOf("val searchResults")
         val to = source.indexOf("val needle = searchQuery", from)
         assertTrue("could not find the search block — has it been renamed?", from in 0 until to)
-        source.substring(from, to)
+        val raw = source.substring(from, to)
+        // Some entries are extracted into helpers to keep the 4000-line composable under the JVM
+        // method-size limit. Count the helper only when the search block actually calls it.
+        val helpers = Regex("""\b([A-Za-z]\w*SearchEntry)\(""").findAll(raw)
+            .map { it.groupValues[1] }
+            .filter { it != "SettingsSearchEntry" }
+            .distinct()
+            .mapNotNull { name ->
+                val start = source.indexOf("private fun $name(")
+                if (start < 0) return@mapNotNull null
+                val end = source.indexOf("\n}", start)
+                if (end < 0) return@mapNotNull null
+                source.substring(start, end + 2)
+            }
+            .joinToString("\n")
+        raw + "\n" + helpers
     }
 
     /**

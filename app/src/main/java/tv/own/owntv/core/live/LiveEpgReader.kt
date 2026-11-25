@@ -12,12 +12,6 @@ import tv.own.owntv.core.epg.EpgShift
 import tv.own.owntv.core.parser.XtEpgEntry
 
 /**
- * How long a resolved now/next stays usable. Long enough that scrolling back to a channel costs
- * nothing, short enough that a programme changing over is noticed.
- */
-private const val CACHE_TTL_MS = 5 * 60_000L
-
-/**
  * How many stored rows to read for Now/Next/Later. Well over the six those show, because a second
  * feed carrying the channel interleaves its own rows, and the lower-priority ones are dropped
  * afterwards ([tv.own.owntv.core.epg.GuidePriority]) and would otherwise eat the list.
@@ -34,7 +28,10 @@ private const val UPCOMING_LIMIT = 18
  * rather than observed, so the caller stays the single place that knows a customization changed.
  */
 class LiveEpgReader(private val epgDao: EpgDao) {
-    private data class CachedEpg(val at: Long, val data: EpgNowNext)
+    private data class CachedEpg(val data: EpgNowNext) {
+        /** Valid exactly until the current programme stops, or the next one is due to start. */
+        val validUntilMs: Long get() = data.now?.stopMs ?: data.next?.startMs ?: Long.MIN_VALUE
+    }
 
     /** Written from the IO dispatcher (the now/next fetch) and cleared from Main (EPG mapping/shift
      *  changes), so it cannot be a plain HashMap — concurrent structural modification of one is
@@ -51,11 +48,15 @@ class LiveEpgReader(private val epgDao: EpgDao) {
         cache.remove(channelId)
     }
 
-    /** Now/next for [ch], cached ~5 min, from the stored bulk guide. */
-    suspend fun nowNext(ch: ChannelEntity, cust: SectionCustomizations, globalShiftMinutes: Int): EpgNowNext? =
+    /** Now/next for [ch], cached until the programme boundary, from the stored bulk guide. */
+    suspend fun nowNext(
+        ch: ChannelEntity,
+        cust: SectionCustomizations,
+        globalShiftMinutes: Int,
+        nowMs: Long = System.currentTimeMillis(),
+    ): EpgNowNext? =
         withContext(Dispatchers.IO) {
-            val now = System.currentTimeMillis()
-            cache[ch.id]?.takeIf { now - it.at < CACHE_TTL_MS }?.let { return@withContext it.data }
+            cache[ch.id]?.takeIf { nowMs < it.validUntilMs }?.let { return@withContext it.data }
 
             // The bulk guide via the effective EPG id (manual match overrides the channel's own id).
             val epgKey = ch.epgChannelId.trim().lowercase().takeIf { it.isNotEmpty() }
@@ -63,7 +64,7 @@ class LiveEpgReader(private val epgDao: EpgDao) {
             // up the SHIFTED "now" and move what comes back — display and catch-up then agree.
             val shift = EpgShift.minutesFor(cust, ch, globalShiftMinutes)
             if (epgKey != null) {
-                val at = EpgShift.toStored(now, shift)
+                val at = EpgShift.toStored(nowMs, shift)
                 val rows = epgDao.upcoming(epgKey, at, UPCOMING_LIMIT).first()
                 val nowProg = rows.onAirAt(at)
                 val future = rows.filter { it.startMs > (nowProg?.startMs ?: 0) }
@@ -74,7 +75,7 @@ class LiveEpgReader(private val epgDao: EpgDao) {
                     val days = runCatching { epgDao.coverageDays(epgKey) }.getOrNull()?.takeIf { it > 0 }
                     fun EpgProgrammeEntity.shifted() = EpgShift.apply(this, shift).toXt()
                     val result = EpgNowNext(nowProg?.shifted(), nextProg?.shifted(), future.drop(1).take(4).map { it.shifted() }, previous = prevProg?.shifted(), coverageDays = days, nowDetails = nowProg?.details)
-                    cache[ch.id] = CachedEpg(now, result)
+                    cache[ch.id] = CachedEpg(result)
                     return@withContext result
                 }
             }
@@ -108,10 +109,10 @@ class LiveEpgReader(private val epgDao: EpgDao) {
         channels: List<ChannelEntity>,
         cust: SectionCustomizations,
         globalShiftMinutes: Int,
+        nowMs: Long = System.currentTimeMillis(),
     ): Map<String, XtEpgEntry> = withContext(Dispatchers.IO) {
         if (channels.isEmpty()) return@withContext emptyMap()
-        val now = System.currentTimeMillis()
-                // Manual EPG-match overrides take precedence over the channel's own epgChannelId, mirroring nowNext.
+        // Manual EPG-match overrides take precedence over the channel's own epgChannelId, mirroring nowNext.
         // Shifted channels look up a different instant, so the batch is grouped by shift — with no
         // offsets configured (the normal case) that's still exactly one query group.
         val channelKeys = channels.mapNotNull { ch ->
@@ -124,7 +125,7 @@ class LiveEpgReader(private val epgDao: EpgDao) {
         val result = HashMap<String, XtEpgEntry>()
         for ((shift, group) in channelKeys.groupBy { it.third }) {
             val delta = shift * 60_000L
-            val at = EpgShift.toStored(now, shift)
+            val at = EpgShift.toStored(nowMs, shift)
             val rowsByKey = group
                 .map { it.second }.distinct()
                 .chunked(400)
@@ -135,7 +136,6 @@ class LiveEpgReader(private val epgDao: EpgDao) {
                 .groupBy { it.epgChannelId }
             for ((channelId, epgKey, _) in group) {
                 rowsByKey[epgKey]
-                    
                     ?.firstOrNull { at in it.startMs until it.stopMs }
                     ?.let { result[channelId] = XtEpgEntry(it.title, null, it.startMs + delta, it.stopMs + delta) }
             }
@@ -147,7 +147,7 @@ class LiveEpgReader(private val epgDao: EpgDao) {
         val fromStored = result.size
         for (ch in channels) {
             if (ch.id in result) continue
-            cachedNow(ch.id, now)?.let { result[ch.id] = it }
+            cachedNow(ch.id, nowMs)?.let { result[ch.id] = it }
         }
         CorePerf.log {
             "live_nowplaying channels=${channels.size} keyed=${channelKeys.size} " +
@@ -163,8 +163,9 @@ class LiveEpgReader(private val epgDao: EpgDao) {
      * preview pane's cache. Deliberately never fetches.
      */
     private fun cachedNow(channelId: String, now: Long): XtEpgEntry? =
-        cache[channelId]?.takeIf { now - it.at < CACHE_TTL_MS }?.data?.now
-            ?.takeIf { it.title.isNotBlank() }?.copy(description = null)
+        cache[channelId]?.takeIf { now < it.validUntilMs }?.data?.now
+            ?.takeIf { it.startMs <= now && it.stopMs > now && it.title.isNotBlank() }
+            ?.copy(description = null)
 
     /**
      * What was on [ch] at [atMs], and what followed it — the archive counterpart of [nowNext], for the

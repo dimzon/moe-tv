@@ -44,36 +44,53 @@ class RutubeApi(
      *
      * `per_page=500` returns each list in a single page today (the largest is ~90 rows); the loop
      * still follows `next` so a future server-side cap cannot truncate the catalogue. A genre
-     * failure is logged and skipped: the base list must never be lost to one bad bucket.
+     * failure is logged and skipped: the base list must never be lost to one bad bucket. The returned
+     * [RutubeCatalogue.isComplete] is false for any such failure, malformed page or pagination cap.
      */
-    suspend fun channels(categoryIds: Collection<Int> = emptyList()): List<RutubeChannel> =
+    suspend fun channels(categoryIds: Collection<Int> = emptyList()): RutubeCatalogue =
         withContext(Dispatchers.IO) {
             val out = LinkedHashMap<String, RutubeChannel>()
-            suspend fun collect(url: String) {
+            var complete = true
+            suspend fun collect(url: String): Boolean {
                 var next: String? = url
                 val visited = HashSet<String>()
-                while (!next.isNullOrBlank() && visited.size < MAX_PAGES && visited.add(next)) {
+                while (!next.isNullOrBlank()) {
+                    // A page cap or a next-page cycle means the provider did not expose an endpoint.
+                    if (visited.size >= MAX_PAGES || !visited.add(next)) return false
                     val page = RutubeParser.parseChannelPage(getText(next))
                     // Map.putIfAbsent is API 24; keep the first occurrence explicitly.
                     for (channel in page.results) if (channel.videoId !in out) out[channel.videoId] = channel
+                    if (!page.isValid) return false
                     next = page.nextUrl
                 }
+                return true
             }
-            collect("$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=wdp&tvprogramm=false&per_page=$PER_PAGE")
+            try {
+                complete = collect(
+                    "$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=wdp&tvprogramm=false&per_page=$PER_PAGE",
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                complete = false
+                Log.w(TAG, "RuTube base catalogue failed: ${e.message}")
+            }
             for (id in categoryIds) {
                 if (id == ALL_CATEGORY_ID) continue
                 try {
-                    collect(
-                        "$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=wdp" +
-                            "&tvprogramm=false&category=$id&per_page=$PER_PAGE",
-                    )
+                    if (!collect(
+                            "$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=wdp" +
+                                "&tvprogramm=false&category=$id&per_page=$PER_PAGE",
+                        )
+                    ) complete = false
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
+                    complete = false
                     Log.w(TAG, "RuTube category $id catalogue failed: ${e.message}")
                 }
             }
-            out.values.toList()
+            RutubeCatalogue(out.values.toList(), complete)
         }
 
     /**
@@ -88,21 +105,39 @@ class RutubeApi(
      * Rows without a genre mapping still yield channels — they appear in «Все» only. A failed row is
      * logged and skipped, exactly like a failed genre list above.
      */
-    suspend fun liveChannels(categories: List<RutubeCategory>): List<RutubeChannel> =
+    suspend fun liveChannels(categories: List<RutubeCategory>): RutubeCatalogue =
         withContext(Dispatchers.IO) {
-            val rows = RutubeParser.parseLiveFeedRows(getText("$baseUrl$LIVE_FEED_PATH"))
+            val rows = try {
+                RutubeParser.parseLiveFeedRows(getText("$baseUrl$LIVE_FEED_PATH"))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "RuTube live feed failed: ${e.message}")
+                return@withContext RutubeCatalogue(emptyList(), isComplete = false)
+            }
+            // The official feed is never legitimately empty; an empty/malformed response is not
+            // evidence that every formerly feed-backed channel disappeared.
+            if (rows.isEmpty()) return@withContext RutubeCatalogue(emptyList(), isComplete = false)
+
             val byId = LinkedHashMap<String, RutubeChannel>()
+            var complete = true
             for (row in rows) {
                 val categoryId = categoryIdFor(row.name, categories)
                 var next: String? = withClient(row.url)
                 val visited = HashSet<String>()
-                while (!next.isNullOrBlank() && visited.size < MAX_PAGES && visited.add(next)) {
+                var rowComplete = true
+                while (!next.isNullOrBlank()) {
+                    if (visited.size >= MAX_PAGES || !visited.add(next)) {
+                        rowComplete = false
+                        break
+                    }
                     val page = try {
                         RutubeParser.parseChannelPage(getText(next))
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
                         Log.w(TAG, "RuTube feed row «${row.name}» failed: ${e.message}")
+                        rowComplete = false
                         break
                     }
                     for (channel in page.results) {
@@ -115,10 +150,15 @@ class RutubeApi(
                             else -> existing
                         }
                     }
+                    if (!page.isValid) {
+                        rowComplete = false
+                        break
+                    }
                     next = page.nextUrl?.let(::withClient)
                 }
+                if (!rowComplete) complete = false
             }
-            byId.values.toList()
+            RutubeCatalogue(byId.values.toList(), complete)
         }
 
     suspend fun briefSchedules(): Map<String, List<RutubeProgramme>> = withContext(Dispatchers.IO) {
@@ -126,7 +166,12 @@ class RutubeApi(
         var url: String? = "$baseUrl/api/v2/video/stream/tvbroadcastinfo/?client=tv&tvprogramm=true"
         val visited = HashSet<String>()
         while (!url.isNullOrBlank() && visited.size < MAX_PAGES && visited.add(url)) {
-            val page = RutubeParser.parseBriefPage(getText(url))
+            val page = try {
+                RutubeParser.parseBriefPage(getText(url))
+            } catch (e: HttpClient.HttpStatusException) {
+                // Like a channel-day 404, this means RuTube has no brief schedule to seed.
+                if (e.code == 404) return@withContext emptyMap() else throw e
+            }
             for ((k, v) in page.schedules) if (v.isNotEmpty()) out[k] = v
             url = page.nextUrl
         }

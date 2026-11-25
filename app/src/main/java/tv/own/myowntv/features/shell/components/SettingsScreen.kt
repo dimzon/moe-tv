@@ -208,11 +208,6 @@ fun SettingsScreen(
     var searchMode by remember { mutableStateOf(false) }
     var searchFromMore by remember { mutableStateOf(false) }
     val searchFieldFocus = remember { FocusRequester() }
-    // While searching, Back clears the query (and returns focus to the field) instead of leaving Settings.
-    BackHandler(enabled = tab == SettingsTab.ROOT && searchQuery.isNotBlank()) {
-        searchQuery = ""
-        runCatching { searchFieldFocus.requestFocus() }
-    }
 
     // Dialog-close focus return: closing a dialog/picker refocuses the row that opened it (focus
     // would otherwise fall spatially back to the sidebar).
@@ -260,7 +255,7 @@ fun SettingsScreen(
         }
         onStartConsumed()
     }
-    val anyDialogOpen = showZoom || showPopupSize || showTheme || showAccent || showUpdate || showGuideDays || showAnimations || showStartup || showStartupChannelPicker || showRefreshPolicy || showAfrWarning || showLivePreviewPanelWarning || showBgImageChooser || showBgPicker || showAmbientGlow || showFocusHighlight || showBgRemote || showNavigation || showLiveLayout || stageSettings.open != null || settingsLock.open
+    val anyDialogOpen = showZoom || showAppIcon || showPopupSize || showTheme || showAccent || showUpdate || showGuideDays || showAnimations || showStartup || showStartupChannelPicker || showRefreshPolicy || showAfrWarning || showLivePreviewPanelWarning || showBgImageChooser || showBgPicker || showAmbientGlow || showFocusHighlight || showBgRemote || showNavigation || showLiveLayout || stageSettings.open != null || settingsLock.open
     // When a dialog closes, restore focus to the row that opened it. NOTE: this restore crosses
     // INTO the root focus group from outside (the dialog), but onEnter does NOT fire for programmatic
     // requestsFocus (only for directional entry) — so dialogReturn must be cleared HERE, not in onEnter.
@@ -369,12 +364,6 @@ fun SettingsScreen(
         searchQuery = ""; searchMode = false
         selectedGroup = SettingsGroup.of(tv.own.myowntv.features.settings.videoGroupOf(ref.section)).ordinal
     }
-    // Back from a page reached through a Quick pin returns to that pin on Quick.
-    BackHandler(enabled = tab == SettingsTab.ROOT && deepReturnKey != null && selectedGroup != 0 && searchQuery.isBlank()) {
-        videoRowKey = null
-        openMiniPlayer = false
-        selectedGroup = 0
-    }
     // Opening a sub-screen the ordinary way cancels any pending Quick-shortcut return, or the Back
     // from it would aim at the shortcut instead of the row just used.
     val open: (SettingsTab) -> Unit = { lastTab = it; deepReturnKey = null; videoRowKey = null; tab = it }
@@ -409,10 +398,6 @@ fun SettingsScreen(
     }
     return
     }
-
-    // Only at the root: every sub-screen registers its own handler, which is nested deeper and
-    // therefore wins while one is open.
-    if (onBack != null) BackHandler { onBack() }
 
 
     // The root rows, as data (see [RootItem]). Building 40 small objects is a fraction of the cost of
@@ -796,18 +781,21 @@ fun SettingsScreen(
     var menuRow by remember { mutableStateOf<RootRow?>(null) }
     // Closing the menu leaves focus nowhere, so the row it belonged to asks for it back.
     var menuReturnKey by remember { mutableStateOf<String?>(null) }
-    /** Where focus goes instead when the menu just removed its own row from Quick. */
-    var unpinReturnKey by remember { mutableStateOf<String?>(null) }
+    var menuReturnRequest by remember { mutableIntStateOf(0) }
+    // Unpinning removes the row, so its neighbour (or the page/search fallback) owns the return.
+    var menuUnpinning by remember { mutableStateOf(false) }
     val menuReturnFocus = remember { FocusRequester() }
-    LaunchedEffect(menuReturnKey) {
-        if (menuReturnKey == null) return@LaunchedEffect
-        kotlinx.coroutines.delay(60)
-        // Unpinning removes the row from Quick, so its requester may no longer be attached to
-        // anything — then the page's first row takes focus rather than nothing at all.
-        if (runCatching { menuReturnFocus.requestFocus() }.isFailure) {
-            runCatching { rowsFocus.requestFocus() }
-        }
-    }
+    // A null key means the last Quick row is gone; do not let the pre-update rows list own return.
+    SettingsMenuFocusRestore(
+        request = menuReturnRequest,
+        menuOpen = menuRow != null,
+        returnKey = menuReturnKey,
+        hasRows = menuReturnKey != null && selectedRows.isNotEmpty(),
+        returnFocus = menuReturnFocus,
+        rowsFocus = rowsFocus,
+        searchFocus = searchFieldFocus,
+        onReturnConsumed = { menuReturnKey = null },
+    )
     // A genuinely new group starts at its top. Recreating the page after a sub-screen does not:
     // its group and scroll were kept above the sub-screen dispatch, so leave them untouched.
     LaunchedEffect(selectedGroup) {
@@ -1033,11 +1021,6 @@ fun SettingsScreen(
             .distinctBy { it.group + it.title }
     }
     val searching = searchQuery.isNotBlank() || searchMode
-    // Back from an empty search: to More when it was opened there, else to the group page.
-    BackHandler(enabled = tab == SettingsTab.ROOT && searchMode && searchQuery.isBlank()) {
-        searchMode = false
-        if (searchFromMore) { searchFromMore = false; onBack?.invoke() }
-    }
     val group = SettingsGroup.entries[selectedGroup.coerceIn(0, SettingsGroup.entries.size - 1)]
     val inQuick = group == SettingsGroup.QUICK
     val pageCount = when {
@@ -1058,6 +1041,31 @@ fun SettingsScreen(
     )
     // Shared with the dialogs below, so the simple ones open in the page's panel.
     val panel = remember { tv.own.myowntv.features.settings.SettingsPanelState() }
+    SettingsRootBackHandler(
+        state = SettingsRootBackState(
+            modalOpen = anyDialogOpen || panel.editor != null,
+            menuOpen = menuRow != null,
+            searchQuery = searchQuery,
+            searchMode = searchMode,
+            searchFromMore = searchFromMore,
+            quickReturn = deepReturnKey != null && selectedGroup != 0,
+            canExitRoot = onBack != null,
+        ),
+        onClearSearch = {
+            searchQuery = ""
+            runCatching { searchFieldFocus.requestFocus() }.getOrDefault(false)
+        },
+        onCloseSearch = {
+            searchMode = false
+            if (searchFromMore) { searchFromMore = false; onBack?.invoke() }
+        },
+        onReturnToQuick = {
+            videoRowKey = null
+            openMiniPlayer = false
+            selectedGroup = 0
+        },
+        onExit = { onBack?.invoke() },
+    )
     CompositionLocalProvider(
         // Subtitle appearance is a page of its own, opened from the Sound & subtitles rows.
         tv.own.myowntv.features.settings.LocalSubtitleStyleOpener provides { saveScroll(); open(SettingsTab.SUBTITLE_STYLE) },
@@ -1105,7 +1113,12 @@ fun SettingsScreen(
                             pinned = !inQuick && row.key in quickPinned,
                             inQuick = inQuick,
                             extra = extras[row.key],
-                            onLongClick = { menuRow = row },
+                            onLongClick = {
+                                menuReturnKey = null
+                                menuUnpinning = false
+                                menuReturnRequest++
+                                menuRow = row
+                            },
                             focus = if (row.key == menuReturnKey) menuReturnFocus else null,
                         )
                     }
@@ -1129,10 +1142,9 @@ fun SettingsScreen(
             onPinToggle = {
                 // Unpinning from inside Quick takes the row out from under the cursor, so hand focus
                 // to the row that slides into its place — the one below, or the one above when it was
-                // last. Without this the sheet has nothing focused and the highlight drops to the spine.
-                if (at >= 0 && inQuick) {
-                    unpinReturnKey = quickPinned.getOrNull(at + 1) ?: quickPinned.getOrNull(at - 1)
-                }
+                // last. With no neighbour left, the restore falls back to the search field.
+                menuUnpinning = at >= 0 && inQuick
+                if (menuUnpinning) menuReturnKey = quickReturnKeyAfterUnpin(quickPinned, row.key)
                 settingsVm.setQuickPinnedKeys(
                     if (at >= 0) quickPinned - row.key else quickPinned + row.key,
                 )
@@ -1148,8 +1160,9 @@ fun SettingsScreen(
                 )
             },
             onDismiss = {
-                menuReturnKey = unpinReturnKey ?: row.key
-                unpinReturnKey = null
+                if (!menuUnpinning) menuReturnKey = row.key
+                menuUnpinning = false
+                menuReturnRequest++
                 menuRow = null
             },
         )

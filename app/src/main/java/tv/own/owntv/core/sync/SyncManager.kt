@@ -67,6 +67,7 @@ class SyncManager(
                 onProgress(stage)
             }
             var result: SyncResult = SyncResult.Cancelled
+            var catalogueComplete = true
             try {
                 if (!effective.hasAny) {
                     // Empty effective (e.g. a live-only remainder after Live turned Off): clean
@@ -81,14 +82,20 @@ class SyncManager(
                     // BulkInsertHelper itself — a joining sync registers as a writer and index restore
                     // waits for the last writer — so sources fetch/parse/insert fully in parallel here.
                     when (source.type) {
-                        SourceType.RUTUBE -> rutubeSyncer?.sync(source, progress, stats)
-                            ?: run { stats.phaseErrors["live"] = "RuTube provider not wired"; Log.w(TAG, "RuTube sync requested without a RutubeApi") }
+                        SourceType.RUTUBE -> {
+                            catalogueComplete = rutubeSyncer?.sync(source, progress, stats)
+                                ?: run {
+                                    stats.phaseErrors["live"] = "RuTube provider not wired"
+                                    Log.w(TAG, "RuTube sync requested without a RutubeApi")
+                                    false
+                                }
+                        }
                     }
-                    // Stamp lastSyncAt only when this pass covered every enabled+constrained section.
-                    // A staged partial pass leaves it null; the background remainder worker stamps via
-                    // completesInitialSync. Comparing against enabledFor (not enabledOf) keeps partial
-                    // live-only passes from never marking synced.
-                    if (effective.isCompleteFor(target)) {
+                    // Stamp lastSyncAt only when this pass covered every enabled+constrained section
+                    // AND every provider catalogue page was read. A staged partial pass leaves it null;
+                    // the background remainder worker stamps via completesInitialSync. Comparing against
+                    // enabledFor (not enabledOf) keeps partial live-only passes from never marking synced.
+                    if (effective.isCompleteFor(target) && catalogueComplete) {
                         val markStartedAt = SystemClock.elapsedRealtime()
                         settings.markSourceSynced(System.currentTimeMillis())
                         Log.d(TAG, "markSynced sourceId=${source.id} ms=${SystemClock.elapsedRealtime() - markStartedAt}")
@@ -98,6 +105,7 @@ class SyncManager(
                         warnings = stats.warnings(),
                         categoriesAdded = stats.processedCounts[SyncSupport.CATEGORIES_ADDED_KEY] ?: 0,
                         categoriesRemoved = stats.processedCounts[SyncSupport.CATEGORIES_REMOVED_KEY] ?: 0,
+                        catalogueComplete = catalogueComplete,
                     )
                 }
             } catch (c: CancellationException) {

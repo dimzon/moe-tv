@@ -44,6 +44,11 @@ sealed interface SyncResult {
         /** Category churn on a resync (always 0 on a source's first sync, where everything is "new"). */
         val categoriesAdded: Int = 0,
         val categoriesRemoved: Int = 0,
+        /**
+         * False when RuTube skipped a catalogue page/bucket. Rows may be upserted, but pruning,
+         * orphan purge and the source's success timestamp are not safe until a complete pass.
+         */
+        val catalogueComplete: Boolean = true,
     ) : SyncResult
 
     data object Cancelled : SyncResult

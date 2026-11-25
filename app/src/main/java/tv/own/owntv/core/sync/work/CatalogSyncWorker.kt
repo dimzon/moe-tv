@@ -92,9 +92,11 @@ class CatalogSyncWorker(
                 Log.i(TAG, "Sync succeeded for source ${source.id} (${source.name}) warnings=$warningText")
                 // Remainder of a staged initial sync: stamp lastSyncAt once priority+remainder together
                 // cover the enabled catalog (SyncManager alone won't — each pass is incomplete).
-                if (completesInitialSync) {
+                if (completesInitialSync && result.catalogueComplete) {
                     settings.markSourceSynced(System.currentTimeMillis())
                     Log.i(TAG, "Staged initial sync complete — markSynced sourceId=${source.id}")
+                } else if (completesInitialSync) {
+                    Log.w(TAG, "Staged initial sync catalogue incomplete — markSynced deferred sourceId=${source.id}")
                 }
                 val finalizeStartedAt = SystemClock.elapsedRealtime()
                 val deferIndexes = source.lastSyncAt == null

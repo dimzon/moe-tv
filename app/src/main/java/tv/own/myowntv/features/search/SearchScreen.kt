@@ -422,7 +422,7 @@ fun SearchScreen(
                 LiveStagePane(
                     channel = activeCh,
                     channelName = ProviderTags.parse(activeCh.name).name,
-                    nowNext = nowNextForChannel(keyedNowNext, activeCh.id),
+                    nowNext = nowNextForChannel(keyedNowNext, activeCh.id, System.currentTimeMillis()),
                     previewEngine = liveVm.previewEngine,
                     showVideo = previewOn,
                     singleSessionBlocked = singleSessionBlocked,

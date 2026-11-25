@@ -3,6 +3,8 @@ package tv.own.owntv.player
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -239,14 +241,31 @@ class LiveTuneController(
      * minting as a full-screen tune, so the grid can never drift from it. No ladder: a tile that fails
      * shows its failure.
      */
-    suspend fun playTile(engine: LivePreviewEngine, channel: ChannelEntity, muted: Boolean) {
+    suspend fun playTile(
+        engine: LivePreviewEngine,
+        channel: ChannelEntity,
+        muted: Boolean,
+        isCurrent: () -> Boolean = { true },
+    ) {
+        if (engine.released) return
+        currentCoroutineContext().ensureActive()
+        if (!isCurrent()) return
         val source = host.sourceOf(channel.sourceId)
+        currentCoroutineContext().ensureActive()
+        if (!isCurrent() || engine.released) return
         val url = if (host.needsResolve(source)) {
             host.resolve(source!!, channel.streamUrl) ?: return
         } else {
             exoUrlFor(channel, source)
         }
-        engine.play(url, muted, request(channel, source, host.captions(source, channel.streamUrl)))
+        currentCoroutineContext().ensureActive()
+        if (!isCurrent() || engine.released) return
+        val captions = host.captions(source, channel.streamUrl)
+        currentCoroutineContext().ensureActive()
+        // Resolution and caption lookup both suspend. The tile may have been cleared, refilled or
+        // released while they ran; only the still-current generation may touch its engine.
+        if (!isCurrent() || engine.released) return
+        engine.play(url, muted, request(channel, source, captions))
     }
 
     /**
@@ -561,14 +580,24 @@ class LiveTuneController(
         override fun downloadHoldsOnlyStream(sourceId: Long): Boolean = downloadHolds(sourceId)
 
         override suspend fun resolve(source: SourceEntity, cmd: String): String? =
-            runCatching { resolver.resolve(source, cmd) }
-                .onFailure { android.util.Log.w(ENGINE_TAG, "stalker resolve failed", it) }
-                .getOrNull()
+            try {
+                resolver.resolve(source, cmd)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                android.util.Log.w(ENGINE_TAG, "stalker resolve failed", e)
+                null
+            }
 
         override suspend fun captions(source: SourceEntity?, cmd: String): List<RutubeCaption> =
-            runCatching { resolver.resolveCaptions(source, cmd) }
-                .onFailure { android.util.Log.w(ENGINE_TAG, "captions resolve failed", it) }
-                .getOrDefault(emptyList())
+            try {
+                resolver.resolveCaptions(source, cmd)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                android.util.Log.w(ENGINE_TAG, "captions resolve failed", e)
+                emptyList()
+            }
 
         // Waits for the settings snapshot, so a tune started at a cold start — Last-channel autoplay —
         // is budgeted by the stored settings, never by defaults.

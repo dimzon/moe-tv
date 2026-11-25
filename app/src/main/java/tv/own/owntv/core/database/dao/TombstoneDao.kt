@@ -51,17 +51,23 @@ interface TombstoneDao {
     suspend fun count(): Int
 
     /**
-     * Forgets this device's deletions — what a *restore* does before applying a
-     * file, and only a restore.
+     * Forgets every deletion. Kept for explicit full-reset callers; section-scoped restore uses
+     * [deleteByKinds] so unselected categories retain their deletion facts.
      *
      * A restore says "my data is what this file says", so a deletion made after the file was written
-     * is no longer true. Left in place these markers silently refuse the very rows the user asked to
-     * bring back ([deletedAt] gates the insert), the restore reports success anyway, and the next
-     * local sync would delete them a second time. A merge must NOT call this: there the deletion is a
-     * fact the other device still has to hear about.
+     * is no longer true for the selected sections. A merge must NOT clear markers: there the deletion
+     * is a fact the other device still has to hear about.
      */
     @Query("DELETE FROM user_data_tombstones")
     suspend fun deleteAll()
+
+    /** Restore clears only the tombstone kinds represented by the sections the user selected. */
+    @Query("DELETE FROM user_data_tombstones WHERE kind IN (:kinds)")
+    suspend fun deleteByKinds(kinds: Set<String>)
+
+    /** Removes one legacy key after its canonical replacement has been recorded. */
+    @Query("DELETE FROM user_data_tombstones WHERE id = :id")
+    suspend fun deleteById(id: Long)
 
     /**
      * Drops all but the [keep] newest. A tombstone is only useful until every device has seen it, and

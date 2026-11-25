@@ -6,17 +6,20 @@ import org.json.JSONObject
 /**
  * Pure parsers for RuTube's public API JSON — ported from the TVTube app's
  * [app.tvtube.data.parser.RutubeParser], adapted to [org.json] (core's existing JSON
- * library; Gson is test-only). Defensive: fields flip types and vanish between endpoints,
- * one odd value must never cost the whole channel list.
+ * library; Gson is test-only). Malformed catalogue/schedule payloads fail loudly: treating a
+ * truncated HTTP-200 response as "empty" would authorize destructive prune or erase a good guide.
  */
 object RutubeParser {
 
+    private fun malformed(message: String): Nothing =
+        throw RutubeApi.RutubeException("Malformed RuTube payload: $message")
+
     fun parseCategories(body: String): List<RutubeCategory> {
-        val root = runCatching { JSONObject(body) }.getOrNull() ?: return emptyList()
-        val results = root.optJSONArray("results") ?: return emptyList()
-        return (0 until results.length()).mapNotNull { i ->
-            val obj = results.optJSONObject(i) ?: return@mapNotNull null
-            val id = obj.optInt("id", Int.MIN_VALUE).takeIf { it != Int.MIN_VALUE } ?: return@mapNotNull null
+        val root = runCatching { JSONObject(body) }.getOrNull() ?: malformed("categories root")
+        val results = root.optJSONArray("results") ?: malformed("categories results")
+        return (0 until results.length()).map { i ->
+            val obj = results.optJSONObject(i) ?: malformed("category row $i")
+            val id = obj.optInt("id", Int.MIN_VALUE).takeIf { it > 0 } ?: malformed("category id $i")
             RutubeCategory(id = id, name = obj.optString("name", ""), alias = obj.optString("alias", ""))
         }
     }
@@ -29,24 +32,25 @@ object RutubeParser {
      * several tabs — the first (canonical) occurrence wins.
      */
     fun parseLiveFeedRows(body: String): List<RutubeLiveRow> {
-        val root = runCatching { JSONObject(body) }.getOrNull() ?: return emptyList()
-        val tabs = root.optJSONArray("tabs") ?: return emptyList()
+        val root = runCatching { JSONObject(body) }.getOrNull() ?: malformed("live feed root")
+        val tabs = root.optJSONArray("tabs") ?: malformed("live feed tabs")
         val orderedTabs = (0 until tabs.length())
-            .mapNotNull { i -> tabs.optJSONObject(i) }
+            .map { i -> tabs.optJSONObject(i) ?: malformed("live feed tab $i") }
             .sortedBy { it.optInt("order_number", 0) }
         val out = ArrayList<RutubeLiveRow>()
         val seen = HashSet<String>()
 
         for (tab in orderedTabs) {
-            val resources = tab.optJSONArray("resources") ?: continue
+            val resources = tab.optJSONArray("resources") ?: malformed("live feed resources")
             val orderedRows = (0 until resources.length())
-                .mapNotNull { i -> resources.optJSONObject(i) }
+                .map { i -> resources.optJSONObject(i) ?: malformed("live feed row $i") }
                 .sortedBy { it.optInt("order_number", 0) }
 
             for (row in orderedRows) {
-                val name = row.str("name")?.trim().orEmpty()
-                val url = row.str("url") ?: continue
-                if (name.isEmpty() || !seen.add(name)) continue
+                val name = row.str("name")?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: malformed("live feed row name")
+                val url = row.str("url") ?: malformed("live feed row url")
+                if (!seen.add(name)) continue
                 out += RutubeLiveRow(name = name, url = url)
             }
         }
@@ -55,53 +59,63 @@ object RutubeParser {
 
     fun parseChannelPage(body: String): RutubeChannelPage {
         val root = runCatching { JSONObject(body) }.getOrNull()
-            ?: return RutubeChannelPage(emptyList(), null)
-        val results = root.optJSONArray("results") ?: return RutubeChannelPage(emptyList(), null)
-        val nextUrl = root.str("next")
+            ?: return RutubeChannelPage(emptyList(), null, isValid = false)
+        val results = root.optJSONArray("results")
+            ?: return RutubeChannelPage(emptyList(), null, isValid = false)
+        val parsed = ArrayList<RutubeChannel>(results.length())
+        var isValid = true
+        for (i in 0 until results.length()) {
+            val channel = parseChannel(results.optJSONObject(i))
+            if (channel == null) isValid = false else parsed += channel
+        }
         return RutubeChannelPage(
-            results = (0 until results.length()).mapNotNull { i -> parseChannel(results.optJSONObject(i)) },
-            nextUrl = nextUrl,
+            results = parsed,
+            nextUrl = root.str("next"),
+            isValid = isValid,
         )
     }
 
     fun parseBriefPage(body: String): RutubeBriefPage {
-        val root = runCatching { JSONObject(body) }.getOrNull() ?: return RutubeBriefPage(emptyList(), emptyMap(), null)
-        val results = root.optJSONArray("results") ?: return RutubeBriefPage(emptyList(), emptyMap(), null)
+        val root = runCatching { JSONObject(body) }.getOrNull() ?: malformed("brief root")
+        val results = root.optJSONArray("results") ?: malformed("brief results")
         val channels = ArrayList<RutubeChannel>()
         val schedules = HashMap<String, List<RutubeProgramme>>()
         for (i in 0 until results.length()) {
-            val obj = results.optJSONObject(i) ?: continue
-            val channel = parseChannel(obj) ?: continue
+            val obj = results.optJSONObject(i) ?: malformed("brief row $i")
+            val channel = parseChannel(obj) ?: malformed("brief channel $i")
             channels += channel
-            val sched = obj.optJSONArray("schedule") ?: continue
-            val programmes = (0 until sched.length()).mapNotNull { j -> parseBriefProgramme(sched.optJSONObject(j)) }
+            val sched = obj.optJSONArray("schedule") ?: malformed("brief schedule $i")
+            val programmes = (0 until sched.length()).map { j ->
+                parseBriefProgramme(sched.optJSONObject(j)) ?: malformed("brief programme $i/$j")
+            }
             if (programmes.isNotEmpty()) schedules[channel.videoId] = programmes
         }
         return RutubeBriefPage(channels, schedules, root.str("next"))
     }
 
     fun parsePangolinDay(body: String): List<RutubeProgramme> {
-        val root = runCatching { JSONObject(body) }.getOrNull() ?: return emptyList()
-        val schedule = root.optJSONObject("result")?.optJSONObject("schedule") ?: return emptyList()
+        val root = runCatching { JSONObject(body) }.getOrNull() ?: malformed("pangolin root")
+        val schedule = root.optJSONObject("result")?.optJSONObject("schedule") ?: malformed("pangolin schedule")
         val out = ArrayList<RutubeProgramme>()
         val keys = schedule.keys()
         while (keys.hasNext()) {
-            val day = schedule.optJSONArray(keys.next()) ?: continue
+            val key = keys.next()
+            val day = schedule.optJSONArray(key) ?: malformed("pangolin day $key")
             for (i in 0 until day.length()) {
-                parsePangolinProgramme(day.optJSONObject(i))?.let(out::add)
+                parsePangolinProgramme(day.optJSONObject(i))?.let(out::add) ?: malformed("pangolin programme $key/$i")
             }
         }
         return out
     }
 
     fun parseMobileSchedule(body: String): List<RutubeProgramme> {
-        val root = runCatching { JSONObject(body) }.getOrNull() ?: return emptyList()
-        val days = root.optJSONArray("schedule") ?: return emptyList()
+        val root = runCatching { JSONObject(body) }.getOrNull() ?: malformed("mobile schedule root")
+        val days = root.optJSONArray("schedule") ?: malformed("mobile schedule days")
         val out = ArrayList<RutubeProgramme>()
         for (i in 0 until days.length()) {
-            val items = days.optJSONObject(i)?.optJSONArray("items") ?: continue
+            val items = days.optJSONObject(i)?.optJSONArray("items") ?: malformed("mobile schedule day $i")
             for (j in 0 until items.length()) {
-                parseMobileProgramme(items.optJSONObject(j))?.let(out::add)
+                parseMobileProgramme(items.optJSONObject(j))?.let(out::add) ?: malformed("mobile programme $i/$j")
             }
         }
         return out
@@ -202,13 +216,15 @@ object RutubeParser {
         val name = author?.str("name")
             ?: obj.str("title")
             ?: return null
-        val cats = obj.optJSONArray("broadcast_category")
+        val cats = if (obj.has("broadcast_category") && !obj.isNull("broadcast_category")) {
+            obj.optJSONArray("broadcast_category") ?: malformed("channel broadcast_category")
+        } else null
         val categoryIds = ArrayList<Int>()
         if (cats != null) for (i in 0 until cats.length()) {
-            cats.optJSONObject(i)?.let {
-                val id = it.optInt("id", Int.MIN_VALUE)
-                if (id != Int.MIN_VALUE) categoryIds += id
-            }
+            val category = cats.optJSONObject(i) ?: malformed("channel broadcast_category row $i")
+            val id = category.optInt("id", Int.MIN_VALUE).takeIf { it > 0 }
+                ?: malformed("channel broadcast_category id $i")
+            categoryIds += id
         }
         // `is_paid` is false on every live row the API returns, but subscription channels carry
         // `common_subscription_product_codes` (PREMIER, SPORT, …) and their play/options answer

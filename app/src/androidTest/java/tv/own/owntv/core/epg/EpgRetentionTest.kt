@@ -81,6 +81,24 @@ class EpgRetentionTest {
         assertEquals(1, countAll())
     }
 
+    @Test
+    fun pruningSelectedChannelsLeavesAFailedChannelsCachedGuideAlone() = runBlocking {
+        db.epgDao().upsertProgrammes(
+            listOf(
+                programme("good", startMs = now - 26 * hour, stopMs = now - 25 * hour),
+                programme("failed", startMs = now - 26 * hour, stopMs = now - 25 * hour),
+            ),
+        )
+
+        db.epgDao().pruneChannels(before = now - 6 * hour, channelIds = listOf("good"))
+
+        assertEquals(1, countAll())
+        assertEquals(
+            "failed",
+            db.epgDao().programmesForChannel("failed", now - 30 * hour, now).single().epgChannelId,
+        )
+    }
+
     private suspend fun countAll(): Int = db.epgDao().countAll()
 
     private fun programme(epgChannelId: String, startMs: Long, stopMs: Long) = EpgProgrammeEntity(

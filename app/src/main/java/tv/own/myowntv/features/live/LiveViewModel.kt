@@ -303,21 +303,23 @@ class LiveViewModel(
     /** Bumped when a channel's EPG mapping changes so [nowNext] reloads for the same focused channel. */
     private val epgRefresh = MutableStateFlow(0)
 
+    /** Programme turnover is independent of LiveScreen's lifetime: the HUD and pane need it too. */
+    private val epgMinuteTick = MutableStateFlow(0L)
 
     /** Now/next for the focused channel, fetched (debounced), together with the id it was read for.
      *  While the debounced read for a newly focused channel is pending, the pair still holds the
      *  previous channel's answer — every reader must check the id ([nowNextForChannel],
      *  [rowProgramme]) before putting a programme under a channel. */
-    val keyedNowNext: StateFlow<Pair<String?, EpgNowNext?>> = combine(_previewChannel, epgRefresh) { ch, tick -> ch to tick }
+    val keyedNowNext: StateFlow<Pair<String?, EpgNowNext?>> = combine(_previewChannel, epgRefresh, epgMinuteTick) { ch, tick, minute -> Triple(ch, tick, minute) }
         .debounce(350)
-        .distinctUntilChanged { a, b -> a.first?.id == b.first?.id && a.second == b.second }
-        .mapLatest { (ch, _) -> ch?.id to ch?.let { epgReader.nowNext(it, custom.value, epgOffset.value) } }
+        .distinctUntilChanged { a, b -> a.first?.id == b.first?.id && a.second == b.second && a.third == b.third }
+        .mapLatest { (ch, _, _) -> ch?.id to ch?.let { epgReader.nowNext(it, custom.value, epgOffset.value) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null to null)
 
     /** Null until the debounced answer belongs to the channel in focus: after a zap the old
      *  channel's programme must not appear under the new one, in the list, the pane or the HUD. */
-    val nowNext: StateFlow<EpgNowNext?> = combine(keyedNowNext, _previewChannel) { keyed, ch ->
-        nowNextForChannel(keyed, ch?.id)
+    val nowNext: StateFlow<EpgNowNext?> = combine(keyedNowNext, _previewChannel, epgMinuteTick) { keyed, ch, _ ->
+        nowNextForChannel(keyed, ch?.id, System.currentTimeMillis())
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** The channel-change banner reads the same guarded answer as the rows and the pane. */
@@ -345,10 +347,13 @@ class LiveViewModel(
     private val custom: StateFlow<SectionCustomizations> = customOnceRead.filterNotNull()
         .stateIn(viewModelScope, SharingStarted.Eagerly, SectionCustomizations())
 
+    /** Shared by every Live surface; constructed before the EPG-offset collector can clear it. */
+    private val nowPlayingCache = NowPlayingCache(viewModelScope, MAX_NOW_PLAYING)
+
     /** Global guide shift (minutes); a per-channel override in [custom] wins over it. Changing it
      *  drops the now/next cache so the details pane reflects the new offset straight away. */
     // The first value is the stored one, not a change — and it can arrive synchronously during
-    // construction, before nowPlayingCache below exists (a monitor-enter NPE on cold start).
+    // construction. The cache above already exists, so a change can safely clear it.
     private val epgOffset: StateFlow<Int> = settings.epgOffsetMinutes
         .withIndex()
         .onEach { if (it.index > 0) { epgReader.clearCache(); epgRefresh.value++; clearNowPlaying() } }
@@ -726,6 +731,15 @@ class LiveViewModel(
     }
 
     init {
+        // Re-read the focused programme on the minute boundary even when LiveScreen is not composed
+        // (mini/audio playback keeps the HUD's guide card alive).
+        viewModelScope.launch {
+            while (true) {
+                val now = System.currentTimeMillis()
+                delay(60_000L - (now % 60_000L))
+                epgMinuteTick.value = System.currentTimeMillis()
+            }
+        }
         // Bring the remembered category back at startup and after each playlist switch, as this
         // view model outlives them. Gated by "Remember last category — Live TV"
         // (Settings → Browsing & lists), on by default.
@@ -902,8 +916,13 @@ class LiveViewModel(
      * has to be resolved to a link per play. All of that already lives here, and a second copy in the
      * grid would drift the first time one of them changed.
      */
-    fun tuneTile(engine: tv.own.owntv.player.LivePreviewEngine, channel: ChannelEntity, muted: Boolean) {
-        viewModelScope.launch { live.playTile(engine, channel, muted) }
+    fun tuneTile(
+        engine: tv.own.owntv.player.LivePreviewEngine,
+        channel: ChannelEntity,
+        muted: Boolean,
+        isCurrent: () -> Boolean,
+    ): Job = viewModelScope.launch {
+        live.playTile(engine, channel, muted, isCurrent)
     }
 
     // The ordered channel list the player zaps within (CH+/CH-, D-pad up/down) and shows in the
@@ -1108,6 +1127,7 @@ class LiveViewModel(
      *  (and re-apply the preview mute) on the next focus. Keeps the stream playing (no stop) — the
      *  controller stands its full-screen watchers down so [playPreview] works again. */
     fun onFullscreenExited() {
+        deferredTune.cancel()
         live.detach() // the stream stays; its watchers and the give-up alarm stand down
         // With the in-pane preview enabled, the preview pane re-takes the engine on the next
         // focus and re-applies the preview mute — so we can leave it running here. But when live preview
@@ -1148,6 +1168,7 @@ class LiveViewModel(
      *  provider category is metadata (used by [previewCategoryName]); it must not replace Favorites,
      *  History, All, a custom category, or the provider folder the user is actually browsing. */
     fun watchFullscreen(channel: ChannelEntity, list: List<ChannelEntity>): Boolean {
+        deferredTune.cancel()
         if (rejectSubscription(channel)) return false
         // Opened with no browse list behind it — the programme-detail "Watch" button does exactly this. Without
         // a zap list, CH+/CH− and the channel-list button are dead for the rest of the session, so rebuild
@@ -1213,6 +1234,8 @@ class LiveViewModel(
      * on single-connection panels as well (see [zapTuneDelayMs]). Only presses that follow it closely wait, so a held key or a burst still
      * costs at most two opens — the first step and the channel the user stops on.
      */
+    private val deferredTune = DeferredLiveTune(viewModelScope)
+
     private fun zapTo(channel: ChannelEntity) {
         tuned(channel)
         val now = android.os.SystemClock.elapsedRealtime()
@@ -1225,22 +1248,19 @@ class LiveViewModel(
         lastZapPressMs = now
         // Diagnostics only: the tune this press causes claims it and times its first frame from here.
         tv.own.owntv.player.ZapTiming.shared.markPress(now)
-        pendingZapTuneJob?.cancel()
+        val generation = deferredTune.cancel()
         if (delayMs <= 0L) {
-            pendingZapTuneJob = null
             startTune(channel)
             return
         }
-        pendingZapTuneJob = viewModelScope.launch {
+        deferredTune.launch(generation) {
             delay(delayMs)
-            // Cleared before handing over, so this tune's own [startTune] doesn't cancel the job
-            // it is running inside.
-            pendingZapTuneJob = null
+            // The token is still current, so this is the final press. Hand over through the same
+            // superseding path as every deliberate tune.
+            if (!deferredTune.finish(generation)) return@launch
             startTune(channel)
         }
     }
-
-    private var pendingZapTuneJob: Job? = null
 
     /**
      * Direct-tune: resolve a provider channel number to a channel and tune it.
@@ -1253,6 +1273,9 @@ class LiveViewModel(
      * bounded window, and the CH+/- anchor that covers the gap — is [LiveZapList.directTune].
      */
     suspend fun tuneByNumber(number: Int): tv.own.myowntv.player.DirectTuneResult {
+        // Numeric entry is a deliberate navigation request: a CH+/- delay still waiting must not
+        // replace the number the user is resolving.
+        deferredTune.cancel()
         try {
             val currentChannel = playingChannel ?: return tv.own.myowntv.player.DirectTuneResult.NotFound(number)
 
@@ -1365,6 +1388,7 @@ class LiveViewModel(
      *  [playChannel] when Live TV's external-player default is on. Some channels store a portal
      *  cmd rather than a URL, so it's resolved first — an external app can't mint one. */
     fun playExternal(channel: ChannelEntity) {
+        deferredTune.cancel()
         if (rejectSubscription(channel)) return
         viewModelScope.launch {
             if (tv.own.owntv.core.database.ChannelMembership.allExcluded(channel, customize.sealedCategoryIds(MediaType.LIVE).first())) return@launch
@@ -1394,6 +1418,8 @@ class LiveViewModel(
      *  dropped just because the preview is still loading (clicking OK before the preview is ready
      *  used to hand the channel to another player and stick on a black screen for HLS). */
     fun ensurePlaying(channel: ChannelEntity) {
+        // Even a rejected deliberate pick supersedes a deferred CH+/- tune.
+        deferredTune.cancel()
         if (rejectSubscription(channel)) return
         // A deliberate pick, not a CH+/- step: an unclaimed zap press must not be timed against it.
         tv.own.owntv.player.ZapTiming.shared.clear()
@@ -1417,11 +1443,10 @@ class LiveViewModel(
 
     /** [ensurePlaying] without forgetting the zap press: the tune a CH+/- step opens, timed from that press. */
     private fun startTune(channel: ChannelEntity) {
+        deferredTune.cancel()
         zapList.cancelPendingRebuild()
         // A deliberate pick supersedes a CH+/- step still waiting out its delay — otherwise the deferred
         // tune would land half a second later and drag the user off the channel they just chose.
-        pendingZapTuneJob?.cancel()
-        pendingZapTuneJob = null
         // Before the full-screen player is first drawn: a channel the engine is already previewing
         // opens on the live surface straight away, instead of waiting for the tune below to get there.
         live.expectPromotion(channel)
@@ -1463,6 +1488,7 @@ class LiveViewModel(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     fun previousChannel() {
+        deferredTune.cancel()
         val previous = live.previousChannel.value ?: return
         viewModelScope.launch {
             val channel = withContext(Dispatchers.IO) { channelDao.getById(previous.id) } ?: return@launch
@@ -1476,6 +1502,7 @@ class LiveViewModel(
      *  playback browse/zap context instead of replacing it with provider-category metadata. A channel in
      *  a locked category, or one that is gone, does not open: false. */
     suspend fun ensurePlayingByIdAsync(channelId: String, zapChannels: List<ChannelEntity> = emptyList()): Boolean {
+        deferredTune.cancel()
         val channel = channelDao.getById(channelId)
             ?.takeUnless { tv.own.owntv.core.database.ChannelMembership.allExcluded(it, customize.sealedCategoryIds(MediaType.LIVE).first()) }
             ?: return false
@@ -1530,6 +1557,7 @@ class LiveViewModel(
     }
 
     fun stopPreview() {
+        deferredTune.cancel()
         live.stop() // both engines, every watcher and the give-up alarm, and the reconnect link
         _previewChannel.value = null
         _paneChannel.value = null
@@ -1553,12 +1581,6 @@ class LiveViewModel(
      * behalf. An earlier version had each caller drop everything outside its own list, which made the
      * Live list and the channel-list overlay evict each other's work every time one opened.
      */
-    private val nowPlayingCache = object : LinkedHashMap<String, tv.own.owntv.core.parser.XtEpgEntry?>(256, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, tv.own.owntv.core.parser.XtEpgEntry?>?) = size > MAX_NOW_PLAYING
-    }
-
-    private val _nowPlaying = MutableStateFlow<Map<String, tv.own.owntv.core.parser.XtEpgEntry?>>(emptyMap())
-
     /**
      * Channel id → the programme airing now.
      *
@@ -1566,30 +1588,18 @@ class LiveViewModel(
      * not asked again on every append; that sentinel is filtered out here, so such a row simply has
      * no entry and draws no second line.
      */
-    val nowPlaying: StateFlow<Map<String, String>> = _nowPlaying
+    val nowPlaying: StateFlow<Map<String, String>> = nowPlayingCache.programmes
         .map { found -> buildMap { found.forEach { (id, p) -> if (p != null) put(id, p.title) } } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     /** [nowPlaying] with the programme's start and stop, for the Stage rows' time left and progress. */
-    val nowProgrammes: StateFlow<Map<String, tv.own.owntv.core.parser.XtEpgEntry>> = _nowPlaying
+    val nowProgrammes: StateFlow<Map<String, tv.own.owntv.core.parser.XtEpgEntry>> = nowPlayingCache.programmes
         .map { found -> buildMap { found.forEach { (id, p) -> if (p != null) put(id, p) } } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    private var nowPlayingJob: kotlinx.coroutines.Job? = null
-
-    private fun publishNowPlaying(resolved: Map<String, tv.own.owntv.core.parser.XtEpgEntry?>) {
-        synchronized(nowPlayingCache) {
-            nowPlayingCache.putAll(resolved)
-            _nowPlaying.value = HashMap(nowPlayingCache)
-        }
-    }
-
-    private fun cachedNowPlaying(): Map<String, tv.own.owntv.core.parser.XtEpgEntry?> = synchronized(nowPlayingCache) { HashMap(nowPlayingCache) }
-
     /** Forget every resolved title — the guide data or the offset moved underneath them. */
     private fun clearNowPlaying() {
-        synchronized(nowPlayingCache) { nowPlayingCache.clear() }
-        _nowPlaying.value = emptyMap()
+        nowPlayingCache.clear()
     }
 
     /**
@@ -1598,19 +1608,13 @@ class LiveViewModel(
      * The Live screen used to key a producer on the whole paging snapshot, so every appended page
      * re-asked for every channel already on screen, and a 60-second timer then repeated that for the
      * full set. Scrolled deep into a large category that is a dozen chunked queries a minute to learn
-     * almost nothing new. The phone has always done it this way; this is the television adopting it.
+     * almost nothing new. The phone has always done it this way; the television is adopting it.
      */
     fun ensureNowPlaying(loaded: List<ChannelEntity>) {
         if (loaded.isEmpty()) return
-        val known = cachedNowPlaying()
-        val missing = loaded.filter { it.id !in known }
-        if (missing.isEmpty()) return
-        nowPlayingJob?.cancel()
-        nowPlayingJob = viewModelScope.launch {
-            val found = runCatching { nowPlayingFor(missing) }.getOrDefault(emptyMap())
-            // Remember the ones with no guide too, as null — otherwise they are re-queried on
-            // every single append, which is most of the cost this removes.
-            publishNowPlaying(found + missing.filter { it.id !in found }.associate { it.id to null })
+        val byId = loaded.associateBy { it.id }
+        nowPlayingCache.load(byId.keys.toList(), force = false) { missing ->
+            nowPlayingFor(missing.map { byId.getValue(it) })
         }
     }
 
@@ -1623,10 +1627,9 @@ class LiveViewModel(
      */
     fun refreshNowPlaying(loaded: List<ChannelEntity>) {
         if (loaded.isEmpty()) return
-        nowPlayingJob?.cancel()
-        nowPlayingJob = viewModelScope.launch {
-            val found = runCatching { nowPlayingFor(loaded) }.getOrDefault(emptyMap())
-            publishNowPlaying(found + loaded.filter { it.id !in found }.associate { it.id to null })
+        val byId = loaded.associateBy { it.id }
+        nowPlayingCache.load(byId.keys.toList(), force = true) { missing ->
+            nowPlayingFor(missing.map { byId.getValue(it) })
         }
     }
 

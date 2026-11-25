@@ -8,6 +8,13 @@ import android.os.Build
 import androidx.core.net.toUri
 import tv.own.owntv.core.database.dao.ReminderDao
 
+/** Alarm operations used by [ReminderManager]; small seam for deterministic rearm tests. */
+interface ReminderAlarmScheduler {
+    suspend fun rearmAll()
+    fun arm(id: Long, atMs: Long)
+    fun cancel(id: Long)
+}
+
 /**
  * One alarm per reminder, re-armed after a reboot, for the
  * same reasons: WorkManager is inexact, `SCHEDULE_EXACT_ALARM` is user-revocable so it is consulted on
@@ -17,7 +24,7 @@ class ReminderScheduler(
     private val context: Context,
     private val reminderDao: ReminderDao,
     private val clock: () -> Long = System::currentTimeMillis,
-) {
+) : ReminderAlarmScheduler {
 
     private val alarms: AlarmManager? = context.getSystemService(AlarmManager::class.java)
 
@@ -28,7 +35,7 @@ class ReminderScheduler(
     }
 
     /** Drop the reminders whose programme has ended and arm the rest. Idempotent: same request code. */
-    suspend fun rearmAll() {
+    override suspend fun rearmAll() {
         val now = clock()
         reminderDao.all().forEach { reminder ->
             val at = ReminderSchedule.wakeAtFor(reminder, now)
@@ -37,7 +44,7 @@ class ReminderScheduler(
         reminderDao.deleteEnded(now)
     }
 
-    fun arm(id: Long, atMs: Long) {
+    override fun arm(id: Long, atMs: Long) {
         val manager = alarms ?: return
         val intent = pendingIntent(id) ?: return
         runCatching {
@@ -52,7 +59,7 @@ class ReminderScheduler(
         }
     }
 
-    fun cancel(id: Long) {
+    override fun cancel(id: Long) {
         val manager = alarms ?: return
         pendingIntent(id)?.let { manager.cancel(it) }
     }

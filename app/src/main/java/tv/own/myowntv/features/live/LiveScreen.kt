@@ -817,7 +817,7 @@ fun LiveScreen(
                                     name = parsed,
                                     // The focused row takes the preview's answer only once it is keyed to this
                                     // channel; until then, and for every other row, use its own guide entry.
-                                    now = rowProgramme(keyedNowNext, channel.id, nowProgrammes),
+                                    now = rowProgramme(keyedNowNext, channel.id, nowProgrammes, System.currentTimeMillis()),
                                     nowTitle = nowPlaying[channel.id],
                                     isFavorite = favoriteIds.contains(channel.id),
                                     showNumber = showChannelNumbers,
@@ -900,7 +900,7 @@ fun LiveScreen(
                 channelName = videoChannel?.let { ProviderTags.parse(it.name).name },
                 // With "OK previews first" the picture stays on the channel OK chose, but the
                 // programme below still follows the highlighted row.
-                nowNext = nowNextForChannel(keyedNowNext, previewChannel?.id),
+                nowNext = nowNextForChannel(keyedNowNext, previewChannel?.id, System.currentTimeMillis()),
                 previewEngine = vm.previewEngine,
                 showVideo = effectivePreview && (!previewOnOk || paneChannel != null),
                 singleSessionBlocked = previewBlockedSingleSession,

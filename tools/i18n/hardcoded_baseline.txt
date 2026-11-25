@@ -47,6 +47,7 @@
 1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	shell-composed
 1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	startup-settled
 1	app/src/main/java/tv/own/myowntv/features/shell/MyOwnTVShell.kt	·
+1	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsNavigation.kt	\0
 1	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	dimzon.github.io/moe-tv-site
 1	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	github.com/dimzon/moe-tv-site
 1	app/src/main/java/tv/own/myowntv/features/shell/components/SettingsScreen.kt	group_guide
@@ -70,16 +71,34 @@
 1	app/src/main/java/tv/own/myowntv/ui/components/TvImeMetrics.kt	requested
 2	app/src/main/java/tv/own/myowntv/ui/theme/MyOwnTVColors.kt	\0
 1	app/src/main/java/tv/own/owntv/core/CoreBuildInfo.kt	dimzon/moe-tv-site
+1	app/src/main/java/tv/own/owntv/core/backup/BackupCrypto.kt	AES
 1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	$mapped:${contextKey.substringAfter(':')}
+4	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	Invalid $key
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	Invalid $key payload
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	Invalid tombstone record
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	Invalid userData record
+2	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	Missing $key
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	Reminder record has no channel rid
 1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	Restore done items=$count
+2	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	at
+2	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	ctx
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	dev
 1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	kind
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	lead
 1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	movedFrom
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	name
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	pos
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	rid
 1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	sections
-1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	tombstones
+2	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	startMs
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	stopMs
+1	app/src/main/java/tv/own/owntv/core/backup/BackupManager.kt	title
 3	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	at
+1	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	ctx
 2	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	dev
 2	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	lead
-9	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	startMs
+1	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	name
+1	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	rid
 3	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	stopMs
 2	app/src/main/java/tv/own/owntv/core/backup/UserDataResolver.kt	title
 1	app/src/main/java/tv/own/owntv/core/companion/CompanionHtml.kt	:root{ color-scheme: dark; --bg:#040E0B; --panel:#12191700; --card:#1B211F; --card-2:#252B29; --line:#3F4945; --text:#DEE4E1; --muted:#BFC9C4; --accent:#8CEE2B; --accent-ink:#123A06; --danger:#FFB4AB; } @font-face{ font-family:'Lora'; font-style:normal; font-weight:400 700; src:url('/lora.ttf') format('truetype'); font-display:swap; } *{box-sizing:border-box} body{ margin:0; color:var(--text); font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; background: radial-gradient(1200px 520px at 12% -12%, rgba(140,238,43,0.10) 0%, transparent 60%), radial-gradient(900px 460px at 100% 0%, rgba(140,238,43,0.06) 0%, transparent 62%), var(--bg); min-height:100vh; } h1,h2,.brand{font-family:'Lora',Georgia,'Noto Sans',system-ui,sans-serif; font-weight:700; letter-spacing:.2px} main{max-width:760px; margin:0 auto; padding:28px 20px 56px} .brandrow{display:flex; align-items:center; gap:12px; margin-bottom:22px} .dot{width:34px; height:34px; border-radius:10px; background:#52DBC8; display:grid; place-items:center; color:#003730} .dot svg{width:18px; height:18px} .brand{font-size:20px; color:var(--text)} .card{background:var(--card); border:1px solid var(--line); border-radius:20px; padding:26px 22px; box-shadow:0 24px 60px rgba(0,0,0,.45)} h1{margin:0 0 8px; font-size:24px} p{line-height:1.55; color:var(--muted); margin:0 0 16px} form{display:grid; gap:14px} label{display:grid; gap:6px; font-size:14px; color:var(--text)} input,select{border:1px solid var(--line); border-radius:12px; padding:13px 14px; background:#0C1311; color:var(--text); font-size:16px; width:100%} input:focus,select:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(140,238,43,.20)} button.go{border:0; border-radius:12px; padding:15px 16px; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:16px; cursor:pointer; margin-top:4px} .pin{font-family:'Lora',Georgia,'Noto Sans',system-ui,sans-serif; font-size:34px; letter-spacing:12px; text-align:center; padding:16px; caret-color:var(--accent)} .err{color:var(--danger); font-size:14px; margin:0 0 12px} .hint{font-size:13px; color:var(--muted); margin-top:6px} a{color:var(--accent)}
@@ -112,6 +131,29 @@
 1	app/src/main/java/tv/own/owntv/core/database/ChannelRename.kt	WHERE remoteId IN (SELECT remoteId FROM channel_rename)
 1	app/src/main/java/tv/own/owntv/core/database/ChannelRename.kt	channel_rename
 1	app/src/main/java/tv/own/owntv/core/database/ManualOrdering.kt	\0
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `categories_new` RENAME TO `categories`
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `categories` ADD COLUMN `alias` TEXT
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX `index_channel_category_categoryId` ON `channel_category` (`categoryId`)
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE INDEX `index_channel_category_channelHexId` ON `channel_category` (`channelHexId`)
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE TABLE `categories_new` (
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	CREATE TABLE `channel_category` (
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	Category $oldId has no name
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	Category $oldId has no numeric RuTube id
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	Channel membership references missing category $oldCategoryId
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	DROP INDEX IF EXISTS `index_categories_remoteId`
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	DROP TABLE IF EXISTS `categories_new`
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	DROP TABLE `categories`
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	DROP TABLE `channel_category`
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	Duplicate RuTube category id $providerId
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	FOREIGN KEY(`categoryId`) REFERENCES `categories`(`id`)
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	FOREIGN KEY(`channelHexId`) REFERENCES `channels`(`remoteId`)
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	INSERT INTO `categories_new` (`id`, `name`, `alias`, `sortOrder`) VALUES (?, ?, ?, ?)
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	INSERT INTO `channel_category` (`channelHexId`, `categoryId`) VALUES (?, ?)
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ON UPDATE NO ACTION ON DELETE CASCADE)
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ON UPDATE NO ACTION ON DELETE CASCADE,
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	PRIMARY KEY(`channelHexId`, `categoryId`),
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	SELECT `channelHexId`, `categoryId` FROM `channel_category`
+1	app/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	name
 1	app/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT remoteId FROM channels
 1	app/src/main/java/tv/own/owntv/core/database/entity/ContentEntities.kt	rutube://$remoteId
 1	app/src/main/java/tv/own/owntv/core/database/entity/ReminderEntity.kt	0
@@ -194,7 +236,6 @@
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	alias
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	author
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	avatar_url
-1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	broadcast_category
 2	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	description
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	detail
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	ext_categories

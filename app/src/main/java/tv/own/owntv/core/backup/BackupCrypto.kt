@@ -2,8 +2,12 @@ package tv.own.owntv.core.backup
 
 import android.util.Base64
 import org.json.JSONObject
+import java.security.GeneralSecurityException
+import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
+import java.nio.CharBuffer
 import javax.crypto.Cipher
+import javax.crypto.Mac
 import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
@@ -28,6 +32,7 @@ import javax.crypto.spec.SecretKeySpec
 object BackupCrypto {
     const val SCHEME = "field-aes-gcm"
     const val KDF = "PBKDF2WithHmacSHA256"
+    private const val KDF_SHA1 = "PBKDF2WithHmacSHA1"
     const val ITERATIONS = 210_000
     private const val SALT_BYTES = 16
     private const val IV_BYTES = 12
@@ -45,20 +50,73 @@ object BackupCrypto {
     /** Builds the root `crypto` metadata block for the given salt. */
     fun cryptoBlock(salt: ByteArray): JSONObject = JSONObject().apply {
         put("scheme", SCHEME)
-        put("kdf", KDF)
+        put("kdf", supportedKdf())
         put("iterations", ITERATIONS)
         put("salt", b64(salt))
     }
 
+    /** SHA-256 PBKDF2 arrived in API 26; API 23/24 must still be able to seal a backup. */
+    private fun supportedKdf(): String = try {
+        SecretKeyFactory.getInstance(KDF)
+        KDF
+    } catch (_: NoSuchAlgorithmException) {
+        KDF_SHA1
+    }
+
     /** Derives the AES key from a passphrase + the backup's salt/iterations. */
-    fun deriveKey(passphrase: CharArray, salt: ByteArray, iterations: Int): SecretKey {
+    fun deriveKey(
+        passphrase: CharArray,
+        salt: ByteArray,
+        iterations: Int,
+        kdf: String = supportedKdf(),
+    ): SecretKey {
         val spec = PBEKeySpec(passphrase, salt, iterations, KEY_BITS)
         return try {
-            val factory = SecretKeyFactory.getInstance(KDF)
+            val factory = try {
+                SecretKeyFactory.getInstance(kdf)
+            } catch (error: NoSuchAlgorithmException) {
+                if (kdf == KDF) {
+                    // API 23/24 lack the provider alias, but HmacSHA256 itself exists. Derive the
+                    // same bytes so a backup sealed on Android 8+ still opens on the minimum SDK.
+                    return SecretKeySpec(pbkdf2HmacSha256(passphrase, salt, iterations), "AES")
+                }
+                throw error
+            }
             SecretKeySpec(factory.generateSecret(spec).encoded, "AES")
         } finally {
             spec.clearPassword()
         }
+    }
+
+    private fun pbkdf2HmacSha256(password: CharArray, salt: ByteArray, iterations: Int): ByteArray {
+        require(iterations > 0) { "PBKDF2 iterations must be positive" }
+        val encoded = Charsets.UTF_8.newEncoder().encode(CharBuffer.wrap(password))
+        val passwordBytes = ByteArray(encoded.remaining()).also(encoded::get)
+        val mac = Mac.getInstance("HmacSHA256")
+        mac.init(SecretKeySpec(passwordBytes, "HmacSHA256"))
+        passwordBytes.fill(0)
+
+        val hashLength = mac.macLength
+        val keyLength = KEY_BITS / 8
+        val blocks = (keyLength + hashLength - 1) / hashLength
+        val output = ByteArray(blocks * hashLength)
+            val saltAndIndex = ByteArray(salt.size + 4)
+
+        salt.copyInto(saltAndIndex)
+        for (block in 1..blocks) {
+            saltAndIndex[salt.size] = (block ushr 24).toByte()
+            saltAndIndex[salt.size + 1] = (block ushr 16).toByte()
+            saltAndIndex[salt.size + 2] = (block ushr 8).toByte()
+            saltAndIndex[salt.size + 3] = block.toByte()
+            var u = mac.doFinal(saltAndIndex)
+            val t = u.copyOf()
+            repeat(iterations - 1) {
+                u = mac.doFinal(u)
+                for (i in 0 until hashLength) t[i] = (t[i].toInt() xor u[i].toInt()).toByte()
+            }
+            t.copyInto(output, (block - 1) * hashLength)
+        }
+        return output.copyOf(keyLength)
     }
 
     /** Derives the key from a [crypto] root block + passphrase. Returns null if the block is malformed. */
@@ -66,7 +124,14 @@ object BackupCrypto {
         crypto ?: return null
         val salt = runCatching { unb64(crypto.getString("salt")) }.getOrNull() ?: return null
         val iters = crypto.optInt("iterations", ITERATIONS)
-        return deriveKey(passphrase.toCharArray(), salt, iters)
+        val kdf = crypto.optString("kdf", KDF_SHA1).ifBlank { KDF_SHA1 }
+        return try {
+            deriveKey(passphrase.toCharArray(), salt, iters, kdf)
+        } catch (_: GeneralSecurityException) {
+            // A newer device may have sealed with SHA-256, which API 23/24 cannot derive. Treat it
+            // like a wrong/unsupported passphrase instead of crashing the import.
+            null
+        }
     }
 
     /** Seals a plaintext secret into a `{ "iv":..., "ct":... }` object. */

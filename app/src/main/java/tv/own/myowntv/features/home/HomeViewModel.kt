@@ -46,6 +46,9 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -86,6 +89,20 @@ data class HomeHeroCard(
     val channel: ChannelEntity,
     val watchedAt: Long,
 )
+
+/** Resolve a hero's stored marker without ever turning cancellation into a poster request. */
+internal suspend fun resolveHeroPreviewUrl(
+    storedUrl: String,
+    source: tv.own.owntv.core.database.entity.SourceEntity,
+    needsResolve: (tv.own.owntv.core.database.entity.SourceEntity) -> Boolean,
+    resolve: suspend (String) -> String,
+): String? = try {
+    if (needsResolve(source)) resolve(storedUrl) else storedUrl
+} catch (e: CancellationException) {
+    throw e
+} catch (_: Exception) {
+    null
+}
 
 @Immutable
 data class HomeUiState(
@@ -128,6 +145,7 @@ class HomeViewModel(
     private val heroPreviewEngine: HeroPreviewEngine,
     private val historyDao: tv.own.owntv.core.database.dao.HistoryDao,
     private val customize: CustomizationStore,
+    private val streamUrlResolver: tv.own.owntv.core.stalker.StreamUrlResolver,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -229,8 +247,19 @@ class HomeViewModel(
     suspend fun startPreview(hero: HomeHeroCard) {
         // One built-in source: its identity and UA are the hardcoded singleton DTO.
         val source = tv.own.owntv.core.repository.BuiltInSource.current
+        val url = resolveHeroPreviewUrl(
+            storedUrl = hero.channel.streamUrl,
+            source = source,
+            needsResolve = streamUrlResolver::needsResolve,
+            resolve = { streamUrlResolver.resolve(source, it) },
+        ) ?: run {
+            // A failed replacement must not leave the previous hero playing under the new artwork.
+            heroPreviewEngine.stop()
+            return
+        }
+        currentCoroutineContext().ensureActive()
         heroPreviewEngine.play(
-            hero.channel.streamUrl, 0L, source.userAgent,
+            url, 0L, source.userAgent,
             tv.own.owntv.core.settings.SourceOverrides.headersWithReferer(hero.channel.httpHeaders, source),
         )
     }

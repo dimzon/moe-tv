@@ -24,11 +24,9 @@ val databaseModule = module {
             // Kotlin — see ManualOrdering — and the tombstone upsert to UPDATE + INSERT OR IGNORE).
             // So the platform engine suffices.
             .setDriver(AndroidSQLiteDriver())
-            // Redesign period, zero installed apps: the schema was reset to v1 without migrations,
-            // so any pre-existing database (dev builds) is simply dropped and recreated.
-            // DELETE THIS LINE before a public release — a wipe-on-mismatch fallback silently
-            // deletes real users' favorites and history.
-            .fallbackToDestructiveMigration(dropAllTables = true)
+            // Public releases start at v8. Keep the chain explicit and shared with migration tests;
+            // an older/unknown schema must surface the existing recovery UI, never wipe user data.
+            .addMigrations(*OwnTVDatabase.ALL_MIGRATIONS)
             .addCallback(object : RoomDatabase.Callback() {
                 // Self-heal index/FTS drift on every open (no-op when healthy): an interrupted bulk
                 // import can leave BulkInsertHelper's dropped indexes missing, which is invisible

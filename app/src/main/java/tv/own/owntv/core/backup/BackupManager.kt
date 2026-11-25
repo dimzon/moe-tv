@@ -279,25 +279,20 @@ class BackupManager(
 
             val kinds = kindsFor(sections)
             val fileVersion = root.optInt("version", 0)
+            val payload = validateRestorePayload(root, kinds, fileVersion)
             val counts = HashMap<String, Int>()
             var deletions = 0
             if (kinds.isNotEmpty()) {
-                root.optJSONArray("userData")?.let { arr ->
-                    for (i in 0 until arr.length()) {
-                        val e = arr.getJSONObject(i)
-                        val kind = e.optString("kind")
-                        if (kind !in kinds) continue
-                        if (isOldListOrder(e, fileVersion)) continue
-                        if (!userData.wouldAdd(kind, e)) continue
-                        counts[kind] = (counts[kind] ?: 0) + 1
-                    }
+                val deletionSnapshot = userData.deletionSnapshot()
+                for (i in 0 until payload.userData.length()) {
+                    val e = payload.userData.getJSONObject(i)
+                    val kind = e.getString("kind")
+                    if (isOldListOrder(e, fileVersion)) continue
+                    if (!userData.wouldAdd(kind, e, deletionSnapshot)) continue
+                    counts[kind] = (counts[kind] ?: 0) + 1
                 }
-                root.optJSONArray("tombstones")?.let { arr ->
-                    for (i in 0 until arr.length()) {
-                        val e = arr.getJSONObject(i)
-                        if (e.optString("kind") !in kinds) continue
-                        if (userData.wouldRemove(e)) deletions++
-                    }
+                for (i in 0 until payload.tombstones.length()) {
+                    if (userData.wouldRemove(payload.tombstones.getJSONObject(i))) deletions++
                 }
             }
 
@@ -340,6 +335,10 @@ class BackupManager(
             // Schema version of the FILE (not of this build). Only used to drop pre-v26 whole-list
             // order snapshots (see [isOldListOrder]).
             val fileVersion = root.optInt("version", 0)
+            val kinds = kindsFor(sections)
+            // Parse and validate every selected record BEFORE clearing markers or writing rows. A
+            // malformed payload must leave the device exactly as it was, not half-restored.
+            val payload = validateRestorePayload(root, kinds, fileVersion)
 
             // Interrupted-restore marker: set before the first write of any kind, cleared only
             // after the last one. A restore spans chunked transactions, so no single transaction
@@ -353,32 +352,20 @@ class BackupManager(
             // Favorites/history/orders/reminders: stashed as pending records — they attach
             // automatically as the post-restore syncs repopulate the content tables
             // (UserDataResolver.resolvePending).
-            val kinds = kindsFor(sections)
             if (kinds.isNotEmpty()) {
-                fun remapUserData(arr: JSONArray): JSONArray {
-                    val filtered = JSONArray()
-                    for (i in 0 until arr.length()) {
-                        val e = arr.getJSONObject(i)
-                        if (e.optString("kind") !in kinds) continue
-                        filtered.put(e)
-                    }
-                    return filtered
+                // A restore drops only this device's markers for the selected sections BEFORE
+                // applying the file. Unselected deletions remain facts for the next merge.
+                if (mode == ImportMode.RESTORE) {
+                    userData.clearDeletions(kinds.intersect(UserDataResolver.TOMBSTONE_KINDS))
                 }
-                // A restore drops this device's own deletion markers BEFORE anything is applied —
-                // otherwise they refuse the very rows being restored
-                // (UserDataResolver.Resolution.REFUSED) and the next local sync would delete them
-                // again. A merge must never do this — see [ImportMode].
-                if (mode == ImportMode.RESTORE) userData.clearDeletions()
                 // Deletions FIRST: they remove any local row older than the deletion, and they
                 // are recorded here, so the very next step cannot re-insert what this one removed.
-                root.optJSONArray("tombstones")?.let { userData.applyTombstones(remapUserData(it)) }
-                root.optJSONArray("userData")?.let { arr ->
-                    val filtered = remapUserData(arr).withoutOldListOrders(fileVersion)
-                    // Refused records were dropped for good, not queued — counting them is what let
-                    // a restore report "N items restored" having reinstated none of them.
-                    val refused = userData.importAll(filtered)
-                    count += (filtered.length() - refused).coerceAtLeast(0)
-                }
+                userData.applyTombstones(payload.tombstones)
+                val filtered = payload.userData.withoutOldListOrders(fileVersion)
+                // Refused records were dropped for good, not queued — counting them is what let
+                // a restore report "N items restored" having reinstated none of them.
+                val refused = userData.importAll(filtered)
+                count += (filtered.length() - refused).coerceAtLeast(0)
             }
 
             settings.clearRestoreMarker()
@@ -392,6 +379,104 @@ class BackupManager(
         if (Section.HISTORY in sections) add(SyncMatrix.KIND_HISTORY)
         if (Section.MANUAL_REORDER in sections) add(SyncMatrix.KIND_ORDER)
         if (Section.REMINDERS in sections) add(SyncMatrix.KIND_REMINDERS)
+    }
+
+    private data class RestorePayload(val userData: JSONArray, val tombstones: JSONArray)
+
+    /**
+     * Validates only the kinds the user selected. Unknown legacy kinds/root keys remain tolerated,
+     * but a selected row must carry the fields its apply path needs — otherwise a late JSON error
+     * could happen after local tombstones had already been cleared.
+     */
+    private fun validateRestorePayload(root: JSONObject, kinds: Set<String>, fileVersion: Int): RestorePayload {
+        if (kinds.isEmpty()) return RestorePayload(JSONArray(), JSONArray())
+        val records = validatedArray(root, "userData")
+        val tombstones = validatedArray(root, "tombstones")
+        val selectedRecords = JSONArray()
+        val selectedTombstones = JSONArray()
+
+        for (i in 0 until records.length()) {
+            val record = records.optJSONObject(i) ?: error("Invalid userData record")
+            val kind = textField(record, "kind", required = true)!!
+            if (kind !in kinds) continue
+            longField(record, "at") // optional LWW stamp; legacy records may omit it
+            when (kind) {
+                SyncMatrix.KIND_FAVORITES, SyncMatrix.KIND_HISTORY -> requireChannelIdentity(record, ridRequired = false)
+                SyncMatrix.KIND_ORDER -> {
+                    requireChannelIdentity(record, ridRequired = false)
+                    textField(record, "ctx", required = true)
+                    intField(record, "pos", required = true)
+                }
+                SyncMatrix.KIND_REMINDERS -> {
+                    requireChannelIdentity(record, ridRequired = true)
+                    longField(record, "startMs", required = true)
+                    longField(record, "stopMs")
+                    intField(record, "lead")
+                    textField(record, "title")
+                }
+            }
+            if (kind == SyncMatrix.KIND_HISTORY) textField(record, "dev")
+            if (kind == SyncMatrix.KIND_ORDER && isOldListOrder(record, fileVersion)) continue
+            selectedRecords.put(record)
+        }
+
+        for (i in 0 until tombstones.length()) {
+            val tombstone = tombstones.optJSONObject(i) ?: error("Invalid tombstone record")
+            val kind = textField(tombstone, "kind", required = true)!!
+            if (kind !in kinds || kind !in UserDataResolver.TOMBSTONE_KINDS) continue
+            longField(tombstone, "at")
+            when (kind) {
+                SyncMatrix.KIND_FAVORITES -> requireChannelIdentity(tombstone, ridRequired = false)
+                SyncMatrix.KIND_ORDER -> {
+                    requireChannelIdentity(tombstone, ridRequired = false)
+                    textField(tombstone, "ctx", required = true)
+                }
+                SyncMatrix.KIND_REMINDERS -> {
+                    requireChannelIdentity(tombstone, ridRequired = true)
+                    longField(tombstone, "startMs", required = true)
+                }
+            }
+            selectedTombstones.put(tombstone)
+        }
+        return RestorePayload(selectedRecords, selectedTombstones)
+    }
+
+    private fun validatedArray(root: JSONObject, key: String): JSONArray {
+        if (!root.has(key) || root.isNull(key)) return JSONArray()
+        return root.optJSONArray(key) ?: error("Invalid $key payload")
+    }
+
+    private fun requireChannelIdentity(record: JSONObject, ridRequired: Boolean) {
+        val rid = textField(record, "rid")
+        if (rid != null) return // A display name is not identity when rid exists; do not even validate it.
+        if (ridRequired) error("Reminder record has no channel rid")
+        textField(record, "name", required = true)
+    }
+
+    private fun textField(record: JSONObject, key: String, required: Boolean = false): String? {
+        if (!record.has(key) || record.isNull(key)) {
+            if (required) error("Missing $key")
+            return null
+        }
+        return (record.opt(key) as? String)?.takeIf { it.isNotBlank() }
+            ?: error("Invalid $key")
+    }
+
+    private fun longField(record: JSONObject, key: String, required: Boolean = false): Long? {
+        if (!record.has(key) || record.isNull(key)) {
+            if (required) error("Missing $key")
+            return null
+        }
+        val number = record.opt(key) as? Number ?: error("Invalid $key")
+        val value = number.toLong()
+        if (!number.toDouble().isFinite() || number.toDouble() != value.toDouble()) error("Invalid $key")
+        return value
+    }
+
+    private fun intField(record: JSONObject, key: String, required: Boolean = false): Int? {
+        val value = longField(record, key, required) ?: return null
+        if (value !in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) error("Invalid $key")
+        return value.toInt()
     }
 
     companion object {

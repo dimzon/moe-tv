@@ -124,6 +124,8 @@ class MultiviewState(
         private set
 
     private val claims = HashMap<Int, OpenStreamRegistry.Claim>()
+    private val tileTunes = TileTuneRegistry()
+    private var released = false
 
     /**
      * Tiles playing sound with no picture — the background-audio case: watch one
@@ -182,8 +184,12 @@ class MultiviewState(
      * what it held first, so swapping a channel never counts as two.
      */
     fun fill(tile: Int, channel: ChannelEntity) {
-        if (tile !in tiles.indices) return
+        if (released || tile !in tiles.indices) return
+        val generation = tileTunes.begin(tile)
         releaseClaim(tile)
+        // Stop the previous stream before asking for another connection or publishing the new tile.
+        // Reusing this engine is fine; letting the old request finish into it is not.
+        pool.peek(tile)?.stop()
         val source = live.sourceOf(channel)
         when (val grant = connectionBudget(source, registry.openOn(channel.sourceId), StreamPurpose.WATCHING)) {
             is StreamGrant.Refused -> {
@@ -196,7 +202,11 @@ class MultiviewState(
         tiles[tile] = MultiviewTile(channel = channel)
         // The first channel to arrive takes the sound; after that the user decides.
         val takesSound = tiles.none { it.channel != null && it != tiles[tile] }
-        live.tuneTile(pool.engineFor(tile), channel, muted = !takesSound && audible != tile)
+        val job = live.tuneTile(
+            pool.engineFor(tile), channel, muted = !takesSound && audible != tile,
+            isCurrent = { !released && tileTunes.isCurrent(tile, generation) },
+        )
+        tileTunes.attach(tile, generation, job)
         if (takesSound) giveSoundTo(tile) else if (audible == tile) pool.giveSoundTo(tile)
     }
 
@@ -214,6 +224,8 @@ class MultiviewState(
      * decoders, bandwidth or video planes — and that is what the tile says.
      */
     fun refuseDeviceLimit(tile: Int) {
+        if (released || tile !in tiles.indices) return
+        tileTunes.begin(tile)
         if (tiles.getOrNull(tile)?.channel == null) return
         releaseClaim(tile)
         pool.release(tile)
@@ -234,12 +246,14 @@ class MultiviewState(
      * index and no engine is silently handed to a different channel.
      */
     fun clear(tile: Int) {
-        if (tile !in tiles.indices) return
+        if (released || tile !in tiles.indices) return
+        tileTunes.begin(tile)
         releaseClaim(tile)
         pool.release(tile)
         soundOnly.remove(tile)
         tiles[tile] = MultiviewTile()
         while (tiles.size > openingTileCount(maxTiles) && tiles.last().isEmpty) {
+            tileTunes.begin(tiles.lastIndex)
             pool.release(tiles.lastIndex)
             tiles.removeAt(tiles.lastIndex)
         }
@@ -249,6 +263,9 @@ class MultiviewState(
 
     /** Leaving the grid. Every engine and every claim goes, or the next tile is refused for a ghost. */
     fun releaseAll() {
+        if (released) return
+        released = true
+        tileTunes.cancelAll()
         claims.values.forEach { registry.release(it) }
         claims.clear()
         pool.releaseAll()

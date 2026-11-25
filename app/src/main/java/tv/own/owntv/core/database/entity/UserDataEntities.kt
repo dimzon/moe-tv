@@ -152,9 +152,9 @@ data class CustomCategoryMemberEntity(
  *
  * [identity] is NOT the volatile `itemId`. It is the same stable content key
  * [tv.own.owntv.core.backup.UserDataResolver] exports into a backup — the channel's hex remoteId
- * and name (plus the custom-category key for an order removal, and the start time for a reminder)
- * as a canonically-ordered JSON object — because the row being deleted has to be recognisable on
- * a device whose ids are entirely different, and across the clear-then-insert of a re-sync on this one.
+ * (name only for pre-rid legacy records), plus the custom-category key for an order removal and the
+ * start time for a reminder, as a canonically-ordered JSON object — because the row being deleted has
+ * to be recognisable on another device and across the clear-then-insert of a re-sync on this one.
  *
  * Only genuine user deletions are recorded. Housekeeping deletes — the orphan purges after a
  * re-sync — must never write one: that would turn "your playlist was refreshed" into "delete this

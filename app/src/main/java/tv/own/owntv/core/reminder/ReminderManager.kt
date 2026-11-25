@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import tv.own.owntv.core.backup.UserDataResolver
@@ -21,7 +23,7 @@ import tv.own.owntv.core.database.entity.ReminderEntity
  */
 class ReminderManager(
     private val reminderDao: ReminderDao,
-    private val scheduler: ReminderScheduler,
+    private val scheduler: ReminderAlarmScheduler,
     /**
      * Sync plumbing, injected so a dismissed reminder records a `prog` tombstone and does not come
      * back from the household on the next merge. Optional only so the class works where sync is not
@@ -40,8 +42,12 @@ class ReminderManager(
     }.stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     init {
-        // Every launch re-arms: some TVs never deliver BOOT_COMPLETED.
-        scope.launch { scheduler.rearmAll() }
+        // The initial emission covers launch/reboot; later emissions cover reminders restored or
+        // merged while the process is alive. rearmAll is idempotent (same PendingIntent request
+        // codes), and distinctUntilChanged avoids needless AlarmManager work.
+        scope.launch {
+            reminderDao.observeAll().distinctUntilChanged().collect { scheduler.rearmAll() }
+        }
     }
 
     /** All the user's reminders. */

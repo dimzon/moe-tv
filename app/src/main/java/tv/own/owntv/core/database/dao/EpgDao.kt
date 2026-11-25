@@ -22,6 +22,14 @@ interface EpgDao {
     @Query("DELETE FROM epg_programmes WHERE stopMs < :before")
     suspend fun prune(before: Long)
 
+    /**
+     * Retention prune restricted to channels whose refresh completed. A failed channel keeps its old
+     * guide until a later successful pass instead of being erased by another channel's failure.
+     * Callers chunk the id list to stay below SQLite's API-23 variable limit.
+     */
+    @Query("DELETE FROM epg_programmes WHERE stopMs < :before AND epgChannelId IN (:channelIds)")
+    suspend fun pruneChannels(before: Long, channelIds: List<String>)
+
     /** Drop programmes beyond the stored horizon — what lowering "Guide days to keep" frees. */
     @Query("DELETE FROM epg_programmes WHERE startMs > :after")
     suspend fun pruneFuture(after: Long)

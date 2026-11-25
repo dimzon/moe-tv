@@ -42,10 +42,12 @@ import tv.own.owntv.core.weather.*
 import tv.own.owntv.player.*
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 import tv.own.owntv.core.categorylock.firstUnsealed
 import tv.own.owntv.core.categorylock.sealedCategoryIds
@@ -72,5 +74,21 @@ internal fun rememberDueReminder(): ReminderEntity? {
         }
     }
     val reminder by due.collectAsStateWithLifecycle(null)
-    return reminder
+    // The manager's alarm tick may never arrive while the app stays open. Re-check the programme
+    // window locally so an ended reminder cannot cover the next one for ever.
+    val now by produceState(System.currentTimeMillis()) {
+        while (true) {
+            value = System.currentTimeMillis()
+            delay(1_000L)
+        }
+    }
+    LaunchedEffect(reminder?.id, now) {
+        val current = reminder ?: return@LaunchedEffect
+        if (current.stopMs <= now) reminders.dismiss(current.id)
+    }
+    return reminder?.let { dueReminder(listOf(it), now) }
 }
+
+/** The first reminder still inside its programme window; pure so expiry is unit-tested. */
+internal fun dueReminder(reminders: List<ReminderEntity>, nowMs: Long): ReminderEntity? =
+    ReminderSchedule.due(reminders, nowMs).firstOrNull()

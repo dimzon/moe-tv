@@ -1,6 +1,7 @@
 package tv.own.owntv.core.database
 
 import androidx.room.Database
+import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import androidx.room.RoomDatabase
@@ -57,9 +58,9 @@ import tv.own.owntv.core.database.dao.CustomCategoryDao
     ],
     // The live-only redesign reset the schema to v1: profiles are gone from every table and the
     // migration history (1 → 57) was dropped with them — migrating the old tables toward a schema
-    // that no longer has a `profiles` table vouched for nothing. There are zero installed
-    // instances, so the database is simply recreated (see DatabaseModule's
-    // fallbackToDestructiveMigration). v2 dropped `channels.categoryId` — the M:N junction
+    // that no longer has a `profiles` table vouched for nothing. That pre-release reset used a
+    // destructive fallback; public upgrades now fail closed unless a migration is registered.
+    // v2 dropped `channels.categoryId` — the M:N junction
     // `channel_category` owns channel↔category membership, and the in-memory visibility rules
     // read ChannelMembership's snapshot. v3 adds `channel_rename` — curated hex→name renames
     // without an FK, mirrored from ChannelRenameSeeds on every sync. v4 slims `channels` to the
@@ -104,6 +105,128 @@ abstract class OwnTVDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "owntv.db"
+
+        /** v8 → v9: additive provider slug. Existing rows keep a null alias. */
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(connection: SQLiteConnection) {
+                if (!hasColumn(connection, "categories", "alias")) {
+                    connection.execSQL("ALTER TABLE `categories` ADD COLUMN `alias` TEXT")
+                }
+            }
+        }
+
+        /**
+         * v9 → v10: the provider's numeric category id replaces the surrogate row id.
+         *
+         * Room runs every migration in its upgrade transaction. This body deliberately finishes all
+         * validation and reads before the first DROP: a null/non-numeric/duplicate remoteId or an
+         * orphaned membership throws, rolling the whole upgrade back instead of leaving a half-remapped
+         * catalogue. The junction is rebuilt against the new parent key in the same transaction.
+         */
+        val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(connection: SQLiteConnection) {
+                val required = listOf("id", "name", "remoteId", "alias", "sortOrder")
+                if (required.any { !hasColumn(connection, "categories", it) }) {
+                    error("Unsupported categories schema at database v9")
+                }
+
+                data class CategoryRow(
+                    val newId: Long,
+                    val name: String,
+                    val alias: String?,
+                    val sortOrder: Int,
+                )
+                data class MembershipRow(val channelHexId: String, val categoryId: Long)
+
+                val categories = ArrayList<CategoryRow>()
+                val idMap = HashMap<Long, Long>()
+                val providerIds = HashSet<Long>()
+                connection.prepare(
+                    "SELECT `id`, `name`, `remoteId`, `alias`, `sortOrder` FROM `categories`",
+                ).use { statement ->
+                    while (statement.step()) {
+                        val oldId = statement.getLong(0)
+                        val providerId = statement.getText(2)?.trim()?.toLongOrNull()
+                            ?.takeIf { it > 0 }
+                            ?: error("Category $oldId has no numeric RuTube id")
+                        if (!providerIds.add(providerId)) {
+                            error("Duplicate RuTube category id $providerId")
+                        }
+                        val name = statement.getText(1)
+                            ?: error("Category $oldId has no name")
+                        categories += CategoryRow(
+                            newId = providerId,
+                            name = name,
+                            alias = if (statement.isNull(3)) null else statement.getText(3),
+                            sortOrder = statement.getInt(4),
+                        )
+                        idMap[oldId] = providerId
+                    }
+                }
+
+                val memberships = ArrayList<MembershipRow>()
+                connection.prepare(
+                    "SELECT `channelHexId`, `categoryId` FROM `channel_category`",
+                ).use { statement ->
+                    while (statement.step()) {
+                        val oldCategoryId = statement.getLong(1)
+                        val newCategoryId = idMap[oldCategoryId]
+                            ?: error("Channel membership references missing category $oldCategoryId")
+                        memberships += MembershipRow(statement.getText(0), newCategoryId)
+                    }
+                }
+
+                // Nothing below this point is conditional on provider data. A failure (including a
+                // disk-full insert) is rolled back by Room together with the validation/read phase.
+                connection.execSQL("DROP TABLE IF EXISTS `categories_new`")
+                connection.execSQL(
+                    "CREATE TABLE `categories_new` (" +
+                        "`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `alias` TEXT, " +
+                        "`sortOrder` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                )
+                connection.prepare(
+                    "INSERT INTO `categories_new` (`id`, `name`, `alias`, `sortOrder`) VALUES (?, ?, ?, ?)",
+                ).use { statement ->
+                    for (row in categories) {
+                        statement.bindLong(1, row.newId)
+                        statement.bindText(2, row.name)
+                        if (row.alias == null) statement.bindNull(3) else statement.bindText(3, row.alias)
+                        statement.bindInt(4, row.sortOrder)
+                        statement.step()
+                        statement.clearBindings()
+                    }
+                }
+
+                connection.execSQL("DROP TABLE `channel_category`")
+                connection.execSQL("DROP TABLE `categories`")
+                connection.execSQL("DROP INDEX IF EXISTS `index_categories_remoteId`")
+                connection.execSQL("ALTER TABLE `categories_new` RENAME TO `categories`")
+                connection.execSQL(
+                    "CREATE TABLE `channel_category` (" +
+                        "`channelHexId` TEXT NOT NULL, `categoryId` INTEGER NOT NULL, " +
+                        "PRIMARY KEY(`channelHexId`, `categoryId`), " +
+                        "FOREIGN KEY(`channelHexId`) REFERENCES `channels`(`remoteId`) " +
+                        "ON UPDATE NO ACTION ON DELETE CASCADE, " +
+                        "FOREIGN KEY(`categoryId`) REFERENCES `categories`(`id`) " +
+                        "ON UPDATE NO ACTION ON DELETE CASCADE)",
+                )
+                connection.prepare(
+                    "INSERT INTO `channel_category` (`channelHexId`, `categoryId`) VALUES (?, ?)",
+                ).use { statement ->
+                    for (row in memberships) {
+                        statement.bindText(1, row.channelHexId)
+                        statement.bindLong(2, row.categoryId)
+                        statement.step()
+                        statement.clearBindings()
+                    }
+                }
+                connection.execSQL("CREATE INDEX `index_channel_category_categoryId` ON `channel_category` (`categoryId`)")
+                connection.execSQL("CREATE INDEX `index_channel_category_channelHexId` ON `channel_category` (`channelHexId`)")
+            }
+        }
+
+        /** The complete supported public-release upgrade chain. Older databases fail closed. */
+        val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_8_9, MIGRATION_9_10)
 
         /**
          * Canonical CREATE statements for every NON-unique index Room expects on the bulk-synced

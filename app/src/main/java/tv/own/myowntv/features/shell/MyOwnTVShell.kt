@@ -267,6 +267,7 @@ fun MyOwnTVShell(
         tv.own.owntv.core.live.DEFAULT_MULTIVIEW_TILES,
     )
     val enginePool = koinInject<tv.own.owntv.player.LiveEnginePool>()
+    val playbackEngines = koinInject<tv.own.owntv.player.PlaybackEngines>()
     val streamRegistry = koinInject<tv.own.owntv.core.live.OpenStreamRegistry>()
     var multiview by remember { mutableStateOf<tv.own.myowntv.features.multiview.MultiviewState?>(null) }
     var multiviewPickFor by remember { mutableStateOf<Int?>(null) }
@@ -525,6 +526,9 @@ fun MyOwnTVShell(
     // all three go, in the order Multiview's own Back uses, and the preview last.
     val sleepTimer = koinInject<tv.own.owntv.player.SleepTimer>()
     val stopForSleep by rememberUpdatedState {
+        // Sleep is terminal. Drop Home/screensaver restore tokens before any engine is released or
+        // stopped, otherwise returning to the foreground would replay the channel just put to sleep.
+        playbackEngines.discardBackgroundRestore()
         multiview?.let { grid ->
             grid.releaseAll()
             multiview = null
@@ -1254,6 +1258,47 @@ fun MyOwnTVShell(
           }
       }
 
+      // Shell-level reminders must survive section changes and appear over browse, Mini/Audio Mode,
+      // Multiview and PiP, not only inside the fullscreen player.
+      val reminderManager = koinInject<tv.own.owntv.core.reminder.ReminderManager>()
+      val reminderMode by settingsRepo.reminderMode.collectAsStateWithLifecycle(tv.own.owntv.core.settings.SettingsRepository.ReminderMode.ASK)
+      val dueReminder = rememberDueReminder()
+      val watchReminder: (tv.own.owntv.core.database.entity.ReminderEntity) -> Unit = { r ->
+          // A reminder switch replaces the whole grid. Release every tile and its resolve job before
+          // the full-screen engine starts, or the old tile could resolve into playback underneath it.
+          multiview?.releaseAll()
+          multiview = null
+          multiviewPickFor = null
+          scope.launch {
+              // Enter the deliberate-tune path first: it cancels any deferred CH+/- before the
+              // reminder dismissal's database write can suspend.
+              val opened = liveVm.ensurePlayingByIdAsync(r.channelId)
+              reminderManager.dismiss(r.id)
+              if (opened) openFullscreen()
+          }
+      }
+      val reminderText = dueReminder?.let {
+          listOf(it.title, tv.own.myowntv.features.epg.reminderEyebrow(it)).joinToString(" · ")
+      }
+      LaunchedEffect(dueReminder?.id, reminderMode) {
+          val r = dueReminder ?: return@LaunchedEffect
+          when (reminderMode) {
+              tv.own.owntv.core.settings.SettingsRepository.ReminderMode.SWITCH -> watchReminder(r)
+              tv.own.owntv.core.settings.SettingsRepository.ReminderMode.NOTIFY -> {
+                  reminderText?.let(shellToast::show)
+                  reminderManager.dismiss(r.id)
+              }
+              tv.own.owntv.core.settings.SettingsRepository.ReminderMode.ASK -> Unit
+          }
+      }
+      if (dueReminder != null && reminderMode == tv.own.owntv.core.settings.SettingsRepository.ReminderMode.ASK) {
+          tv.own.myowntv.features.epg.ReminderPrompt(
+              reminder = dueReminder,
+              onWatch = { watchReminder(dueReminder) },
+              onDismiss = { scope.launch { reminderManager.dismiss(dueReminder.id) } },
+          )
+      }
+
       if (multiview == null && (playerMode == PlayerMode.FULLSCREEN || playerMode == PlayerMode.MINI)) {
         val isFull = playerMode == PlayerMode.FULLSCREEN
         Box(
@@ -1358,37 +1403,6 @@ fun MyOwnTVShell(
                     } else null,
                     modifier = Modifier.fillMaxSize(),
                 )
-                tv.own.myowntv.ui.components.InAppToast(shellToast)
-                // Programme reminders: when one comes up, ask to switch, switch, or only say so (the
-                // Programme reminders setting) — over whatever is on screen, the player included.
-                val reminderManager = koinInject<tv.own.owntv.core.reminder.ReminderManager>()
-                val reminderMode by settingsRepo.reminderMode.collectAsStateWithLifecycle(tv.own.owntv.core.settings.SettingsRepository.ReminderMode.ASK)
-                val dueReminder = rememberDueReminder()
-                val watchReminder: (tv.own.owntv.core.database.entity.ReminderEntity) -> Unit = { r ->
-                    scope.launch {
-                        reminderManager.dismiss(r.id)
-                        if (liveVm.ensurePlayingByIdAsync(r.channelId)) openFullscreen()
-                    }
-                }
-                val reminderText = dueReminder?.let { listOf(it.title, tv.own.myowntv.features.epg.reminderEyebrow(it)).joinToString(" · ") }
-                LaunchedEffect(dueReminder?.id, reminderMode) {
-                    val r = dueReminder ?: return@LaunchedEffect
-                    when (reminderMode) {
-                        tv.own.owntv.core.settings.SettingsRepository.ReminderMode.SWITCH -> watchReminder(r)
-                        tv.own.owntv.core.settings.SettingsRepository.ReminderMode.NOTIFY -> {
-                            reminderText?.let(shellToast::show)
-                            reminderManager.dismiss(r.id)
-                        }
-                        tv.own.owntv.core.settings.SettingsRepository.ReminderMode.ASK -> Unit
-                    }
-                }
-                if (dueReminder != null && reminderMode == tv.own.owntv.core.settings.SettingsRepository.ReminderMode.ASK) {
-                    tv.own.myowntv.features.epg.ReminderPrompt(
-                        reminder = dueReminder,
-                        onWatch = { watchReminder(dueReminder) },
-                        onDismiss = { scope.launch { reminderManager.dismiss(dueReminder.id) } },
-                    )
-                }
                 // Left — the playing channel's own provider category.
                 if (showChannelList && isLiveChannel) {
                     if (showCategoryBrowser) {
@@ -1535,6 +1549,9 @@ fun MyOwnTVShell(
             }
         }
     }
+    // Last in the root Box: shell feedback, including NOTIFY reminders, must draw over opaque
+    // fullscreen/Multiview content rather than behind it.
+    tv.own.myowntv.ui.components.InAppToast(shellToast)
     }
 }
 

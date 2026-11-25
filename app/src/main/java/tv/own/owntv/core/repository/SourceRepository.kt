@@ -87,7 +87,8 @@ class SourceRepository(
         // success: a partial pass never touched the rest, and a failure proves nothing. Off
         // sections retain cache + user data, so their favorites stay resolvable.
         val effective = contentTypes.effectiveFor(source)
-        val purge = result is SyncResult.Success && effective.isCompleteFor(SyncContentTypes.enabledFor(source))
+        val purge = result is SyncResult.Success && result.catalogueComplete &&
+            effective.isCompleteFor(SyncContentTypes.enabledFor(source))
         val relinkStartedAt = SystemClock.elapsedRealtime()
         // Serialized: parallel source syncs (startup refresh runs every source at once) must not
         // relink/purge against each other's mid-flight state.

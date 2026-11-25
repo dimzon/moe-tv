@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONArray
 import org.json.JSONObject
 import tv.own.owntv.core.database.dao.ChannelDao
@@ -67,6 +69,8 @@ class UserDataResolver(
 ) {
 
     private fun reminderDao() = db.reminderDao()
+    private val normalizationMutex = Mutex()
+    @Volatile private var tombstonesNormalized = false
 
     // --- deletions (v36) -------------------------------------------------------------------------
     //
@@ -88,14 +92,7 @@ class UserDataResolver(
      * Reminders identify by (channelId, startMs) — see [ReminderEntity] — and `rid` carries the
      * channelId there; every producer of this string spells those two fields the same way.
      */
-    fun canonicalIdentity(record: JSONObject): String = JSONObject().apply {
-        record.optStringOrNull("rid")?.let { put("rid", it) }
-        record.optStringOrNull("name")?.let { put("name", it) }
-        // Membership is per custom category: removing a channel from one list is not removing it from
-        // another, so the category has to be part of what was deleted.
-        record.optStringOrNull("ctx")?.let { put("ctx", it) }
-        if (record.has("startMs")) put("startMs", record.optLong("startMs"))
-    }.toString()
+    fun canonicalIdentity(record: JSONObject): String = canonicalUserDataIdentity(record)
 
     /** The stable content key of a channel, or null when its content row is already gone. */
     suspend fun identityOf(itemId: String): JSONObject? = describe(itemId)
@@ -141,15 +138,60 @@ class UserDataResolver(
     }
 
     /**
-     * Drops this device's deletion markers — see [TombstoneDao.deleteAll].
-     * A restore calls this before applying the file; a merge never does.
+     * Drops only this device's selected deletion markers. A restore calls this before applying its
+     * selected sections; a merge never does. Retired/unselected kinds are deliberately untouched.
      */
-    suspend fun clearDeletions() {
-        tombstoneDao.deleteAll()
+    suspend fun clearDeletions(kinds: Set<String> = TOMBSTONE_KINDS) {
+        if (kinds.isNotEmpty()) tombstoneDao.deleteByKinds(kinds)
+    }
+
+    /**
+     * Older builds included both rid and display name in a tombstone key. Re-key those rows to the
+     * rid-only form, newest timestamp wins, and only then delete the legacy row. Invalid JSON and
+     * retired kinds are left alone rather than guessed at.
+     */
+    private suspend fun ensureLegacyTombstonesNormalized() {
+        if (tombstonesNormalized) return
+        normalizationMutex.withLock {
+            if (tombstonesNormalized) return
+            db.transaction {
+                tombstoneDao.getAllOnce().forEach { row ->
+                    if (row.kind !in TOMBSTONE_KINDS) return@forEach
+                    val record = runCatching { JSONObject(row.identity) }.getOrNull() ?: return@forEach
+                    val normalized = canonicalIdentity(record)
+                    if (normalized == row.identity) return@forEach
+                    tombstoneDao.record(row.kind, normalized, row.deletedAt)
+                    tombstoneDao.deleteById(row.id)
+                }
+            }
+            tombstonesNormalized = true
+        }
+    }
+
+    private suspend fun deletedAt(kind: String, record: JSONObject, normalize: Boolean = true): Long? {
+        if (normalize) {
+            ensureLegacyTombstonesNormalized()
+            return tombstoneDao.deletedAt(kind, canonicalIdentity(record))
+        }
+        // Preview is read-only: recognize canonical and legacy spellings without rewriting rows.
+        return deletionSnapshot().deletedAt(kind, record)
+    }
+
+    /** One read of the tombstone table, normalized by stable content key, for a whole preview. */
+    suspend fun deletionSnapshot(): DeletionSnapshot {
+        val newest = HashMap<DeletionKey, Long>()
+        tombstoneDao.getAllOnce().forEach { row ->
+            if (row.kind !in TOMBSTONE_KINDS) return@forEach
+            val record = runCatching { JSONObject(row.identity) }.getOrNull() ?: return@forEach
+            val key = record.deletionKey(row.kind)
+            newest[key] = maxOf(newest[key] ?: Long.MIN_VALUE, row.deletedAt)
+        }
+        return DeletionSnapshot(newest)
     }
 
     /** The deletions to put in a sync payload, as records of the same shape [exportAll] produces. */
     suspend fun exportTombstones(kinds: Set<String>): JSONArray {
+        ensureLegacyTombstonesNormalized()
         val out = JSONArray()
         tombstoneDao.getAllOnce().forEach { row ->
             if (row.kind !in kinds) return@forEach
@@ -171,6 +213,7 @@ class UserDataResolver(
      */
     suspend fun applyTombstones(entries: JSONArray?): Int {
         if (entries == null || entries.length() == 0) return 0
+        ensureLegacyTombstonesNormalized()
         var applied = 0
         var i = 0
         while (i < entries.length()) {
@@ -312,8 +355,10 @@ class UserDataResolver(
      *  Returns how many records a newer local deletion refused. Those are dropped for good rather
      *  than left pending, so the caller must not count them as restored — see [BackupManager]. */
     suspend fun importAll(entries: JSONArray?): Int {
-        if (entries != null && entries.length() > 0) addPending(entries)
-        return resolvePending()
+        pendingMutex.withLock {
+            if (entries != null && entries.length() > 0) addPending(entries)
+            return resolvePendingLocked()
+        }
     }
 
     /**
@@ -321,10 +366,13 @@ class UserDataResolver(
      * sync; resolved records are inserted (idempotently — the user data tables have unique
      * (type, item) indices) and removed from the pending set.
      */
-    suspend fun resolvePending(): Int {
+    suspend fun resolvePending(): Int = pendingMutex.withLock { resolvePendingLocked() }
+
+    private suspend fun resolvePendingLocked(): Int {
         val raw = context.pendingStore.data.first()[PENDING_KEY] ?: return 0
         val entries = runCatching { JSONArray(raw) }.getOrNull() ?: return 0
         if (entries.length() == 0) return 0
+        ensureLegacyTombstonesNormalized()
 
         val (remaining, refused) = resolveAllChunked(entries)
         context.pendingStore.edit { prefs ->
@@ -386,9 +434,10 @@ class UserDataResolver(
      * change something. A record a local deletion already outranks does not, because applying it
      * would do nothing.
      */
-    suspend fun wouldAdd(kind: String, e: JSONObject): Boolean {
+    suspend fun wouldAdd(kind: String, e: JSONObject, deletions: DeletionSnapshot? = null): Boolean {
         val at = e.optLong("at", 0)
-        if (tombstoneDao.deletedAt(kind, canonicalIdentity(e))?.let { it >= at } == true) return false
+        val deletionTime = deletions?.deletedAt(kind, e) ?: deletedAt(kind, e, normalize = false)
+        if (deletionTime?.let { it >= at } == true) return false
         return when (kind) {
             SyncMatrix.KIND_FAVORITES -> {
                 val itemId = locate(e) ?: return true
@@ -436,14 +485,15 @@ class UserDataResolver(
     }
 
     /**
-     * The content key a record points at, or null while the channel is not (yet) here. The record's
-     * `rid` IS the key — the hex never changes — and the name is only a fallback for very old files
-     * that predate stable ids.
+     * The content key a record points at, or null while the channel is not (yet) here. A present rid
+     * is authoritative: if that exact channel is absent, a same-name fallback could attach the record
+     * to a different channel. Name is used only by legacy records that carry no rid at all.
      */
     private suspend fun locate(e: JSONObject): String? {
         val rid = e.optStringOrNull("rid")
-        return rid?.takeIf { channelDao.getById(it) != null }
-            ?: channelDao.findByName(e.optStringOrNull("name") ?: e.getString("name"))?.remoteId
+        if (rid != null) return rid.takeIf { channelDao.getById(it) != null }
+        val name = e.optStringOrNull("name") ?: return null
+        return channelDao.findByName(name)?.remoteId
     }
 
     /** What [resolveAndInsert] did with one record. */
@@ -479,7 +529,7 @@ class UserDataResolver(
         // Dropped rather than retried for ever — but reported as REFUSED, because the caller must be
         // able to tell "put back" from "deliberately not put back". A restore clears this device's
         // markers first (see BackupManager.ImportMode.RESTORE), so there it refuses nothing.
-        if (tombstonesPresent && tombstoneDao.deletedAt(e.optString("kind"), canonicalIdentity(e))?.let { it >= at } == true) {
+        if (tombstonesPresent && deletedAt(e.optString("kind"), e)?.let { it >= at } == true) {
             return Resolution.REFUSED
         }
         return runCatching {
@@ -527,14 +577,14 @@ class UserDataResolver(
     /**
      * Applies one `prog` record, per-row LWW on [ReminderEntity.updatedAt]: absent → insert, local
      * older → replace, local same-or-newer → keep. The identity is (channelId, startMs); a record
-     * whose channel this device does not have is skipped for good.
+     * whose channel this device does not have stays pending until the catalogue is restored.
      */
     private suspend fun resolveAndInsertReminder(e: JSONObject, tombstonesPresent: Boolean): Resolution {
         val at = e.optLong("at", System.currentTimeMillis())
         // The same deletion-loses rule as every other kind: an older record behind a newer local
         // dismissal must not resurrect the reminder (see [applyRecord]).
         if (tombstonesPresent &&
-            tombstoneDao.deletedAt(e.optString("kind"), canonicalIdentity(e))?.let { it >= at } == true
+            deletedAt(e.optString("kind"), e)?.let { it >= at } == true
         ) {
             return Resolution.REFUSED
         }
@@ -543,7 +593,9 @@ class UserDataResolver(
         val dao = db.reminderDao()
         val existing = dao.getByChannelAndStart(channelId, startMs)
         if (existing != null && existing.updatedAt >= at) return Resolution.HANDLED
-        val channel = channelDao.getById(channelId) ?: return Resolution.HANDLED
+        // The catalogue may not have been restored yet. Keep the reminder pending rather than
+        // silently dropping it; ReminderManager will arm it when the row appears.
+        val channel = channelDao.getById(channelId) ?: return Resolution.PENDING
         return runCatching {
             dao.upsert(
                 ReminderEntity(
@@ -590,5 +642,60 @@ class UserDataResolver(
         /** Newest deletions kept. "Clear watch history" writes one per row, and a deletion is only
          *  useful until every device has seen it. */
         private const val MAX_TOMBSTONES = 20_000
+
+        /**
+         * Process-wide, not per resolver: backup import and a post-sync resolve can be launched by
+         * different repositories/workers in the same process. Append + resolve + pending-store replace
+         * must be one critical section or a concurrent resolve can overwrite a just-appended record.
+         */
+        private val pendingMutex = Mutex()
     }
+}
+
+/**
+ * Stable tombstone identity. A provider id is authoritative; the display name must not become part of
+ * the key when it exists (a rename would otherwise resurrect a deleted favorite). Name remains the
+ * fallback only for pre-rid backup records.
+ */
+internal fun canonicalUserDataIdentity(record: JSONObject): String = JSONObject().apply {
+    fun text(key: String): String? =
+        if (!record.has(key) || record.isNull(key)) null else record.optString(key).takeIf { it.isNotBlank() }
+
+    val rid = text("rid")
+    if (rid != null) {
+        put("rid", rid)
+    } else {
+        text("name")?.let { put("name", it) }
+    }
+    // Membership is per custom category: removing a channel from one list is not removing it from
+    // another, so the category has to be part of what was deleted.
+    text("ctx")?.let { put("ctx", it) }
+    if (record.has("startMs") && !record.isNull("startMs")) {
+        put("startMs", record.optLong("startMs"))
+    }
+}.toString()
+
+data class DeletionKey(
+    val kind: String,
+    val rid: String?,
+    val legacyName: String?,
+    val ctx: String?,
+    val startMs: Long?,
+)
+
+data class DeletionSnapshot(private val newest: Map<DeletionKey, Long>) {
+    fun deletedAt(kind: String, record: JSONObject): Long? = newest[record.deletionKey(kind)]
+}
+
+private fun JSONObject.deletionKey(kind: String): DeletionKey {
+    fun text(key: String): String? =
+        if (!has(key) || isNull(key)) null else optString(key).takeIf { it.isNotBlank() }
+    val rid = text("rid")
+    return DeletionKey(
+        kind = kind,
+        rid = rid,
+        legacyName = if (rid == null) text("name") else null,
+        ctx = text("ctx"),
+        startMs = if (has("startMs") && !isNull("startMs")) optLong("startMs") else null,
+    )
 }

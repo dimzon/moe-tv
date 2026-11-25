@@ -23,16 +23,29 @@ data class EpgNowNext(
  * debounced, so while the highlight moves on the key still names the previous channel: showing
  * that answer under the new channel is what made the row briefly name the wrong programme.
  */
-internal fun nowNextForChannel(keyed: Pair<String?, EpgNowNext?>, channelId: String?): EpgNowNext? =
-    keyed.second.takeIf { channelId != null && keyed.first == channelId }
+internal fun nowNextForChannel(
+    keyed: Pair<String?, EpgNowNext?>,
+    channelId: String?,
+    nowMs: Long,
+): EpgNowNext? {
+    if (channelId == null || keyed.first != channelId) return null
+    val answer = keyed.second ?: return null
+    val now = answer.now
+    if (now != null) return answer.takeIf { now.startMs <= nowMs && now.stopMs > nowMs }
+    // No current programme is a valid gap answer only until the advertised next programme starts.
+    return answer.takeIf { answer.next == null || answer.next.startMs > nowMs }
+}
 
 /**
  * What a channel row prints: the fresh answer for that channel when it has arrived, otherwise the
- * batched per-channel guide. The keyed guard keeps a stale answer from ever reaching another row.
+ * batched per-channel guide. Both paths reject a programme whose stop has passed, and the keyed guard
+ * keeps a stale answer from ever reaching another row.
  */
 internal fun rowProgramme(
     keyed: Pair<String?, EpgNowNext?>,
     channelId: String,
     perChannel: Map<String, XtEpgEntry>,
+    nowMs: Long,
 ): XtEpgEntry? =
-    nowNextForChannel(keyed, channelId)?.now ?: perChannel[channelId]
+    nowNextForChannel(keyed, channelId, nowMs)?.now
+        ?: perChannel[channelId]?.takeIf { it.startMs <= nowMs && it.stopMs > nowMs }

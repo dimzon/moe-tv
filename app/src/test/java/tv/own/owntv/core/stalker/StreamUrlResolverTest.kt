@@ -52,6 +52,12 @@ class StreamUrlResolverTest {
     }
 
     @Test
+    fun resolve_acceptsTheOneSegmentMarkerStoredByChannelEntity() = runBlocking {
+        val r = StreamUrlResolver(canned().api)
+        assertEquals("https://cdn.example.test/live.m3u8", r.resolve(source, "rutube://abc123"))
+    }
+
+    @Test
     fun resolve_aMarkerWithoutAVideoIdIsRefused() = runBlocking {
         val r = StreamUrlResolver(canned().api)
         val e = runCatching { r.resolve(source, "rutube://7/") }.exceptionOrNull()

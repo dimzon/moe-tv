@@ -3,8 +3,10 @@ package tv.own.owntv.core.sync
 import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import tv.own.owntv.core.database.BulkInsertHelper
@@ -39,12 +41,12 @@ internal class RuTubeSyncer(
     private val channelRenameDao: tv.own.owntv.core.database.ChannelRenameDao,
     private val renameSeeds: Map<String, String>,
 ) {
-    suspend fun sync(s: SourceEntity, progress: SyncCounters, stats: SyncStatsCollector) =
+    suspend fun sync(s: SourceEntity, progress: SyncCounters, stats: SyncStatsCollector): Boolean =
         coroutineScope {
             syncLive(s, progress, stats)
         }
 
-    private suspend fun syncLive(s: SourceEntity, progress: SyncCounters, stats: SyncStatsCollector) {
+    private suspend fun syncLive(s: SourceEntity, progress: SyncCounters, stats: SyncStatsCollector): Boolean {
         val ctx = currentCoroutineContext()
         val freshSource = s.lastSyncAt == null
         val label = SyncPhase.LIVE.name
@@ -55,12 +57,16 @@ internal class RuTubeSyncer(
         val rawCategories = rutube.categories()
         // The curated TV list carries RuTube's numbering and genres; the official TV feed carries
         // the channels that list omits (SKY SPORTS TENNIS, radio streams, regional channels, …).
-        val tvChannels = rutube.channels(rawCategories.map { it.id })
-        val feedChannels = rutube.liveChannels(rawCategories)
+        val tvCatalogue = rutube.channels(rawCategories.map { it.id })
+        val feedCatalogue = rutube.liveChannels(rawCategories)
+        val tvChannels = tvCatalogue.channels
+        val feedChannels = feedCatalogue.channels
+        val catalogueComplete = tvCatalogue.isComplete && feedCatalogue.isComplete && rawCategories.isNotEmpty()
         val allChannels = mergeRutubeChannels(tvChannels, feedChannels)
         Log.i(
             TAG,
-            "$label catalogue tv=${tvChannels.size} feed=${feedChannels.size} merged=${allChannels.size} ruTube",
+            "$label catalogue tv=${tvChannels.size} feed=${feedChannels.size} merged=${allChannels.size} " +
+                "complete=$catalogueComplete ruTube",
         )
         // Subscription channels (Premier/SPORT/…) never enter the catalogue: `is_paid` is false
         // everywhere, the real signal is `common_subscription_product_codes`; play/options answers
@@ -73,7 +79,9 @@ internal class RuTubeSyncer(
         val channels = allChannels
             .filterNot { it.isPaid || it.originType == "ifrm" }
             .filter {
-                it.videoId in feedIds || feedChannels.isEmpty() || rutube.isVideoAvailable(it.videoId)
+                it.videoId in feedIds ||
+                    (feedCatalogue.isComplete && feedChannels.isEmpty()) ||
+                    rutube.isVideoAvailable(it.videoId)
             }
         // The shipped rename dictionary (hex videoId → name): mirrored wholesale, then applied at
         // both ends — to the fresh rows below, and to already-stored rows by the apply pass after
@@ -84,6 +92,15 @@ internal class RuTubeSyncer(
         val renames = renameSeeds
         if (channels.isEmpty()) {
             throw IllegalStateException("RuTube returned no live channels — refusing to wipe the catalogue")
+        }
+        if (!catalogueComplete) {
+            stats.addWarning(
+                SyncWarning(
+                    phase = label,
+                    message = "RuTube catalogue incomplete; pruning and membership rebuild skipped",
+                    kind = SyncWarningKind.PAGE_FAILURE,
+                ),
+            )
         }
         val categoryNameById = rawCategories.associateBy({ it.id }, { it.name.ifBlank { it.alias } })
 
@@ -146,15 +163,14 @@ internal class RuTubeSyncer(
             ) { add ->
                 entities.forEach { add(it) }
             }
-            if (!freshSource) {
+            if (!freshSource && catalogueComplete) {
                 support.pruneChannels(label, remoteIds, stats)
                 support.pruneCategories(categoryRefresh.seenIds, label, stats)
             }
         }
-        // Rebuild the many-to-many link (redesign §2): every genre in broadcast_category[], not just
-        // the primary bucket. Keyed by the channel's hex videoId (= channels.remoteId), so a re-sync's
-        // clear-then-insert never orphans a membership. Runs after the channels are committed.
-        rebuildChannelCategories(channels, catMap)
+        // Rebuild the many-to-many link only from a complete catalogue. Clearing it from a partial
+        // response would silently hide channels whose genre bucket failed to load.
+        if (catalogueComplete) rebuildChannelCategories(channels, catMap)
         // Rewrite the stored names of rows the dictionary covers — a no-op for the fresh rows the
         // upsert already renamed, the fix for rows whose content hash was untouched, and an inert
         // pass over orphans (no FK, a deleted channel's rename just waits).
@@ -162,6 +178,7 @@ internal class RuTubeSyncer(
         progress.update(SyncPhase.LIVE, total[0])
         stats.processedCounts["channels"] = total[0]
         Log.i(TAG, "$label phase end sourceId=${s.id} unique=${total[0]} ruTube")
+        return catalogueComplete
     }
 
     /**
@@ -263,75 +280,132 @@ class RutubePlaybackResolver(private val rutube: RutubeApi) {
  *     A 404 = "no upstream schedule" — empty, not an error, and it stops further days
  *     for that channel without hitting the heavy mobile fallback.
  *  3. Mobile all-days fallback ONLY for real fetch errors (not 404).
- *  4. Room upserts + age pruning.
+ *  4. Room upserts + age pruning only for channels that completed without a fetch/write failure.
  */
-class RuTubeEpgSyncer(
-    private val rutube: RutubeApi,
+class RuTubeEpgSyncer internal constructor(
     private val epgDao: tv.own.owntv.core.database.dao.EpgDao,
+    private val fetchBrief: suspend () -> Map<String, List<RutubeProgramme>>,
+    private val fetchDay: suspend (videoId: String, date: String) -> List<RutubeProgramme>,
+    private val fetchAllDays: suspend (videoId: String) -> List<RutubeProgramme>,
 ) {
+    constructor(rutube: RutubeApi, epgDao: tv.own.owntv.core.database.dao.EpgDao) : this(
+        epgDao,
+        rutube::briefSchedules,
+        rutube::scheduleDay,
+        rutube::scheduleAllDays,
+    )
+
     /** How far out the full grid is fetched, in days. */
     var guideDays: Int = 7
 
-    suspend fun sync(channelIds: List<String>): EpgSyncSummary {
-        runCatching {
-            val brief = rutube.briefSchedules()
-            // Write brief programmes now/next; the full grid replaces them with the same rows plus
-            // category/artwork the brief does not carry.
-            writeBrief(brief)
-        }.onFailure { e -> Log.w(TAG, "RuTube brief seed failed: ${e.message}") }
+    private data class ChannelOutcome(
+        val programmesWritten: Int,
+        val hasGuide: Boolean,
+        val failed: Boolean,
+        val failedWrites: Int,
+    )
 
-        var channelsWithGuide = 0
-        var programmesWritten = 0
+    suspend fun sync(channelIds: List<String>): EpgSyncSummary {
+        var failedSeed = false
+        var failedWrites = 0
+        var briefWritten = 0
+        val brief = try {
+            fetchBrief()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            failedSeed = true
+            Log.w(TAG, "RuTube brief seed failed: ${e.message}")
+            null
+        }
+        if (brief != null) {
+            try {
+                // Write brief programmes now/next; the full grid replaces them with the same rows plus
+                // category/artwork the brief does not carry.
+                briefWritten = writeBrief(brief)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                failedWrites++
+                Log.w(TAG, "RuTube brief seed write failed: ${e.message}")
+            }
+        }
+
         val semaphore = Semaphore(CONCURRENCY)
         val today = UtcDates.today()
-        coroutineScope {
-            val jobs = channelIds.map { videoId ->
+        val ids = channelIds.distinct()
+        // Each coroutine owns its counters and returns an immutable outcome. Awaiting and folding on
+        // one coroutine removes the lost-update race on shared Ints; cancellation is never swallowed.
+        val outcomes = coroutineScope {
+            ids.map { videoId ->
                 async {
                     semaphore.withPermit {
-                        runCatching {
-                            var dayZeroEmpty = false
-                            var ok = true
-                            for (offset in 0 until guideDays) {
-                                if (dayZeroEmpty) break
-                                val date = UtcDates.iso(today + offset)
-                                val programmes = try {
-                                    rutube.scheduleDay(videoId, date)
+                        var dayZeroEmpty = false
+                        var failed = false
+                        var writesFailed = 0
+                        var written = 0
+                        for (offset in 0 until guideDays.coerceAtLeast(1)) {
+                            if (dayZeroEmpty) break
+                            currentCoroutineContext().ensureActive()
+                            val date = UtcDates.iso(today + offset)
+                            val programmes = try {
+                                fetchDay(videoId, date)
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Exception) {
+                                // Real fetch error → mobile all-days fallback, once. A successful
+                                // fallback recovers the channel; only an unrecovered error fails it.
+                                try {
+                                    fetchAllDays(videoId)
+                                } catch (fallback: CancellationException) {
+                                    throw fallback
+                                } catch (fallback: Exception) {
+                                    failed = true
+                                    Log.w(TAG, "RuTube guide fallback failed $videoId: ${fallback.message}")
+                                    emptyList()
+                                }
+                            }
+                            if (offset == 0 && programmes.isEmpty()) {
+                                // 404/no schedule upstream is a successful empty channel, not a failure.
+                                dayZeroEmpty = true
+                                continue
+                            }
+                            if (programmes.isNotEmpty()) {
+                                try {
+                                    written += writeChannel(videoId, programmes)
                                 } catch (e: CancellationException) {
                                     throw e
                                 } catch (e: Exception) {
-                                    // Real fetch error → mobile all-days fallback, once.
-                                    ok = false
-                                    try { rutube.scheduleAllDays(videoId) } catch (fallback: Exception) {
-                                        Log.w(TAG, "RuTube guide fallback failed $videoId: ${fallback.message}")
-                                        emptyList()
-                                    }
-                                }
-                                if (offset == 0 && programmes.isEmpty()) {
-                                    // No schedule upstream at all — skip the remaining days.
-                                    dayZeroEmpty = true
-                                    continue
-                                }
-                                if (programmes.isNotEmpty()) {
-                                    val written = writeChannel(videoId, programmes)
-                                    programmesWritten += written
+                                    failed = true
+                                    writesFailed++
+                                    Log.w(TAG, "RuTube guide write failed $videoId: ${e.message}")
                                 }
                             }
-                            if (ok && !dayZeroEmpty) channelsWithGuide++
-                        }.onFailure { Log.w(TAG, "RuTube guide $videoId failed: ${it.message}") }
+                        }
+                        ChannelOutcome(
+                            programmesWritten = written,
+                            hasGuide = !failed && !dayZeroEmpty,
+                            failed = failed,
+                            failedWrites = writesFailed,
+                        )
                     }
                 }
-            }
-            jobs.forEach { it.await() }
+            }.awaitAll()
         }
-        // Prune old programmes (> 2 days back) for this source.
-        pruneOld()
+
+        val pruneIds = outcomes.indices.filter { !outcomes[it].failed }.map(ids::get)
+        failedWrites += outcomes.sumOf { it.failedWrites }
+        failedWrites += pruneSuccessfulChannels(pruneIds)
         return EpgSyncSummary(
-            channelsWithGuide = channelsWithGuide,
-            programmesWritten = programmesWritten,
+            channelsWithGuide = outcomes.count { it.hasGuide },
+            programmesWritten = briefWritten + outcomes.sumOf { it.programmesWritten },
+            failedChannels = outcomes.count { it.failed },
+            failedWrites = failedWrites,
+            failedSeed = failedSeed,
         )
     }
 
-    private suspend fun writeBrief(brief: Map<String, List<RutubeProgramme>>) {
+    private suspend fun writeBrief(brief: Map<String, List<RutubeProgramme>>): Int {
         val programmes = brief.flatMap { (videoId, programmes) ->
             programmes.map { p ->
                 tv.own.owntv.core.database.entity.EpgProgrammeEntity(
@@ -346,6 +420,7 @@ class RuTubeEpgSyncer(
             }
         }
         programmes.chunked(500).forEach { epgDao.upsertProgrammes(it) }
+        return programmes.size
     }
 
     private suspend fun writeChannel(videoId: String, programmes: List<RutubeProgramme>): Int {
@@ -366,21 +441,39 @@ class RuTubeEpgSyncer(
         return rows.size
     }
 
-    private suspend fun pruneOld() {
-        // 2-day-old cutoff, in millis.
+    private suspend fun pruneSuccessfulChannels(channelIds: List<String>): Int {
+        if (channelIds.isEmpty()) return 0
+        // 2-day-old cutoff, in millis. Chunk below SQLite's API-23 host-parameter limit.
         val cutoff = System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000L
-        // EpgDao.prune deletes globally; for a single-source app this is equivalent.
-        runCatching { epgDao.prune(cutoff) }
-            .onFailure { Log.w(TAG, "RuTube EPG prune failed: ${it.message}") }
+        var failures = 0
+        channelIds.chunked(PRUNE_QUERY_CHUNK).forEach { ids ->
+            try {
+                epgDao.pruneChannels(cutoff, ids)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                failures++
+                Log.w(TAG, "RuTube EPG prune failed: ${e.message}")
+            }
+        }
+        return failures
     }
 
     companion object {
         private const val TAG = SyncSupport.TAG
         private const val CONCURRENCY = 6
+        private const val PRUNE_QUERY_CHUNK = 500
     }
 }
 
 data class EpgSyncSummary(
     val channelsWithGuide: Int,
     val programmesWritten: Int,
-)
+    val failedChannels: Int = 0,
+    val failedWrites: Int = 0,
+    val failedSeed: Boolean = false,
+) {
+    /** An all-404 pass has no rows but no failures, and therefore still counts as synced. */
+    val hasFailures: Boolean
+        get() = failedChannels > 0 || failedWrites > 0 || failedSeed
+}

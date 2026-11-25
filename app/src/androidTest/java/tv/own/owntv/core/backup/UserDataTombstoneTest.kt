@@ -5,8 +5,12 @@ import tv.own.owntv.core.database.ownTVTestDatabase
 import androidx.datastore.preferences.core.edit
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -20,6 +24,7 @@ import tv.own.owntv.core.database.entity.FavoriteEntity
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
 import tv.own.owntv.core.i18n.LocaleStore
 import tv.own.owntv.core.settings.SettingsRepository
+import tv.own.owntv.core.settings.SyncMatrix
 
 /**
  * The merge rule local sync stands on: a deletion is a fact with a time on it, and the newer of the
@@ -251,6 +256,153 @@ class UserDataTombstoneTest {
 
         resolver.importAll(incomingHistory(channelId, at = 900))
         assertEquals(900L, db.historyDao().getAllOnce().single().watchedAt)
+    }
+
+    /** A present rid is authoritative even when a different channel has the legacy name. */
+    @Test
+    fun aMissingRidNeverFallsBackToAnotherChannelsName() = runBlocking {
+        insertChannel("rid-present", "Same name")
+        val incoming = JSONArray().put(
+            JSONObject().put("kind", "fav").put("rid", "rid-missing").put("name", "Same name").put("at", 100),
+        )
+
+        resolver.importAll(incoming)
+
+        assertEquals("a same-name channel stole the record", 0, db.favoriteDao().getAllOnce().size)
+        val pending = JSONArray(context.pendingStore.data.first()[PENDING_KEY])
+        assertEquals(1, pending.length())
+        insertChannel("rid-missing", "Renamed since export")
+        resolver.resolvePending()
+        assertEquals("rid-missing", db.favoriteDao().getAllOnce().single().itemId)
+    }
+
+    @Test
+    fun legacyNameOnlyRecordsStillResolve() = runBlocking {
+        insertChannel("rid-present", "Legacy name")
+        resolver.importAll(
+            JSONArray().put(JSONObject().put("kind", "fav").put("name", "Legacy name").put("at", 100)),
+        )
+        assertEquals("rid-present", db.favoriteDao().getAllOnce().single().itemId)
+    }
+
+    /** Old tombstones included the display name; re-keying must preserve the newer deletion. */
+    @Test
+    fun legacyRidAndNameTombstonesNormalizeWithoutLosingTheirTimestamp() = runBlocking {
+        insertChannel("rid-1", "Old name")
+        db.tombstoneDao().record("fav", """{"rid":"rid-1","name":"Old name"}""", 200)
+
+        resolver.importAll(
+            JSONArray().put(JSONObject().put("kind", "fav").put("rid", "rid-1").put("name", "New name").put("at", 100)),
+        )
+
+        assertEquals(0, db.favoriteDao().getAllOnce().size)
+        val exported = resolver.exportTombstones(setOf("fav"))
+        assertEquals(1, exported.length())
+        val identity = exported.getJSONObject(0).getString("rid")
+        assertEquals("rid-1", identity)
+        assertFalse("canonical identity still contains the display name", exported.getJSONObject(0).has("name"))
+        assertEquals(1, db.tombstoneDao().getAllOnce().size)
+    }
+
+    @Test
+    fun previewingAnIncomingFavoriteDoesNotRewriteLegacyTombstones() = runBlocking {
+        insertChannel("rid-present", "Same name")
+        val legacy = JSONObject().put("rid", "rid-present").put("name", "Same name").toString()
+        db.tombstoneDao().record(SyncMatrix.KIND_FAVORITES, legacy, 100)
+
+        val incoming = JSONObject().put("kind", SyncMatrix.KIND_FAVORITES)
+            .put("rid", "rid-present").put("name", "Same name").put("at", 50)
+        assertFalse(resolver.wouldAdd(SyncMatrix.KIND_FAVORITES, incoming))
+        assertEquals(legacy, db.tombstoneDao().getAllOnce().single().identity)
+    }
+
+    @Test
+    fun previewMatchesALegacyTombstoneByRidAfterAChannelRename() = runBlocking {
+        insertChannel("rid-present", "New name")
+        val legacy = JSONObject().put("rid", "rid-present").put("name", "Old name").toString()
+        db.tombstoneDao().record(SyncMatrix.KIND_FAVORITES, legacy, 100)
+
+        val incoming = JSONObject().put("kind", SyncMatrix.KIND_FAVORITES)
+            .put("rid", "rid-present").put("name", "New name").put("at", 50)
+        assertFalse(resolver.wouldAdd(SyncMatrix.KIND_FAVORITES, incoming))
+        assertEquals(legacy, db.tombstoneDao().getAllOnce().single().identity)
+    }
+
+    @Test
+    fun legacyTombstoneNormalizationNeverDowngradesANewerCanonicalDeletion() = runBlocking {
+        insertChannel("rid-1", "Channel")
+        db.tombstoneDao().record("fav", """{"rid":"rid-1"}""", 300L)
+        db.tombstoneDao().record("fav", """{"rid":"rid-1","name":"Old name"}""", 200L)
+
+        resolver.importAll(
+            JSONArray().put(JSONObject().put("kind", "fav").put("rid", "rid-1").put("at", 250L)),
+        )
+
+        assertEquals(0, db.favoriteDao().getAllOnce().size)
+        val rows = db.tombstoneDao().getAllOnce()
+        assertEquals(1, rows.size)
+        assertEquals(300L, rows.single().deletedAt)
+        assertFalse(rows.single().identity.contains("name"))
+    }
+
+    @Test
+    fun restoreClearDeletesOnlySelectedTombstoneKinds() = runBlocking {
+        db.tombstoneDao().record("fav", "{}", 100)
+        db.tombstoneDao().record("order", "{}", 100)
+        db.tombstoneDao().record("prog", "{}", 100)
+
+        resolver.clearDeletions(setOf("fav"))
+
+        assertEquals(0, resolver.exportTombstones(setOf("fav")).length())
+        assertEquals(1, resolver.exportTombstones(setOf("order")).length())
+        assertEquals(1, resolver.exportTombstones(setOf("prog")).length())
+    }
+
+    @Test
+    fun aReminderWaitsForItsMissingChannelInsteadOfBeingDropped() = runBlocking {
+        val incoming = JSONArray().put(
+            JSONObject().put("kind", "prog").put("rid", "later-channel").put("startMs", 10_000L)
+                .put("stopMs", 20_000L).put("title", "Programme").put("at", 100L),
+        )
+
+        resolver.importAll(incoming)
+
+        assertEquals(null, db.reminderDao().getByChannelAndStart("later-channel", 10_000L))
+        val pending = JSONArray(context.pendingStore.data.first()[PENDING_KEY])
+        assertEquals(1, pending.length())
+        insertChannel("later-channel", "Channel")
+        resolver.resolvePending()
+        assertEquals("Programme", db.reminderDao().getByChannelAndStart("later-channel", 10_000L)?.title)
+    }
+
+    @Test
+    fun concurrentAppendAndResolveCannotLosePendingRecords() = runBlocking {
+        val channels = (1..40).map { insertChannel("rid-$it", "Channel $it") }
+        val other = UserDataResolver(
+            context = context,
+            channelDao = db.channelDao(),
+            favoriteDao = db.favoriteDao(),
+            historyDao = db.historyDao(),
+            contentOrderDao = db.contentOrderDao(),
+            customCategoryDao = db.customCategoryDao(),
+            tombstoneDao = db.tombstoneDao(),
+            db = db,
+        )
+        fun records(ids: List<String>) = JSONArray().apply {
+            ids.forEach { put(JSONObject().put("kind", "fav").put("rid", it).put("at", 100L)) }
+        }
+
+        coroutineScope {
+            val first = async { resolver.importAll(records(channels.take(20))) }
+            val second = async { other.importAll(records(channels.drop(20))) }
+            first.await()
+            second.await()
+        }
+        resolver.resolvePending()
+
+        assertEquals(channels.size, db.favoriteDao().getAllOnce().size)
+        val pending = context.pendingStore.data.first()[PENDING_KEY]
+        assertEquals(0, pending?.let { JSONArray(it).length() } ?: 0)
     }
 
     private suspend fun incomingHistory(itemId: String, at: Long): JSONArray {

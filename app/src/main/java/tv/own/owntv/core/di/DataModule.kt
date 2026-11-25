@@ -3,6 +3,7 @@ package tv.own.owntv.core.di
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import org.koin.android.ext.koin.androidContext
+import org.koin.dsl.bind
 import org.koin.dsl.module
 import tv.own.owntv.core.backup.BackupManager
 import tv.own.owntv.core.database.BulkInsertHelper
@@ -223,7 +224,7 @@ val dataModule = module {
     // Programme reminders: context, reminderDao — then reminderDao, scheduler. Not eager: the app
     // warms this on an IO scope at launch so every launch still re-arms, without opening the DB and
     // AlarmManager during startKoin on the main thread (see MyOwnTVApp).
-    single { tv.own.owntv.core.reminder.ReminderScheduler(androidContext(), get()) }
+    single { tv.own.owntv.core.reminder.ReminderScheduler(androidContext(), get()) } bind tv.own.owntv.core.reminder.ReminderAlarmScheduler::class
     single { tv.own.owntv.core.reminder.ReminderManager(get(), get()) }
     // settings, userDataResolver — the four-section backup container (favorites / history / manual
     // reorder / reminders). The customizations, the settings block and the wallpaper left the

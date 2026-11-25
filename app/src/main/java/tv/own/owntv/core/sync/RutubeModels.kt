@@ -17,6 +17,12 @@ data class RutubeChannel(
 
 data class RutubeCategory(val id: Int, val name: String, val alias: String)
 
+/**
+ * A usable catalogue plus whether every requested page/bucket was read. Callers may upsert the rows
+ * they got, but only a complete catalogue authorizes pruning or rebuilding memberships.
+ */
+data class RutubeCatalogue(val channels: List<RutubeChannel>, val isComplete: Boolean)
+
 /** One row of the official TV feed (`pangolin/api/tv/feeds/live_smarttv/`): its group name and list URL. */
 data class RutubeLiveRow(val name: String, val url: String)
 
@@ -190,6 +196,8 @@ data class RutubeProgramme(
 data class RutubeChannelPage(
     val results: List<RutubeChannel>,
     val nextUrl: String?,
+    /** False for malformed JSON or rows that could not be parsed, not merely an empty valid page. */
+    val isValid: Boolean = true,
 )
 
 data class RutubeBriefPage(
