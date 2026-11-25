@@ -172,7 +172,7 @@ internal fun OnNowCard(
                     horizontalArrangement = Arrangement.spacedBy(8.mpx),
                 ) {
                     if (showNumber) channel.number?.let { number ->
-                        Text(number.toString(), style = stageText(16, 700), color = StageColors.Muted, maxLines = 1)
+                        Text(number.toString(), style = stageText(16, 700), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     Text(
                         channel.name, style = stageText(20, 700), color = StageColors.Text,
