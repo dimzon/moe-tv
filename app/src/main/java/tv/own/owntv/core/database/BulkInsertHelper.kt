@@ -2,7 +2,6 @@ package tv.own.owntv.core.database
 
 import android.os.SystemClock
 import android.util.Log
-import androidx.room.Transactor
 import androidx.room.execSQL
 import androidx.room.useWriterConnection
 import kotlinx.coroutines.NonCancellable

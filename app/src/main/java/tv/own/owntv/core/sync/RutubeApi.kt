@@ -10,10 +10,9 @@ import tv.own.owntv.core.network.HttpClient
  * Client for RuTube's public API — ported from TVTube's
  * [app.tvtube.data.remote.RutubeApi], adapted to core's [HttpClient].
  *
- * Anonymous: the TV catalogue, the guide and play options are open. Two quirks:
- *  - play options is gated on a **mobile User-Agent** — a desktop UA gets 404 for every video;
- *  - requests must **not** go through a system proxy — the caller must provide an OkHttpClient
- *    built with `Proxy.NO_PROXY` (see [RutubeHttpClients] in DataModule).
+ * Anonymous: the TV catalogue, the guide and play options are open. Play options is gated on a
+ * **mobile User-Agent** — a desktop UA gets 404 for every video. Requests use the app's shared
+ * [HttpClient], so API and playback follow the same proxy/DNS settings.
  *
  * [http] must be a raw OkHttp-backed client for 404 handling: [HttpClient.get] throws
  * [HttpClient.HttpStatusException] on non-2xx, which is exactly the signal we need for

@@ -983,8 +983,6 @@
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	watch_history
 1	room-schema	app/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	watchedAt
 2	technical	app/src/main/java/tv/own/owntv/core/di/DataModule.kt	User-Agent
-2	technical	app/src/main/java/tv/own/owntv/core/di/DataModule.kt	rutube
-2	technical	app/src/main/java/tv/own/owntv/core/di/DataModule.kt	rutubeOkHttp
 3	empty	app/src/main/java/tv/own/owntv/core/di/DatabaseModule.kt	\0
 1	technical	app/src/main/java/tv/own/owntv/core/di/DatabaseModule.kt	)
 1	log	app/src/main/java/tv/own/owntv/core/di/DatabaseModule.kt	, heal=

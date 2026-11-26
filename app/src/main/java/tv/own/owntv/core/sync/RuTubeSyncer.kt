@@ -16,7 +16,7 @@ import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.parser.XtCategory
 
 /**
- * RuTube live-only syncer — the RuTube counterpart of [XtreamSyncer] (single-phase LIVE).
+ * RuTube live-only syncer.
  *
  * Reuses the full [SyncSupport] machinery: [SyncSupport.refreshCategories],
  * [SyncSupport.chunked], [SyncSupport.upsertStable]/[SyncSupport.insertFresh] and

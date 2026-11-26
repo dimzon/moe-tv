@@ -31,7 +31,7 @@ class ExternalPlayerLauncher(private val context: Context) {
 
     // Open url externally. Returns true if an external app was actually launched.
     // [userAgent] is the source's UA; [httpHeaders] is the stored `Key: Value` per-line block from
-    // ChannelEntity.httpHeaders (M3U `#EXTVLCOPT`/`#EXTHTTP`/`#KODIPROP`). Both are optional.
+    // [httpHeaders] is the stored `Key: Value` per-line block. Both extras are optional.
     fun launch(
         url: String,
         title: String? = null,

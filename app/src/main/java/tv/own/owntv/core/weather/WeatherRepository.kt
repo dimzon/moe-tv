@@ -6,7 +6,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import tv.own.owntv.core.network.ConnectivityObserver
-import java.util.concurrent.TimeUnit
 
 /**
  * Fetches current weather via Open-Meteo (free, no API key) after resolving the device's

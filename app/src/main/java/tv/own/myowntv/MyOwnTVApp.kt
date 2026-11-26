@@ -1,44 +1,6 @@
 package tv.own.myowntv
-import tv.own.owntv.*
-import tv.own.owntv.core.*
-import tv.own.owntv.core.backup.*
-import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.categorylock.*
-import tv.own.owntv.core.companion.*
-import tv.own.owntv.core.content.*
-import tv.own.owntv.core.customize.*
-import tv.own.owntv.core.database.*
-import tv.own.owntv.core.database.dao.*
-import tv.own.owntv.core.database.entity.*
-import tv.own.owntv.core.di.*
-import tv.own.owntv.core.drm.*
-import tv.own.owntv.core.epg.*
-import tv.own.owntv.core.home.*
-import tv.own.owntv.core.i18n.*
-import tv.own.owntv.core.launcher.*
-import tv.own.owntv.core.live.*
-import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.model.*
-import tv.own.owntv.core.nav.*
-import tv.own.owntv.core.network.*
-import tv.own.owntv.core.player.*
-import tv.own.owntv.core.reminder.*
-import tv.own.owntv.core.repository.*
-import tv.own.owntv.core.settings.*
-import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.sync.*
-import tv.own.owntv.core.sync.local.*
-import tv.own.owntv.core.sync.work.*
-import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.tv.*
-import tv.own.owntv.core.ui.*
-import tv.own.owntv.core.ui.stage.*
-import tv.own.owntv.core.update.*
-import tv.own.owntv.core.util.*
-import tv.own.owntv.core.weather.*
-import tv.own.owntv.player.*
 
+import tv.own.owntv.core.sync.AutoRefresh
 import android.app.Activity
 import android.app.Application
 import android.content.Context
@@ -173,8 +135,7 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
         // A crash from a previous run is mailed to the maintainer through FormSubmit (subject = name +
         // version), on a daemon thread so the launch path never waits on the network. Once per crash.
         tv.own.owntv.core.util.CrashUploader.uploadPending(this)
-        // Core learns a panel's session limit while syncing; the engine is what acts on it. Registered
-        // before Koin so the very first source flow already reaches the player (see LiveSessionLimit).
+        // Register the engine callback before Koin initializes the playback stack (see LiveSessionLimit).
         tv.own.owntv.core.player.LiveSessionLimit.report = tv.own.owntv.player.LiveStreamQuirks::rememberSessionLimit
         startKoin {
             androidLogger(if (BuildConfig.DEBUG) Level.ERROR else Level.NONE)
@@ -234,8 +195,8 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
 
     /**
      * App-wide Coil loader that fetches images through the app's OkHttpClient — so posters/logos get
-     * the same player-style User-Agent and connection pooling our IPTV requests use (some panels reject
-     * default UAs). Crossfade (120 ms, off on low-RAM) smooths the grid as images stream in. The memory
+     * the same player-style User-Agent and connection pooling our network requests use. Crossfade
+     * (120 ms, off on low-RAM) smooths the grid as images stream in. The memory
      * cache stays well below Coil's default ~25% — on a 4K TV every megabyte belongs to the video
      * pipeline, not to channel-logo bitmaps: 15% of the heap up to 64 MB, and 10% on low-RAM devices.
      */
@@ -247,11 +208,10 @@ class MyOwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Co
         // unusable. OkHttp then needs retryOnConnectionFailure to try the next resolved address (the TV's
         // browser already does this fallback). Derive one long-lived client so Coil keeps the app-wide
         // proxy, DNS, UA, TLS and connection-pool configuration while regaining alternate-route fallback.
-        // The shared client is also pinned to HTTP/1.1, because IPTV panels answer an HTTP/2 handshake
-        // with RST_STREAM(PROTOCOL_ERROR). Image CDNs are the opposite case: they negotiate h2, and a
+        // The shared client is also pinned to HTTP/1.1. Image CDNs can negotiate h2, and a
         // grid opens dozens of requests to one host at once. Over HTTP/1.1 those
         // queue behind OkHttp's per-host connection limit; over h2 they multiplex on a single connection.
-        // Restore protocol negotiation for images only — the panel-facing client keeps its 1.1 pin.
+        // Restore protocol negotiation for images only — the network client keeps its 1.1 pin.
         val imageHttpClient = GlobalContext.get().get<OkHttpClient>()
             .newBuilder()
             .retryOnConnectionFailure(true)

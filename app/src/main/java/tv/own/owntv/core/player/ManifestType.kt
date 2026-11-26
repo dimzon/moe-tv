@@ -1,16 +1,13 @@
 package tv.own.owntv.core.player
 
 /**
- * The streaming container a playlist entry declares for itself, from Kodi's
+ * The streaming container declared for a stream, from Kodi's
  * `#KODIPROP:inputstream.adaptive.manifest_type` property.
  *
- * A stream URL is not always self-describing. The JioTV-Go family of proxies publishes protected
- * channels as `https://host/live/mpd/173` — no extension at all — and only redirects to the real
- * `…/render.mpd` once the request is made. Media3 picks its media source from the URL *before* that
- * redirect, so an undeclared DASH channel is handed to the progressive extractor, which sniffs an XML
- * manifest and fails with `ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED`. Reading the declaration is what
- * makes the FIRST attempt correct; `LivePreviewEngine`'s response sniff is what rescues the entries
- * (and the whole Xtream/Stalker world) that declare nothing at all.
+ * A stream URL is not always self-describing: an extensionless URL may redirect to a manifest only
+ * after the request is made, after Media3 has selected its media source. Reading an explicit
+ * declaration makes the first attempt correct; `LivePreviewEngine`'s response sniff rescues streams
+ * that declare nothing.
  *
  * Stored on [tv.own.owntv.core.database.entity.ChannelEntity.manifestType] (and the movie/episode
  * twins) as [key], which is also exactly the token Kodi uses — so the stored value round-trips a

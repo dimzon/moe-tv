@@ -62,7 +62,7 @@
     <string name="player_playback_error">Playback error</string>
     <!-- Translators: Technical detail text below the structured error in the player error overlay. "error" is the raw engine error string, shown for debugging/bug reports. -->
     <string name="player_raw_error">err: <xliff:g id="error">%1$s</xliff:g></string>
-    <!-- Translators: Shown under the loading spinner while the app waits out a delay the IPTV provider asked for, then retries the channel by itself. "code" is the HTTP status (429), "reason" is the provider\'s own message and is not translated, "seconds" counts down to the automatic retry. -->
+    <!-- Translators: Shown under the loading spinner while the app waits out a provider-requested delay, then retries the channel by itself. "code" is the HTTP status (429), "reason" is the provider\'s own message and is not translated, "seconds" counts down to the automatic retry. -->
     <string name="player_provider_retry_after">HTTP <xliff:g id="code">%1$d</xliff:g>: <xliff:g id="reason">%2$s</xliff:g> Retrying in <xliff:g id="seconds">%3$d</xliff:g>s.</string>
     <!-- Translators: Substituted as the reason in player_provider_retry_after when the provider gave no message of its own. -->
     <string name="player_provider_busy">The provider is busy.</string>
@@ -102,7 +102,6 @@
     <string name="player_live">LIVE</string>
     <!-- Translators: One-time hint over the live player when a channel keeps dropping frames. State the fact plainly; there is no other engine to switch to. -->
     <string name="player_smoothness_hint">This channel is dropping frames — the picture may stutter.</string>
-    <!-- Translators: Error when the Stalker portal fails to return a stream link. "portal" refers to the Stalker middleware. -->
     <string name="player_error_stream_link">Could not get a stream link from the portal. Check the connection and try again.</string>
     <!-- Translators: Error when the video file is not properly configured for streaming (missing fast-start). -->
     <string name="player_error_not_streaming">This video isn\'t formatted for streaming. Ask the provider to re-encode with fast-start, or download it first.</string>
@@ -236,7 +235,7 @@
 
     <!-- Translators: Playback-log event headline after surround output fails. -->
     <string name="player_reason_stereo_fallback">Switched to stereo audio</string>
-    <!-- Translators: Playback-log event headline for IPTV providers that permit only one active connection. -->
+    <!-- Translators: Playback-log event headline when a provider permits only one active connection. -->
     <string name="player_reason_one_session_provider">Provider allows one session at a time</string>
     <!-- Translators: Playback-log event headline when Live TV switches to another playback fallback. -->
     <string name="player_reason_live_fallback">Live playback switched to a fallback</string>

@@ -3,19 +3,19 @@ package tv.own.owntv.core.ui.stage
 import java.util.Locale
 
 /**
- * The short outlined mark that says which playlist a row comes from ("GOLD"), and its colour as an
+ * The short outlined mark derived from a source or category name ("GOLD"), and its colour as an
  * ARGB long (core has no Compose `Color`; each app wraps it once). Shared by the TV and the phone.
  */
 data class PlaylistMark(val text: String, val argb: Long) {
     companion object {
         /**
-         * The first four letters of the playlist's name, upper-case, after dropping a
-         * leading "IPTV" or "TV" word and every separator — IPTV_GOLD → GOLD, Junior → JUNI, X → X. A
+         * The first four letters of the name, upper-case, after dropping a
+         * leading broadcast prefix and every separator — TV_GOLD → GOLD, Junior → JUNI, X → X. A
          * prefix only counts as a whole word, so "Tvoli" keeps its T; a name that is nothing but the
          * prefix keeps it.
          *
-         * The colour comes from [Palette] by [index] (the playlist's position), so marks
-         * stay distinct and never change while the playlists do not.
+         * The colour comes from [Palette] by [index], so marks stay distinct and never change while
+         * the source order does not.
          */
         // Math.floorMod is API 24; the plain remainder works on Android 6 once normalised to >= 0.
         fun of(name: String, index: Int): PlaylistMark {

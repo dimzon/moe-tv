@@ -33,8 +33,7 @@ data class MediaMeta(
     val subtitle: String? = null,
     val logoUrl: String? = null,
     /** Stable per-channel identity — the key the remembered zoom, volume, A/V delay and track
-     *  languages are filed under. Null falls back to the stream URL, which is what every channel
-     *  used to be keyed on and is still correct for M3U/Xtream. */
+     *  languages are filed under. Null falls back to the stream URL. */
     val contentKey: String? = null,
 )
 

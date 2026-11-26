@@ -297,14 +297,13 @@ class LivePreviewEngine(
             .launchIn(settingsScope)
         // Detailed playback logging is observed for the whole process in OwnTVApp — this engine is
         // a lazy singleton, so an observer here only started once the user opened Live TV.
-        // Live latency no longer only sets a LiveConfiguration offset (which Media3 honours for HLS/DASH
-        // and ignores for the raw MPEG-TS most Xtream live URLs are) — it now drives the LoadControl,
-        // whose durations are fixed at construction. So a change while a channel is playing rebuilds,
-        // exactly like the surround/hardware-decoding settings above.
+        // Live latency drives the LoadControl as well as the live offset; LoadControl durations are
+        // fixed at construction. So a change while a channel is playing rebuilds, exactly like the
+        // surround/hardware-decoding settings above.
         playbackSettings.field { it.liveBufferSeconds }.onEach {
             val changed = liveBufferSecs != it
             liveBufferSecs = it
-            // A playlist override outranks the global value, so a global change cannot alter what this
+            // A source override outranks the global value, so a global change cannot alter what this
             // tune is using — rebuilding for it would drop the picture to arrive at the same numbers.
             if (changed && liveBufferOverride == null) currentUrl?.let { _ -> rebuildForSettingChange() }
         }.launchIn(settingsScope)
@@ -769,10 +768,9 @@ class LivePreviewEngine(
         private set
 
     /**
-     * Reconnect URL provider — set ONLY when the current item's URL is short-lived and must be
-     * re-minted on reconnect (Stalker live). Before a reconnect/HUD-retry reload, the
-     * engine awaits this; a null provider or null result → replay [currentUrl] as-is (M3U/Xtream,
-     * whose URLs are stable). Installed/cleared by `LiveViewModel` on each tune.
+     * Optional provider for a fresh stream URL before reconnect or HUD retry. The engine awaits it
+     * before reloading; a null provider or null result replays [currentUrl] as-is. Installed and
+     * cleared by the tune controller on each tune.
      */
     @Volatile var reconnectUrlProvider: tv.own.owntv.core.stalker.ReconnectUrlProvider? = null
 
@@ -1484,8 +1482,7 @@ class LivePreviewEngine(
                 // sibling and letting the ladder take the failure; the panel is marked mixed only if that
                 // shows a picture.
                 LiveStartRungs.Rung.DROP_HOST_HLS_LESSON -> { retryWithoutHostHlsLesson(); return }
-                // The ONLY route for a stream that declares nothing: a Stalker portal hands back its own `cmd`
-                // and an Xtream panel's URL we build ourselves, so neither can ever carry a `manifest_type`.
+                // The response was a DASH manifest: reopen the same URL with the DASH extractor.
                 LiveStartRungs.Rung.REDIRECT_DASH -> { retryRedirectedStreamAsDash(); return }
                 // Refused only because the previous engine's session hasn't been released yet — wait it out
                 // once instead of failing the channel or bouncing it to the ladder (see [noteSessionLimit]).
@@ -1648,26 +1645,25 @@ class LivePreviewEngine(
         recreateSurface()
     }
 
-    /** [prerollSecsOverride] = the tuned channel's playlist "Pre-buffer" override in
-     *  seconds; null follows the global setting. */
+    /** [prerollSecsOverride] = the tuned source's pre-buffer override in seconds; null follows the
+     *  global setting. */
     fun play(
         url: String,
         muted: Boolean,
         meta: MediaMeta = MediaMeta(),
         userAgent: String? = null,
         prerollSecsOverride: Int? = null,
-        /** This playlist's Live latency override; null follows the global setting. */
+        /** This source's Live latency override; null follows the global setting. */
         liveBufferOverride: LiveBuffer.Override? = null,
-        /** Per-channel HTTP headers serialized as `Key: Value` per line (M3U); null for none. */
+        /** Per-channel HTTP headers serialized as `Key: Value` per line; null for none. */
         httpHeaders: String? = null,
         /** Widevine/ClearKey licence details for this channel; null for an unprotected stream. */
         drmConfig: String? = null,
-        /** The container this channel declares for itself (M3U `#KODIPROP:…manifest_type`), as
-         *  [tv.own.owntv.core.player.ManifestType.key]; null means "infer from the URL", which is what
-         *  every channel did before v43. */
+        /** The container declared for this stream, as [tv.own.owntv.core.player.ManifestType.key];
+         *  null means "infer from the URL". */
         manifestType: String? = null,
-        /** The panel's own URL for this channel (Xtream `direct_source`); a LAST-RESORT retry only,
-         *  never the URL tuned first — see [tv.own.owntv.core.database.entity.ChannelEntity.directSource]. */
+        /** An alternate provider URL for this channel; a LAST-RESORT retry only, never the URL
+         *  tuned first. */
         directSource: String? = null,
         /** Sidecar SRT/VTT text the feed advertises beside the stream (`play/options` `captions[]`
          *  for RuTube); merged under the video as single-sample text tracks. Empty = none
@@ -1990,7 +1986,7 @@ class LivePreviewEngine(
     )
     @Volatile private var backgroundRestore: TunedRequest? = null
 
-    /** The current channel as it was tuned, at [url] (a Stalker retry swaps in a freshly minted one). */
+    /** The current channel as it was tuned, at [url]. */
     private fun tunedRequest(url: String) = TunedRequest(
         url, muted, _currentMeta.value, tunedUserAgent, tunedPrerollSecs, tunedLiveBufferOverride,
         tunedHttpHeaders, tunedDrmConfig, tunedManifestType, tunedDirectSource, tunedCaptions,
@@ -2119,9 +2115,8 @@ class LivePreviewEngine(
      *  (then the HUD's Retry button takes over).
      *  tune.retryCount is reset to 0 as soon as playback goes healthy again (STATE_READY).
      *
-     *  For an expiring-URL source (Stalker) the reconnect must NOT replay the now-dead
-     *  resolved URL — a [reconnectUrlProvider] mints a fresh one first (null/absent → replay as-is,
-     *  which is correct for M3U/Xtream and direct-URL Stalker portals). */
+     *  If the current URL is short-lived, a [reconnectUrlProvider] supplies a fresh one first;
+     *  otherwise the current URL is replayed. */
     private fun reconnect(reason: String, fastHlsHttpRecovery: Boolean = false, immediate: Boolean = false) {
         mainHandler.removeCallbacks(stallWatchdog); mainHandler.removeCallbacks(progressWatchdog); mainHandler.removeCallbacks(fpsFastRefresh)
         mainHandler.removeCallbacks(openWatchdog)
@@ -2157,7 +2152,7 @@ class LivePreviewEngine(
             fastHlsHttpRecovery -> hlsHttpReconnectDelayMs(tune.retryCount)
             else -> reconnectDelayMs(tune.retryCount)
         }
-        // Resolve a fresh URL off-main (Stalker create_link is a network call) before the delayed reload.
+        // Resolve a fresh URL off-main before the delayed reload when the source provides one.
         val provider = reconnectUrlProvider
         scope.launch {
             val fresh = if (provider != null) {
@@ -2503,12 +2498,9 @@ class LivePreviewEngine(
      * Whether this failure is about the *shape* of the stream, i.e. the only kind a `.ts`⇄`.m3u8` swap
      * could possibly fix.
      *
-     * The guard matters more than the retry. A refusal — 403, 429, a session limit — is the panel
+     * The guard matters more than the retry. A refusal — 403, 429, a session limit — is the provider
      * answering the *account*, and the identical answer waits at every other URL on it, so swapping the
-     * extension there just invents a URL that 404s. Traced on a panel that returns 429 "Channel limit
-     * has been reached": the ladder read it as a format problem, chased an invented `.ts` endpoint for
-     * ~45 s and ended on a screen blaming the channel, while the original URL worked the moment the
-     * account's other stream closed.
+     * extension there just invents a URL that may not exist.
      */
     private fun isFormatFailure(error: PlaybackException): Boolean {
         val http = httpStatusOf(error)
@@ -2689,10 +2681,9 @@ class LivePreviewEngine(
      * The DASH twin of [retryRedirectedStreamAsHls]: the response was an MPD but the load was opened
      * with the progressive extractor, which cannot parse XML. Re-open the SAME URL as DASH.
      *
-     * This rung is what closes the gap the declaration cannot reach. An M3U entry can say
-     * `manifest_type=mpd` and be routed correctly on the first attempt; a Stalker `cmd` and an Xtream
-     * live URL carry no declaration at all and never can, so for those this is the only route to DASH
-     * that exists.
+     * This rung closes the gap an explicit declaration cannot reach: a stream URL that carries no
+     * declaration can still reveal a DASH manifest through its response, and reopening the same URL
+     * with the DASH extractor is the only route that does not invent another address.
      */
     private fun retryRedirectedStreamAsDash() {
         val p = player ?: return
@@ -2945,11 +2936,11 @@ class LivePreviewEngine(
         val url = currentUrl ?: return
         // Replay the identity this channel was tuned with — HUD Retry used to re-open with the URL only,
         // so a channel needing a Referer/UA played on first open and 403'd the moment you pressed Retry.
-        // Captured now: play() below resets the tuned fields, and the Stalker path resolves first.
+        // Captured now: play() below resets the tuned fields, and URL resolution runs first.
         val request = tunedRequest(url)
         val provider = reconnectUrlProvider
         if (provider == null) { play(request); return }
-        // Expiring-URL source (Stalker): re-resolve before retrying, then reload on the main thread.
+        // Short-lived URL: re-resolve before retrying, then reload on the main thread.
         scope.launch {
             val fresh = withContext(Dispatchers.IO) {
                 runCatching { provider.freshUrl() }
@@ -3163,8 +3154,8 @@ class LivePreviewEngine(
     // Effective User-Agent for the current stream; updated per play() call.
     // null = no source UA configured, use DEFAULT_USER_AGENT.
     private var currentUa: String = HttpClient.DEFAULT_USER_AGENT
-    /** Per-channel HTTP headers for the tuned channel (M3U `#EXTVLCOPT`/`#EXTHTTP`/`#KODIPROP`).
-     *  Empty for providers that carry none, which is the usual case. */
+    /** Per-channel HTTP headers for the tuned channel, serialized as `Key: Value` per line.
+     *  Empty when the channel carries none. */
     private var currentHeaders: Map<String, String> = emptyMap()
     private var dataSourceForUa: String = ""
     private var dataSourceForHeaders: Map<String, String> = emptyMap()
@@ -3380,7 +3371,7 @@ class LivePreviewEngine(
                 .setDefaultRequestProperties(
                     currentHeaders.filterKeys { !it.equals("User-Agent", ignoreCase = true) },
                 )
-            // Raw MPEG-TS (typical Xtream live ".ts"): providers rarely declare caption descriptors in
+            // Raw MPEG-TS streams rarely declare caption descriptors in
             // the PMT, so the stock TS extractor never exposes the embedded CEA-608 track.
             // FLAG_OVERRIDE_CAPTION_DESCRIPTORS makes it expose the standard CC1 track regardless; the
             // flag only affects TS — every other format sniffs exactly as before. Passed into the same
@@ -3555,7 +3546,7 @@ class LivePreviewEngine(
     }
 
     private fun build(): ExoPlayer {
-        // Tuned for raw MPEG-TS live (Xtream `.ts`, no HLS manifest): ONE long-lived HTTP response, where
+        // Tuned for raw MPEG-TS live (no HLS manifest): ONE long-lived HTTP response, where
         // ExoPlayer stops reading the socket once the buffer is full and resumes only after it drains back
         // to minBufferMs. Provider restreamers/proxies cull a connection that sits idle that long, and EOF
         // on a duration-less source surfaces as STATE_ENDED/IO error — a reconnect (visible glitch) every
@@ -3784,8 +3775,8 @@ class LivePreviewEngine(
          *     HLS lesson is also set by any plain `.m3u8` URL on the same host.
          *  4. **[inferredHls]** — Media3's own guess from the URL's extension.
          *
-         * Everything else is progressive, which is the raw-MPEG-TS path the majority of Xtream live
-         * runs on and the behaviour every channel had before v43.
+         * Everything else is progressive, preserving the raw-MPEG-TS route for streams whose URL
+         * carries no HLS or DASH signal.
          */
         internal fun routeFor(
             declared: tv.own.owntv.core.player.ManifestType?,
@@ -3811,18 +3802,11 @@ class LivePreviewEngine(
         }
 
         /**
-         * Whether the very last rung — the panel's own `direct_source` address — is worth one attempt.
+         * Whether an alternate provider URL is worth one final attempt.
          *
-         * Deliberately conservative, because this field is the reason every other client ignores it:
-         * panels build it from the streaming server's configured domain and fall back to its raw IP, so
-         * a misconfigured panel or load balancer publishes an address reachable only inside their own
-         * network. It is therefore never tuned first and never replaces [ChannelEntity.streamUrl] —
-         * reached only here, once, after every other rung is spent, where the alternative is an error
-         * screen. Used that way it can only add channels, never take one away.
-         *
-         * [httpStatus] guards the same trap [isFormatFailure] documents: a panel answering 429
-         * "Channel limit has been reached" is refusing the *request*, not the address, and a different
-         * URL cannot answer it — chasing one would only burn seconds before the same error.
+         * It is never tuned first and never replaces [ChannelEntity.streamUrl]: it is reached only
+         * after every other rung is spent. A request refusal is not an address failure, so a different
+         * URL cannot answer it and is not worth trying.
          */
         internal fun shouldTryDirectSource(
             directSource: String?,
@@ -3845,13 +3829,10 @@ class LivePreviewEngine(
         /**
          * The DASH twin of [isHlsResponse], read off the response the request actually ended at.
          *
-         * This is the only container signal available for a stream nothing declares — a Stalker portal
-         * hands back its own `cmd` and an Xtream live URL is one we build ourselves, so neither can
-         * carry a `manifest_type`. It is also what rescued the reported channel: the submitted URL was
-         * `…/live/mpd/173` with no extension, and the redirect landed on `…/render.mpd`.
-         *
-         * The path is tested before the query deliberately, the same way [isHlsResponse] does it: a
-         * signed manifest URL carries its token as a parameter after the extension.
+         * This is the container signal available when a stream declares nothing: the request can
+         * redirect to an MPD without saying so in its original URL. The path is tested before the
+         * query deliberately, the same way [isHlsResponse] does it: a signed manifest URL carries its
+         * token as a parameter after the extension.
          */
         internal fun isDashResponse(url: String, contentType: String?): Boolean {
             val type = contentType.orEmpty().substringBefore(';').trim().lowercase()
@@ -4081,7 +4062,7 @@ internal data class TuneState(
     @field:Volatile var responseWasDash: Boolean = false,
     var forceDashForCurrentLoad: Boolean = false,
     var redirectedDashRetryDone: Boolean = false,
-    /** The last rung — the panel's own address — has been spent for this tune (v43). */
+    /** The alternate provider address has been spent for this tune. */
     var directSourceRetryDone: Boolean = false,
     /** The playlist shape is logged once per prepare (and again whenever we back off). */
     var playlistLogged: Boolean = false,

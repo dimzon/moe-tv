@@ -1,48 +1,11 @@
 @file:OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 
 package tv.own.myowntv.features.live
-import tv.own.owntv.*
-import tv.own.owntv.core.*
-import tv.own.owntv.core.backup.*
-import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.categorylock.*
-import tv.own.owntv.core.companion.*
-import tv.own.owntv.core.content.*
-import tv.own.owntv.core.customize.*
-import tv.own.owntv.core.database.*
-import tv.own.owntv.core.database.dao.*
-import tv.own.owntv.core.database.entity.*
-import tv.own.owntv.core.di.*
-import tv.own.owntv.core.drm.*
-import tv.own.owntv.core.epg.*
-import tv.own.owntv.core.home.*
-import tv.own.owntv.core.i18n.*
-import tv.own.owntv.core.launcher.*
-import tv.own.owntv.core.live.*
-import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.model.*
-import tv.own.owntv.core.nav.*
-import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
-import tv.own.owntv.core.player.*
-import tv.own.owntv.core.reminder.*
-import tv.own.owntv.core.repository.*
-import tv.own.owntv.core.settings.*
-import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.stalker.*
-import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.sync.*
-import tv.own.owntv.core.sync.local.*
-import tv.own.owntv.core.sync.work.*
-import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.tv.*
-import tv.own.owntv.core.ui.*
-import tv.own.owntv.core.ui.stage.*
-import tv.own.owntv.core.update.*
-import tv.own.owntv.core.util.*
-import tv.own.owntv.core.weather.*
-import tv.own.owntv.player.*
 
+import tv.own.owntv.core.categorylock.sealedCategoryIds
+import tv.own.owntv.core.live.nowNextForChannel
+import tv.own.owntv.core.tv.TvHomePublisher
+import tv.own.owntv.core.util.onFailureReport
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -88,7 +51,6 @@ import tv.own.owntv.core.customize.CategoryRestorePlan
 import tv.own.owntv.core.customize.planCategoryRestore
 import tv.own.owntv.core.customize.restoreCategoryToDefault
 import tv.own.owntv.core.customize.SectionCustomizations
-import tv.own.owntv.core.customize.sealsItemIn
 import tv.own.owntv.core.categorylock.lockAwareCountsByContexts
 import tv.own.owntv.core.categorylock.visibleOnceRead
 import tv.own.owntv.core.categorylock.whileAllSealed
@@ -108,7 +70,6 @@ import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.database.entity.WatchHistoryEntity
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.util.throttleLatest
-import tv.own.owntv.core.model.SourceType
 import tv.own.owntv.core.parser.XtEpgEntry
 import tv.own.owntv.core.repository.activeProfileSources
 import tv.own.owntv.core.settings.SourceOverrides
@@ -903,7 +864,7 @@ class LiveViewModel(
         _multiviewSelection.value = emptyList()
     }
 
-    /** The playlist a channel came from, so a caller can ask what it allows (Multiview's tile budget). */
+    /** The source a channel came from, so a caller can ask what it allows (Multiview's tile budget). */
     fun sourceOf(channel: ChannelEntity): SourceEntity? =
         sourceById[channel.sourceId] ?: tv.own.owntv.core.repository.BuiltInSource.current
 
@@ -911,10 +872,9 @@ class LiveViewModel(
      * Tune [channel] into a Multiview tile's own engine.
      *
      * Deliberately routed through here rather than built in the grid: which URL a channel actually
-     * plays is not a property of the channel row. It is the playlist's pre-buffer override, its live
-     * latency, its User-Agent, the channel's own headers and DRM, and — when the stored URL is a portal command — a `cmd` that
-     * has to be resolved to a link per play. All of that already lives here, and a second copy in the
-     * grid would drift the first time one of them changed.
+     * plays is not a property of the channel row. It is the source's pre-buffer override, its live
+     * latency, its User-Agent and the channel's own headers and DRM. All of that already lives here,
+     * and a second copy in the grid would drift the first time one of them changed.
      */
     fun tuneTile(
         engine: tv.own.owntv.player.LivePreviewEngine,
@@ -1218,10 +1178,9 @@ class LiveViewModel(
      * CH+/- step: show the channel at once, open the stream once the user stops moving.
      *
      * Holding the channel key steps roughly every 170 ms, and every step used to open a stream —
-     * thirteen opens in 3.6 s on a real remote. Providers answer that as abuse: a one-session panel
-     * locks the account for ~2 minutes (HTTP 458, every channel refused until it clears), and a
-     * portal API returns 429 for the duration of the burst. Neither is a playback problem, and no
-     * fallback ladder can help, because the stream the user actually wants is refused too.
+     * thirteen opens in 3.6 s on a real remote. A provider can read that as abuse and rate-limit the
+     * requests. That is not a playback problem, and no fallback ladder can help, because the stream
+     * the user actually wants is refused too.
      *
      * So the *decision* stays instant — the channel changes on screen, history and the zap anchor move,
      * and the next press steps from here — while the network work waits [ZAP_TUNE_DELAY_MS] and is
@@ -1230,8 +1189,8 @@ class LiveViewModel(
      * Deliberately NOT applied to deliberate picks ([ensurePlaying] from the channel list, Guide, Home
      * or a deep link): those are a single considered choice and must open immediately.
      *
-     * An isolated press is one of those too: with no zap key for [ZAP_ISOLATED_PRESS_MS] it opens at once,
-     * on single-connection panels as well (see [zapTuneDelayMs]). Only presses that follow it closely wait, so a held key or a burst still
+     * An isolated press is one of those too: with no zap key for [ZAP_ISOLATED_PRESS_MS] it opens at once
+     * (see [zapTuneDelayMs]). Only presses that follow it closely wait, so a held key or a burst still
      * costs at most two opens — the first step and the channel the user stops on.
      */
     private val deferredTune = DeferredLiveTune(viewModelScope)
@@ -1240,7 +1199,7 @@ class LiveViewModel(
         tuned(channel)
         val now = android.os.SystemClock.elapsedRealtime()
         val delayMs = zapTuneDelayMs(lastZapPressMs, now)
-        // Logged only: single-session hosts follow the same rule (see ZAP_ISOLATED_PRESS_MS).
+        // Logged only: hosts with a single-session limit follow the same rule (see ZAP_ISOLATED_PRESS_MS).
         val singleConnection = tv.own.owntv.player.LiveStreamQuirks.isSingleSession(channel.streamUrl)
         tv.own.owntv.player.LiveDiagnosticsLog.event(
             "zap: tune wait ${delayMs}ms — ${zapWaitReason(lastZapPressMs, now, singleConnection)}",
@@ -1385,8 +1344,8 @@ class LiveViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     /** Hand [channel] to an external app (VLC, MX Player). Used by the Live TV long-press menu, and by
-     *  [playChannel] when Live TV's external-player default is on. Some channels store a portal
-     *  cmd rather than a URL, so it's resolved first — an external app can't mint one. */
+     *  [playChannel] when Live TV's external-player default is on. The stream URL is resolved first
+     *  when the source requires it. */
     fun playExternal(channel: ChannelEntity) {
         deferredTune.cancel()
         if (rejectSubscription(channel)) return

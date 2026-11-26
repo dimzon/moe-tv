@@ -57,7 +57,7 @@ internal fun LivePreviewEngine.play(url: String, muted: Boolean, request: LiveRe
  *
  * This is the orchestration the television's `LiveViewModel` and the phone's `LiveTuner` each carried
  * in their own ~600 lines, and which had drifted apart: the fallback [LiveLadder] and its "Give up
- * after" alarm, the HLS/TS rung choice, HLS-redirect learning and the Stalker reconnect link. The app
+ * after" alarm, the HLS/TS rung choice and HLS-redirect learning. The app
  * keeps only presentation — which channel is on screen, the HUD, history.
  *
  * The app plays live on one engine, [LivePreviewEngine]; the ladder's rungs are the two stream formats
@@ -78,12 +78,11 @@ class LiveTuneController(
     /** What the controller needs from outside the engine. [CoreHost] is the one the app uses. */
     interface Host {
         suspend fun sourceOf(sourceId: Long): SourceEntity?
-        /** A Stalker playlist stores a portal command, minted into a URL per play. */
+        /** Whether this source's stored URL marker must be resolved to a stream URL per play. */
         fun needsResolve(source: SourceEntity?): Boolean
         suspend fun resolve(source: SourceEntity, cmd: String): String?
-        /** Sidecar subtitles the feed advertises beside a resolved stream (RuTube `captions[]`); empty
-         *  for every other source — and for a source that is not loaded (yet) — so the caller can pass
-         *  it straight through unchecked. */
+        /** Sidecar subtitles the feed advertises beside a resolved stream (RuTube `captions[]`);
+         *  empty when the source is not loaded yet or advertises none. */
         suspend fun captions(source: SourceEntity?, cmd: String): List<RutubeCaption> = emptyList()
         /** Settings → "Give up on a channel after", in seconds; 0 is Never. */
         suspend fun globalBudgetSecs(): Int
@@ -129,8 +128,8 @@ class LiveTuneController(
      */
     private var forceTsFor: String? = null
 
-    /** The Stalker command whose minted URL the engine holds, so a re-focus or a promote can tell "same
-     *  channel" without minting again — the engine's own URL is the minted link, not the command. */
+    /** The stored URL marker whose resolved stream URL the engine holds, so a re-focus or a promote
+     *  can tell "same channel" without resolving again. */
     private var exoStalkerCmd: String? = null
 
     private var tuneJob: Job? = null
@@ -157,9 +156,8 @@ class LiveTuneController(
     /**
      * Route [channel], arm its ladder and start the engine. Called from inside [launch].
      *
-     * [resolved] is a URL already minted for a Stalker channel by this tune (the phone mints one before
-     * offering the channel to a cast receiver): minting ends the portal's previous session, so the first
-     * rung reuses it and only later rungs mint again.
+     * [resolved] is a URL already resolved for this tune; the first rung reuses it instead of
+     * resolving the same channel again.
      */
     suspend fun start(channel: ChannelEntity, source: SourceEntity?, resolved: String? = null) {
         previewJob?.cancel()
@@ -237,8 +235,8 @@ class LiveTuneController(
     }
 
     /**
-     * Tune [channel] into a Multiview tile's own [engine] — same URL, headers, overrides and Stalker
-     * minting as a full-screen tune, so the grid can never drift from it. No ladder: a tile that fails
+     * Tune [channel] into a Multiview tile's own [engine] — same URL, headers, overrides and resolution
+     * as a full-screen tune, so the grid can never drift from it. No ladder: a tile that fails
      * shows its failure.
      */
     suspend fun playTile(
@@ -508,18 +506,16 @@ class LiveTuneController(
         if (forceTsFor == channel.streamUrl || LiveStreamQuirks.lacksHlsVariant(channel.streamUrl)) channel.streamUrl
         else channel.playStreamUrl(source)
 
-    /** Whether "Prefer HLS" rewrites this channel's URL at all; if not, HLS and TS rungs are one
-     *  attempt and the ladder drops the HLS ones. A Stalker command is not a URL. */
+    /** Whether the source rewrites this channel's URL; if not, HLS and TS rungs are one attempt and
+     *  the ladder drops the redundant HLS rung. */
     private fun hasHlsAlternative(channel: ChannelEntity, source: SourceEntity?): Boolean =
         !host.needsResolve(source) && channel.playStreamUrl(source) != channel.streamUrl
 
     private fun isRequestRefusal(reason: String): Boolean =
         PlayerErrors.httpStatusIn(reason)?.let { LiveStreamQuirks.isRequestRefusal(it) } == true
 
-    /**
-     * Install the Stalker reconnect link on the engine while a Stalker channel plays, so a mid-session
-     * stream death mints a fresh `create_link` instead of looping on the expired one; cleared otherwise.
-     */
+    /** Install the source's reconnect URL provider while a channel plays, so a mid-session stream
+     *  death can request a fresh URL instead of replaying an expired one; cleared otherwise. */
     private fun setReconnect(channel: ChannelEntity?, source: SourceEntity?) {
         if (channel == null || source == null || !host.needsResolve(source)) {
             engine.reconnectUrlProvider = null
@@ -559,7 +555,7 @@ class LiveTuneController(
     }
 
     /**
-     * The [Host] the app uses: the settings store, the playlist row and Stalker minting through
+     * The [Host] the app uses: the settings store, the source row and URL resolution through
      * [StreamUrlResolver]. [label] is the line under the channel name (the television's "#123");
      * [sourceLookup] lets the television read its warm playlist map.
      */

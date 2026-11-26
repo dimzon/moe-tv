@@ -1,6 +1,5 @@
 package tv.own.owntv.core.database
 
-import android.content.Context
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection

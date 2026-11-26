@@ -74,9 +74,7 @@
     <string name="sync_error_connection">Couldn\'t connect to the server. It may be down, or the address may be wrong.</string>
     <!-- Translators: Error message when the server interrupts the download during sync. -->
     <string name="sync_error_interrupted">The server interrupted the download. Please try again.</string>
-    <!-- Translators: Error message when the Stalker portal rejects the MAC address. Suggests checking MAC and date/time. -->
     <string name="sync_error_mac">The portal refused this MAC address. Check the MAC (and the TV\'s date &amp; time) \u2014 or the subscription may have expired.</string>
-    <!-- Translators: Error message when the MAC address format is invalid. "AA:BB:CC:DD:EE:FF" is an example format. -->
     <string name="sync_error_invalid_mac">Invalid MAC address \u2014 use AA:BB:CC:DD:EE:FF</string>
     <!-- Translators: Separator between sync count segments. The middle dot (·) is surrounded by spaces. -->
     <string name="sync_counts_separator">"  ·  "</string>
@@ -149,9 +147,7 @@
         <item quantity="one"><xliff:g id="count">%1$d</xliff:g> category removed</item>
         <item quantity="other"><xliff:g id="count">%1$d</xliff:g> categories removed</item>
     </plurals>
-    <!-- Translators: Error when the Stalker portal URL is unreachable. Suggests checking the URL format. -->
     <string name="sync_error_portal">Couldn\'t reach the portal. Check the portal URL \u2014 it usually ends in /c/.</string>
-    <!-- Translators: Error when the Stalker portal session expires. -->
     <string name="sync_error_session">The portal session expired. Please try again.</string>
     <!-- Translators: Error when the server rejects login credentials. -->
     <string name="sync_error_auth">The server rejected your login. Check your username and password.</string>

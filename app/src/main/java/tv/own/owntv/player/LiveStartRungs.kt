@@ -59,8 +59,8 @@ internal object LiveStartRungs {
 
     /** The rungs before the provider back-off, or null to go on to it. */
     fun before(i: Input): Rung? = when {
-        // Some Xtream panels advertise a `.ts` endpoint but redirect it to an `.m3u8` manifest; content type
-        // selection happened before the redirect, so the progressive extractor sees `#EXTM3U`.
+        // Some endpoints answer a `.ts` request with an `.m3u8` manifest; content-type selection
+        // happened before the redirect, so the progressive extractor sees `#EXTM3U`.
         !i.redirectedHlsRetryDone && !i.activeIsHls && i.responseWasHls && i.containerUnsupported -> Rung.REDIRECT_HLS
         i.hlsFromHostLesson && LiveStreamQuirks.disprovesHlsLesson(i.formatFailure, i.httpStatus) ->
             Rung.DROP_HOST_HLS_LESSON

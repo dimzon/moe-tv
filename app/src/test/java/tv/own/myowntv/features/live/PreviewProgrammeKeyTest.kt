@@ -1,9 +1,9 @@
 package tv.own.myowntv.features.live
-import tv.own.owntv.*
-import tv.own.owntv.core.*
-import tv.own.owntv.core.live.*
-import tv.own.owntv.core.parser.*
 
+import tv.own.owntv.core.live.EpgNowNext
+import tv.own.owntv.core.live.nowNextForChannel
+import tv.own.owntv.core.live.rowProgramme
+import tv.own.owntv.core.parser.XtEpgEntry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

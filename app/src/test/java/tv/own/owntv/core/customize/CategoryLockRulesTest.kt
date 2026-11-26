@@ -10,7 +10,6 @@ import tv.own.owntv.core.database.entity.CategoryEntity
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.live.LiveKey
 import tv.own.owntv.core.live.isChannelVisible
-import tv.own.owntv.core.model.MediaType
 
 /** A locked category counts as hidden until the PIN opens it, stays on the rail, and needs a PIN to count at all. */
 class CategoryLockRulesTest {

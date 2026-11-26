@@ -1,7 +1,6 @@
 package tv.own.owntv.core.sync
 
 import tv.own.owntv.core.database.entity.SourceEntity
-import tv.own.owntv.core.model.SourceType
 
 /**
  * Per-section choice on Add (Now / Later / Off). Edit uses only On(=Now) / Off — now-vs-later

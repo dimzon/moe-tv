@@ -46,12 +46,9 @@ fun classifySyncFailure(raw: String?, online: Boolean): FriendlySyncFailure = wh
         FriendlySyncFailure.StreamInterrupted
     raw.contains("Portal login rejected", ignoreCase = true) -> FriendlySyncFailure.AuthenticationRejected
     raw.containsAny("MAC may not be authorized", "MAC not authorized", "Portal rejected", "no valid MAC") -> FriendlySyncFailure.MacNotAuthorised
-    // A portal's bare-text refusal of a MAC asking too fast — busy, not a bad login.
     raw.contains("Authorization failed", ignoreCase = true) -> FriendlySyncFailure.ServerError
     raw.containsAny("Portal handshake", "portal API endpoint") -> FriendlySyncFailure.PortalHandshakeFailed
     raw.containsAny("token may have expired", "returned no cmd") -> FriendlySyncFailure.PortalSessionExpired
-    // 513 is not a standard status; Xtream panels on that software answer it, with an empty body, to
-    // every call made with a username or password they do not accept.
     raw.containsAny("HTTP 401", "HTTP 403", "HTTP 513") -> FriendlySyncFailure.AuthenticationRejected
     raw.contains("HTTP 404", ignoreCase = true) -> FriendlySyncFailure.NotFound
     raw.containsAny("HTTP 500", "HTTP 502", "HTTP 503", "HTTP 504") -> FriendlySyncFailure.ServerError
@@ -64,7 +61,7 @@ fun classifySyncFailure(raw: String?, online: Boolean): FriendlySyncFailure = wh
 /**
  * True when a sync failure looks transient (offline, network blip, server 5xx) — i.e. worth a
  * WorkManager [androidx.work.ListenableWorker.Result.retry] with backoff instead of a terminal failure.
- * Auth/URL problems (401/403/404, malformed data) are permanent: retrying them just hammers the panel.
+ * Auth/URL problems (401/403/404, malformed data) are permanent: retrying them just hammers the server.
  */
 fun isTransientSyncError(raw: String?, online: Boolean): Boolean = when {
     !online -> true

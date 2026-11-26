@@ -16,14 +16,13 @@
 | Что | Значение |
 |---|---|
 | User-Agent | `com.rutube.mobile/31.18.0 (Android 13)` — **обязателен** для `play/options`; с десктопным UA приходит 404 на каждый видео-id |
-| Прокси | **запрещён**. Через системный прокси RuTube отдаёт ложные `blocking_rule` 404 и пустой `live_streams` |
+| Прокси | Общий proxy/DNS-клиент приложения: API и плеер используют одинаковые настройки |
 | Referer | `https://rutube.ru/` (не обязателен, но ставим) |
 | Accept | `application/json` |
 | Авторизация | нет, всё публичное |
 
-В коде: отдельный `OkHttpClient` с `java.net.Proxy.NO_PROXY` и Koin-квалификатором
-`"rutubeOkHttp"`, обёрнутый в `HttpClient` с квалификатором `"rutube"`
-(`core/di/DataModule.kt`).
+В коде: обычный `HttpClient` поверх общего `OkHttpClient` с live proxy/DNS-настройками
+(`core/di/DataModule.kt`). Медиа-плеер использует тот же базовый клиент через `StreamingHttpClient`.
 
 ---
 
@@ -340,7 +339,7 @@ app/src/main/java/tv/own/owntv/core/database/
 └── OwnTVDatabase.kt      # version = 56
 
 app/src/main/java/tv/own/owntv/core/di/DataModule.kt
-                          # rutubeOkHttp (NO_PROXY), rutube HttpClient, RutubeApi, resolver
+                          # общий HttpClient, StreamingHttpClient, RutubeApi, resolver
 
 app/src/main/java/tv/own/myowntv/features/setup/
 ├── SetupViewModel.kt     # startRutube()
@@ -354,7 +353,9 @@ app/src/main/java/tv/own/myowntv/features/settings/EpgSemiAutoSync.kt
 
 ## 8. Проверка вручную (curl)
 
-Все запросы — без прокси:
+Для диагностики на машине разработчика запросы выполняются без прокси — так исключаются
+ложные `blocking_rule` ответы. Это ограничение проверки, а не конфигурация приложения:
+в приложении API и плеер используют один общий proxy/DNS-клиент.
 
 ```bash
 UA='com.rutube.mobile/31.18.0 (Android 13)'

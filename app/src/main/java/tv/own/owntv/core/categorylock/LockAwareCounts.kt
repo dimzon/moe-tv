@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import tv.own.owntv.core.database.dao.CustomCategoryCount
 import tv.own.owntv.core.database.dao.CustomCategoryDao
-import tv.own.owntv.core.model.MediaType
 
 /**
  * A count that leaves out the [sealed] categories: [plain] while none is sealed, [excluding] them

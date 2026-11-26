@@ -19,8 +19,8 @@ private val Context.customizeStore: DataStore<Preferences> by preferencesDataSto
 
 /**
  * Stable identity for a category/channel that survives re-sync (content rows are clear-then-insert,
- * so DB ids change every refresh). Xtream rows key on the provider's remote id; M3U rows (no stable
- * id) fall back to the name — so a provider-side rename can detach an M3U customization.
+ * so DB ids change every refresh). Rows key on the provider's remote id, with the name as a fallback
+ * when no stable id is available.
  */
 object CustomizeKeys {
     /** Prefix of custom combined-category ids — they share the key namespace, so

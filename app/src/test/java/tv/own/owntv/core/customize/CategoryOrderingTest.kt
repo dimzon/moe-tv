@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 import tv.own.owntv.core.database.entity.CategoryEntity
-import tv.own.owntv.core.model.MediaType
 
 /**
  * The rail and a category move must build the same list — the reason this file exists. Both apps

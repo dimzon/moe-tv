@@ -42,8 +42,8 @@ class ZapTiming(private val claimWindowMs: Long = CLAIM_WINDOW_MS) {
     }
 
     companion object {
-        /** Comfortably longer than the zap wait (500 ms) plus the channel lookup before the engine starts,
-         *  including a Stalker portal minting the stream URL; far shorter than a user's next decision. */
+        /** Comfortably longer than the zap wait (500 ms) plus channel lookup and URL resolution;
+         *  far shorter than a user's next decision. */
         const val CLAIM_WINDOW_MS = 5_000L
 
         /** The one instance both engines and the app share. */

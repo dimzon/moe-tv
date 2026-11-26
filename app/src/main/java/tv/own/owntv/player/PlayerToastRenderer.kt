@@ -2,7 +2,6 @@ package tv.own.owntv.player
 
 import android.content.Context
 import androidx.annotation.StringRes
-import tv.own.myowntv.R
 import tv.own.owntv.core.i18n.AppLocale
 import tv.own.owntv.core.i18n.LocaleStore
 

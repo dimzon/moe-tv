@@ -21,8 +21,8 @@ import kotlinx.coroutines.launch
  * never reached the ExoPlayer engines on memory pressure at all.
  *
  * - [onTrimMemory] is for every host: memory pressure means the same thing on a phone and a TV.
- * - [onAppBackgrounded] / [onAppForegrounded] are the **television's** policy — an IPTV box has no
- *   background playback, so Home or the screensaver frees every stream and brings it back after. A
+ * - [onAppBackgrounded] / [onAppForegrounded] are the **television's** policy — background playback
+ *   is unavailable, so Home or the screensaver frees every stream and brings it back after. A
  *   phone plays on with the screen off by design and keeps its own, finer policy; it must not call these.
  *
  * Main thread only, like the engines.

@@ -50,13 +50,13 @@ val dataModule = module {
             // Platform trust plus the Let's Encrypt roots older/current devices lack. Clients
             // derived with newBuilder() (streaming, players) inherit it.
             .sslSocketFactory(trust.sslSocketFactory, trust.trustManager)
-            // Force HTTP/1.1. Several IPTV panels / EPG hosts (and their CDNs) have flaky HTTP/2 stacks
-            // that send RST_STREAM(PROTOCOL_ERROR) on large/slow responses — e.g. big EPG XML downloads
+            // Force HTTP/1.1. Some hosts and CDNs have flaky HTTP/2 stacks
+            // that send RST_STREAM(PROTOCOL_ERROR) on large/slow responses — e.g. big XML downloads
             // which OkHttp surfaces as "stream was reset: PROTOCOL_ERROR". HTTP/1.1 sidesteps it
             // with no real downside for our mostly-single-stream downloads.
             .protocols(listOf(Protocol.HTTP_1_1))
-            // Default a player-style UA for any request that didn't set one (e.g. Coil image loads),
-            // since some IPTV panels reject the stock OkHttp UA. Per-source UAs still override this.
+            // Default a player-style UA for any request that didn't set one (e.g. Coil image loads).
+            // Per-source UAs still override this.
             .addInterceptor { chain ->
                 val req = chain.request()
                 val out = if (req.header("User-Agent").isNullOrBlank()) {
@@ -70,28 +70,10 @@ val dataModule = module {
     }
     // The playback client: same proxy/DNS/UA/protocol configuration as the singleton above,
     // but its own connection pool, so a live stop can evict *stream* sockets without dropping keep-alive
-    // for EPG, panel API and image traffic.
+    // for EPG and image traffic.
     single { tv.own.owntv.core.network.StreamingHttpClient(get()) }
     single { HttpClient(get()) }
-    // RuTube's API must never go through a proxy (false blocking_rule 404s), so it gets its own
-    // no-proxy OkHttpClient under a name, wrapped by a named HttpClient for the RuTube stack.
-    single(org.koin.core.qualifier.named("rutubeOkHttp")) {
-        val trust = tv.own.owntv.core.network.ExtraTrustAnchors(
-            androidContext().resources.openRawResource(tv.own.myowntv.R.raw.isrg_extra_roots),
-        )
-        okhttp3.OkHttpClient.Builder()
-            .proxy(java.net.Proxy.NO_PROXY)
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(20, TimeUnit.SECONDS)
-            .writeTimeout(20, TimeUnit.SECONDS)
-            .protocols(listOf(okhttp3.Protocol.HTTP_1_1))
-            .sslSocketFactory(trust.sslSocketFactory, trust.trustManager)
-            .build()
-    }
-    single(org.koin.core.qualifier.named("rutube")) {
-        tv.own.owntv.core.network.HttpClient(get(org.koin.core.qualifier.named("rutubeOkHttp")))
-    }
-    single { tv.own.owntv.core.sync.RutubeApi(get(org.koin.core.qualifier.named("rutube"))) }
+    single { tv.own.owntv.core.sync.RutubeApi(get()) }
     single { tv.own.owntv.core.sync.RutubePlaybackResolver(get()) }
     single { ConnectivityObserver(androidContext()) }
     // Category locks: the in-memory unlocks of this session, and the view that applies them (settings,

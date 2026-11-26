@@ -16,7 +16,7 @@ import java.io.IOException
 import java.io.InputStream
 
 /**
- * Thin OkHttp wrapper for fetching M3U playlists and Xtream JSON. [get] streams the response body to
+ * Thin OkHttp wrapper for fetching source data. [get] streams the response body to
  * a block (so huge payloads are never fully buffered) and always closes the response. A per-source
  * custom User-Agent can be supplied.
  */
@@ -109,7 +109,7 @@ class HttpClient(private val client: OkHttpClient) {
         throw IOException("GET failed for $safeUrl")
     }
 
-    /** Convenience for small responses (e.g. Xtream category lists). */
+    /** Convenience for small responses. */
     suspend fun getText(
         url: String,
         userAgent: String? = null,
@@ -119,42 +119,33 @@ class HttpClient(private val client: OkHttpClient) {
     companion object {
         private const val TAG = "HttpClient"
 
-        /** Player-style UA that IPTV panels broadly accept. Overridable per source. */
+        /** Default player-style User-Agent. Overridable per source. */
         const val DEFAULT_USER_AGENT = "VLC/3.0.20 LibVLC/3.0.20"
 
         /**
          * The identity to fall back on when a provider refuses [DEFAULT_USER_AGENT] outright.
          *
-         * Some hosts sit behind a WAF that blocklists player User-Agents by name: measured on a
-         * Cloudflare-fronted panel that answers `VLC/3.0.20 LibVLC/3.0.20` — and `vlc`, and `okhttp/…`,
-         * and a blank UA — with a 403 "Just a moment…" challenge page, while serving the identical URL
-         * 200 to anything else. A bare `Mozilla/5.0` was enough to clear that particular panel, but the
-         * full desktop-browser string is what such rules are actually written around, so it is the safer
-         * bet against the next WAF that scores UA *completeness* rather than matching a blocklist.
-         *
-         * Never the default — plenty of panels expect (and some require) the VLC identity, so this is
-         * only ever reached after the default has actually been refused.
+         * Never the default — a provider may require the default player identity, so this is only
+         * reached after that identity has actually been refused.
          */
         const val FALLBACK_USER_AGENT =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
         private const val RETRY_DELAY_MS = 750L
         private const val MAX_RETRY_DELAY_MS = 3_000L
 
-        /** Mask credentials for display (info overlay / logs): query params AND Xtream `/type/user/pass/`
-         *  and `/user/pass/{id}` path segments, which is where live URLs embed them. Safe on free text
-         *  (an error message with a URL in it), not just on a bare URL. */
+        /** Mask credentials for display (info overlay / logs): query values and credential-bearing
+         *  path segments. Safe on free text, not just on a bare URL. */
         fun redactUrl(url: String): String = url
             .replace(QUERY_CREDENTIALS, "$1=***")
             .replace(PATH_CREDENTIALS, "$1•••/•••/")
-            // The short form an Xtream `get.php` playlist uses for live channels: `host/user/pass/{id}`,
-            // no type segment. A numeric last segment right after two others is that shape; the odd
-            // non-Xtream path of the same shape loses two segments of a log line, never a secret.
+            // Short path form with two credential segments followed by a numeric id.
+            // A non-credential path of the same shape loses two segments of a log line, never a secret.
             .replace(SHORT_XTREAM_PATH, "$1•••/•••/$2")
             .replace(USERINFO, "$1***@")
 
         // Compiled once: redactUrl runs on every logged HTTP response and every play() line, several times
         // a second while a live channel plays with detailed logging on.
-        // `mac` is a Stalker portal's credential (`…/play/live.php?mac=…`).
+        // Session credentials in query values must be masked too.
         private val QUERY_CREDENTIALS = Regex("(?i)(username|password|user|pass|token|data|auth|signature|sig|key|mac)=[^&]*")
         // `timeshift` is the catch-up/archive form (/timeshift/user/pass/duration/start/id.ts) — it embeds
         // the same credentials as a live URL, so it must be masked here too.
@@ -163,8 +154,7 @@ class HttpClient(private val client: OkHttpClient) {
         // source URL with embedded creds).
         private val USERINFO = Regex("(?i)(://)([^/@:]+)(:[^/@]*)?@")
 
-        /** Mask a bare hostname for display (logs, errors), as [redactUrl] masks a URL's credentials: the
-         *  provider's host identifies the account's panel as surely as the credentials do. */
+        /** Mask a bare hostname for display (logs, errors), as [redactUrl] masks a URL's credentials. */
         fun redactHost(hostname: String): String = "•••"
 
         private val SHORT_XTREAM_PATH =

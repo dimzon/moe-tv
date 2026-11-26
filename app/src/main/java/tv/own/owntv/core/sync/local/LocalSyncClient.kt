@@ -31,8 +31,8 @@ data class RemoteDevice(
  * Both apps use it, so the phone can drive the television and the television the phone.
  *
  * Deliberately `HttpURLConnection` rather than the app's OkHttp: this talks to a plain-HTTP address
- * on the local network, and it must not inherit the proxy, interceptors, cookie jar or user-agent an
- * IPTV provider's client is configured with.
+ * on the local network, and it must not inherit the proxy, interceptors, cookie jar or user-agent of
+ * the app's shared HTTP client.
  */
 class LocalSyncClient {
 

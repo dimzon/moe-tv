@@ -2,7 +2,6 @@ package tv.own.owntv.core.database.entity
 
 import androidx.compose.runtime.Immutable
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -52,7 +51,7 @@ data class ChannelEntity(
     /** Former row id — now just the natural key. Call sites that keyed user data on it key on the hex. */
     val id: String get() = remoteId
 
-    /** tvg-id (M3U) / epg_channel_id (Xtream) — links to EPG; for RuTube it IS the videoId. */
+    /** The RuTube videoId, which links the channel to its EPG entries. */
     val epgChannelId: String get() = remoteId
 
     /** The tune-time marker `rutube://{videoId}` — resolved to a live HLS URL by the built-in helper. */
@@ -74,22 +73,11 @@ data class ChannelEntity(
     val isPaid: Boolean get() = false
 }
 
-/**
- * The stream URL to tune: the channel's own `.ts`, swapped to `.m3u8` when the playlist's "Prefer HLS"
- * is on for an Xtream source.
- *
- * **Deliberately NOT gated on `hlsSupported`** — this KDoc used to claim it was, and two earlier audits
- * recommended adding that gate on the strength of the comment. It would be wrong. Panels lie about
- * `allowed_output_formats`: gating here breaks HLS for every user on an under-reporting panel, and for
- * every source that has not finished syncing yet. The authoritative note is on the field itself in
- * `SourceEntities.kt`. A channel whose `.m3u8` genuinely doesn't work is handled after the fact, per
- * channel and per engine, by `LiveStreamQuirks.rememberNoHlsVariant`.
- */
+/** Return the stream URL to tune; the single built-in source needs no source-specific rewrite. */
 fun ChannelEntity.playStreamUrl(source: SourceEntity?): String =
     resolveStreamUrl(streamUrl, source)
 
-/** Swaps .ts to .m3u8 if preferHls is active for an Xtream source. See [playStreamUrl] for why this is
- *  not gated on `hlsSupported`. */
+/** Return the URL unchanged for the single built-in source. */
 fun resolveStreamUrl(url: String, source: SourceEntity?): String = url
 
 

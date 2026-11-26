@@ -4,7 +4,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import tv.own.owntv.core.database.entity.CategoryEntity
-import tv.own.owntv.core.model.MediaType
 
 class AdultCategoryClassifierTest {
     @Test

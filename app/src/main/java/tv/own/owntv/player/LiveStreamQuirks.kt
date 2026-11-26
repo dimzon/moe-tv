@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
  *
  * Tracked here:
  *
- *  1. **`.ts` that is really HLS.** Some Xtream panels advertise `/live/user/pass/ID.ts` but
+ *  1. **`.ts` that is really HLS.** Some endpoints advertise a `.ts` address but
  *     HTTP-redirect it to an `.m3u8` manifest. ExoPlayer picks its media source from the URL
  *     *before* that redirect and hands a text manifest to the progressive extractor
  *     (`ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED`). Once the engine has seen the redirect land on a
@@ -60,10 +60,9 @@ object LiveStreamQuirks {
      * The non-standard status a panel returns when the account's one allowed session is already in use.
      *
      * Traced on a panel whose edge answers `458` with an empty `text/html` body and no redirect, while a
-     * permitted request is redirected through to the origin. It is not an HTTP standard code — Xtream
-     * panels invent codes in this range for "max connections" — so it is matched exactly rather than by
-     * class, and it means something very different from [isEdgeRefusal]: the stream is fine, *we* are the
-     * second client.
+     * permitted request is redirected through to the origin. It is not an HTTP standard code, so it is
+     * matched exactly rather than by class, and it means something very different from [isEdgeRefusal]:
+     * the stream is fine, *we* are the second client.
      *
      * `407` joins it for the same reason. A panel fronted by a gateway answers the *reconnect* with
      * "Proxy Authentication Required" while the dying connection is still counted against the
@@ -210,8 +209,8 @@ object LiveStreamQuirks {
     /**
      * The `.ts` ⇄ `.m3u8` sibling of [url], or null when there is no extension to swap.
      *
-     * The extension is tested on the PATH only, and any query/fragment is carried over untouched. An
-     * M3U live URL like `…/stream-output.m3u8?mode=hls` ends in a *parameter* rather than an extension,
+     * The extension is tested on the PATH only, and any query/fragment is carried over untouched. A
+     * live URL like `…/stream-output.m3u8?mode=hls` ends in a *parameter* rather than an extension,
      * so testing the whole string skips the swap entirely; and the provider's own `mode` is usually
      * required, so dropping it yields a 400 instead of the sibling.
      */
@@ -244,11 +243,11 @@ object LiveStreamQuirks {
     /**
      * Record that this panel allows only one session at a time (it answered [isSessionLimit]).
      *
-     * On such a panel nothing may hold two connections at once: whichever one holds the session keeps
-     * playing and the other is locked out until the holder's socket is really gone. That is why the
-     * preview pane stands down while full screen holds the stream, why a minted Stalker link is
-     * retired carefully, and why a refused `458` waits and re-asks once instead of failing the channel.
-     * Panel-wide, because the limit is on the *account*, not the channel.
+     * On such a provider nothing may hold two connections at once: whichever one holds the session
+     * keeps playing and the other is locked out until the holder's socket is really gone. That is why
+     * the preview pane stands down while full screen holds the stream, and why a refused `458` waits
+     * and re-asks once instead of failing the channel. Provider-wide, because the limit is on the
+     * *account*, not the channel.
      */
     fun rememberSessionLimit(url: String) { singleSessionHosts += hostKey(url) }
 
@@ -258,11 +257,9 @@ object LiveStreamQuirks {
      * Record that this channel has no `.m3u8` sibling the live engine can play, so "Prefer HLS" must be
      * ignored for it.
      *
-     * The playlist setting rewrites every Xtream `.ts` to `.m3u8` blindly, but a panel does not
-     * necessarily remux *every* channel: the odd one answers its `.m3u8` with a 404, an empty body, or a
-     * playlist whose segments never arrive — and the channel that played perfectly in TS mode turns into
-     * a black screen or a spinner that never resolves. The fix is to fall back to the `.ts` the panel
-     * does serve.
+     * A provider preference can rewrite `.ts` URLs to `.m3u8`, but the provider does not necessarily
+     * remux *every* channel: an odd channel can answer its `.m3u8` with a 404, an empty body, or a
+     * playlist whose segments never arrive. The fix is to fall back to the `.ts` URL that is served.
      *
      * Traced on a 4K channel whose `.m3u8` is served perfectly well, while the engine's audio renderer
      * never produces a sample from it (`audio=false` with the buffer full).

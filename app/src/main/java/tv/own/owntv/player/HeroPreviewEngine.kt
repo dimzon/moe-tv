@@ -131,8 +131,8 @@ class HeroPreviewEngine(
     private var builtForHeaders: Map<String, String> = emptyMap()
     private var builtForSoftware = false
 
-    /** [httpHeaders] = this item's own `Key: Value` request headers (M3U `#EXTVLCOPT`/`#EXTHTTP`), or
-     *  null for none. A stream that needs a Referer to open needs it here too, or the hero preview is
+    /** [httpHeaders] = this item's own `Key: Value` request headers, or null for none.
+     *  A stream that needs a Referer to open needs it here too, or the hero preview is
      *  the one place in the app that gets a 403 while the player itself plays the item fine. */
     fun play(url: String, seekToMs: Long = 0L, userAgent: String? = null, httpHeaders: String? = null) {
         // One-session provider with its single stream already in use: previewing here would knock the

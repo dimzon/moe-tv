@@ -5,10 +5,9 @@ import java.util.Locale
 /**
  * The languages offered for "Preferred audio / subtitle language", shared by both apps.
  *
- * Codes are ISO 639-2/T, the form stream tracks are tagged with. The list covers languages common
- * on IPTV and is a superset of the app's UI locale catalogue (`tools/i18n/locales.json`); it is not
- * derived from the translations the app ships. Names come from the platform in the display language,
- * so the list needs no strings.
+ * Codes are ISO 639-2/T, the form stream tracks are tagged with. The list is a superset of the app's
+ * UI locale catalogue (`tools/i18n/locales.json`); it is not derived from the translations the app
+ * ships. Names come from the platform in the display language, so the list needs no strings.
  */
 object TrackLanguages {
 
@@ -20,7 +19,7 @@ object TrackLanguages {
         "ara", "ben", "bul", "ces", "dan", "deu", "ell", "eng", "est", "fas", "fin", "fra", "heb", "hin",
         "hrv", "hun", "ind", "ita", "jpn", "kor", "lav", "lit", "mal", "msa", "nld", "nor", "pol", "por",
         "ron", "rus", "slk", "slv", "spa", "srp", "swe", "tha", "tur", "ukr", "vie", "zho",
-        // Common on IPTV, not an app language.
+        // Additional track languages that are not app UI languages.
         "bos", "cat", "kur", "mkd", "pan", "sqi", "tam", "tel", "tgl", "urd",
     )
 

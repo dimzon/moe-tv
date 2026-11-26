@@ -4,10 +4,9 @@ import org.json.JSONObject
 import tv.own.owntv.core.network.StreamHeaders
 
 /**
- * The DRM a stream needs, as an M3U playlist declares it.
+ * The DRM configuration for a stream.
  *
- * Kodi's `#KODIPROP:inputstream.adaptive.*` convention is what playlists in the wild use, and it is
- * how self-hosted proxies (JioTV-Go and friends) publish protected channels:
+ * Kodi's `#KODIPROP:inputstream.adaptive.*` convention describes protected-stream properties:
  *
  * ```
  * #KODIPROP:inputstream.adaptive.manifest_type=mpd
@@ -63,7 +62,7 @@ data class DrmConfig(
         /**
          * Stored string → config. Total: a malformed or unknown-scheme blob reads as "no DRM" rather
          * than throwing, because a row we cannot interpret must degrade to the pre-DRM behaviour, not
-         * break the whole playlist load.
+         * break the whole stream load.
          */
         fun decode(serialized: String?): DrmConfig? {
             val text = serialized?.takeIf { it.isNotBlank() } ?: return null
@@ -107,7 +106,7 @@ data class DrmConfig(
          *    Every key must be a 128-bit one; a single malformed pair drops the whole declaration.
          *  - Only the plain passthrough request/response templates. Kodi's `license_key` may carry
          *    `url|headers|postDataTemplate|responseTemplate`; anything but an empty or `R{SSM}`/`B`
-         *    template means the portal expects a request body we do not build.
+         *    template means the declaration expects a request body we do not build.
          */
         fun fromKodiProps(props: Map<String, String>): DrmConfig? {
             val type = props[PROP_LICENSE_TYPE]?.lowercase().orEmpty()

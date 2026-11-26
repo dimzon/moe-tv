@@ -30,11 +30,11 @@ sealed interface HeroItem {
     val durationMs: Long
     val lastEngagementAt: Long
 
-    /** Playlist this item came from — used to give the preview the same source-wide User-Agent the
+    /** Source this item came from — used to give the preview the same source-wide User-Agent the
      *  player uses. */
     val sourceId: Long
 
-    /** This item's own `Key: Value` request headers (M3U), or null. Same reason as [sourceId]. */
+    /** This item's own `Key: Value` request headers, or null. Same reason as [sourceId]. */
     val httpHeaders: String?
 
     data class LiveHero(

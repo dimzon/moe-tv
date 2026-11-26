@@ -7,15 +7,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 
 /**
- * Which playlist the user is watching right now, so background work can step out of its way.
+ * Which source the user is watching right now, so background work can step out of its way.
  *
  * This exists because [OpenStreamRegistry] cannot answer the question, although it looks as though
  * it should. That register is the **connection budget** — Multiview tiles and recordings claim
  * against it because they have to ask "may I open one more?". Fullscreen playback never asks, so it
  * never claims, so `openOn(sourceId).total > 0` is false for the single most important case there
  * is. The background catalogue drain was gated on exactly that expression and consequently never
- * yielded once; a channel played for four minutes on the reference portal and the drain paged
- * straight through it.
+ * yielded once; background work could then page through the catalogue while playback continued.
  *
  * The player in `:player-core` cannot raise this itself — it is handed a URL and has no
  * notion of a `sourceId`. So it is the host's playback screen, which holds the row, that opens and
@@ -35,7 +34,7 @@ class WatchSession {
 
     private val _watching = MutableStateFlow<Set<Long>>(emptySet())
 
-    /** The playlists currently on screen. A set, because Multiview can show several at once. */
+    /** The sources currently on screen. A set, because Multiview can show several at once. */
     val watching: StateFlow<Set<Long>> = _watching.asStateFlow()
 
     /** The user started watching something from [sourceId]. Safe to call twice. */

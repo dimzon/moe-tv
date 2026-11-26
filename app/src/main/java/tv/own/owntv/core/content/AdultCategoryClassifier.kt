@@ -8,9 +8,8 @@ import tv.own.owntv.core.database.entity.CategoryEntity
 /**
  * Conservative classifier for provider category/folder names.
  *
- * IPTV protocols expose a category name, but no dependable adult flag. Keep this classifier
- * category-only: applying these words to programme or movie titles would create false positives
- * such as "Sex and the City". [isAdult] remains for name-driven chips (genre colouring); the
+ * Keep this classifier category-only: applying these words to programme or movie titles would create
+ * false positives such as "Sex and the City". [isAdult] remains for name-driven chips (genre colouring); the
  * kids-profile policy it used to enforce is gone with the profiles.
  */
 object AdultCategoryClassifier {

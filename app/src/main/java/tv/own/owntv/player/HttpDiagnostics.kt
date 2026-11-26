@@ -30,8 +30,8 @@ internal object HttpDiagnostics {
     /**
      * A failed response's body, reduced to one short printable line for the log: markup stripped,
      * whitespace collapsed, capped, then scrubbed of anything that could identify the account. Scrubbing
-     * is done against [requestUrl]'s **own** credentials — the Xtream `/live/<user>/<pass>/` segments and
-     * signed query values — so even a panel that echoes the username back in an error page cannot leak it.
+     * is done against [requestUrl]'s **own** credential-bearing path segments and signed query values,
+     * so even a provider that echoes the username back in an error page cannot leak it.
      */
     fun textPrefix(bytes: ByteArray, requestUrl: String): String {
         val text = bytes.decodeToString()

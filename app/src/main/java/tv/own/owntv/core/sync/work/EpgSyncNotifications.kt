@@ -31,10 +31,9 @@ internal object EpgSyncNotifications {
      * source, not per app, unlike the download queue. Sharing one id would let the second sync's
      * notification replace the first's and take the first service's justification with it.
      *
-     * The id is folded into a small range rather than used raw: a source id is a database key, is
-     * routinely negative for portal-derived guides, and has no business deciding a notification id's
-     * magnitude. A collision needs two sources whose ids are 1024 apart syncing simultaneously, and
-     * costs one notification, not a crash.
+     * The id is folded into a small range rather than used raw: a source id is a database key and has
+     * no business deciding a notification id's magnitude. A collision needs two sources whose ids are
+     * 1024 apart syncing simultaneously, and costs one notification, not a crash.
      */
     private const val NOTIFICATION_ID_BASE = 4203
     private const val ID_SPREAD = 0x3FF

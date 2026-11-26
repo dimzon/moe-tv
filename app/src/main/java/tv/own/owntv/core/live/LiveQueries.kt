@@ -5,13 +5,11 @@ import kotlinx.coroutines.flow.Flow
 import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.customize.SectionCustomizations
 import tv.own.owntv.core.customize.seals
-import tv.own.owntv.core.customize.sealsItemIn
 import tv.own.owntv.core.database.ManualOrderPagingSource
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.CustomCategoryDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.ContentOrderEntity
-import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.settings.SettingsRepository
 
 /**

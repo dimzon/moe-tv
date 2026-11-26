@@ -1,13 +1,10 @@
 package tv.own.owntv.core.network
 
 /**
- * Per-channel HTTP request headers.
+ * Per-channel HTTP request headers, stored as one `Key: Value` per line.
  *
- * M3U playlists carry per-entry HTTP options — `#EXTVLCOPT:http-user-agent`, `#EXTHTTP:{"cookie":…}`,
- * `#KODIPROP:inputstream.adaptive.stream_headers`, or the `url|User-Agent=…&Referer=…` pipe suffix.
- * Restreams and token-protected CDNs routinely require them, and without them the provider answers 403.
- *
- * Stored on [tv.own.owntv.core.database.entity.ChannelEntity.httpHeaders] as one `Key: Value` per line
+ * Streams can require headers such as a User-Agent, Referer or Cookie. Stored on
+ * [tv.own.owntv.core.database.entity.ChannelEntity.httpHeaders] as one `Key: Value` per line
  * — deliberately not JSON: it is exactly what an HTTP request looks like, needs no parser dependency,
  * and is human-readable in a backup file.
  */

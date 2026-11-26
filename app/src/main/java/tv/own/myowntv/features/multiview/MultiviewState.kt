@@ -1,45 +1,4 @@
 package tv.own.myowntv.features.multiview
-import tv.own.owntv.*
-import tv.own.owntv.core.*
-import tv.own.owntv.core.backup.*
-import tv.own.owntv.core.brand.*
-import tv.own.owntv.core.categorylock.*
-import tv.own.owntv.core.companion.*
-import tv.own.owntv.core.content.*
-import tv.own.owntv.core.customize.*
-import tv.own.owntv.core.database.*
-import tv.own.owntv.core.database.dao.*
-import tv.own.owntv.core.database.entity.*
-import tv.own.owntv.core.di.*
-import tv.own.owntv.core.drm.*
-import tv.own.owntv.core.epg.*
-import tv.own.owntv.core.home.*
-import tv.own.owntv.core.i18n.*
-import tv.own.owntv.core.launcher.*
-import tv.own.owntv.core.live.*
-import tv.own.owntv.core.menu.*
-import tv.own.owntv.core.model.*
-import tv.own.owntv.core.nav.*
-import tv.own.owntv.core.network.*
-import tv.own.owntv.core.parser.*
-import tv.own.owntv.core.player.*
-import tv.own.owntv.core.reminder.*
-import tv.own.owntv.core.repository.*
-import tv.own.owntv.core.settings.*
-import tv.own.owntv.core.setup.*
-import tv.own.owntv.core.stalker.*
-import tv.own.owntv.core.storage.*
-import tv.own.owntv.core.sync.*
-import tv.own.owntv.core.sync.local.*
-import tv.own.owntv.core.sync.work.*
-import tv.own.owntv.core.theme.*
-import tv.own.owntv.core.tv.*
-import tv.own.owntv.core.ui.*
-import tv.own.owntv.core.ui.stage.*
-import tv.own.owntv.core.update.*
-import tv.own.owntv.core.util.*
-import tv.own.owntv.core.weather.*
-import tv.own.owntv.player.*
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -211,17 +170,11 @@ class MultiviewState(
     }
 
     /**
-     * A tile that was playing has stopped, while other tiles from the same playlist carry on.
+     * A tile that was playing has stopped, while other tiles carry on.
      *
-     * **It does not blame the provider, and it used to.** That version was built on the belief that
-     * this portal silently cut the oldest stream; measuring the account directly disproved it — four
-     * of its streams run side by side for as long as you like. Every time a stricter rule fired it was
-     * wrong, most visibly when it told the user their provider allowed three streams while three of
-     * its streams were playing in front of them.
-     *
-     * What is left is the honest reading. The connection budget had already established the provider
-     * allows this many, so a picture that stops after that is the television reaching its own limit —
-     * decoders, bandwidth or video planes — and that is what the tile says.
+     * The connection budget had already established the provider allows this many, so a picture that
+     * stops after that is the television reaching its own limit — decoders, bandwidth or video planes —
+     * and that is what the tile says.
      */
     fun refuseDeviceLimit(tile: Int) {
         if (released || tile !in tiles.indices) return

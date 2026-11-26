@@ -57,9 +57,8 @@ class LiveLadder {
      * Reset the ladder for a fresh tune of [streamUrl]. Rungs already climbed are forgotten — a new tune
      * is a new chance, including for a channel that ended the last one on its final rung.
      *
-     * The HLS rungs are dropped entirely when this channel has no HLS/TS distinction — "Prefer HLS" off
-     * for the playlist, a Stalker cmd, or a URL that is natively `.m3u8` — leaving the plain `.ts`
-     * attempt, which is what happened before any of this existed.
+     * The HLS rung is dropped when this channel has no HLS/TS distinction: there is no alternative
+     * address to try.
      *
      * Why per-format rungs at all: a channel's `.m3u8` and its `.ts` are different muxes, and a stream
      * that chokes on one can play as the other.
@@ -103,10 +102,9 @@ class LiveLadder {
     /**
      * Give the tune [byMs] more time, because the wait that just happened was one OwnTV asked for.
      *
-     * The case this exists for is a provider back-off: an HTTP 429 with a `Retry-After` is the panel
-     * naming the second at which the channel frees up, and the engine is counting it down behind the
-     * spinner. Charging that wait to the budget would abandon a perfectly good channel over a delay the
-     * app itself agreed to.
+     * The case this exists for is a provider back-off: an HTTP 429 with a `Retry-After` asks the app
+     * to wait, and the engine is counting it down behind the spinner. Charging that wait to the budget
+     * would abandon a perfectly good channel over a delay the app itself agreed to.
      */
     fun postponeDeadline(byMs: Long) {
         deadlineAtMs = deadlineAtMs?.plus(byMs)
@@ -129,8 +127,8 @@ class LiveLadder {
      * NEXT tune of this channel skips the dead rung instead of paying for it again. Never recorded when
      * there was no swap to blame.
      *
-     * [failureWasAboutFormat] is the guard on that lesson. A panel that refuses the *request* — an
-     * account-busy 458, a 403, a rate limit — says nothing whatsoever about whether its `.m3u8` works,
+     * [failureWasAboutFormat] is the guard on that lesson. A provider that refuses the *request* — an
+     * account-busy status, a 403, a rate limit — says nothing whatsoever about whether its `.m3u8` works,
      * so nothing may be learned from it: recording a format lesson there teaches the app a fact it had
      * no evidence for, and the lesson would outlive the lockout that produced it.
      *

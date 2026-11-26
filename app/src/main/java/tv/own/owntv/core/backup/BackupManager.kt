@@ -620,8 +620,8 @@ internal fun remapCustomizationValue(raw: String, sourceIdMap: Map<Long, Long>):
  *
  * A key in the older stream-URL shape has no source id to remap ("http" never parses as a Long) and
  * passes through unchanged, as does every key when no sources took part ([sourceIdMap] empty). A key
- * whose source id has no entry in a non-empty map is **dropped** (null): its playlist was not restored,
- * and the same number here may be a different playlist, which would inherit its zoom or delay.
+ * whose source id has no entry in a non-empty map is **dropped** (null): its source was not restored,
+ * and the same number here may identify a different source, which would inherit its zoom or delay.
  */
 internal fun remapContentKey(key: String, sourceIdMap: Map<Long, Long>): String? {
     if (sourceIdMap.isEmpty()) return key
@@ -634,7 +634,7 @@ internal fun remapContentKey(key: String, sourceIdMap: Map<Long, Long>): String?
  * Scopes per-item player keys to the sources riding in this backup.
  *
  * [allowUrlKeys] admits the legacy stream-URL keys, and is true only when a passphrase was given:
- * an IPTV stream URL routinely carries the account's username and password in its path or query, so
+ * an unencrypted stream URL can carry account credentials in its path or query, so
  * in an unencrypted backup those keys are exactly the credential leak the secret policy exists to
  * prevent. A stable key is only ever "<sourceId>:<TYPE>:<remoteId>" and leaks nothing.
  */

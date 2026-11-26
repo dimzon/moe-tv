@@ -1,6 +1,5 @@
 package tv.own.owntv.core.sync
 
-import org.json.JSONArray
 import org.json.JSONObject
 
 /**
