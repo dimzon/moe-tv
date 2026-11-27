@@ -145,6 +145,20 @@ class RutubeLiveCatalogueTest {
         assertEquals(listOf(4, 2), merged[1].categoryIds)
     }
 
+    @Test
+    fun `known broken rows are removed before numbering and liveness probes`() {
+        val normal = channel("normal", "Рабочий канал", 1)
+        val paid = channel("paid", "Подписочный", 2, isPaid = true)
+        val iframe = channel("iframe", "Заглушка", 3, originType = "ifrm")
+        val ctv = channel("f785d738a845cc80658e887843a18ed9", "CTV", 4)
+        val rbkUfa = channel("75957f55ed1e9b4e0ec00f8dd9594fcc", "РБК-Уфа", 5)
+        val illi = channel("eda2da42eea89951e4135141a30915f7", "ИЛЛИ ТВ", 6)
+
+        val filtered = RuTubeSyncer.filterCatalogueChannels(listOf(normal, paid, iframe, ctv, rbkUfa, illi))
+
+        assertEquals(listOf(normal), filtered)
+    }
+
     private fun channel(
         id: String,
         name: String,
@@ -152,6 +166,7 @@ class RutubeLiveCatalogueTest {
         originType: String? = null,
         authorId: Long? = null,
         categoryIds: List<Int> = emptyList(),
+        isPaid: Boolean = false,
     ) = RutubeChannel(
         videoId = id,
         name = name,
@@ -159,7 +174,7 @@ class RutubeLiveCatalogueTest {
         logoUrl = null,
         categoryIds = categoryIds,
         orderNumber = order,
-        isPaid = false,
+        isPaid = isPaid,
         originType = originType,
         authorId = authorId,
     )

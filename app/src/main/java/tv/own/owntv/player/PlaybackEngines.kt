@@ -40,6 +40,7 @@ class PlaybackEngines(
     enum class Pressure { NONE, LOW, CRITICAL }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var lastCriticalTrimLevel: Int? = null
 
     init {
         // From Android 14 the RUNNING_* trim levels are no longer delivered, so the only pressure
@@ -65,6 +66,13 @@ class PlaybackEngines(
                 // Once per pressure episode: act when it rises, re-arm when it is over.
                 if (pressure > applied) {
                     Log.i(TAG, "memory pressure $pressure avail=${info.availMem shr 20}MiB threshold=${info.threshold shr 20}MiB")
+                    if (pressure == Pressure.CRITICAL) {
+                        LiveDiagnosticsLog.event(
+                            "event=memory_pressure source=poll pressure=CRITICAL " +
+                                "availMiB=${info.availMem shr 20} thresholdMiB=${info.threshold shr 20} " +
+                                "activeAtSignal=${engineActive()}",
+                        )
+                    }
                     applyPressure(pressure)
                 }
                 applied = if (pressure == Pressure.NONE) Pressure.NONE else maxOf(applied, pressure)
@@ -76,7 +84,24 @@ class PlaybackEngines(
     }
 
     /** Forward `Application.onTrimMemory`. Levels that only mean "the UI is hidden" are ignored. */
-    fun onTrimMemory(level: Int) = applyPressure(pressureOf(level))
+    fun onTrimMemory(level: Int) {
+        val pressure = pressureOf(level)
+        if (pressure == Pressure.CRITICAL) {
+            if (level != lastCriticalTrimLevel) {
+                lastCriticalTrimLevel = level
+                LiveDiagnosticsLog.event(
+                    "event=memory_pressure source=trim level=$level pressure=CRITICAL " +
+                        "activeAtSignal=${engineActive()}",
+                )
+            }
+        } else {
+            lastCriticalTrimLevel = null
+        }
+        applyPressure(pressure)
+    }
+
+    private fun engineActive(): Boolean =
+        livePreview.state.value != LivePreviewEngine.State.IDLE || pool.inUse.value
 
     private fun applyPressure(pressure: Pressure) {
         if (pressure != Pressure.CRITICAL) return

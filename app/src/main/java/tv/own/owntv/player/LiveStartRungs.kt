@@ -53,6 +53,8 @@ internal object LiveStartRungs {
         /** Decoder rebuilds this load has already spent. */
         val decoderRebuildsDone: Int,
         val altFormatRetryDone: Boolean,
+        /** Resolver-minted URLs must not be rewritten into a speculative sibling endpoint. */
+        val allowAlternateFormat: Boolean = true,
         /** [LivePreviewEngine.shouldTryDirectSource] for this failure. */
         val directSourceUseful: Boolean,
     )
@@ -75,7 +77,7 @@ internal object LiveStartRungs {
         // Checked before the rebuild, which is for a decoder that *died*, not for one that was never free.
         i.decoderExhausted -> Rung.DECODER_EXHAUSTED
         i.decoderFailure && decoderRebuildDelayMs(i.decoderRebuildsDone) != null -> Rung.REBUILD_DECODER
-        !i.altFormatRetryDone && i.formatFailure -> Rung.ALT_FORMAT
+        !i.altFormatRetryDone && i.allowAlternateFormat && i.formatFailure -> Rung.ALT_FORMAT
         i.directSourceUseful -> Rung.DIRECT_SOURCE
         else -> Rung.FAIL
     }

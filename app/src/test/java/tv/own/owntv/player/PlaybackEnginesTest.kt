@@ -26,6 +26,44 @@ class PlaybackEnginesTest {
     }
 
     @Test
+    fun `routine stop after a critical episode follows policy without claiming new pressure`() {
+        val mode = decoderReleaseMode(
+            cause = EngineStopCause.ROUTINE,
+            hasPlayer = true,
+            sawUhd = false,
+            memoryPressureLatched = true,
+        )
+        val reason = decoderReleaseReason(
+            cause = EngineStopCause.ROUTINE,
+            sawUhd = false,
+            memoryPressureLatched = true,
+        )
+
+        assertEquals("post_critical_policy", mode)
+        assertEquals("post-critical memory policy", reason)
+    }
+
+    @Test
+    fun `the critical stop itself and a later UHD release have distinct reasons`() {
+        assertEquals(
+            "critical_pressure",
+            decoderReleaseMode(EngineStopCause.CRITICAL_PRESSURE, true, false, true),
+        )
+        assertEquals(
+            "critical memory pressure",
+            decoderReleaseReason(EngineStopCause.CRITICAL_PRESSURE, false, true),
+        )
+        assertEquals(
+            "UHD channel left",
+            decoderReleaseReason(EngineStopCause.ROUTINE, true, false),
+        )
+        assertEquals(
+            "reuse",
+            decoderReleaseMode(EngineStopCause.BACKGROUND, true, false, false),
+        )
+    }
+
+    @Test
     fun `android 14 memory info maps to the same two steps`() {
         val t = 200L shl 20
         assertEquals(Pressure.NONE, PlaybackEngines.pressureOf(lowMemory = false, availMem = t * 2 + 1, threshold = t))

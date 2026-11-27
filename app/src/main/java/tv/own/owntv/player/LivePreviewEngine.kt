@@ -130,7 +130,7 @@ class LivePreviewEngine(
         _autoPreviewSuppressed.value = true
         LiveDiagnosticsLog.event("critical memory pressure — stopping preview, suppressing auto-preview")
         discardBackgroundRestore()
-        stop()
+        stopInternal(EngineStopCause.CRITICAL_PRESSURE)
     }
     /** The pre-roll this tune should use — zero for a stream already caught unable to satisfy one
      *  ([LiveStreamQuirks.defeatsPreroll]), otherwise the per-playlist override or the global setting. */
@@ -863,6 +863,7 @@ class LivePreviewEngine(
         // the previous channel's frames that still arrive right after play() on the reused player.
         firstFrameGate.take()?.let { t ->
             val now = android.os.SystemClock.elapsedRealtime()
+            if (tune.firstFrameAtMs == 0L) tune.firstFrameAtMs = now
             // A CH+/− press that led here adds the whole wait the user saw, including the app's zap delay.
             val sincePress = ZapTiming.sincePress(t.pressAtMs, now)
             LiveDiagnosticsLog.event("first frame after ${now - t.startedMs}ms${ZapTiming.pressSuffix(sincePress)}")
@@ -1116,6 +1117,7 @@ class LivePreviewEngine(
      * retry is a channel error, a failed reconnect is a lost connection).
      */
     private fun reprepare(p: ExoPlayer, url: String) {
+        resetRebufferFlapWindow()
         p.setMediaSource(mediaSourceFor(url, tunedCaptions))
         p.prepare()
         p.playWhenReady = true
@@ -1158,15 +1160,27 @@ class LivePreviewEngine(
         if (tune.prerollRetunePending) return
         val now = android.os.SystemClock.elapsedRealtime()
         val pos = player?.currentPosition ?: 0L
-        if (now - tune.flapWindowStartMs > FLAP_WINDOW_MS) { tune.flapWindowStartMs = now; tune.flapCount = 0; tune.flapWindowStartPos = pos }
-        if (++tune.flapCount < FLAP_LIMIT) return
+        if (tune.flapWindowStartMs == 0L || now - tune.flapWindowStartMs > RebufferFlapPolicy.WINDOW_MS) {
+            tune.flapWindowStartMs = now
+            tune.flapCount = 0
+            tune.flapWindowStartPos = pos
+        }
+        val count = tune.flapCount + 1
+        tune.flapCount = count
+        val decision = RebufferFlapPolicy.evaluate(now, pos, tune.flapWindowStartMs, count, tune.flapWindowStartPos)
+        if (count < RebufferFlapPolicy.LIMIT) return
+
+        val bufferedMs = player?.totalBufferedDuration ?: androidx.media3.common.C.TIME_UNSET
+        val detail = "$count re-buffers in ${decision.elapsedMs}ms, position advanced ${decision.advancedMs}ms, " +
+            "required=${decision.requiredProgressMs}ms buffered=$bufferedMs"
+        resetRebufferFlapWindow()
         // A channel that re-buffers often but still moves forward is merely choppy — that's the reconnect
         // ladder's business, not this. Only "many re-buffers, almost no playback" counts as a flap.
-        val advancedMs = pos - tune.flapWindowStartPos
-        if (advancedMs >= FLAP_MIN_PROGRESS_MS) { tune.flapWindowStartMs = now; tune.flapCount = 0; tune.flapWindowStartPos = pos; return }
+        if (!decision.starved) {
+            LiveDiagnosticsLog.event("re-buffer burst ($detail) verdict=progressing")
+            return
+        }
         val url = currentUrl
-        val detail = "${tune.flapCount} re-buffers in ${now - tune.flapWindowStartMs}ms, position advanced ${advancedMs}ms"
-        tune.flapWindowStartMs = now; tune.flapCount = 0; tune.flapWindowStartPos = pos
         if (url != null && effectivePrerollSecs() > 0) {
             LiveDiagnosticsLog.event("re-buffer flap ($detail) — this stream can't reach its pre-buffer, reopening without one")
             android.util.Log.i(LiveDiagnosticsLog.TAG, "preroll defeated — reopening without pre-buffer ($detail)")
@@ -1175,6 +1189,12 @@ class LivePreviewEngine(
         }
         LiveDiagnosticsLog.event("re-buffer flap ($detail) with no pre-buffer — giving up on ExoPlayer for this stream")
         failLoad("playback kept re-buffering ($detail)")
+    }
+
+    private fun resetRebufferFlapWindow() {
+        tune.flapWindowStartMs = 0L
+        tune.flapCount = 0
+        tune.flapWindowStartPos = 0L
     }
 
     /** The fallback ladder has given up on this channel — there is no rung left, or the whole tune ran
@@ -1289,6 +1309,9 @@ class LivePreviewEngine(
                     }
                 }
                 Player.STATE_READY -> {
+                    if (tune.firstReadyAtMs == 0L) {
+                        tune.firstReadyAtMs = android.os.SystemClock.elapsedRealtime()
+                    }
                     val resumed = tune.hasPlayed // a READY after first play == recovered from a buffer/stall
                     // A late recovery: the ladder called this channel dead (failLoad) while the reconnect it
                     // had already started was still opening, and that reconnect has now produced a picture.
@@ -1374,6 +1397,9 @@ class LivePreviewEngine(
         override fun onIsPlayingChanged(isPlaying: Boolean) { _isPlaying.value = isPlaying }
 
         override fun onRenderedFirstFrame() {
+            if (tune.firstFrameAtMs == 0L) {
+                tune.firstFrameAtMs = android.os.SystemClock.elapsedRealtime()
+            }
             tune.firstFrameRendered = true
             // The plain-TS retry played: this channel is TS on a panel that redirects others, so the
             // panel-wide HLS lesson is wrong there. Proved once, then never re-learned this session.
@@ -1410,6 +1436,7 @@ class LivePreviewEngine(
         override fun onCues(cueGroup: androidx.media3.common.text.CueGroup) { _cues.value = cueGroup.cues }
 
         override fun onPlayerError(error: PlaybackException) {
+            tune.lastPlayerErrorCode = error.errorCodeName
             android.util.Log.w(LiveDiagnosticsLog.TAG, "ExoPlayer error: ${error.errorCodeName}", error)
             LiveDiagnosticsLog.event("player_error code=${error.errorCodeName} hasPlayed=${tune.hasPlayed}")
             // A decoder or audio-output failure while tunneled is the tunnel's; a network one is not.
@@ -1467,6 +1494,7 @@ class LivePreviewEngine(
                 fallbackUserAgentAvailable = !tune.uaRetryDone && !uaIsCustom && currentUa != HttpClient.FALLBACK_USER_AGENT,
                 decoderRebuildsDone = tune.decoderRebuilds,
                 altFormatRetryDone = tune.altFormatRetryDone,
+                allowAlternateFormat = tune.allowAlternateFormat,
                 directSourceUseful = shouldTryDirectSource(
                     directSource = tunedDirectSource,
                     currentUrl = currentUrl,
@@ -1630,11 +1658,12 @@ class LivePreviewEngine(
      *  second frame (measured on the TCL: Realtek's HEVC decoder logs "surface changed" and stops). With
      *  no surface Media3 starts the codec on a placeholder and moves it the same way, so [play] also holds
      *  its prepare until the replacement arrives through [setSurface]. */
-    fun releaseDecoderForUhd(force: Boolean = false) {
+    internal fun releaseDecoderForUhd(force: Boolean = false, cause: EngineStopCause = EngineStopCause.ROUTINE) {
         if (!sawUhd && !force) return // only pay the rebuild when leaving a genuine UHD stream
+        val leavingUhd = sawUhd
         sawUhd = false
         if (player == null) return
-        val reason = if (force) "critical memory pressure" else "UHD channel left"
+        val reason = decoderReleaseReason(cause, sawUhd = leavingUhd, memoryPressureLatched = force) ?: return
         android.util.Log.i(LiveDiagnosticsLog.TAG, "releaseDecoderForUhd(): releasing the decoder + surface ($reason)")
         LiveDiagnosticsLog.event("$reason — full decoder release+rebuild")
         player?.run { removeListener(listener); release() }
@@ -1669,12 +1698,17 @@ class LivePreviewEngine(
          *  for RuTube); merged under the video as single-sample text tracks. Empty = none
          *  advertised, which is every broadcast the scans found so far. */
         captions: List<tv.own.owntv.core.sync.RutubeCaption> = emptyList(),
+        /** Whether a pre-first-frame format failure may try the URL's `.ts`/`.m3u8` sibling. */
+        allowAlternateFormat: Boolean = true,
     ) {
         if (released) return
         LiveDiagnosticsLog.event("play() engine=$engineId url=${HttpClient.redactUrl(url)} muted=$muted")
         // THE reset. Everything a new channel must not inherit from the previous one lives in
         // [TuneState], so forgetting it is one assignment that cannot be partially done.
-        tune = TuneState(playStartedMs = android.os.SystemClock.elapsedRealtime())
+        tune = TuneState(
+            playStartedMs = android.os.SystemClock.elapsedRealtime(),
+            allowAlternateFormat = allowAlternateFormat,
+        )
         // The CH+/− press that caused this tune (if any) is claimed now, so only this tune is timed from it.
         firstFrameGate.arm(tune.playStartedMs, ZapTiming.shared.claim(tune.playStartedMs))
         deadlineMisses.set(0); deadlineArmed = false
@@ -1983,6 +2017,7 @@ class LivePreviewEngine(
         val manifestType: String?,
         val directSource: String?,
         val captions: List<tv.own.owntv.core.sync.RutubeCaption> = emptyList(),
+        val allowAlternateFormat: Boolean = true,
     )
     @Volatile private var backgroundRestore: TunedRequest? = null
 
@@ -1990,19 +2025,21 @@ class LivePreviewEngine(
     private fun tunedRequest(url: String) = TunedRequest(
         url, muted, _currentMeta.value, tunedUserAgent, tunedPrerollSecs, tunedLiveBufferOverride,
         tunedHttpHeaders, tunedDrmConfig, tunedManifestType, tunedDirectSource, tunedCaptions,
+        tune.allowAlternateFormat,
     )
 
     private fun play(r: TunedRequest) = play(
         r.url, muted = r.muted, meta = r.meta, userAgent = r.userAgent, prerollSecsOverride = r.prerollSecs,
         liveBufferOverride = r.liveBufferOverride, httpHeaders = r.httpHeaders, drmConfig = r.drmConfig,
         manifestType = r.manifestType, directSource = r.directSource, captions = r.captions,
+        allowAlternateFormat = r.allowAlternateFormat,
     )
 
     /** Backgrounded (screensaver / Home): remember what's playing, then free the stream. Paired with
      *  [onAppForegrounded]. */
     fun onAppBackgrounded() {
         currentUrl?.let { backgroundRestore = tunedRequest(it) }
-        stop()
+        stopInternal(EngineStopCause.BACKGROUND)
     }
 
     /** Foregrounded: re-tune the live channel that was freed while backgrounded (at the live edge), so it
@@ -2021,10 +2058,69 @@ class LivePreviewEngine(
     /** How far into the current stream playback is, in ms; 0 with nothing loaded. A saved copy's clock. */
     fun livePositionMs(): Long = player?.currentPosition?.coerceAtLeast(0L) ?: 0L
 
+    /** A URL-free snapshot of where the current open attempt stopped. The controller adds whole-tune
+     *  timing; the engine contributes only state observed inside this player. */
+    internal fun openingDiagnostics(
+        outcome: String,
+        stage: String? = null,
+        resolveOutcome: String? = null,
+        resolveMs: Long? = null,
+        elapsedMs: Long = 0L,
+        budgetMs: Long = 0L,
+        postponedMs: Long = 0L,
+    ): OpeningDiagnostics {
+        val p = player
+        val now = android.os.SystemClock.elapsedRealtime()
+        val firstFrame = tune.firstFrameAtMs > 0L || tune.firstFrameRendered || tune.everRendered
+        val inferredStage = stage ?: when {
+            currentUrl == null -> "resolve"
+            awaitingFreshSurface -> "surface"
+            firstFrame -> "first_frame"
+            p?.playbackState == Player.STATE_READY || tune.firstReadyAtMs > 0L -> "ready_no_frame"
+            tune.lastVideoDecoder != null -> "decoder"
+            (p?.totalBufferedDuration ?: 0L) > 0L -> "buffer"
+            else -> "network"
+        }
+        val resolving = inferredStage == "resolve"
+        val playerState = if (resolving) null else when (p?.playbackState) {
+            Player.STATE_IDLE -> "IDLE"
+            Player.STATE_BUFFERING -> "BUFFERING"
+            Player.STATE_READY -> "READY"
+            Player.STATE_ENDED -> "ENDED"
+            else -> null
+        }
+        val lastBytesAgoMs = if (resolving) null else throughputTracker.lastBytesAtMs
+            .takeIf { it > 0L && it >= tune.playStartedMs }
+            ?.let { (now - it).coerceAtLeast(0L) }
+        return OpeningDiagnostics(
+            outcome = outcome,
+            stage = inferredStage,
+            elapsedMs = elapsedMs,
+            budgetMs = budgetMs,
+            postponedMs = postponedMs,
+            resolveOutcome = resolveOutcome,
+            resolveMs = resolveMs,
+            playerState = playerState,
+            route = if (resolving) null else activeRoute.logName,
+            bufferedMs = if (resolving) null else p?.totalBufferedDuration?.takeIf { it >= 0L },
+            ready = if (resolving) false else tune.firstReadyAtMs > 0L,
+            firstFrame = if (resolving) false else firstFrame,
+            decoder = if (resolving) null else tune.lastVideoDecoder,
+            decoderHardware = if (resolving) null else tune.lastVideoDecoderHardware,
+            decoderRebuilds = if (resolving) 0 else tune.decoderRebuilds,
+            lastBytesAgoMs = lastBytesAgoMs,
+            errorCode = if (resolving) null else tune.lastPlayerErrorCode,
+        )
+    }
+
     /** Stop playback and free the decoder/connection (leaving fullscreen, a Multiview tile closing). Keeps the
      *  ExoPlayer instance alive for the next preview. */
-    fun stop() {
-        LiveDiagnosticsLog.event("stop() — intentional")
+    fun stop() = stopInternal(EngineStopCause.ROUTINE)
+
+    private fun stopInternal(cause: EngineStopCause) {
+        val hadStream = currentUrl != null
+        val releaseMode = decoderReleaseMode(cause, player != null, sawUhd, memoryPressure)
+        LiveDiagnosticsLog.event("stop() cause=${cause.logName} hadStream=$hadStream decoderRelease=$releaseMode")
         tune.stoppingIntentionally = true
         currentUrl = null
         tune.hasPlayed = false; deadlineArmed = false; tune.retryCount = 0; tune.reconnectPending = false; tune.gaveUp = false; tune.decoderRebuilds = 0
@@ -2054,7 +2150,7 @@ class LivePreviewEngine(
         // Leaving a UHD channel (back / exit fullscreen / background) fully releases the 4K decoder.
         // The same full release applies after critical pressure, even for SD/HD: a parked decoder
         // keeps its mediaserver buffers, which is what restarts the weak boxes.
-        releaseDecoderForUhd(force = memoryPressure)
+        releaseDecoderForUhd(force = memoryPressure, cause = cause)
     }
 
     /**
@@ -3945,13 +4041,8 @@ class LivePreviewEngine(
         /** Media3's decoder (4xxx) and audio-track (5xxx) error codes: the ones a tunnel can cause. */
         private val TUNNEL_FAILURE_CODES = 4000..5999
         private const val AUDIO_ONLY_CONFIRM_MS = 5_000L // allow late video-track discovery before showing radio badge
-        // Re-buffer flap (see [noteRebufferFlap]): this many re-buffers inside the window while the
-        // position crawls == the stream is oscillating, not playing. The traced case managed ~8 per
-        // second, so it trips about two seconds in; a merely choppy channel re-buffers a handful of
-        // times a minute and clears the window long before reaching the limit.
-        private const val FLAP_WINDOW_MS = 6_000L
-        private const val FLAP_LIMIT = 12
-        private const val FLAP_MIN_PROGRESS_MS = 3_000L // real playback inside the window == choppy, not flapping
+        // Re-buffer flap thresholds live in [RebufferFlapPolicy]: transition density alone is not enough;
+        // the playback clock must also fail to advance relative to the burst's duration.
         // "Buffered but not playing" (see [openWatchdog] branch 1). Four consecutive polls == four seconds
         // of a satisfied load control with no frame, which no healthy channel produces: once enough is
         // buffered to start, ExoPlayer starts within a poll or two even on a slow decoder handshake.
@@ -4074,6 +4165,8 @@ internal data class TuneState(
     var uaRetryDone: Boolean = false,
     /** Whether this load has already tried the channel's `.ts`⇄`.m3u8` sibling. */
     var altFormatRetryDone: Boolean = false,
+    /** Resolver-minted URLs are not panel-published sibling endpoints and must not be rewritten. */
+    var allowAlternateFormat: Boolean = true,
     /** Automatic 429 waits already spent on this tune. */
     var providerBackOffs: Int = 0,
     // Audio/text tracks enumerated from the active stream (multi-language live channels).
@@ -4083,6 +4176,11 @@ internal data class TuneState(
     var textSelections: List<TextSel> = emptyList(),
     var noVideoTriggered: Boolean = false,
     var readySinceMs: Long = 0L,
+    /** First READY / rendered-frame milestones for terminal opening diagnostics; unlike readySinceMs,
+     *  these are not reset by later READY transitions inside the same tune. */
+    var firstReadyAtMs: Long = 0L,
+    var firstFrameAtMs: Long = 0L,
+    var lastPlayerErrorCode: String? = null,
     var hasAudioTrack: Boolean = false,
     /** Assumed true until this stream's own track list says otherwise — an audio-only channel is the
      *  exception, and assuming "no video" would arm the no-picture watchdog against every stream. */

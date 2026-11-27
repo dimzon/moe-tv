@@ -1531,6 +1531,7 @@
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	$label phase end sourceId=${s.id} unique=${total[0]} ruTube
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	$label phase start sourceId=${s.id} fresh=$freshSource ruTube
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	%s · %s
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	75957f55ed1e9b4e0ec00f8dd9594fcc
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube EPG prune failed: ${e.message}
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube brief seed failed: ${e.message}
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	RuTube brief seed write failed: ${e.message}
@@ -1541,6 +1542,8 @@
 2	room-schema	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	channels
 1	room-schema	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	channels_fts
 1	log	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	complete=$catalogueComplete ruTube
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	eda2da42eea89951e4135141a30915f7
+1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	f785d738a845cc80658e887843a18ed9
 1	protocol	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	ifrm
 1	protocol	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	rutube://
 1	technical	app/src/main/java/tv/own/owntv/core/sync/RuTubeSyncer.kt	Прямая трансляция
@@ -2240,6 +2243,7 @@
 1	log	app/src/main/java/tv/own/owntv/player/LiveLadder.kt	ExoPlayer + HLS
 1	log	app/src/main/java/tv/own/owntv/player/LiveLadder.kt	ExoPlayer + TS
 12	empty	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	\0
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	$count re-buffers in ${decision.elapsedMs}ms, position advanced ${decision.advancedMs}ms,
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	$idx@${LiveStreamQuirks.hostKey(abs)}${HttpClient.redactUrl(abs.substringAfter("://").substringAfter('/')).takeLast(28)}
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	$kind codec: ${e.message ?: e.javaClass.simpleName}
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	$kind codec: ${it.diagnosticInfo}
@@ -2250,7 +2254,6 @@
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	${error.errorCodeName} again after playing — this stream's content is unplayable on ExoPlayer
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	${error.errorCodeName} while a reconnect waits — running it now
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	${f.width}x${f.height}
-1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	${tune.flapCount} re-buffers in ${now - tune.flapWindowStartMs}ms, position advanced ${advancedMs}ms
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	${videoSize.height}p
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	%.1f Mbps
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	%.2f:1
@@ -2271,10 +2274,10 @@
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	AV1
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	Age
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	Authorization
-1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	BUFFERING
+2	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	BUFFERING
 4	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	Content-Type
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	Cookie
-1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	ENDED
+2	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	ENDED
 5	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	ExoPlayer
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	ExoPlayer can't play this stream (${error.errorCodeName})
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	ExoPlayer error: ${error.errorCodeName}
@@ -2284,11 +2287,11 @@
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	HEVC
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	HTTP $HTTP_TOO_MANY_REQUESTS with Retry-After ${secs}s — waiting it out and retrying automatically
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	HTTP 458 while the previous engine's session was still open — waiting and retrying once
-1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	IDLE
+2	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	IDLE
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	MONO
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	MPEG-2
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	MPEG-4
-1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	READY
+2	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	READY
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	Range
 2	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	Retry-After
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	STATE_ENDED before first play — no action
@@ -2299,7 +2302,6 @@
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	STEREO
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	Server
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	Set-Cookie
-1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	UHD channel left
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	UNKNOWN($playbackState)
 2	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	User-Agent
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	VP9
@@ -2318,16 +2320,17 @@
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	audioWatchdog: $reason — forcing stereo for this session
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	av01
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	avc
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	buffer
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	buffer stopped growing at ${buffered}ms
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	buffered but never started playing ($detail)
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	buffering stalled
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	building tunneled player (N19)
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	cap=${heapCapBytes shr 20}MiB target=${targetBufferBytes shr 20}MiB
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	connection pool evict failed: ${it.javaClass.simpleName}
-1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	critical memory pressure
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	critical memory pressure — stopping preview, suppressing auto-preview
 1	protocol	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	dash
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	dataType=${mediaLoadData.dataType} canceled=$wasCanceled
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	decoder
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	decoder exhausted — no MediaCodec instance available
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	decoder exhausted: no MediaCodec instance available
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	decoder failed before first frame ($why) — rebuild ${tune.decoderRebuilds} in ${delayMs}ms
@@ -2341,6 +2344,7 @@
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	every rung spent — retrying at the panel's direct_source address
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	exo/live: $reason
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	first frame after ${now - t.startedMs}ms${ZapTiming.pressSuffix(sincePress)}
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	first_frame
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	frame hook NOT wired — no video renderer found; picture-freeze detection falls back to the no-progress backstop
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	frame hook send FAILED (${it.message}) — picture-freeze detection falls back to the no-progress backstop
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	frames dropped faster than shown
@@ -2376,6 +2380,7 @@
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	mp4v-es
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	mpeg2
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	muxedCaptions=${mv.muxedCaptionFormats?.size ?: 0}
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	network
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	network re-validated while reconnecting — retrying now
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	network restored
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	network restored — resuming the channel the ladder gave up on
@@ -2420,9 +2425,11 @@
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	provider refused with HTTP 458 (account session still in use) uri=${HttpClient.redactUrl(uri)}
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	provider refuses its own signed segment URLs — ExoPlayer cannot re-sign them; handing this
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	provider still refusing after ${tune.providerBackOffs} waits — letting the failure through
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	re-buffer burst ($detail) verdict=progressing
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	re-buffer flap ($detail) with no pre-buffer — giving up on ExoPlayer for this stream
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	re-buffer flap ($detail) — this stream can't reach its pre-buffer, reopening without one
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	ready
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	ready_no_frame
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	rebuilt decoder never started, video=false
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	reconnect attempt ${tune.retryCount}/$MAX_RECONNECTS reason=$reason
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	reconnect exhausted ($reason) at ${tune.retryCount}/$MAX_RECONNECTS after ${failingSecs}s — giving up
@@ -2437,6 +2444,8 @@
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	reqCookie=${request.header("Cookie") != null} reqAuth=${request.header("Authorization") != null}
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	reqRange=${request.header("Range") != null} ua=${request.header("User-Agent").orEmpty()}
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	requested=${HttpClient.redactUrl(requested)}
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	required=${decision.requiredProgressMs}ms buffered=$bufferedMs
+2	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	resolve
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	response is a DASH manifest — retrying with DashMediaSource
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	restart=${lc.bufferForPlaybackAfterRebufferMs} preroll=${effectivePrerollSecs()}s
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	retry fresh-url failed: ${it.message}
@@ -2453,8 +2462,9 @@
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	stallWatchdog armed (${STALL_MS}ms)
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	state_changed state=$name playWhenReady=${p?.playWhenReady} isPlaying=${p?.isPlaying}
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	still ${buffered}ms after ${waitedMs}ms
-1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	stop() — intentional
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	stop() cause=${cause.logName} hadStream=$hadStream decoderRelease=$releaseMode
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	stream frozen — no progress ${noProgressMs}ms
+1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	surface
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	targetDurSec=${playlist.targetDurationUs / 1_000_000.0} windowSec=${playlist.durationUs / 1_000_000.0}
 1	log	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	targetOffsetSec=${targetOffsetSecs ?: -1}
 1	technical	app/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	text
@@ -2488,6 +2498,7 @@
 1	protocol	app/src/main/java/tv/own/owntv/player/LiveStreamQuirks.kt	.ts
 1	protocol	app/src/main/java/tv/own/owntv/player/LiveStreamQuirks.kt	://
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	$reason — gave up after ${armedBudgetMs / 1000}s
+1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	'${channel.name}' ${snapshot.line()}
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	'${channel.name}' falling back to $label ($reason)
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	'${channel.name}' — giving up: $detail
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	'${channel.name}' — no fallback left ($detail)
@@ -2499,11 +2510,40 @@
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	captions resolve failed
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	engine: $message
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	no picture within ${armedBudgetMs / 1000}s of tuning
+1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	no_fallback
+1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	null
+1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	pending
+2	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	ready
+1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	resolve
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	stalker reconnect re-resolve failed '${channel.name}'
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	stalker resolve failed
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	the ExoPlayer preview had already failed
+1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	timeout
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	budgetMs=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	bufferedMs=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	decoder=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	decoderHardware=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	decoderRebuilds=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	elapsedMs=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	errorCode=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	event=open_terminal outcome=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	firstFrame=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	lastBytesAgoMs=
+5	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	none
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	playerState=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	postponedMs=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	ready=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	resolveMs=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	resolveOutcome=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	route=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	stage=
+1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	unknown
 1	technical	app/src/main/java/tv/own/owntv/player/PlaybackEngines.kt	DEPRECATION
 1	log	app/src/main/java/tv/own/owntv/player/PlaybackEngines.kt	OwnTV-Memory
+2	log	app/src/main/java/tv/own/owntv/player/PlaybackEngines.kt	activeAtSignal=${engineActive()}
+1	log	app/src/main/java/tv/own/owntv/player/PlaybackEngines.kt	availMiB=${info.availMem shr 20} thresholdMiB=${info.threshold shr 20}
+1	log	app/src/main/java/tv/own/owntv/player/PlaybackEngines.kt	event=memory_pressure source=poll pressure=CRITICAL
+1	log	app/src/main/java/tv/own/owntv/player/PlaybackEngines.kt	event=memory_pressure source=trim level=$level pressure=CRITICAL
 1	log	app/src/main/java/tv/own/owntv/player/PlaybackEngines.kt	memory poll off
 1	log	app/src/main/java/tv/own/owntv/player/PlaybackEngines.kt	memory poll on
 1	log	app/src/main/java/tv/own/owntv/player/PlaybackEngines.kt	memory pressure $pressure avail=${info.availMem shr 20}MiB threshold=${info.threshold shr 20}MiB
@@ -2576,6 +2616,17 @@
 3	compiler	app/src/main/java/tv/own/owntv/player/PlaybackSession.kt	DEPRECATION
 1	technical	app/src/main/java/tv/own/owntv/player/PlaybackSession.kt	OwnTV
 1	compiler	app/src/main/java/tv/own/owntv/player/PlaybackSettings.kt	UNCHECKED_CAST
+1	log	app/src/main/java/tv/own/owntv/player/PlaybackStopDiagnostics.kt	UHD channel left
+1	log	app/src/main/java/tv/own/owntv/player/PlaybackStopDiagnostics.kt	background
+1	log	app/src/main/java/tv/own/owntv/player/PlaybackStopDiagnostics.kt	critical memory pressure
+2	log	app/src/main/java/tv/own/owntv/player/PlaybackStopDiagnostics.kt	critical_pressure
+1	log	app/src/main/java/tv/own/owntv/player/PlaybackStopDiagnostics.kt	none
+1	log	app/src/main/java/tv/own/owntv/player/PlaybackStopDiagnostics.kt	post-critical memory policy
+1	log	app/src/main/java/tv/own/owntv/player/PlaybackStopDiagnostics.kt	post_critical_policy
+1	log	app/src/main/java/tv/own/owntv/player/PlaybackStopDiagnostics.kt	release
+1	log	app/src/main/java/tv/own/owntv/player/PlaybackStopDiagnostics.kt	reuse
+1	log	app/src/main/java/tv/own/owntv/player/PlaybackStopDiagnostics.kt	routine_stop
+1	log	app/src/main/java/tv/own/owntv/player/PlaybackStopDiagnostics.kt	uhd
 1	log	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	${e.tag}: ${e.text}
 1	regex	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	(?:\\bhttp(?: error)? |\\bresponse code[:= ]+|\\bstatus(?: code)?[:= ]+)(\\d{3})\\b
 1	log	app/src/main/java/tv/own/owntv/player/PlayerDiagnostics.kt	*:S

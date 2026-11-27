@@ -41,6 +41,7 @@ class TuneStateTest {
         // have video until its own track list says otherwise (assuming none would arm the no-picture
         // watchdog against every stream), and "no position seen yet" is -1 because 0 is a real position.
         assertTrue("a fresh tune assumes the stream has video", fresh.hasVideoTrack)
+        assertTrue("panel URL fallback stays enabled unless a resolver disables it", fresh.allowAlternateFormat)
         assertEquals("no position seen yet", -1L, fresh.lastProgressPos)
     }
 

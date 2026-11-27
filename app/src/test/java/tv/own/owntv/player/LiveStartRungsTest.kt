@@ -56,6 +56,17 @@ class LiveStartRungsTest {
     }
 
     @Test
+    fun `resolver URLs do not invent a sibling format but direct source still works`() {
+        val resolver = none.copy(formatFailure = true, httpStatus = 404, allowAlternateFormat = false)
+        assertEquals(Rung.FAIL, LiveStartRungs.after(resolver))
+        assertEquals(
+            Rung.DIRECT_SOURCE,
+            LiveStartRungs.after(resolver.copy(directSourceUseful = true)),
+        )
+        assertEquals(Rung.ALT_FORMAT, LiveStartRungs.after(resolver.copy(allowAlternateFormat = true)))
+    }
+
+    @Test
     fun `a decoder that dies before the first frame is rebuilt three times, waiting longer each time`() {
         val dead = none.copy(decoderFailure = true)
         assertEquals(listOf(500L, 1_500L, 3_000L), (0..2).map { LiveStartRungs.decoderRebuildDelayMs(it) })

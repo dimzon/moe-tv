@@ -76,8 +76,7 @@ internal class RuTubeSyncer(
         // The curated-only tail gets a liveness probe: RuTube keeps deleted videos in the guide
         // (e.g. the old CTV card), while feed-backed channels are live by definition.
         val feedIds = feedChannels.mapTo(HashSet()) { it.videoId }
-        val channels = allChannels
-            .filterNot { it.isPaid || it.originType == "ifrm" }
+        val channels = filterCatalogueChannels(allChannels)
             .filter {
                 it.videoId in feedIds ||
                     (feedCatalogue.isComplete && feedChannels.isEmpty()) ||
@@ -208,6 +207,18 @@ internal class RuTubeSyncer(
 
     internal companion object {
         private const val TAG = SyncSupport.TAG
+
+        /** Provider rows that still exist but have no playable live HLS. Keep the rename seeds: an
+         *  orphan rename is inert and lets a repaired channel keep its editorial name on a later sync. */
+        private val KNOWN_BROKEN_IDS = setOf(
+            "75957f55ed1e9b4e0ec00f8dd9594fcc", // hls404 — РБК-Уфа
+            "f785d738a845cc80658e887843a18ed9", // hls404 — CTV
+            "eda2da42eea89951e4135141a30915f7", // empty_hls — ИЛЛИ ТВ
+        )
+
+        /** Static catalogue exclusions, before liveness probes, numbering, upsert and category rebuild. */
+        internal fun filterCatalogueChannels(channels: List<RutubeChannel>): List<RutubeChannel> =
+            channels.filterNot { it.isPaid || it.originType == "ifrm" || it.videoId in KNOWN_BROKEN_IDS }
 
         private val PREFIXES = listOf(
             "Прямой эфир",

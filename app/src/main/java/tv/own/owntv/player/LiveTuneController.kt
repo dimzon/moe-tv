@@ -35,6 +35,9 @@ data class LiveRequest(
     /** Sidecar subtitles the feed advertises beside this stream (RuTube `captions[]`); empty for
      *  sources/feeds that carry none. */
     val captions: List<RutubeCaption> = emptyList(),
+    /** Panel-published sibling endpoints may have a `.ts`/`.m3u8` alternative. Resolver-minted
+     *  URLs (RuTube and similar sources) must not be rewritten speculatively. */
+    val allowAlternateFormat: Boolean = true,
 )
 
 /** Start [url] on the live ExoPlayer engine with everything [request] carries — a tune, or a Multiview tile. */
@@ -50,6 +53,7 @@ internal fun LivePreviewEngine.play(url: String, muted: Boolean, request: LiveRe
     manifestType = request.manifestType,
     directSource = request.directSource,
     captions = request.captions,
+    allowAlternateFormat = request.allowAlternateFormat,
 )
 
 /**
@@ -120,6 +124,11 @@ class LiveTuneController(
 
     private val ladder = LiveLadder()
     private var armedBudgetMs: Long = LiveLadder.NO_BUDGET
+    private var tuneStartedAtMs = 0L
+    private var openingStage: String? = null
+    private var resolveStartedAtMs = 0L
+    private var resolveMs: Long? = null
+    private var resolveOutcome: String? = null
 
     /**
      * The channel whose ExoPlayer rung is the explicit `.ts` one. Keyed by channel, not a bare flag: the
@@ -340,24 +349,34 @@ class LiveTuneController(
         }
         exoResolveJob?.cancel()
         engine.releaseDecoderForUhd()
+        openingStage = "resolve"
+        resolveStartedAtMs = host.nowMs()
+        resolveMs = null
+        resolveOutcome = "pending"
         // Best-effort, alongside minting: captions are read for the same channel, and a fetch that
         // fails must not keep the stream it rides with from starting.
         val captions = host.captions(source, channel.streamUrl)
         if (resolved != null) {
             // Already minted by this tune: start now, so the caller's next line finds the stream there.
+            resolveOutcome = "ready"
+            resolveMs = (host.nowMs() - resolveStartedAtMs).coerceAtLeast(0L)
             playExoStalker(channel, source, resolved, captions)
             return
         }
         // Detached: minting is a network call, and a ladder step that got here from a watcher must not
         // die with that watcher when [watchExo] replaces it.
         exoResolveJob = scope.launch {
-            val url = host.resolve(source, channel.streamUrl) ?: return@launch
+            val url = host.resolve(source, channel.streamUrl)
             if (!isCurrent(channel)) return@launch // zapped away while minting
+            resolveMs = (host.nowMs() - resolveStartedAtMs).coerceAtLeast(0L)
+            resolveOutcome = if (url == null) "null" else "ready"
+            if (url == null) return@launch
             playExoStalker(channel, source, url, captions)
         }
     }
 
     private fun playExoStalker(channel: ChannelEntity, source: SourceEntity, url: String, captions: List<RutubeCaption>) {
+        openingStage = null
         exoStalkerCmd = channel.streamUrl
         setReconnect(channel, source)
         engine.play(url, muted = false, request(channel, source, captions))
@@ -388,6 +407,11 @@ class LiveTuneController(
 
     private suspend fun arm(channel: ChannelEntity, source: SourceEntity?) {
         forceTsFor = null
+        tuneStartedAtMs = host.nowMs()
+        openingStage = null
+        resolveStartedAtMs = 0L
+        resolveMs = null
+        resolveOutcome = null
         val secs = SourceOverrides.liveTuneTimeoutSecsOf(source) ?: host.globalBudgetSecs()
         armedBudgetMs = if (secs <= 0) LiveLadder.NO_BUDGET else secs * 1000L
         ladder.arm(channel.streamUrl, budgetMs = armedBudgetMs, nowMs = host.nowMs()) {
@@ -419,7 +443,7 @@ class LiveTuneController(
             host.recordLadderEvent(PlayerFailureReason.LIVE_NO_FALLBACK, "'${channel.name}': $detail")
             exoWatchJob?.cancel()
             exoResolveJob?.cancel()
-            abandon(channel, detail)
+            abandon(channel, detail, outcome = "timeout")
         }
     }
 
@@ -473,8 +497,25 @@ class LiveTuneController(
 
     /** Put the failure on screen: a stream that delivers no segment produces no frame AND no error, so
      *  the honest answer is written by whoever decided to stop trying. */
-    private fun abandon(channel: ChannelEntity, detail: String) {
+    private fun abandon(channel: ChannelEntity, detail: String, outcome: String = "no_fallback") {
+        logOpeningTerminal(channel, outcome)
         engine.abandon("'${channel.name}': $detail")
+    }
+
+    private fun logOpeningTerminal(channel: ChannelEntity, outcome: String) {
+        val now = host.nowMs()
+        val elapsedMs = if (tuneStartedAtMs > 0L) (now - tuneStartedAtMs).coerceAtLeast(0L) else 0L
+        val postponedMs = if (armedBudgetMs > 0L) (elapsedMs - armedBudgetMs).coerceAtLeast(0L) else 0L
+        val snapshot = engine.openingDiagnostics(
+            outcome = outcome,
+            stage = openingStage,
+            resolveOutcome = resolveOutcome,
+            resolveMs = resolveMs,
+            elapsedMs = elapsedMs,
+            budgetMs = armedBudgetMs,
+            postponedMs = postponedMs,
+        )
+        engineLog("'${channel.name}' ${snapshot.line()}")
     }
 
     private fun cancelLadderJobs() {
@@ -545,6 +586,7 @@ class LiveTuneController(
         manifestType = channel.manifestType,
         directSource = channel.directSource,
         captions = captions,
+        allowAlternateFormat = !host.needsResolve(source),
     )
 
     /** Routing decisions go to logcat unconditionally (`adb logcat -s LiveEngine`) and to the
