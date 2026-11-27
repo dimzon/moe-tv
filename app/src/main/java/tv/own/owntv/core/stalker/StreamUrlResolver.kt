@@ -2,6 +2,13 @@ package tv.own.owntv.core.stalker
 
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.SourceType
+import tv.own.owntv.core.sync.RutubeCaption
+
+/** A playable URL and the sidecars advertised by the same provider response. */
+data class ResolvedPlayback(
+    val url: String,
+    val captions: List<RutubeCaption> = emptyList(),
+)
 
 /**
  * Turns a stored item URL into a playable URL at play time. RuTube is the only source that needs
@@ -32,22 +39,19 @@ class StreamUrlResolver(
      * Every call is a FRESH resolve (never cached) — this is what the reconnect paths call
      * ("resolve fresh").
      */
-    suspend fun resolve(source: SourceEntity, storedUrl: String): String {
-        if (source.type == SourceType.RUTUBE) return resolveRutube(storedUrl)
-        return storedUrl
-    }
+    suspend fun resolve(source: SourceEntity, storedUrl: String): String =
+        resolvePlayback(source, storedUrl).url
 
-    /**
-     * A RuTube channel's stored `rutube://{sourceId}/{videoId}` marker → the live HLS URL the
-     * official client would play. Fresh every call: play/options URLs expire, and the
-     * reconnect path calls back here to mint a new one.
-     */
-    private suspend fun resolveRutube(storedUrl: String): String {
+    /** Resolve the URL and its captions from one provider answer. RuTube's `play/options` carries
+     *  both; calling it twice made every tune wait for two sequential network requests and opened a
+     *  cancellation window between recording the new channel and actually playing it. */
+    suspend fun resolvePlayback(source: SourceEntity, storedUrl: String): ResolvedPlayback {
+        if (source.type != SourceType.RUTUBE) return ResolvedPlayback(storedUrl)
         val api = rutube ?: throw java.io.IOException("RuTube playback resolver is not configured")
         val videoId = rutubeVideoId(storedUrl)
             ?: throw java.io.IOException("RuTube channel has no video id: $storedUrl")
         return when (val result = api.playUrl(videoId)) {
-            is tv.own.owntv.core.sync.RutubePlayback.Ready -> result.url
+            is tv.own.owntv.core.sync.RutubePlayback.Ready -> ResolvedPlayback(result.url, result.captions)
             is tv.own.owntv.core.sync.RutubePlayback.Unavailable ->
                 throw java.io.IOException("RuTube: ${result.reason.name}${result.detail?.let { " ($it)" } ?: ""}")
         }

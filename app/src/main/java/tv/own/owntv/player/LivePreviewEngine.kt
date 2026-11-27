@@ -774,6 +774,10 @@ class LivePreviewEngine(
      */
     @Volatile var reconnectUrlProvider: tv.own.owntv.core.stalker.ReconnectUrlProvider? = null
 
+    /** Lets the tune controller drop stale full-screen/preview ownership when lifecycle, memory
+     *  pressure or Multiview stops this engine without going through [LiveTuneController]. */
+    @Volatile var onEngineStopped: (() -> Unit)? = null
+
 
     // Live auto-reconnect: a channel that DID play and then errors/stalls (provider hiccup / Wi-Fi blip)
     // re-fetches from the live edge instead of dead-ending. A channel that NEVER opened keeps the old
@@ -2151,6 +2155,7 @@ class LivePreviewEngine(
         // The same full release applies after critical pressure, even for SD/HD: a parked decoder
         // keeps its mediaserver buffers, which is what restarts the weak boxes.
         releaseDecoderForUhd(force = memoryPressure, cause = cause)
+        onEngineStopped?.invoke()
     }
 
     /**
@@ -2199,6 +2204,7 @@ class LivePreviewEngine(
         currentUrl = null
         deadlineArmed = false
         sawUhd = false
+        onEngineStopped?.invoke()
         _state.value = State.IDLE
         // A released engine is never reused (LiveEnginePool drops it), and each Multiview tile is its
         // own engine — without this every closed tile left its settings collectors running for ever.

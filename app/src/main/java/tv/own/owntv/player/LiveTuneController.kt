@@ -20,6 +20,7 @@ import tv.own.owntv.core.settings.LiveLatency
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.settings.SourceOverrides
 import tv.own.owntv.core.stalker.ReconnectUrlProvider
+import tv.own.owntv.core.stalker.ResolvedPlayback
 import tv.own.owntv.core.stalker.StreamUrlResolver
 
 /** Everything a live tune hands the engine besides the URL. */
@@ -85,6 +86,11 @@ class LiveTuneController(
         /** Whether this source's stored URL marker must be resolved to a stream URL per play. */
         fun needsResolve(source: SourceEntity?): Boolean
         suspend fun resolve(source: SourceEntity, cmd: String): String?
+        /** URL and sidecars from one provider answer where the source supports it. */
+        suspend fun resolvePlayback(source: SourceEntity, cmd: String): ResolvedPlayback? {
+            val url = resolve(source, cmd) ?: return null
+            return ResolvedPlayback(url, captions(source, cmd))
+        }
         /** Sidecar subtitles the feed advertises beside a resolved stream (RuTube `captions[]`);
          *  empty when the source is not loaded yet or advertises none. */
         suspend fun captions(source: SourceEntity?, cmd: String): List<RutubeCaption> = emptyList()
@@ -112,6 +118,25 @@ class LiveTuneController(
     /** True while the preview pane is held back because the provider allows one stream at a time and
      *  something outside the app — a download — already holds it. */
     val previewBlockedSingleSession: StateFlow<Boolean> = _previewBlocked.asStateFlow()
+
+    init {
+        engine.onEngineStopped = ::handleEngineStopped
+    }
+
+    /** Lifecycle, memory pressure and Multiview can stop the shared engine directly. Drop every
+     *  controller-owned marker then, otherwise a later preview is rejected as if fullscreen still
+     *  owned the player. */
+    private fun handleEngineStopped() {
+        tuneJob?.cancel()
+        previewJob?.cancel()
+        cancelLadderJobs()
+        previewRequest = previewRequest.invalidate()
+        current = null
+        _liveOnExo.value = false
+        _previewBlocked.value = false
+        exoStalkerCmd = null
+        setReconnect(null, null)
+    }
 
     private val recall = ChannelRecall()
 
@@ -169,14 +194,16 @@ class LiveTuneController(
      * resolving the same channel again.
      */
     suspend fun start(channel: ChannelEntity, source: SourceEntity?, resolved: String? = null) {
+        val previewFailed = previewRequest.isCommitted(channel.id) && engineHasChannel(channel) && engineFailed
         previewJob?.cancel()
+        previewRequest = previewRequest.invalidate()
         cancelLadderJobs()
         current = channel
         recall.onWatched(channel)
         _previewBlocked.value = false
         engineLog("tune '${channel.name}' -> ExoPlayer")
         arm(channel, source)
-        if (previewedChannelId == channel.id && engineFailed) {
+        if (previewFailed) {
             // The preview already found the engine can't open this channel. Promoting it put the
             // preview's error on screen for ~1 s while the ladder moved on to the next rung: go there
             // directly.
@@ -187,8 +214,8 @@ class LiveTuneController(
         }
     }
 
-    /** The channel the preview pane last asked the engine for (see [expectPromotion]). */
-    private var previewedChannelId: String? = null
+    /** The focus preview currently resolving, and whether it has reached the engine. */
+    private var previewRequest = PreviewRequestState()
 
     /**
      * The user is opening [channel] full screen. When the engine is already previewing it, say so at
@@ -197,7 +224,9 @@ class LiveTuneController(
      * 4K channel: ~4 s of black on opening before this existed. [start] sets this again in any case.
      */
     fun expectPromotion(channel: ChannelEntity) {
-        if (previewedChannelId == channel.id && engine.currentUrl != null && !engineFailed) _liveOnExo.value = true
+        if (previewRequest.isCommitted(channel.id) && engineHasChannel(channel) && !engineFailed) {
+            _liveOnExo.value = true
+        }
     }
 
     /**
@@ -209,37 +238,53 @@ class LiveTuneController(
      */
     fun preview(channel: ChannelEntity, muted: Boolean) {
         if (_liveOnExo.value) {
-            if (current != null) return
-            // An [expectPromotion] no tune followed (an external player, a refused channel): the pane is
-            // still the pane, and must not stay frozen on the last channel.
+            // A live full-screen tune still owns the engine. A null URL means some external stop path
+            // (background, Multiview, relaunch) bypassed detach(); clear that stale ownership so the pane
+            // can start again instead of silently dropping every later focus.
+            if (current != null && engine.currentUrl != null) return
+            current = null
             _liveOnExo.value = false
         }
-        previewedChannelId = channel.id
+        val request = previewRequest.begin(channel.id)
+        previewRequest = request
+        val generation = request.generation
         previewJob?.cancel()
         previewJob = scope.launch {
             val source = host.sourceOf(channel.sourceId)
+            currentCoroutineContext().ensureActive()
+            if (!previewRequest.isCurrent(generation, channel.id) || _liveOnExo.value) return@launch
             if (host.needsResolve(source)) {
-                if (exoStalkerCmd == channel.streamUrl && !engineFailed) {
+                if (engineHasChannel(channel)) {
                     engine.setMuted(muted)
+                    previewRequest = previewRequest.commit()
                     return@launch
                 }
-                val url = host.resolve(source!!, channel.streamUrl) ?: return@launch
-                if (_liveOnExo.value) return@launch // promoted to full-screen while resolving
+                val resolved = host.resolvePlayback(source!!, channel.streamUrl) ?: return@launch
+                currentCoroutineContext().ensureActive()
+                if (!previewRequest.isCurrent(generation, channel.id) || _liveOnExo.value || engine.released) return@launch
                 if (blockedBySingleSession(channel)) return@launch
+                // No suspension from here through engine.play: the recorded identity must describe the
+                // channel actually handed to the player, never a cancelled resolve/caption lookup.
                 exoStalkerCmd = channel.streamUrl
                 setReconnect(channel, source)
-                engine.play(url, muted, request(channel, source, host.captions(source, channel.streamUrl)))
+                engine.play(resolved.url, muted, request(channel, source, resolved.captions))
+                previewRequest = previewRequest.commit()
                 return@launch
             }
             val url = exoUrlFor(channel, source)
+            val captions = host.captions(source, channel.streamUrl)
+            currentCoroutineContext().ensureActive()
+            if (!previewRequest.isCurrent(generation, channel.id) || _liveOnExo.value || engine.released) return@launch
             if (blockedBySingleSession(channel)) return@launch
-            if (engine.currentUrl == url && !engineFailed) {
-                engine.setMuted(muted) // already previewing it (a re-focus) — just re-apply the mute
+            if (engine.currentUrl == url && engineHasChannel(channel) && !engineFailed) {
+                engine.setMuted(muted)
+                previewRequest = previewRequest.commit()
                 return@launch
             }
             exoStalkerCmd = null
             setReconnect(null, null)
-            engine.play(url, muted, request(channel, source, host.captions(source, channel.streamUrl)))
+            engine.play(url, muted, request(channel, source, captions))
+            previewRequest = previewRequest.commit()
         }
     }
 
@@ -260,19 +305,19 @@ class LiveTuneController(
         val source = host.sourceOf(channel.sourceId)
         currentCoroutineContext().ensureActive()
         if (!isCurrent() || engine.released) return
-        val url = if (host.needsResolve(source)) {
-            host.resolve(source!!, channel.streamUrl) ?: return
+        val playback = if (host.needsResolve(source)) {
+            host.resolvePlayback(source!!, channel.streamUrl) ?: return
         } else {
-            exoUrlFor(channel, source)
+            ResolvedPlayback(exoUrlFor(channel, source))
         }
         currentCoroutineContext().ensureActive()
         if (!isCurrent() || engine.released) return
-        val captions = host.captions(source, channel.streamUrl)
+        val captions = if (host.needsResolve(source)) playback.captions else host.captions(source, channel.streamUrl)
         currentCoroutineContext().ensureActive()
         // Resolution and caption lookup both suspend. The tile may have been cleared, refilled or
         // released while they ran; only the still-current generation may touch its engine.
         if (!isCurrent() || engine.released) return
-        engine.play(url, muted, request(channel, source, captions))
+        engine.play(playback.url, muted, request(channel, source, captions))
     }
 
     /**
@@ -281,6 +326,8 @@ class LiveTuneController(
      * no ladder.
      */
     fun detach() {
+        previewJob?.cancel()
+        previewRequest = previewRequest.invalidate()
         tuneJob?.cancel()
         cancelLadderJobs()
         current = null
@@ -290,8 +337,11 @@ class LiveTuneController(
     /** Stop the engine (the preview, or a stream [detach] left playing). */
     fun stopExo() {
         previewJob?.cancel()
+        previewRequest = previewRequest.invalidate()
         exoResolveJob?.cancel()
         exoWatchJob?.cancel()
+        current = null
+        _liveOnExo.value = false
         exoStalkerCmd = null
         setReconnect(null, null)
         engine.stop()
@@ -306,6 +356,7 @@ class LiveTuneController(
     fun stop() {
         cancelTune()
         previewJob?.cancel()
+        previewRequest = previewRequest.invalidate()
         cancelLadderJobs()
         current = null
         _previewBlocked.value = false
@@ -328,7 +379,7 @@ class LiveTuneController(
             return
         }
         val url = exoUrlFor(channel, source)
-        if (engine.currentUrl == url) {
+        if (engine.currentUrl == url && engineHasChannel(channel)) {
             engine.setMuted(false) // promote — instant if already playing, otherwise keeps loading
         } else {
             // Leaving a UHD channel: release its 4K decoder before the rebuild (no-op for SD/HD).
@@ -341,7 +392,7 @@ class LiveTuneController(
     }
 
     private suspend fun startOnExoStalker(channel: ChannelEntity, source: SourceEntity, resolved: String?) {
-        if (exoStalkerCmd == channel.streamUrl && resolved == null) {
+        if (resolved == null && engineHasChannel(channel)) {
             engine.setMuted(false) // promote the preview that already holds this command
             setReconnect(channel, source)
             watchExo(channel, source)
@@ -353,11 +404,11 @@ class LiveTuneController(
         resolveStartedAtMs = host.nowMs()
         resolveMs = null
         resolveOutcome = "pending"
-        // Best-effort, alongside minting: captions are read for the same channel, and a fetch that
-        // fails must not keep the stream it rides with from starting.
-        val captions = host.captions(source, channel.streamUrl)
         if (resolved != null) {
-            // Already minted by this tune: start now, so the caller's next line finds the stream there.
+            // Already minted by this tune: only the sidecars still need looking up.
+            val captions = host.captions(source, channel.streamUrl)
+            currentCoroutineContext().ensureActive()
+            if (!isCurrent(channel)) return
             resolveOutcome = "ready"
             resolveMs = (host.nowMs() - resolveStartedAtMs).coerceAtLeast(0L)
             playExoStalker(channel, source, resolved, captions)
@@ -366,12 +417,12 @@ class LiveTuneController(
         // Detached: minting is a network call, and a ladder step that got here from a watcher must not
         // die with that watcher when [watchExo] replaces it.
         exoResolveJob = scope.launch {
-            val url = host.resolve(source, channel.streamUrl)
+            val playback = host.resolvePlayback(source, channel.streamUrl)
             if (!isCurrent(channel)) return@launch // zapped away while minting
             resolveMs = (host.nowMs() - resolveStartedAtMs).coerceAtLeast(0L)
-            resolveOutcome = if (url == null) "null" else "ready"
-            if (url == null) return@launch
-            playExoStalker(channel, source, url, captions)
+            resolveOutcome = if (playback == null) "null" else "ready"
+            if (playback == null) return@launch
+            playExoStalker(channel, source, playback.url, playback.captions)
         }
     }
 
@@ -528,6 +579,11 @@ class LiveTuneController(
 
     private fun isCurrent(channel: ChannelEntity): Boolean = current?.id == channel.id
 
+    /** The engine's metadata is written by the same [play] call that loads the URL, so unlike
+     *  [exoStalkerCmd] it cannot get ahead of a cancelled resolve. */
+    private fun engineHasChannel(channel: ChannelEntity): Boolean =
+        engine.currentUrl != null && engine.currentMeta.value.contentKey == contentKey(channel.remoteId)
+
     private fun isStillExo(channel: ChannelEntity): Boolean = _liveOnExo.value && isCurrent(channel)
 
     /** Whether the preview pane may ask for [channel]'s stream: only something outside the app (a
@@ -620,6 +676,16 @@ class LiveTuneController(
         override suspend fun resolve(source: SourceEntity, cmd: String): String? =
             try {
                 resolver.resolve(source, cmd)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                android.util.Log.w(ENGINE_TAG, "stalker resolve failed", e)
+                null
+            }
+
+        override suspend fun resolvePlayback(source: SourceEntity, cmd: String): ResolvedPlayback? =
+            try {
+                resolver.resolvePlayback(source, cmd)
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {

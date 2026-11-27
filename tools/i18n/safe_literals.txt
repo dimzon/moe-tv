@@ -2516,7 +2516,7 @@
 2	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	ready
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	resolve
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	stalker reconnect re-resolve failed '${channel.name}'
-1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	stalker resolve failed
+2	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	stalker resolve failed
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	the ExoPlayer preview had already failed
 1	log	app/src/main/java/tv/own/owntv/player/LiveTuneController.kt	timeout
 1	log	app/src/main/java/tv/own/owntv/player/OpeningDiagnostics.kt	budgetMs=

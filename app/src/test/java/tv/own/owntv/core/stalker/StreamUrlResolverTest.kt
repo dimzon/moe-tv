@@ -52,6 +52,34 @@ class StreamUrlResolverTest {
     }
 
     @Test
+    fun resolvePlayback_returnsUrlAndCaptionsFromOneRequest() = runBlocking {
+        val canned = canned()
+        val r = StreamUrlResolver(canned.api)
+        val playback = r.resolvePlayback(source, "rutube://7/abc123")
+
+        assertEquals("https://cdn.example.test/live.m3u8", playback.url)
+        assertEquals(listOf("https://pic.example.test/1.vtt"), playback.captions.map { it.file })
+        assertEquals("URL and captions must share one play/options answer", 1, canned.calls.get())
+    }
+
+    @Test
+    fun resolvePlayback_everyCallHitsPlayOptionsAgain() = runBlocking {
+        val canned = canned()
+        val r = StreamUrlResolver(canned.api)
+        repeat(2) { r.resolvePlayback(source, "rutube://7/abc123") }
+
+        assertEquals(2, canned.calls.get())
+    }
+
+    @Test
+    fun resolvePlayback_aSubscriptionChannelStillRefusesWithItsReason() = runBlocking {
+        val r = StreamUrlResolver(canned(code = 404, playJson = "{}").api)
+        val e = runCatching { r.resolvePlayback(source, "rutube://7/abc123") }.exceptionOrNull()
+
+        assertTrue(e is java.io.IOException && e.message!!.contains("LOGIN_REQUIRED"))
+    }
+
+    @Test
     fun resolve_acceptsTheOneSegmentMarkerStoredByChannelEntity() = runBlocking {
         val r = StreamUrlResolver(canned().api)
         assertEquals("https://cdn.example.test/live.m3u8", r.resolve(source, "rutube://abc123"))
