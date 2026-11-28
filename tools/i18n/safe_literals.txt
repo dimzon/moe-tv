@@ -2168,14 +2168,16 @@
 1	technical	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	${f.channelCount}ch
 1	technical	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	${f.sampleRate / 1000}kHz
 1	technical	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	?
-8	log	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	AudioOutputPolicy
-1	compiler	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	DEPRECATION
+9	log	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	AudioOutputPolicy
+3	compiler	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	DEPRECATION
+1	technical	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	android.os.DeadSystemException
 1	technical	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	audio
 1	log	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	audio decoder released: $decoderName
 1	log	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	audio decoder: $decoderName (init ${initializationDurationMs}ms, passthrough=$passthrough)
 1	log	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	audio format -> ${format.sampleMimeType} ${format.channelCount}ch ${format.sampleRate}Hz
 1	technical	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	audio output underran ${AudioOutputPolicy.UNDERRUN_LIMIT}× in ${AudioOutputPolicy.UNDERRUN_WINDOW_MS / 1000}s
 1	log	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	audio path: passthrough — the TV is decoding this stream
+1	log	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	audio service is restarting; using safe PCM capabilities
 1	technical	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	audio sink error: ${audioSinkError.message ?: audioSinkError.javaClass.simpleName}
 1	log	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	audio timestamp discontinuity: ${audioSinkError.actualPresentationTimeUs - audioSinkError.expectedPresentationTimeUs}us
 1	log	app/src/main/java/tv/own/owntv/player/AudioOutputPolicy.kt	audio underrun: buffer=${bufferSize}B/${bufferSizeMs}ms, ${elapsedSinceLastFeedMs}ms since last feed

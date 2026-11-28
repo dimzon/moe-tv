@@ -2,6 +2,7 @@ package tv.own.owntv.player
 
 import android.content.Context
 import android.os.Handler
+import androidx.media3.common.AudioAttributes
 import androidx.media3.common.Format
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.audio.ChannelMixingAudioProcessor
@@ -81,10 +82,13 @@ object AudioOutputPolicy {
  * a track-selection constraint alone would not (the selector still picks a 5.1 track when it is the
  * only one).
  *
- * The no-argument [DefaultAudioSink.Builder] is deprecated precisely *because* passing a `Context`
- * makes the sink query the real device capabilities and ignore anything set here — which is the one
- * thing we must not let it do. If a future Media3 removes it, the `runCatching` falls back to the
- * stock sink and we lose the guarantee rather than the playback.
+ * Both sink variants use the no-argument [DefaultAudioSink.Builder] with explicit capabilities.
+ * The normal path takes a one-shot snapshot through the overload that does not register a receiver;
+ * this avoids Media3's `AudioCapabilitiesReceiver` crashing inside `onAudioDevicesRemoved` when a
+ * vendor ROM restarts system_server. The snapshot is refreshed whenever the player is rebuilt.
+ * Passing a Context would make the sink ignore the explicit capabilities and install that receiver.
+ * If a future Media3 removes the no-argument builder, the `runCatching` falls back to the stock sink
+ * and we lose the guarantee rather than the playback.
  *
  * Every sink carries an [AudioDynamicsProcessor] (night mode / volume levelling), which passes
  * sound through untouched while both are off. With [passthrough] false the sink refuses encoded
@@ -166,12 +170,16 @@ class OwnTVRenderersFactory(
     private fun buildBaseAudioSink(
         context: Context,
         enableFloatOutput: Boolean,
-        enableAudioOutputPlaybackParams: Boolean,
+        enableOutputParams: Boolean,
     ): AudioSink? {
-        // What DefaultRenderersFactory builds itself, plus the processor.
-        fun deviceSink(): AudioSink = DefaultAudioSink.Builder(context)
+        // What DefaultRenderersFactory builds itself, plus the processor. The explicit snapshot is
+        // intentional: Builder(context) installs Media3's AudioCapabilitiesReceiver, whose device-removed
+        // callback can re-register a receiver while system_server is restarting and kill the process.
+        @Suppress("DEPRECATION")
+        fun deviceSink(): AudioSink = DefaultAudioSink.Builder()
+            .setAudioCapabilities(deviceAudioCapabilities(context))
             .setEnableFloatOutput(enableFloatOutput)
-            .setEnableAudioOutputPlaybackParameters(enableAudioOutputPlaybackParams)
+            .setEnableAudioOutputPlaybackParameters(enableOutputParams)
             .setAudioProcessors(arrayOf(AudioDynamicsProcessor()))
             .build()
         if (!forceStereo) return deviceSink()
@@ -180,7 +188,7 @@ class OwnTVRenderersFactory(
             DefaultAudioSink.Builder()
                 .setAudioCapabilities(AudioCapabilities.DEFAULT_AUDIO_CAPABILITIES)
                 .setEnableFloatOutput(enableFloatOutput)
-                .setEnableAudioOutputPlaybackParameters(enableAudioOutputPlaybackParams)
+                .setEnableAudioOutputPlaybackParameters(enableOutputParams)
                 // Capping the capabilities only removes passthrough: decoders still hand over 5.1 PCM
                 // (Media3 asks them for every channel they have), so mix it down here.
                 .setAudioProcessors(arrayOf(StereoDownmix.processor(), AudioDynamicsProcessor()))
@@ -190,6 +198,18 @@ class OwnTVRenderersFactory(
             deviceSink()
         }
     }
+
+    /** One-shot capability query that does not register Media3's HDMI/audio-device receiver. */
+    @Suppress("DEPRECATION")
+    private fun deviceAudioCapabilities(context: Context): AudioCapabilities =
+        try {
+            AudioCapabilities.getCapabilities(context, AudioAttributes.DEFAULT, null)
+        } catch (e: RuntimeException) {
+            // DeadSystemException is API 24; compare by name so this class stays loadable on API 23.
+            if (e.javaClass.name != "android.os.DeadSystemException") throw e
+            android.util.Log.w("AudioOutputPolicy", "audio service is restarting; using safe PCM capabilities", e)
+            AudioCapabilities.DEFAULT_AUDIO_CAPABILITIES
+        }
 }
 
 /**
