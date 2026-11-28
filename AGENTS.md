@@ -80,24 +80,53 @@ C:\Users\User\Desktop\SCRCPY\adb.cmd <alias> shell am force-stop com.github.dimz
 ## R8 mapping (retrace)
 
 Карта обфускации — единственный способ прочитать release-стек; терять её нельзя.
+Ниже — готовый порядок поиска, чтобы не исследовать скрипты заново.
 
-- `build-release.cmd <флейвор>` и `publish.cmd` после сборки кладут карту в
-  `build/mapping/<variant>-<versionName_>-<versionCode>.txt` (для universal —
-  `universalRelease-<код>.txt`; `publish.cmd` добавляет имя версии, например
-  `universalRelease-1.9_118.txt`). Каталог `build/` в `.gitignore` — это локальная копия.
-- `publish.cmd` дополнительно загружает карту в релиз `v<версия>` репозитория
-  `dimzon/moe-tv-site` как asset `MoeTV_<версия>_<versionCode>_universal_mapping.txt`.
-  Эта копия переживает `gradle clean` и смену машины.
-- CI (`android.yml`) кладёт карту в artifact рядом с APK: `MoeTV_<версия>_<код>_mapping.txt`
-  для тега, `MoeTV-dev-<sha>_mapping.txt` иначе.
-- Сопоставление с отчётом о краше: в шапке отчёта есть `МОЁ ТВ <версия> (<versionCode>)`,
-  `build <FINGERPRINT>` и `signature <хеш>`. Нужен mapping именно этого `<versionCode>`:
-  локальный `build/mapping/universalRelease-<versionCode>.txt` или asset
-  `MoeTV_<версия>_<versionCode>_universal_mapping.txt`.
-- Retrace: `java -cp r8.jar com.android.tools.r8.retrace.Retrace mapping.txt stack.txt`
-  (или Analyze Stack Trace в Android Studio). Без карты строки `SourceFile:NN` бессмысленны.
-- Сборка без карты не публикуется: `publish.cmd` падает, если `mapping.txt` не найден;
-  `build-release.cmd` падает, если архиватор не нашёл карту для собранного флейвора.
+### Где хранится mapping
+
+1. **Локальная копия после `build-release.cmd` / `publish.cmd`:**
+   `build/mapping/<variant>-<versionName_>-<versionCode>.txt`.
+   Для universal и опубликованной версии это, например,
+   `build/mapping/universalRelease-1.14_145.txt`.
+   Если `VERSION_NAME` не задан, имя версии в файле отсутствует:
+   `build/mapping/universalRelease-145.txt`.
+   Архивирование выполняет `tools/archive-mapping.cmd`; каталог `build/` в `.gitignore`.
+
+2. **Публичная release-копия (основная для чужих crash reports):**
+   `publish.cmd` загружает mapping в релиз `v<версия>` репозитория `dimzon/moe-tv-site`
+   с именем `MoeTV_<версия>_<versionCode>_universal_mapping.txt`.
+   Прямая ссылка:
+   `https://github.com/dimzon/moe-tv-site/releases/download/v<версия>/MoeTV_<версия>_<versionCode>_universal_mapping.txt`.
+   Эта копия переживает `gradle clean`, смену машины и является приоритетной для опубликованных APK.
+
+3. **CI artifact:**
+   `.github/workflows/android.yml` кладёт mapping рядом с APK:
+   `MoeTV_<версия>_<код>_mapping.txt` для тега и
+   `MoeTV-dev-<sha>_mapping.txt` для manual/dev сборки.
+   CI artifacts временные; для публичного релиза использовать release-копию из п. 2.
+
+### Как сопоставить crash report
+
+В шапке отчёта берутся `МОЁ ТВ <версия> (<versionCode>)`, `build <FINGERPRINT>` и
+`signature <хеш>`. Нужен mapping именно этого `<versionCode>`.
+
+Пример для отчёта **МОЁ ТВ 1.14 (145)**:
+
+- локально: `build/mapping/universalRelease-1.14_145.txt`;
+- публично: `MoeTV_1.14_145_universal_mapping.txt` в релизе
+  `https://github.com/dimzon/moe-tv-site/releases/tag/v1.14`;
+- скачать без браузера:
+  `gh release download v1.14 --repo dimzon/moe-tv-site --pattern "MoeTV_1.14_145_universal_mapping.txt" --dir build/mapping`.
+
+### Retrace
+
+- CLI: `java -cp "C:\Work\tools\androidsdk\cmdline-tools\latest\lib\r8.jar" com.android.tools.r8.retrace.Retrace mapping.txt stack.txt`.
+  Это проверенный путь на текущей машине; R8 jar не хранится в репозитории.
+  В Android Studio можно использовать встроенный **Analyze Stack Trace**.
+- Без карты строки `SourceFile:NN` бессмысленны.
+
+Сборка без карты не публикуется: `publish.cmd` падает, если `mapping.txt` не найден;
+`build-release.cmd` падает, если архиватор не нашёл карту для собранного флейвора.
 
 ## Git
 

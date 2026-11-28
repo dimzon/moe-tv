@@ -26,3 +26,9 @@
 #     in anonymous reports as a corrupted SparseBooleanArray. Keep it a standalone class: renaming
 #     and obfuscation are fine, merging/optimization of this class are not. ---
 -keep,allowobfuscation class androidx.media3.common.FlagSet$Builder { *; }
+
+# --- kotlinx-coroutines 1.11 synthetic channel segment factory. R8 9.4.14 left an invalid
+#     descriptor for this class in the 1.12 universal release; 32-bit ART on Amlogic W2/API 30
+#     then crashed ExoPlayer's playback thread with NoClassDefFoundError. Keep its real name
+#     and class identity: the object is tiny, and a valid descriptor is required on vendor ROMs. ---
+-keep class kotlinx.coroutines.channels.BufferedChannelKt$createSegmentFunction$1 { *; }
