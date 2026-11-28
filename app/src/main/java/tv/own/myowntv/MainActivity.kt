@@ -108,29 +108,6 @@ open class MainActivity : ComponentActivity() {
     @Volatile
     private var startupSettled = false
 
-    /**
-     * "Exit" moves the task to the back instead of finishing it (see [onExitApp]), so the Activity,
-     * its ViewModels and the Compose tree stay alive. A launcher relaunch then only delivers
-     * [onNewIntent], never a fresh [onCreate], and would resume on the section the user was on.
-     * Set on exit, consumed on the next [onStart].
-     */
-    private var exitedToBackground = false
-
-    /** Bumped on a relaunch so the shell's local state is recreated from cold-launch defaults. */
-    private var relaunchKey by mutableStateOf(0)
-
-    /**
-     * A relaunch after "Exit" skips [onCreate], so give the shell a cold-launch state once. Called
-     * from both [onNewIntent] (launcher icon / deep link) and [onStart] (recents), since either may be
-     * the first hook Android delivers — the flag makes it a no-op after the first one.
-     */
-    private fun resetShellAfterExitIfNeeded() {
-        if (!exitedToBackground) return
-        exitedToBackground = false
-        shellViewModel.resetForRelaunch()
-        relaunchKey++ // disposes the shell's local state so the startup action and focus start fresh
-    }
-
     private val livePreview: tv.own.owntv.player.LivePreviewEngine by inject()
     private val engines: tv.own.owntv.player.PlaybackEngines by inject()
     private val visibility: tv.own.owntv.core.player.PlaybackVisibilityWatch by inject()
@@ -203,7 +180,6 @@ open class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        resetShellAfterExitIfNeeded()
         pendingDeepLink = LauncherDeepLink.parse(intent.data)
         Log.d(TAG, "onNewIntent deepLinkHost=${intent.data?.host} deepLinkType=${pendingDeepLink?.javaClass?.simpleName ?: "none"}")
     }
@@ -251,11 +227,6 @@ open class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        // Exit moved the task to the back rather than finishing it (see onExitApp), so a relaunch
-        // never recreates the shell: reset it here so the start-up action runs again and the last
-        // section does not carry over. A normal Home/another-app visit keeps its state — only an
-        // explicit Exit raises exitedToBackground. onNewIntent may have reset already.
-        resetShellAfterExitIfNeeded()
         // Paired with onStop (see [onVisibility]); notably the TV screensaver, which kicks in during a long pause.
         visibility.activityStarted()
         // Staleness-based auto refresh on resume (interval modes only — STARTUP is cold-start only). The
@@ -481,42 +452,25 @@ open class MainActivity : ComponentActivity() {
                             )
                         } else {
                             LaunchedEffect(Unit) { Perf.stamp("destination-ready") } // splash hand-off — the number startup work moves
-                            // Keyed so a relaunch after "Exit" disposes the old composition: the shell's
-                            // local state cannot survive moveTaskToBack, which keeps this Activity alive
-                            // and delivers only onNewIntent on relaunch.
-                            androidx.compose.runtime.key(relaunchKey) {
-                                MyOwnTVShell(
-                                    selectedSection = selectedSection,
-                                    visibleSections = visibleSections,
-                                    onSelectSection = viewModel::selectSection,
-                                    themeMode = themeMode,
-                                    uiZoomPercent = uiZoomPercent,
-                                    onSetZoom = viewModel::setUiZoom,
-                                    fontCustomization = fontCustomization,
-                                    onSetFontCustomization = viewModel::setFontCustomization,
-                                    sourceSummary = sourceSummary,
-                                    weatherInfo = weather,
-                                    weatherFahrenheit = weatherFahrenheit,
-                                    pendingDeepLink = pendingDeepLink,
-                                    onDeepLinkConsumed = { pendingDeepLink = null },
-                                    isOffline = !isOnline,
-                                    // "Exit" moves the task behind the launcher instead of finishing it:
-                                    // pausing while finishing crashes Android 10 vendor firmwares (Allwinner
-                                    // H616 boxes) whose completePauseLocked lost the stock AOSP null guard,
-                                    // so every finish() there died with an NPE in system_server. The engines
-                                    // release in onStop (see [onVisibility]) exactly as they do for Home.
-                                    // Flag the exit so the next onStart can recreate the shell — without
-                                    // a fresh Activity the last section and player state would survive.
-                                    // The dialog is dismissed by MyOwnTVShell before this runs, so its
-                                    // window does not come back with the task.
-                                    onExitApp = {
-                                        exitedToBackground = true
-                                        moveTaskToBack(true)
-                                    },
-                                    onStartupSettled = { startupSettled = true },
-                                    modifier = Modifier.fillMaxSize(),
-                                )
-                            }
+                            MyOwnTVShell(
+                                selectedSection = selectedSection,
+                                visibleSections = visibleSections,
+                                onSelectSection = viewModel::selectSection,
+                                themeMode = themeMode,
+                                uiZoomPercent = uiZoomPercent,
+                                onSetZoom = viewModel::setUiZoom,
+                                fontCustomization = fontCustomization,
+                                onSetFontCustomization = viewModel::setFontCustomization,
+                                sourceSummary = sourceSummary,
+                                weatherInfo = weather,
+                                weatherFahrenheit = weatherFahrenheit,
+                                pendingDeepLink = pendingDeepLink,
+                                onDeepLinkConsumed = { pendingDeepLink = null },
+                                isOffline = !isOnline,
+                                onExitApp = { finish() },
+                                onStartupSettled = { startupSettled = true },
+                                modifier = Modifier.fillMaxSize(),
+                            )
                         }
                         } // end foreground Box (above the background layer)
                     }

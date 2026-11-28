@@ -46,7 +46,7 @@
 - **Channels RuTube leaves unnumbered (ТВ «Известия», the feed tail) get an app-assigned sequential number, so direct tune and the number column work for every channel**
 - **The 99999 "no slot" placeholder no longer shows up as a channel number**
 - **Favourite heart is a clear red in channel rows and the player instead of a pale pink**
-- **Exit dialog no longer flashes when the app is relaunched**
+- **Exit now closes the app instead of leaving its task in the background**
 - **CALL/CAMERA/SEARCH keys no longer crash the app on Android 10+**
 - **Volume keys no longer open the player controls before changing the volume**
 - **Customize: the Move arrows keep focus, so items can be shifted several positions in a row**
