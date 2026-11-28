@@ -52,6 +52,7 @@ import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.myowntv.features.home.durationText
 import tv.own.myowntv.features.live.LivePlate
+import tv.own.myowntv.player.LivePreviewFailureOverlay
 import tv.own.myowntv.ui.components.ChannelLogoTile
 import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.components.MyOwnTVPopup
@@ -135,6 +136,12 @@ internal fun GuideVideo(
                 modifier = Modifier.align(Alignment.BottomStart).padding(start = 22.mpx, end = 22.mpx, bottom = 18.mpx),
             )
         }
+        LivePreviewFailureOverlay(
+            engine = previewEngine,
+            channel = channel,
+            showVideo = showVideo,
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 

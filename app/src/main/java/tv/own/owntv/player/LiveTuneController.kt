@@ -21,6 +21,7 @@ import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.settings.SourceOverrides
 import tv.own.owntv.core.stalker.ReconnectUrlProvider
 import tv.own.owntv.core.stalker.ResolvedPlayback
+import tv.own.owntv.core.stalker.RuTubeUnavailableException
 import tv.own.owntv.core.stalker.StreamUrlResolver
 
 /** Everything a live tune hands the engine besides the URL. */
@@ -259,7 +260,12 @@ class LiveTuneController(
                     previewRequest = previewRequest.commit()
                     return@launch
                 }
-                val resolved = host.resolvePlayback(source!!, channel.streamUrl) ?: return@launch
+                val resolved = try {
+                    host.resolvePlayback(source!!, channel.streamUrl)
+                } catch (e: RuTubeUnavailableException) {
+                    if (previewRequest.isCurrent(generation, channel.id)) reportRuTubeUnavailable(channel, e)
+                    return@launch
+                } ?: return@launch
                 currentCoroutineContext().ensureActive()
                 if (!previewRequest.isCurrent(generation, channel.id) || _liveOnExo.value || engine.released) return@launch
                 if (blockedBySingleSession(channel)) return@launch
@@ -306,7 +312,12 @@ class LiveTuneController(
         currentCoroutineContext().ensureActive()
         if (!isCurrent() || engine.released) return
         val playback = if (host.needsResolve(source)) {
-            host.resolvePlayback(source!!, channel.streamUrl) ?: return
+            try {
+                host.resolvePlayback(source!!, channel.streamUrl) ?: return
+            } catch (e: RuTubeUnavailableException) {
+                if (isCurrent()) reportRuTubeUnavailable(channel, e, engine)
+                return
+            }
         } else {
             ResolvedPlayback(exoUrlFor(channel, source))
         }
@@ -417,7 +428,17 @@ class LiveTuneController(
         // Detached: minting is a network call, and a ladder step that got here from a watcher must not
         // die with that watcher when [watchExo] replaces it.
         exoResolveJob = scope.launch {
-            val playback = host.resolvePlayback(source, channel.streamUrl)
+            val playback = try {
+                host.resolvePlayback(source, channel.streamUrl)
+            } catch (e: RuTubeUnavailableException) {
+                if (!isCurrent(channel)) return@launch
+                resolveMs = (host.nowMs() - resolveStartedAtMs).coerceAtLeast(0L)
+                resolveOutcome = "unavailable:${e.unavailable.reason.name}"
+                deadlineJob?.cancel()
+                exoWatchJob?.cancel()
+                reportRuTubeUnavailable(channel, e)
+                return@launch
+            }
             if (!isCurrent(channel)) return@launch // zapped away while minting
             resolveMs = (host.nowMs() - resolveStartedAtMs).coerceAtLeast(0L)
             resolveOutcome = if (playback == null) "null" else "ready"
@@ -584,6 +605,20 @@ class LiveTuneController(
     private fun engineHasChannel(channel: ChannelEntity): Boolean =
         engine.currentUrl != null && engine.currentMeta.value.contentKey == contentKey(channel.remoteId)
 
+    private fun reportRuTubeUnavailable(
+        channel: ChannelEntity,
+        error: RuTubeUnavailableException,
+        target: LivePreviewEngine = engine,
+    ) {
+        val reason = error.unavailable.reason.name
+        engineLog("'${channel.name}' — RuTube refused playback: $reason")
+        target.reportFailure(
+            failure = PlaybackFailure.RuTubeUnavailable(error.unavailable),
+            info = ErrorInfo(null, null, "RuTube play/options: $reason"),
+            meta = host.meta(channel),
+        )
+    }
+
     private fun isStillExo(channel: ChannelEntity): Boolean = _liveOnExo.value && isCurrent(channel)
 
     /** Whether the preview pane may ask for [channel]'s stream: only something outside the app (a
@@ -678,6 +713,8 @@ class LiveTuneController(
                 resolver.resolve(source, cmd)
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
+            } catch (e: RuTubeUnavailableException) {
+                throw e
             } catch (e: Exception) {
                 android.util.Log.w(ENGINE_TAG, "stalker resolve failed", e)
                 null
@@ -687,6 +724,8 @@ class LiveTuneController(
             try {
                 resolver.resolvePlayback(source, cmd)
             } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: RuTubeUnavailableException) {
                 throw e
             } catch (e: Exception) {
                 android.util.Log.w(ENGINE_TAG, "stalker resolve failed", e)

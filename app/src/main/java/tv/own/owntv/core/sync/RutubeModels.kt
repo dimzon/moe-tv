@@ -224,8 +224,20 @@ sealed interface RutubePlayback {
     data class Unavailable(
         val reason: UnavailableReason,
         val detail: String? = null,
+        val blockingRule: RutubeBlockingRule? = null,
     ) : RutubePlayback
 }
+
+data class RutubeBlockingRule(
+    val imageUrl: String? = null,
+    val languages: List<RutubeBlockingRuleLanguage> = emptyList(),
+)
+
+data class RutubeBlockingRuleLanguage(
+    val lang: String? = null,
+    val title: String? = null,
+    val description: String? = null,
+)
 
 /** One sidecar subtitle advertised beside a RuTube stream — `play/options`' `captions[]` entry:
  *  `format` is `srt`/`vtt`, `file` a ready URL on `pic.rtbcdn.ru` (no auth), `langTitle` the menu
@@ -240,6 +252,7 @@ data class RutubeCaption(
 
 enum class UnavailableReason {
     LOGIN_REQUIRED,
+    BLOCKING_RULE,
     IFRAME,
     NO_STREAM,
     NETWORK,

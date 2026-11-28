@@ -1,5 +1,6 @@
 package tv.own.myowntv.features.live
 
+import tv.own.myowntv.player.LivePreviewFailureOverlay
 import tv.own.myowntv.ui.theme.stageTone
 import tv.own.myowntv.ui.theme.stageShadow
 import androidx.compose.foundation.background
@@ -317,6 +318,12 @@ internal fun LiveStagePane(
                     modifier = Modifier.align(Alignment.Center).background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(8.mpx)).padding(horizontal = 12.mpx, vertical = 6.mpx),
                 )
             }
+            LivePreviewFailureOverlay(
+                engine = previewEngine,
+                channel = channel,
+                showVideo = showVideo,
+                modifier = Modifier.fillMaxSize(),
+            )
         }
         val now = nowNext?.now
         Column(Modifier.fillMaxWidth().padding(start = 4.mpx, end = 4.mpx, top = 34.mpx)) {

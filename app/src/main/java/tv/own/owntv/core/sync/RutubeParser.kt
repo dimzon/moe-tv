@@ -129,6 +129,27 @@ object RutubeParser {
         val detailType = detailObject?.str("type")
         val iframeUrl = root?.str("iframe_url")
         val originType = root?.str("origin_type")
+        val blockingRule = if (detailType == "blocking_rule") {
+            val languages = ArrayList<RutubeBlockingRuleLanguage>()
+            val rows = detailObject?.optJSONArray("languages")
+            if (rows != null) {
+                for (i in 0 until minOf(rows.length(), 8)) {
+                    val row = rows.optJSONObject(i) ?: continue
+                    val title = row.str("title")?.take(512)
+                    val description = row.str("description")?.take(2_048)
+                    if (title.isNullOrBlank() && description.isNullOrBlank()) continue
+                    languages += RutubeBlockingRuleLanguage(
+                        lang = row.str("lang")?.take(16),
+                        title = title,
+                        description = description,
+                    )
+                }
+            }
+            RutubeBlockingRule(
+                imageUrl = detailObject?.str("image")?.take(2_048),
+                languages = languages,
+            )
+        } else null
 
         // Sidecar subtitles (`captions[]`): SRT/VTT URLs the client side-loads under the video. Anything
         // else in the array is skip-worthy, and one odd entry must never cost the playlist or the
@@ -168,13 +189,14 @@ object RutubeParser {
         if (vod != null) return RutubePlayback.Ready(vod, captions)
 
         val reason = when {
+            detailType == "blocking_rule" -> UnavailableReason.BLOCKING_RULE
             detailType == "login_required" || detailType == "common_subscription" -> UnavailableReason.LOGIN_REQUIRED
             detail == "login_required" -> UnavailableReason.LOGIN_REQUIRED
             originType == "ifrm" || !iframeUrl.isNullOrBlank() -> UnavailableReason.IFRAME
             httpCode !in 200..299 -> UnavailableReason.NETWORK
             else -> UnavailableReason.NO_STREAM
         }
-        return RutubePlayback.Unavailable(reason, detail)
+        return RutubePlayback.Unavailable(reason, detail, blockingRule)
     }
 
 

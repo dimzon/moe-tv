@@ -1260,6 +1260,21 @@ class LivePreviewEngine(
      *  and surface an error so the tune controller can climb the ladder (TS variant / next rung) or give
      *  up immediately. */
     private fun failLoad(reason: String) {
+        val failure = if (currentDrm?.scheme == tv.own.owntv.core.drm.DrmConfig.Scheme.FAIRPLAY) PlaybackFailure.FairPlay
+            else PlayerErrors.visibleFailure(reason, currentUrl, PlaybackFailure.Channel)
+        terminalFailure(failure, ErrorInfo(PlayerErrors.reasonFor(reason), exoSpec(), reason))
+    }
+
+    /** Publish a provider-resolution failure before a URL exists. The previous channel must stop, and the
+     *  HUD/preview must name the channel that failed rather than the stream that used to be playing. */
+    fun reportFailure(failure: PlaybackFailure, info: ErrorInfo, meta: MediaMeta? = null) {
+        if (meta != null) _currentMeta.value = meta
+        currentUrl = null
+        reconnectUrlProvider = null
+        terminalFailure(failure, info)
+    }
+
+    private fun terminalFailure(failure: PlaybackFailure, info: ErrorInfo) {
         mainHandler.removeCallbacks(stallWatchdog)
         mainHandler.removeCallbacks(progressWatchdog)
         mainHandler.removeCallbacks(openWatchdog)
@@ -1267,10 +1282,8 @@ class LivePreviewEngine(
         tune.gaveUp = true
         _stalledSinceMs.value = null
         _isPlaying.value = false; _buffering.value = false
-        // A FairPlay channel keeps its own message through the ladder's give-up, which fails it again.
-        _error.value = if (currentDrm?.scheme == tv.own.owntv.core.drm.DrmConfig.Scheme.FAIRPLAY) PlaybackFailure.FairPlay
-            else PlayerErrors.visibleFailure(reason, currentUrl, PlaybackFailure.Channel)
-        _errorInfo.value = ErrorInfo(PlayerErrors.reasonFor(reason), exoSpec(), reason)
+        _error.value = failure
+        _errorInfo.value = info
         _state.value = State.ERROR
         // A load can fail while the picture is still running (a stall verdict, a watchdog). When the
         // ladder has no other rung, the channel would keep playing and sounding under the error screen.
@@ -2146,6 +2159,8 @@ class LivePreviewEngine(
         _videoAspect.value = null; _videoSize.value = null; _streamChips.value = emptyList(); _videoFps.value = null
         _videoRes.value = null // else the next channel's HUD opens showing the previous one's resolution badge
         _state.value = State.IDLE
+        _error.value = null
+        _errorInfo.value = null
         // Said here, not left to STATE_IDLE: a player already idle mid-reconnect raises no new state, and
         // a phone keeps its screen on while an engine reports buffering.
         _buffering.value = false
@@ -2204,6 +2219,8 @@ class LivePreviewEngine(
         currentUrl = null
         deadlineArmed = false
         sawUhd = false
+        _error.value = null
+        _errorInfo.value = null
         onEngineStopped?.invoke()
         _state.value = State.IDLE
         // A released engine is never reused (LiveEnginePool drops it), and each Multiview tile is its

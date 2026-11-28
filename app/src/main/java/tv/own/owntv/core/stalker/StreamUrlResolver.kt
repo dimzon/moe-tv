@@ -1,5 +1,6 @@
 package tv.own.owntv.core.stalker
 
+import java.io.IOException
 import tv.own.owntv.core.database.entity.SourceEntity
 import tv.own.owntv.core.model.SourceType
 import tv.own.owntv.core.sync.RutubeCaption
@@ -9,6 +10,11 @@ data class ResolvedPlayback(
     val url: String,
     val captions: List<RutubeCaption> = emptyList(),
 )
+
+/** A definitive provider answer that must reach the player as a typed failure. */
+class RuTubeUnavailableException(
+    val unavailable: tv.own.owntv.core.sync.RutubePlayback.Unavailable,
+) : IOException("RuTube: ${unavailable.reason.name}")
 
 /**
  * Turns a stored item URL into a playable URL at play time. RuTube is the only source that needs
@@ -53,7 +59,7 @@ class StreamUrlResolver(
         return when (val result = api.playUrl(videoId)) {
             is tv.own.owntv.core.sync.RutubePlayback.Ready -> ResolvedPlayback(result.url, result.captions)
             is tv.own.owntv.core.sync.RutubePlayback.Unavailable ->
-                throw java.io.IOException("RuTube: ${result.reason.name}${result.detail?.let { " ($it)" } ?: ""}")
+                throw RuTubeUnavailableException(result)
         }
     }
 

@@ -57,6 +57,7 @@ import tv.own.owntv.core.i18n.horizontalDirection
 import tv.own.owntv.core.settings.PlayerRemoteOptions
 import tv.own.owntv.core.settings.RemoteShortcutAction
 import tv.own.owntv.core.settings.RemoteShortcutPress
+import tv.own.owntv.core.sync.UnavailableReason
 import tv.own.myowntv.ui.components.LocalRemoteShortcuts
 import tv.own.myowntv.ui.components.MyOwnTVIcon
 import tv.own.myowntv.ui.components.OwnTVSpinner
@@ -621,7 +622,19 @@ fun PlayerHud(
         }
 
         // Status overlay (always shown).
+        val blockingRule = (error as? PlaybackFailure.RuTubeUnavailable)
+            ?.takeIf { it.unavailable.reason == UnavailableReason.BLOCKING_RULE }
+            ?.unavailable?.blockingRule
         when {
+            blockingRule != null -> RuTubeBlockingRuleOverlay(
+                rule = blockingRule,
+                modifier = Modifier.fillMaxSize(),
+                onBack = onBack,
+                onChannelUp = onChannelUp,
+                onChannelDown = onChannelDown,
+                onOpenChannelList = onOpenChannelList,
+                focusRequester = retryFocus,
+            )
             error != null -> Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(R.string.player_playback_error), style = tv.own.myowntv.ui.theme.stageText(40, 600), color = Color.White)
                 Spacer(Modifier.height(8.dp))

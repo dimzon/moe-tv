@@ -23,7 +23,7 @@ import java.io.InputStream
 class HttpClient(private val client: OkHttpClient) {
 
     /** Non-2xx response. Thrown before the body block runs, so retrying it never re-emits parsed items. */
-    class HttpStatusException(val code: Int, message: String) : IOException(message)
+    class HttpStatusException(val code: Int, message: String, val body: String? = null) : IOException(message)
 
     suspend fun <T> get(
         url: String,
@@ -31,6 +31,7 @@ class HttpClient(private val client: OkHttpClient) {
         onProgress: ((Long, Long?) -> Unit)? = null,
         maxAttempts: Int = 1,
         headers: Map<String, String> = emptyMap(),
+        captureErrorBody: Boolean = false,
         block: suspend (InputStream) -> T,
     ): T = withContext(Dispatchers.IO) {
         val ua = userAgent?.takeIf { it.isNotBlank() } ?: DEFAULT_USER_AGENT
@@ -59,7 +60,12 @@ class HttpClient(private val client: OkHttpClient) {
                 call.execute().use { response ->
                     responseReceived = true
                     val headersAt = SystemClock.elapsedRealtime()
-                    if (!response.isSuccessful) throw HttpStatusException(response.code, "HTTP ${response.code} for ${redactUrl(url)}")
+                    if (!response.isSuccessful) {
+                        val errorBody = if (captureErrorBody) {
+                            runCatching { response.peekBody(MAX_ERROR_BODY_BYTES).string() }.getOrNull()
+                        } else null
+                        throw HttpStatusException(response.code, "HTTP ${response.code} for ${redactUrl(url)}", errorBody)
+                    }
                     val body = response.body
                     val totalBytes = body.contentLength().takeIf { it >= 0 }
                     // Info, not debug, and deliberately so: release builds strip Log.d, and this one
@@ -114,7 +120,8 @@ class HttpClient(private val client: OkHttpClient) {
         url: String,
         userAgent: String? = null,
         headers: Map<String, String> = emptyMap(),
-    ): String = get(url, userAgent, headers = headers) { it.readBytes().decodeToString() }
+        captureErrorBody: Boolean = false,
+    ): String = get(url, userAgent, headers = headers, captureErrorBody = captureErrorBody) { it.readBytes().decodeToString() }
 
     companion object {
         private const val TAG = "HttpClient"
@@ -132,6 +139,7 @@ class HttpClient(private val client: OkHttpClient) {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
         private const val RETRY_DELAY_MS = 750L
         private const val MAX_RETRY_DELAY_MS = 3_000L
+        private const val MAX_ERROR_BODY_BYTES = 64_000L
 
         /** Mask credentials for display (info overlay / logs): query values and credential-bearing
          *  path segments. Safe on free text, not just on a bare URL. */

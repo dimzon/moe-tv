@@ -228,8 +228,6 @@
 1	app/src/main/java/tv/own/owntv/core/settings/SyncMatrix.kt	his
 1	app/src/main/java/tv/own/owntv/core/settings/SyncMatrix.kt	order
 1	app/src/main/java/tv/own/owntv/core/settings/SyncMatrix.kt	prog
-1	app/src/main/java/tv/own/owntv/core/stalker/StreamUrlResolver.kt	\0
-1	app/src/main/java/tv/own/owntv/core/stalker/StreamUrlResolver.kt	($it)
 1	app/src/main/java/tv/own/owntv/core/sync/ChannelRenameSeeds.kt	$ASSET unreadable — shipping no renames
 1	app/src/main/java/tv/own/owntv/core/sync/ChannelRenameSeeds.kt	ChannelRenameSeeds
 1	app/src/main/java/tv/own/owntv/core/sync/ChannelRenameSeeds.kt	channel_renames.json
@@ -240,7 +238,6 @@
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	alias
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	author
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	avatar_url
-2	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	description
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	detail
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	ext_categories
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	hls
@@ -263,7 +260,6 @@
 2	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	stop
 2	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	subtitle
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	thumbnail_url
-4	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	title
 1	app/src/main/java/tv/own/owntv/core/sync/RutubeParser.kt	video_balancer
 1	app/src/main/java/tv/own/owntv/core/sync/SyncManager.kt	Result: $result | Duration: ${duration}ms
 1	app/src/main/java/tv/own/owntv/core/sync/SyncManager.kt	RuTube provider not wired

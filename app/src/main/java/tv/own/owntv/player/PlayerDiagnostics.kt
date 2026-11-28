@@ -6,6 +6,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.concurrent.ConcurrentLinkedDeque
 import tv.own.myowntv.R
+import tv.own.owntv.core.sync.RutubePlayback
 
 /**
  * Tails the app's OWN logcat for the below-the-engine playback failures the player objects can't expose:
@@ -137,6 +138,8 @@ sealed interface PlaybackFailure {
     data object FairPlay : PlaybackFailure
     /** Genuine unknown engine/provider text; intentionally not translated. */
     data class Raw(val message: String) : PlaybackFailure
+    /** A definitive RuTube `play/options` refusal, including a structured blocking rule when present. */
+    data class RuTubeUnavailable(val unavailable: RutubePlayback.Unavailable) : PlaybackFailure
 }
 
 /**
@@ -173,6 +176,7 @@ fun PlaybackFailure.describe(resolve: (Int, List<Any>) -> String): String {
         PlaybackFailure.AccountInUse -> str(R.string.player_error_account_in_use)
         PlaybackFailure.FairPlay -> str(R.string.player_error_fairplay)
         is PlaybackFailure.Raw -> message
+        is PlaybackFailure.RuTubeUnavailable -> str(R.string.player_error_channel)
     }
 }
 

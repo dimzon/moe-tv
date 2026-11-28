@@ -88,6 +88,54 @@ class RutubeParserPlayOptionsTest {
     }
 
     @Test
+    fun `blocking rule preserves image and ordered localized text`() {
+        val result = RutubeParser.parsePlayOptions(
+            244,
+            """{"detail":{"type":"blocking_rule","name":"blocking_rule_9607895",
+                "image":"https://pic.rtbcdn.ru/playerstub/block.png",
+                "languages":[
+                  {"lang":"rus","title":"Видео недоступно","description":"Правообладатель или VPN"},
+                  {"lang":"eng","title":"Video is not available","description":""}
+                ]}}""",
+        ) as RutubePlayback.Unavailable
+
+        assertEquals(UnavailableReason.BLOCKING_RULE, result.reason)
+        assertEquals("blocking_rule_9607895", result.detail)
+        assertEquals("https://pic.rtbcdn.ru/playerstub/block.png", result.blockingRule?.imageUrl)
+        assertEquals(
+            listOf(
+                RutubeBlockingRuleLanguage("rus", "Видео недоступно", "Правообладатель или VPN"),
+                RutubeBlockingRuleLanguage("eng", "Video is not available", null),
+            ),
+            result.blockingRule?.languages,
+        )
+    }
+
+    @Test
+    fun `malformed blocking language rows are skipped`() {
+        val result = RutubeParser.parsePlayOptions(
+            200,
+            """{"detail":{"type":"blocking_rule","languages":[
+                  "not-an-object", null, {"lang":"rus","title":" ","description":""},
+                  {"lang":"eng","title":"Video is not available"}
+                ]}}""",
+        ) as RutubePlayback.Unavailable
+
+        assertEquals(1, result.blockingRule?.languages?.size)
+        assertEquals("eng", result.blockingRule?.languages?.single()?.lang)
+    }
+
+    @Test
+    fun `a usable HLS URL still wins over blocking metadata`() {
+        val result = RutubeParser.parsePlayOptions(
+            244,
+            """{"live_streams":{"hls":[{"url":"https://example.test/live.m3u8"}]},
+                "detail":{"type":"blocking_rule","image":"https://pic.rtbcdn.ru/block.png"}}""",
+        )
+        assertTrue(result is RutubePlayback.Ready)
+    }
+
+    @Test
     fun `malformed body never throws`() {
         org.junit.Assert.assertTrue(RutubeParser.parsePlayOptions(200, null) is RutubePlayback.Unavailable)
         org.junit.Assert.assertTrue(RutubeParser.parsePlayOptions(200, "not json{") is RutubePlayback.Unavailable)

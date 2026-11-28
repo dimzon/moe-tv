@@ -224,21 +224,22 @@ class RutubeApi(
         val url = "$baseUrl/api/play/options/$videoId/?no_404=true&pver=v2" +
             "&referer=https%3A%2F%2Ftv-androidtv.rutube.ru"
         try {
-            val body = getText(url)
+            val body = getText(url, captureErrorBody = true)
             RutubeParser.parsePlayOptions(200, body)
         } catch (e: HttpClient.HttpStatusException) {
-            // Paid channels answer 404 with detail.name = login_required — present in the
-            // body, which HttpClient discards. Re-parse best-effort: without the body we
-            // cannot distinguish, so treat any play-options 404 as login_required (the
-            // dominant cause) and let the UI show the paid message. Iframe/no-stream
-            // channels answer 200 with no stream, handled above.
-            // 404 = login_required; 244 = RuTube's "payment required" answer for subscription
-            // channels when the TV query parameters are used (Premier/SPORT packages).
+            // 244 is a successful status for OkHttp and is parsed above. Keep the defensive 244 branch
+            // too: if that policy ever changes, a structured blocking_rule must not collapse to login.
+            // 404 bodies need the bounded capture enabled for this endpoint.
             if (e.code == 404 || e.code == 244) {
-                RutubePlayback.Unavailable(UnavailableReason.LOGIN_REQUIRED, e.message)
-            } else {
-                RutubePlayback.Unavailable(UnavailableReason.NETWORK, e.message)
+                val parsed = e.body?.let { RutubeParser.parsePlayOptions(e.code, it) }
+                if (parsed is RutubePlayback.Unavailable && parsed.reason != UnavailableReason.NETWORK) {
+                    return@withContext parsed
+                }
+                // Legacy fallback for an absent/truncated/malformed body: 404/244 has historically
+                // meant login_required, and changing that blindly would regress subscription channels.
+                return@withContext RutubePlayback.Unavailable(UnavailableReason.LOGIN_REQUIRED, e.message)
             }
+            return@withContext RutubePlayback.Unavailable(UnavailableReason.NETWORK, e.message)
         } catch (e: java.io.IOException) {
             RutubePlayback.Unavailable(UnavailableReason.NETWORK, e.message)
         }
@@ -254,10 +255,11 @@ class RutubeApi(
     private fun withClient(url: String): String =
         if (url.contains("client=")) url else url + (if ('?' in url) "&" else "?") + "client=tv"
 
-    private suspend fun getText(url: String): String = http.getText(
+    private suspend fun getText(url: String, captureErrorBody: Boolean = false): String = http.getText(
         url = url,
         userAgent = userAgent,
         headers = mapOf("Accept" to "application/json", "Referer" to "$baseUrl/"),
+        captureErrorBody = captureErrorBody,
     )
 
     companion object {
