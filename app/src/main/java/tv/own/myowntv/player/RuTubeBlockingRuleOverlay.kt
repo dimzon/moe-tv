@@ -26,7 +26,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
@@ -101,13 +101,20 @@ internal fun RuTubeBlockingRuleOverlay(
                     }
                 }
                 Column(Modifier.weight(1f)) {
-                    Text(title, style = stageText(16, 700), color = Color.White, maxLines = 3)
+                    Text(
+                        title,
+                        style = stageText(16, 700),
+                        color = Color.White,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                     if (description != null) {
                         Text(
                             description,
                             style = stageText(12, 400),
                             color = Color.White.copy(alpha = 0.72f),
                             maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(top = 4.mpx),
                         )
                     }

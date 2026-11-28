@@ -77,6 +77,19 @@ C:\Users\User\Desktop\SCRCPY\adb.cmd <alias> shell am force-stop com.github.dimz
 Задачи `assemble*` через `gradlew` напрямую не запускать. Флейворы `standard`,
 `x86_64` и `all` не собирать — они остались историческим заделом.
 
+### Обязательная проверка перед push
+
+Перед **каждым push** из корня репозитория прогнать все gating-проверки отдельного
+workflow `i18n`; зелёный Android CI сам по себе не заменяет этот workflow:
+
+```bat
+python tools/i18n/check_hardcoded_strings.py verify --bootstrap
+python tools/i18n/check_number_locale.py
+python tools/i18n/check_text_overflow.py
+```
+
+Push без успешного выполнения этих трёх команд запрещён.
+
 ## R8 mapping (retrace)
 
 Карта обфускации — единственный способ прочитать release-стек; терять её нельзя.
