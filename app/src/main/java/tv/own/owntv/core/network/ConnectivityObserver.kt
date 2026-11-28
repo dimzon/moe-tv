@@ -23,6 +23,10 @@ class ConnectivityObserver(private val context: Context) {
     private val cm: ConnectivityManager?
         get() = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
 
+    /** Last successful verdict. A system_server restart must not turn a transient binder failure into
+     *  an app crash or a false offline banner; the next callback/poll replaces this value. */
+    @Volatile private var lastKnownOnline = true
+
     /**
      * A best-effort snapshot of whether the active network has validated internet.
      *
@@ -32,9 +36,21 @@ class ConnectivityObserver(private val context: Context) {
      * outside, which is the thing the offline warning is about.
      */
     fun isOnlineNow(): Boolean {
-        val manager = cm ?: return true
-        val network = manager.activeNetwork ?: return false
-        return manager.getNetworkCapabilities(network)?.hasInternet() == true
+        return try {
+            val manager = cm ?: return true
+            val network = manager.activeNetwork
+            val online = network != null &&
+                manager.getNetworkCapabilities(network)?.hasInternet() == true
+            lastKnownOnline = online
+            online
+        } catch (e: RuntimeException) {
+            if (!e.isDeadSystemException()) throw e
+            // Some TV firmwares restart system_server while the app is polling. The framework then
+            // throws from activeNetwork/getNetworkCapabilities; keep the last good verdict and let the
+            // next 20-second poll recover instead of killing the process.
+            Log.w(TAG, "connectivity service is restarting; using last known online=$lastKnownOnline", e)
+            lastKnownOnline
+        }
     }
 
     /**
@@ -43,9 +59,15 @@ class ConnectivityObserver(private val context: Context) {
      * a moment ago, which is the one outcome a saver setting must never produce by accident.
      */
     fun isMeteredNow(): Boolean {
-        val manager = cm ?: return false
-        val caps = manager.getNetworkCapabilities(manager.activeNetwork ?: return false) ?: return false
-        return !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+        return try {
+            val manager = cm ?: return false
+            val caps = manager.getNetworkCapabilities(manager.activeNetwork ?: return false) ?: return false
+            !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+        } catch (e: RuntimeException) {
+            if (!e.isDeadSystemException()) throw e
+            Log.w(TAG, "connectivity service is restarting; treating network as unmetered", e)
+            false
+        }
     }
 
     /** [isMeteredNow] now, then again whenever the network carrying traffic changes (Wi-Fi ⇄ mobile). */
@@ -111,5 +133,10 @@ class ConnectivityObserver(private val context: Context) {
 
     private companion object {
         const val TAG = "ConnectivityObserver"
+        private const val DEAD_SYSTEM_EXCEPTION = "android.os.DeadSystemException"
     }
+
+    /** The framework class is API 24; checking its name keeps this fallback loadable on API 23. */
+    private fun RuntimeException.isDeadSystemException(): Boolean =
+        javaClass.name == DEAD_SYSTEM_EXCEPTION
 }

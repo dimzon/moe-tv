@@ -1109,6 +1109,9 @@
 1	log	app/src/main/java/tv/own/owntv/core/network/BoundedDns.kt	dns ${HttpClient.redactHost(hostname)} failed (${failure.javaClass.simpleName}) — using its last known addresses
 1	technical	app/src/main/java/tv/own/owntv/core/network/BoundedDns.kt	owntv-dns
 1	log	app/src/main/java/tv/own/owntv/core/network/ConnectivityObserver.kt	ConnectivityObserver
+1	technical	app/src/main/java/tv/own/owntv/core/network/ConnectivityObserver.kt	android.os.DeadSystemException
+1	log	app/src/main/java/tv/own/owntv/core/network/ConnectivityObserver.kt	connectivity service is restarting; treating network as unmetered
+1	log	app/src/main/java/tv/own/owntv/core/network/ConnectivityObserver.kt	connectivity service is restarting; using last known online=$lastKnownOnline
 1	log	app/src/main/java/tv/own/owntv/core/network/ConnectivityObserver.kt	could not watch the default network
 1	log	app/src/main/java/tv/own/owntv/core/network/ConnectivityObserver.kt	could not watch the network
 1	url	app/src/main/java/tv/own/owntv/core/network/DnsConfig.kt	$base${if ('?' in base) '&' else '?'}dns=$query
