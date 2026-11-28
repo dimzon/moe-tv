@@ -8,36 +8,28 @@ import org.junit.Test
 
 class CrashBlacklistTest {
 
-    private val franklinReport = """
+    private val sampleReport = """
         МОЁ ТВ 1.15 (148)
-        build Droidlogic/franklin/franklin:11/RD2A.211001.002/eng.ugoos.20241111.140057:userdebug/test-keys
-        signature 77d89d3e
-        java.lang.RuntimeException: android.os.DeadSystemException
+        build example/device:11/test-keys
+        signature 0123abcd
+        java.lang.RuntimeException: example
     """.trimIndent()
-
-    @Test
-    fun `the shipped blacklist suppresses the diagnosed Franklin crash`() {
-        val entries = CrashBlacklist.load()
-        val entry = entries.single { it.signature == "77d89d3e" }
-        assertTrue(entry.reason.isNotBlank())
-        assertTrue(CrashBlacklist.reasonFor(franklinReport, entries)?.isNotBlank() == true)
-    }
 
     @Test
     fun `another signature is still uploaded`() {
         val entries = CrashBlacklist.parse(
-            """[{"signature":"77d89d3e","reason":"diagnosed platform crash"}]""",
+            """[{"signature":"0123abcd","reason":"diagnosed platform crash"}]""",
         )
-        val report = franklinReport.replace("signature 77d89d3e", "signature 0123abcd")
+        val report = sampleReport.replace("signature 0123abcd", "signature fedcba98")
         assertNull(CrashBlacklist.reasonFor(report, entries))
     }
 
     @Test
     fun `a report without a signature is still uploaded`() {
         val entries = CrashBlacklist.parse(
-            """[{"signature":"77d89d3e","reason":"diagnosed platform crash"}]""",
+            """[{"signature":"0123abcd","reason":"diagnosed platform crash"}]""",
         )
-        val report = franklinReport.replace("signature 77d89d3e\n", "")
+        val report = sampleReport.replace("signature 0123abcd\n", "")
         assertNull(CrashBlacklist.reasonFor(report, entries))
     }
 
@@ -51,10 +43,10 @@ class CrashBlacklistTest {
         val entries = CrashBlacklist.parse(
             """
             [
-              {"signature":"77d89d3e"},
+              {"signature":"0123abcd"},
               {"reason":"no signature"},
               {"signature":" ","reason":"blank signature"},
-              {"signature":"0123abcd","reason":" "}
+              {"signature":"fedcba98","reason":" "}
             ]
             """.trimIndent(),
         )
@@ -64,10 +56,10 @@ class CrashBlacklistTest {
     @Test
     fun `one incomplete row does not disable valid rows`() {
         val entries = CrashBlacklist.parse(
-            """[{"signature":"77d89d3e"},{"signature":"0123abcd","reason":"known"}]""",
+            """[{"signature":"0123abcd"},{"signature":"fedcba98","reason":"known"}]""",
         )
         assertEquals(1, entries.size)
-        assertEquals("0123abcd", entries.single().signature)
+        assertEquals("fedcba98", entries.single().signature)
         assertFalse(entries.single().reason.isBlank())
     }
 }

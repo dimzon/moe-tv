@@ -113,21 +113,12 @@ object CrashRecorder {
     }.getOrElse { "environment unavailable: ${it.javaClass.simpleName}" }
 
     /**
-     * Short grouping key for the crash mail: the throwable class plus the first frames of its stack.
+     * Short grouping key for the crash mail: the root exception class plus the first frames of its
+     * stack. Following the cause chain avoids grouping unrelated framework-wrapper failures together.
      * Obfuscated names are stable within a release, and the version in the mail subject separates
      * releases, so identical reports thread together without exposing the whole trace in the subject.
      */
-    private fun signature(error: Throwable): String {
-        val key = buildString {
-            append(error.javaClass.name)
-            for (frame in error.stackTrace.take(8)) {
-                append('|').append(frame.className).append('#').append(frame.methodName)
-            }
-        }
-        val digest = java.security.MessageDigest.getInstance("SHA-256")
-            .digest(key.toByteArray(Charsets.UTF_8))
-        return java.math.BigInteger(1, digest).toString(16).padStart(64, '0').take(8)
-    }
+    private fun signature(error: Throwable): String = CrashSignature.of(error)
 
     private fun write(context: Context, thread: Thread, error: Throwable, survived: Boolean = false) {
         val stamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US)

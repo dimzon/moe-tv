@@ -2056,7 +2056,6 @@
 1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	64-bit
 1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	ABIs ${Build.SUPPORTED_ABIS.joinToString()} · $processBits process · heap ${heapMiB} MiB
 1	technical	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	Crashed $stamp on thread "${thread.name}"
-1	technical	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	SHA-256
 1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	build ${Build.FINGERPRINT}
 1	file-path	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	diagnostics
 1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	environment unavailable: ${it.javaClass.simpleName}
@@ -2066,6 +2065,8 @@
 1	technical	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	yyyy-MM-dd HH:mm:ss
 1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	· RAM ${mem.totalMem shr 20} MiB, free ${mem.availMem shr 20} MiB
 1	log	app/src/main/java/tv/own/owntv/core/util/CrashRecorder.kt	· uptime ${SystemClock.elapsedRealtime() / 1000} s
+1	technical	app/src/main/java/tv/own/owntv/core/util/CrashSignature.kt	SHA-256
+1	log	app/src/main/java/tv/own/owntv/core/util/CrashSignature.kt	unknown
 1	technical	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	$name ${CoreBuildInfo.versionName} (${CoreBuildInfo.versionCode}) crash $signature
 1	log	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	crash upload suppressed: $reason
 1	technical	app/src/main/java/tv/own/owntv/core/util/CrashUploader.kt	https://github.com/dimzon/moe-tv-site
