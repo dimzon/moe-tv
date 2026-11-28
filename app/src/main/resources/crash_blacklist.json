@@ -1,0 +1,6 @@
+[
+  {
+    "signature": "77d89d3e",
+    "reason": "Diagnosed DeadSystemException in Media3 AudioCapabilitiesReceiver after Android system_server died on Droidlogic/ugoos firmware; repeated reports are not actionable."
+  }
+]

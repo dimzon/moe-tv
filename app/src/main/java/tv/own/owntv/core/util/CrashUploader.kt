@@ -24,6 +24,9 @@ import java.net.URL
  * A survived platform crash ([CrashRecorder.SURVIVED_LINE]) is **never mailed**: it is an already
  * diagnosed framework bug that no report can change, so it never reaches the inbox. The record
  * stays on disk and shows up in Error log → Export if a user ever asks about a hiccup.
+ *
+ * A signature listed in [CrashBlacklist] is also not mailed. Its record stays on disk and is not
+ * marked uploaded, so removing the blacklist entry makes that report eligible again.
  */
 object CrashUploader {
     private const val TAG = "OwnTV-CrashUploader"
@@ -54,6 +57,10 @@ object CrashUploader {
         // A survived platform crash is a diagnosed framework bug the report cannot change: it is
         // never mailed. The record stays on disk for manual exports only.
         if (report.contains(CrashRecorder.SURVIVED_LINE)) return
+        CrashBlacklist.reasonFor(report)?.let { reason ->
+            Log.i(TAG, "crash upload suppressed: $reason")
+            return
+        }
         val signature = report.lineSequence()
             .firstOrNull { it.startsWith("signature ") }
             ?.substringAfter(' ')
